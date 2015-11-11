@@ -10,7 +10,6 @@ import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
-import com.jme3.bullet.control.VehicleControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.effect.ParticleEmitter;
 import com.jme3.effect.ParticleMesh;
@@ -30,7 +29,6 @@ import com.jme3.scene.*;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.scene.control.CameraControl.ControlDirection;
 import com.jme3.scene.debug.Arrow;
-import com.jme3.scene.shape.Box;
 import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.shadow.EdgeFilteringMode;
@@ -41,12 +39,11 @@ public class Rally extends SimpleApplication implements ActionListener {
 	
 	//boiler stuff
 	private BulletAppState bulletAppState;
-	private VehicleControl player;
+	private MyVehicleControl player;
 	
 	//skid stuff
 	ParticleEmitter emit;
 	private boolean ifSmoke = false;
-	private Material grey;
 	private LinkedList<Geometry> skidList = new LinkedList<Geometry>();
 	private Vector3f wheel0Last = new Vector3f(0,0,0);
 	private Vector3f wheel1Last = new Vector3f(0,0,0);
@@ -64,7 +61,7 @@ public class Rally extends SimpleApplication implements ActionListener {
 	
 	//hud stuff
 	private BitmapText hudText;
-	private BitmapText gear;
+	private BitmapText hudText2;
 	private boolean toggle;
 	
 	//driving stuff
@@ -83,14 +80,14 @@ public class Rally extends SimpleApplication implements ActionListener {
 	
 	//directions
 	private Vector3f forward = new Vector3f();
-	private Vector3f rightPlayer;
-	private Vector3f leftPlayer;
+	private Vector3f rightPlayer = new Vector3f();
+	private Vector3f leftPlayer = new Vector3f();
 	
 	//contact points
-	private boolean contact0;
-	private boolean contact1;
-	private boolean contact2;
-	private boolean contact3;
+	private boolean contact0 = false;
+	private boolean contact1 = false;
+	private boolean contact2 = false;
+	private boolean contact3 = false;
 	
 	//debug stuff
 	private Node arrowNode;
@@ -262,7 +259,7 @@ public class Rally extends SimpleApplication implements ActionListener {
 		compoundShape.addChildShape(CollisionShapeFactory.createDynamicMeshShape(carmodel), Vector3f.ZERO);
 		
 		carNode = new Node("vehicleNode");
-		player = new VehicleControl(compoundShape, Car.mass);
+		player = new MyVehicleControl(compoundShape, Car.mass);
 		carNode.addControl(player);
 		carNode.attachChild(carmodel);
 
@@ -276,7 +273,7 @@ public class Rally extends SimpleApplication implements ActionListener {
 		wheels1.center();
 		node1.attachChild(wheels1);
 		player.addWheel(node1, new Vector3f(-Car.w_xOff, Car.w_yOff, Car.w_zOff),
-				Car.wheelDirection, Car.wheelAxle, Car.restLength, Car.radius, true);
+				Car.wheelDirection, Car.wheelAxle, Car.restLength, Car.wheelRadius, true);
 
 		Node node2 = new Node("wheel 2 node");
 		Spatial wheels2 = assetManager.loadModel(Car.wheelOBJModel);
@@ -284,14 +281,14 @@ public class Rally extends SimpleApplication implements ActionListener {
 		wheels2.center();
 		node2.attachChild(wheels2);
 		player.addWheel(node2, new Vector3f(Car.w_xOff, Car.w_yOff, Car.w_zOff),
-				Car.wheelDirection, Car.wheelAxle, Car.restLength, Car.radius, true);
+				Car.wheelDirection, Car.wheelAxle, Car.restLength, Car.wheelRadius, true);
 
 		Node node3 = new Node("wheel 3 node");
 		Spatial wheels3 = assetManager.loadModel(Car.wheelOBJModel);
 		wheels3.center();
 		node3.attachChild(wheels3);
 		player.addWheel(node3, new Vector3f(-Car.w_xOff-0.05f, Car.w_yOff, -Car.w_zOff),
-				Car.wheelDirection, Car.wheelAxle, Car.restLength, Car.radius, false);
+				Car.wheelDirection, Car.wheelAxle, Car.restLength, Car.wheelRadius, false);
 
 		Node node4 = new Node("wheel 4 node");
 		Spatial wheels4 = assetManager.loadModel(Car.wheelOBJModel);
@@ -299,7 +296,7 @@ public class Rally extends SimpleApplication implements ActionListener {
 		wheels4.center();
 		node4.attachChild(wheels4);
 		player.addWheel(node4, new Vector3f(Car.w_xOff+0.05f, Car.w_yOff, -Car.w_zOff),
-				Car.wheelDirection, Car.wheelAxle, Car.restLength, Car.radius, false);
+				Car.wheelDirection, Car.wheelAxle, Car.restLength, Car.wheelRadius, false);
 
 		//Friction
 		player.setFrictionSlip(0, Car.wheel1Slip);
@@ -317,10 +314,6 @@ public class Rally extends SimpleApplication implements ActionListener {
 		
 		getPhysicsSpace().add(player);
 		player.setPhysicsLocation(world.start);
-		
-		grey = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		grey.setColor("Color", new ColorRGBA(0.2f, 0.2f, 0.2f, 0.7f));
-		grey.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		
 		makeSmoke(node1);
 		makeSmoke(node2);
@@ -386,12 +379,12 @@ public class Rally extends SimpleApplication implements ActionListener {
 		hudText.setLocalTranslation(0, 200, 0); 	// position
 		guiNode.attachChild(hudText);
 		
-		gear = new BitmapText(guiFont, false);
-		gear.setSize(guiFont.getCharSet().getRenderedSize());	  		// font size
-		gear.setColor(ColorRGBA.White);									// font color
-		gear.setText("");												// the text
-		gear.setLocalTranslation(0, 300, 0); 	// position
-		guiNode.attachChild(gear);
+		hudText2 = new BitmapText(guiFont, false);
+		hudText2.setSize(guiFont.getCharSet().getRenderedSize());	  		// font size
+		hudText2.setColor(ColorRGBA.White);									// font color
+		hudText2.setText("");												// the text
+		hudText2.setLocalTranslation(0, 300, 0); 	// position
+		guiNode.attachChild(hudText2);
 	}
 	
 	private PhysicsSpace getPhysicsSpace(){
@@ -470,14 +463,11 @@ public class Rally extends SimpleApplication implements ActionListener {
 	/* Physics below */
 
 	public void carPhysics(float tpf) {
-		if (toggle){
-			//no need to apply wheel forces now
-			//TODO still apply drag though
-			return;
-		}
+		if (toggle){ return; }//no need to apply wheel forces now
 		
-		//note that z is forward, x is side
-		//  and the notes say x is forward and y is sideways
+		//NOTE: that z is forward, x is side
+		//  but the notes say x is forward and y is sideways
+		
 		Matrix3f w_angle = player.getPhysicsRotationMatrix();
 		Vector3f w_velocity = player.getLinearVelocity();
 		
@@ -504,13 +494,15 @@ public class Rally extends SimpleApplication implements ActionListener {
 		Vector3f force_lat_front = new Vector3f();
 		if (contact0 && contact1) { //contact with front
 			force_lat_front.x = (float)(slipanglefront*Car.CA_F);
-			force_lat_front.x = FastMath.clamp(force_lat_front.x, -Car.MAX_GRIP, Car.MAX_GRIP); 
+			force_lat_front.x = FastMath.clamp(force_lat_front.x, -Car.MAX_GRIP, Car.MAX_GRIP);
+			player.w0_myskid = player.w1_myskid = Math.abs(force_lat_front.x)/Car.MAX_GRIP;
 			force_lat_front.x *= weight;
 		}
 		Vector3f force_lat_rear = new Vector3f();
 		if (contact2 && contact3) {
 			force_lat_rear.x = (float)(slipanglerear*Car.CA_R);
 			force_lat_rear.x = FastMath.clamp(force_lat_rear.x, -Car.MAX_GRIP, Car.MAX_GRIP);
+			player.w2_myskid = player.w3_myskid = Math.abs(force_lat_rear.x)/Car.MAX_GRIP;
 			force_lat_rear.x *= weight;
 		}
 		
@@ -532,7 +524,7 @@ public class Rally extends SimpleApplication implements ActionListener {
 		Vector3f ftraction = new Vector3f();
 		if (contact0 && contact1 && contact2 && contact3) {
 			ftraction.z = 100*(accel - brakeCurrent*FastMath.sign(velocity.z));
-		}
+		} //TODO make accel 'cost' grip
 		
 		//speed drag and linear resistance here
 		Vector3f resistance = new Vector3f();
@@ -566,7 +558,6 @@ public class Rally extends SimpleApplication implements ActionListener {
 		//calc total position and time
 		distance += player.getLinearVelocity().length()*tpf;
 		totaltime += tpf;
-//		System.out.println(player.getLinearVelocity().length() + " " + totaltime);
 		
 		WheelInfo wi0 = player.getWheel(0).getWheelInfo();
 		RaycastInfo rayCastInfo0 = wi0.raycastInfo;
@@ -596,16 +587,18 @@ public class Rally extends SimpleApplication implements ActionListener {
 			//TODO turn off smoke thingos
 		}
 		
-		Matrix3f w_angle = player.getPhysicsRotationMatrix();
+//		Matrix3f w_angle = player.getPhysicsRotationMatrix();
 		Vector3f w_velocity = player.getLinearVelocity();		
-		Vector3f l_velocity = w_angle.invert().mult(w_velocity).normalize();
+//		Vector3f l_velocity = w_angle.invert().mult(w_velocity).normalize();
 		
 		//////////////////////////////////
 		float speed = player.getLinearVelocity().length();
 		hudText.setText(speed + "m/s" + getWheelTractionInfo()); // the ui text
+		
 		curGear = (int)(speed/7);
 		accelCurrent = speed % 7 / 7;
-		gear.setText(curGear+" | "+accelCurrent + "\n" +(ifAccel));
+		float totalgrip = player.w0_myskid+player.w1_myskid+player.w2_myskid+player.w3_myskid;
+		hudText2.setText(curGear+" | "+accelCurrent + "\n" +(ifAccel)+"\n"+totalgrip);
 		
 
 		Vector3f velocityVector = player.getLinearVelocity().normalize();
@@ -613,9 +606,8 @@ public class Rally extends SimpleApplication implements ActionListener {
 		
 		//camera
 		if (player.getLinearVelocity().length() > 2) {
-			Vector3f w_v_norm = w_velocity.normalize();
-			offset = new Vector3f(-w_v_norm.x*8, 3, -w_v_norm.z*8);
-//			offset = new Vector3f(0, 3, -8);
+			Vector3f world_v_norm = w_velocity.normalize();
+			offset = new Vector3f(-world_v_norm.x*8, 3, -world_v_norm.z*8);
 		}
 		camNode.setLocalTranslation(offset.add(player.getPhysicsLocation()));
 		camNode.lookAt(carNode.getLocalTranslation().add(0, 1.5f, 0), Vector3f.UNIT_Y);
@@ -651,40 +643,11 @@ public class Rally extends SimpleApplication implements ActionListener {
 			putShapeArrow(ColorRGBA.Cyan, leftPlayer, player.getPhysicsLocation());
 			putShapeArrow(ColorRGBA.Cyan, rightPlayer, player.getPhysicsLocation());
 		}
-		frameCount++;
 		
+		//skid marks
+		frameCount++;
 		if (frameCount % 4 == 0) {
-			//skid marks
-			if (contact0) {
-				addSkidLine(wheel0Last, player.getWheel(0).getCollisionLocation());
-				wheel0Last = player.getWheel(0).getCollisionLocation();
-			} else {
-				wheel0Last = Vector3f.ZERO;
-			}
-			if (contact1) {
-				addSkidLine(wheel1Last, player.getWheel(1).getCollisionLocation());
-				wheel1Last = player.getWheel(1).getCollisionLocation();
-			} else {
-				wheel1Last = Vector3f.ZERO;
-			}
-			if (contact2) {
-				addSkidLine(wheel2Last, player.getWheel(2).getCollisionLocation());
-				wheel2Last = player.getWheel(2).getCollisionLocation();
-			} else {
-				wheel2Last = Vector3f.ZERO;
-			}
-			if (contact3) {
-				addSkidLine(wheel3Last, player.getWheel(3).getCollisionLocation());
-				wheel3Last = player.getWheel(3).getCollisionLocation();
-			} else {
-				wheel3Last = Vector3f.ZERO;
-			}
-			
-			int extra = skidList.size() - 500; //so i can remove more than one (like all 4 that frame)
-			for (int i = 0; i < extra; i++) {
-				arrowNode.detachChild(skidList.getFirst());
-				skidList.removeFirst();
-			}
+			addSkidLines();
 		}
 		
 		//turning torque (from the driver)
@@ -702,25 +665,61 @@ public class Rally extends SimpleApplication implements ActionListener {
 		
 	}
 	
-	private void addSkidLine(Vector3f a, Vector3f b) {
+	private void addSkidLines() {
+		if (contact0) {
+			addSkidLine(wheel0Last, player.getWheel(0).getCollisionLocation(), player.w0_myskid);
+			wheel0Last = player.getWheel(0).getCollisionLocation();
+		} else {
+			wheel0Last = Vector3f.ZERO;
+		}
+		if (contact1) {
+			addSkidLine(wheel1Last, player.getWheel(1).getCollisionLocation(), player.w1_myskid);
+			wheel1Last = player.getWheel(1).getCollisionLocation();
+		} else {
+			wheel1Last = Vector3f.ZERO;
+		}
+		if (contact2) {
+			addSkidLine(wheel2Last, player.getWheel(2).getCollisionLocation(), player.w2_myskid);
+			wheel2Last = player.getWheel(2).getCollisionLocation();
+		} else {
+			wheel2Last = Vector3f.ZERO;
+		}
+		if (contact3) {
+			addSkidLine(wheel3Last, player.getWheel(3).getCollisionLocation(), player.w3_myskid);
+			wheel3Last = player.getWheel(3).getCollisionLocation();
+		} else {
+			wheel3Last = Vector3f.ZERO;
+		}
+		
+		int extra = skidList.size() - 500; //so i can remove more than one (like all 4 that frame)
+		for (int i = 0; i < extra; i++) {
+			arrowNode.detachChild(skidList.getFirst());
+			skidList.removeFirst();
+		}
+	}
+	
+	private void addSkidLine(Vector3f a, Vector3f b, float grip) {
 		if (a.equals(new Vector3f(0,0,0)) || b.equals(new Vector3f(0,0,0))) {
-			return; //don't make a line because its not valid
+			return; //don't make a line because its not a valid position
 		}
 		a.y += 0.01;
-		b.y += 0.01; //z-buffering
+		b.y += 0.01; //z-buffering (i.e. up from the ground)
 		
 		Mesh mesh = new Mesh(); //making a quad
 		Vector3f [] vertices = new Vector3f[4];
-		vertices[0] = a.add(rightPlayer.mult(0.15f));
-		vertices[1] = b.add(rightPlayer.mult(0.15f));
-		vertices[2] = a.add(leftPlayer.mult(0.15f));
-		vertices[3] = b.add(leftPlayer.mult(0.15f));
+		vertices[0] = a.add(rightPlayer.mult(Car.wheelWidth));
+		vertices[1] = b.add(rightPlayer.mult(Car.wheelWidth));
+		vertices[2] = a.add(leftPlayer.mult(Car.wheelWidth));
+		vertices[3] = b.add(leftPlayer.mult(Car.wheelWidth));
 		int[] indexes = { 2,0,1, 1,3,2 };
 		mesh.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(vertices));
 		mesh.setBuffer(Type.Index,    3, BufferUtils.createIntBuffer(indexes));
 		mesh.updateBound();
 		
-		Geometry geo = new Geometry("OurMesh", mesh); // using our custom mesh object
+		Geometry geo = new Geometry("MyMesh", mesh); // using our custom mesh object
+		Material grey = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+		grey.setColor("Color", new ColorRGBA(grip, grip, grip, 1));
+		grey.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		geo.setMaterial(grey);
 		arrowNode.attachChild(geo);
 		skidList.add(geo);

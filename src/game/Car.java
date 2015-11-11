@@ -18,10 +18,14 @@ public class Car {
 	//wheels
 	static Vector3f wheelDirection = new Vector3f(0, -1, 0); //vertical
 	static Vector3f wheelAxle = new Vector3f(-1, 0, 0); //horizontal
-	static final float radius = 0.3f;
+
+	static final float wheelWidth = 0.15f;
+	static final float wheelRadius = 0.3f;
+	
 	static final float w_xOff = 0.68f; //wheels x offset (side)
 	static final float w_yOff = 0f; //wheels no height
 	static final float w_zOff = 1.1f; //wheels z offset (front and back)
+	
 	
 	//suspension values for wheels
 	//see for details: https://docs.google.com/Doc?docid=0AXVUZ5xw6XpKZGNuZG56a3FfMzU0Z2NyZnF4Zmo&hl=en
@@ -51,6 +55,6 @@ public class Car {
 	static final float MAX_ACCEL = mass*45f/400;
 	static final float MAX_STEERING = 0.5f;
 	static final float MAX_BRAKE = mass*50/400;
-	static final Vector3f JUMP_FORCE = new Vector3f(0, 5*mass, 0);		
+	static final Vector3f JUMP_FORCE = new Vector3f(0, 5*mass, 0);	
 }
 
