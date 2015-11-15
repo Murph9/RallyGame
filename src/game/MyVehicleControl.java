@@ -219,16 +219,16 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 			
 		} else if (binding.equals("Space")) {
 			if (value) {
-				applyImpulse(car.JUMP_FORCE, Vector3f.ZERO);
+				applyImpulse(car.JUMP_FORCE, Vector3f.ZERO); //push up
 				Vector3f old = getPhysicsLocation();
-				old.y += 2;
+				old.y += 2; //and move up
 				setPhysicsLocation(old);
 			}
 			
 		} else if (binding.equals("Impluse")) {
 			if (value) {
 				togglePhys = !togglePhys;
-				System.out.println("impluse");
+				System.out.println("physics = "+!togglePhys);
 			}
 			
 		} else if (binding.equals("Reset")) {
@@ -260,7 +260,7 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 	
 	private void specialPhysics(float tpf) {
 		if (togglePhys){ return; }//no need to apply wheel forces now
-		
+
 		//NOTE: that z is forward, x is side
 		//  but the notes say x is forward and y is sideways
 		
@@ -384,7 +384,7 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		}
 		
 		Matrix3f playerRot = new Matrix3f();
-		getInterpolatedPhysicsRotation(playerRot);
+		getPhysicsRotationMatrix(playerRot);
 		
 		left = playerRot.mult(Vector3f.UNIT_X);
 		right = playerRot.mult(Vector3f.UNIT_X.negate());

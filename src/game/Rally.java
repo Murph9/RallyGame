@@ -136,7 +136,7 @@ public class Rally extends SimpleApplication {
 		rootNode.addLight(sun);
 		
 		rootNode.setShadowMode(ShadowMode.CastAndReceive);
-		bulletAppState.getPhysicsSpace().setGravity(new Vector3f(0, -9.81f, 0));
+//		bulletAppState.getPhysicsSpace().setGravity(new Vector3f(0, -9.81f, 0));
 		
 		arrowNode = new Node();
 		rootNode.attachChild(arrowNode);
@@ -242,7 +242,6 @@ public class Rally extends SimpleApplication {
 		hudText = new BitmapText(guiFont, false);		  
 		hudText.setSize(guiFont.getCharSet().getRenderedSize());	  		// font size
 		hudText.setColor(ColorRGBA.White);									// font color
-//		hudText.setText(player.getCurrentVehicleSpeedKmHour()+"km/h");	// the text
 		hudText.setText("");												// the text
 		hudText.setLocalTranslation(0, 200, 0); 	// position
 		guiNode.attachChild(hudText);
@@ -265,8 +264,7 @@ public class Rally extends SimpleApplication {
 	
 	@Override
 	public void simpleUpdate(float tpf) {
-		//calc total position and time
-		totaltime += tpf;
+		totaltime += tpf; //calc total time
 		
 		player.myUpdate(tpf); //BIG update here
 		
@@ -274,9 +272,7 @@ public class Rally extends SimpleApplication {
 			System.out.println(player.getPhysicsLocation() + "distance:"+player.distance + "time:" + totaltime);
 		}
 		
-//		Matrix3f w_angle = player.getPhysicsRotationMatrix();
 		Vector3f w_velocity = player.getLinearVelocity();
-//		Vector3f l_velocity = w_angle.invert().mult(w_velocity).normalize();
 		
 		//////////////////////////////////
 		float speed = player.getLinearVelocity().length();
