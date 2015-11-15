@@ -64,7 +64,7 @@ class RallyCar extends Car {
 
 class TrackCar extends Car {
 	
-	TrackCar() {
+	TrackCar() { //different values
 		DRAG = 3.4f;
 		RESISTANCE = 30;
 	}
