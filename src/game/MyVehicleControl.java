@@ -1,6 +1,7 @@
 package game;
 
 import java.util.LinkedList;
+import java.util.List;
 
 import com.bulletphysics.dynamics.vehicle.WheelInfo;
 import com.bulletphysics.dynamics.vehicle.WheelInfo.RaycastInfo;
@@ -21,6 +22,7 @@ import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
+import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
@@ -77,6 +79,8 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 	int steeringDirection = 0; //-1 = right, 1 = left
 	
 	float brakeCurrent = 0;
+	
+	boolean ifHandbrake = false;
 	//- driving stuff
 	
 	float distance = 0;
@@ -141,6 +145,7 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		
 		////////////////////////
 		setupKeys();
+//		skidNode.setShadowMode(ShadowMode.Off);
 	}
 	
 	private void makeSmoke(Node wheelNode) {
@@ -170,7 +175,8 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		rally.getInputManager().addMapping("Rights", new KeyTrigger(KeyInput.KEY_K));
 		rally.getInputManager().addMapping("Ups", new KeyTrigger(KeyInput.KEY_U));
 		rally.getInputManager().addMapping("Downs", new KeyTrigger(KeyInput.KEY_J));
-		rally.getInputManager().addMapping("Space", new KeyTrigger(KeyInput.KEY_SPACE));
+		rally.getInputManager().addMapping("Jump", new KeyTrigger(KeyInput.KEY_Q));
+		rally.getInputManager().addMapping("Handbrake", new KeyTrigger(KeyInput.KEY_SPACE));
 		rally.getInputManager().addMapping("Reset", new KeyTrigger(KeyInput.KEY_RETURN));
 		rally.getInputManager().addMapping("Impluse", new KeyTrigger(KeyInput.KEY_LCONTROL));
 		rally.getInputManager().addMapping("Reverse", new KeyTrigger(KeyInput.KEY_LSHIFT));
@@ -179,7 +185,8 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		rally.getInputManager().addListener(this, "Rights");
 		rally.getInputManager().addListener(this, "Ups");
 		rally.getInputManager().addListener(this, "Downs");
-		rally.getInputManager().addListener(this, "Space");
+		rally.getInputManager().addListener(this, "Jump");
+		rally.getInputManager().addListener(this, "Handbrake");
 		rally.getInputManager().addListener(this, "Reset");
 		rally.getInputManager().addListener(this, "Impluse");
 		rally.getInputManager().addListener(this, "Reverse");
@@ -188,6 +195,10 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 	}
 	
 	public void onAction(String binding, boolean value, float tpf) {
+		//value == 'if pressed'
+		//value = value of press, with keys its always 0 or 1
+		//controllers on the otherhand...
+		
 		if (binding.equals("Lefts")) {
 			if (value) {
 				steeringDirection = 1;
@@ -195,7 +206,8 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 				steeringDirection = 0;
 			}
 			steer(steeringCurrent);
-		} else if (binding.equals("Rights")) {
+		} 
+		if (binding.equals("Rights")) {
 			if (value) {
 				steeringDirection = -1;
 			} else {
@@ -210,14 +222,16 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 				ifAccel = false;
 			}
 
-		} else if (binding.equals("Downs")) {
+		} 
+		if (binding.equals("Downs")) {
 			if (value) {
 				brakeCurrent += car.MAX_BRAKE;
 			} else {
 				brakeCurrent -= car.MAX_BRAKE;
 			}
 			
-		} else if (binding.equals("Space")) {
+		} 
+		if (binding.equals("Jump")) {
 			if (value) {
 				applyImpulse(car.JUMP_FORCE, Vector3f.ZERO); //push up
 				Vector3f old = getPhysicsLocation();
@@ -225,15 +239,19 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 				setPhysicsLocation(old);
 			}
 			
-		} else if (binding.equals("Impluse")) {
+		} 
+		if (binding.equals("Handbrake")) {
+			ifHandbrake = !ifHandbrake;
+			
+		} 
+		if (binding.equals("Impluse")) {
 			if (value) {
 				togglePhys = !togglePhys;
 				System.out.println("physics = "+!togglePhys);
 			}
-			
-		} else if (binding.equals("Reset")) {
+		} 
+		if (binding.equals("Reset")) {
 			if (value) {
-				setPhysicsLocation(rally.world.start);
 				setPhysicsRotation(new Matrix3f());
 				setLinearVelocity(Vector3f.ZERO);
 				setAngularVelocity(Vector3f.ZERO);
@@ -241,6 +259,26 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 				
 				rally.arrowNode.detachAllChildren();
 
+				if (rally.fancyWorld) {
+					//TODO wow this is a mess
+					List<Spatial> ne = new LinkedList<Spatial>(rally.worldB.pieces);
+					for (Spatial s: ne) {
+						rally.getPhysicsSpace().remove(s.getControl(0));
+						rally.worldB.detachChild(s);
+						rally.worldB.pieces.remove(s);
+					}
+					rally.worldB.start = new Vector3f(0,0,0);
+					rally.worldB.nextPos = new Vector3f(0,0,0);
+					setPhysicsLocation(rally.worldB.start);
+					Matrix3f p = new Matrix3f();
+					p.fromAngleAxis(FastMath.DEG_TO_RAD*90, Vector3f.UNIT_Y);
+					setPhysicsRotation(p);
+
+				} else {
+					setPhysicsLocation(rally.world.start);
+				}
+				
+				
 				skidNode.detachAllChildren();
 				skidList.clear();
 				wheel0Last = Vector3f.ZERO;
@@ -249,8 +287,7 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 				wheel3Last = Vector3f.ZERO;
 			} else {
 			}
-		}
-		
+		} 
 		if (binding.equals("Reverse")) {
 			ifReverse = !ifReverse;
 		}
@@ -277,10 +314,12 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 			rot_angle = Math.atan(yawspeed / velocity.z);
 			sideslip = Math.atan(velocity.x / velocity.z);
 		}
+		
 		float steeringCur = steeringCurrent;
-		if (velocity.z < 0) { //need to flip the steering on reverse
+		if (velocity.z < 0) { //need to flip the steering on moving in reverse
 			steeringCur *= -1;
 		}
+		
 		double slipanglefront = sideslip + rot_angle - steeringCur;
 		double slipanglerear = sideslip - rot_angle;
 		
@@ -293,14 +332,22 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 			force_lat_front.x = FastMath.clamp(force_lat_front.x, -car.MAX_GRIP, car.MAX_GRIP);
 			w0_myskid = w1_myskid = Math.abs(force_lat_front.x)/car.MAX_GRIP;
 			force_lat_front.x *= weight;
+//			if (ifHandbrake) { 
+//				force_lat_front.x *= 0.5;
+//			}
 		}
+		
 		Vector3f force_lat_rear = new Vector3f();
 		if (contact2 && contact3) {
 			force_lat_rear.x = (float)(slipanglerear*car.CA_R);
 			force_lat_rear.x = FastMath.clamp(force_lat_rear.x, -car.MAX_GRIP, car.MAX_GRIP);
 			w2_myskid = w3_myskid = Math.abs(force_lat_rear.x)/car.MAX_GRIP;
 			force_lat_rear.x *= weight;
+			if (ifHandbrake) {
+				force_lat_rear.x *= 0.5f;
+			}
 		}
+//		System.out.println(force_lat_rear.x);
 		
 		float accel;
 		float x = accelCurrent;
@@ -312,7 +359,6 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 			if (ifReverse) {
 				accel *= -1;
 			}
-			
 		} else {
 			accel = 0;
 		}
@@ -322,6 +368,7 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 			ftraction.z = 100*(accel - brakeCurrent*FastMath.sign(velocity.z));
 		} //TODO make accel 'cost' grip
 		
+		
 		//speed drag and linear resistance here
 		Vector3f resistance = new Vector3f();
 		resistance.z = (float)(-(car.RESISTANCE * velocity.z + car.DRAG * velocity.z * Math.abs(velocity.z)));
@@ -330,7 +377,7 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		//put into a force
 		Vector3f force = new Vector3f();
 		force.z = (float) (ftraction.z + Math.sin(steeringCurrent)*force_lat_front.z + force_lat_rear.z + resistance.z);
-		force.x = (float) (Math.cos(steeringCurrent)*force_lat_front.x + force_lat_rear.x + resistance.x); //ftraction.x = 0
+		force.x = (float) (ftraction.x + Math.cos(steeringCurrent)*force_lat_front.x + force_lat_rear.x + resistance.x);
 		
 		force.mult(Math.min(Math.abs(velocity.z), 1)); //less physics while not moving far forward
 		
@@ -438,7 +485,7 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 	
 	private void addSkidLine(Vector3f a, Vector3f b, float grip) {
 		if (a.equals(new Vector3f(0,0,0)) || b.equals(new Vector3f(0,0,0))) {
-			return; //don't make a line because its not a valid position
+			return; //don't make a line because they aren't valid positions
 		}
 		a.y += 0.01;
 		b.y += 0.01; //z-buffering (i.e. to stop it "fighting" with the ground)
@@ -473,11 +520,9 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 			mat.setColor("Color", new ColorRGBA(0,0,0,0)); //empty
 		}
 		
-//		if (ifGlow) { TODO why is this here?
-//			mat.setColor("GlowColor", ColorRGBA.Blue);
-//		}
-		//TODO fix texture to have no shadow
-		//TODO actually scale the texture alpha by grip
+//		mat.setColor("GlowColor", ColorRGBA.Blue); TODO move somewhere else
+		
+//		TODO actually scale the texture alpha by grip
 		
 		mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
 		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);

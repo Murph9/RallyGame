@@ -39,10 +39,11 @@ public class Rally extends SimpleApplication {
 	private CameraNode camNode;
 	private Vector3f offset;
 	
-	//Model Enum stuff
-	World world = World.duct; //Set map here
-	private boolean ifNeedMaterial = true;
-	private boolean worldRotate = false; //for those sideways obj files
+	//World Model Enum stuff
+	World world = World.slotcar2; //Set map here
+	
+	boolean fancyWorld = true;
+	WorldBuilder worldB;
 	
 	//hud stuff
 	private BitmapText hudText;
@@ -51,6 +52,7 @@ public class Rally extends SimpleApplication {
 	//car stuff
 	private Node carNode;
 	private MyVehicleControl player;
+	private Car car = new RallyCar(); //set car here
 	
 	//debug stuff
 	Node arrowNode;
@@ -104,27 +106,32 @@ public class Rally extends SimpleApplication {
 	}
 
 	private void createWorld() {
-		Material mat = new Material(assetManager, "Common/MatDefs/Misc/ShowNormals.j3md");
-		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
-		
-        //imported model		
-		Spatial worldNode = assetManager.loadModel(world.name);
-		if (worldNode instanceof Node) {
-			for (Spatial s: ((Node) worldNode).getChildren()) {
-				if (ifNeedMaterial) {
-					s.setMaterial(mat);
-				}
-				addWorldModel(s);
-			}
+		if (fancyWorld) {
+			worldB = new WorldBuilder(this, assetManager);
+			rootNode.attachChild(worldB);
 		} else {
-			Geometry worldModel = (Geometry) assetManager.loadModel(world.name);
-			
-			if (ifNeedMaterial) {
-				worldModel.setMaterial(mat);
-			}
-			addWorldModel(worldModel);
-		}
 		
+			Material mat = new Material(assetManager, "Common/MatDefs/Misc/ShowNormals.j3md");
+			mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
+			
+		    //imported model		
+			Spatial worldNode = assetManager.loadModel(world.name);
+			if (worldNode instanceof Node) {
+				for (Spatial s: ((Node) worldNode).getChildren()) {
+					if (world.ifNeedsTexture) {
+						s.setMaterial(mat);
+					}
+					addWorldModel(s);
+				}
+			} else {
+				Geometry worldModel = (Geometry) assetManager.loadModel(world.name);
+				
+				if (world.ifNeedsTexture) {
+					worldModel.setMaterial(mat);
+				}
+				addWorldModel(worldModel);
+			}
+		}
 		//lights
 		AmbientLight al = new AmbientLight();
 		al.setColor(ColorRGBA.White.mult(0.4f));
@@ -136,7 +143,7 @@ public class Rally extends SimpleApplication {
 		rootNode.addLight(sun);
 		
 		rootNode.setShadowMode(ShadowMode.CastAndReceive);
-//		bulletAppState.getPhysicsSpace().setGravity(new Vector3f(0, -9.81f, 0));
+//		bulletAppState.getPhysicsSpace().setGravity(new Vector3f(0, -9.81f, 0)); //defaults to normal
 		
 		arrowNode = new Node();
 		rootNode.attachChild(arrowNode);
@@ -182,9 +189,9 @@ public class Rally extends SimpleApplication {
 		System.out.println("Adding: "+ s.getName());
 		
 		s.move(0,-5,0);
-		if (worldRotate) {
-			s.rotate(-90*FastMath.DEG_TO_RAD, 0, 0);
-		}
+		//if (worldRotate) { TODO check this isn't needed anymore
+			//s.rotate(-90*FastMath.DEG_TO_RAD, 0, 0);
+		//}
 		s.scale(world.scale);
 		
 		CollisionShape world = CollisionShapeFactory.createMeshShape(s);
@@ -202,16 +209,14 @@ public class Rally extends SimpleApplication {
 		camNode = new CameraNode("Cam Node", cam);
 		camNode.setControlDir(ControlDirection.SpatialToCamera);
 	
-		rootNode.attachChild(camNode);
+		carNode.attachChild(camNode);
 		camNode.setLocalTranslation(new Vector3f(0, 3, -8));
-		camNode.lookAt(carNode.getLocalTranslation().add(0, 1.5f, 0), Vector3f.UNIT_Y);
+		camNode.lookAt(new Vector3f(0, 1.5f, 0), Vector3f.UNIT_Y);
 		
 		offset = new Vector3f(0,3,-8);
 	}
 	
 	private void buildPlayer() {
-		Car car = new RallyCar(); //Car Type
-		
 		Spatial carmodel = assetManager.loadModel(car.carOBJModel); //use it as car. for now
 		//create a compound shape and attach CollisionShape for the car body at 0,1,0
 		//this shifts the effective center of mass of the BoxCollisionShape to 0,-1,0
@@ -229,7 +234,14 @@ public class Rally extends SimpleApplication {
 		rootNode.attachChild(player.skidNode);
 		
 		getPhysicsSpace().add(player);
-		player.setPhysicsLocation(world.start);
+		if (fancyWorld) {
+			player.setPhysicsLocation(worldB.start);
+			Matrix3f p = player.getPhysicsRotationMatrix();
+			p.fromAngleAxis(FastMath.DEG_TO_RAD*90, Vector3f.UNIT_Y);
+			player.setPhysicsRotation(p);
+		} else {
+			player.setPhysicsLocation(world.start);
+		}
 	}
 	
 	private void connectJoyStick() {
@@ -254,7 +266,7 @@ public class Rally extends SimpleApplication {
 		guiNode.attachChild(hudText2);
 	}
 	
-	private PhysicsSpace getPhysicsSpace(){
+	public PhysicsSpace getPhysicsSpace(){
 		return bulletAppState.getPhysicsSpace();
 	}
 	
@@ -267,14 +279,22 @@ public class Rally extends SimpleApplication {
 		totaltime += tpf; //calc total time
 		
 		player.myUpdate(tpf); //BIG update here
-		
+		if (fancyWorld) {
+			worldB.update(player.getPhysicsLocation());
+		}
+			
 		if (ifDebug) {
 			System.out.println(player.getPhysicsLocation() + "distance:"+player.distance + "time:" + totaltime);
 		}
+		//////////////////////////////////
 		
 		Vector3f w_velocity = player.getLinearVelocity();
+//		Matrix3f w_angle = player.getPhysicsRotationMatrix();
+//		Vector3f velocity = w_angle.invert().mult(w_velocity);
+
+		Vector3f velocityVector = player.getLinearVelocity().normalize();
+		player.getForwardVector(player.forward);
 		
-		//////////////////////////////////
 		float speed = player.getLinearVelocity().length();
 		hudText.setText(speed + "m/s" + player.getWheelTractionInfo()); // the ui text
 		
@@ -283,18 +303,18 @@ public class Rally extends SimpleApplication {
 		float totalgrip = player.getTotalGrip();
 		hudText2.setText(player.curGear+" | "+player.accelCurrent + "\n" +(player.ifAccel)+"\n"+totalgrip);
 		
-
-		Vector3f velocityVector = player.getLinearVelocity().normalize();
-		player.getForwardVector(player.forward);
-		
+		/////////////////////////////////
 		//camera
 		if (player.getLinearVelocity().length() > 2) {
 			Vector3f world_v_norm = w_velocity.normalize();
 			offset = new Vector3f(-world_v_norm.x*8, 3, -world_v_norm.z*8);
+			offset = new Vector3f(0, 3, -8);
 		}
-		camNode.setLocalTranslation(offset.add(player.getPhysicsLocation()));
-		camNode.lookAt(carNode.getLocalTranslation().add(0, 1.5f, 0), Vector3f.UNIT_Y);
+		camNode.setLocalTranslation(offset);
+		camNode.lookAt(player.getPhysicsLocation().add(new Vector3f(0,1,0)), Vector3f.UNIT_Y);
 		
+		
+		//////////////////////////////////
 		if (frameCount % 10 == 0 && ifDebug) {
 			float driftAngle = velocityVector.angleBetween(player.forward);
 			float driftRightAngle = FastMath.RAD_TO_DEG*(velocityVector.angleBetween(player.right)); 
@@ -332,15 +352,13 @@ public class Rally extends SimpleApplication {
 	}
 	
 	private Geometry createShape(Mesh shape, ColorRGBA color){
-		  Geometry g = new Geometry("coordinate axis", shape);
-		  Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		  mat.getAdditionalRenderState().setWireframe(true);
-		  mat.setColor("Color", color);
-		  g.setMaterial(mat);
-		  g.setShadowMode(ShadowMode.Off);
-		  return g;
+		Geometry g = new Geometry("coordinate axis", shape);
+		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+		mat.getAdditionalRenderState().setWireframe(true);
+		mat.setColor("Color", color);
+		g.setMaterial(mat);
+		g.setShadowMode(ShadowMode.Off);
+		return g;
 	}
 	
 }
-
-
