@@ -22,7 +22,6 @@ import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
-import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
@@ -332,6 +331,9 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 			force_lat_front.x = FastMath.clamp(force_lat_front.x, -car.MAX_GRIP, car.MAX_GRIP);
 			w0_myskid = w1_myskid = Math.abs(force_lat_front.x)/car.MAX_GRIP;
 			force_lat_front.x *= weight;
+//			if (ifAccel) {
+//				force_lat_front.x *= 0.5; //TODO simple attempt at accel loss of grip
+//			}
 //			if (ifHandbrake) { 
 //				force_lat_front.x *= 0.5;
 //			}
@@ -343,11 +345,13 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 			force_lat_rear.x = FastMath.clamp(force_lat_rear.x, -car.MAX_GRIP, car.MAX_GRIP);
 			w2_myskid = w3_myskid = Math.abs(force_lat_rear.x)/car.MAX_GRIP;
 			force_lat_rear.x *= weight;
+//			if (ifAccel) {
+//				force_lat_rear.x *= 0.5;
+//			}
 			if (ifHandbrake) {
 				force_lat_rear.x *= 0.5f;
 			}
 		}
-//		System.out.println(force_lat_rear.x);
 		
 		float accel;
 		float x = accelCurrent;
@@ -363,39 +367,34 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 			accel = 0;
 		}
 		//TODO figure out why '100' / ?maybe brake and accel can fight?
-		Vector3f ftraction = new Vector3f();
+		float ftractionz = 0;
 		if (contact0 && contact1 && contact2 && contact3) {
-			ftraction.z = 100*(accel - brakeCurrent*FastMath.sign(velocity.z));
+			ftractionz = 100*(accel - brakeCurrent*FastMath.sign(velocity.z));
 		} //TODO make accel 'cost' grip
 		
+		//linear resistance and quadratic drag here
+		float resistancez = (float)(-(car.RESISTANCE * velocity.z + car.DRAG * velocity.z * Math.abs(velocity.z)));
+		float resistancex = (float)(-(car.RESISTANCE * velocity.x + car.DRAG * velocity.x * Math.abs(velocity.x))); 
+
+		////////////////////////////////////
+		//put them into global and two x direction forces:
+		Vector3f totalNeutral = new Vector3f();
+		totalNeutral.x = resistancex;
+		totalNeutral.z = ftractionz + FastMath.sin(steeringCurrent)*force_lat_front.z + force_lat_rear.z + resistancez;
 		
-		//speed drag and linear resistance here
-		Vector3f resistance = new Vector3f();
-		resistance.z = (float)(-(car.RESISTANCE * velocity.z + car.DRAG * velocity.z * Math.abs(velocity.z)));
-		resistance.x = (float)(-(car.RESISTANCE * velocity.x + car.DRAG * velocity.x * Math.abs(velocity.x))); 
+		float totalxfront = FastMath.cos(steeringCurrent)*force_lat_front.x;
+		Vector3f xfront = w_angle.mult(new Vector3f(totalxfront, 0, 0));
 		
-		//put into a force
-		Vector3f force = new Vector3f();
-		force.z = (float) (ftraction.z + Math.sin(steeringCurrent)*force_lat_front.z + force_lat_rear.z + resistance.z);
-		force.x = (float) (ftraction.x + Math.cos(steeringCurrent)*force_lat_front.x + force_lat_rear.x + resistance.x);
+		float totalxrear = force_lat_rear.x;
+		Vector3f xrear = w_angle.mult(new Vector3f(totalxrear, 0, 0));
+		Vector3f front = w_angle.mult(new Vector3f(0, 0, car.w_zOff));
+
+		applyCentralForce(w_angle.mult(totalNeutral)); //forces on the main car
+		applyForce(xfront, front); //front wheels
+		applyForce(xrear, front.negate()); //rear wheels
 		
-		force.mult(Math.min(Math.abs(velocity.z), 1)); //less physics while not moving far forward
-		
-		Vector3f w_force = w_angle.mult(force); //reset to world coords
-		applyCentralForce(w_force);
-		//TODO make it so each wheel is individual
-		
-		//* Angular Acceleration:
-			//CM to front * flf.y - CM to rear * flr.y
-		double torque = car.length/2 * force_lat_front.x - car.length/2 * force_lat_rear.x;
-		
-			//Inertia = (1/12)*mass*(w*w + h*h) == 12*(4*4+1*1)/mass
-		double angular_acceleration = (car.width*car.width + car.length*car.length)*12 * torque / car.mass;
-		
-		applyTorque(new Vector3f(0, (float)(angular_acceleration), 0));
-		
+		System.out.println(totalNeutral);
 	}
-	
 	//////////////////////////////////////////////////////////////
 	public void myUpdate(float tpf) {
 		distance += getLinearVelocity().length()*tpf;

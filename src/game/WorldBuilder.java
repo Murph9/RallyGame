@@ -23,31 +23,32 @@ public class WorldBuilder extends Node {
 	//designed to generate the world infront of the player dynamically.
 	
 	/* TODO:
-	 * Make world pieces
 	 * use the player position 
 	 * remove the pieces after we are far away
 	 */
 	
-	float scale;
+	
 	Rally rally;
 	AssetManager assetManager;
-	Material mat;
 	
 	List<Spatial> pieces = new LinkedList<Spatial>();
 	
 	Vector3f start;
-	
 	Vector3f nextPos;
+	float scale;
 	float nextAngle;
 	int count = 0;
-	
+
+	Material mat;
+	boolean needsMaterial;
 	
 	WorldBuilder (Rally rally, AssetManager asset) {
 		this.rally = rally;
-		this.scale = 10;
+		this.scale = 15;
 		this.assetManager = asset;
 		this.start = new Vector3f(0,0,0);
 		this.nextPos = new Vector3f(0,0,0);
+		this.needsMaterial = false;
 		
 		this.mat = new Material(assetManager, "Common/MatDefs/Misc/ShowNormals.j3md");
 		this.mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
@@ -69,8 +70,8 @@ public class WorldBuilder extends Node {
         matfloor.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
         matfloor.setColor("Color", ColorRGBA.Red);
         
-        Box start = new Box(10, 0.25f, 10);
-        Geometry startGeometry = new Geometry("Floor", start);
+        Box start = new Box(10, 0.25f, 10); //Something to spawn on (or in hint hint)
+        Geometry startGeometry = new Geometry("Starting Box", start);
         startGeometry.setMaterial(matfloor);
         startGeometry.setLocalTranslation(0, -0.1f, 0);
         startGeometry.addControl(new RigidBodyControl(0));
@@ -81,35 +82,46 @@ public class WorldBuilder extends Node {
 	
 	public void update(Vector3f playerPos) {
 		count++;
-		if (count % 75 == 0) {
-			WorldPiece[] a = WorldPiece.values();
-			int next = (int)(Math.random()*a.length);
-			WorldPiece cur = a[next];
-			cur.setMirrored(FastMath.nextRandomInt()%2==0);
-			addModel(a[next]);
+		if (count % 10 == 0) { //don't check that often
+			switch ("WorldPiece") {
+			/*case "WorldPiece": //timed track is cool
+				WorldPiece[] a = WorldPiece.values();
+				int next = (int)(Math.random()*a.length);
+				addModel(a[next]);
+				break;*/
+			case "WorldPiece":
+				WorldPiece[] b = WorldPiece.values();
+				while (nextPos.subtract(playerPos).length() < 50) {
+					int nextb = (int)(Math.random()*b.length);
+					addModel(b[nextb]);	
+				}
+				break;
+			case "WPCity":
+				WPCity[] c = WPCity.values();
+				while (nextPos.subtract(playerPos).length() < 50) {
+					int nextc = (int)(Math.random()*c.length);
+					addModel(c[nextc]);
+				}
+				break;
+			default:
+				break;
+			}
 		}
 	}
 	
 	//test for world building
-	public void addModel(WorldPiece world) {
+	public void addModel(Blocks world) {
 		 //imported model		
 		Spatial worldNode = assetManager.loadModel(world.getName());
-		Spatial s = ((Node)worldNode).getChild(0);
-		s.setMaterial(mat); //TODO double sided objects
+		Spatial s = ((Node)worldNode).getChild(0); //there is only one object in there (hopefully)
+		if (needsMaterial) {
+			s.setMaterial(mat); //TODO double sided objects
+		}
 		
 		//translate, rotate, scale
 		s.setLocalTranslation(nextPos);
 		s.rotate(0, nextAngle, 0);
-		Vector3f v = new Vector3f(1,1,1).mult(scale);
-		if (world.getMirrored()) {
-			if (world.equals(WorldPiece.HILL)) {
-				s.scale(v.x, -v.y, v.z);
-			} else {
-				s.scale(v.x, v.y, -v.z);
-			}
-		} else {
-			s.scale(v.x, v.y, v.z);
-		}
+		s.scale(scale);
 
 		CollisionShape coll = CollisionShapeFactory.createMeshShape(s);
 	
@@ -118,9 +130,9 @@ public class WorldBuilder extends Node {
 		rally.getPhysicsSpace().add(landscape);
 		this.attachChild(s);
 
+		System.out.println("Adding: "+world.getName());
 		if (rally.ifDebug) {
-			System.err.println("Adding: "+ world.getName() + ", at: " + nextPos);
-			System.err.println("Rot: " + nextAngle + ", Obj.angle: " + world.getNewAngle() + ", Obj.nextPos: " + world.getNewPos());
+			System.err.println("at: "+nextPos+", Rot: "+nextAngle+", Obj.angle: "+world.getNewAngle()+", Obj.nextPos: "+world.getNewPos());
 		}
 		pieces.add(s);
 		
@@ -144,55 +156,88 @@ public class WorldBuilder extends Node {
 	}
 }
 
-enum WorldPiece {
+enum WorldPiece implements Blocks {
 	
-	CROSS("world/wb_cross.blend", new Vector3f(2,0,0), 0),
-	STRAIGHT("world/wb_straight.blend", new Vector3f(2,0,0), 0),
-	SHARP_LEFT("world/wb_sharp.blend", new Vector3f(1,0,-1), FastMath.DEG_TO_RAD*90),
-	HILL("world/wb_hill.blend", new Vector3f(2,0.5f,0), 0),
-	LEFT("world/wb_corner.blend", new Vector3f(1,0,-1), FastMath.DEG_TO_RAD*90),
-	LONG_LEFT("world/wb_long.blend", new Vector3f(2,0,-2), FastMath.DEG_TO_RAD*90),
-	CHICANE_LEFT("world/wb_diff.blend", new Vector3f(2,0,-1), 0),
+	CROSS("wbsimple/cross.blend", new Vector3f(2,0,0), 0),
+	STRAIGHT("wbsimple/straight.blend", new Vector3f(2,0,0), 0),
+	
+	LEFT("wbsimple/left.blend", new Vector3f(1,0,-1), FastMath.DEG_TO_RAD*90),
+	LEFT_SHARP("wbsimple/left_sharp.blend", new Vector3f(1,0,-1), FastMath.DEG_TO_RAD*90),
+	LEFT_LONG("wbsimple/left_long.blend", new Vector3f(2,0,-2), FastMath.DEG_TO_RAD*90),
+	LEFT_CHICANE("wbsimple/left_chicane.blend", new Vector3f(2,0,-1), 0),
+	
+	RIGHT("wbsimple/right.blend", new Vector3f(1,0,1), FastMath.DEG_TO_RAD*-90),
+	RIGHT_SHARP("wbsimple/right_sharp.blend", new Vector3f(1,0,1), FastMath.DEG_TO_RAD*-90),
+	RIGHT_LONG("wbsimple/right_long.blend", new Vector3f(2,0,2), FastMath.DEG_TO_RAD*-90),
+	RIGHT_CHICANE("wbsimple/right_chicane.blend", new Vector3f(2,0,1), 0),
+	
+	HILL_UP("wbsimple/hill_up.blend", new Vector3f(4,0.5f,0), 0),
+	HILL_DOWN("wbsimple/hill_down.blend", new Vector3f(4,-0.5f,0), 0),
 	;
 	
-	private String name;
-	private Vector3f newPos; //what the piece does to the track
-	private float newAngle; //change of angle (deg) for the next peice
+	String name;
+	Vector3f newPos; //what the piece does to the track
+	float newAngle; //change of angle (deg) for the next peice
 
-	private boolean mirrored;
-	
 	WorldPiece(String s, Vector3f a, float g) {
 		this.name = s;
 		this.newPos = a;
 		this.newAngle = g;
-		this.mirrored = false;
 	}
-
-	void setMirrored (boolean i) { mirrored = i; }
-	boolean getMirrored() { return mirrored; }
-	
-	String getName() {
+	public String getName() {
 		return name;
 	}
-	
-	//gets to update the position of the next one
-	Vector3f getNewPos() {
-		Vector3f out = new Vector3f(newPos.x, newPos.y, newPos.z);
-		if (mirrored) {
-			if (this.equals(WorldPiece.HILL)) {
-				out.y *= -1;
-			} else {
-				out.z *= -1;
-			}
-		}
-		return out;
+	public Vector3f getNewPos() {
+		return newPos;
 	}
-	
-	float getNewAngle() {
-		float out = newAngle;
-		if (mirrored) {
-			out *= -1;
-		}		
-		return out;
+	public float getNewAngle() {
+		return newAngle;
 	}
+}
+
+
+enum WPCity implements Blocks { //TODO finish all the models here
+	CROSS("wbcity/cross.blend", new Vector3f(2,0,0), 0),
+	STRAIGHT("wbcity/straight.blend", new Vector3f(2,0,0), 0),
+	
+	LEFT("wbcity/left.blend", new Vector3f(1,0,-1), FastMath.DEG_TO_RAD*90),
+	LEFT_SHARP("wbcity/left_sharp.blend", new Vector3f(1,0,-1), FastMath.DEG_TO_RAD*90),
+	LEFT_LONG("wbcity/left_long.blend", new Vector3f(2,0,-2), FastMath.DEG_TO_RAD*90),
+	LEFT_CHICANE("wbcity/left_chicane.blend", new Vector3f(2,0,-1), 0),
+	
+	RIGHT("wbcity/right.blend", new Vector3f(1,0,1), FastMath.DEG_TO_RAD*-90),
+	RIGHT_SHARP("wbcity/right_sharp.blend", new Vector3f(1,0,1), FastMath.DEG_TO_RAD*-90),
+	RIGHT_LONG("wbcity/right_long.blend", new Vector3f(2,0,2), FastMath.DEG_TO_RAD*-90),
+	RIGHT_CHICANE("wbcity/right_chicane.blend", new Vector3f(2,0,1), 0),
+	
+	HILL_UP("wbcity/hill_up.blend", new Vector3f(4,0.5f,0), 0),
+	HILL_DOWN("wbcity/hill_down.blend", new Vector3f(4,-0.5f,0), 0),
+	;
+	
+	String name;
+	Vector3f newPos; //what the piece does to the track
+	float newAngle; //change of angle (deg) for the next piece
+
+	WPCity(String s, Vector3f a, float g) {
+		this.name = s;
+		this.newPos = a;
+		this.newAngle = g;
+	}
+	public String getName() {
+		return name;
+	}
+	public Vector3f getNewPos() {
+		return newPos;
+	}
+	public float getNewAngle() {
+		return newAngle;
+	}
+}
+
+
+interface Blocks {
+	
+	String getName();
+	Vector3f getNewPos();
+	float getNewAngle();
 }

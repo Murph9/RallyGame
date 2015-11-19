@@ -40,9 +40,9 @@ public class Rally extends SimpleApplication {
 	private Vector3f offset;
 	
 	//World Model Enum stuff
-	World world = World.slotcar2; //Set map here
+	World world = World.track2; //Set map here
 	
-	boolean fancyWorld = true;
+	boolean fancyWorld = false;
 	WorldBuilder worldB;
 	
 	//hud stuff
@@ -51,8 +51,9 @@ public class Rally extends SimpleApplication {
 	
 	//car stuff
 	private Node carNode;
+	private Node camHelpNode;
 	private MyVehicleControl player;
-	private Car car = new RallyCar(); //set car here
+	private Car car = new TrackCar(); //set car here
 	
 	//debug stuff
 	Node arrowNode;
@@ -210,10 +211,10 @@ public class Rally extends SimpleApplication {
 		camNode.setControlDir(ControlDirection.SpatialToCamera);
 	
 		carNode.attachChild(camNode);
-		camNode.setLocalTranslation(new Vector3f(0, 3, -8));
-		camNode.lookAt(new Vector3f(0, 1.5f, 0), Vector3f.UNIT_Y);
+		camNode.setLocalTranslation(player.car.CAM_OFFSET);
+		camNode.lookAt(player.car.LOOK_AT, Vector3f.UNIT_Y);
 		
-		offset = new Vector3f(0,3,-8);
+		offset = player.car.CAM_OFFSET;
 	}
 	
 	private void buildPlayer() {
@@ -229,6 +230,10 @@ public class Rally extends SimpleApplication {
 		
 		carNode.addControl(player);
 		carNode.attachChild(carmodel);
+
+		camHelpNode = new Node();
+		carNode.attachChild(camHelpNode);
+		camHelpNode.setLocalTranslation(0, 1, 8);
 		
 		rootNode.attachChild(carNode);
 		rootNode.attachChild(player.skidNode);
@@ -287,10 +292,11 @@ public class Rally extends SimpleApplication {
 			System.out.println(player.getPhysicsLocation() + "distance:"+player.distance + "time:" + totaltime);
 		}
 		//////////////////////////////////
+		//Hud stuff
 		
 		Vector3f w_velocity = player.getLinearVelocity();
-//		Matrix3f w_angle = player.getPhysicsRotationMatrix();
-//		Vector3f velocity = w_angle.invert().mult(w_velocity);
+		Matrix3f w_angle = player.getPhysicsRotationMatrix();
+		Vector3f velocity = w_angle.invert().mult(w_velocity);
 
 		Vector3f velocityVector = player.getLinearVelocity().normalize();
 		player.getForwardVector(player.forward);
@@ -306,13 +312,14 @@ public class Rally extends SimpleApplication {
 		/////////////////////////////////
 		//camera
 		if (player.getLinearVelocity().length() > 2) {
-			Vector3f world_v_norm = w_velocity.normalize();
-			offset = new Vector3f(-world_v_norm.x*8, 3, -world_v_norm.z*8);
-			offset = new Vector3f(0, 3, -8);
+			Vector3f world_v_norm = velocity.normalize();
+			Vector3f yplane = player.car.CAM_OFFSET;
+			offset = new Vector3f(world_v_norm.x*yplane.z, yplane.y, world_v_norm.z*yplane.z);
+//			offset = player.car.CAM_OFFSET; //for a fixed camera
 		}
+		camHelpNode.setLocalTranslation(player.forward.mult(player.car.length/4)); //just in front of the car
 		camNode.setLocalTranslation(offset);
-		camNode.lookAt(player.getPhysicsLocation().add(new Vector3f(0,1,0)), Vector3f.UNIT_Y);
-		
+		camNode.lookAt(player.getPhysicsLocation().add(player.car.LOOK_AT), Vector3f.UNIT_Y);
 		
 		//////////////////////////////////
 		if (frameCount % 10 == 0 && ifDebug) {
@@ -342,16 +349,16 @@ public class Rally extends SimpleApplication {
 	}
 	
 	
-	private void putShapeArrow(ColorRGBA color, Vector3f dir, Vector3f pos) {
+	void putShapeArrow(ColorRGBA color, Vector3f dir, Vector3f pos) {
 		Arrow arrow = new Arrow(dir);
 		arrow.setLineWidth(1); // make arrow thicker
 		Geometry arrowG = createShape(arrow, color);
-		arrowG.setLocalTranslation(player.getPhysicsLocation());
+		arrowG.setLocalTranslation(pos);
 		arrowG.setShadowMode(ShadowMode.Off);
 		arrowNode.attachChild(arrowG);
 	}
 	
-	private Geometry createShape(Mesh shape, ColorRGBA color){
+	Geometry createShape(Mesh shape, ColorRGBA color){
 		Geometry g = new Geometry("coordinate axis", shape);
 		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 		mat.getAdditionalRenderState().setWireframe(true);
