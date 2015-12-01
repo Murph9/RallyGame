@@ -2,6 +2,7 @@ package game;
 
 import com.jme3.math.Vector3f;
 
+//Simple class that makes changing static world quite easy
 public enum World {
 	skyline("assets/skyline.blend", 800, new Vector3f(-27.7f, 84.5f, 111.3f), true), 
 	mycity("assets/mycity.blend", 13, new Vector3f(0,0,0), false), 

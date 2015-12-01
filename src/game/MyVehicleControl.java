@@ -22,6 +22,7 @@ import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
+import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
@@ -35,24 +36,8 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 	//skid stuff
 	Node skidNode = new Node();
 	LinkedList<Spatial> skidList = new LinkedList<Spatial>();
-	Vector3f wheel0Last = new Vector3f(0,0,0);
-	Vector3f wheel1Last = new Vector3f(0,0,0);
-	Vector3f wheel2Last = new Vector3f(0,0,0);
-	Vector3f wheel3Last = new Vector3f(0,0,0);
-	
-	//contact points
-	boolean contact0 = false;
-	boolean contact1 = false;
-	boolean contact2 = false;
-	boolean contact3 = false;
-	
-	float w0_myskid;
-	float w1_myskid;
-	float w2_myskid;
-	float w3_myskid;
 	
 	boolean ifSmoke = false;
-	ParticleEmitter emit;
 	
 	//directions
 	Vector3f forward = new Vector3f();
@@ -65,6 +50,11 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 	
 	//car data
 	Car car;
+
+	MyWheelNode wn0;
+	MyWheelNode wn1;
+	MyWheelNode wn2;
+	MyWheelNode wn3;
 	
 	//driving stuff
 	boolean togglePhys = false;
@@ -93,78 +83,79 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		this.setSuspensionCompression(car.susCompression);
 		this.setSuspensionDamping(car.susDamping);
 		this.setSuspensionStiffness(car.stiffness);
-		this.setMaxSuspensionForce(25*car.mass);
+		this.setMaxSuspensionForce(25*car.mass); //TODO put in 'Car.java'
 		
-		Node node1 = new Node("wheel 1 node");
-		Spatial wheels1 = assetManager.loadModel(car.wheelOBJModel);
-		wheels1.center();
-		node1.attachChild(wheels1);
-		addWheel(node1, new Vector3f(-car.w_xOff, car.w_yOff, car.w_zOff),
+		
+		wn0 = new MyWheelNode("wheel 0 node", this, 0);
+		Spatial wheel0 = assetManager.loadModel(car.wheelModel);
+		wheel0.center();
+		wn0.attachChild(wheel0);
+		addWheel(wn0, new Vector3f(-car.w_xOff, car.w_yOff, car.w_zOff),
 				car.wheelDirection, car.wheelAxle, car.restLength, car.wheelRadius, true);
 
-		Node node2 = new Node("wheel 2 node");
-		Spatial wheels2 = assetManager.loadModel(car.wheelOBJModel);
-		wheels2.rotate(0, FastMath.PI, 0);
-		wheels2.center();
-		node2.attachChild(wheels2);
-		addWheel(node2, new Vector3f(car.w_xOff, car.w_yOff, car.w_zOff),
+		wn1 = new MyWheelNode("wheel 1 node", this, 1);
+		Spatial wheel1 = assetManager.loadModel(car.wheelModel);
+		wheel1.rotate(0, FastMath.PI, 0);
+		wheel1.center();
+		wn1.attachChild(wheel1);
+		addWheel(wn1, new Vector3f(car.w_xOff, car.w_yOff, car.w_zOff),
 				car.wheelDirection, car.wheelAxle, car.restLength, car.wheelRadius, true);
 
-		Node node3 = new Node("wheel 3 node");
-		Spatial wheels3 = assetManager.loadModel(car.wheelOBJModel);
-		wheels3.center();
-		node3.attachChild(wheels3);
-		addWheel(node3, new Vector3f(-car.w_xOff-0.05f, car.w_yOff, -car.w_zOff),
+		wn2 = new MyWheelNode("wheel 2 node", this, 2);
+		Spatial wheel2 = assetManager.loadModel(car.wheelModel);
+		wheel2.center();
+		wn2.attachChild(wheel2);
+		addWheel(wn2, new Vector3f(-car.w_xOff-0.05f, car.w_yOff, -car.w_zOff),
 				car.wheelDirection, car.wheelAxle, car.restLength, car.wheelRadius, false);
 
-		Node node4 = new Node("wheel 4 node");
-		Spatial wheels4 = assetManager.loadModel(car.wheelOBJModel);
-		wheels4.rotate(0, FastMath.PI, 0);
-		wheels4.center();
-		node4.attachChild(wheels4);
-		addWheel(node4, new Vector3f(car.w_xOff+0.05f, car.w_yOff, -car.w_zOff),
+		wn3 = new MyWheelNode("wheel 3 node", this, 3);
+		Spatial wheel3 = assetManager.loadModel(car.wheelModel);
+		wheel3.rotate(0, FastMath.PI, 0);
+		wheel3.center();
+		wn3.attachChild(wheel3);
+		addWheel(wn3, new Vector3f(car.w_xOff+0.05f, car.w_yOff, -car.w_zOff),
 				car.wheelDirection, car.wheelAxle, car.restLength, car.wheelRadius, false);
 
 		//Friction
-		setFrictionSlip(0, car.wheel1Slip);
-		setFrictionSlip(1, car.wheel2Slip);
-		setFrictionSlip(2, car.wheel3Slip);
-		setFrictionSlip(3, car.wheel4Slip);
+		setFrictionSlip(0, car.wheel0Slip);
+		setFrictionSlip(1, car.wheel1Slip);
+		setFrictionSlip(2, car.wheel2Slip);
+		setFrictionSlip(3, car.wheel3Slip);
 		
 		//attaching all the things (wheels)
-		carNode.attachChild(node1);
-		carNode.attachChild(node2);
-		carNode.attachChild(node3);
-		carNode.attachChild(node4);
+		carNode.attachChild(wn0);
+		carNode.attachChild(wn1);
+		carNode.attachChild(wn2);
+		carNode.attachChild(wn3);
 		
-		makeSmoke(node1);
-		makeSmoke(node2);
-		makeSmoke(node3);
-		makeSmoke(node4);
+		makeSmoke(wn0);
+		makeSmoke(wn1);
+		makeSmoke(wn2);
+		makeSmoke(wn3);
 		
 		////////////////////////
 		setupKeys();
 //		skidNode.setShadowMode(ShadowMode.Off);
 	}
 	
-	private void makeSmoke(Node wheelNode) {
-		emit = new ParticleEmitter("Emitter", ParticleMesh.Type.Triangle, 30);
-	    emit.setImagesX(15); //smoke is 15x1 (1 is default for y)
-	    emit.setEndColor(new ColorRGBA(1f, 1f, 1f, 0f)); //transparent
-	    emit.setStartColor(new ColorRGBA(0.4f, 0.4f, 0.4f, 0.3f)); //strong white
+	private void makeSmoke(MyWheelNode wheelNode) {
+		wheelNode.smoke = new ParticleEmitter("Emitter", ParticleMesh.Type.Triangle, 30);
+		wheelNode.smoke.setImagesX(15); //smoke is 15x1 (1 is default for y)
+		wheelNode.smoke.setEndColor(new ColorRGBA(1f, 1f, 1f, 0f)); //transparent
+		wheelNode.smoke.setStartColor(new ColorRGBA(0.4f, 0.4f, 0.4f, 0.3f)); //strong white
 
-	    emit.setStartSize(0.5f);
-	    emit.setGravity(0, -4, 0);
-	    emit.setLowLife(1f);
-	    emit.setHighLife(1f);
-	    emit.getParticleInfluencer().setVelocityVariation(0.05f);
-//	    emit.getParticleInfluencer().setInitialVelocity(new Vector3f(0, 20, 0));
+		wheelNode.smoke.setStartSize(0.5f);
+		wheelNode.smoke.setGravity(0, -4, 0);
+		wheelNode.smoke.setLowLife(1f);
+		wheelNode.smoke.setHighLife(1f);
+		wheelNode.smoke.getParticleInfluencer().setVelocityVariation(0.05f);
+//	    wheelNode.smoke.getParticleInfluencer().setInitialVelocity(new Vector3f(0, 20, 0));
 	    
 	    Material mat_emit = new Material(assetManager, "Common/MatDefs/Misc/Particle.j3md");
 	    mat_emit.setTexture("Texture", assetManager.loadTexture("Effects/Smoke/Smoke.png"));
-	    emit.setMaterial(mat_emit);
+	    wheelNode.smoke.setMaterial(mat_emit);
 	    if (ifSmoke) {
-	    	wheelNode.attachChild(emit);
+	    	wheelNode.attachChild(wheelNode.smoke);
 	    }
 	}
 	
@@ -251,39 +242,7 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		} 
 		if (binding.equals("Reset")) {
 			if (value) {
-				setPhysicsRotation(new Matrix3f());
-				setLinearVelocity(Vector3f.ZERO);
-				setAngularVelocity(Vector3f.ZERO);
-				resetSuspension();
-				
-				rally.arrowNode.detachAllChildren();
-
-				if (rally.fancyWorld) {
-					//TODO wow this is a mess
-					List<Spatial> ne = new LinkedList<Spatial>(rally.worldB.pieces);
-					for (Spatial s: ne) {
-						rally.getPhysicsSpace().remove(s.getControl(0));
-						rally.worldB.detachChild(s);
-						rally.worldB.pieces.remove(s);
-					}
-					rally.worldB.start = new Vector3f(0,0,0);
-					rally.worldB.nextPos = new Vector3f(0,0,0);
-					setPhysicsLocation(rally.worldB.start);
-					Matrix3f p = new Matrix3f();
-					p.fromAngleAxis(FastMath.DEG_TO_RAD*90, Vector3f.UNIT_Y);
-					setPhysicsRotation(p);
-
-				} else {
-					setPhysicsLocation(rally.world.start);
-				}
-				
-				
-				skidNode.detachAllChildren();
-				skidList.clear();
-				wheel0Last = Vector3f.ZERO;
-				wheel1Last = Vector3f.ZERO;
-				wheel2Last = Vector3f.ZERO;
-				wheel3Last = Vector3f.ZERO;
+				reset();
 			} else {
 			}
 		} 
@@ -291,14 +250,15 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 			ifReverse = !ifReverse;
 		}
 	}
-	//- controls
+	//end controls
 	
+	////////////////////////////////////////////////////
 	
 	private void specialPhysics(float tpf) {
 		if (togglePhys){ return; }//no need to apply wheel forces now
 
 		//NOTE: that z is forward, x is side
-		//  but the notes say x is forward and y is sideways
+		//  the reference ntoes say that x is forward and y is sideways (just be careful)
 		
 		Matrix3f w_angle = getPhysicsRotationMatrix();
 		Vector3f w_velocity = getLinearVelocity();
@@ -326,10 +286,10 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		
 		//calculate grid off of the slip angle
 		Vector3f force_lat_front = new Vector3f();
-		if (contact0 && contact1) { //contact with front
+		if (wn0.contact && wn1.contact) { //contact with front
 			force_lat_front.x = (float)(slipanglefront*car.CA_F);
-			force_lat_front.x = FastMath.clamp(force_lat_front.x, -car.MAX_GRIP, car.MAX_GRIP);
-			w0_myskid = w1_myskid = Math.abs(force_lat_front.x)/car.MAX_GRIP;
+			force_lat_front.x = FastMath.clamp(force_lat_front.x, -car.MAX_GRIP, car.MAX_GRIP); //TODO don't clamp here, clamp on the wheel later
+			wn0.skid = wn1.skid = Math.abs(force_lat_front.x)/car.MAX_GRIP;
 			force_lat_front.x *= weight;
 //			if (ifAccel) {
 //				force_lat_front.x *= 0.5; //TODO simple attempt at accel loss of grip
@@ -340,10 +300,10 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		}
 		
 		Vector3f force_lat_rear = new Vector3f();
-		if (contact2 && contact3) {
+		if (wn2.contact && wn3.contact) {
 			force_lat_rear.x = (float)(slipanglerear*car.CA_R);
 			force_lat_rear.x = FastMath.clamp(force_lat_rear.x, -car.MAX_GRIP, car.MAX_GRIP);
-			w2_myskid = w3_myskid = Math.abs(force_lat_rear.x)/car.MAX_GRIP;
+			wn2.skid = wn3.skid = Math.abs(force_lat_rear.x)/car.MAX_GRIP;
 			force_lat_rear.x *= weight;
 //			if (ifAccel) {
 //				force_lat_rear.x *= 0.5;
@@ -356,7 +316,7 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		float accel;
 		float x = accelCurrent;
 		if (ifAccel) {
-			accel = (accelCurrent+0.5f)*car.MAX_ACCEL; //TODO fix stall on gear 4/5
+			accel = (accelCurrent+0.5f)*car.MAX_ACCEL; //TODO gears
 			accel = -FastMath.pow((x - 0.57f),4) - FastMath.pow((x - 0.57f),3) - (FastMath.pow((x - 0.57f),2) - 0.42f);
 			accel *= car.MAX_ACCEL*4;
 			accel = car.MAX_ACCEL; //TODO remove for 'geared' accel
@@ -368,32 +328,39 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		}
 		//TODO figure out why '100' / ?maybe brake and accel can fight?
 		float ftractionz = 0;
-		if (contact0 && contact1 && contact2 && contact3) {
+		if (wn0.contact && wn1.contact && wn2.contact && wn3.contact) {
 			ftractionz = 100*(accel - brakeCurrent*FastMath.sign(velocity.z));
 		} //TODO make accel 'cost' grip
 		
 		//linear resistance and quadratic drag here
-		float resistancez = (float)(-(car.RESISTANCE * velocity.z + car.DRAG * velocity.z * Math.abs(velocity.z)));
-		float resistancex = (float)(-(car.RESISTANCE * velocity.x + car.DRAG * velocity.x * Math.abs(velocity.x))); 
+		float dragy = (float)(-(car.RESISTANCE * velocity.z + car.DRAG * velocity.z * Math.abs(velocity.z)));
+		float dragx = (float)(-(car.RESISTANCE * velocity.x + car.DRAG * velocity.x * Math.abs(velocity.x))); 
 
 		////////////////////////////////////
 		//put them into global and two x direction forces:
+		//TODO fix backwards and slow speeds
 		Vector3f totalNeutral = new Vector3f();
-		totalNeutral.x = resistancex;
-		totalNeutral.z = ftractionz + FastMath.sin(steeringCurrent)*force_lat_front.z + force_lat_rear.z + resistancez;
-		
-		float totalxfront = FastMath.cos(steeringCurrent)*force_lat_front.x;
-		Vector3f xfront = w_angle.mult(new Vector3f(totalxfront, 0, 0));
-		
-		float totalxrear = force_lat_rear.x;
-		Vector3f xrear = w_angle.mult(new Vector3f(totalxrear, 0, 0));
-		Vector3f front = w_angle.mult(new Vector3f(0, 0, car.w_zOff));
+		totalNeutral.x = dragx;
+		totalNeutral.z = ftractionz + FastMath.sin(steeringCurrent)*force_lat_front.z + force_lat_rear.z + dragy;
 
 		applyCentralForce(w_angle.mult(totalNeutral)); //forces on the main car
-		applyForce(xfront, front); //front wheels
-		applyForce(xrear, front.negate()); //rear wheels
 		
-		System.out.println(totalNeutral);
+		float totalxfront = FastMath.cos(steeringCurrent)*force_lat_front.x;
+		float totalxrear = force_lat_rear.x;
+				
+		Vector3f xfront = w_angle.mult(new Vector3f(totalxfront, 0, 0));
+		Vector3f xrear = w_angle.mult(new Vector3f(totalxrear, 0, 0));
+
+		Vector3f frontAvg = w_angle.mult(wn0.getLocalTranslation().interpolate(wn1.getLocalTranslation(), 0.5f).add(new Vector3f(0,-car.wheelRadius,0)));
+		Vector3f rearAvg = w_angle.mult(wn2.getLocalTranslation().interpolate(wn3.getLocalTranslation(), 0.5f).add(new Vector3f(0,-car.wheelRadius,0)));
+		
+		applyForce(xfront, frontAvg); //front wheels
+		applyForce(xrear, rearAvg); //front wheels
+		
+		rally.putShapeArrow(ColorRGBA.Black, Vector3f.UNIT_X, getPhysicsLocation().add(frontAvg));
+		rally.putShapeArrow(ColorRGBA.Blue, Vector3f.UNIT_X, getPhysicsLocation().add(rearAvg));
+		
+//		System.out.println(totalxrear - totalxfront); //TODO slight unstability going in a straight line
 	}
 	//////////////////////////////////////////////////////////////
 	public void myUpdate(float tpf) {
@@ -401,34 +368,28 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		
 		WheelInfo wi0 = getWheel(0).getWheelInfo();
 		RaycastInfo rayCastInfo0 = wi0.raycastInfo;
-		contact0 = (rayCastInfo0.groundObject != null);
+		wn0.contact = (rayCastInfo0.groundObject != null);
 		
 		WheelInfo wi1 = getWheel(1).getWheelInfo();
 		RaycastInfo rayCastInfo1 = wi1.raycastInfo;
-		contact1 = (rayCastInfo1.groundObject != null);
+		wn1.contact= (rayCastInfo1.groundObject != null);
 		
 		WheelInfo wi2 = getWheel(2).getWheelInfo();
 		RaycastInfo rayCastInfo2 = wi2.raycastInfo;
-		contact2 = (rayCastInfo2.groundObject != null);
+		wn2.contact = (rayCastInfo2.groundObject != null);
 		
 		WheelInfo wi3 = getWheel(3).getWheelInfo();
 		RaycastInfo rayCastInfo3 = wi3.raycastInfo;
-		contact3 = (rayCastInfo3.groundObject != null);
+		wn3.contact = (rayCastInfo3.groundObject != null);
 		
-		specialPhysics(tpf);
+		specialPhysics(tpf); //yay 
 		
 		//skid marks
 		rally.frameCount++;
 		if (rally.frameCount % 4 == 0) {
 			addSkidLines();
 		}
-		
-		if (ifAccel) { //TODO or traction
-			//TODO stuff with smoke thingos
-		} else {
-			//TODO turn off smoke thingos
-		}
-		
+				
 		Matrix3f playerRot = new Matrix3f();
 		getPhysicsRotationMatrix(playerRot);
 		
@@ -450,30 +411,10 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 	}
 	
 	private void addSkidLines() {
-		if (contact0) {
-			addSkidLine(wheel0Last, getWheel(0).getCollisionLocation(), w0_myskid);
-			wheel0Last = getWheel(0).getCollisionLocation();
-		} else {
-			wheel0Last = Vector3f.ZERO;
-		}
-		if (contact1) {
-			addSkidLine(wheel1Last, getWheel(1).getCollisionLocation(), w1_myskid);
-			wheel1Last = getWheel(1).getCollisionLocation();
-		} else {
-			wheel1Last = Vector3f.ZERO;
-		}
-		if (contact2) {
-			addSkidLine(wheel2Last, getWheel(2).getCollisionLocation(), w2_myskid);
-			wheel2Last = getWheel(2).getCollisionLocation();
-		} else {
-			wheel2Last = Vector3f.ZERO;
-		}
-		if (contact3) {
-			addSkidLine(wheel3Last, getWheel(3).getCollisionLocation(), w3_myskid);
-			wheel3Last = getWheel(3).getCollisionLocation();
-		} else {
-			wheel3Last = Vector3f.ZERO;
-		}
+		wn0.addSkidLine();
+		wn1.addSkidLine();
+		wn2.addSkidLine();
+		wn3.addSkidLine();
 		
 		int extra = skidList.size() - 500; //so i can remove more than one (like all 4 that frame)
 		for (int i = 0; i < extra; i++) {
@@ -481,57 +422,6 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 			skidList.removeFirst();
 		}
 	}
-	
-	private void addSkidLine(Vector3f a, Vector3f b, float grip) {
-		if (a.equals(new Vector3f(0,0,0)) || b.equals(new Vector3f(0,0,0))) {
-			return; //don't make a line because they aren't valid positions
-		}
-		a.y += 0.01;
-		b.y += 0.01; //z-buffering (i.e. to stop it "fighting" with the ground)
-		
-		Mesh mesh = new Mesh(); //making a quad positions
-		Vector3f [] vertices = new Vector3f[4];
-		vertices[0] = a.add(right.mult(car.wheelWidth));
-		vertices[1] = b.add(right.mult(car.wheelWidth));
-		vertices[2] = a.add(left.mult(car.wheelWidth));
-		vertices[3] = b.add(left.mult(car.wheelWidth));
-		
-		Vector2f[] texCoord = new Vector2f[4]; //texture of quad
-		texCoord[0] = new Vector2f(0, 0);
-		texCoord[1] = new Vector2f(0, 1);
-		texCoord[2] = new Vector2f(1, 0);
-		texCoord[3] = new Vector2f(1, 1);
-		
-		int[] indexes = { 2,0,1, 1,3,2 };
-		mesh.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(vertices));
-		mesh.setBuffer(Type.TexCoord, 2, BufferUtils.createFloatBuffer(texCoord));
-		mesh.setBuffer(Type.Index,    3, BufferUtils.createIntBuffer(indexes));
-
-		mesh.updateBound();
-		
-		Geometry geo = new Geometry("MyMesh", mesh); // using our custom mesh object
-		
-		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		if (grip > 0.5) {
-			Texture tex = assetManager.loadTexture("assets/stripes.png");
-			mat.setTexture("ColorMap", tex);
-		} else {
-			mat.setColor("Color", new ColorRGBA(0,0,0,0)); //empty
-		}
-		
-//		mat.setColor("GlowColor", ColorRGBA.Blue); TODO move somewhere else
-		
-//		TODO actually scale the texture alpha by grip
-		
-		mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
-		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
-		
-		geo.setMaterial(mat);
-		geo.setQueueBucket(Bucket.Translucent); //render order = last
-		skidNode.attachChild(geo);
-		skidList.add(geo);
-	}
-
 	
 	////////////////////
 	//getters
@@ -545,6 +435,130 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 	}
 	
 	public float getTotalGrip() {
-		return w0_myskid+w1_myskid+w2_myskid+w3_myskid;
+		MyWheelNode[] n = {wn0, wn1, wn2, wn3};
+		float total = 0;
+		for (MyWheelNode a: n) {
+			total += a.skid;
+		}
+		return total;
+	}
+
+	private void reset() { //TODO clean
+		setPhysicsRotation(new Matrix3f());
+		setLinearVelocity(Vector3f.ZERO);
+		setAngularVelocity(Vector3f.ZERO);
+		resetSuspension();
+		
+		rally.arrowNode.detachAllChildren();
+
+		if (rally.fancyWorld) {
+			//TODO wow this is a mess
+			List<Spatial> ne = new LinkedList<Spatial>(rally.worldB.pieces);
+			for (Spatial s: ne) {
+				rally.getPhysicsSpace().remove(s.getControl(0));
+				rally.worldB.detachChild(s);
+				rally.worldB.pieces.remove(s);
+			}
+			rally.worldB.start = new Vector3f(0,0,0);
+			rally.worldB.nextPos = new Vector3f(0,0,0);
+			setPhysicsLocation(rally.worldB.start);
+			Matrix3f p = new Matrix3f();
+			p.fromAngleAxis(FastMath.DEG_TO_RAD*90, Vector3f.UNIT_Y);
+			setPhysicsRotation(p);
+
+		} else {
+			setPhysicsLocation(rally.world.start);
+		}
+		
+		skidNode.detachAllChildren();
+		skidList.clear();
+		wn0.last = Vector3f.ZERO;
+		wn1.last = Vector3f.ZERO;
+		wn2.last = Vector3f.ZERO;
+		wn3.last = Vector3f.ZERO;
+	}
+}
+
+
+
+class MyWheelNode extends Node {
+
+	MyVehicleControl mvc;
+	int num;
+	
+	Material mat;
+	int[] indexes = { 2,0,1, 1,3,2 };
+	
+	boolean contact;
+	Vector3f last;
+	
+	float skid;
+	ParticleEmitter smoke;
+	
+	public MyWheelNode(String name, MyVehicleControl mvc, int num) {
+		super(name);
+		this.mvc = mvc;
+		this.num = num;
+		this.last = new Vector3f(Vector3f.ZERO);
+	}
+
+	public void addSkidLine() {
+		if (contact) {
+			addSkidLine(last, mvc.getWheel(num).getCollisionLocation(), skid);
+			last = mvc.getWheel(num).getCollisionLocation();
+		} else {
+			last = Vector3f.ZERO;
+		}
+	}
+	
+	private void addSkidLine(Vector3f a, Vector3f b, float grip) {
+		if (a.equals(Vector3f.ZERO) || b.equals(Vector3f.ZERO)) {
+			return; //don't make a line because they aren't valid positions
+		}
+		a.y += 0.02;
+		b.y += 0.02; //z-buffering (i.e. to stop it "fighting" with the ground)
+		
+		Mesh mesh = new Mesh(); //making a quad positions
+		Vector3f [] vertices = new Vector3f[4];
+		vertices[0] = a.add(mvc.right.mult(mvc.car.wheelWidth));
+		vertices[1] = b.add(mvc.right.mult(mvc.car.wheelWidth));
+		vertices[2] = a.add(mvc.left.mult(mvc.car.wheelWidth));
+		vertices[3] = b.add(mvc.left.mult(mvc.car.wheelWidth));
+		
+		Vector2f[] texCoord = new Vector2f[4]; //texture of quad
+		texCoord[0] = new Vector2f(0, 0);
+		texCoord[1] = new Vector2f(0, 1);
+		texCoord[2] = new Vector2f(1, 0);
+		texCoord[3] = new Vector2f(1, 1);
+		
+		mesh.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(vertices));
+		mesh.setBuffer(Type.TexCoord, 2, BufferUtils.createFloatBuffer(texCoord));
+		mesh.setBuffer(Type.Index,    3, BufferUtils.createIntBuffer(indexes));
+
+		mesh.updateBound();
+		
+		Geometry geo = new Geometry("MyMesh", mesh);
+		
+		//TODO only one wheels skid is showing
+		Material mat = new Material(mvc.assetManager, "Common/MatDefs/Light/Lighting.j3md");
+		
+		Texture tex = mvc.assetManager.loadTexture("assets/stripes.png");
+		mat.setTexture("DiffuseMap", tex);
+		mat.setTexture("NormalMap", tex);
+		mat.setBoolean("UseMaterialColors", true);
+		
+		mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
+		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
+		
+		mat.setColor("Diffuse", new ColorRGBA(0,0,0,grip));
+		
+		mat.setBoolean("UseMaterialColors", true);
+		geo.setMaterial(mat);
+		geo.setShadowMode(ShadowMode.Off);
+		geo.setQueueBucket(Bucket.Transparent); //render order = last
+		mvc.skidNode.attachChild(geo);
+		mvc.skidList.add(geo);
+		
+//		mat.setColor("GlowColor", ColorRGBA.Blue); TODO move somewhere else
 	}
 }

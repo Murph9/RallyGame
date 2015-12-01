@@ -23,8 +23,7 @@ public class WorldBuilder extends Node {
 	//designed to generate the world infront of the player dynamically.
 	
 	/* TODO:
-	 * use the player position 
-	 * remove the pieces after we are far away
+	 * stop them overlapping
 	 */
 	
 	
@@ -32,40 +31,24 @@ public class WorldBuilder extends Node {
 	AssetManager assetManager;
 	
 	List<Spatial> pieces = new LinkedList<Spatial>();
+	String type = "WPCity"; //WPSimple, WorldBuilder, WPCity
 	
-	Vector3f start;
-	Vector3f nextPos;
-	float scale;
-	float nextAngle;
+	
+	Vector3f start = new Vector3f(0,0,0);
+	Vector3f nextPos = new Vector3f(0,0,0);
+	float scale = 25;
+	float nextAngle = 0;
 	int count = 0;
 
 	Material mat;
-	boolean needsMaterial;
+	boolean needsMaterial = true;
 	
 	WorldBuilder (Rally rally, AssetManager asset) {
 		this.rally = rally;
-		this.scale = 15;
 		this.assetManager = asset;
-		this.start = new Vector3f(0,0,0);
-		this.nextPos = new Vector3f(0,0,0);
-		this.needsMaterial = false;
-		
-		this.mat = new Material(assetManager, "Common/MatDefs/Misc/ShowNormals.j3md");
+		this.mat = new Material(assetManager, "Common/MatDefs/Misc/ShowNormals.j3md");		
 		this.mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		
-		//Just get a generic floor for testing
-		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
-		mat.setColor("Color", ColorRGBA.Blue);
-		
-		Box floorBox = new Box(140, 0.25f, 140);
-        Geometry floorGeometry = new Geometry("Floor", floorBox);
-        floorGeometry.setMaterial(mat);
-        floorGeometry.setLocalTranslation(0, -10, 0);
-        floorGeometry.addControl(new RigidBodyControl(0));
-        this.attachChild(floorGeometry);
-        rally.getPhysicsSpace().add(floorGeometry);
-        
         Material matfloor = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         matfloor.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
         matfloor.setColor("Color", ColorRGBA.Red);
@@ -83,14 +66,14 @@ public class WorldBuilder extends Node {
 	public void update(Vector3f playerPos) {
 		count++;
 		if (count % 10 == 0) { //don't check that often
-			switch ("WorldPiece") {
+			switch (type) {
 			/*case "WorldPiece": //timed track is cool
 				WorldPiece[] a = WorldPiece.values();
 				int next = (int)(Math.random()*a.length);
 				addModel(a[next]);
 				break;*/
-			case "WorldPiece":
-				WorldPiece[] b = WorldPiece.values();
+			case "WPSimple":
+				WPSimple[] b = WPSimple.values();
 				while (nextPos.subtract(playerPos).length() < 50) {
 					int nextb = (int)(Math.random()*b.length);
 					addModel(b[nextb]);	
@@ -114,9 +97,9 @@ public class WorldBuilder extends Node {
 		 //imported model		
 		Spatial worldNode = assetManager.loadModel(world.getName());
 		Spatial s = ((Node)worldNode).getChild(0); //there is only one object in there (hopefully)
-		if (needsMaterial) {
+//		if (needsMaterial) {
 			s.setMaterial(mat); //TODO double sided objects
-		}
+//		}
 		
 		//translate, rotate, scale
 		s.setLocalTranslation(nextPos);
@@ -130,7 +113,7 @@ public class WorldBuilder extends Node {
 		rally.getPhysicsSpace().add(landscape);
 		this.attachChild(s);
 
-		System.out.println("Adding: "+world.getName());
+		System.err.println("Adding: "+world.getName());
 		if (rally.ifDebug) {
 			System.err.println("at: "+nextPos+", Rot: "+nextAngle+", Obj.angle: "+world.getNewAngle()+", Obj.nextPos: "+world.getNewPos());
 		}
@@ -156,7 +139,8 @@ public class WorldBuilder extends Node {
 	}
 }
 
-enum WorldPiece implements Blocks {
+//stands for world piece simple, as in its a simple piece of the world
+enum WPSimple implements Blocks {
 	
 	CROSS("wbsimple/cross.blend", new Vector3f(2,0,0), 0),
 	STRAIGHT("wbsimple/straight.blend", new Vector3f(2,0,0), 0),
@@ -179,7 +163,7 @@ enum WorldPiece implements Blocks {
 	Vector3f newPos; //what the piece does to the track
 	float newAngle; //change of angle (deg) for the next peice
 
-	WorldPiece(String s, Vector3f a, float g) {
+	WPSimple(String s, Vector3f a, float g) {
 		this.name = s;
 		this.newPos = a;
 		this.newAngle = g;
@@ -195,18 +179,16 @@ enum WorldPiece implements Blocks {
 	}
 }
 
-
-enum WPCity implements Blocks { //TODO finish all the models here
+//stands for a world piece that looks more like a city
+enum WPCity implements Blocks {
 	CROSS("wbcity/cross.blend", new Vector3f(2,0,0), 0),
-	STRAIGHT("wbcity/straight.blend", new Vector3f(2,0,0), 0),
+	STRAIGHT("wbcity/straight.blend", new Vector3f(3,0,0), 0),
 	
 	LEFT("wbcity/left.blend", new Vector3f(1,0,-1), FastMath.DEG_TO_RAD*90),
-	LEFT_SHARP("wbcity/left_sharp.blend", new Vector3f(1,0,-1), FastMath.DEG_TO_RAD*90),
 	LEFT_LONG("wbcity/left_long.blend", new Vector3f(2,0,-2), FastMath.DEG_TO_RAD*90),
 	LEFT_CHICANE("wbcity/left_chicane.blend", new Vector3f(2,0,-1), 0),
 	
 	RIGHT("wbcity/right.blend", new Vector3f(1,0,1), FastMath.DEG_TO_RAD*-90),
-	RIGHT_SHARP("wbcity/right_sharp.blend", new Vector3f(1,0,1), FastMath.DEG_TO_RAD*-90),
 	RIGHT_LONG("wbcity/right_long.blend", new Vector3f(2,0,2), FastMath.DEG_TO_RAD*-90),
 	RIGHT_CHICANE("wbcity/right_chicane.blend", new Vector3f(2,0,1), 0),
 	
@@ -223,15 +205,9 @@ enum WPCity implements Blocks { //TODO finish all the models here
 		this.newPos = a;
 		this.newAngle = g;
 	}
-	public String getName() {
-		return name;
-	}
-	public Vector3f getNewPos() {
-		return newPos;
-	}
-	public float getNewAngle() {
-		return newAngle;
-	}
+	public String getName() { return name; }
+	public Vector3f getNewPos() { return new Vector3f(newPos); }
+	public float getNewAngle() { return newAngle; }
 }
 
 

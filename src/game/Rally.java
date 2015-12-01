@@ -19,15 +19,15 @@ import com.jme3.post.filters.BloomFilter;
 import com.jme3.post.ssao.SSAOFilter;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.*;
-import com.jme3.scene.control.CameraControl.ControlDirection;
 import com.jme3.scene.debug.Arrow;
 import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.shadow.EdgeFilteringMode;
 import com.jme3.system.AppSettings;
 
-//Long TODOs:
-//http://wiki.jmonkeyengine.org/doku.php/jme3:advanced:multiple_camera_views
+//Long TODO: 
+//Map
+//  http://wiki.jmonkeyengine.org/doku.php/jme3:advanced:multiple_camera_views
 
 
 public class Rally extends SimpleApplication {
@@ -36,8 +36,7 @@ public class Rally extends SimpleApplication {
 	private BulletAppState bulletAppState;
 	
 	//camera stuff
-	private CameraNode camNode;
-	private Vector3f offset;
+	private Camera camNode;
 	
 	//World Model Enum stuff
 	World world = World.track2; //Set map here
@@ -46,14 +45,13 @@ public class Rally extends SimpleApplication {
 	WorldBuilder worldB;
 	
 	//hud stuff
-	private BitmapText hudText;
-	private BitmapText hudText2;
+	private BitmapText speedText;
+	private Geometry speedo;
 	
 	//car stuff
 	private Node carNode;
-	private Node camHelpNode;
 	private MyVehicleControl player;
-	private Car car = new TrackCar(); //set car here
+	private Car car = new RallyCar(); //set car here
 	
 	//debug stuff
 	Node arrowNode;
@@ -74,7 +72,7 @@ public class Rally extends SimpleApplication {
 //    BloomFilter bloom;
     
     /////////////////////////////////////
-    //Joystick stuff
+    //Joystick stuff - TODO
     private Controller myJoy;
 	
     
@@ -85,6 +83,7 @@ public class Rally extends SimpleApplication {
 		settings.setFrameRate(60);
 		settings.setUseJoysticks(true);
 		app.setSettings(settings);
+
 
 		app.setShowSettings(false);
 		app.setDisplayStatView(false);
@@ -145,6 +144,7 @@ public class Rally extends SimpleApplication {
 		
 		rootNode.setShadowMode(ShadowMode.CastAndReceive);
 //		bulletAppState.getPhysicsSpace().setGravity(new Vector3f(0, -9.81f, 0)); //defaults to normal
+		viewPort.setBackgroundColor(ColorRGBA.Blue);
 		
 		arrowNode = new Node();
 		rootNode.attachChild(arrowNode);
@@ -190,9 +190,6 @@ public class Rally extends SimpleApplication {
 		System.out.println("Adding: "+ s.getName());
 		
 		s.move(0,-5,0);
-		//if (worldRotate) { TODO check this isn't needed anymore
-			//s.rotate(-90*FastMath.DEG_TO_RAD, 0, 0);
-		//}
 		s.scale(world.scale);
 		
 		CollisionShape world = CollisionShapeFactory.createMeshShape(s);
@@ -204,21 +201,15 @@ public class Rally extends SimpleApplication {
 		rootNode.attachChild(s);
 	}
 
-	private void initCamera() { //TODO make a lag free camera (thats locked to the car)
+	private void initCamera() {
 		flyCam.setEnabled(false);
 		
-		camNode = new CameraNode("Cam Node", cam);
-		camNode.setControlDir(ControlDirection.SpatialToCamera);
-	
-		carNode.attachChild(camNode);
-		camNode.setLocalTranslation(player.car.CAM_OFFSET);
-		camNode.lookAt(player.car.LOOK_AT, Vector3f.UNIT_Y);
-		
-		offset = player.car.CAM_OFFSET;
+		camNode = new Camera("Cam Node", cam, player);
+		rootNode.attachChild(camNode);
 	}
 	
 	private void buildPlayer() {
-		Spatial carmodel = assetManager.loadModel(car.carOBJModel); //use it as car. for now
+		Spatial carmodel = assetManager.loadModel(car.carModel); //use it as car. for now
 		//create a compound shape and attach CollisionShape for the car body at 0,1,0
 		//this shifts the effective center of mass of the BoxCollisionShape to 0,-1,0
 		CompoundCollisionShape compoundShape = new CompoundCollisionShape();
@@ -231,10 +222,6 @@ public class Rally extends SimpleApplication {
 		carNode.addControl(player);
 		carNode.attachChild(carmodel);
 
-		camHelpNode = new Node();
-		carNode.attachChild(camHelpNode);
-		camHelpNode.setLocalTranslation(0, 1, 8);
-		
 		rootNode.attachChild(carNode);
 		rootNode.attachChild(player.skidNode);
 		
@@ -256,19 +243,20 @@ public class Rally extends SimpleApplication {
 	}
 	
 	private void setupGUI() {
-		hudText = new BitmapText(guiFont, false);		  
-		hudText.setSize(guiFont.getCharSet().getRenderedSize());	  		// font size
-		hudText.setColor(ColorRGBA.White);									// font color
-		hudText.setText("");												// the text
-		hudText.setLocalTranslation(0, 200, 0); 	// position
-		guiNode.attachChild(hudText);
+		speedText = new BitmapText(guiFont, false);		  
+		speedText.setSize(guiFont.getCharSet().getRenderedSize());	  		// font size
+		speedText.setColor(ColorRGBA.White);								// font color
+		speedText.setText("");												// the text
+		speedText.setLocalTranslation(0, settings.getHeight(), 0); // position
+		guiNode.attachChild(speedText);
 		
-		hudText2 = new BitmapText(guiFont, false);
-		hudText2.setSize(guiFont.getCharSet().getRenderedSize());	  		// font size
-		hudText2.setColor(ColorRGBA.White);									// font color
-		hudText2.setText("");												// the text
-		hudText2.setLocalTranslation(0, 300, 0); 	// position
-		guiNode.attachChild(hudText2);
+		Arrow s = new Arrow(Vector3f.UNIT_X);
+		speedo = new Geometry("Sphere", s);
+		speedo.setLocalTranslation(settings.getWidth()-50, 0, 0);
+		speedo.scale(150);
+		Material m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+		speedo.setMaterial(m);
+		guiNode.attachChild(speedo);
 	}
 	
 	public PhysicsSpace getPhysicsSpace(){
@@ -294,32 +282,23 @@ public class Rally extends SimpleApplication {
 		//////////////////////////////////
 		//Hud stuff
 		
-		Vector3f w_velocity = player.getLinearVelocity();
-		Matrix3f w_angle = player.getPhysicsRotationMatrix();
-		Vector3f velocity = w_angle.invert().mult(w_velocity);
-
 		Vector3f velocityVector = player.getLinearVelocity().normalize();
 		player.getForwardVector(player.forward);
 		
 		float speed = player.getLinearVelocity().length();
-		hudText.setText(speed + "m/s" + player.getWheelTractionInfo()); // the ui text
-		
 		player.curGear = (int)(speed/7);
 		player.accelCurrent = speed % 7 / 7;
 		float totalgrip = player.getTotalGrip();
-		hudText2.setText(player.curGear+" | "+player.accelCurrent + "\n" +(player.ifAccel)+"\n"+totalgrip);
+		
+		speedText.setText(speed + "m/s\ngear:" + player.curGear + "\naccel:" + player.accelCurrent+ "\ngrip:" + totalgrip); // the ui text
+		
+		speedo.setLocalRotation(Quaternion.IDENTITY);
+		speedo.rotate(0, 0, FastMath.PI);
+		speedo.rotate(0, 0, -speed/50);
 		
 		/////////////////////////////////
 		//camera
-		if (player.getLinearVelocity().length() > 2) {
-			Vector3f world_v_norm = velocity.normalize();
-			Vector3f yplane = player.car.CAM_OFFSET;
-			offset = new Vector3f(world_v_norm.x*yplane.z, yplane.y, world_v_norm.z*yplane.z);
-//			offset = player.car.CAM_OFFSET; //for a fixed camera
-		}
-		camHelpNode.setLocalTranslation(player.forward.mult(player.car.length/4)); //just in front of the car
-		camNode.setLocalTranslation(offset);
-		camNode.lookAt(player.getPhysicsLocation().add(player.car.LOOK_AT), Vector3f.UNIT_Y);
+		camNode.myUpdate(tpf);
 		
 		//////////////////////////////////
 		if (frameCount % 10 == 0 && ifDebug) {
@@ -347,7 +326,6 @@ public class Rally extends SimpleApplication {
 			putShapeArrow(ColorRGBA.Cyan, player.right, player.getPhysicsLocation());
 		}
 	}
-	
 	
 	void putShapeArrow(ColorRGBA color, Vector3f dir, Vector3f pos) {
 		Arrow arrow = new Arrow(dir);
