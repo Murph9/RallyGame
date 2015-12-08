@@ -3,51 +3,79 @@ package game;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.bulletphysics.linearmath.QuaternionUtil;
 import com.jme3.asset.AssetManager;
+import com.jme3.asset.TextureKey;
 import com.jme3.bullet.collision.shapes.CollisionShape;
+import com.jme3.bullet.collision.shapes.PlaneCollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
+import com.jme3.math.Plane;
 import com.jme3.math.Quaternion;
+import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
+import com.jme3.renderer.queue.RenderQueue.Bucket;
+import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
+import com.jme3.scene.shape.Quad;
+import com.jme3.scene.shape.Sphere;
+import com.jme3.texture.Texture;
+import com.jme3.util.SkyFactory;
+import com.jme3.water.SimpleWaterProcessor;
 
 public class WorldBuilder extends Node {
 
 	//designed to generate the world infront of the player dynamically.
 	
-	/* TODO:
-	 * stop them overlapping
-	 */
+	static final Quaternion 
+		STRIAGHT = Quaternion.IDENTITY,
+		LEFT_90 = new Quaternion(0, 0.7071f, 0, 0.7071f),
+		LEFT_45 = new Quaternion(0, 0.3827f, 0, 0.9239f),
+		
+		RIGHT_90 = new Quaternion(0, -0.7071f, 0, 0.7071f),
+		RIGHT_45 = new Quaternion(0, -0.3827f, 0, 0.9239f)
+		;
 	
+	//TODO s
+	//hard - try and just make a curver to drive on instead of the loaded segments
+		//bezier curve stuffs..
 	
 	Rally rally;
 	AssetManager assetManager;
 	
 	List<Spatial> pieces = new LinkedList<Spatial>();
-	String type = "WPCity"; //WPSimple, WorldBuilder, WPCity
-	
+
+	WP[] wbtype;
+	Material mat;
+
+	Geometry water;
 	
 	Vector3f start = new Vector3f(0,0,0);
 	Vector3f nextPos = new Vector3f(0,0,0);
-	float scale = 25;
-	float nextAngle = 0;
+	Quaternion nextRot = new Quaternion();
 	int count = 0;
 
-	Material mat;
-	boolean needsMaterial = true;
+	float distance = 150;
+	final float max_wp = 50;
 	
-	WorldBuilder (Rally rally, AssetManager asset) {
+	WorldBuilder (Rally rally, AssetManager asset, WP[] type, boolean mat) {
 		this.rally = rally;
 		this.assetManager = asset;
-		this.mat = new Material(assetManager, "Common/MatDefs/Misc/ShowNormals.j3md");		
-		this.mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
+		this.wbtype = type; //kind of keeps this class generic
+		
+		this.setShadowMode(ShadowMode.CastAndReceive);
+		
+		if (mat) {
+			this.mat = new Material(assetManager, "Common/MatDefs/Misc/ShowNormals.j3md");		
+			this.mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
+		}
 		
         Material matfloor = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         matfloor.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
@@ -61,159 +89,113 @@ public class WorldBuilder extends Node {
         this.attachChild(startGeometry);
         rally.getPhysicsSpace().add(startGeometry);
         
+        rally.getRootNode().attachChild(SkyFactory.createSky(assetManager, "Textures/Sky/Bright/BrightSky.dds", false));
+        
+        if (type[0] instanceof WPFloating) { //this is the nice floating one
+        	// we create a water processor
+        	SimpleWaterProcessor waterProcessor = new SimpleWaterProcessor(assetManager);
+        	// we set wave properties
+        	waterProcessor.setRenderSize(256,256);    // performance boost (don't know the default)
+        	waterProcessor.setWaterDepth(40);         // transparency of water
+        	waterProcessor.setDistortionScale(0.5f); // strength of waves (default = 0.2)
+        	waterProcessor.setWaveSpeed(0.05f);       // speed of waves
+        	waterProcessor.setWaterColor(ColorRGBA.Green); //TODO actually make it green
+        	
+        	waterProcessor.setReflectionScene(rally.getRootNode());
+        	
+        	// we set the water plane
+        	Vector3f waterLocation = new Vector3f(0,-6,0);
+        	waterProcessor.setPlane(new Plane(Vector3f.UNIT_Y, waterLocation.dot(Vector3f.UNIT_Y)));
+        	rally.getViewPort().addProcessor(waterProcessor);
+        	
+        	// we define the wave size by setting the size of the texture coordinates
+        	Quad quad = new Quad(4000,4000);
+        	quad.scaleTextureCoordinates(new Vector2f(50f,50f));
+        	 
+        	// we create the water geometry from the quad
+        	water = new Geometry("water", quad);
+        	water.setLocalRotation(new Quaternion().fromAngleAxis(-FastMath.HALF_PI, Vector3f.UNIT_X));
+        	water.setLocalTranslation(-2000, -4, 2000);
+        	water.setShadowMode(ShadowMode.Receive);
+        	water.setMaterial(waterProcessor.getMaterial());
+        	rally.getRootNode().attachChild(water);
+        	
+        	//add lastly a plane just under it so i don't fall forever
+        	/* TODO
+        	Plane under = new Plane(Vector3f.UNIT_Y, waterLocation.add(0,-1,0).dot(Vector3f.UNIT_Y));
+        	PlaneCollisionShape p = new PlaneCollisionShape(under);
+        	
+        	RigidBodyControl underp = new RigidBodyControl(p, 0);
+//        	p.addControl(underp);
+    		underp.setKinematic(false);
+    		rally.getPhysicsSpace().add(underp);
+//    		this.attachChild(p);
+    		*/
+        }
 	}
 	
 	public void update(Vector3f playerPos) {
 		count++;
-		if (count % 10 == 0) { //don't check that often
-			switch (type) {
-			/*case "WorldPiece": //timed track is cool
-				WorldPiece[] a = WorldPiece.values();
-				int next = (int)(Math.random()*a.length);
-				addModel(a[next]);
-				break;*/
-			case "WPSimple":
-				WPSimple[] b = WPSimple.values();
-				while (nextPos.subtract(playerPos).length() < 50) {
-					int nextb = (int)(Math.random()*b.length);
-					addModel(b[nextb]);	
+		if (count % 10 == 0) {
+			while (nextPos.subtract(playerPos).length() < distance) {
+				int nextb = (int)(Math.random()*wbtype.length);
+				Quaternion inv = nextRot.mult(wbtype[nextb].getNewAngle()).inverse();
+				Quaternion result = Quaternion.IDENTITY.mult(inv);
+				float angle = FastMath.acos(result.getW())*2; //believe me that this gets the angle between them
+				
+				if (FastMath.abs(angle) < FastMath.PI) { //try *3/2 if its not interesting enough
+					addModel(wbtype[nextb]);
 				}
-				break;
-			case "WPCity":
-				WPCity[] c = WPCity.values();
-				while (nextPos.subtract(playerPos).length() < 50) {
-					int nextc = (int)(Math.random()*c.length);
-					addModel(c[nextc]);
+			}
+			List<Spatial> temp = new LinkedList<Spatial>(pieces);
+			for (Spatial sp: temp) {
+				if (sp.getWorldTranslation().subtract(playerPos).length() > distance*1.5f) {
+						//1.5 because don't delete the ones we just placed
+					rally.getPhysicsSpace().remove(sp.getControl(0));
+					this.detachChild(sp);
+					pieces.remove(sp);
+					System.err.println("Removing: "+sp.getName() + ", num left: "+pieces.size());
 				}
-				break;
-			default:
-				break;
 			}
 		}
 	}
 	
 	//test for world building
-	public void addModel(Blocks world) {
-		 //imported model		
+	public void addModel(WP world) {
+		//imported model
 		Spatial worldNode = assetManager.loadModel(world.getName());
 		Spatial s = ((Node)worldNode).getChild(0); //there is only one object in there (hopefully)
-//		if (needsMaterial) {
+		if (mat != null) {
 			s.setMaterial(mat); //TODO double sided objects
-//		}
+		}
+		
+		float scale = world.getScale();
 		
 		//translate, rotate, scale
 		s.setLocalTranslation(nextPos);
-		s.rotate(0, nextAngle, 0);
+		s.rotate(nextRot);
 		s.scale(scale);
 
 		CollisionShape coll = CollisionShapeFactory.createMeshShape(s);
 	
 		RigidBodyControl landscape = new RigidBodyControl(coll, 0);
 		s.addControl(landscape);
+		landscape.setKinematic(false);
 		rally.getPhysicsSpace().add(landscape);
 		this.attachChild(s);
 
 		System.err.println("Adding: "+world.getName());
 		if (rally.ifDebug) {
-			System.err.println("at: "+nextPos+", Rot: "+nextAngle+", Obj.angle: "+world.getNewAngle()+", Obj.nextPos: "+world.getNewPos());
+			System.err.println("at: "+nextPos+", Rot: "+nextRot+", Obj.angle: "+world.getNewAngle()+", Obj.nextPos: "+world.getNewPos());
 		}
 		pieces.add(s);
 		
-		if (pieces.size() > 20) {
-			Spatial sp = pieces.get(0);
-			rally.getPhysicsSpace().remove(sp.getControl(0));
-			this.detachChild(sp);
-			pieces.remove(sp);
-		}
 		
 		///////////////////////////////////////
 		//setup the position of the next object
-		Quaternion q = new Quaternion();
-		q.fromAngleAxis(nextAngle, Vector3f.UNIT_Y);
-
 		Vector3f cur = world.getNewPos().mult(scale);
-		nextPos.addLocal(q.mult(cur));
+		nextPos.addLocal(nextRot.mult(cur));
 		
-		nextAngle += world.getNewAngle();
-		nextAngle = nextAngle % 360; //so it doesn't get large
+		nextRot.multLocal(world.getNewAngle());
 	}
-}
-
-//stands for world piece simple, as in its a simple piece of the world
-enum WPSimple implements Blocks {
-	
-	CROSS("wbsimple/cross.blend", new Vector3f(2,0,0), 0),
-	STRAIGHT("wbsimple/straight.blend", new Vector3f(2,0,0), 0),
-	
-	LEFT("wbsimple/left.blend", new Vector3f(1,0,-1), FastMath.DEG_TO_RAD*90),
-	LEFT_SHARP("wbsimple/left_sharp.blend", new Vector3f(1,0,-1), FastMath.DEG_TO_RAD*90),
-	LEFT_LONG("wbsimple/left_long.blend", new Vector3f(2,0,-2), FastMath.DEG_TO_RAD*90),
-	LEFT_CHICANE("wbsimple/left_chicane.blend", new Vector3f(2,0,-1), 0),
-	
-	RIGHT("wbsimple/right.blend", new Vector3f(1,0,1), FastMath.DEG_TO_RAD*-90),
-	RIGHT_SHARP("wbsimple/right_sharp.blend", new Vector3f(1,0,1), FastMath.DEG_TO_RAD*-90),
-	RIGHT_LONG("wbsimple/right_long.blend", new Vector3f(2,0,2), FastMath.DEG_TO_RAD*-90),
-	RIGHT_CHICANE("wbsimple/right_chicane.blend", new Vector3f(2,0,1), 0),
-	
-	HILL_UP("wbsimple/hill_up.blend", new Vector3f(4,0.5f,0), 0),
-	HILL_DOWN("wbsimple/hill_down.blend", new Vector3f(4,-0.5f,0), 0),
-	;
-	
-	String name;
-	Vector3f newPos; //what the piece does to the track
-	float newAngle; //change of angle (deg) for the next peice
-
-	WPSimple(String s, Vector3f a, float g) {
-		this.name = s;
-		this.newPos = a;
-		this.newAngle = g;
-	}
-	public String getName() {
-		return name;
-	}
-	public Vector3f getNewPos() {
-		return newPos;
-	}
-	public float getNewAngle() {
-		return newAngle;
-	}
-}
-
-//stands for a world piece that looks more like a city
-enum WPCity implements Blocks {
-	CROSS("wbcity/cross.blend", new Vector3f(2,0,0), 0),
-	STRAIGHT("wbcity/straight.blend", new Vector3f(3,0,0), 0),
-	
-	LEFT("wbcity/left.blend", new Vector3f(1,0,-1), FastMath.DEG_TO_RAD*90),
-	LEFT_LONG("wbcity/left_long.blend", new Vector3f(2,0,-2), FastMath.DEG_TO_RAD*90),
-	LEFT_CHICANE("wbcity/left_chicane.blend", new Vector3f(2,0,-1), 0),
-	
-	RIGHT("wbcity/right.blend", new Vector3f(1,0,1), FastMath.DEG_TO_RAD*-90),
-	RIGHT_LONG("wbcity/right_long.blend", new Vector3f(2,0,2), FastMath.DEG_TO_RAD*-90),
-	RIGHT_CHICANE("wbcity/right_chicane.blend", new Vector3f(2,0,1), 0),
-	
-	HILL_UP("wbcity/hill_up.blend", new Vector3f(4,0.5f,0), 0),
-	HILL_DOWN("wbcity/hill_down.blend", new Vector3f(4,-0.5f,0), 0),
-	;
-	
-	String name;
-	Vector3f newPos; //what the piece does to the track
-	float newAngle; //change of angle (deg) for the next piece
-
-	WPCity(String s, Vector3f a, float g) {
-		this.name = s;
-		this.newPos = a;
-		this.newAngle = g;
-	}
-	public String getName() { return name; }
-	public Vector3f getNewPos() { return new Vector3f(newPos); }
-	public float getNewAngle() { return newAngle; }
-}
-
-
-interface Blocks {
-	
-	String getName();
-	Vector3f getNewPos();
-	float getNewAngle();
 }

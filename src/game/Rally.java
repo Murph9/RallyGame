@@ -20,13 +20,14 @@ import com.jme3.post.ssao.SSAOFilter;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.*;
 import com.jme3.scene.debug.Arrow;
+import com.jme3.scene.shape.Box;
 import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.shadow.EdgeFilteringMode;
 import com.jme3.system.AppSettings;
 
 //Long TODO: 
-//Map
+//Map maybe?
 //  http://wiki.jmonkeyengine.org/doku.php/jme3:advanced:multiple_camera_views
 
 
@@ -41,17 +42,25 @@ public class Rally extends SimpleApplication {
 	//World Model Enum stuff
 	World world = World.track2; //Set map here
 	
-	boolean fancyWorld = false;
+	boolean dynamicWorld = true;
+	WP[] type = WPFloating.values();
+	boolean needsMaterial = false;
 	WorldBuilder worldB;
+	
 	
 	//hud stuff
 	private BitmapText speedText;
 	private Geometry speedo;
+	private Geometry speedo2;
+	private Geometry b0;
+	private Geometry b1;
+	private Geometry b2;
+	private Geometry b3;
 	
 	//car stuff
 	private Node carNode;
-	private MyVehicleControl player;
-	private Car car = new RallyCar(); //set car here
+	MyVehicleControl player;
+	private Car car = new NormalCar(); //set car here
 	
 	//debug stuff
 	Node arrowNode;
@@ -80,10 +89,11 @@ public class Rally extends SimpleApplication {
 		Rally app = new Rally();
 		AppSettings settings = new AppSettings(true);
 		settings.setResolution(1300,720);
-		settings.setFrameRate(60);
+		settings.setFrameRate(60); //60
 		settings.setUseJoysticks(true);
+//		settings.setBitsPerPixel(16); //TODO why not?
+		
 		app.setSettings(settings);
-
 
 		app.setShowSettings(false);
 		app.setDisplayStatView(false);
@@ -94,6 +104,7 @@ public class Rally extends SimpleApplication {
 	public void simpleInitApp() {
 		bulletAppState = new BulletAppState();
 		stateManager.attach(bulletAppState);
+//		bulletAppState.setDebugEnabled(true);
 		
 		createWorld();
 				
@@ -103,11 +114,15 @@ public class Rally extends SimpleApplication {
 		connectJoyStick();
 		
 		setupGUI();
+		
+		Quaternion q = new Quaternion();
+		q.fromAngleAxis(FastMath.PI*1/16, Vector3f.UNIT_X);
+		System.out.println(q);
 	}
 
 	private void createWorld() {
-		if (fancyWorld) {
-			worldB = new WorldBuilder(this, assetManager);
+		if (dynamicWorld) {
+			worldB = new WorldBuilder(this, assetManager, type, needsMaterial);
 			rootNode.attachChild(worldB);
 		} else {
 		
@@ -139,10 +154,9 @@ public class Rally extends SimpleApplication {
 
 		DirectionalLight sun = new DirectionalLight();
 		sun.setColor(ColorRGBA.White);
-		sun.setDirection(new Vector3f(-.3f,-.6f,-.5f).normalizeLocal());
+		sun.setDirection(new Vector3f(-0.3f, -0.6f, -0.5f).normalizeLocal());
 		rootNode.addLight(sun);
 		
-		rootNode.setShadowMode(ShadowMode.CastAndReceive);
 //		bulletAppState.getPhysicsSpace().setGravity(new Vector3f(0, -9.81f, 0)); //defaults to normal
 		viewPort.setBackgroundColor(ColorRGBA.Blue);
 		
@@ -210,11 +224,12 @@ public class Rally extends SimpleApplication {
 	
 	private void buildPlayer() {
 		Spatial carmodel = assetManager.loadModel(car.carModel); //use it as car. for now
+		carmodel.setShadowMode(ShadowMode.CastAndReceive);
+		
 		//create a compound shape and attach CollisionShape for the car body at 0,1,0
 		//this shifts the effective center of mass of the BoxCollisionShape to 0,-1,0
 		CompoundCollisionShape compoundShape = new CompoundCollisionShape();
 		compoundShape.addChildShape(CollisionShapeFactory.createDynamicMeshShape(carmodel), Vector3f.ZERO);
-		
 		
 		carNode = new Node("vehicleNode");
 		player = new MyVehicleControl(compoundShape, car, assetManager, carNode, this);
@@ -226,7 +241,7 @@ public class Rally extends SimpleApplication {
 		rootNode.attachChild(player.skidNode);
 		
 		getPhysicsSpace().add(player);
-		if (fancyWorld) {
+		if (dynamicWorld) {
 			player.setPhysicsLocation(worldB.start);
 			Matrix3f p = player.getPhysicsRotationMatrix();
 			p.fromAngleAxis(FastMath.DEG_TO_RAD*90, Vector3f.UNIT_Y);
@@ -247,16 +262,66 @@ public class Rally extends SimpleApplication {
 		speedText.setSize(guiFont.getCharSet().getRenderedSize());	  		// font size
 		speedText.setColor(ColorRGBA.White);								// font color
 		speedText.setText("");												// the text
-		speedText.setLocalTranslation(0, settings.getHeight(), 0); // position
+		speedText.setLocalTranslation(settings.getWidth()-200, 300, 0); // position
 		guiNode.attachChild(speedText);
 		
-		Arrow s = new Arrow(Vector3f.UNIT_X);
-		speedo = new Geometry("Sphere", s);
-		speedo.setLocalTranslation(settings.getWidth()-50, 0, 0);
-		speedo.scale(150);
+		BitmapText the50 = new BitmapText(guiFont, false);
+		the50.setSize(guiFont.getCharSet().getRenderedSize());	  		// font size
+		the50.setColor(ColorRGBA.DarkGray);								// font color
+		the50.setText("50");												// the text
+		the50.setLocalTranslation(settings.getWidth()-70, 120, 0); // position
+		guiNode.attachChild(the50);
+		
+		BitmapText the1 = new BitmapText(guiFont, false);
+		the1.setSize(guiFont.getCharSet().getRenderedSize());	  		// font size
+		the1.setColor(ColorRGBA.Gray);								// font color
+		the1.setText("1");												// the text
+		the1.setLocalTranslation(settings.getWidth()-170, 120, 0); // position
+		guiNode.attachChild(the1);
+		
+		//TODO make better
 		Material m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+		m.setColor("Color", ColorRGBA.DarkGray);
+		
+		Arrow s = new Arrow(Vector3f.UNIT_X);
+		speedo = new Geometry("Speed", s);
+		speedo.setLocalTranslation(settings.getWidth()-75, 0, 0);
+		speedo.scale(100);
 		speedo.setMaterial(m);
 		guiNode.attachChild(speedo);
+		
+		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+		m.setColor("Color", ColorRGBA.Gray);
+		
+		speedo2 = new Geometry("RPM", s);
+		speedo2.setLocalTranslation(settings.getWidth()-175, 0, 0);
+		speedo2.scale(100);
+		speedo2.setMaterial(m);
+		guiNode.attachChild(speedo2);
+		
+		
+		int width = settings.getWidth() - 350;
+		Box b = new Box(10, 10, 1);
+		b0 = new Geometry("frontleft", b);
+		b0.setLocalTranslation(width, 50, 0);
+		b0.setMaterial(m);
+		guiNode.attachChild(b0);
+		
+		b1 = new Geometry("frontright", b);
+		b1.setLocalTranslation(width +25, 50, 0);
+		b1.setMaterial(m);
+		guiNode.attachChild(b1);
+		
+		b2 = new Geometry("rearleft", b);
+		b2.setLocalTranslation(width, 25, 0);
+		b2.setMaterial(m);
+		guiNode.attachChild(b2);
+		
+		b3 = new Geometry("rearright", b);
+		b3.setLocalTranslation(width + 25, 25, 0);
+		b3.setMaterial(m);
+		guiNode.attachChild(b3);
+		
 	}
 	
 	public PhysicsSpace getPhysicsSpace(){
@@ -272,7 +337,7 @@ public class Rally extends SimpleApplication {
 		totaltime += tpf; //calc total time
 		
 		player.myUpdate(tpf); //BIG update here
-		if (fancyWorld) {
+		if (dynamicWorld) {
 			worldB.update(player.getPhysicsLocation());
 		}
 			
@@ -294,7 +359,24 @@ public class Rally extends SimpleApplication {
 		
 		speedo.setLocalRotation(Quaternion.IDENTITY);
 		speedo.rotate(0, 0, FastMath.PI);
-		speedo.rotate(0, 0, -speed/50);
+		speedo.rotate(0, 0, -speed*FastMath.DEG_TO_RAD*90/50);
+		
+		speedo2.setLocalRotation(Quaternion.IDENTITY);
+		speedo2.rotate(0, 0, FastMath.PI);
+		speedo2.rotate(0, 0, -player.accelCurrent*FastMath.HALF_PI);
+		
+		Material m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+		m.setColor("Color", new ColorRGBA(player.wn0.skid,player.wn0.skid,player.wn0.skid,1));
+		b0.setMaterial(m);
+		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+		m.setColor("Color", new ColorRGBA(player.wn1.skid,player.wn1.skid,player.wn1.skid,1));
+		b1.setMaterial(m);
+		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+		m.setColor("Color", new ColorRGBA(player.wn2.skid,player.wn2.skid,player.wn2.skid,1));
+		b2.setMaterial(m);
+		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+		m.setColor("Color", new ColorRGBA(player.wn3.skid,player.wn3.skid,player.wn3.skid,1));
+		b3.setMaterial(m);
 		
 		/////////////////////////////////
 		//camera

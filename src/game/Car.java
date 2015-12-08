@@ -48,12 +48,12 @@ public abstract class Car {
 	float wheel2Slip = 1.0f;
 	float wheel3Slip = 1.0f;
 	
-	//my physics grip constants - TODO tweak numbers
+	//my physics grip constants
 	float DRAG = 4.5f;
 	float RESISTANCE = 30.0f;
-	float CA_R = -5;
-	float CA_F = -5;
-	float MAX_GRIP = 2f;
+	float CA_R = -5f;
+	float CA_F = -5f;
+	float MAX_GRIP = 2.5f;
 	
 	//other
 	float MAX_ACCEL = 90;
@@ -70,8 +70,6 @@ class NormalCar extends Car {
 class RallyCar extends Car {
 	
 	RallyCar() {
-		//TODO its not an actual rally car yet..
-		
 		carModel = "assets/car4raid_1.obj"; //...well it is now?
 		wheelModel = "assets/wheelraid1.obj";
 		
@@ -108,12 +106,12 @@ class RallyCar extends Car {
 		
 		CA_F = -7; //more than 6 ok.?
 		CA_R = -6f; //more than 6 ok.?
-		MAX_GRIP = 2.5f;
+		MAX_GRIP = 3f;
 		
-		stiffness  = 20.0f; //50
+		stiffness  = 40.0f;
 		restLength = 0.15f;
-		compValue  = 0.4f;
-		dampValue  = 0.5f;
+		compValue  = 0.2f;
+		dampValue  = 0.3f;
 		
 		susCompression = compValue * 2 * FastMath.sqrt(stiffness);
 		susDamping = dampValue * 2 * FastMath.sqrt(stiffness);
@@ -121,7 +119,7 @@ class RallyCar extends Car {
 	}
 }
 
-class TrackCar extends Car { //TODO maybe massive enum?
+class TrackCar extends Car {
 	
 	TrackCar() {
 		carModel = "assets/f1.blend";
