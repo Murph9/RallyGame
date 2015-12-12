@@ -19,7 +19,7 @@ public class Camera extends CameraNode {
 		
 		Vector3f pPos = p.getPhysicsLocation();
 		setLocalTranslation(pPos.add(p.car.CAM_OFFSET)); //starting position of the camera
-		lookAt(pPos.add(p.car.LOOK_AT), Vector3f.UNIT_Y); //look at car
+		lookAt(pPos.add(p.car.LOOK_AT), new Vector3f(0,1,0)); //look at car
 		
 		setControlDir(ControlDirection.SpatialToCamera);
 	}
@@ -32,7 +32,7 @@ public class Camera extends CameraNode {
 		
 		setLocalTranslation(FastMath.interpolateLinear(tpf*damping, curPos, wantPos));
 		
-		lookAt(p.getPhysicsLocation().add(p.car.LOOK_AT), Vector3f.UNIT_Y);
+		lookAt(p.getPhysicsLocation().add(p.car.LOOK_AT), new Vector3f(0,1,0));
 	}
 
 }

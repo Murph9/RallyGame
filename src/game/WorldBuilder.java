@@ -3,11 +3,8 @@ package game;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.bulletphysics.linearmath.QuaternionUtil;
 import com.jme3.asset.AssetManager;
-import com.jme3.asset.TextureKey;
 import com.jme3.bullet.collision.shapes.CollisionShape;
-import com.jme3.bullet.collision.shapes.PlaneCollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.material.Material;
@@ -18,15 +15,12 @@ import com.jme3.math.Plane;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
-import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Quad;
-import com.jme3.scene.shape.Sphere;
-import com.jme3.texture.Texture;
 import com.jme3.util.SkyFactory;
 import com.jme3.water.SimpleWaterProcessor;
 
@@ -43,7 +37,7 @@ public class WorldBuilder extends Node {
 		RIGHT_45 = new Quaternion(0, -0.3827f, 0, 0.9239f)
 		;
 	
-	//TODO s
+	//TODO's
 	//hard - try and just make a curver to drive on instead of the loaded segments
 		//bezier curve stuffs..
 	
@@ -62,6 +56,7 @@ public class WorldBuilder extends Node {
 	Quaternion nextRot = new Quaternion();
 	int count = 0;
 
+	int totalPlaced = 0;
 	float distance = 150;
 	final float max_wp = 50;
 	
@@ -149,12 +144,14 @@ public class WorldBuilder extends Node {
 			}
 			List<Spatial> temp = new LinkedList<Spatial>(pieces);
 			for (Spatial sp: temp) {
-				if (sp.getWorldTranslation().subtract(playerPos).length() > distance*1.5f) {
+				if (sp.getWorldTranslation().subtract(playerPos).length() > distance/2) {
 						//1.5 because don't delete the ones we just placed
 					rally.getPhysicsSpace().remove(sp.getControl(0));
 					this.detachChild(sp);
 					pieces.remove(sp);
 					System.err.println("Removing: "+sp.getName() + ", num left: "+pieces.size());
+				} else {
+					break;
 				}
 			}
 		}
@@ -177,7 +174,7 @@ public class WorldBuilder extends Node {
 		s.scale(scale);
 
 		CollisionShape coll = CollisionShapeFactory.createMeshShape(s);
-	
+		
 		RigidBodyControl landscape = new RigidBodyControl(coll, 0);
 		s.addControl(landscape);
 		landscape.setKinematic(false);
@@ -190,12 +187,16 @@ public class WorldBuilder extends Node {
 		}
 		pieces.add(s);
 		
-		
+		totalPlaced++;
 		///////////////////////////////////////
 		//setup the position of the next object
 		Vector3f cur = world.getNewPos().mult(scale);
 		nextPos.addLocal(nextRot.mult(cur));
 		
 		nextRot.multLocal(world.getNewAngle());
+	}
+	
+	public int getTotalPlaced() {
+		return totalPlaced;
 	}
 }

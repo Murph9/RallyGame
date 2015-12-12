@@ -38,8 +38,6 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 	Node skidNode = new Node();
 	LinkedList<Spatial> skidList = new LinkedList<Spatial>();
 	
-	boolean ifSmoke = false;
-	
 	//directions
 	Vector3f forward = new Vector3f();
 	Vector3f right = new Vector3f();
@@ -51,7 +49,7 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 	
 	//car data
 	Car car;
-
+	
 	MyWheelNode wn0;
 	MyWheelNode wn1;
 	MyWheelNode wn2;
@@ -59,9 +57,11 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 	
 	//driving stuff
 	boolean togglePhys = false;
+	boolean ifSmoke = false;
+
+	int curGear = 1; //TODO set this
+	int curRPM = 0;
 	
-	int curGear = 0;
-	float accelCurrent = 0;
 	boolean ifAccel = false;
 	boolean ifReverse = false;
 	
@@ -84,7 +84,7 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		this.setSuspensionCompression(car.susCompression);
 		this.setSuspensionDamping(car.susDamping);
 		this.setSuspensionStiffness(car.stiffness);
-		this.setMaxSuspensionForce(25*car.mass); //TODO put in 'Car.java'
+		this.setMaxSuspensionForce(car.maxSusForce);
 		
 		
 		wn0 = new MyWheelNode("wheel 0 node", this, 0);
@@ -224,7 +224,7 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		} 
 		if (binding.equals("Jump")) {
 			if (value) {
-				applyImpulse(car.JUMP_FORCE, Vector3f.ZERO); //push up
+				applyImpulse(car.JUMP_FORCE, new Vector3f(0,0,0)); //push up
 				Vector3f old = getPhysicsLocation();
 				old.y += 2; //and move up
 				setPhysicsLocation(old);
@@ -257,7 +257,8 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 	
 	private void specialPhysics(float tpf) {
 		if (togglePhys){ return; }//no need to apply wheel forces now
-
+		//TODO fix backwards and slow speeds
+		
 		//NOTE: that z is forward, x is side
 		//  the reference ntoes say that x is forward and y is sideways (just be careful)
 		
@@ -280,38 +281,40 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 			steeringCur *= -1;
 		}
 		
+		//important angles
 		double slipanglefront = sideslip + rot_angle - steeringCur;
 		double slipanglerear = sideslip - rot_angle;
 		
 		//////////////////////////////////
 		double weight = car.mass*9.81*0.25; //0.25 because its per wheel
+		
 		Vector3f force_lat_front_left = new Vector3f();
 		Vector3f force_lat_front_right = new Vector3f();
 		Vector3f force_lat_rear_left = new Vector3f();
 		Vector3f force_lat_rear_right = new Vector3f();
 		
 		//calculate off of the slip angle
-		if (wn0.contact) { //FRONT - left
+		if (wn0.contact) { //front left
 			force_lat_front_left.x = (float)(slipanglefront*car.CA_F);
 			force_lat_front_left.x = FastMath.clamp(force_lat_front_left.x, -car.MAX_GRIP, car.MAX_GRIP); //TODO clamp later
 			wn0.skid = Math.abs(force_lat_front_left.x)/car.MAX_GRIP;
 			force_lat_front_left.x *= weight;
 		} else { wn0.skid = 0; }
-		if (wn1.contact) { //FRONT - right
+		if (wn1.contact) { //front right
 			force_lat_front_right.x = (float)(slipanglefront*car.CA_F);
 			force_lat_front_right.x = FastMath.clamp(force_lat_front_right.x, -car.MAX_GRIP, car.MAX_GRIP);
 			wn1.skid = Math.abs(force_lat_front_right.x)/car.MAX_GRIP;
 			force_lat_front_right.x *= weight;
 		} else { wn1.skid = 0; }
 
-		if (wn2.contact) { //REAR - left
+		if (wn2.contact) { //rear left
 			force_lat_rear_left.x = (float)(slipanglerear*car.CA_R);
 			force_lat_rear_left.x = FastMath.clamp(force_lat_rear_left.x, -car.MAX_GRIP, car.MAX_GRIP);
 			wn2.skid = Math.abs(force_lat_rear_left.x)/car.MAX_GRIP;
 			force_lat_rear_left.x *= weight;
 			if (ifHandbrake) force_lat_rear_left.x *= 0.5f;
 		} else { wn2.skid = 0; }
-		if (wn3.contact) { //REAR- right
+		if (wn3.contact) { //rear right
 			force_lat_rear_right.x = (float)(slipanglerear*car.CA_R);
 			force_lat_rear_right.x = FastMath.clamp(force_lat_rear_right.x, -car.MAX_GRIP, car.MAX_GRIP);
 			wn3.skid = Math.abs(force_lat_rear_right.x)/car.MAX_GRIP;
@@ -320,23 +323,22 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		} else { wn3.skid = 0; }
 		
 		float accel;
-		float x = accelCurrent;
 		if (ifAccel) {
-			accel = (accelCurrent+0.5f)*car.MAX_ACCEL; //TODO gears
-			accel = -FastMath.pow((x - 0.57f),4) - FastMath.pow((x - 0.57f),3) - (FastMath.pow((x - 0.57f),2) - 0.42f);
-			accel *= car.MAX_ACCEL*4;
-			accel = car.MAX_ACCEL; //TODO remove for 'geared' accel
+			accel = getForceFromEngineToWheels(velocity.z);//*accelCurrent;
+//			accel = car.MAX_ACCEL; //TODO remove for 'geared' accel
 			if (ifReverse) {
 				accel *= -1;
 			}
 		} else {
+			getForceFromEngineToWheels(velocity.z); //because the rpm and gear still need to be updated
 			accel = 0;
 		}
+		
 		//TODO figure out why '100' / ?maybe brake and accel can fight?
 		float ftractionz = 0;
-		if (wn0.contact && wn1.contact && wn2.contact && wn3.contact) { //TODO per wheel
-			ftractionz = 100*(accel - brakeCurrent*FastMath.sign(velocity.z));
-		} //TODO make accel 'cost' grip
+		if (wn2.contact && wn3.contact) {
+			ftractionz = accel - 100*(brakeCurrent*FastMath.sign(velocity.z));
+		} //TODO make accel 'cost' grip, maybe try and just do the physics per wheel
 		
 		//linear resistance and quadratic drag here
 		float dragy = (float)(-(car.RESISTANCE * velocity.z + car.DRAG * velocity.z * Math.abs(velocity.z)));
@@ -344,37 +346,90 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 
 		////////////////////////////////////
 		//put them into global and 4 x direction forces:
-		//TODO fix backwards and slow speeds
-		Vector3f totalNeutral = new Vector3f();
-		totalNeutral.x = dragx;
-		totalNeutral.z = ftractionz + dragy + 
-				FastMath.sin(steeringCurrent)*force_lat_front_left.z + force_lat_rear_left.z +
-				FastMath.sin(steeringCurrent)*force_lat_front_right.z + force_lat_rear_right.z;
-
+		Vector3f totalNeutral = new Vector3f(dragx,0,dragy);
 		applyCentralForce(w_angle.mult(totalNeutral)); //non wheel based forces on the car
+
+		ftractionz /= 2; //because 2 wheels an axel
+		if (car.driveFront && car.driveRear) 
+			ftractionz /= 2; //if its split up between the front and rear axle
 		
+		//    wn0      wn1      wn2      wn3
+		float flx,flz, frx,frz, rlx,rlz, rrx,rrz;
 		
-		float totalxfrontleft = FastMath.cos(steeringCurrent)*force_lat_front_left.x;
-		float totalxfrontright = FastMath.cos(steeringCurrent)*force_lat_front_right.x;
-		float totalxrearleft = force_lat_rear_left.x;
-		float totalxrearright = force_lat_rear_right.x;
-				
-		Vector3f xfrontl = w_angle.mult(new Vector3f(totalxfrontleft, 0, 0));
-		Vector3f xfrontr = w_angle.mult(new Vector3f(totalxfrontright, 0, 0));
-		Vector3f xrearl = w_angle.mult(new Vector3f(totalxrearleft, 0, 0));
-		Vector3f xrearr = w_angle.mult(new Vector3f(totalxrearright, 0, 0));
+		flx = FastMath.cos(steeringCurrent)*force_lat_front_left.x;
+		frx = FastMath.cos(steeringCurrent)*force_lat_front_right.x;
+		if (car.driveFront) {
+			flz = FastMath.sin(steeringCurrent)*force_lat_front_left.z + ftractionz;
+			frz = FastMath.sin(steeringCurrent)*force_lat_front_right.z + ftractionz;
+		} else {
+			flz = FastMath.sin(steeringCurrent)*force_lat_front_left.z;
+			frz = FastMath.sin(steeringCurrent)*force_lat_front_right.z;
+		}
 		
-		Vector3f frontLeft = w_angle.mult(wn0.getLocalTranslation().add(new Vector3f(0,-car.wheelRadius,0)));
-		Vector3f frontRight = w_angle.mult(wn1.getLocalTranslation().add(new Vector3f(0,-car.wheelRadius,0)));
-		Vector3f rearLeft = w_angle.mult(wn2.getLocalTranslation().add(new Vector3f(0,-car.wheelRadius,0)));
-		Vector3f rearRight = w_angle.mult(wn3.getLocalTranslation().add(new Vector3f(0,-car.wheelRadius,0)));
+		rlx = force_lat_rear_left.x;
+		rrx = force_lat_rear_right.x;
+		if (car.driveRear) {
+			rlz = force_lat_rear_left.z + ftractionz;
+			rrz = force_lat_rear_right.z + ftractionz;
+		} else {
+			rlz = force_lat_rear_left.z;
+			rrz = force_lat_rear_right.z;
+		}
 		
-		applyForce(xfrontl, frontLeft); //apply forces
-		applyForce(xfrontr, frontRight);
-		applyForce(xrearl, rearLeft);
-		applyForce(xrearr, rearRight);
+		Vector3f frontl = w_angle.mult(new Vector3f(flx, 0, flz));
+		Vector3f frontr = w_angle.mult(new Vector3f(frx, 0, frz));
+		Vector3f rearl = w_angle.mult(new Vector3f(rlx, 0, rlz));
+		Vector3f rearr = w_angle.mult(new Vector3f(rrx, 0, rrz));
 		
-//		TODO slight unstability going in a straight line
+		if (wn0.contact)
+			applyForce(frontl, w_angle.mult(wn0.getLocalTranslation())); //apply forces
+		if (wn1.contact)
+			applyForce(frontr, w_angle.mult(wn1.getLocalTranslation())); //TODO add in the height of the wheel
+		if (wn2.contact)
+			applyForce(rearl, w_angle.mult(wn2.getLocalTranslation()));
+		if (wn3.contact)
+			applyForce(rearr, w_angle.mult(wn3.getLocalTranslation()));
+		
+		////////////////////
+		//TODO actually do something about engine torque
+		
+		//basic overall forumla for acceleration
+//		drive = direction*(engineTorque*throttle)*gearratio*diffratio*transmissioneffiency/wheelradius
+		
+		//slip ratio and traction force
+//		o = (w*wheelradius - velocity.z)/(abs(velocity.z))
+//		I get the feeling the CAR_MAXGRIP is actually for this section
+		
+		//torque on the drive wheels overview
+//		totaltorque = drivetorque + tractiontorque + braketorque
+//		angular accel = totaltorque/rearwheelsinertia (rear wheel inetria = (wheelmass*radius^2)/2 )
+//		rearwheelangularvelocity += anguaraccel*tpf
+	
+		//the notes specifically say that this situation kind of seems circular.
+		//just use the last values: new = old + change*timestep
+		
+	}
+	
+	private float getForceFromEngineToWheels(float speedForward) {
+		float wheelrot = speedForward/(2*FastMath.PI*car.wheelRadius); //w = v/(2*Pi*r) -> rad/sec
+		
+		float curGearRatio = car.gearRatios[1+curGear];
+		float diffRatio = car.gearRatios[0];
+		curRPM = (int)(wheelrot*curGearRatio*diffRatio*60); //TODO change from gear 1
+			//wheel rad/s, gearratio, diffratio, conversion from rad/sec to rad/min
+		if (curRPM > 5500 && curGear < car.gearRatios.length-2) { //TODO test end range
+			curGear++;
+		}
+		//TODO find good numbers for all of these IFS
+		//TODO put them in the Car class
+		if (curRPM < 2400 && curGear > 1) { 
+			curGear--;
+		}
+		
+		float engineTorque = lerpTorque(curRPM);
+		float driveTorque = engineTorque*curGearRatio*diffRatio;//TODO*trasmissionefficency;
+		
+		return driveTorque/car.wheelRadius;
 	}
 	
 	//////////////////////////////////////////////////////////////
@@ -408,8 +463,8 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		Matrix3f playerRot = new Matrix3f();
 		getPhysicsRotationMatrix(playerRot);
 		
-		left = playerRot.mult(Vector3f.UNIT_X);
-		right = playerRot.mult(Vector3f.UNIT_X.negate());
+		left = playerRot.mult(new Vector3f(1,0,0));
+		right = playerRot.mult(new Vector3f(1,0,0).negate());
 
 		//wheel turning logic
 		if (steeringDirection > 0) { //left
@@ -424,7 +479,6 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		if (Math.abs(steeringCurrent) < 0.05 ) steeringCurrent = 0;
 		steer(steeringCurrent);
 	}
-	
 	
 	///////////////////////////////////////////////////////////
 	private void addSkidLines() {
@@ -462,8 +516,8 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 
 	private void reset() { //TODO clean
 		setPhysicsRotation(new Matrix3f());
-		setLinearVelocity(Vector3f.ZERO);
-		setAngularVelocity(Vector3f.ZERO);
+		setLinearVelocity(new Vector3f(0,0,0));
+		setAngularVelocity(new Vector3f(0,0,0));
 		resetSuspension();
 		
 		rally.arrowNode.detachAllChildren();
@@ -482,7 +536,7 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 			
 			setPhysicsLocation(rally.worldB.start);
 			Matrix3f p = new Matrix3f();
-			p.fromAngleAxis(FastMath.DEG_TO_RAD*90, Vector3f.UNIT_Y);
+			p.fromAngleAxis(FastMath.DEG_TO_RAD*90, new Vector3f(0,1,0));
 			setPhysicsRotation(p);
 
 			setAngularVelocity(new Vector3f());
@@ -492,13 +546,28 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		
 		skidNode.detachAllChildren();
 		skidList.clear();
-		wn0.last = Vector3f.ZERO;
-		wn1.last = Vector3f.ZERO;
-		wn2.last = Vector3f.ZERO;
-		wn3.last = Vector3f.ZERO;
+		wn0.last = new Vector3f(0,0,0);
+		wn1.last = new Vector3f(0,0,0);
+		wn2.last = new Vector3f(0,0,0);
+		wn3.last = new Vector3f(0,0,0);
+	}
+
+	private float lerpTorque(int rpm) {
+		if (rpm < 0) rpm = 0; //prevent array issues
+		
+		int intrpm = (rpm / 1000); //basically divide by 1000 and round down
+		float remrpm = (float)(rpm % 1000)/1000;
+		float before = torqueFromArray(intrpm);
+		float after = torqueFromArray(intrpm+1);
+		return FastMath.interpolateLinear(remrpm, before, after);
+	}
+	
+	private float torqueFromArray(int i) {
+		if (i < 1) i = 1;
+		if (i > car.torque.length-1) i =car.torque.length-1; 
+		return car.torque[i];
 	}
 }
-
 
 
 class MyWheelNode extends Node {
@@ -519,7 +588,7 @@ class MyWheelNode extends Node {
 		super(name);
 		this.mvc = mvc;
 		this.num = num;
-		this.last = new Vector3f(Vector3f.ZERO);
+		this.last = new Vector3f(new Vector3f(0,0,0));
 		
 		this.setShadowMode(ShadowMode.CastAndReceive);
 	}
@@ -529,16 +598,16 @@ class MyWheelNode extends Node {
 			addSkidLine(last, mvc.getWheel(num).getCollisionLocation(), skid);
 			last = mvc.getWheel(num).getCollisionLocation();
 		} else {
-			last = Vector3f.ZERO;
+			last = new Vector3f(0,0,0);
 		}
 	}
 	
 	private void addSkidLine(Vector3f a, Vector3f b, float grip) {
-		if (a.equals(Vector3f.ZERO) || b.equals(Vector3f.ZERO)) {
+		if (a.equals(new Vector3f(0,0,0)) || b.equals(new Vector3f(0,0,0))) {
 			return; //don't make a line because they aren't valid positions
 		}
-		a.y += 0.02;
-		b.y += 0.02; //z-buffering (i.e. to stop it "fighting" with the ground)
+		a.y += 0.05;
+		b.y += 0.05; //z-buffering (i.e. to stop it "fighting" with the ground)
 		
 		Mesh mesh = new Mesh(); //making a quad positions
 		Vector3f [] vertices = new Vector3f[4];
@@ -561,7 +630,6 @@ class MyWheelNode extends Node {
 		
 		Geometry geo = new Geometry("MyMesh", mesh);
 		
-		//TODO only one wheels skid is showing
 		Material mat = new Material(mvc.assetManager, "Common/MatDefs/Light/Lighting.j3md");
 		
 		Texture tex = mvc.assetManager.loadTexture("assets/stripes.png");
@@ -577,7 +645,7 @@ class MyWheelNode extends Node {
 		mat.setBoolean("UseMaterialColors", true);
 		geo.setMaterial(mat);
 		geo.setShadowMode(ShadowMode.Off);
-		geo.setQueueBucket(Bucket.Transparent); //render order = last
+		geo.setQueueBucket(Bucket.Transparent);
 		mvc.skidNode.attachChild(geo);
 		mvc.skidList.add(geo);
 		

@@ -11,8 +11,8 @@ public enum WPFloating implements WP {
 //	STRAIGHT_UP("straight.blend", new Vector3f(20,0,0), new Quaternion(0, 0, 0.098f, 0.9952f)),
 //	STRAIGHT_DOWN("straight.blend", new Vector3f(20,0,0), new Quaternion(0, 0, -0.098f, 0.9952f)),
 	
-//	LEFT_CURVE("left.blend", new Vector3f(30,0,-30), new Quaternion(0, 0.7071f, 0, 0.7071f)),
-//	RIGHT_CURVE("right.blend", new Vector3f(30,0,30), new Quaternion(0, -0.7071f, 0, 0.7071f)),
+	LEFT_CURVE("left.blend", new Vector3f(21.21f,0,-8.79f), new Quaternion(0, 0.38268346f, 0, 0.9238795f)),
+	RIGHT_CURVE("right.blend", new Vector3f(21.21f,0,8.79f), new Quaternion(0, -0.38268346f, 0, 0.9238795f)),
 	;
 	
 	private static String folder = "wbfloating/";

@@ -40,11 +40,12 @@ public abstract class Car {
 	
 	float susCompression = compValue * 2 * FastMath.sqrt(stiffness);
 	float susDamping = dampValue * 2 * FastMath.sqrt(stiffness);
+	float maxSusForce = 25*mass; //TODO '25' is a random number.
 	
 	//grip constants
-	//my physics work mostly with 0.01f, but feels better with:
+	//my physics works with 0.01f, but feels better with: 1f
 	float wheel0Slip = 1.0f;
-	float wheel1Slip = 1.0f; //don't change these values so you spin out, make them "change due to acceleration"
+	float wheel1Slip = 1.0f;
 	float wheel2Slip = 1.0f;
 	float wheel3Slip = 1.0f;
 	
@@ -60,11 +61,20 @@ public abstract class Car {
 	float MAX_STEERING = 0.5f;
 	float MAX_BRAKE = 100;
 	Vector3f JUMP_FORCE = new Vector3f(0, 5*mass, 0);
+	
+	boolean driveFront = false, driveRear = true; //this would be rear wheel drive
+	
+	//this one is from the notes, is a viper
+	float[] torque = new float[]{0,390,445,460,480,475,360,10}; //starts at 0 rpm, steps every 1000rpm (until done)
+	float[] gearRatios = new float[]{3.42f,2.9f,2.66f,1.78f,1.3f,1,0.74f,0.5f};; //diff,reverse,gear1,gear2,g3,g4,g5,g6,...
+	
+	//TODO i found a porsche boxter engine curve
+//	float[] torque = new float[]{0,223,250,280,300,310,280,245,10}; //starts at 0 rpm, steps every 1000rpm (until done)
 }
 
 class NormalCar extends Car {
 	//for using the default settings.
-	//kinda feels like a real car...
+	//probably shouldn't have a custom constructor
 }
 
 class RallyCar extends Car {
@@ -74,9 +84,8 @@ class RallyCar extends Car {
 		wheelModel = "assets/wheelraid1.obj";
 		
 		/* just from looking at top gear rally:
-		 * - oversteers easily, and feels light, probably some kind of "phantom turning force like I had before"
+		 * - oversteers easily, and feels light,
 		 *  + snaps at a very small slip angle
-		 *  + both of the CA_.. are high, return is quick and drifting is fast
 		 *   - don't know if MAX_GRIP actually plays a part yet (doesn't look like it)
 		 *  + might not need the stock jme3 traction
 		 * - camera centered on the front of the car
@@ -134,6 +143,10 @@ class TrackCar extends Car {
 		MAX_STEERING = 0.25f;
 		MAX_ACCEL = 140;
 		MAX_BRAKE = 200;
+
+		CA_F = -7;
+		CA_R = -6.5f;
+		MAX_GRIP = 3f;
 		
 		stiffness  = 100.0f;
 		restLength = 0.05f;

@@ -12,6 +12,7 @@ import com.jme3.font.BitmapText;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
+import com.jme3.material.RenderState.BlendMode;
 import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.*;
 import com.jme3.post.FilterPostProcessor;
@@ -21,6 +22,7 @@ import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.*;
 import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.shape.Box;
+import com.jme3.scene.shape.Quad;
 import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.shadow.EdgeFilteringMode;
@@ -40,7 +42,7 @@ public class Rally extends SimpleApplication {
 	private Camera camNode;
 	
 	//World Model Enum stuff
-	World world = World.track2; //Set map here
+	World world = World.duct; //Set map here
 	
 	boolean dynamicWorld = true;
 	WP[] type = WPFloating.values();
@@ -50,17 +52,20 @@ public class Rally extends SimpleApplication {
 	
 	//hud stuff
 	private BitmapText speedText;
-	private Geometry speedo;
-	private Geometry speedo2;
-	private Geometry b0;
-	private Geometry b1;
-	private Geometry b2;
-	private Geometry b3;
+	private BitmapText score;
+	private Geometry speedArrow;
+	private Geometry speedBackground;
+	private Geometry rpmArrow;
+	private Geometry rpmBackground;
+	private Geometry gripBox0;
+	private Geometry gripBox1;
+	private Geometry gripBox2;
+	private Geometry gripBox3;
 	
 	//car stuff
 	private Node carNode;
 	MyVehicleControl player;
-	private Car car = new NormalCar(); //set car here
+	private Car car = new TrackCar(); //set car here
 	
 	//debug stuff
 	Node arrowNode;
@@ -91,6 +96,7 @@ public class Rally extends SimpleApplication {
 		settings.setResolution(1300,720);
 		settings.setFrameRate(60); //60
 		settings.setUseJoysticks(true);
+		settings.setVSync(false);
 //		settings.setBitsPerPixel(16); //TODO why not?
 		
 		app.setSettings(settings);
@@ -115,8 +121,9 @@ public class Rally extends SimpleApplication {
 		
 		setupGUI();
 		
+		//Just getting numbers
 		Quaternion q = new Quaternion();
-		q.fromAngleAxis(FastMath.PI*1/16, Vector3f.UNIT_X);
+		q.fromAngleAxis(FastMath.HALF_PI/2, new Vector3f(0,1,0));
 		System.out.println(q);
 	}
 
@@ -229,7 +236,7 @@ public class Rally extends SimpleApplication {
 		//create a compound shape and attach CollisionShape for the car body at 0,1,0
 		//this shifts the effective center of mass of the BoxCollisionShape to 0,-1,0
 		CompoundCollisionShape compoundShape = new CompoundCollisionShape();
-		compoundShape.addChildShape(CollisionShapeFactory.createDynamicMeshShape(carmodel), Vector3f.ZERO);
+		compoundShape.addChildShape(CollisionShapeFactory.createDynamicMeshShape(carmodel), new Vector3f(0,0,0));
 		
 		carNode = new Node("vehicleNode");
 		player = new MyVehicleControl(compoundShape, car, assetManager, carNode, this);
@@ -244,7 +251,7 @@ public class Rally extends SimpleApplication {
 		if (dynamicWorld) {
 			player.setPhysicsLocation(worldB.start);
 			Matrix3f p = player.getPhysicsRotationMatrix();
-			p.fromAngleAxis(FastMath.DEG_TO_RAD*90, Vector3f.UNIT_Y);
+			p.fromAngleAxis(FastMath.DEG_TO_RAD*90, new Vector3f(0,1,0));
 			player.setPhysicsRotation(p);
 		} else {
 			player.setPhysicsLocation(world.start);
@@ -265,62 +272,76 @@ public class Rally extends SimpleApplication {
 		speedText.setLocalTranslation(settings.getWidth()-200, 300, 0); // position
 		guiNode.attachChild(speedText);
 		
-		BitmapText the50 = new BitmapText(guiFont, false);
-		the50.setSize(guiFont.getCharSet().getRenderedSize());	  		// font size
-		the50.setColor(ColorRGBA.DarkGray);								// font color
-		the50.setText("50");												// the text
-		the50.setLocalTranslation(settings.getWidth()-70, 120, 0); // position
-		guiNode.attachChild(the50);
+		score = new BitmapText(guiFont, false);		  
+		score.setSize(guiFont.getCharSet().getRenderedSize());	  		// font size
+		score.setColor(ColorRGBA.White);								// font color
+		score.setText("");												// the text
+		score.setLocalTranslation(settings.getWidth()-200, settings.getHeight(), 0); // position
+		guiNode.attachChild(score);
 		
-		BitmapText the1 = new BitmapText(guiFont, false);
-		the1.setSize(guiFont.getCharSet().getRenderedSize());	  		// font size
-		the1.setColor(ColorRGBA.Gray);								// font color
-		the1.setText("1");												// the text
-		the1.setLocalTranslation(settings.getWidth()-170, 120, 0); // position
-		guiNode.attachChild(the1);
-		
-		//TODO make better
 		Material m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 		m.setColor("Color", ColorRGBA.DarkGray);
 		
-		Arrow s = new Arrow(Vector3f.UNIT_X);
-		speedo = new Geometry("Speed", s);
-		speedo.setLocalTranslation(settings.getWidth()-75, 0, 0);
-		speedo.scale(100);
-		speedo.setMaterial(m);
-		guiNode.attachChild(speedo);
+		Arrow s = new Arrow(new Vector3f(1,0,0));
+		speedArrow = new Geometry("Speed", s);
+		speedArrow.setLocalTranslation(settings.getWidth()-75, 0, 0);
+		speedArrow.scale(100);
+		speedArrow.setMaterial(m);
+		guiNode.attachChild(speedArrow);
+		
+		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+		m.setTexture("ColorMap", assetManager.loadTexture("assets/speedm_s.png"));
+		m.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
+		
+		Quad qspeed = new Quad(128,128);
+		speedBackground = new Geometry("SpeedoBackground", qspeed);
+		speedBackground.setLocalTranslation(settings.getWidth()-75-128, -128, -1);
+		speedBackground.scale(2);
+		speedBackground.setMaterial(m);
+		guiNode.attachChild(speedBackground);
 		
 		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 		m.setColor("Color", ColorRGBA.Gray);
 		
-		speedo2 = new Geometry("RPM", s);
-		speedo2.setLocalTranslation(settings.getWidth()-175, 0, 0);
-		speedo2.scale(100);
-		speedo2.setMaterial(m);
-		guiNode.attachChild(speedo2);
+		rpmArrow = new Geometry("RPM", s);
+		rpmArrow.setLocalTranslation(settings.getWidth()-175, 0, 0);
+		rpmArrow.scale(100);
+		rpmArrow.setMaterial(m);
+		guiNode.attachChild(rpmArrow);
+		
+		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+		m.setTexture("ColorMap", assetManager.loadTexture("assets/speedrpm.png"));
+		m.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
+		
+		Quad qrpm = new Quad(128,128);
+		rpmBackground = new Geometry("SpeedoBackground", qrpm);
+		rpmBackground.setLocalTranslation(settings.getWidth()-175-128, -128, -1);
+		rpmBackground.scale(2);
+		rpmBackground.setMaterial(m);
+		guiNode.attachChild(rpmBackground);
 		
 		
 		int width = settings.getWidth() - 350;
 		Box b = new Box(10, 10, 1);
-		b0 = new Geometry("frontleft", b);
-		b0.setLocalTranslation(width, 50, 0);
-		b0.setMaterial(m);
-		guiNode.attachChild(b0);
+		gripBox0 = new Geometry("frontleft", b);
+		gripBox0.setLocalTranslation(width, 50, 0);
+		gripBox0.setMaterial(m);
+		guiNode.attachChild(gripBox0);
 		
-		b1 = new Geometry("frontright", b);
-		b1.setLocalTranslation(width +25, 50, 0);
-		b1.setMaterial(m);
-		guiNode.attachChild(b1);
+		gripBox1 = new Geometry("frontright", b);
+		gripBox1.setLocalTranslation(width +25, 50, 0);
+		gripBox1.setMaterial(m);
+		guiNode.attachChild(gripBox1);
 		
-		b2 = new Geometry("rearleft", b);
-		b2.setLocalTranslation(width, 25, 0);
-		b2.setMaterial(m);
-		guiNode.attachChild(b2);
+		gripBox2 = new Geometry("rearleft", b);
+		gripBox2.setLocalTranslation(width, 25, 0);
+		gripBox2.setMaterial(m);
+		guiNode.attachChild(gripBox2);
 		
-		b3 = new Geometry("rearright", b);
-		b3.setLocalTranslation(width + 25, 25, 0);
-		b3.setMaterial(m);
-		guiNode.attachChild(b3);
+		gripBox3 = new Geometry("rearright", b);
+		gripBox3.setLocalTranslation(width + 25, 25, 0);
+		gripBox3.setMaterial(m);
+		guiNode.attachChild(gripBox3);
 		
 	}
 	
@@ -347,66 +368,42 @@ public class Rally extends SimpleApplication {
 		//////////////////////////////////
 		//Hud stuff
 		
-		Vector3f velocityVector = player.getLinearVelocity().normalize();
 		player.getForwardVector(player.forward);
 		
 		float speed = player.getLinearVelocity().length();
-		player.curGear = (int)(speed/7);
-		player.accelCurrent = speed % 7 / 7;
 		float totalgrip = player.getTotalGrip();
 		
-		speedText.setText(speed + "m/s\ngear:" + player.curGear + "\naccel:" + player.accelCurrent+ "\ngrip:" + totalgrip); // the ui text
+		speedText.setText(speed + "m/s\ngear:" + player.curGear + "\naccel:" + player.curRPM+ "\ngrip:" + totalgrip); // the ui text
 		
-		speedo.setLocalRotation(Quaternion.IDENTITY);
-		speedo.rotate(0, 0, FastMath.PI);
-		speedo.rotate(0, 0, -speed*FastMath.DEG_TO_RAD*90/50);
+		if (dynamicWorld) {
+			score.setText("Placed: "+worldB.getTotalPlaced());
+		}
 		
-		speedo2.setLocalRotation(Quaternion.IDENTITY);
-		speedo2.rotate(0, 0, FastMath.PI);
-		speedo2.rotate(0, 0, -player.accelCurrent*FastMath.HALF_PI);
+		speedArrow.setLocalRotation(Quaternion.IDENTITY);
+		speedArrow.rotate(0, 0, FastMath.PI);
+		speedArrow.rotate(0, 0, -speed*FastMath.DEG_TO_RAD*90/50);
+		
+		rpmArrow.setLocalRotation(Quaternion.IDENTITY);
+		rpmArrow.rotate(0, 0, FastMath.PI);
+		rpmArrow.rotate(0, 0, -player.curRPM*FastMath.HALF_PI/5000);
 		
 		Material m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 		m.setColor("Color", new ColorRGBA(player.wn0.skid,player.wn0.skid,player.wn0.skid,1));
-		b0.setMaterial(m);
+		gripBox0.setMaterial(m);
 		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 		m.setColor("Color", new ColorRGBA(player.wn1.skid,player.wn1.skid,player.wn1.skid,1));
-		b1.setMaterial(m);
+		gripBox1.setMaterial(m);
 		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 		m.setColor("Color", new ColorRGBA(player.wn2.skid,player.wn2.skid,player.wn2.skid,1));
-		b2.setMaterial(m);
+		gripBox2.setMaterial(m);
 		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 		m.setColor("Color", new ColorRGBA(player.wn3.skid,player.wn3.skid,player.wn3.skid,1));
-		b3.setMaterial(m);
+		gripBox3.setMaterial(m);
 		
 		/////////////////////////////////
 		//camera
 		camNode.myUpdate(tpf);
 		
-		//////////////////////////////////
-		if (frameCount % 10 == 0 && ifDebug) {
-			float driftAngle = velocityVector.angleBetween(player.forward);
-			float driftRightAngle = FastMath.RAD_TO_DEG*(velocityVector.angleBetween(player.right)); 
-//			float driftLeftAngle = FastMath.RAD_TO_DEG*(velocityVector.angleBetween(leftPlayer));
-			
-			Quaternion driftA = null;
-			if (driftRightAngle < 90) { //are we turning right or left?
-				driftA = new Quaternion().fromAngleAxis(driftAngle*2, new Vector3f(0,1,0));
-			} else { //driftAngle * 2
-				driftA = new Quaternion().fromAngleAxis(-driftAngle*2, new Vector3f(0,1,0));
-			}
-			
-			putShapeArrow(ColorRGBA.Blue, player.forward.negate(), Vector3f.ZERO);
-			putShapeArrow(ColorRGBA.Red, player.forward, Vector3f.ZERO);
-			
-			//////////////////////////////////Velocity
-			putShapeArrow(ColorRGBA.Green, velocityVector, player.getPhysicsLocation());
-			
-			putShapeArrow(ColorRGBA.White, driftA.mult(velocityVector), player.getPhysicsLocation());
-			
-			////////////////////////////////// Left and right
-			putShapeArrow(ColorRGBA.Cyan, player.left, player.getPhysicsLocation());
-			putShapeArrow(ColorRGBA.Cyan, player.right, player.getPhysicsLocation());
-		}
 	}
 	
 	void putShapeArrow(ColorRGBA color, Vector3f dir, Vector3f pos) {
