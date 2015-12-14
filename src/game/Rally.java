@@ -42,19 +42,18 @@ public class Rally extends SimpleApplication {
 	private Camera camNode;
 	
 	//World Model Enum stuff
-	World world = World.duct; //Set map here
+	World world = World.track2; //Set map here
 	
-	boolean dynamicWorld = true;
+	boolean dynamicWorld = false;
 	WP[] type = WPFloating.values();
 	boolean needsMaterial = false;
 	WorldBuilder worldB;
 	
 	
 	//hud stuff
-	private BitmapText speedText;
+	private BitmapText statsText;
 	private BitmapText score;
-	private Geometry speedArrow;
-	private Geometry speedBackground;
+	private BitmapText speedText;
 	private Geometry rpmArrow;
 	private Geometry rpmBackground;
 	private Geometry gripBox0;
@@ -65,7 +64,7 @@ public class Rally extends SimpleApplication {
 	//car stuff
 	private Node carNode;
 	MyVehicleControl player;
-	private Car car = new TrackCar(); //set car here
+	private Car car = new RallyCar(); //set car here
 	
 	//debug stuff
 	Node arrowNode;
@@ -265,12 +264,12 @@ public class Rally extends SimpleApplication {
 	}
 	
 	private void setupGUI() {
-		speedText = new BitmapText(guiFont, false);		  
-		speedText.setSize(guiFont.getCharSet().getRenderedSize());	  		// font size
-		speedText.setColor(ColorRGBA.White);								// font color
-		speedText.setText("");												// the text
-		speedText.setLocalTranslation(settings.getWidth()-200, 300, 0); // position
-		guiNode.attachChild(speedText);
+		statsText = new BitmapText(guiFont, false);		  
+		statsText.setSize(guiFont.getCharSet().getRenderedSize());	  		// font size
+		statsText.setColor(ColorRGBA.White);								// font color
+		statsText.setText("");												// the text
+		statsText.setLocalTranslation(settings.getWidth()-200, 300, 0); // position
+		guiNode.attachChild(statsText);
 		
 		score = new BitmapText(guiFont, false);		  
 		score.setSize(guiFont.getCharSet().getRenderedSize());	  		// font size
@@ -279,43 +278,32 @@ public class Rally extends SimpleApplication {
 		score.setLocalTranslation(settings.getWidth()-200, settings.getHeight(), 0); // position
 		guiNode.attachChild(score);
 		
+		///////////////////////////////////////////////
+		speedText = new BitmapText(guiFont, false);
+		speedText.setSize(guiFont.getCharSet().getRenderedSize()*2);	  		// font size
+		speedText.setColor(ColorRGBA.Black);								// font color
+		speedText.setText("");												// the text
+		speedText.setLocalTranslation(settings.getWidth()-128-50, 60, 0); // position
+		guiNode.attachChild(speedText);
+		
 		Material m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		m.setColor("Color", ColorRGBA.DarkGray);
-		
+		m.setColor("Color", ColorRGBA.Black);
+
 		Arrow s = new Arrow(new Vector3f(1,0,0));
-		speedArrow = new Geometry("Speed", s);
-		speedArrow.setLocalTranslation(settings.getWidth()-75, 0, 0);
-		speedArrow.scale(100);
-		speedArrow.setMaterial(m);
-		guiNode.attachChild(speedArrow);
-		
-		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		m.setTexture("ColorMap", assetManager.loadTexture("assets/speedm_s.png"));
-		m.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
-		
-		Quad qspeed = new Quad(128,128);
-		speedBackground = new Geometry("SpeedoBackground", qspeed);
-		speedBackground.setLocalTranslation(settings.getWidth()-75-128, -128, -1);
-		speedBackground.scale(2);
-		speedBackground.setMaterial(m);
-		guiNode.attachChild(speedBackground);
-		
-		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		m.setColor("Color", ColorRGBA.Gray);
-		
+		s.setLineWidth(4);
 		rpmArrow = new Geometry("RPM", s);
-		rpmArrow.setLocalTranslation(settings.getWidth()-175, 0, 0);
+		rpmArrow.setLocalTranslation(settings.getWidth()-256+128, -40+128, 0);
 		rpmArrow.scale(100);
 		rpmArrow.setMaterial(m);
 		guiNode.attachChild(rpmArrow);
 		
 		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		m.setTexture("ColorMap", assetManager.loadTexture("assets/speedrpm.png"));
+		m.setTexture("ColorMap", assetManager.loadTexture("assets/speedo.png"));
 		m.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
 		
 		Quad qrpm = new Quad(128,128);
 		rpmBackground = new Geometry("SpeedoBackground", qrpm);
-		rpmBackground.setLocalTranslation(settings.getWidth()-175-128, -128, -1);
+		rpmBackground.setLocalTranslation(settings.getWidth()-256, -40, -1);
 		rpmBackground.scale(2);
 		rpmBackground.setMaterial(m);
 		guiNode.attachChild(rpmBackground);
@@ -373,19 +361,16 @@ public class Rally extends SimpleApplication {
 		float speed = player.getLinearVelocity().length();
 		float totalgrip = player.getTotalGrip();
 		
-		speedText.setText(speed + "m/s\ngear:" + player.curGear + "\naccel:" + player.curRPM+ "\ngrip:" + totalgrip); // the ui text
+		statsText.setText(speed + "m/s\ngear:" + player.curGear + "\naccel:" + player.curRPM+ "\ngrip:" + totalgrip); // the ui text
+		speedText.setText((int)Math.abs(player.getCurrentVehicleSpeedKmHour()) + " km/h");
 		
 		if (dynamicWorld) {
 			score.setText("Placed: "+worldB.getTotalPlaced());
 		}
 		
-		speedArrow.setLocalRotation(Quaternion.IDENTITY);
-		speedArrow.rotate(0, 0, FastMath.PI);
-		speedArrow.rotate(0, 0, -speed*FastMath.DEG_TO_RAD*90/50);
-		
 		rpmArrow.setLocalRotation(Quaternion.IDENTITY);
 		rpmArrow.rotate(0, 0, FastMath.PI);
-		rpmArrow.rotate(0, 0, -player.curRPM*FastMath.HALF_PI/5000);
+		rpmArrow.rotate(0, 0, -player.curRPM*FastMath.HALF_PI/6000);
 		
 		Material m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 		m.setColor("Color", new ColorRGBA(player.wn0.skid,player.wn0.skid,player.wn0.skid,1));

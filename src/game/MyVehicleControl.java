@@ -63,7 +63,7 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 	int curRPM = 0;
 	
 	boolean ifAccel = false;
-	boolean ifReverse = false;
+	float accelCurrent = 1;
 	
 	float steeringCurrent = 0;
 	int steeringDirection = 0; //-1 = right, 1 = left
@@ -248,7 +248,11 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 			}
 		} 
 		if (binding.equals("Reverse")) {
-			ifReverse = !ifReverse;
+			if (curGear == 1) { //i.e. first gear
+				curGear = 0;
+			} else {
+				curGear = 1;
+			}
 		}
 	}
 	//end controls
@@ -286,7 +290,7 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		double slipanglerear = sideslip - rot_angle;
 		
 		//////////////////////////////////
-		double weight = car.mass*9.81*0.25; //0.25 because its per wheel
+		double weight = car.mass*(-getGravity().y/1000)*0.25; //0.25 because its per wheel
 		
 		Vector3f force_lat_front_left = new Vector3f();
 		Vector3f force_lat_front_right = new Vector3f();
@@ -296,48 +300,45 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		//calculate off of the slip angle
 		if (wn0.contact) { //front left
 			force_lat_front_left.x = (float)(slipanglefront*car.CA_F);
-			force_lat_front_left.x = FastMath.clamp(force_lat_front_left.x, -car.MAX_GRIP, car.MAX_GRIP); //TODO clamp later
-			wn0.skid = Math.abs(force_lat_front_left.x)/car.MAX_GRIP;
+			force_lat_front_left.x = FastMath.clamp(force_lat_front_left.x, -car.MAX_LAT_GRIP, car.MAX_LAT_GRIP); //TODO clamp later
+			wn0.skid = Math.abs(force_lat_front_left.x)/car.MAX_LAT_GRIP;
 			force_lat_front_left.x *= weight;
 		} else { wn0.skid = 0; }
 		if (wn1.contact) { //front right
 			force_lat_front_right.x = (float)(slipanglefront*car.CA_F);
-			force_lat_front_right.x = FastMath.clamp(force_lat_front_right.x, -car.MAX_GRIP, car.MAX_GRIP);
-			wn1.skid = Math.abs(force_lat_front_right.x)/car.MAX_GRIP;
+			force_lat_front_right.x = FastMath.clamp(force_lat_front_right.x, -car.MAX_LAT_GRIP, car.MAX_LAT_GRIP);
+			wn1.skid = Math.abs(force_lat_front_right.x)/car.MAX_LAT_GRIP;
 			force_lat_front_right.x *= weight;
 		} else { wn1.skid = 0; }
 
 		if (wn2.contact) { //rear left
 			force_lat_rear_left.x = (float)(slipanglerear*car.CA_R);
-			force_lat_rear_left.x = FastMath.clamp(force_lat_rear_left.x, -car.MAX_GRIP, car.MAX_GRIP);
-			wn2.skid = Math.abs(force_lat_rear_left.x)/car.MAX_GRIP;
+			force_lat_rear_left.x = FastMath.clamp(force_lat_rear_left.x, -car.MAX_LAT_GRIP, car.MAX_LAT_GRIP);
+			wn2.skid = Math.abs(force_lat_rear_left.x)/car.MAX_LAT_GRIP;
 			force_lat_rear_left.x *= weight;
 			if (ifHandbrake) force_lat_rear_left.x *= 0.5f;
 		} else { wn2.skid = 0; }
 		if (wn3.contact) { //rear right
 			force_lat_rear_right.x = (float)(slipanglerear*car.CA_R);
-			force_lat_rear_right.x = FastMath.clamp(force_lat_rear_right.x, -car.MAX_GRIP, car.MAX_GRIP);
-			wn3.skid = Math.abs(force_lat_rear_right.x)/car.MAX_GRIP;
+			force_lat_rear_right.x = FastMath.clamp(force_lat_rear_right.x, -car.MAX_LAT_GRIP, car.MAX_LAT_GRIP);
+			wn3.skid = Math.abs(force_lat_rear_right.x)/car.MAX_LAT_GRIP;
 			force_lat_rear_right.x *= weight;
 			if (ifHandbrake) force_lat_rear_right.x *= 0.5f;
 		} else { wn3.skid = 0; }
 		
-		float accel;
+		float accel = getEngineBrakeWheelForce(velocity.z)*accelCurrent;
 		if (ifAccel) {
-			accel = getForceFromEngineToWheels(velocity.z);//*accelCurrent;
 //			accel = car.MAX_ACCEL; //TODO remove for 'geared' accel
-			if (ifReverse) {
-				accel *= -1;
-			}
-		} else {
-			getForceFromEngineToWheels(velocity.z); //because the rpm and gear still need to be updated
+		} else { //no accel for you
 			accel = 0;
 		}
+		
+		accel -= 100*brakeCurrent*FastMath.sign(velocity.z);
 		
 		//TODO figure out why '100' / ?maybe brake and accel can fight?
 		float ftractionz = 0;
 		if (wn2.contact && wn3.contact) {
-			ftractionz = accel - 100*(brakeCurrent*FastMath.sign(velocity.z));
+			ftractionz = accel;// - 100*(brakeCurrent*FastMath.sign(velocity.z));
 		} //TODO make accel 'cost' grip, maybe try and just do the physics per wheel
 		
 		//linear resistance and quadratic drag here
@@ -349,15 +350,13 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		Vector3f totalNeutral = new Vector3f(dragx,0,dragy);
 		applyCentralForce(w_angle.mult(totalNeutral)); //non wheel based forces on the car
 
-		ftractionz /= 2; //because 2 wheels an axel
+		ftractionz /= 2; //because 2 wheels an axle
 		if (car.driveFront && car.driveRear) 
 			ftractionz /= 2; //if its split up between the front and rear axle
 		
-		//    wn0      wn1      wn2      wn3
-		float flx,flz, frx,frz, rlx,rlz, rrx,rrz;
+		//    wn0  wn1  wn2  wn3
+		float flz, frz, rlz, rrz;
 		
-		flx = FastMath.cos(steeringCurrent)*force_lat_front_left.x;
-		frx = FastMath.cos(steeringCurrent)*force_lat_front_right.x;
 		if (car.driveFront) {
 			flz = FastMath.sin(steeringCurrent)*force_lat_front_left.z + ftractionz;
 			frz = FastMath.sin(steeringCurrent)*force_lat_front_right.z + ftractionz;
@@ -365,9 +364,6 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 			flz = FastMath.sin(steeringCurrent)*force_lat_front_left.z;
 			frz = FastMath.sin(steeringCurrent)*force_lat_front_right.z;
 		}
-		
-		rlx = force_lat_rear_left.x;
-		rrx = force_lat_rear_right.x;
 		if (car.driveRear) {
 			rlz = force_lat_rear_left.z + ftractionz;
 			rrz = force_lat_rear_right.z + ftractionz;
@@ -376,60 +372,47 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 			rrz = force_lat_rear_right.z;
 		}
 		
-		Vector3f frontl = w_angle.mult(new Vector3f(flx, 0, flz));
-		Vector3f frontr = w_angle.mult(new Vector3f(frx, 0, frz));
-		Vector3f rearl = w_angle.mult(new Vector3f(rlx, 0, rlz));
-		Vector3f rearr = w_angle.mult(new Vector3f(rrx, 0, rrz));
+		Vector3f frontl = w_angle.mult(new Vector3f(FastMath.cos(steeringCurrent)*force_lat_front_left.x, 0, flz));
+		Vector3f frontr = w_angle.mult(new Vector3f(FastMath.cos(steeringCurrent)*force_lat_front_right.x, 0, frz));
+		Vector3f rearl = w_angle.mult(new Vector3f(force_lat_rear_left.x, 0, rlz));
+		Vector3f rearr = w_angle.mult(new Vector3f(force_lat_rear_right.x, 0, rrz));
 		
-		if (wn0.contact)
-			applyForce(frontl, w_angle.mult(wn0.getLocalTranslation())); //apply forces
-		if (wn1.contact)
-			applyForce(frontr, w_angle.mult(wn1.getLocalTranslation())); //TODO add in the height of the wheel
-		if (wn2.contact)
-			applyForce(rearl, w_angle.mult(wn2.getLocalTranslation()));
-		if (wn3.contact)
-			applyForce(rearr, w_angle.mult(wn3.getLocalTranslation()));
-		
-		////////////////////
-		//TODO actually do something about engine torque
-		
-		//basic overall forumla for acceleration
-//		drive = direction*(engineTorque*throttle)*gearratio*diffratio*transmissioneffiency/wheelradius
-		
-		//slip ratio and traction force
-//		o = (w*wheelradius - velocity.z)/(abs(velocity.z))
-//		I get the feeling the CAR_MAXGRIP is actually for this section
-		
-		//torque on the drive wheels overview
-//		totaltorque = drivetorque + tractiontorque + braketorque
-//		angular accel = totaltorque/rearwheelsinertia (rear wheel inetria = (wheelmass*radius^2)/2 )
-//		rearwheelangularvelocity += anguaraccel*tpf
-	
-		//the notes specifically say that this situation kind of seems circular.
-		//just use the last values: new = old + change*timestep
-		
+		if (wn0.contact) applyForce(frontl, w_angle.mult(wn0.getLocalTranslation().add(0,-car.wheelRadius,0))); //apply forces
+		if (wn1.contact) applyForce(frontr, w_angle.mult(wn1.getLocalTranslation().add(0,-car.wheelRadius,0))); //TODO add in the height of the wheel
+		if (wn2.contact) applyForce(rearl, w_angle.mult(wn2.getLocalTranslation().add(0,-car.wheelRadius,0)));
+		if (wn3.contact) applyForce(rearr, w_angle.mult(wn3.getLocalTranslation().add(0,-car.wheelRadius,0)));
 	}
 	
-	private float getForceFromEngineToWheels(float speedForward) {
+	private float getEngineBrakeWheelForce(float speedForward) {
 		float wheelrot = speedForward/(2*FastMath.PI*car.wheelRadius); //w = v/(2*Pi*r) -> rad/sec
 		
-		float curGearRatio = car.gearRatios[1+curGear];
-		float diffRatio = car.gearRatios[0];
-		curRPM = (int)(wheelrot*curGearRatio*diffRatio*60); //TODO change from gear 1
+		float curGearRatio = car.gearRatios[curGear];//0 = reverse, >= 1 normal make sense
+		float diffRatio = car.diffRatio;
+		curRPM = (int)(wheelrot*curGearRatio*diffRatio*60); //rad/sec to rad/min and the drive ratios to engine
 			//wheel rad/s, gearratio, diffratio, conversion from rad/sec to rad/min
-		if (curRPM > 5500 && curGear < car.gearRatios.length-2) { //TODO test end range
+		autoTransmission(curRPM);
+		
+		float engineTorque = lerpTorque(curRPM);
+		float driveTorque = engineTorque*curGearRatio*diffRatio*car.transEffic;
+		
+//		float omega = (wheelrot*car.wheelRadius - speedForward)/FastMath.abs(speedForward);
+
+		float totalTorque = driveTorque/car.wheelRadius;
+//		float weightAWheel = car.mass*9.81f*0.25f; //0.25 because its per wheel
+//		totalTorque = FastMath.clamp(totalTorque, -(float)(car.MAX_LONG_GRIP*weightAWheel), (float)(car.MAX_LONG_GRIP*weightAWheel));
+		return totalTorque;
+	}
+	
+	private void autoTransmission(int rpm) {
+		if (rpm > car.gearUp && curGear < car.gearRatios.length-1) { //TODO test end range
 			curGear++;
 		}
-		//TODO find good numbers for all of these IFS
-		//TODO put them in the Car class
-		if (curRPM < 2400 && curGear > 1) { 
+		//TODO find good numbers for all of these gear numbers
+		//TODO put them in the Car class as constants
+		else if (rpm < car.gearDown && curGear > 1) {
 			curGear--;
 		}
 		
-		float engineTorque = lerpTorque(curRPM);
-		float driveTorque = engineTorque*curGearRatio*diffRatio;//TODO*trasmissionefficency;
-		
-		return driveTorque/car.wheelRadius;
 	}
 	
 	//////////////////////////////////////////////////////////////

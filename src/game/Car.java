@@ -25,6 +25,7 @@ public abstract class Car {
 
 	float wheelWidth = 0.15f;
 	float wheelRadius = 0.3f;
+	float MAX_STEERING = 0.5f;
 	
 	float w_xOff = 0.68f; //wheels x offset (side)
 	float w_yOff = 0f; //wheels no height
@@ -50,15 +51,15 @@ public abstract class Car {
 	float wheel3Slip = 1.0f;
 	
 	//my physics grip constants
-	float DRAG = 4.5f;
+	float DRAG = 2.5f;
 	float RESISTANCE = 30.0f;
 	float CA_R = -5f;
 	float CA_F = -5f;
-	float MAX_GRIP = 2.5f;
+	float MAX_LAT_GRIP = 2.5f;
+	float MAX_LONG_GRIP = 2.5f;
 	
-	//other
-	float MAX_ACCEL = 90;
-	float MAX_STEERING = 0.5f;
+	//other (debug)
+	float MAX_ACCEL = 90; //TODO taken out?
 	float MAX_BRAKE = 100;
 	Vector3f JUMP_FORCE = new Vector3f(0, 5*mass, 0);
 	
@@ -66,7 +67,13 @@ public abstract class Car {
 	
 	//this one is from the notes, is a viper
 	float[] torque = new float[]{0,390,445,460,480,475,360,10}; //starts at 0 rpm, steps every 1000rpm (until done)
-	float[] gearRatios = new float[]{3.42f,2.9f,2.66f,1.78f,1.3f,1,0.74f,0.5f};; //diff,reverse,gear1,gear2,g3,g4,g5,g6,...
+		//TODO maybe 500 rpm splits later?
+	float gearDown = 2400;	
+	float gearUp = 5500;
+	
+	float transEffic = 0.75f; //TODO apparently 0.7 is common
+	float diffRatio = 3.42f;
+	float[] gearRatios = new float[]{-2.9f,2.66f,1.78f,1.3f,1,0.74f,0.5f};; //reverse,gear1,gear2,g3,g4,g5,g6,...
 	
 	//TODO i found a porsche boxter engine curve
 //	float[] torque = new float[]{0,223,250,280,300,310,280,245,10}; //starts at 0 rpm, steps every 1000rpm (until done)
@@ -97,10 +104,9 @@ class RallyCar extends Car {
 		//DON'T TOUCH THESE UNTIL YOU GET THE ACTUAL PHYSICS OF THE CAR RIGHT
 		//////////////////////////////////////////////////////////////////////		
 		mass = 1000;
-		MAX_ACCEL = 140;
 		MAX_BRAKE = 200;
 		
-		wheel0Slip = 0.01f; //don't put them on zero, their physics doesn't like it
+		wheel0Slip = 0.01f; //if you make it zero relaly slow speeds get weird
 		wheel1Slip = 0.01f;
 		wheel2Slip = 0.01f;
 		wheel3Slip = 0.01f;
@@ -108,23 +114,28 @@ class RallyCar extends Car {
 		wheelWidth = 0.25f;
 		wheelRadius = 0.4f;
 		
+		driveFront = true;
+		driveRear = true; //this would be rear wheel drive
+		
 		w_xOff = 0.7f; //wheels x offset (side)
 		w_yOff = 0.2f; //wheels no height
 		w_zOff = 1.1f; //wheels z offset (front and back)
 		
+		CA_F = -7;
+		CA_R = -6f;
+		MAX_LAT_GRIP = 3f;
 		
-		CA_F = -7; //more than 6 ok.?
-		CA_R = -6f; //more than 6 ok.?
-		MAX_GRIP = 3f;
-		
-		stiffness  = 40.0f;
+		stiffness  = 35.0f;
 		restLength = 0.15f;
-		compValue  = 0.2f;
-		dampValue  = 0.3f;
+		compValue  = 0.6f;
+		dampValue  = 0.7f;
 		
 		susCompression = compValue * 2 * FastMath.sqrt(stiffness);
 		susDamping = dampValue * 2 * FastMath.sqrt(stiffness);
+		maxSusForce = 25000;
 		
+		torque = new float[]{0,720,880,920,960,973,720,10}; //starts at 0 rpm, steps every 1000rpm (until done)
+		diffRatio = 4f;
 	}
 }
 
@@ -137,8 +148,8 @@ class TrackCar extends Car {
 		
 		mass = 1000;
 		
-		DRAG = 3f;
-		RESISTANCE = 20;
+		DRAG = 0.3f; //engine is stopping before these values...
+		RESISTANCE = 5;
 		
 		MAX_STEERING = 0.25f;
 		MAX_ACCEL = 140;
@@ -146,7 +157,7 @@ class TrackCar extends Car {
 
 		CA_F = -7;
 		CA_R = -6.5f;
-		MAX_GRIP = 3f;
+		MAX_LAT_GRIP = 3f;
 		
 		stiffness  = 100.0f;
 		restLength = 0.05f;
@@ -164,6 +175,13 @@ class TrackCar extends Car {
 		w_yOff = 0.1f; //wheels y offset (height)
 		w_zOff = 1.6f; //wheels z offset (front and back)
 		
+		//TODO found via internet
+		torque = new float[]{0,300,500,500,550,608,595,580,560,540,525,500,440,400,350,0};
+		gearDown = 6000;
+		gearUp = 13500;
+		
+		diffRatio = 5.5f;
+		gearRatios = new float[]{-10f,3.23f,2.19f,1.71f,1.39f,1.16f,0.93f};; //reverse,gear1,gear2,g3,g4,g5,g6,...
 	}
 }
 

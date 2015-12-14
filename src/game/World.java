@@ -6,7 +6,7 @@ import com.jme3.math.Vector3f;
 public enum World {
 	skyline("assets/skyline.blend", 800, new Vector3f(-27.7f, 84.5f, 111.3f), true), 
 	mycity("assets/mycity.blend", 13, new Vector3f(0,0,0), false), 
-	duct("assets/duct.blend", 10, new Vector3f(0,0,0), true),
+	duct("assets/duct.blend", 100, new Vector3f(0,-14,0), true),
 	raleigh("assets/raleigh.blend", 8, new Vector3f(34.441566f, 15.72906f, 27.334211f), true),
 
 	//others
