@@ -42,9 +42,9 @@ public class Rally extends SimpleApplication {
 	private Camera camNode;
 	
 	//World Model Enum stuff
-	World world = World.track2; //Set map here
+	World world = World.duct; //Set map here
 	
-	boolean dynamicWorld = false;
+	boolean dynamicWorld = true;
 	WP[] type = WPFloating.values();
 	boolean needsMaterial = false;
 	WorldBuilder worldB;
@@ -64,7 +64,7 @@ public class Rally extends SimpleApplication {
 	//car stuff
 	private Node carNode;
 	MyVehicleControl player;
-	private Car car = new RallyCar(); //set car here
+	private Car car = new TrackCar(); //set car here
 	
 	//debug stuff
 	Node arrowNode;
@@ -359,9 +359,8 @@ public class Rally extends SimpleApplication {
 		player.getForwardVector(player.forward);
 		
 		float speed = player.getLinearVelocity().length();
-		float totalgrip = player.getTotalGrip();
 		
-		statsText.setText(speed + "m/s\ngear:" + player.curGear + "\naccel:" + player.curRPM+ "\ngrip:" + totalgrip); // the ui text
+		statsText.setText(speed + "m/s\ngear:" + player.curGear + "\naccel:" + player.curRPM+ "\n"); // the ui text
 		speedText.setText((int)Math.abs(player.getCurrentVehicleSpeedKmHour()) + " km/h");
 		
 		if (dynamicWorld) {

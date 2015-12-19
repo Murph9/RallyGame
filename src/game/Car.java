@@ -10,31 +10,34 @@ public abstract class Car {
 	String wheelModel = "assets/wheel.obj";
 	
 	//camera options
-	Vector3f LOOK_AT = new Vector3f(0,1f,0);
-	Vector3f CAM_OFFSET = new Vector3f(0,3,-7);
+	Vector3f LOOK_AT = new Vector3f(0,1f,0); //top of car usually
+	Vector3f CAM_OFFSET = new Vector3f(0,3,-7); //where the camera is
 	
 	//physical things
-	float mass = 1200;
-	float width = 1.4f; //x size, door handle to door handle
-	float height = 1f; //y size, roof to ground
-	float length = 3f; //z size, from front to back
+	float mass = 1200; //kg (total)
+	float width = 1.4f; //x size meter, door handle to door handle
+	float height = 1f; //y size meter, roof to ground
+	float length = 3f; //z size meter, from front to back
 	
 	//wheels
 	Vector3f wheelDirection = new Vector3f(0, -1, 0); //vertical
 	Vector3f wheelAxle = new Vector3f(-1, 0, 0); //horizontal
 
-	float wheelWidth = 0.15f;
-	float wheelRadius = 0.3f;
-	float MAX_STEERING = 0.5f;
+	float wheelWidth = 0.15f; //m
+	float wheelRadius = 0.3f; //m
+	float wheelMass = 75; //kg
+	float MAX_STEERING = 0.5f; //radians
 	
-	float w_xOff = 0.68f; //wheels x offset (side)
-	float w_yOff = 0f; //wheels no height
-	float w_zOff = 1.1f; //wheels z offset (front and back)
+	float[] slipRatioCurve = new float[]{0, 6000, 5990, 5000, 3000, 1000};
+	
+	float w_xOff = 0.68f; //wheels x offset (side), meters
+	float w_yOff = 0f; //wheels y offest (height), meters
+	float w_zOff = 1.1f; //wheels z offset (front and back), meters
 	
 	
 	//suspension values for wheels
 	//see for details: https://docs.google.com/Doc?docid=0AXVUZ5xw6XpKZGNuZG56a3FfMzU0Z2NyZnF4Zmo&hl=en
-	float stiffness = 60.0f;//200=f1 car
+	float stiffness = 60.0f; //200=f1 car
 	float compValue = 0.6f; //(should be lower than damp)
 	float dampValue = 0.7f;
 	float restLength = 0f;
@@ -44,39 +47,40 @@ public abstract class Car {
 	float maxSusForce = 25*mass; //TODO '25' is a random number.
 	
 	//grip constants
-	//my physics works with 0.01f, but feels better with: 1f
+	//my physics works with 0.01f, but feels better with: 1.0f
 	float wheel0Slip = 1.0f;
 	float wheel1Slip = 1.0f;
 	float wheel2Slip = 1.0f;
 	float wheel3Slip = 1.0f;
 	
 	//my physics grip constants
-	float DRAG = 2.5f;
-	float RESISTANCE = 30.0f;
+	float DRAG = 2.5f; //squared component
+	float RESISTANCE = 30.0f; //linear component
 	float CA_R = -5f;
 	float CA_F = -5f;
 	float MAX_LAT_GRIP = 2.5f;
 	float MAX_LONG_GRIP = 2.5f;
 	
 	//other (debug)
-	float MAX_ACCEL = 90; //TODO taken out?
-	float MAX_BRAKE = 100;
+	float MAX_ACCEL = 9000; //TODO take it out?
+	float MAX_BRAKE = 3000;
 	Vector3f JUMP_FORCE = new Vector3f(0, 5*mass, 0);
 	
 	boolean driveFront = false, driveRear = true; //this would be rear wheel drive
 	
-	//this one is from the notes, is a viper
+	//this one is from the notes, is a corevette c6 ~1999
 	float[] torque = new float[]{0,390,445,460,480,475,360,10}; //starts at 0 rpm, steps every 1000rpm (until done)
-		//TODO maybe 500 rpm splits later?
-	float gearDown = 2400;	
+		//TODO maybe 500 rpm splits (will get better peaks, good for testing grip)
+	
+	float gearDown = 2400;//TODO find good numbers for all of these gear numbers
 	float gearUp = 5500;
 	
-	float transEffic = 0.75f; //TODO apparently 0.7 is common
-	float diffRatio = 3.42f;
+	float transEffic = 0.75f; //TODO apparently 0.7 is common (power is lost to rotating things
+	float diffRatio = 3.42f; //helps set the total drive ratio
 	float[] gearRatios = new float[]{-2.9f,2.66f,1.78f,1.3f,1,0.74f,0.5f};; //reverse,gear1,gear2,g3,g4,g5,g6,...
 	
-	//TODO i found a porsche boxter engine curve
-//	float[] torque = new float[]{0,223,250,280,300,310,280,245,10}; //starts at 0 rpm, steps every 1000rpm (until done)
+	//TODO i found a porsche boxter engine curve:
+//	float[] torque = new float[]{0,223,250,280,300,310,280,245,10};
 }
 
 class NormalCar extends Car {
@@ -104,7 +108,6 @@ class RallyCar extends Car {
 		//DON'T TOUCH THESE UNTIL YOU GET THE ACTUAL PHYSICS OF THE CAR RIGHT
 		//////////////////////////////////////////////////////////////////////		
 		mass = 1000;
-		MAX_BRAKE = 200;
 		
 		wheel0Slip = 0.01f; //if you make it zero relaly slow speeds get weird
 		wheel1Slip = 0.01f;
@@ -152,8 +155,6 @@ class TrackCar extends Car {
 		RESISTANCE = 5;
 		
 		MAX_STEERING = 0.25f;
-		MAX_ACCEL = 140;
-		MAX_BRAKE = 200;
 
 		CA_F = -7;
 		CA_R = -6.5f;
