@@ -64,7 +64,7 @@ public class Rally extends SimpleApplication {
 	//car stuff
 	private Node carNode;
 	MyVehicleControl player;
-	private Car car = new TrackCar(); //set car here
+	private Car car = new RallyCar(); //set car here
 	
 	//debug stuff
 	Node arrowNode;

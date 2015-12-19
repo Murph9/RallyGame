@@ -7,6 +7,10 @@ import com.jme3.math.Vector3f;
 //Its short for help, if the name was any longer it might not actually be helpful
 public class H {
 
+	/**
+	 * Easier way of typing System.out.println();
+	 * @param o The thing you wanted printed
+	 */
 	public static void p(Object o) {
 		System.out.println(o);
 	}
@@ -19,12 +23,13 @@ public class H {
 		}
 		return newV;
 	}
+	
 	public static float lerpArray(float i, float[] array) {
 		if (i < 0) i = 0; //prevent array issues
 		int whole = (int) i;
 		float rem = i - whole;
-		float low = H.niceArray(whole, array);
-		float high = H.niceArray(whole+1, array);
+		float low = array[clamp(whole, 0, array.length-1)];
+		float high = array[clamp(whole+1, 0, array.length-1)];
 		return FastMath.interpolateLinear(rem, low, high);
 	}
 	
@@ -33,15 +38,15 @@ public class H {
 		
 		int intrpm = (rpm / 1000); //basically divide by 1000 and round down
 		float remrpm = (float)(rpm % 1000)/1000;
-		float before = H.niceArray(intrpm, array);
-		float after = H.niceArray(intrpm+1, array);
+		float before = array[clamp(intrpm, 0, array.length-1)];
+		float after = array[clamp(intrpm+1, 0, array.length-1)];
 		return FastMath.interpolateLinear(remrpm, before, after);
 	}
 	
-	public static float niceArray(int i, float[] array) {
-		if (i < 0) i = 0;
-		if (i > array.length-1) i = array.length-1; 
-		return array[i];
+	public static int clamp(int input, int low, int high) {
+		if (input < low) input = low;
+		if (input > high) input = high;
+		return input;
 	}
 	
 	public static float cylinderInertia(float r, float mass) {

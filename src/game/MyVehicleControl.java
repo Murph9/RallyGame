@@ -85,6 +85,7 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		this.setSuspensionDamping(car.susDamping);
 		this.setSuspensionStiffness(car.stiffness);
 		this.setMaxSuspensionForce(car.maxSusForce);
+		this.setMaxSuspensionTravelCm(car.maxSusTravel);
 		
 		
 		wn0 = new MyWheelNode("wheel 0 node", this, 0);
@@ -333,13 +334,10 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 			accel = 0;
 		}
 		
-		accel -= 100*brakeCurrent*FastMath.sign(velocity.z);
-		
-		//TODO figure out why '100' / ?maybe brake and accel can fight?
-		float ftractionz = 0;
+		float ftractionz = -brakeCurrent*FastMath.sign(velocity.z);
 		if (wn2.contact && wn3.contact) {
-			ftractionz = accel;// - 100*(brakeCurrent*FastMath.sign(velocity.z));
-		} //TODO make accel 'cost' grip, maybe try and just do the physics per wheel
+			ftractionz += accel;
+		} //TODO try and just do the physics per wheel
 		
 		//linear resistance and quadratic drag here
 		float dragy = (float)(-(car.RESISTANCE * velocity.z + car.DRAG * velocity.z * Math.abs(velocity.z)));
@@ -377,10 +375,10 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		Vector3f rearl = w_angle.mult(new Vector3f(force_lat_rear_left.x, 0, rlz));
 		Vector3f rearr = w_angle.mult(new Vector3f(force_lat_rear_right.x, 0, rrz));
 		
-		if (wn0.contact) applyForce(frontl, w_angle.mult(wn0.getLocalTranslation().add(0,-car.wheelRadius,0))); //apply forces
-		if (wn1.contact) applyForce(frontr, w_angle.mult(wn1.getLocalTranslation().add(0,-car.wheelRadius,0))); //TODO add in the height of the wheel
-		if (wn2.contact) applyForce(rearl, w_angle.mult(wn2.getLocalTranslation().add(0,-car.wheelRadius,0)));
-		if (wn3.contact) applyForce(rearr, w_angle.mult(wn3.getLocalTranslation().add(0,-car.wheelRadius,0)));
+		if (wn0.contact) applyForce(frontl, w_angle.mult(wn0.getForceLocation(car.wheelRadius, car.rollFraction))); //apply forces
+		if (wn1.contact) applyForce(frontr, w_angle.mult(wn1.getForceLocation(car.wheelRadius, car.rollFraction)));
+		if (wn2.contact) applyForce(rearl, w_angle.mult(wn2.getForceLocation(car.wheelRadius, car.rollFraction)));
+		if (wn3.contact) applyForce(rearr, w_angle.mult(wn3.getForceLocation(car.wheelRadius, car.rollFraction)));
 	}
 	
 	private float getEngineBrakeWheelForce(float speedForward) {
@@ -395,24 +393,16 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		float engineTorque = lerpTorque(curRPM);
 		float driveTorque = engineTorque*curGearRatio*diffRatio*car.transEffic;
 		
-//		float omega = (wheelrot*car.wheelRadius - speedForward)/FastMath.abs(speedForward);
-
 		float totalTorque = driveTorque/car.wheelRadius;
-//		float weightAWheel = car.mass*9.81f*0.25f; //0.25 because its per wheel
-//		totalTorque = FastMath.clamp(totalTorque, -(float)(car.MAX_LONG_GRIP*weightAWheel), (float)(car.MAX_LONG_GRIP*weightAWheel));
 		return totalTorque;
 	}
 	
 	private void autoTransmission(int rpm) {
 		if (rpm > car.gearUp && curGear < car.gearRatios.length-1) { //TODO test end range
 			curGear++;
-		}
-		//TODO find good numbers for all of these gear numbers
-		//TODO put them in the Car class as constants
-		else if (rpm < car.gearDown && curGear > 1) {
+		} else if (rpm < car.gearDown && curGear > 1) {
 			curGear--;
 		}
-		
 	}
 	
 	//////////////////////////////////////////////////////////////
@@ -478,26 +468,8 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 	}
 	
 	////////////////////
-	//getters
-	public String getWheelTractionInfo() {
-		String out = "";
-		out = "\n" + getWheel(0).getSkidInfo() + "\n" +
-		getWheel(1).getSkidInfo() + "\n" + 
-		getWheel(2).getSkidInfo() + "\n" +
-		getWheel(3).getSkidInfo();
-		return out;
-	}
-	
-	public float getTotalGrip() {
-		MyWheelNode[] n = {wn0, wn1, wn2, wn3};
-		float total = 0;
-		for (MyWheelNode a: n) {
-			total += a.skid;
-		}
-		return total;
-	}
 
-	private void reset() { //TODO clean
+	private void reset() {
 		setPhysicsRotation(new Matrix3f());
 		setLinearVelocity(new Vector3f(0,0,0));
 		setAngularVelocity(new Vector3f(0,0,0));
@@ -536,19 +508,9 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 	}
 
 	private float lerpTorque(int rpm) {
-		if (rpm < 0) rpm = 0; //prevent array issues
-		
-		int intrpm = (rpm / 1000); //basically divide by 1000 and round down
-		float remrpm = (float)(rpm % 1000)/1000;
-		float before = torqueFromArray(intrpm);
-		float after = torqueFromArray(intrpm+1);
-		return FastMath.interpolateLinear(remrpm, before, after);
-	}
-	
-	private float torqueFromArray(int i) {
-		if (i < 1) i = 1;
-		if (i > car.torque.length-1) i =car.torque.length-1; 
-		return car.torque[i];
+		if (rpm < 1000) rpm = 1000; //prevent stall
+		float RPM = (float)rpm / 1000;
+		return H.lerpArray(RPM, car.torque);
 	}
 }
 
@@ -576,6 +538,10 @@ class MyWheelNode extends Node {
 		this.setShadowMode(ShadowMode.CastAndReceive);
 	}
 
+	public Vector3f getForceLocation(float wheelRadius, float rollInfluence) {
+		return getLocalTranslation().add(0,-wheelRadius*rollInfluence,0);
+	}
+	
 	public void addSkidLine() {
 		if (contact) {
 			addSkidLine(last, mvc.getWheel(num).getCollisionLocation(), skid);
@@ -631,7 +597,5 @@ class MyWheelNode extends Node {
 		geo.setQueueBucket(Bucket.Transparent);
 		mvc.skidNode.attachChild(geo);
 		mvc.skidList.add(geo);
-		
-//		mat.setColor("GlowColor", ColorRGBA.Blue); TODO move somewhere else
 	}
 }

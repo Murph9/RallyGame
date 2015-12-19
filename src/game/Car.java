@@ -27,13 +27,13 @@ public abstract class Car {
 	float wheelRadius = 0.3f; //m
 	float wheelMass = 75; //kg
 	float MAX_STEERING = 0.5f; //radians
+	float rollFraction = 1; //1 = full into roll, 0 = no roll
 	
-	float[] slipRatioCurve = new float[]{0, 6000, 5990, 5000, 3000, 1000};
+	float[] slipRatioCurve = new float[]{0, 6000, 5990, 5000, 3000, 1000}; //TODO use (maybe?)
 	
 	float w_xOff = 0.68f; //wheels x offset (side), meters
 	float w_yOff = 0f; //wheels y offest (height), meters
 	float w_zOff = 1.1f; //wheels z offset (front and back), meters
-	
 	
 	//suspension values for wheels
 	//see for details: https://docs.google.com/Doc?docid=0AXVUZ5xw6XpKZGNuZG56a3FfMzU0Z2NyZnF4Zmo&hl=en
@@ -45,6 +45,7 @@ public abstract class Car {
 	float susCompression = compValue * 2 * FastMath.sqrt(stiffness);
 	float susDamping = dampValue * 2 * FastMath.sqrt(stiffness);
 	float maxSusForce = 25*mass; //TODO '25' is a random number.
+	float maxSusTravel = 50;
 	
 	//grip constants
 	//my physics works with 0.01f, but feels better with: 1.0f
@@ -63,7 +64,7 @@ public abstract class Car {
 	
 	//other (debug)
 	float MAX_ACCEL = 9000; //TODO take it out?
-	float MAX_BRAKE = 3000;
+	float MAX_BRAKE = 10000;
 	Vector3f JUMP_FORCE = new Vector3f(0, 5*mass, 0);
 	
 	boolean driveFront = false, driveRear = true; //this would be rear wheel drive
@@ -118,11 +119,11 @@ class RallyCar extends Car {
 		wheelRadius = 0.4f;
 		
 		driveFront = true;
-		driveRear = true; //this would be rear wheel drive
+		driveRear = true;
 		
-		w_xOff = 0.7f; //wheels x offset (side)
-		w_yOff = 0.2f; //wheels no height
-		w_zOff = 1.1f; //wheels z offset (front and back)
+		w_xOff = 0.7f;
+		w_yOff = 0.2f;
+		w_zOff = 1.1f;
 		
 		CA_F = -7;
 		CA_R = -6f;
@@ -132,6 +133,7 @@ class RallyCar extends Car {
 		restLength = 0.15f;
 		compValue  = 0.6f;
 		dampValue  = 0.7f;
+		rollFraction = 0.4f;
 		
 		susCompression = compValue * 2 * FastMath.sqrt(stiffness);
 		susDamping = dampValue * 2 * FastMath.sqrt(stiffness);
@@ -160,7 +162,7 @@ class TrackCar extends Car {
 		CA_R = -6.5f;
 		MAX_LAT_GRIP = 3f;
 		
-		stiffness  = 100.0f;
+		stiffness  = 200.0f;
 		restLength = 0.05f;
 		compValue  = 0.8f;
 		dampValue  = 0.9f;
@@ -171,10 +173,11 @@ class TrackCar extends Car {
 		width = 1.5f;
 		height = 0.7f;
 		length = 5f;
+		rollFraction = 0.2f;
 		
-		w_xOff = 0.62f; //wheels x offset (side)
-		w_yOff = 0.1f; //wheels y offset (height)
-		w_zOff = 1.6f; //wheels z offset (front and back)
+		w_xOff = 0.62f;
+		w_yOff = 0.05f;
+		w_zOff = 1.6f;
 		
 		//TODO found via internet
 		torque = new float[]{0,300,500,500,550,608,595,580,560,540,525,500,440,400,350,0};
