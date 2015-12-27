@@ -75,6 +75,7 @@ public abstract class Car {
 	
 	float gearDown = 2400;//TODO find good numbers for all of these gear numbers
 	float gearUp = 5500;
+	float redline = 6500;
 	
 	float transEffic = 0.75f; //TODO apparently 0.7 is common (power is lost to rotating things
 	float diffRatio = 3.42f; //helps set the total drive ratio
@@ -183,6 +184,7 @@ class TrackCar extends Car {
 		torque = new float[]{0,300,500,500,550,608,595,580,560,540,525,500,440,400,350,0};
 		gearDown = 6000;
 		gearUp = 13500;
+		redline = 15000;
 		
 		diffRatio = 5.5f;
 		gearRatios = new float[]{-10f,3.23f,2.19f,1.71f,1.39f,1.16f,0.93f};; //reverse,gear1,gear2,g3,g4,g5,g6,...

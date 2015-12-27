@@ -8,6 +8,7 @@ import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
+import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
@@ -39,7 +40,7 @@ public class Rally extends SimpleApplication {
 	private BulletAppState bulletAppState;
 	
 	//camera stuff
-	private Camera camNode;
+	private MyCamera camNode;
 	
 	//World Model Enum stuff
 	World world = World.duct; //Set map here
@@ -49,22 +50,14 @@ public class Rally extends SimpleApplication {
 	boolean needsMaterial = false;
 	WorldBuilder worldB;
 	
-	
-	//hud stuff
-	private BitmapText statsText;
-	private BitmapText score;
-	private BitmapText speedText;
-	private Geometry rpmArrow;
-	private Geometry rpmBackground;
-	private Geometry gripBox0;
-	private Geometry gripBox1;
-	private Geometry gripBox2;
-	private Geometry gripBox3;
-	
 	//car stuff
 	private Node carNode;
 	MyVehicleControl player;
-	private Car car = new RallyCar(); //set car here
+	private Car car = new NormalCar(); //set car here
+	
+	//gui stuff
+	UINode uiNode;
+	MiniMap minimap;
 	
 	//debug stuff
 	Node arrowNode;
@@ -110,6 +103,7 @@ public class Rally extends SimpleApplication {
 		bulletAppState = new BulletAppState();
 		stateManager.attach(bulletAppState);
 //		bulletAppState.setDebugEnabled(true);
+		
 		
 		createWorld();
 				
@@ -202,12 +196,11 @@ public class Rally extends SimpleApplication {
 	        
 	        viewPort.addProcessor(fpp);
         }
-        
 		
 	}
 	
 	private void addWorldModel(Spatial s) {
-		System.out.println("Adding: "+ s.getName());
+		System.err.println("Adding: "+ s.getName());
 		
 		s.move(0,-5,0);
 		s.scale(world.scale);
@@ -224,7 +217,7 @@ public class Rally extends SimpleApplication {
 	private void initCamera() {
 		flyCam.setEnabled(false);
 		
-		camNode = new Camera("Cam Node", cam, player);
+		camNode = new MyCamera("Cam Node", cam, player);
 		rootNode.attachChild(camNode);
 	}
 	
@@ -264,79 +257,13 @@ public class Rally extends SimpleApplication {
 	}
 	
 	private void setupGUI() {
-		statsText = new BitmapText(guiFont, false);		  
-		statsText.setSize(guiFont.getCharSet().getRenderedSize());	  		// font size
-		statsText.setColor(ColorRGBA.White);								// font color
-		statsText.setText("");												// the text
-		statsText.setLocalTranslation(settings.getWidth()-200, 300, 0); // position
-		guiNode.attachChild(statsText);
-		
-		score = new BitmapText(guiFont, false);		  
-		score.setSize(guiFont.getCharSet().getRenderedSize());	  		// font size
-		score.setColor(ColorRGBA.White);								// font color
-		score.setText("");												// the text
-		score.setLocalTranslation(settings.getWidth()-200, settings.getHeight(), 0); // position
-		guiNode.attachChild(score);
-		
-		///////////////////////////////////////////////
-		speedText = new BitmapText(guiFont, false);
-		speedText.setSize(guiFont.getCharSet().getRenderedSize()*2);	  		// font size
-		speedText.setColor(ColorRGBA.Black);								// font color
-		speedText.setText("");												// the text
-		speedText.setLocalTranslation(settings.getWidth()-128-50, 60, 0); // position
-		guiNode.attachChild(speedText);
-		
-		Material m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		m.setColor("Color", ColorRGBA.Black);
-
-		Arrow s = new Arrow(new Vector3f(1,0,0));
-		s.setLineWidth(4);
-		rpmArrow = new Geometry("RPM", s);
-		rpmArrow.setLocalTranslation(settings.getWidth()-256+128, -40+128, 0);
-		rpmArrow.scale(100);
-		rpmArrow.setMaterial(m);
-		guiNode.attachChild(rpmArrow);
-		
-		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		m.setTexture("ColorMap", assetManager.loadTexture("assets/speedo.png"));
-		m.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
-		
-		Quad qrpm = new Quad(128,128);
-		rpmBackground = new Geometry("SpeedoBackground", qrpm);
-		rpmBackground.setLocalTranslation(settings.getWidth()-256, -40, -1);
-		rpmBackground.scale(2);
-		rpmBackground.setMaterial(m);
-		guiNode.attachChild(rpmBackground);
-		
-		
-		int width = settings.getWidth() - 350;
-		Box b = new Box(10, 10, 1);
-		gripBox0 = new Geometry("frontleft", b);
-		gripBox0.setLocalTranslation(width, 50, 0);
-		gripBox0.setMaterial(m);
-		guiNode.attachChild(gripBox0);
-		
-		gripBox1 = new Geometry("frontright", b);
-		gripBox1.setLocalTranslation(width +25, 50, 0);
-		gripBox1.setMaterial(m);
-		guiNode.attachChild(gripBox1);
-		
-		gripBox2 = new Geometry("rearleft", b);
-		gripBox2.setLocalTranslation(width, 25, 0);
-		gripBox2.setMaterial(m);
-		guiNode.attachChild(gripBox2);
-		
-		gripBox3 = new Geometry("rearright", b);
-		gripBox3.setLocalTranslation(width + 25, 25, 0);
-		gripBox3.setMaterial(m);
-		guiNode.attachChild(gripBox3);
-		
+		uiNode = new UINode(this);
+		minimap = new MiniMap(this);
 	}
 	
 	public PhysicsSpace getPhysicsSpace(){
 		return bulletAppState.getPhysicsSpace();
 	}
-	
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/* Physics below */
@@ -355,34 +282,8 @@ public class Rally extends SimpleApplication {
 		}
 		//////////////////////////////////
 		//Hud stuff
-		
-		player.getForwardVector(player.forward);
-		
-		float speed = player.getLinearVelocity().length();
-		
-		statsText.setText(speed + "m/s\ngear:" + player.curGear + "\naccel:" + player.curRPM+ "\n"); // the ui text
-		speedText.setText((int)Math.abs(player.getCurrentVehicleSpeedKmHour()) + " km/h");
-		
-		if (dynamicWorld) {
-			score.setText("Placed: "+worldB.getTotalPlaced());
-		}
-		
-		rpmArrow.setLocalRotation(Quaternion.IDENTITY);
-		rpmArrow.rotate(0, 0, FastMath.PI);
-		rpmArrow.rotate(0, 0, -player.curRPM*FastMath.HALF_PI/6000);
-		
-		Material m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		m.setColor("Color", new ColorRGBA(player.wn0.skid,player.wn0.skid,player.wn0.skid,1));
-		gripBox0.setMaterial(m);
-		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		m.setColor("Color", new ColorRGBA(player.wn1.skid,player.wn1.skid,player.wn1.skid,1));
-		gripBox1.setMaterial(m);
-		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		m.setColor("Color", new ColorRGBA(player.wn2.skid,player.wn2.skid,player.wn2.skid,1));
-		gripBox2.setMaterial(m);
-		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		m.setColor("Color", new ColorRGBA(player.wn3.skid,player.wn3.skid,player.wn3.skid,1));
-		gripBox3.setMaterial(m);
+		uiNode.update(tpf);
+		minimap.update(tpf);
 		
 		/////////////////////////////////
 		//camera
@@ -409,4 +310,13 @@ public class Rally extends SimpleApplication {
 		return g;
 	}
 	
+	public BitmapFont getFont() {
+		return guiFont;
+	}
+	public AppSettings getSettings() {
+		return settings;
+	}
+	public com.jme3.renderer.Camera getCam() {
+		return cam;
+	}
 }

@@ -2,16 +2,17 @@ package game;
 
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
+import com.jme3.renderer.Camera;
 import com.jme3.scene.CameraNode;
 import com.jme3.scene.control.CameraControl.ControlDirection;
 
-public class Camera extends CameraNode {
+public class MyCamera extends CameraNode {
 	
 	private MyVehicleControl p;
 	
 	private float damping;
 	
-	Camera(String name, com.jme3.renderer.Camera c, MyVehicleControl p) {
+	MyCamera(String name, Camera c, MyVehicleControl p) {
 		super(name, c);
 		this.p = p;
 		

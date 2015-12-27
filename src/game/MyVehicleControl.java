@@ -333,6 +333,10 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		} else { //no accel for you
 			accel = 0;
 		}
+		float totalaccel = accel;
+		accel = FastMath.clamp(accel, (float)-weight*car.MAX_LONG_GRIP, (float)weight*car.MAX_LONG_GRIP);
+		
+//		H.p(totalaccel + " " + accel);
 		
 		float ftractionz = -brakeCurrent*FastMath.sign(velocity.z);
 		if (wn2.contact && wn3.contact) {
