@@ -18,6 +18,12 @@ import com.jme3.system.AppSettings;
 
 public class UINode {
 
+	//TODO:
+	/* the code is terrible
+	 * the output for the track car is terrible
+	 * red near the redline?
+	 */
+	
 	Rally r; //want all the infos
 	
 	//hud stuff
@@ -43,8 +49,18 @@ public class UINode {
 	//speed squares
 	Geometry[] speed = new Geometry[9];
 	
+	//speedo numbers
+	float zeroAng = -FastMath.PI;
+	float maxAng = -FastMath.TWO_PI;
+	int maxAngRPM;
+	float redline;
+	
+	int centerx, centery = 64+22, radius = 118;
+	
 	UINode (Rally r) {
 		this.r = r;
+		this.redline = r.player.car.redline;
+		this.maxAngRPM = (int)FastMath.ceil(this.redline) + 1000;
 
 		BitmapFont guiFont = r.getFont();
 		AppSettings settings = r.getSettings();
@@ -80,20 +96,7 @@ public class UINode {
 		guiNode.attachChild(rpmArrow);
 		
 		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		m.setColor("Color", ColorRGBA.Red);
-		
-		redlineArrow = new Geometry("Redline", l);
-		redlineArrow.setLocalTranslation(width, -40+128, 0);
-		redlineArrow.scale(100);
-		redlineArrow.setMaterial(m);
-		
-		redlineArrow.setLocalRotation(Quaternion.IDENTITY);
-		redlineArrow.rotate(0, 0, FastMath.PI);
-		redlineArrow.rotate(0, 0, -r.player.car.redline*FastMath.HALF_PI/6000);
-		guiNode.attachChild(redlineArrow);
-		
-		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		m.setTexture("ColorMap", assetManager.loadTexture(dir+"speedo2.png"));
+		m.setTexture("ColorMap", assetManager.loadTexture(dir+"speedo3.png"));
 		m.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
 		
 		Quad qrpm = new Quad(128,128);
@@ -102,7 +105,12 @@ public class UINode {
 		rpmBackground.scale(2);
 		rpmBackground.setMaterial(m);
 		guiNode.attachChild(rpmBackground);
+
 		
+		///////////////////////////////////
+		//grip boxes
+		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+		m.setColor("Color", ColorRGBA.White);
 		
 		width = settings.getWidth() - 350;
 		Box b = new Box(10, 10, 1);
@@ -154,6 +162,56 @@ public class UINode {
 		speed[2].setMaterial(matset[0]);
 		guiNode.attachChild(speed[2]);
 		
+		makeSpeedo(r, guiNode);
+	}
+
+	private void makeSpeedo(Rally r2, Node guiNode) {
+		Node speedoNode = new Node("Speedo");
+		guiNode.attachChild(speedoNode);
+		
+		Line l = new Line(Vector3f.ZERO, Vector3f.UNIT_X.negate()); //inwards
+		l.setLineWidth(2);
+		
+		centerx = r2.getSettings().getWidth()-128;
+		
+		Material m = new Material(r.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+		m.setColor("Color", ColorRGBA.Black);
+		
+		final int MAX = 0; //3 notches inbetween
+		int linecount = MAX; //start with big notch
+		
+		int count = 0;
+		for (float i = zeroAng; i >= maxAng; i += (maxAng-zeroAng)*(1000/(float)maxAngRPM)) {
+	
+			Geometry line = new Geometry("RPM", l);
+			line.setLocalTranslation(centerx+FastMath.cos(i)*radius, centery+FastMath.sin(i)*radius, 0);
+			Quaternion q = new Quaternion();
+			q.fromAngleAxis(i, Vector3f.UNIT_Z);
+			line.setLocalRotation(q);
+			if (linecount != MAX) {
+				line.scale(10);
+				linecount++;
+			} else {
+				line.scale(20);
+				linecount = 0;
+				Quad quad = new Quad(20, 20);
+				Geometry g = new Geometry("speedoNumber"+count, quad);
+				g.setLocalTranslation((centerx-10)+FastMath.cos(i)*(radius-20), (centery-10)+FastMath.sin(i)*(radius-20), 0);
+				if (count < 10) {
+					g.setMaterial(matset[count]);
+				} else {
+					g.setMaterial(matset[count-10]); //TODO fix
+				}
+				if (count*1000 > redline) {
+					m = new Material(r.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+					m.setColor("Color", ColorRGBA.Red);
+				}
+				speedoNode.attachChild(g);
+				count++;
+			}
+			line.setMaterial(m);
+			speedoNode.attachChild(line);
+		}
 	}
 
 	public void update(float tpf) {
@@ -174,8 +232,8 @@ public class UINode {
 		}
 		
 		rpmArrow.setLocalRotation(Quaternion.IDENTITY);
-		rpmArrow.rotate(0, 0, FastMath.PI);
-		rpmArrow.rotate(0, 0, -player.curRPM*FastMath.HALF_PI/6000);
+		float angle = FastMath.interpolateLinear(player.curRPM/(float)maxAngRPM, zeroAng, maxAng);
+		rpmArrow.rotate(0, 0, angle);
 		
 		Material m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 		m.setColor("Color", new ColorRGBA(player.wn0.skid,player.wn0.skid,player.wn0.skid,1));

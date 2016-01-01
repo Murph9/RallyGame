@@ -55,9 +55,9 @@ public abstract class Car {
 	float wheel3Slip = 1.0f;
 	
 	//my physics grip constants
-	float DRAG = 2.5f; //squared component
-	float RESISTANCE = 30.0f; //linear component
-	float CA_R = -5f;
+	float DRAG = 1.5f; //squared component
+	float RESISTANCE = 15.0f; //linear component
+	float CA_R = -5.3f;
 	float CA_F = -5f;
 	float MAX_LAT_GRIP = 2.5f;
 	float MAX_LONG_GRIP = 2.5f;
@@ -69,7 +69,7 @@ public abstract class Car {
 	
 	boolean driveFront = false, driveRear = true; //this would be rear wheel drive
 	
-	//this one is from the notes, is a corevette c6 ~1999
+	//this one is from the notes, is a corvette c6 ~1999
 	float[] torque = new float[]{0,390,445,460,480,475,360,10}; //starts at 0 rpm, steps every 1000rpm (until done)
 		//TODO maybe 500 rpm splits (will get better peaks, good for testing grip)
 	
@@ -79,7 +79,7 @@ public abstract class Car {
 	
 	float transEffic = 0.75f; //TODO apparently 0.7 is common (power is lost to rotating things
 	float diffRatio = 3.42f; //helps set the total drive ratio
-	float[] gearRatios = new float[]{-2.9f,2.66f,1.78f,1.3f,1,0.74f,0.5f};; //reverse,gear1,gear2,g3,g4,g5,g6,...
+	float[] gearRatios = new float[]{-2.9f,3.40f,2.5f,1.8f,1,0.74f,0.5f};; //reverse,gear1,gear2,g3,g4,g5,g6,...
 	
 	//TODO i found a porsche boxter engine curve:
 //	float[] torque = new float[]{0,223,250,280,300,310,280,245,10};
@@ -142,6 +142,11 @@ class RallyCar extends Car {
 		
 		torque = new float[]{0,720,880,920,960,973,720,10}; //starts at 0 rpm, steps every 1000rpm (until done)
 		diffRatio = 4f;
+		
+		transEffic = 0.75f;
+		diffRatio = 3.42f;
+		gearRatios = new float[]{-2.9f,2.66f,1.78f,1.3f,1,0.74f,0.5f};
+		
 	}
 }
 

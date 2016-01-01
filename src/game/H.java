@@ -8,7 +8,7 @@ import com.jme3.math.Vector3f;
 public class H {
 
 	/**
-	 * Easier way of typing System.out.println();
+	 * Easier way of typing System.out.println(); -> H.p();
 	 * @param o The thing you wanted printed
 	 */
 	public static void p(Object o) {

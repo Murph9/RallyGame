@@ -83,10 +83,12 @@ public class Rally extends SimpleApplication {
 	
     
 	public static void main(String[] args) {
+		int fps = 30; //default is 60
+		
 		Rally app = new Rally();
 		AppSettings settings = new AppSettings(true);
 		settings.setResolution(1300,720);
-		settings.setFrameRate(60); //60
+		settings.setFrameRate(fps); //60 is default
 		settings.setUseJoysticks(true);
 		settings.setVSync(false);
 //		settings.setBitsPerPixel(16); //TODO why not?
@@ -103,7 +105,6 @@ public class Rally extends SimpleApplication {
 		bulletAppState = new BulletAppState();
 		stateManager.attach(bulletAppState);
 //		bulletAppState.setDebugEnabled(true);
-		
 		
 		createWorld();
 				
