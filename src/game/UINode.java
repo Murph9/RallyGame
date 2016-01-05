@@ -29,6 +29,7 @@ public class UINode {
 	//hud stuff
 	BitmapText statsText;
 	BitmapText score;
+	static BitmapText debugtext;
 	
 	Geometry rpmArrow;
 	Geometry redlineArrow;
@@ -75,11 +76,18 @@ public class UINode {
 		guiNode.attachChild(statsText);
 		
 		score = new BitmapText(guiFont, false);		  
-		score.setSize(guiFont.getCharSet().getRenderedSize());	  		// font size
-		score.setColor(ColorRGBA.White);								// font color
-		score.setText("");												// the text
+		score.setSize(guiFont.getCharSet().getRenderedSize());
+		score.setColor(ColorRGBA.White);
+		score.setText("");
 		score.setLocalTranslation(settings.getWidth()-200, settings.getHeight(), 0); // position
 		guiNode.attachChild(score);
+		
+		debugtext = new BitmapText(guiFont, false);		  
+		debugtext.setSize(guiFont.getCharSet().getRenderedSize());
+		debugtext.setColor(ColorRGBA.White);
+		debugtext.setText("Hey");
+		debugtext.setLocalTranslation(200, 30, 0); // position
+		guiNode.attachChild(debugtext);
 		
 		///////////////////////////////////////////////
 		Material m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -236,16 +244,16 @@ public class UINode {
 		rpmArrow.rotate(0, 0, angle);
 		
 		Material m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		m.setColor("Color", new ColorRGBA(player.wn0.skid,player.wn0.skid,player.wn0.skid,1));
+		m.setColor("Color", new ColorRGBA(player.wheel[0].skid,player.wheel[0].skid,player.wheel[0].skid,1));
 		gripBox0.setMaterial(m);
 		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		m.setColor("Color", new ColorRGBA(player.wn1.skid,player.wn1.skid,player.wn1.skid,1));
+		m.setColor("Color", new ColorRGBA(player.wheel[1].skid,player.wheel[1].skid,player.wheel[1].skid,1));
 		gripBox1.setMaterial(m);
 		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		m.setColor("Color", new ColorRGBA(player.wn2.skid,player.wn2.skid,player.wn2.skid,1));
+		m.setColor("Color", new ColorRGBA(player.wheel[2].skid,player.wheel[2].skid,player.wheel[2].skid,1));
 		gripBox2.setMaterial(m);
 		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		m.setColor("Color", new ColorRGBA(player.wn3.skid,player.wn3.skid,player.wn3.skid,1));
+		m.setColor("Color", new ColorRGBA(player.wheel[3].skid,player.wheel[3].skid,player.wheel[3].skid,1));
 		gripBox3.setMaterial(m);
 	}
 
@@ -266,4 +274,8 @@ public class UINode {
 		
 	}
 	
+	
+	public static void setDebugText(String text) {
+		debugtext.setText(text);
+	}
 }

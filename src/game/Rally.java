@@ -9,11 +9,9 @@ import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.font.BitmapFont;
-import com.jme3.font.BitmapText;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
-import com.jme3.material.RenderState.BlendMode;
 import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.*;
 import com.jme3.post.FilterPostProcessor;
@@ -22,8 +20,6 @@ import com.jme3.post.ssao.SSAOFilter;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.*;
 import com.jme3.scene.debug.Arrow;
-import com.jme3.scene.shape.Box;
-import com.jme3.scene.shape.Quad;
 import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.shadow.EdgeFilteringMode;
@@ -53,7 +49,7 @@ public class Rally extends SimpleApplication {
 	//car stuff
 	private Node carNode;
 	MyVehicleControl player;
-	private Car car = new NormalCar(); //set car here
+	private Car car = new TrackCar(); //set car here
 	
 	//gui stuff
 	UINode uiNode;
@@ -87,7 +83,7 @@ public class Rally extends SimpleApplication {
 		
 		Rally app = new Rally();
 		AppSettings settings = new AppSettings(true);
-		settings.setResolution(1300,720);
+		settings.setResolution(1028,728);
 		settings.setFrameRate(fps); //60 is default
 		settings.setUseJoysticks(true);
 		settings.setVSync(false);
@@ -107,7 +103,7 @@ public class Rally extends SimpleApplication {
 //		bulletAppState.setDebugEnabled(true);
 		
 		createWorld();
-				
+		
 		buildPlayer();
 		initCamera();
 
@@ -232,7 +228,7 @@ public class Rally extends SimpleApplication {
 		compoundShape.addChildShape(CollisionShapeFactory.createDynamicMeshShape(carmodel), new Vector3f(0,0,0));
 		
 		carNode = new Node("vehicleNode");
-		player = new MyVehicleControl(compoundShape, car, assetManager, carNode, this);
+		player = new MyVehicleControl(compoundShape, car, carNode, this);
 		
 		carNode.addControl(player);
 		carNode.attachChild(carmodel);

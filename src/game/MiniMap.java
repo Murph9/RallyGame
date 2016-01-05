@@ -3,7 +3,6 @@ package game;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.renderer.ViewPort;
-import com.jme3.system.AppSettings;
 
 public class MiniMap {
 

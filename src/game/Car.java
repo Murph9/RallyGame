@@ -19,6 +19,9 @@ public abstract class Car {
 	float height = 1f; //y size meter, roof to ground
 	float length = 3f; //z size meter, from front to back
 	
+	float steerAngle = 0.5f; //radians
+	float steerFactor = 10f; //TODO ??
+	
 	//wheels
 	Vector3f wheelDirection = new Vector3f(0, -1, 0); //vertical
 	Vector3f wheelAxle = new Vector3f(-1, 0, 0); //horizontal
@@ -26,10 +29,10 @@ public abstract class Car {
 	float wheelWidth = 0.15f; //m
 	float wheelRadius = 0.3f; //m
 	float wheelMass = 75; //kg
-	float MAX_STEERING = 0.5f; //radians
-	float rollFraction = 1; //1 = full into roll, 0 = no roll
+
+	float rollFraction = 0.5f; //1 = full into roll, 0 = no roll
 	
-	float[] slipRatioCurve = new float[]{0, 6000, 5990, 5000, 3000, 1000}; //TODO use (maybe?)
+//	float[] slipRatioCurve = new float[]{0, 6000, 5990, 5000, 3000, 1000}; //TODO use (maybe?)
 	
 	float w_xOff = 0.68f; //wheels x offset (side), meters
 	float w_yOff = 0f; //wheels y offest (height), meters
@@ -78,7 +81,7 @@ public abstract class Car {
 	float redline = 6500;
 	
 	float transEffic = 0.75f; //TODO apparently 0.7 is common (power is lost to rotating things
-	float diffRatio = 3.42f; //helps set the total drive ratio
+	float diffRatio = 5.0f; //helps set the total drive ratio
 	float[] gearRatios = new float[]{-2.9f,3.40f,2.5f,1.8f,1,0.74f,0.5f};; //reverse,gear1,gear2,g3,g4,g5,g6,...
 	
 	//TODO i found a porsche boxter engine curve:
@@ -88,6 +91,14 @@ public abstract class Car {
 class NormalCar extends Car {
 	//for using the default settings.
 	//probably shouldn't have a custom constructor
+	
+	NormalCar() {
+//		wheel0Slip = 0;
+//		wheel1Slip = 0;
+//		wheel2Slip = 0;
+//		wheel3Slip = 0;
+	}
+	
 }
 
 class RallyCar extends Car {
@@ -127,7 +138,7 @@ class RallyCar extends Car {
 		w_zOff = 1.1f;
 		
 		CA_F = -7;
-		CA_R = -6f;
+		CA_R = -6;
 		MAX_LAT_GRIP = 3f;
 		
 		stiffness  = 35.0f;
@@ -162,7 +173,7 @@ class TrackCar extends Car {
 		DRAG = 0.3f; //engine is stopping before these values...
 		RESISTANCE = 5;
 		
-		MAX_STEERING = 0.25f;
+		steerAngle = 0.25f;
 
 		CA_F = -7;
 		CA_R = -6.5f;

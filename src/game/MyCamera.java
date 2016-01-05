@@ -28,11 +28,18 @@ public class MyCamera extends CameraNode {
 	
 	//I may have just made the default camera again :(
 	public void myUpdate(float tpf) {
-		Vector3f wantPos = p.getPhysicsLocation().add(p.getPhysicsRotation().mult(p.car.CAM_OFFSET));
+		Vector3f wantPos = null;
+		Vector3f lookPos = new Vector3f(p.car.CAM_OFFSET);
+		if (p.ifLookBack) {
+			lookPos.x *= -1;
+			lookPos.z *= -1;
+		}
+		wantPos = p.getPhysicsLocation().add(p.getPhysicsRotation().mult(lookPos));
 		Vector3f curPos = getLocalTranslation();
 		
-		setLocalTranslation(FastMath.interpolateLinear(tpf*damping, curPos, wantPos));
+		Vector3f pos = FastMath.interpolateLinear(tpf*damping, curPos, wantPos);
 		
+		setLocalTranslation(pos);
 		lookAt(p.getPhysicsLocation().add(p.car.LOOK_AT), new Vector3f(0,1,0));
 	}
 
