@@ -1,7 +1,11 @@
 package game;
 
 
+import java.util.LinkedList;
+import java.util.List;
+
 import com.jme3.app.SimpleApplication;
+import com.jme3.asset.TextureKey;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CollisionShape;
@@ -24,11 +28,10 @@ import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.shadow.EdgeFilteringMode;
 import com.jme3.system.AppSettings;
+import com.jme3.texture.Texture;
 
 //Long TODO: 
-//Map maybe?
-//  http://wiki.jmonkeyengine.org/doku.php/jme3:advanced:multiple_camera_views
-
+//<empty>
 
 public class Rally extends SimpleApplication {
 	
@@ -38,7 +41,7 @@ public class Rally extends SimpleApplication {
 	//camera stuff
 	private MyCamera camNode;
 	
-	//World Model Enum stuff
+	//World Model
 	World world = World.duct; //Set map here
 	
 	boolean dynamicWorld = true;
@@ -49,7 +52,7 @@ public class Rally extends SimpleApplication {
 	//car stuff
 	private Node carNode;
 	MyVehicleControl player;
-	private Car car = new TrackCar(); //set car here
+	private Car car = new RallyCar(); //set car here
 	
 	//gui stuff
 	UINode uiNode;
@@ -84,10 +87,9 @@ public class Rally extends SimpleApplication {
 		Rally app = new Rally();
 		AppSettings settings = new AppSettings(true);
 		settings.setResolution(1028,728);
-		settings.setFrameRate(fps); //60 is default
+		settings.setFrameRate(fps);
 		settings.setUseJoysticks(true);
 		settings.setVSync(false);
-//		settings.setBitsPerPixel(16); //TODO why not?
 		
 		app.setSettings(settings);
 
@@ -146,11 +148,11 @@ public class Rally extends SimpleApplication {
 		}
 		//lights
 		AmbientLight al = new AmbientLight();
-		al.setColor(ColorRGBA.White.mult(0.4f));
+		al.setColor(ColorRGBA.White.mult(0.3f));
 		rootNode.addLight(al);
 
 		DirectionalLight sun = new DirectionalLight();
-		sun.setColor(ColorRGBA.White);
+		sun.setColor(new ColorRGBA(0.9f, 0.9f, 1f, 1f));
 		sun.setDirection(new Vector3f(-0.3f, -0.6f, -0.5f).normalizeLocal());
 		rootNode.addLight(sun);
 		
@@ -219,9 +221,22 @@ public class Rally extends SimpleApplication {
 	}
 	
 	private void buildPlayer() {
-		Spatial carmodel = assetManager.loadModel(car.carModel); //use it as car. for now
+		Node carmodel = (Node) assetManager.loadModel(car.carModel);
 		carmodel.setShadowMode(ShadowMode.CastAndReceive);
 		
+		TextureKey key = new TextureKey("Textures/Sky/Bright/BrightSky.dds", true);
+        key.setGenerateMips(true);
+        key.setAsCube(true);
+        final Texture tex = assetManager.loadTexture(key);
+        
+        for (Geometry g: getGeomList(carmodel)) {
+        	Material m = g.getMaterial();
+            m.setBoolean("UseMaterialColors",true);
+            m.setTexture("EnvMap", tex);
+            m.setVector3("FresnelParams", new Vector3f(0.05f, 0.18f, 0.11f));
+            g.setMaterial(m);
+        }
+        
 		//create a compound shape and attach CollisionShape for the car body at 0,1,0
 		//this shifts the effective center of mass of the BoxCollisionShape to 0,-1,0
 		CompoundCollisionShape compoundShape = new CompoundCollisionShape();
@@ -246,6 +261,45 @@ public class Rally extends SimpleApplication {
 			player.setPhysicsLocation(world.start);
 		}
 	}
+	
+	private List<Geometry> getGeomList(Node n) {
+		return RGeomList(n);
+	}
+	private List<Geometry> RGeomList(Node n) {
+		List<Geometry> listg = new LinkedList<Geometry>();
+		
+		List<Spatial> list = n.getChildren();
+		if (list.isEmpty()) return listg;
+		
+		for (Spatial sp: list) {
+        	if (sp instanceof Node) {
+        		listg.addAll(getGeomList((Node)sp));
+        	}
+        	if (sp instanceof Geometry) {
+        		listg.add((Geometry)sp);
+        	}
+        }
+		return listg;
+	}
+	
+	
+	private Geometry findGeom(Spatial spatial, String name) {
+        if (spatial instanceof Node) {
+            Node node = (Node) spatial;
+            for (int i = 0; i < node.getQuantity(); i++) {
+                Spatial child = node.getChild(i);
+                Geometry result = findGeom(child, name);
+                if (result != null) {
+                    return result;
+                }
+            }
+        } else if (spatial instanceof Geometry) {
+            if (spatial.getName().startsWith(name)) {
+                return (Geometry) spatial;
+            }
+        }
+        return null;
+    }
 	
 	private void connectJoyStick() {
 		myJoy = new Controller();

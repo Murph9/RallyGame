@@ -93,10 +93,10 @@ class NormalCar extends Car {
 	//probably shouldn't have a custom constructor
 	
 	NormalCar() {
-//		wheel0Slip = 0;
-//		wheel1Slip = 0;
-//		wheel2Slip = 0;
-//		wheel3Slip = 0;
+		wheel0Slip = 0;
+		wheel1Slip = 0;
+		wheel2Slip = 0;
+		wheel3Slip = 0;
 	}
 	
 }
@@ -143,9 +143,9 @@ class RallyCar extends Car {
 		
 		stiffness  = 35.0f;
 		restLength = 0.15f;
-		compValue  = 0.6f;
+		compValue  = 0.4f;
 		dampValue  = 0.7f;
-		rollFraction = 0.4f;
+		rollFraction = 0.6f;
 		
 		susCompression = compValue * 2 * FastMath.sqrt(stiffness);
 		susDamping = dampValue * 2 * FastMath.sqrt(stiffness);
@@ -168,7 +168,7 @@ class TrackCar extends Car {
 		wheelModel = "assets/f1_wheel.blend";
 		CAM_OFFSET = new Vector3f(0,2.5f,-6);
 		
-		mass = 1000;
+		mass = 900;
 		
 		DRAG = 0.3f; //engine is stopping before these values...
 		RESISTANCE = 5;
@@ -198,7 +198,7 @@ class TrackCar extends Car {
 		
 		//TODO found via internet
 		torque = new float[]{0,300,500,500,550,608,595,580,560,540,525,500,440,400,350,0};
-		gearDown = 6000;
+		gearDown = 9000;
 		gearUp = 13500;
 		redline = 15000;
 		

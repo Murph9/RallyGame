@@ -74,7 +74,7 @@ public class WorldBuilder extends Node {
 		
         Material matfloor = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         matfloor.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
-        matfloor.setColor("Color", ColorRGBA.Red);
+        matfloor.setColor("Color", ColorRGBA.Green);
         
         Box start = new Box(10, 0.25f, 10); //Something to spawn on (or in hint hint)
         Geometry startGeometry = new Geometry("Starting Box", start);
