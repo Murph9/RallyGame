@@ -248,6 +248,12 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 	}
 	//end controls
 	
+	
+	//TODO Things taken out:
+	//- handbrake
+	//- the graphical grip values
+	
+	
 	////////////////////////////////////////////////////
 	
 	private void specialPhysics(float tpf) {
@@ -282,105 +288,79 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 			slipanglefront *= velocity.z*velocity.z/4; //4 because 2*2
 			slipanglerear *= velocity.z*velocity.z/4;
 		}
+
+		//////////////////////////////////////////////////
+		//'Wheel'less forces (TODO braking in wheels)
+		float braking = 0;
+		if (wheel[0].contact || wheel[1].contact || wheel[2].contact || wheel[3].contact) {
+			braking = -brakeCurrent*FastMath.sign(velocity.z);
+		}
+		Vector3f brakeVec = new Vector3f(w_velocity.normalize()).mult(braking);
+		
+		//linear resistance and quadratic drag
+		float dragz = (float)(-(car.RESISTANCE * velocity.z + car.DRAG * velocity.z * Math.abs(velocity.z)));
+		float dragx = (float)(-(car.RESISTANCE * velocity.x + car.DRAG * velocity.x * Math.abs(velocity.x)));
+		float dragy = (float)(-(car.RESISTANCE * velocity.y + car.DRAG * velocity.y * Math.abs(velocity.y)));
+
+		Vector3f totalNeutral = new Vector3f(dragx, dragy, dragz);
+		applyCentralForce(w_angle.mult(totalNeutral).add(brakeVec)); //non wheel based forces on the car
 		
 		//////////////////////////////////
-		double weight = car.mass*(-getGravity().y/1000)*0.25; //0.25 because its per wheel
+		double weightperwheel = car.mass*(-getGravity().y/1000)*0.25; //0.25 because its per wheel
 		
-		Vector3f force_lat_front_left = new Vector3f();
-		Vector3f force_lat_front_right = new Vector3f();
-		Vector3f force_lat_rear_left = new Vector3f();
-		Vector3f force_lat_rear_right = new Vector3f();
+		Vector3f fl = new Vector3f(); //front left
+		Vector3f fr = new Vector3f(); //front right
+		Vector3f rl = new Vector3f(); //rear  left
+		Vector3f rr = new Vector3f(); //rear  right
 		
-		//calculate off of the slip angle
-		if (wheel[0].contact) { //front left
-			force_lat_front_left.x = (float)(slipanglefront*car.CA_F);
-			force_lat_front_left.x = FastMath.clamp(force_lat_front_left.x, -car.MAX_LAT_GRIP, car.MAX_LAT_GRIP); //TODO clamp later
-			wheel[0].skid = Math.abs(force_lat_front_left.x)/car.MAX_LAT_GRIP;
-			force_lat_front_left.x *= weight;
-		} else { wheel[0].skid = 0; }
-		if (wheel[1].contact) { //front right
-			force_lat_front_right.x = (float)(slipanglefront*car.CA_F);
-			force_lat_front_right.x = FastMath.clamp(force_lat_front_right.x, -car.MAX_LAT_GRIP, car.MAX_LAT_GRIP);
-			wheel[1].skid = Math.abs(force_lat_front_right.x)/car.MAX_LAT_GRIP;
-			force_lat_front_right.x *= weight;
-		} else { wheel[1].skid = 0; }
+		//latitudinal forces that are calculated off the slip angle
+		fl.x = fr.x = (float)(slipanglefront * car.CA_F*weightperwheel);
+		rl.x = rr.x = (float)(slipanglerear * car.CA_R*weightperwheel);
 
-		if (wheel[2].contact) { //rear left
-			force_lat_rear_left.x = (float)(slipanglerear*car.CA_R);
-			force_lat_rear_left.x = FastMath.clamp(force_lat_rear_left.x, -car.MAX_LAT_GRIP, car.MAX_LAT_GRIP);
-			wheel[2].skid = Math.abs(force_lat_rear_left.x)/car.MAX_LAT_GRIP;
-			force_lat_rear_left.x *= weight;
-			if (ifHandbrake) force_lat_rear_left.x *= 0.5f;
-		} else { wheel[2].skid = 0; }
-		if (wheel[3].contact) { //rear right
-			force_lat_rear_right.x = (float)(slipanglerear*car.CA_R);
-			force_lat_rear_right.x = FastMath.clamp(force_lat_rear_right.x, -car.MAX_LAT_GRIP, car.MAX_LAT_GRIP);
-			wheel[3].skid = Math.abs(force_lat_rear_right.x)/car.MAX_LAT_GRIP;
-			force_lat_rear_right.x *= weight;
-			if (ifHandbrake) force_lat_rear_right.x *= 0.5f;
-		} else { wheel[3].skid = 0; }
-
-		
 		//////////////////////////////////////
 		//longitudinal forces
-		float accel = getEngineBrakeWheelForce(velocity.z)*accelCurrent;
+		float accel = 0;
 		if (ifAccel) {
-//			accel = car.MAX_ACCEL; //remove for 'geared' accel
-		} else { //no accel for you
-			accel = 0;
+			accel = getEngineWheelForce(velocity.z)*accelCurrent;
+//			totalaccel = car.MAX_ACCEL; //remove for 'geared' accel
+//			totalaccel = FastMath.clamp(accel, (float)-weightperwheel*car.MAX_GRIP, (float)weightperwheel*car.MAX_GRIP);
 		}
-//		float totalaccel = accel;
-		accel = FastMath.clamp(accel, (float)-weight*car.MAX_LONG_GRIP, (float)weight*car.MAX_LONG_GRIP);
-//		H.pUI("Excess accel"+(totalaccel-accel));
-		
-		float ftractionz = -brakeCurrent*FastMath.sign(velocity.z);
-		if (wheel[2].contact && wheel[3].contact) {
-			ftractionz += accel;
+
+		accel /= 2; //because 2 wheels an axle
+		if (car.driveFront && car.driveRear) { 
+			accel /= 2; //if its split up between the front and rear axle
 		}
-		
-		//linear resistance and quadratic drag here
-		float dragy = (float)(-(car.RESISTANCE * velocity.z + car.DRAG * velocity.z * Math.abs(velocity.z)));
-		float dragx = (float)(-(car.RESISTANCE * velocity.x + car.DRAG * velocity.x * Math.abs(velocity.x))); 
-
-		////////////////////////////////////
-		//put them into global and 4 x direction forces:
-		Vector3f totalNeutral = new Vector3f(dragx,0,dragy);
-		applyCentralForce(w_angle.mult(totalNeutral)); //non wheel based forces on the car
-
-		ftractionz /= 2; //because 2 wheels an axle
-		if (car.driveFront && car.driveRear) 
-			ftractionz /= 2; //if its split up between the front and rear axle
-		
-		//    wheel[0, 1, 2, 3]
-		float flz, frz, rlz, rrz;
-		
+			
 		if (car.driveFront) {
-			flz = FastMath.sin(steeringCurrent)*force_lat_front_left.z + ftractionz;
-			frz = FastMath.sin(steeringCurrent)*force_lat_front_right.z + ftractionz;
-		} else {
-			flz = FastMath.sin(steeringCurrent)*force_lat_front_left.z;
-			frz = FastMath.sin(steeringCurrent)*force_lat_front_right.z;
+			fl.z = accel;
+			fr.z = accel;
 		}
+		fl.x = FastMath.cos(steeringCurrent)*fl.x;
+		fr.x = FastMath.cos(steeringCurrent)*fr.x;
+		
 		if (car.driveRear) {
-			rlz = force_lat_rear_left.z + ftractionz;
-			rrz = force_lat_rear_right.z + ftractionz;
-		} else {
-			rlz = force_lat_rear_left.z;
-			rrz = force_lat_rear_right.z;
+			rl.z = accel;
+			rr.z = accel;
 		}
 		
-		Vector3f frontl = w_angle.mult(new Vector3f(FastMath.cos(steeringCurrent)*force_lat_front_left.x, 0, flz));
-		Vector3f frontr = w_angle.mult(new Vector3f(FastMath.cos(steeringCurrent)*force_lat_front_right.x, 0, frz));
-		Vector3f rearl = w_angle.mult(new Vector3f(force_lat_rear_left.x, 0, rlz));
-		Vector3f rearr = w_angle.mult(new Vector3f(force_lat_rear_right.x, 0, rrz));
+		Vector3f wfl = new Vector3f(H.clamp(fl,weightperwheel*car.MAX_GRIP));
+		Vector3f wfr = new Vector3f(H.clamp(fr,weightperwheel*car.MAX_GRIP));
+		Vector3f wrl = new Vector3f(H.clamp(rl,weightperwheel*car.MAX_GRIP));
+		Vector3f wrr = new Vector3f(H.clamp(rr,weightperwheel*car.MAX_GRIP));
 		
-		if (wheel[0].contact) applyForce(frontl, w_angle.mult(wheel[0].getForceLocation(car.wheelRadius, car.rollFraction))); //apply forces
-		if (wheel[1].contact) applyForce(frontr, w_angle.mult(wheel[1].getForceLocation(car.wheelRadius, car.rollFraction)));
-		if (wheel[2].contact) applyForce(rearl, w_angle.mult(wheel[2].getForceLocation(car.wheelRadius, car.rollFraction)));
-		if (wheel[3].contact) applyForce(rearr, w_angle.mult(wheel[3].getForceLocation(car.wheelRadius, car.rollFraction)));
+		//and finally apply forces
+		if (wheel[0].contact) 
+			applyForce(w_angle.mult(wfl), w_angle.mult(wheel[0].getForceLocation(car.wheelRadius, car.rollFraction)));
+		if (wheel[1].contact) 
+			applyForce(w_angle.mult(wfr), w_angle.mult(wheel[1].getForceLocation(car.wheelRadius, car.rollFraction)));
+		if (wheel[2].contact) 
+			applyForce(w_angle.mult(wrl), w_angle.mult(wheel[2].getForceLocation(car.wheelRadius, car.rollFraction)));
+		if (wheel[3].contact) 
+			applyForce(w_angle.mult(wrr), w_angle.mult(wheel[3].getForceLocation(car.wheelRadius, car.rollFraction)));
+		
 	}
 	
-	private float getEngineBrakeWheelForce(float speedForward) {
+	private float getEngineWheelForce(float speedForward) {
 		float wheelrot = speedForward/(2*FastMath.PI*car.wheelRadius); //w = v/(2*Pi*r) -> rad/sec
 		
 		float curGearRatio = car.gearRatios[curGear];//0 = reverse, >= 1 normal make sense

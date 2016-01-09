@@ -62,8 +62,9 @@ public abstract class Car {
 	float RESISTANCE = 15.0f; //linear component
 	float CA_R = -5.3f;
 	float CA_F = -5f;
-	float MAX_LAT_GRIP = 2.5f;
-	float MAX_LONG_GRIP = 2.5f;
+	float MAX_GRIP = 2.5f;
+//	float MAX_LAT_GRIP = 2.5f;
+//	float MAX_LONG_GRIP = 2.5f;
 	
 	//other (debug)
 	float MAX_ACCEL = 9000; //TODO take it out?
@@ -139,7 +140,8 @@ class RallyCar extends Car {
 		
 		CA_F = -7;
 		CA_R = -6;
-		MAX_LAT_GRIP = 3f;
+		MAX_GRIP = 3f;
+//		MAX_LAT_GRIP = 3f;
 		
 		stiffness  = 35.0f;
 		restLength = 0.15f;
@@ -177,7 +179,8 @@ class TrackCar extends Car {
 
 		CA_F = -7;
 		CA_R = -6.5f;
-		MAX_LAT_GRIP = 3f;
+		MAX_GRIP = 3f;
+//		MAX_LAT_GRIP = 3f;
 		
 		stiffness  = 200.0f;
 		restLength = 0.05f;
