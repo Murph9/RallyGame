@@ -21,7 +21,7 @@ public enum WPSimple2 implements WP {
 	HILL_DOWN("hill_down.blend", new Vector3f(4,-0.5f,0), WorldBuilder.STRIAGHT),
 	;
 	
-	private static String folder = "wbsimple2/";
+	private static String dir = "assets/wbsimple2/";
 	
 	String name;
 	Vector3f newPos; //what the piece does to the track
@@ -33,7 +33,7 @@ public enum WPSimple2 implements WP {
 		this.newRot = g;
 	}
 	public float getScale() { return 25; }
-	public String getName() { return folder+name; }
+	public String getName() { return dir+name; }
 	public Vector3f getNewPos() { return new Vector3f(newPos); }
 	public Quaternion getNewAngle() { return new Quaternion(newRot); }
 }

@@ -30,7 +30,7 @@ import com.jme3.shadow.EdgeFilteringMode;
 import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
 
-//Long TODO: 
+//Long TODO's: 
 //<empty>
 
 public class Rally extends SimpleApplication {

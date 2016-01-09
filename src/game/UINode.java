@@ -42,7 +42,7 @@ public class UINode {
 	Geometry gripBox3;
 	
 	//texture location
-	String dir = "assets/digital/";
+	final String dir = "assets/digital/";
 	
 	//texture set
 	Material[] matset = new Material[10];

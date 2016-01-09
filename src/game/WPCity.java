@@ -18,7 +18,7 @@ public enum WPCity implements WP {
 	
 	;
 	
-	private static String folder = "wbcity/";
+	private static String dir = "assets/wbcity/";
 	
 	String name;
 	Vector3f newPos; //what the piece does to the next track
@@ -30,7 +30,7 @@ public enum WPCity implements WP {
 		this.newRot = g;
 	}
 	public float getScale() { return 1; }
-	public String getName() { return folder+name; }
+	public String getName() { return dir+name; }
 	public Vector3f getNewPos() { return new Vector3f(newPos); }
 	public Quaternion getNewAngle() { return new Quaternion(newRot); }
 }

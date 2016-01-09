@@ -15,7 +15,7 @@ public enum WPFloating implements WP {
 	RIGHT_CURVE("right.blend", new Vector3f(21.21f,0,8.79f), new Quaternion(0, -0.38268346f, 0, 0.9238795f)),
 	;
 	
-	private static String folder = "wbfloating/";
+	private static String dir = "assets/wbfloating/";
 	
 	String name;
 	Vector3f newPos; //what the piece does to the track
@@ -27,7 +27,7 @@ public enum WPFloating implements WP {
 		this.newRot = g;
 	}
 	public float getScale() { return 1; }
-	public String getName() { return folder+name; }
+	public String getName() { return dir+name; }
 	public Vector3f getNewPos() { return new Vector3f(newPos); }
 	public Quaternion getNewAngle() { return new Quaternion(newRot); }
 }

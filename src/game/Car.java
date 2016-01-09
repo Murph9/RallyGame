@@ -5,12 +5,14 @@ import com.jme3.math.Vector3f;
 
 public abstract class Car {
 	
+	static final String dir = "assets/models/";
+	
 	//model strings (can be xx.obj or xx.blend)
-	String carModel = "assets/car4.obj";
-	String wheelModel = "assets/wheel.obj";
+	String carModel = dir+"car4.obj";
+	String wheelModel = dir+"wheel.obj";
 	
 	//camera options
-	Vector3f LOOK_AT = new Vector3f(0,1f,0); //top of car usually
+	Vector3f LOOK_AT = new Vector3f(0,0.5f,0); //top of car usually
 	Vector3f CAM_OFFSET = new Vector3f(0,3,-7); //where the camera is
 	
 	//physical things
@@ -73,7 +75,7 @@ public abstract class Car {
 	
 	boolean driveFront = false, driveRear = true; //this would be rear wheel drive
 	
-	//this one is from the notes, is a corvette c6 ~1999
+	//this one is from the notes, is a ~1999 corvette c6 
 	float[] torque = new float[]{0,390,445,460,480,475,360,10}; //starts at 0 rpm, steps every 1000rpm (until done)
 		//TODO maybe 500 rpm splits (will get better peaks, good for testing grip)
 	
@@ -105,8 +107,8 @@ class NormalCar extends Car {
 class RallyCar extends Car {
 	
 	RallyCar() {
-		carModel = "assets/car4raid_1.obj"; //...well it is now?
-		wheelModel = "assets/wheelraid1.obj";
+		carModel = dir+"car4raid_1.obj"; //...well it is now?
+		wheelModel = dir+"wheelraid1.obj";
 		
 		/* just from looking at top gear rally:
 		 * - oversteers easily, and feels light,
@@ -166,8 +168,8 @@ class RallyCar extends Car {
 class TrackCar extends Car {
 	
 	TrackCar() {
-		carModel = "assets/f1.blend";
-		wheelModel = "assets/f1_wheel.blend";
+		carModel = dir+"f1.blend";
+		wheelModel = dir+"f1_wheel.blend";
 		CAM_OFFSET = new Vector3f(0,2.5f,-6);
 		
 		mass = 900;
