@@ -4,6 +4,11 @@ package game;
 import java.util.LinkedList;
 import java.util.List;
 
+import world.WP;
+import world.WPFloating;
+import world.World;
+import world.WorldBuilder;
+
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.TextureKey;
 import com.jme3.bullet.BulletAppState;
@@ -33,6 +38,12 @@ import com.jme3.texture.Texture;
 //Long TODO's: 
 //<empty>
 
+//Bugs TODO
+//braking makes you go reversed
+//maps a little weird still, probably need to remove some of the postprocessing stuff
+ //tried that and got no where, they are connected for some reason
+//i broke skidmarks again, will need to fix that
+
 public class Rally extends SimpleApplication {
 	
 	//boiler stuff
@@ -44,7 +55,7 @@ public class Rally extends SimpleApplication {
 	//World Model
 	World world = World.duct; //Set map here
 	
-	boolean dynamicWorld = true;
+	boolean dynamicWorld = false;
 	WP[] type = WPFloating.values();
 	boolean needsMaterial = false;
 	WorldBuilder worldB;
@@ -61,7 +72,7 @@ public class Rally extends SimpleApplication {
 	//debug stuff
 	Node arrowNode;
 	int frameCount = 0;
-	boolean ifDebug = false;
+	public boolean ifDebug = false;
 	
 	private double totaltime = 0;
 	
@@ -82,7 +93,7 @@ public class Rally extends SimpleApplication {
 	
     
 	public static void main(String[] args) {
-		int fps = 30; //default is 60
+		int fps = 60; //default is 60
 		
 		Rally app = new Rally();
 		AppSettings settings = new AppSettings(true);
@@ -107,11 +118,11 @@ public class Rally extends SimpleApplication {
 		createWorld();
 		
 		buildPlayer();
-		initCamera();
-
-		connectJoyStick();
+		initCameras();
 		
 		setupGUI();
+		
+		connectJoyStick();
 		
 		//Just getting numbers
 		Quaternion q = new Quaternion();
@@ -120,11 +131,13 @@ public class Rally extends SimpleApplication {
 	}
 
 	private void createWorld() {
+		minimap = new MiniMap(this);
+		
 		if (dynamicWorld) {
 			worldB = new WorldBuilder(this, assetManager, type, needsMaterial);
 			rootNode.attachChild(worldB);
+			
 		} else {
-		
 			Material mat = new Material(assetManager, "Common/MatDefs/Misc/ShowNormals.j3md");
 			mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 			
@@ -146,6 +159,7 @@ public class Rally extends SimpleApplication {
 				addWorldModel(worldModel);
 			}
 		}
+		
 		//lights
 		AmbientLight al = new AmbientLight();
 		al.setColor(ColorRGBA.White.mult(0.3f));
@@ -169,7 +183,6 @@ public class Rally extends SimpleApplication {
 	        dlsr.setLambda(0.55f);
 	        dlsr.setShadowIntensity(0.6f);
 	        dlsr.setEdgeFilteringMode(EdgeFilteringMode.Nearest);
-//	        dlsr.displayFrustum();
 	        viewPort.addProcessor(dlsr);
 	
 	        dlsf = new DirectionalLightShadowFilter(assetManager, 2048, 3);
@@ -213,10 +226,10 @@ public class Rally extends SimpleApplication {
 		rootNode.attachChild(s);
 	}
 
-	private void initCamera() {
+	private void initCameras() {
 		flyCam.setEnabled(false);
 		
-		camNode = new MyCamera("Cam Node", cam, player);
+		camNode = new MyCamera("Cam Node", cam, player, this);
 		rootNode.attachChild(camNode);
 	}
 	
@@ -282,25 +295,6 @@ public class Rally extends SimpleApplication {
 		return listg;
 	}
 	
-	
-	private Geometry findGeom(Spatial spatial, String name) {
-        if (spatial instanceof Node) {
-            Node node = (Node) spatial;
-            for (int i = 0; i < node.getQuantity(); i++) {
-                Spatial child = node.getChild(i);
-                Geometry result = findGeom(child, name);
-                if (result != null) {
-                    return result;
-                }
-            }
-        } else if (spatial instanceof Geometry) {
-            if (spatial.getName().startsWith(name)) {
-                return (Geometry) spatial;
-            }
-        }
-        return null;
-    }
-	
 	private void connectJoyStick() {
 		myJoy = new Controller();
 		
@@ -309,7 +303,6 @@ public class Rally extends SimpleApplication {
 	
 	private void setupGUI() {
 		uiNode = new UINode(this);
-		minimap = new MiniMap(this);
 	}
 	
 	public PhysicsSpace getPhysicsSpace(){

@@ -8,27 +8,23 @@ public class MiniMap {
 
 	Rally r;
 	Camera cam;
+	ViewPort view;
 	
-	final float height = 150;
+	final float height = 100;
 	
 	MiniMap(Rally r) {
 		this.r = r;
 		
-//		AppSettings set = r.getSettings();
-		
-		cam = r.getCam().clone();
-//		cam = new Camera(set.getWidth(),set.getHeight());
-//		cam.setParallelProjection(true); //TODO
-//		cam.setFrustum(0, 5, -20, 20, -20, 20);
+		cam = r.getCam().clone(); //TODO this just copies the current camera, causes weird water things
 		
 		cam.setViewPort(0.05f, 0.15f, 0.05f, 0.2f);
 		cam.setLocation(new Vector3f(0, height, 0));
-		cam.lookAt(r.player.getPhysicsLocation(), new Vector3f(0,1,0)); //look at car
 		
-		ViewPort miniview = r.getRenderManager().createMainView("Mini Map", cam);
-		miniview.setClearFlags(true, true, true);
-		miniview.attachScene(r.getRootNode());
-		miniview.clearProcessors(); //no need for shadows on map
+		
+		view = r.getRenderManager().createMainView("MiniMap", cam);
+		view.setClearFlags(true, true, true);
+
+		view.attachScene(r.getRootNode());
 	}
 	
 	public void update(float tpf) {
@@ -37,6 +33,5 @@ public class MiniMap {
 		
 		pos.addLocal(0,height,0);
 		cam.setLocation(pos);
-		
 	}
 }

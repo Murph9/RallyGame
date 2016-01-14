@@ -9,12 +9,14 @@ import com.jme3.scene.control.CameraControl.ControlDirection;
 public class MyCamera extends CameraNode {
 	
 	private MyVehicleControl p;
+	Rally r;
 	
 	private float damping;
 	
-	MyCamera(String name, Camera c, MyVehicleControl p) {
+	MyCamera(String name, Camera c, MyVehicleControl p, Rally r) {
 		super(name, c);
 		this.p = p;
+		this.r = r;
 		
 		this.damping = 30;
 		
@@ -41,6 +43,7 @@ public class MyCamera extends CameraNode {
 		
 		setLocalTranslation(pos);
 		lookAt(p.getPhysicsLocation().add(p.car.LOOK_AT), new Vector3f(0,1,0));
+		
 	}
 
 }
