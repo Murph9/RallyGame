@@ -25,7 +25,7 @@ public class Controller {
 	}
 
 	public void setAxisValue(Joystick joystick, JoystickAxis axis, float value) {
-//		System.out.println( "Axis:" + axis.getName() + "=" + value );
+		H.p( "Axis:" + axis.getName() + "=" + value );
 		if (!toControl.containsKey(joystick)) {
 			toControl.put(joystick, new PlayerControl());
 		}
@@ -102,6 +102,7 @@ public class Controller {
 		Map<String, Boolean> buttons = new HashMap<String, Boolean>();
 
 		PlayerControl() {
+			//These are setup for my x-box controller
 			// A "standard" mapping... fits a majority of my game pads
 	        buttons.put(JoystickButton.BUTTON_3, new Boolean(false));
 	        buttons.put(JoystickButton.BUTTON_1, new Boolean(false));

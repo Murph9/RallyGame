@@ -1,10 +1,12 @@
 package game;
 
 import com.jme3.effect.ParticleEmitter;
+import com.jme3.effect.ParticleMesh;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;
 import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
@@ -34,18 +36,54 @@ public class MyWheelNode extends Node {
 		super(name);
 		this.mvc = mvc;
 		this.num = num;
-		this.last = new Vector3f(new Vector3f(0,0,0));
+		this.last = new Vector3f(0,0,0);
 		
-		this.setShadowMode(ShadowMode.CastAndReceive);
+		this.smoke = initSmoke();
+		attachChild(this.smoke); //TODO fix rotate with tyre
+		
+		this.setShadowMode(ShadowMode.Off);
+	}
+	
+	public void update(float tpf) {
+		if (skid <= 0.1 && contact) {
+			smoke.setEnabled(true);
+		} else {
+			smoke.setEnabled(false);
+		}
+		
+		//TODO should probably do something more than this..
+	}
+	
+	private ParticleEmitter initSmoke() {
+		ParticleEmitter smoke = new ParticleEmitter("Emitter", ParticleMesh.Type.Triangle, 40);
+		smoke.setParticlesPerSec(10);
+		smoke.setInWorldSpace(true);
+		smoke.setRotateSpeed(FastMath.QUARTER_PI);
+		
+		smoke.setImagesX(15); //the smoke image is 15x * 1y (y is already the default of 1)
+		smoke.setEndColor(new ColorRGBA(0.7f, 0.7f, 0.7f, 0.2f));
+		smoke.setStartColor(new ColorRGBA(0.7f, 0.7f, 0.7f, 0.7f));
+
+		smoke.setStartSize(0.4f);
+		smoke.setEndSize(10f);
+		
+		//TODO to use these move the emitter to something that doesn't rotate
+//		smoke.getParticleInfluencer().setInitialVelocity(new Vector3f(0,9,0));
+//		smoke.getParticleInfluencer().setVelocityVariation(0.05f);
+
+	    Material emit = new Material(mvc.assetManager, "Common/MatDefs/Misc/Particle.j3md");
+	    emit.setTexture("Texture", mvc.assetManager.loadTexture("Effects/Smoke/Smoke.png"));
+	    smoke.setMaterial(emit);
+    	return smoke;
 	}
 
-	public Vector3f getForceLocation(float wheelRadius, float rollInfluence) {
+	public Vector3f getContactPoint(float wheelRadius, float rollInfluence) {
 		return getLocalTranslation().add(0,-wheelRadius*rollInfluence,0);
 	}
 	
 	public void addSkidLine() {
 		if (contact) {
-			addSkidLine(last, mvc.getWheel(num).getCollisionLocation(), skid);
+			addSkidLine(last, mvc.getWheel(num).getCollisionLocation(), (1-skid));
 			last = mvc.getWheel(num).getCollisionLocation();
 		} else {
 			last = new Vector3f(0,0,0);

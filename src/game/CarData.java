@@ -3,7 +3,7 @@ package game;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 
-public abstract class Car {
+public abstract class CarData {
 	
 	static final String dir = "assets/models/";
 	
@@ -34,8 +34,6 @@ public abstract class Car {
 
 	float rollFraction = 0.5f; //1 = full into roll, 0 = no roll
 	
-//	float[] slipRatioCurve = new float[]{0, 6000, 5990, 5000, 3000, 1000}; //TODO use (maybe?)
-	
 	float w_xOff = 0.68f; //wheels x offset (side), meters
 	float w_yOff = 0f; //wheels y offest (height), meters
 	float w_zOff = 1.1f; //wheels z offset (front and back), meters
@@ -52,22 +50,17 @@ public abstract class Car {
 	float maxSusForce = 25*mass; //TODO '25' is a random number.
 	float maxSusTravel = 50;
 	
-	//grip constants
-	//my physics works with 0.01f, but feels better with: 1.0f
-	float wheel0Slip = 1.0f;
-	float wheel1Slip = 1.0f;
-	float wheel2Slip = 1.0f;
-	float wheel3Slip = 1.0f;
+	//jme3 grip constants
+	//my physics works with 0f, but feels tighter with: 1.0f
+	float wheel0Slip = 0;
+	float wheel1Slip = 0;
+	float wheel2Slip = 0;
+	float wheel3Slip = 0;
 	
-	//my physics grip constants
+	//drag constants
 	float DRAG = 1.5f; //squared component
 	float RESISTANCE = 15.0f; //linear component
-	float CA_R = -5.3f;
-	float CA_F = -5f;
-	float MAX_GRIP = 2.5f;
-//	float MAX_LAT_GRIP = 2.5f;
-//	float MAX_LONG_GRIP = 2.5f;
-	
+
 	//other (debug)
 	float MAX_ACCEL = 9000; //TODO take it out?
 	float MAX_BRAKE = 10000;
@@ -89,22 +82,39 @@ public abstract class Car {
 	
 	//TODO i found a porsche boxter engine curve:
 //	float[] torque = new float[]{0,223,250,280,300,310,280,245,10};
+
+	/////////////////////////////////
+	//grip constants
+	CarWheelData wheeldata = new NormalWheel();
+	
+	//old constants from simpler traction
+	float CA_R = -5.3f;
+	float CA_F = -5f;
+	float MAX_GRIP = 2.5f;
+
 }
 
-class NormalCar extends Car {
+class NormalCar extends CarData {
 	//for using the default settings.
 	//probably shouldn't have a custom constructor
 	
-	NormalCar() {
-		wheel0Slip = 0;
-		wheel1Slip = 0;
-		wheel2Slip = 0;
-		wheel3Slip = 0;
+	NormalCar() {}
+	
+}
+
+class NormalFCar extends CarData {
+	//for using the default settings.
+	//probably shouldn't have a custom constructor
+	
+	NormalFCar() {
+		driveFront = true;
+		driveRear = false;
 	}
 	
 }
 
-class RallyCar extends Car {
+
+class RallyCar extends CarData {
 	
 	RallyCar() {
 		carModel = dir+"car4raid_1.obj"; //...well it is now?
@@ -165,7 +175,7 @@ class RallyCar extends Car {
 	}
 }
 
-class TrackCar extends Car {
+class TrackCar extends CarData {
 	
 	TrackCar() {
 		carModel = dir+"f1.blend";
@@ -182,7 +192,6 @@ class TrackCar extends Car {
 		CA_F = -7;
 		CA_R = -6.5f;
 		MAX_GRIP = 3f;
-//		MAX_LAT_GRIP = 3f;
 		
 		stiffness  = 200.0f;
 		restLength = 0.05f;

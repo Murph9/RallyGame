@@ -18,11 +18,11 @@ public class H {
 		UINode.setDebugText(o.toString());
 	}
 	
-	public static Vector3f clamp(Vector3f v, double value) {
+	public static Vector3f clamp(Vector3f v, float value) {
 		float length = v.length();
 		Vector3f newV = new Vector3f(v);
 		if (length > Math.abs(value)) {
-			newV.normalizeLocal().multLocal((float)value);
+			newV.normalizeLocal().multLocal(value);
 		}
 		return newV;
 	}
@@ -54,5 +54,24 @@ public class H {
 	
 	public static float cylinderInertia(float r, float mass) {
 		return mass*r*r/2;
+	}
+	
+	public static String roundDecimal(float num, int places) {
+		if (places == 0) {
+			return Integer.toString((int)num);
+		}
+		
+		String s = Float.toString(num);
+		String[] sa = s.split("\\.");
+		
+		if (sa.length > 1) {
+			places = Math.min(sa[1].length(), places);
+			return sa[0]+"."+sa[1].substring(0, places);
+		} else {
+			return sa.toString();
+		}
+	}
+	public static String roundDecimal(double num, int places) { //...
+		return roundDecimal((float)num,places);
 	}
 }

@@ -8,13 +8,9 @@ import com.bulletphysics.dynamics.vehicle.WheelInfo.RaycastInfo;
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.VehicleControl;
-import com.jme3.effect.ParticleEmitter;
-import com.jme3.effect.ParticleMesh;
 import com.jme3.input.KeyInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
-import com.jme3.material.Material;
-import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
@@ -38,19 +34,18 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 	Rally rally;
 	
 	//car data
-	Car car;
+	CarData car;
 	
 	MyWheelNode[] wheel = new MyWheelNode[4];
 	
 	//driving stuff
 	boolean togglePhys = false;
-	boolean ifSmoke = false;
 
 	int curGear = 1;
 	int curRPM = 0;
 	
 	boolean ifAccel = false;
-	float accelCurrent = 1;
+	float accelCurrent = 1; //TODO keys are off on, so 0 or 1, controllers not so much
 	
 	float steeringCurrent = 0;
 	boolean steerLeft = false;
@@ -66,7 +61,7 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 	
 	double t1, t2;
 	
-	MyVehicleControl(CollisionShape col, Car cartype, Node carNode, Rally rally) {
+	MyVehicleControl(CollisionShape col, CarData cartype, Node carNode, Rally rally) {
 		super(col, cartype.mass);
 		this.car = cartype;
 		this.rally = rally;
@@ -77,7 +72,6 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		this.setSuspensionStiffness(car.stiffness);
 		this.setMaxSuspensionForce(car.maxSusForce);
 		this.setMaxSuspensionTravelCm(car.maxSusTravel);
-		
 		
 		wheel[0] = new MyWheelNode("wheel 0 node", this, 0);
 		Spatial wheel0 = assetManager.loadModel(car.wheelModel);
@@ -109,7 +103,7 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		addWheel(wheel[3], new Vector3f(car.w_xOff+0.05f, car.w_yOff, -car.w_zOff),
 				car.wheelDirection, car.wheelAxle, car.restLength, car.wheelRadius, false);
 
-		//Friction
+		//Their friction
 		setFrictionSlip(0, car.wheel0Slip);
 		setFrictionSlip(1, car.wheel1Slip);
 		setFrictionSlip(2, car.wheel2Slip);
@@ -119,7 +113,6 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		for (MyWheelNode w: wheel) {
 			//attaching all the things (wheels)
 			carNode.attachChild(w);
-			makeSmoke(w);
 		}
 		
 		////////////////////////
@@ -127,29 +120,6 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 //		skidNode.setShadowMode(ShadowMode.Off);
 	}
 	
-	private void makeSmoke(MyWheelNode w) {
-	    if (!ifSmoke) {
-	    	return;
-	    }
-		
-		w.smoke = new ParticleEmitter("Emitter", ParticleMesh.Type.Triangle, 40);
-		w.smoke.setParticlesPerSec(10);
-		
-		w.smoke.setImagesX(15); //the smoke image is 15x * 1y (y is already the default of 1)
-		w.smoke.setEndColor(new ColorRGBA(0.7f, 0.7f, 0.7f, 0.3f));
-		w.smoke.setStartColor(new ColorRGBA(0.7f, 0.7f, 0.7f, 0f));
-
-		w.smoke.setStartSize(0.1f);
-		w.smoke.setEndSize(4f);
-		w.smoke.setLowLife(4f);
-		w.smoke.setHighLife(4f);
-		w.smoke.getParticleInfluencer().setVelocityVariation(0.05f);
-	    
-	    Material emit = new Material(assetManager, "Common/MatDefs/Misc/Particle.j3md");
-	    emit.setTexture("Texture", assetManager.loadTexture("Effects/Smoke/Smoke.png"));
-	    w.smoke.setMaterial(emit);
-    	w.attachChild(w.smoke);
-	}
 	
 	//controls
 	private void setupKeys() {
@@ -251,7 +221,6 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 	
 	//TODO Things taken out:
 	//- handbrake
-	//- the graphical grip values
 	
 	
 	////////////////////////////////////////////////////
@@ -279,8 +248,10 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 			velocity.z += 0.001;
 		}
 		//important angles
-		double slipanglefront = Math.atan((velocity.x + yawspeed) / Math.abs(velocity.z)) - steeringCur;
-		double slipanglerear = Math.atan((velocity.x - yawspeed) / Math.abs(velocity.z));
+		double[] slips = VehicleHelper.calcSlipAngle(velocity.x, velocity.z, yawspeed, steeringCur);
+		double slipanglefront = slips[0];
+		double slipanglerear = slips[1];
+		UINode.angle.setText(H.roundDecimal(Math.abs(FastMath.RAD_TO_DEG*slipanglerear), 0)+" '");
 		
 		//decay these values at slow speeds (< 2 m/s)
 		//TODO this kind of breaks slow speed turning
@@ -289,21 +260,22 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 			slipanglerear *= velocity.z*velocity.z/4;
 		}
 
+		
 		//////////////////////////////////////////////////
 		//'Wheel'less forces (TODO braking in wheels)
 		float braking = 0;
 		if (wheel[0].contact || wheel[1].contact || wheel[2].contact || wheel[3].contact) {
 			braking = -brakeCurrent*FastMath.sign(velocity.z);
 		}
-		Vector3f brakeVec = new Vector3f(w_velocity.normalize()).mult(braking);
+		Vector3f brakeVec = new Vector3f(0,0,1).multLocal(braking);
 		
 		//linear resistance and quadratic drag
-		float dragz = (float)(-(car.RESISTANCE * velocity.z + car.DRAG * velocity.z * Math.abs(velocity.z)));
 		float dragx = (float)(-(car.RESISTANCE * velocity.x + car.DRAG * velocity.x * Math.abs(velocity.x)));
 		float dragy = (float)(-(car.RESISTANCE * velocity.y + car.DRAG * velocity.y * Math.abs(velocity.y)));
-
+		float dragz = (float)(-(car.RESISTANCE * velocity.z + car.DRAG * velocity.z * Math.abs(velocity.z)));
+		
 		Vector3f totalNeutral = new Vector3f(dragx, dragy, dragz);
-		applyCentralForce(w_angle.mult(totalNeutral).add(brakeVec)); //non wheel based forces on the car
+		applyCentralForce(w_angle.mult(totalNeutral.add(brakeVec)));
 		
 		//////////////////////////////////
 		double weightperwheel = car.mass*(-getGravity().y/1000)*0.25; //0.25 because its per wheel
@@ -314,19 +286,24 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		Vector3f rr = new Vector3f(); //rear  right
 		
 		//latitudinal forces that are calculated off the slip angle
-		fl.x = fr.x = (float)(slipanglefront * car.CA_F*weightperwheel);
-		rl.x = rr.x = (float)(slipanglerear * car.CA_R*weightperwheel);
+		fl.x = fr.x = -(float)VehicleHelper.magicForumlaSimple(car, (float)slipanglefront, (float)weightperwheel);
+		rl.x = rr.x = -(float)VehicleHelper.magicForumlaSimple(car, (float)slipanglerear, (float)weightperwheel);
+
+//		fl.x = fr.x = (float)(slipanglefront * car.CA_F*weightperwheel); //old lateral physics
+//		rl.x = rr.x = (float)(slipanglerear * car.CA_R*weightperwheel);
 
 		//////////////////////////////////////
 		//longitudinal forces
-		float accel = 0;
-		if (ifAccel) {
-			accel = getEngineWheelForce(velocity.z)*accelCurrent;
+		float accel = getEngineWheelForce(velocity.z)*accelCurrent;
+		if (!ifAccel) { //no accel for you (so it still calculates the RPMs)
+			accel = 0;
 //			totalaccel = car.MAX_ACCEL; //remove for 'geared' accel
 //			totalaccel = FastMath.clamp(accel, (float)-weightperwheel*car.MAX_GRIP, (float)weightperwheel*car.MAX_GRIP);
 		}
 
-		accel /= 2; //because 2 wheels an axle
+//		H.p(VehicleHelper.longitudinalForce(car, )); //TODO wait until we have the slip ratio
+		
+		accel /= 2; //per wheel because at least 2 wheels
 		if (car.driveFront && car.driveRear) { 
 			accel /= 2; //if its split up between the front and rear axle
 		}
@@ -335,28 +312,38 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 			fl.z = accel;
 			fr.z = accel;
 		}
-		fl.x = FastMath.cos(steeringCurrent)*fl.x;
-		fr.x = FastMath.cos(steeringCurrent)*fr.x;
+//		fl.x = FastMath.cos(steeringCurrent)*fl.x; //TODO why are these here?
+//		fr.x = FastMath.cos(steeringCurrent)*fr.x;
 		
 		if (car.driveRear) {
 			rl.z = accel;
 			rr.z = accel;
 		}
+		float te = (float)weightperwheel*car.MAX_GRIP;		
 		
-		Vector3f wfl = new Vector3f(H.clamp(fl,weightperwheel*car.MAX_GRIP));
-		Vector3f wfr = new Vector3f(H.clamp(fr,weightperwheel*car.MAX_GRIP));
-		Vector3f wrl = new Vector3f(H.clamp(rl,weightperwheel*car.MAX_GRIP));
-		Vector3f wrr = new Vector3f(H.clamp(rr,weightperwheel*car.MAX_GRIP));
+		//TODO if we want fancy traction it would have to be applied here
+		
+		wheel[0].skid = FastMath.clamp((te-fl.length())/te, 0, 1);
+		fl = new Vector3f(H.clamp(fl, te));
+		
+		wheel[1].skid = FastMath.clamp((te-fr.length())/te, 0, 1);
+		fr = new Vector3f(H.clamp(fr, te));
+		
+		wheel[2].skid = FastMath.clamp((te-rl.length())/te, 0, 1);
+		rl = new Vector3f(H.clamp(rl, te));
+		
+		wheel[3].skid = FastMath.clamp((te-rr.length())/te, 0, 1);
+		rr = new Vector3f(H.clamp(rr, te));
 		
 		//and finally apply forces
 		if (wheel[0].contact) 
-			applyForce(w_angle.mult(wfl), w_angle.mult(wheel[0].getForceLocation(car.wheelRadius, car.rollFraction)));
+			applyForce(w_angle.mult(fl), w_angle.mult(wheel[0].getContactPoint(car.wheelRadius, car.rollFraction)));
 		if (wheel[1].contact) 
-			applyForce(w_angle.mult(wfr), w_angle.mult(wheel[1].getForceLocation(car.wheelRadius, car.rollFraction)));
+			applyForce(w_angle.mult(fr), w_angle.mult(wheel[1].getContactPoint(car.wheelRadius, car.rollFraction)));
 		if (wheel[2].contact) 
-			applyForce(w_angle.mult(wrl), w_angle.mult(wheel[2].getForceLocation(car.wheelRadius, car.rollFraction)));
+			applyForce(w_angle.mult(rl), w_angle.mult(wheel[2].getContactPoint(car.wheelRadius, car.rollFraction)));
 		if (wheel[3].contact) 
-			applyForce(w_angle.mult(wrr), w_angle.mult(wheel[3].getForceLocation(car.wheelRadius, car.rollFraction)));
+			applyForce(w_angle.mult(rr), w_angle.mult(wheel[3].getContactPoint(car.wheelRadius, car.rollFraction)));
 		
 	}
 	
@@ -400,7 +387,12 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 			w.contact = (ray.groundObject != null);
 		}
 		
-		specialPhysics(tpf); //yay 
+		specialPhysics(tpf); //yay
+		
+		for (MyWheelNode wn: wheel) {
+			wn.update(tpf);
+		}
+		
 		
 		//skid marks
 		rally.frameCount++;
@@ -415,6 +407,7 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		right = playerRot.mult(new Vector3f(1,0,0).negate());
 
 		//wheel turning logic -TODO
+			//trying to turn less at high speed
 		steeringCurrent = 0;
 		float speedFactor = 1;
 //		speedFactor = car.steerFactor/(getLinearVelocity().length()*10);
@@ -479,3 +472,93 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		}
 	}
 }
+
+class VehicleHelper {
+	
+	static double[] calcSlipAngle(double vx, double vz, double yawspeed, double steeringCur) {
+		double[] out = new double[]{
+				Math.atan((vx + yawspeed) / Math.abs(vz)) - steeringCur, 
+				Math.atan((vx - yawspeed) / Math.abs(vz))};
+		return out;
+	}
+	
+	
+	//http://www.gamedev.net/topic/462784-simplified-pacejka-magic-formula/
+	static double longitudinalFancyForce(CarData c, float slipRatio, float Fz) {
+		CarWheelData d = c.wheeldata;
+		double PeakFC = Fz*d.b1 + d.b2;
+		
+		double C = d.b0;
+		double D = Fz*PeakFC;
+		double BCD = (d.b3*Fz*Fz + d.b4*Fz) * Math.exp(-d.b5*Fz);
+		double B = BCD/(C*D);
+		double H = d.b9*Fz + d.b10;
+		double E = (d.b6*Fz*Fz + d.b7*Fz + d.b8) * (1 - d.b13*FastMath.sign((float)(slipRatio+H)));
+		double V = d.b11*Fz + d.b12;
+		double B1 = B * (slipRatio + H);
+		
+		double Force = D * Math.sin(C * Math.atan(B1 - E * (B1 - Math.atan(B1)))) + V;
+		return Force;
+	}
+	
+	static double lateralFancyForce(CarData c, float slipangle, float Fz) {
+		CarWheelData d = c.wheeldata;
+		double PeakFC = Fz*d.b1 + d.b2;
+		double y = 0; //camber angle (is always going to be 0)
+		
+		double C = d.a0;
+		double D = Fz*PeakFC * (1 - d.a15*y*y);
+		double BCD = d.a3*Math.sin(Math.atan(Fz/d.a4) * 2) * (1 - d.a5*Math.abs(y));
+		double B = BCD/(C*D);
+		double H = d.a8*Fz + d.a9 + d.a10*y;
+		double E = (d.a6*Fz + d.a7) * (1 - (d.a16*y + d.a17)*FastMath.sign((float)(slipangle+H)));
+		double V = d.a11*Fz + d.a12 + (d.a13*Fz + d.a14)*y*Fz;
+		double B1 = B * (slipangle + H);
+		
+		double Force = D * Math.sin(C * Math.atan(B1 - E * (B1 - Math.atan(B1)))) + V;
+		return Force;
+	}
+	
+	
+	/** Pacejka's Formula simplified 
+	 * (bottom of http://www.edy.es/dev/docs/pacejka-94-parameters-explained-a-comprehensive-guide/)
+	 * @param c The constant data about the car
+	 * @param slip Slip angle or slip ratio
+	 * @param Fz Load on the tire
+	 * @return The force expected
+	 */
+	static double magicForumlaSimple(CarData c, float slip, float Fz) {
+		CarWheelData d = c.wheeldata;
+		double PeakFC = Fz*d.b1 + d.b2;
+
+		double C = d.a0;
+		double D = Fz*PeakFC;
+		double BCD = d.a3*Math.sin(Math.atan(Fz/d.a4) * 2);
+		double B = BCD/(C*D);
+		double H = d.a8*Fz + d.a9;
+		double E = (d.a6*Fz + d.a7) * (1 - (d.a17)*FastMath.sign((float)(slip+H)));
+		
+		//TODO: not too sure why the above doesn't work, but here are some values from the source
+		B = 10;
+		C = 1.9;
+		D = 1;
+		E = 0.97;
+		
+		
+		double Force = Fz * D * Math.sin(C * Math.atan(B*slip - E * (B*slip - Math.atan(B*slip))));
+		return Force;
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

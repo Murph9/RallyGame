@@ -4,7 +4,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
 //stands for world piece simple, as in its a simple piece of the world
-public enum WPSimple implements WP {
+public enum Simple implements WP {
 	
 	CROSS("cross.blend", new Vector3f(2,0,0), WorldBuilder.STRIAGHT),
 	STRAIGHT("straight.blend", new Vector3f(2,0,0), WorldBuilder.STRIAGHT),
@@ -29,7 +29,7 @@ public enum WPSimple implements WP {
 	Vector3f newPos; //what the piece does to the track
 	Quaternion newRot; //change of angle (deg) for the next peice
 
-	WPSimple(String s, Vector3f a, Quaternion g) {
+	Simple(String s, Vector3f a, Quaternion g) {
 		this.name = s;
 		this.newPos = a;
 		this.newRot = g;

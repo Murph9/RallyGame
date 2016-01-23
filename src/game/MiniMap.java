@@ -17,16 +17,18 @@ public class MiniMap {
 		
 		cam = r.getCam().clone(); //TODO this just copies the current camera, causes weird water things
 		
-		cam.setViewPort(0.05f, 0.15f, 0.05f, 0.2f);
+		cam.setViewPort(0f, 0.2f, 0f, 0.2f);
 		cam.setLocation(new Vector3f(0, height, 0));
 		
 		
 		view = r.getRenderManager().createMainView("MiniMap", cam);
 		view.setClearFlags(true, true, true);
+		view.clearProcessors();
 
 		view.attachScene(r.getRootNode());
 	}
 	
+	//TODO also fix the scene here so the water isn't so distracting
 	public void update(float tpf) {
 		Vector3f pos = r.player.getPhysicsLocation();
 		cam.lookAt(pos, r.player.forward);

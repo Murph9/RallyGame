@@ -59,7 +59,7 @@ public class JoyStick extends SimpleApplication {
  
         int gamepadSize = cam.getHeight() / 2;
         float scale = gamepadSize / 512.0f;        
-        gamepad = new GamepadView();       
+        gamepad = new GamepadView();
         gamepad.setLocalTranslation( cam.getWidth() - gamepadSize - (scale * 20), 0, 0 );
         gamepad.setLocalScale( scale, scale, scale ); 
         guiNode.attachChild(gamepad); 
@@ -104,7 +104,7 @@ public class JoyStick extends SimpleApplication {
         if( this.viewedJoystick != null ) {
             joystickInfo.detachAllChildren();
         }
-                   
+        
         this.viewedJoystick = stick;
  
         if( this.viewedJoystick != null ) {       

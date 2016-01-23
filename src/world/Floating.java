@@ -4,7 +4,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
 
-public enum WPFloating implements WP {
+public enum Floating implements WP {
 	STRAIGHT("straight.blend", new Vector3f(20,0,0), Quaternion.IDENTITY),
 	
 	//these weird angles are just to show i can do it...
@@ -21,7 +21,7 @@ public enum WPFloating implements WP {
 	Vector3f newPos; //what the piece does to the track
 	Quaternion newRot;
 
-	WPFloating(String s, Vector3f a, Quaternion g) {
+	Floating(String s, Vector3f a, Quaternion g) {
 		this.name = s;
 		this.newPos = a;
 		this.newRot = g;

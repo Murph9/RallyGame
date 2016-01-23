@@ -5,7 +5,7 @@ import com.jme3.math.Vector3f;
 
 //TODO place parts of road on slopes
 
-public enum WPCity implements WP {
+public enum City implements WP {
 	STRAIGHT("small_straight.blend", new Vector3f(20,0,0), WorldBuilder.STRIAGHT),
 	SMALL_HILL_UP("small_hill_up.blend", new Vector3f(10,0.5f,0), WorldBuilder.STRIAGHT),
 	SMALL_HILL_DOWN("small_hill_down.blend", new Vector3f(10,-0.5f,0), WorldBuilder.STRIAGHT),
@@ -24,7 +24,7 @@ public enum WPCity implements WP {
 	Vector3f newPos; //what the piece does to the next track
 	Quaternion newRot;
 
-	WPCity(String s, Vector3f a, Quaternion g) {
+	City(String s, Vector3f a, Quaternion g) {
 		this.name = s;
 		this.newPos = a;
 		this.newRot = g;

@@ -5,8 +5,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import world.WP;
-import world.WPFloating;
-import world.World;
+import world.Floating;
+import world.StaticWorld;
 import world.WorldBuilder;
 
 import com.jme3.app.SimpleApplication;
@@ -18,6 +18,7 @@ import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.font.BitmapFont;
+import com.jme3.input.Joystick;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
@@ -36,13 +37,13 @@ import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
 
 //Long TODO's: 
-//<empty>
+//i broke skidmarks again, will need to fix that :(
+//ENGINE stuff
 
 //Bugs TODO
-//braking makes you go reversed
 //maps a little weird still, probably need to remove some of the postprocessing stuff
  //tried that and got no where, they are connected for some reason
-//i broke skidmarks again, will need to fix that
+
 
 public class Rally extends SimpleApplication {
 	
@@ -53,17 +54,17 @@ public class Rally extends SimpleApplication {
 	private MyCamera camNode;
 	
 	//World Model
-	World world = World.duct; //Set map here
+	StaticWorld world = StaticWorld.dragstrip; //Set map here
 	
 	boolean dynamicWorld = false;
-	WP[] type = WPFloating.values();
+	WP[] type = Floating.values();
 	boolean needsMaterial = false;
 	WorldBuilder worldB;
 	
 	//car stuff
 	private Node carNode;
 	MyVehicleControl player;
-	private Car car = new RallyCar(); //set car here
+	private CarData car = new NormalFCar(); //set car here
 	
 	//gui stuff
 	UINode uiNode;
@@ -296,8 +297,12 @@ public class Rally extends SimpleApplication {
 	}
 	
 	private void connectJoyStick() {
-		myJoy = new Controller();
+		Joystick[] joysticks = inputManager.getJoysticks();
+		if (joysticks == null) {
+			H.p("There are no joysticks :( .");
+		}
 		
+		myJoy = new Controller();
 		inputManager.addRawInputListener(new JoystickEventListner(myJoy, inputManager));
 	}
 	

@@ -5,7 +5,7 @@ import com.jme3.math.Vector3f;
 
 
 //stands for a world piece that looks more like a city
-public enum WPSimple2 implements WP {
+public enum Simple2 implements WP {
 	CROSS("cross.blend", new Vector3f(2,0,0), WorldBuilder.STRIAGHT),
 	STRAIGHT("straight.blend", new Vector3f(3,0,0), WorldBuilder.STRIAGHT),
 	
@@ -27,7 +27,7 @@ public enum WPSimple2 implements WP {
 	Vector3f newPos; //what the piece does to the track
 	Quaternion newRot; //change of angle (deg) for the next piece
 
-	WPSimple2(String s, Vector3f a, Quaternion g) {
+	Simple2(String s, Vector3f a, Quaternion g) {
 		this.name = s;
 		this.newPos = a;
 		this.newRot = g;

@@ -18,9 +18,7 @@ import com.jme3.system.AppSettings;
 
 public class UINode {
 
-	//TODO:
-	/* the code is terrible
-	 * the output for the track car is terrible
+	/*TODO:
 	 * red near the redline?
 	 */
 	
@@ -30,6 +28,7 @@ public class UINode {
 	BitmapText statsText;
 	BitmapText score;
 	static BitmapText debugtext;
+	static BitmapText angle;
 	
 	Geometry rpmArrow;
 	Geometry redlineArrow;
@@ -51,9 +50,11 @@ public class UINode {
 	Geometry[] speed = new Geometry[9];
 	
 	//speedo numbers
-	float zeroAng = -FastMath.PI;
-	float maxAng = -FastMath.TWO_PI;
-	int maxAngRPM;
+	float startAng = -FastMath.PI;
+	int startRPM = 0; //because sometimes it might not be
+	
+	float finalAng = -FastMath.TWO_PI;
+	int finalRPM; //should be more than redline
 	float redline;
 	
 	int centerx, centery = 64+22, radius = 118;
@@ -61,7 +62,7 @@ public class UINode {
 	UINode (Rally r) {
 		this.r = r;
 		this.redline = r.player.car.redline;
-		this.maxAngRPM = (int)FastMath.ceil(this.redline) + 1000;
+		this.finalRPM = (int)FastMath.ceil(this.redline) + 1000;
 
 		BitmapFont guiFont = r.getFont();
 		AppSettings settings = r.getSettings();
@@ -81,6 +82,13 @@ public class UINode {
 		score.setText("");
 		score.setLocalTranslation(settings.getWidth()-200, settings.getHeight(), 0); // position
 		guiNode.attachChild(score);
+		
+		angle = new BitmapText(guiFont, false);		  
+		angle.setSize(guiFont.getCharSet().getRenderedSize());
+		angle.setColor(ColorRGBA.White);
+		angle.setText("blaj");
+		angle.setLocalTranslation(settings.getWidth()-300, 30, 0); // position
+		guiNode.attachChild(angle);
 		
 		debugtext = new BitmapText(guiFont, false);		  
 		debugtext.setSize(guiFont.getCharSet().getRenderedSize());
@@ -171,6 +179,8 @@ public class UINode {
 		guiNode.attachChild(speed[2]);
 		
 		makeSpeedo(r, guiNode);
+		
+		
 	}
 
 	private void makeSpeedo(Rally r2, Node guiNode) {
@@ -179,47 +189,52 @@ public class UINode {
 		
 		Line l = new Line(Vector3f.ZERO, Vector3f.UNIT_X.negate()); //inwards
 		l.setLineWidth(2);
+		Quad quad = new Quad(20, 20);
 		
 		centerx = r2.getSettings().getWidth()-128;
 		
 		Material m = new Material(r.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 		m.setColor("Color", ColorRGBA.Black);
 		
-		final int MAX = 0; //3 notches inbetween
-		int linecount = MAX; //start with big notch
-		
-		int count = 0;
-		for (float i = zeroAng; i >= maxAng; i += (maxAng-zeroAng)*(1000/(float)maxAngRPM)) {
-	
+		for (int i = 0; i <= finalRPM; i += 1000) {
+			float angle = FastMath.interpolateLinear(i/(float)finalRPM, startAng, finalAng);;
+			
 			Geometry line = new Geometry("RPM", l);
-			line.setLocalTranslation(centerx+FastMath.cos(i)*radius, centery+FastMath.sin(i)*radius, 0);
+			line.setLocalTranslation(centerx+FastMath.cos(angle)*radius, centery+FastMath.sin(angle)*radius, 0);
 			Quaternion q = new Quaternion();
-			q.fromAngleAxis(i, Vector3f.UNIT_Z);
+			q.fromAngleAxis(angle, Vector3f.UNIT_Z);
 			line.setLocalRotation(q);
-			if (linecount != MAX) {
-				line.scale(10);
-				linecount++;
-			} else {
-				line.scale(20);
-				linecount = 0;
-				Quad quad = new Quad(20, 20);
-				Geometry g = new Geometry("speedoNumber"+count, quad);
-				g.setLocalTranslation((centerx-10)+FastMath.cos(i)*(radius-20), (centery-10)+FastMath.sin(i)*(radius-20), 0);
-				if (count < 10) {
-					g.setMaterial(matset[count]);
-				} else {
-					g.setMaterial(matset[count-10]); //TODO fix
-				}
-				if (count*1000 > redline) {
-					m = new Material(r.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-					m.setColor("Color", ColorRGBA.Red);
-				}
-				speedoNode.attachChild(g);
-				count++;
-			}
+			line.scale(20);
 			line.setMaterial(m);
 			speedoNode.attachChild(line);
+			
+			Node g = addNumber(angle, (int)i/1000, quad);
+			speedoNode.attachChild(g);
 		}
+	}
+	
+	private Node addNumber(float angle, int i, Quad quad) {
+		Node n = new Node("rpm "+i);
+		n.setLocalTranslation(centerx-10, centery-10, 0);
+		
+		Geometry g = new Geometry("speedoNumber "+i, quad);
+		if (i > 9) { //multinumber
+			g.setLocalTranslation(FastMath.cos(angle)*(radius-20), FastMath.sin(angle)*(radius-20), 0);
+			g.setMaterial(matset[i % 10]);
+			n.attachChild(g);
+			
+			Geometry g2 = new Geometry("speedoNumber "+i+"+", quad);
+			g2.setLocalTranslation(-20+FastMath.cos(angle)*(radius-20), FastMath.sin(angle)*(radius-20), 0);
+			g2.setMaterial(matset[i/10]);
+			n.attachChild(g2);
+			
+		} else { //normal number
+			g.setLocalTranslation(FastMath.cos(angle)*(radius-20), FastMath.sin(angle)*(radius-20), 0);
+			g.setMaterial(matset[i]);
+			n.attachChild(g);
+		}
+		
+		return n;
 	}
 
 	public void update(float tpf) {
@@ -233,14 +248,15 @@ public class UINode {
 		statsText.setText(speed + "m/s\ngear:" + player.curGear + "\naccel:" + player.curRPM+ "\n"); // the ui text
 		int speedKMH = (int)Math.abs(player.getCurrentVehicleSpeedKmHour());
 
-		setDigits(speedKMH);
+		setSpeedDigits(speedKMH);
 		
 		if (r.dynamicWorld) {
 			score.setText("Placed: "+r.worldB.getTotalPlaced());
 		}
 		
+		//TODO slightly fancier?
 		rpmArrow.setLocalRotation(Quaternion.IDENTITY);
-		float angle = FastMath.interpolateLinear(player.curRPM/(float)maxAngRPM, zeroAng, maxAng);
+		float angle = FastMath.interpolateLinear(player.curRPM/(float)finalRPM, startAng, finalAng);
 		rpmArrow.rotate(0, 0, angle);
 		
 		Material m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -257,7 +273,7 @@ public class UINode {
 		gripBox3.setMaterial(m);
 	}
 
-	private void setDigits(int speedKMH) {
+	private void setSpeedDigits(int speedKMH) {
 		int count = 0;
 		while (count < 3) {
 			speed[count].setMaterial(matset[0]);
@@ -271,7 +287,6 @@ public class UINode {
 			speedKMH /= 10;
 			count++;
 		}
-		
 	}
 	
 	

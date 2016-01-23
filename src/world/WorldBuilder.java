@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.jme3.asset.AssetManager;
+import com.jme3.asset.TextureKey;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.collision.shapes.PlaneCollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
@@ -87,10 +88,23 @@ public class WorldBuilder extends Node {
         startGeometry.addControl(new RigidBodyControl(0));
         this.attachChild(startGeometry);
         rally.getPhysicsSpace().add(startGeometry);
+
         
         rally.getRootNode().attachChild(SkyFactory.createSky(assetManager, "Textures/Sky/Bright/BrightSky.dds", false));
+        boolean mine = false; //TODO my try (note, the images need to rotate around one, so that the sky and floor match
+        if (mine) {
+	        TextureKey keye = new TextureKey("assets/east.png", true);
+	        TextureKey keyw = new TextureKey("assets/west.png", true);
+	        TextureKey keyn = new TextureKey("assets/north.png", true);
+	        TextureKey keys = new TextureKey("assets/south.png", true);
+	        TextureKey keyt = new TextureKey("assets/top.png", true);
+	        TextureKey keyb = new TextureKey("assets/bottom.png", true);
+	        rally.getRootNode().attachChild(SkyFactory.createSky(assetManager, assetManager.loadTexture(keyw), 
+	        		assetManager.loadTexture(keye), assetManager.loadTexture(keyn), 
+	        		assetManager.loadTexture(keys), assetManager.loadTexture(keyt), assetManager.loadTexture(keyb)));
+        }
         
-        if (type[0] instanceof WPFloating && wantWater) { //this is the nice floating looking one
+        if (type[0] instanceof Floating && wantWater) { //this is the nice floating looking one
         	// we create a water processor
         	SimpleWaterProcessor waterProcessor = new SimpleWaterProcessor(assetManager);
         	// we set wave properties
