@@ -8,9 +8,8 @@ import com.bulletphysics.dynamics.vehicle.WheelInfo.RaycastInfo;
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.VehicleControl;
-import com.jme3.input.KeyInput;
+import com.jme3.input.InputManager;
 import com.jme3.input.controls.ActionListener;
-import com.jme3.input.controls.KeyTrigger;
 import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
@@ -39,8 +38,6 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 	MyWheelNode[] wheel = new MyWheelNode[4];
 	
 	//driving stuff
-	boolean togglePhys = false;
-
 	int curGear = 1;
 	int curRPM = 0;
 	
@@ -58,6 +55,8 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 	
 	float distance = 0;
 	boolean ifLookBack = false;
+	
+    Controller myJoy;
 	
 	double t1, t2;
 	
@@ -118,102 +117,72 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		////////////////////////
 		setupKeys();
 //		skidNode.setShadowMode(ShadowMode.Off);
-	}
-	
+		
+	}	
 	
 	//controls
 	private void setupKeys() {
-		rally.getInputManager().addMapping("Left", new KeyTrigger(KeyInput.KEY_LEFT));
-		rally.getInputManager().addMapping("Right", new KeyTrigger(KeyInput.KEY_RIGHT));
-		rally.getInputManager().addMapping("Up", new KeyTrigger(KeyInput.KEY_UP));
-		rally.getInputManager().addMapping("Down", new KeyTrigger(KeyInput.KEY_DOWN));
-		rally.getInputManager().addMapping("Jump", new KeyTrigger(KeyInput.KEY_Q));
-		rally.getInputManager().addMapping("Handbrake", new KeyTrigger(KeyInput.KEY_SPACE));
-		rally.getInputManager().addMapping("Reset", new KeyTrigger(KeyInput.KEY_RETURN));
-		rally.getInputManager().addMapping("Physics", new KeyTrigger(KeyInput.KEY_LCONTROL));
-		rally.getInputManager().addMapping("LookBack", new KeyTrigger(KeyInput.KEY_Z));
-		rally.getInputManager().addMapping("Reverse", new KeyTrigger(KeyInput.KEY_LSHIFT));
+		InputManager i = rally.getInputManager();
+		i.addRawInputListener(new MyKeyListener(this)); //my input class, practice for controller class
+		i.addRawInputListener(new JoystickEventListner(this));
 		
-		rally.getInputManager().addListener(this, "Left");
-		rally.getInputManager().addListener(this, "Right");
-		rally.getInputManager().addListener(this, "Up");
-		rally.getInputManager().addListener(this, "Down");
-		rally.getInputManager().addListener(this, "Jump");
-		rally.getInputManager().addListener(this, "Handbrake");
-		rally.getInputManager().addListener(this, "Reset");
-		rally.getInputManager().addListener(this, "Physics");
-		rally.getInputManager().addListener(this, "LookBack");
-		rally.getInputManager().addListener(this, "Reverse");
-		
-		//TODO use the Controller class
+		i.addListener(this, "Left");
+		i.addListener(this, "Right");
+		i.addListener(this, "Up");
+		i.addListener(this, "Down");
+		i.addListener(this, "Jump");
+		i.addListener(this, "Handbrake");
+		i.addListener(this, "Reset");
+		i.addListener(this, "Physics");
+		i.addListener(this, "LookBack");
+		i.addListener(this, "Reverse");
 	}
 	
 	public void onAction(String binding, boolean value, float tpf) {
-		//value == 'if pressed'
-		//value = value of press, with keys its always 0 or 1
-		//controllers on the otherhand...
-		
-		if (binding.equals("Left")) {
-			steerLeft = value;
-		} 
-		if (binding.equals("Right")) {
-			steerRight= value;
-		}
-		
-		if (binding.equals("Up")) {
-			if (value) {
-				ifAccel = true;
-			} else {
-				ifAccel = false;
-			}
-
-		} 
-		if (binding.equals("Down")) {
-			if (value) {
-				brakeCurrent += car.MAX_BRAKE;
-			} else {
-				brakeCurrent -= car.MAX_BRAKE;
-			}
+		//value == 'if pressed (down) - we get one back when its unpressed (up)'
+		//tpf is being used as the value for joysticks. deal with it
+		switch(binding) {
+		case "Left": 
+			steerLeft = value; //TODO controller logic doesn't work with this.
+			break;
 			
-		} 
-		if (binding.equals("Jump")) {
+		case "Right": 
+			steerRight = value;
+			break;
+			
+		case "Up":
+			ifAccel = value;
+			break;
+			
+		case "Down":
+			if (value) brakeCurrent = car.MAX_BRAKE;
+			else brakeCurrent = 0;
+			break;
+			
+		case "Jump":
 			if (value) {
 				applyImpulse(car.JUMP_FORCE, new Vector3f(0,0,0)); //push up
 				Vector3f old = getPhysicsLocation();
 				old.y += 2; //and move up
 				setPhysicsLocation(old);
 			}
+			break;
 			
-		} 
-		if (binding.equals("Handbrake")) {
-			ifHandbrake = !ifHandbrake;
+		case "HandBrake":
+			ifHandbrake = value;
+			break;
 			
-		} 
-		if (binding.equals("Physics")) {
-			if (value) {
-				togglePhys = !togglePhys;
-				H.p("physics = "+!togglePhys);
-			}
-		} 
-		if (binding.equals("Reset")) {
-			if (value) {
-				reset();
-			} else {
-			}
-		} 
-		if (binding.equals("Reverse")) {
-			if (curGear == 1) { //i.e. first gear
-				curGear = 0;
-			} else {
-				curGear = 1;
-			}
-		}
-		if (binding.equals("LookBack")) {
-			if (value) {
-				ifLookBack = true;
-			} else {
-				ifLookBack = false;
-			}
+		case "Reset":
+			if (value) reset();
+			break;
+			
+		case "Reverse":
+			if (value) curGear = 0;
+			else curGear = 1;
+			break;
+			
+		case "LookBack":
+			ifLookBack = value;
 		}
 	}
 	//end controls
@@ -222,12 +191,12 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 	//TODO Things taken out:
 	//- handbrake
 	
+	//TODO need to add redline (which is kill engine if above <number>)
+	
 	
 	////////////////////////////////////////////////////
 	
 	private void specialPhysics(float tpf) {
-		if (togglePhys){ return; }//no need to apply wheel forces now
-		
 		//NOTE: that z is forward, x is side
 		// - the reference notes say that x is forward and y is sideways so just be careful
 		
@@ -364,6 +333,8 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 	}
 	
 	private void autoTransmission(int rpm) {
+		if (curGear == 0) return; //no changing out of reverse on me please..
+		
 		if (rpm > car.gearUp && curGear < car.gearRatios.length-1) {
 			curGear++;
 		} else if (rpm < car.gearDown && curGear > 1) {
@@ -482,7 +453,7 @@ class VehicleHelper {
 		return out;
 	}
 	
-	
+	//TODO these fancy methods don't work
 	//http://www.gamedev.net/topic/462784-simplified-pacejka-magic-formula/
 	static double longitudinalFancyForce(CarData c, float slipRatio, float Fz) {
 		CarWheelData d = c.wheeldata;
@@ -549,16 +520,3 @@ class VehicleHelper {
 		return Force;
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

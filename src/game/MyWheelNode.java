@@ -20,6 +20,8 @@ import com.jme3.util.BufferUtils;
 
 public class MyWheelNode extends Node {
 
+	static Texture tex;
+	
 	MyVehicleControl mvc;
 	int num;
 	
@@ -34,6 +36,8 @@ public class MyWheelNode extends Node {
 	
 	public MyWheelNode(String name, MyVehicleControl mvc, int num) {
 		super(name);
+		tex = mvc.assetManager.loadTexture("assets/stripes.png");
+		
 		this.mvc = mvc;
 		this.num = num;
 		this.last = new Vector3f(0,0,0);
@@ -119,10 +123,7 @@ public class MyWheelNode extends Node {
 		Geometry geo = new Geometry("MyMesh", mesh);
 		
 		Material mat = new Material(mvc.assetManager, "Common/MatDefs/Light/Lighting.j3md");
-		
-		Texture tex = mvc.assetManager.loadTexture("assets/stripes.png");
 		mat.setTexture("DiffuseMap", tex);
-		mat.setTexture("NormalMap", tex);
 		mat.setBoolean("UseMaterialColors", true);
 		
 		mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
@@ -130,7 +131,6 @@ public class MyWheelNode extends Node {
 		
 		mat.setColor("Diffuse", new ColorRGBA(0,0,0,grip));
 		
-		mat.setBoolean("UseMaterialColors", true);
 		geo.setMaterial(mat);
 		geo.setShadowMode(ShadowMode.Off);
 		geo.setQueueBucket(Bucket.Transparent);

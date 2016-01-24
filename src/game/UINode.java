@@ -47,7 +47,9 @@ public class UINode {
 	Material[] matset = new Material[10];
 	
 	//speed squares
-	Geometry[] speed = new Geometry[9];
+	Geometry[] speedo = new Geometry[3];
+	//gear label
+	Geometry gear = new Geometry();
 	
 	//speedo numbers
 	float startAng = -FastMath.PI;
@@ -162,24 +164,28 @@ public class UINode {
 		Quad quad = new Quad(29,49);
 		width = settings.getWidth()-130;
 		
-		speed[0] = new Geometry("ones", quad);
-		speed[0].setLocalTranslation(width, 8, -1);
-		speed[0].scale(1);
-		speed[0].setMaterial(matset[0]);
-		guiNode.attachChild(speed[0]);
+		speedo[0] = new Geometry("ones", quad);
+		speedo[0].setLocalTranslation(width, 8, -1);
+		speedo[0].scale(1);
+		speedo[0].setMaterial(matset[0]);
+		guiNode.attachChild(speedo[0]);
 		
-		speed[1] = new Geometry("SpeedoBackground", quad);
-		speed[1].setLocalTranslation(width-32, 8, -1);
-		speed[1].setMaterial(matset[0]);
-		guiNode.attachChild(speed[1]);
+		speedo[1] = new Geometry("tens", quad);
+		speedo[1].setLocalTranslation(width-32, 8, -1);
+		speedo[1].setMaterial(matset[0]);
+		guiNode.attachChild(speedo[1]);
 		
-		speed[2] = new Geometry("SpeedoBackground", quad);
-		speed[2].setLocalTranslation(width-64, 8, -1);
-		speed[2].setMaterial(matset[0]);
-		guiNode.attachChild(speed[2]);
+		speedo[2] = new Geometry("hundereds", quad);
+		speedo[2].setLocalTranslation(width-64, 8, -1);
+		speedo[2].setMaterial(matset[0]);
+		guiNode.attachChild(speedo[2]);
+		
+		gear = new Geometry("gear", quad);
+		gear.setLocalTranslation(width-64, 68, -1);
+		gear.setMaterial(matset[1]);
+		guiNode.attachChild(gear);
 		
 		makeSpeedo(r, guiNode);
-		
 		
 	}
 
@@ -245,10 +251,11 @@ public class UINode {
 		
 		float speed = player.getLinearVelocity().length();
 		
-		statsText.setText(speed + "m/s\ngear:" + player.curGear + "\naccel:" + player.curRPM+ "\n"); // the ui text
+		statsText.setText("speed:"+speed + "m/s\nRPM:" + player.curRPM);
 		int speedKMH = (int)Math.abs(player.getCurrentVehicleSpeedKmHour());
 
 		setSpeedDigits(speedKMH);
+		setGearDigit(player.curGear);
 		
 		if (r.dynamicWorld) {
 			score.setText("Placed: "+r.worldB.getTotalPlaced());
@@ -276,17 +283,22 @@ public class UINode {
 	private void setSpeedDigits(int speedKMH) {
 		int count = 0;
 		while (count < 3) {
-			speed[count].setMaterial(matset[0]);
+			speedo[count].setMaterial(matset[0]);
 			count++;
 		}
 		
 		count = 0;
 		speedKMH %= 1000; //not more than 999
 		while (speedKMH > 0) {
-			speed[count].setMaterial(matset[speedKMH % 10]);
+			speedo[count].setMaterial(matset[speedKMH % 10]);
 			speedKMH /= 10;
 			count++;
 		}
+	}
+	
+	private void setGearDigit(int gearIn) {
+		gearIn = (int)FastMath.clamp(gearIn, 0, 9); //so we don't go off the end of the texture array
+		gear.setMaterial(matset[gearIn]);
 	}
 	
 	

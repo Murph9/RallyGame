@@ -13,9 +13,7 @@ public class Controller {
 	Map<Joystick, PlayerControl> toControl = new HashMap<Joystick, PlayerControl>();
 		//this is a mapping between the control recieved from JME3, to what is currently pressed
 
-	
 	public void setButtonValue(Joystick joystick, JoystickButton button, boolean isPressed) {
-//		System.out.println("Button:" + button.getName() + "=" + (isPressed ? "Down" : "Up"));
 		if (!toControl.containsKey(joystick)) {
 			toControl.put(joystick, new PlayerControl());
 		}
@@ -25,7 +23,6 @@ public class Controller {
 	}
 
 	public void setAxisValue(Joystick joystick, JoystickAxis axis, float value) {
-		H.p( "Axis:" + axis.getName() + "=" + value );
 		if (!toControl.containsKey(joystick)) {
 			toControl.put(joystick, new PlayerControl());
 		}
@@ -131,20 +128,6 @@ public class Controller {
 	        buttons.put("POV +X", new Boolean(false));
 	        buttons.put("POV -Y", new Boolean(false));
 	        buttons.put("POV -X", new Boolean(false));
-		}
-		
-		public String toString() {
-			String out = "xx"+xAxis;
-			out += "yx"+yAxis;
-			out += "xr"+xRot;
-			out += "yr"+yRot;
-			
-			out += "zx"+zAxis;
-
-			for(String s: buttons.keySet()) {
-				out += s+""+buttons.get(s);
-			}
-			return out;
 		}
 	}
 }

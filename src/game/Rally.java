@@ -64,7 +64,7 @@ public class Rally extends SimpleApplication {
 	//car stuff
 	private Node carNode;
 	MyVehicleControl player;
-	private CarData car = new NormalFCar(); //set car here
+	private CarData car = new TrackCar(); //set car here
 	
 	//gui stuff
 	UINode uiNode;
@@ -88,10 +88,6 @@ public class Rally extends SimpleApplication {
 //    FilterPostProcessor fpp;
 //    BloomFilter bloom;
     
-    /////////////////////////////////////
-    //Joystick stuff - TODO
-    private Controller myJoy;
-	
     
 	public static void main(String[] args) {
 		int fps = 60; //default is 60
@@ -301,9 +297,6 @@ public class Rally extends SimpleApplication {
 		if (joysticks == null) {
 			H.p("There are no joysticks :( .");
 		}
-		
-		myJoy = new Controller();
-		inputManager.addRawInputListener(new JoystickEventListner(myJoy, inputManager));
 	}
 	
 	private void setupGUI() {
