@@ -37,7 +37,7 @@ public class MyKeyListener implements RawInputListener {
 	
 	public void onKeyEvent(KeyInputEvent arg0) {
 		if (layout.containsKey(arg0.getKeyCode())) {
-			a.onAction(layout.get(arg0.getKeyCode()), arg0.isPressed(), 0);
+			a.onAction(layout.get(arg0.getKeyCode()), arg0.isPressed(), arg0.isPressed() ? 1 : 0);
 		}
 	}
 	

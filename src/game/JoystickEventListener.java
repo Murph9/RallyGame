@@ -1,6 +1,10 @@
 package game;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.jme3.input.JoystickAxis;
+import com.jme3.input.JoystickButton;
 import com.jme3.input.RawInputListener;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.event.JoyAxisEvent;
@@ -18,11 +22,28 @@ class JoystickEventListner implements RawInputListener {
 	
 	//it also is currently hardcoded..
 	
+	Map<String, String> intToButton = new HashMap<String, String>(); //internal int to human readable string
+	Map<String, String> buttonToMapping = new HashMap<String, String>(); //to game mapping
+	
 	ActionListener a;
 	double stickdeadzone = 0.15f;
 	
 	JoystickEventListner (ActionListener a) {
 		this.a = a;
+		
+		intToButton.put(JoystickButton.BUTTON_0, "A"); //A
+		intToButton.put(JoystickButton.BUTTON_1, "B"); //B
+		intToButton.put(JoystickButton.BUTTON_2, "X"); //X
+		intToButton.put(JoystickButton.BUTTON_3, "Y"); //Y
+		
+		intToButton.put(JoystickButton.BUTTON_4, "LeftBumper"); //LeftBumper
+		intToButton.put(JoystickButton.BUTTON_5, "RightBumper"); //RightBumper
+		
+		intToButton.put(JoystickButton.BUTTON_6, "Select"); //Select
+		intToButton.put(JoystickButton.BUTTON_7, "Start"); //Start
+		
+		intToButton.put(JoystickButton.BUTTON_8, "LeftStick"); //LeftStick
+		intToButton.put(JoystickButton.BUTTON_9, "RightStick"); //RightStick
 	}
 
 	@Override
@@ -30,74 +51,49 @@ class JoystickEventListner implements RawInputListener {
 		JoystickAxis axis = arg0.getAxis();
 		float value = arg0.getValue();
 		
-		if (Math.abs(value) > stickdeadzone) {
-
-			//TODO fix
-			if (axis == axis.getJoystick().getXAxis()) { // left/right normal stick
-				if (value > 0) {
-					a.onAction("Left", true, value);
-					a.onAction("Right", true, 0);
-				} else {
-					a.onAction("Left", true, value);
-					a.onAction("Right", true, 0);
-				}
-			}/* else if (axis == axis.getJoystick().getYAxis()) {
-				cur.yAxis = -value;
-
-			} else if (axis == axis.getJoystick().getAxis(JoystickAxis.Z_AXIS)) {
-				// Note: in the above condition, we could check the axis name but
-				// I have at least one joystick that reports 2 "Z Axis" axes.
-				// In this particular case, the first one is the right one so
-				// a name based lookup will find the proper one. It's a problem
-				// because the erroneous axis sends a constant stream of values.
-//				System.out.println("triggers=" + value);
-				// left is positive value and right is negative value
-				// ignore small numbers and numbers that are close to one..
-
-				cur.zAxis = value;
+		//TODO fix
+		if (axis == axis.getJoystick().getXAxis()) { // left/right normal stick
+			if (value > 0) {
+				a.onAction("Left", false, 0);
+				a.onAction("Right", true, Math.abs(value) < stickdeadzone ? 0 : value); //less than deadzone = 0
+			} else {
+				a.onAction("Left", false, 0);
+				a.onAction("Right", true, Math.abs(value) < stickdeadzone ? 0 : value);
+			}
+		} else if (axis == axis.getJoystick().getYAxis()) { //up/down normal stick
+			//not mapped yet			
+			
+		} else if (axis == axis.getJoystick().getAxis(JoystickAxis.Z_AXIS)) { //triggers?
+			if (value > 0) { //brake
+				a.onAction("Up", false, 0);
+				a.onAction("Down", true, Math.abs(value) < stickdeadzone ? 0 : value); //less than deadzone = 0
+			} else {
+				a.onAction("Down", false, 0);
+				a.onAction("Up", true, Math.abs(value) < stickdeadzone ? 0 : -value);
+			}
+			
+		} else if (axis == axis.getJoystick().getAxis(JoystickAxis.Z_ROTATION)) {
+			//not mapped yet
 				
-			} else if (axis == axis.getJoystick().getAxis(JoystickAxis.Z_ROTATION)) {
-				System.out.println("???Button 12???");
+		} else if (axis.getName().equals("Y Rotation")) { //The other stick
+			//not mapped yet
+			
+		} else if (axis.getName().equals("X Rotation")) { //The other stick
+			//not mapped yet
+		
+		} else if (axis == axis.getJoystick().getPovXAxis()) { //DPAD
+			// TODO - fix the pov_x and pov_y buttons
 
-			} else if (axis.getName().equals("Y Rotation")) { //The other stick
-				cur.yRot = value;
-			} else if (axis.getName().equals("X Rotation")) { //The other stick
-				cur.xRot = value;
-
-			} else if (axis == axis.getJoystick().getPovXAxis()) { //DPAD
-//				TODO - fix the pov_x and pov_y buttons
-				
-				if (cur.lastPovX < 0) {
-					cur.buttons.put("POV -X", false); //dpad left/right
-				} else if (cur.lastPovX > 0) {
-					cur.buttons.put("POV +X", false);
-				}
-				if (value < 0) {
-					cur.buttons.put("POV -X", true);
-				} else if (value > 0) {
-					cur.buttons.put("POV +X", true);
-				}
-				cur.lastPovX = value;
-			} else if (axis == axis.getJoystick().getPovYAxis()) {
-				System.out.println(axis.getJoystick().getPovYAxis());
-				if (cur.lastPovY < 0) {
-					cur.buttons.put("POV -Y", false); //dpad up/dwown
-				} else if (cur.lastPovY > 0) {
-					cur.buttons.put("POV +Y", false);
-				}
-				if (value < 0) {
-					cur.buttons.put("POV -Y", true);
-				} else if (value > 0) {
-					cur.buttons.put("POV +Y", true);
-				}
-				cur.lastPovY = value;
-			}*/
+		} else if (axis == axis.getJoystick().getPovYAxis()) {
+		
 		}
+		
 		arg0.isConsumed();
 	}
 
 	@Override
 	public void onJoyButtonEvent(JoyButtonEvent arg0) {
+		a.onAction(Integer.toString(arg0.getButtonIndex()), arg0.isPressed(), arg0.isPressed() ? 1 : 0);
 		
 		arg0.isConsumed();
 	}
@@ -109,52 +105,3 @@ class JoystickEventListner implements RawInputListener {
 	public void onMouseMotionEvent(MouseMotionEvent arg0) {}
 	public void onTouchEvent(TouchEvent arg0) {}
 }
-
-/*package game;
-
-import game.Controller.PlayerControl;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import com.jme3.input.InputManager;
-import com.jme3.input.Joystick;
-import com.jme3.input.KeyInput;
-import com.jme3.input.RawInputListener;
-import com.jme3.input.controls.ActionListener;
-import com.jme3.input.event.JoyAxisEvent;
-import com.jme3.input.event.JoyButtonEvent;
-import com.jme3.input.event.KeyInputEvent;
-import com.jme3.input.event.MouseButtonEvent;
-import com.jme3.input.event.MouseMotionEvent;
-import com.jme3.input.event.TouchEvent;
-
-class JoystickEventListner implements RawInputListener {
-
-	ActionListener a;
-	
-	JoystickEventListner (ActionListener a) {
-		this.a = a;
-	}
-	
-	public void beginInput() {}
-	public void endInput() {}
-
-	@Override
-	public void onJoyAxisEvent(JoyAxisEvent arg0) {
-		if (Math.abs(arg0.getValue()) > 0.1) { //because deadzone TODO setting
-			a.onAction(arg0.getAxis().getJoystick(), arg0.getAxis(), arg0.getValue());
-		}
-	}
-
-	@Override
-	public void onJoyButtonEvent(JoyButtonEvent arg0) {
-		con.setButtonValue(arg0.getButton().getJoystick(), arg0.getButton(), arg0.isPressed());
-	}
-
-	public void onKeyEvent(KeyInputEvent arg0) {}
-	public void onMouseButtonEvent(MouseButtonEvent arg0) {}
-	public void onMouseMotionEvent(MouseMotionEvent arg0) {}
-	public void onTouchEvent(TouchEvent arg0) {}
-}
-*/

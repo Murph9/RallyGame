@@ -218,6 +218,10 @@ public class Rally extends SimpleApplication {
 	
 		RigidBodyControl landscape = new RigidBodyControl(world, 0);
 		s.addControl(landscape);
+		if (ifShadow) {
+			s.setShadowMode(ShadowMode.Receive);
+		}
+
 		bulletAppState.getPhysicsSpace().add(landscape);
 		
 		rootNode.attachChild(s);

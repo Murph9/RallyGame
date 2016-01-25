@@ -41,12 +41,11 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 	int curGear = 1;
 	int curRPM = 0;
 	
-	boolean ifAccel = false;
-	float accelCurrent = 1; //TODO keys are off on, so 0 or 1, controllers not so much
+	float accelCurrent = 0;
 	
 	float steeringCurrent = 0;
-	boolean steerLeft = false;
-	boolean steerRight= false;
+	float steerLeft = 0;
+	float steerRight= 0;
 	
 	float brakeCurrent = 0;
 	
@@ -143,20 +142,19 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		//tpf is being used as the value for joysticks. deal with it
 		switch(binding) {
 		case "Left": 
-			steerLeft = value; //TODO controller logic doesn't work with this.
+			steerLeft = tpf;
 			break;
 			
 		case "Right": 
-			steerRight = value;
+			steerRight = tpf;
 			break;
 			
 		case "Up":
-			ifAccel = value;
+			accelCurrent = tpf;
 			break;
 			
 		case "Down":
-			if (value) brakeCurrent = car.MAX_BRAKE;
-			else brakeCurrent = 0;
+			brakeCurrent = car.MAX_BRAKE*tpf;
 			break;
 			
 		case "Jump":
@@ -181,17 +179,22 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 			else curGear = 1;
 			break;
 			
-		case "LookBack":
+		case "Lookback":
 			ifLookBack = value;
+			break;
+			
+		default:
+			//nothing
+			break;
 		}
 	}
 	//end controls
 	
 	
-	//TODO Things taken out:
+	//TODO Things taken out of physics:
 	//- handbrake
 	
-	//TODO need to add redline (which is kill engine if above <number>)
+	//TODO need to add redline (which kills the engine if rpm is above redline)
 	
 	
 	////////////////////////////////////////////////////
@@ -264,13 +267,9 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		//////////////////////////////////////
 		//longitudinal forces
 		float accel = getEngineWheelForce(velocity.z)*accelCurrent;
-		if (!ifAccel) { //no accel for you (so it still calculates the RPMs)
-			accel = 0;
-//			totalaccel = car.MAX_ACCEL; //remove for 'geared' accel
-//			totalaccel = FastMath.clamp(accel, (float)-weightperwheel*car.MAX_GRIP, (float)weightperwheel*car.MAX_GRIP);
-		}
 
 //		H.p(VehicleHelper.longitudinalForce(car, )); //TODO wait until we have the slip ratio
+		
 		
 		accel /= 2; //per wheel because at least 2 wheels
 		if (car.driveFront && car.driveRear) { 
@@ -281,28 +280,24 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 			fl.z = accel;
 			fr.z = accel;
 		}
-//		fl.x = FastMath.cos(steeringCurrent)*fl.x; //TODO why are these here?
-//		fr.x = FastMath.cos(steeringCurrent)*fr.x;
-		
 		if (car.driveRear) {
 			rl.z = accel;
 			rr.z = accel;
 		}
-		float te = (float)weightperwheel*car.MAX_GRIP;		
+
+		float maxforceOnWheel = (float)weightperwheel*car.MAX_GRIP;
 		
-		//TODO if we want fancy traction it would have to be applied here
+		wheel[0].skid = FastMath.clamp((maxforceOnWheel-fl.length())/maxforceOnWheel, 0, 1);
+		fl = new Vector3f(H.clamp(fl, maxforceOnWheel));
 		
-		wheel[0].skid = FastMath.clamp((te-fl.length())/te, 0, 1);
-		fl = new Vector3f(H.clamp(fl, te));
+		wheel[1].skid = FastMath.clamp((maxforceOnWheel-fr.length())/maxforceOnWheel, 0, 1);
+		fr = new Vector3f(H.clamp(fr, maxforceOnWheel));
 		
-		wheel[1].skid = FastMath.clamp((te-fr.length())/te, 0, 1);
-		fr = new Vector3f(H.clamp(fr, te));
+		wheel[2].skid = FastMath.clamp((maxforceOnWheel-rl.length())/maxforceOnWheel, 0, 1);
+		rl = new Vector3f(H.clamp(rl, maxforceOnWheel));
 		
-		wheel[2].skid = FastMath.clamp((te-rl.length())/te, 0, 1);
-		rl = new Vector3f(H.clamp(rl, te));
-		
-		wheel[3].skid = FastMath.clamp((te-rr.length())/te, 0, 1);
-		rr = new Vector3f(H.clamp(rr, te));
+		wheel[3].skid = FastMath.clamp((maxforceOnWheel-rr.length())/maxforceOnWheel, 0, 1);
+		rr = new Vector3f(H.clamp(rr, maxforceOnWheel));
 		
 		//and finally apply forces
 		if (wheel[0].contact) 
@@ -351,12 +346,23 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 	//////////////////////////////////////////////////////////////
 	public void myUpdate(float tpf) {
 		distance += getLinearVelocity().length()*tpf;
+		rally.frameCount++;
+		
+		Matrix3f playerRot = new Matrix3f();
+		getPhysicsRotationMatrix(playerRot);
+		
+		left = playerRot.mult(new Vector3f(1,0,0));
+		right = playerRot.mult(new Vector3f(1,0,0).negate());
 		
 		for (MyWheelNode w: wheel) {
 			WheelInfo wi = getWheel(w.num).getWheelInfo();
 			RaycastInfo ray = wi.raycastInfo;
 			w.contact = (ray.groundObject != null);
 		}
+
+		//skid marks
+		addSkidLines();
+
 		
 		specialPhysics(tpf); //yay
 		
@@ -364,29 +370,16 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 			wn.update(tpf);
 		}
 		
-		
-		//skid marks
-		rally.frameCount++;
-		if (rally.frameCount % 4 == 0) {
-			addSkidLines();
-		}
-				
-		Matrix3f playerRot = new Matrix3f();
-		getPhysicsRotationMatrix(playerRot);
-		
-		left = playerRot.mult(new Vector3f(1,0,0));
-		right = playerRot.mult(new Vector3f(1,0,0).negate());
-
 		//wheel turning logic -TODO
 			//trying to turn less at high speed
 		steeringCurrent = 0;
 		float speedFactor = 1;
 //		speedFactor = car.steerFactor/(getLinearVelocity().length()*10);
-		if (steerLeft) { //left
-			steeringCurrent += car.steerAngle*speedFactor;
+		if (steerLeft != 0) { //left
+			steeringCurrent += car.steerAngle*speedFactor*steerLeft; //maxangle*speedFactor*turnfraction
 		}
-		if (steerRight) { //right
-			steeringCurrent -= car.steerAngle*speedFactor;
+		if (steerRight != 0) { //right
+			steeringCurrent -= car.steerAngle*speedFactor*steerRight; //maxangle*speedFactor*turnfraction
 		}
 		steer(steeringCurrent);
 		H.pUI(steeringCurrent);
@@ -394,14 +387,16 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 	
 	///////////////////////////////////////////////////////////
 	private void addSkidLines() {
-		for (MyWheelNode w: wheel) {
-			w.addSkidLine();
-		}
-		
-		int extra = skidList.size() - 500; //so i can remove more than one (like all 4 that frame)
-		for (int i = 0; i < extra; i++) {
-			skidNode.detachChild(skidList.getFirst());
-			skidList.removeFirst();
+		if (rally.frameCount % 4 == 0) {
+			for (MyWheelNode w: wheel) {
+				w.addSkidLine();
+			}
+			
+			int extra = skidList.size() - 500; //so i can remove more than one (like all 4 that frame)
+			for (int i = 0; i < extra; i++) {
+				skidNode.detachChild(skidList.getFirst());
+				skidList.removeFirst();
+			}
 		}
 	}
 	

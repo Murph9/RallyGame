@@ -62,8 +62,8 @@ public abstract class CarData {
 	float RESISTANCE = 15.0f; //linear component
 
 	//other (debug)
-	float MAX_ACCEL = 9000; //TODO take it out?
-	float MAX_BRAKE = 10000;
+//	float MAX_ACCEL = 9000; //TODO take it out?
+	float MAX_BRAKE = 20000;
 	Vector3f JUMP_FORCE = new Vector3f(0, 5*mass, 0);
 	
 	boolean driveFront = false, driveRear = true; //this would be rear wheel drive
@@ -120,20 +120,7 @@ class RallyCar extends CarData {
 		carModel = dir+"car4raid_1.obj"; //...well it is now?
 		wheelModel = dir+"wheelraid1.obj";
 		
-		/* just from looking at top gear rally:
-		 * - oversteers easily, and feels light,
-		 *  + snaps at a very small slip angle
-		 *   - don't know if MAX_GRIP actually plays a part yet (doesn't look like it)
-		 *  + might not need the stock jme3 traction
-		 * - camera centered on the front of the car
-		 *  + seems to follow velocity direction greatly, and some some fancy rules on slow speeds
-		 * - suspension is slightly bouncy and likes being close under the car, but can extend the length of the car
-		 *  + remember im looking at the "soft suspension" option
-		 */
-		//////////////////////////////////////////////////////////////////////
-		//DON'T TOUCH THESE UNTIL YOU GET THE ACTUAL PHYSICS OF THE CAR RIGHT
-		//////////////////////////////////////////////////////////////////////		
-		mass = 1000;
+		mass = 1400;
 		
 		wheel0Slip = 0.01f; //if you make it zero relaly slow speeds get weird
 		wheel1Slip = 0.01f;
@@ -165,13 +152,16 @@ class RallyCar extends CarData {
 		susDamping = dampValue * 2 * FastMath.sqrt(stiffness);
 		maxSusForce = 25000;
 		
-		torque = new float[]{0,720,880,920,960,973,720,10}; //starts at 0 rpm, steps every 1000rpm (until done)
+		torque = new float[]{0,420,580,620,660,673,420,10}; //starts at 0 rpm, steps every 1000rpm (until done)
 		diffRatio = 4f;
 		
-		transEffic = 0.75f;
-		diffRatio = 3.42f;
-		gearRatios = new float[]{-2.9f,2.66f,1.78f,1.3f,1,0.74f,0.5f};
+		gearDown = 2900;
+		gearUp = 5700;
+		redline = 6500;
 		
+		transEffic = 0.75f;
+		diffRatio = 5.5f;
+		gearRatios = new float[]{-3.5f,3.66f,2.5f,1.9f,1.4f,1.02f,0.7f};
 	}
 }
 
@@ -217,7 +207,7 @@ class TrackCar extends CarData {
 		redline = 15000;
 		
 		diffRatio = 5.5f;
-		gearRatios = new float[]{-10f,3.23f,2.19f,1.71f,1.39f,1.16f,0.93f};; //reverse,gear1,gear2,g3,g4,g5,g6,...
+		gearRatios = new float[]{-5f,3.23f,2.19f,1.71f,1.39f,1.16f,0.93f};; //reverse,gear1,gear2,g3,g4,g5,g6,...
 	}
 }
 
