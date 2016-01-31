@@ -244,7 +244,7 @@ public class UINode {
 	}
 
 	public void update(float tpf) {
-		MyVehicleControl player = r.player;
+		MyPhysicsVehicle player = r.player;
 		AssetManager assetManager = r.getAssetManager();
 		
 		r.player.getForwardVector(r.player.forward);

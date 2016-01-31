@@ -26,7 +26,7 @@ class JoystickEventListner implements RawInputListener {
 	Map<String, String> buttonToMapping = new HashMap<String, String>(); //to game mapping
 	
 	ActionListener a;
-	double stickdeadzone = 0.15f;
+	double stickdeadzone = 0.25f; //TODO maybe still causing issues?
 	
 	JoystickEventListner (ActionListener a) {
 		this.a = a;
@@ -65,11 +65,11 @@ class JoystickEventListner implements RawInputListener {
 			
 		} else if (axis == axis.getJoystick().getAxis(JoystickAxis.Z_AXIS)) { //triggers?
 			if (value > 0) { //brake
-				a.onAction("Up", false, 0);
-				a.onAction("Down", true, Math.abs(value) < stickdeadzone ? 0 : value); //less than deadzone = 0
+				a.onAction("Accel", false, 0);
+				a.onAction("Brake", true, Math.abs(value) < stickdeadzone ? 0 : value); //less than deadzone = 0
 			} else {
-				a.onAction("Down", false, 0);
-				a.onAction("Up", true, Math.abs(value) < stickdeadzone ? 0 : -value);
+				a.onAction("Brake", false, 0);
+				a.onAction("Accel", true, Math.abs(value) < stickdeadzone ? 0 : -value);
 			}
 			
 		} else if (axis == axis.getJoystick().getAxis(JoystickAxis.Z_ROTATION)) {

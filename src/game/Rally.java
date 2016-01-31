@@ -38,12 +38,14 @@ import com.jme3.texture.Texture;
 
 //Long TODO's: 
 //i broke skidmarks again, will need to fix that :(
+
 //ENGINE stuff
 
 //Bugs TODO
 //maps a little weird still, probably need to remove some of the postprocessing stuff
  //tried that and got no where, they are connected for some reason
 
+//track car is slightly off the groud by a lot
 
 public class Rally extends SimpleApplication {
 	
@@ -54,16 +56,16 @@ public class Rally extends SimpleApplication {
 	private MyCamera camNode;
 	
 	//World Model
-	StaticWorld world = StaticWorld.dragstrip; //Set map here
+	StaticWorld world = StaticWorld.skyline; //Set map here
 	
-	boolean dynamicWorld = false;
+	boolean dynamicWorld = true;
 	WP[] type = Floating.values();
 	boolean needsMaterial = false;
 	WorldBuilder worldB;
 	
 	//car stuff
 	private Node carNode;
-	MyVehicleControl player;
+	MyVC player;
 	private CarData car = new TrackCar(); //set car here
 	
 	//gui stuff
@@ -94,7 +96,7 @@ public class Rally extends SimpleApplication {
 		
 		Rally app = new Rally();
 		AppSettings settings = new AppSettings(true);
-		settings.setResolution(1028,728);
+		settings.setResolution(1280,720);
 		settings.setFrameRate(fps);
 		settings.setUseJoysticks(true);
 		settings.setVSync(false);
@@ -236,7 +238,6 @@ public class Rally extends SimpleApplication {
 	
 	private void buildPlayer() {
 		Node carmodel = (Node) assetManager.loadModel(car.carModel);
-		carmodel.setShadowMode(ShadowMode.CastAndReceive);
 		
 		TextureKey key = new TextureKey("Textures/Sky/Bright/BrightSky.dds", true);
         key.setGenerateMips(true);
@@ -257,10 +258,11 @@ public class Rally extends SimpleApplication {
 		compoundShape.addChildShape(CollisionShapeFactory.createDynamicMeshShape(carmodel), new Vector3f(0,0,0));
 		
 		carNode = new Node("vehicleNode");
-		player = new MyVehicleControl(compoundShape, car, carNode, this);
+		player = new MyVC(compoundShape, car, carNode, this);
 		
 		carNode.addControl(player);
 		carNode.attachChild(carmodel);
+		carNode.setShadowMode(ShadowMode.CastAndReceive);
 
 		rootNode.attachChild(carNode);
 		rootNode.attachChild(player.skidNode);

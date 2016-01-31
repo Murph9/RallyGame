@@ -34,9 +34,10 @@ public abstract class CarData {
 
 	float rollFraction = 0.5f; //1 = full into roll, 0 = no roll
 	
-	float w_xOff = 0.68f; //wheels x offset (side), meters
-	float w_yOff = 0f; //wheels y offest (height), meters
-	float w_zOff = 1.1f; //wheels z offset (front and back), meters
+	//TODO make front and back independant
+	float wheel_xOff = 0.68f; //wheels x offset (side), meters
+	float wheel_yOff = 0f; //wheels y offest (height), meters
+	float wheel_zOff = 1.1f; //wheels z offset (front and back), meters
 	
 	//suspension values for wheels
 	//see for details: https://docs.google.com/Doc?docid=0AXVUZ5xw6XpKZGNuZG56a3FfMzU0Z2NyZnF4Zmo&hl=en
@@ -75,6 +76,9 @@ public abstract class CarData {
 	float gearDown = 2400;//TODO find good numbers for all of these gear numbers
 	float gearUp = 5500;
 	float redline = 6500;
+	
+	float engineCompression = 0.2f; //is going to be multiplied by the RPM
+	float redlineCutTime = 0.4f;
 	
 	float transEffic = 0.75f; //TODO apparently 0.7 is common (power is lost to rotating things
 	float diffRatio = 5.0f; //helps set the total drive ratio
@@ -133,9 +137,9 @@ class RallyCar extends CarData {
 		driveFront = true;
 		driveRear = true;
 		
-		w_xOff = 0.7f;
-		w_yOff = 0.2f;
-		w_zOff = 1.1f;
+		wheel_xOff = 0.7f;
+		wheel_yOff = 0.2f;
+		wheel_zOff = 1.1f;
 		
 		CA_F = -7;
 		CA_R = -6;
@@ -196,12 +200,12 @@ class TrackCar extends CarData {
 		length = 5f;
 		rollFraction = 0.2f;
 		
-		w_xOff = 0.62f;
-		w_yOff = 0.05f;
-		w_zOff = 1.6f;
+		wheel_xOff = 0.62f;
+		wheel_yOff = 0.12f;
+		wheel_zOff = 1.63f;
 		
 		//TODO found via internet
-		torque = new float[]{0,300,500,500,550,608,595,580,560,540,525,500,440,400,350,0};
+		torque = new float[]{0, 300,500,500,550,608, 595,580,560,540,525, 500,440,410,360,250};
 		gearDown = 9000;
 		gearUp = 13500;
 		redline = 15000;

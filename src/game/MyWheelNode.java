@@ -22,7 +22,7 @@ public class MyWheelNode extends Node {
 
 	static Texture tex;
 	
-	MyVehicleControl mvc;
+	MyPhysicsVehicle mvc;
 	int num;
 	
 	Material mat;
@@ -34,7 +34,7 @@ public class MyWheelNode extends Node {
 	float skid;
 	ParticleEmitter smoke;
 	
-	public MyWheelNode(String name, MyVehicleControl mvc, int num) {
+	public MyWheelNode(String name, MyPhysicsVehicle mvc, int num) {
 		super(name);
 		tex = mvc.assetManager.loadTexture("assets/stripes.png");
 		

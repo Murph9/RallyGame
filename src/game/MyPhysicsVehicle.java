@@ -3,11 +3,15 @@ package game;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.bulletphysics.dynamics.vehicle.DefaultVehicleRaycaster;
 import com.bulletphysics.dynamics.vehicle.WheelInfo;
 import com.bulletphysics.dynamics.vehicle.WheelInfo.RaycastInfo;
 import com.jme3.asset.AssetManager;
+import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CollisionShape;
-import com.jme3.bullet.control.VehicleControl;
+import com.jme3.bullet.objects.PhysicsVehicle;
+import com.jme3.bullet.objects.VehicleWheel;
+import com.jme3.bullet.util.Converter;
 import com.jme3.input.InputManager;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.math.FastMath;
@@ -17,7 +21,10 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
-public class MyVehicleControl extends VehicleControl implements ActionListener {
+//extends:
+//https://github.com/jMonkeyEngine/jmonkeyengine/blob/master/jme3-jbullet/src/main/java/com/jme3/bullet/objects/PhysicsVehicle.java
+
+public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 	
 	//skid stuff
 	Node skidNode = new Node();
@@ -32,10 +39,14 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 	AssetManager assetManager;
 	Rally rally;
 	
+	Controller myJoy;
+	
 	//car data
-	CarData car;
+	protected CarData car;
+	protected Node carNode;
 	
 	MyWheelNode[] wheel = new MyWheelNode[4];
+	Spatial[] wheelSpat = new Spatial[4];
 	
 	//driving stuff
 	int curGear = 1;
@@ -54,15 +65,17 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 	
 	float distance = 0;
 	boolean ifLookBack = false;
+	boolean ifLookSide = false;
 	
-    Controller myJoy;
+	float redlineKillFor = 0;
 	
-	double t1, t2;
+//	double t1, t2;
 	
-	MyVehicleControl(CollisionShape col, CarData cartype, Node carNode, Rally rally) {
+	MyPhysicsVehicle(CollisionShape col, CarData cartype, Node carNode, Rally rally) {
 		super(col, cartype.mass);
 		this.car = cartype;
 		this.rally = rally;
+		this.carNode = carNode;
 		this.assetManager = rally.getAssetManager();
 		
 		this.setSuspensionCompression(car.susCompression);
@@ -72,33 +85,33 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		this.setMaxSuspensionTravelCm(car.maxSusTravel);
 		
 		wheel[0] = new MyWheelNode("wheel 0 node", this, 0);
-		Spatial wheel0 = assetManager.loadModel(car.wheelModel);
-		wheel0.center();
-		wheel[0].attachChild(wheel0);
-		addWheel(wheel[0], new Vector3f(-car.w_xOff, car.w_yOff, car.w_zOff),
+		wheelSpat[0] = assetManager.loadModel(car.wheelModel);
+		wheelSpat[0].center();
+		wheel[0].attachChild(wheelSpat[0]);
+		addWheel(wheel[0], new Vector3f(-car.wheel_xOff, car.wheel_yOff, car.wheel_zOff),
 				car.wheelDirection, car.wheelAxle, car.restLength, car.wheelRadius, true);
 
 		wheel[1] = new MyWheelNode("wheel 1 node", this, 1);
-		Spatial wheel1 = assetManager.loadModel(car.wheelModel);
-		wheel1.rotate(0, FastMath.PI, 0);
-		wheel1.center();
-		wheel[1].attachChild(wheel1);
-		addWheel(wheel[1], new Vector3f(car.w_xOff, car.w_yOff, car.w_zOff),
+		wheelSpat[1] = assetManager.loadModel(car.wheelModel);
+		wheelSpat[1].rotate(0, FastMath.PI, 0);
+		wheelSpat[1].center();
+		wheel[1].attachChild(wheelSpat[1]);
+		addWheel(wheel[1], new Vector3f(car.wheel_xOff, car.wheel_yOff, car.wheel_zOff),
 				car.wheelDirection, car.wheelAxle, car.restLength, car.wheelRadius, true);
 
 		wheel[2] = new MyWheelNode("wheel 2 node", this, 2);
-		Spatial wheel2 = assetManager.loadModel(car.wheelModel);
-		wheel2.center();
-		wheel[2].attachChild(wheel2);
-		addWheel(wheel[2], new Vector3f(-car.w_xOff-0.05f, car.w_yOff, -car.w_zOff),
+		wheelSpat[2] = assetManager.loadModel(car.wheelModel);
+		wheelSpat[2].center();
+		wheel[2].attachChild(wheelSpat[2]);
+		addWheel(wheel[2], new Vector3f(-car.wheel_xOff-0.05f, car.wheel_yOff, -car.wheel_zOff),
 				car.wheelDirection, car.wheelAxle, car.restLength, car.wheelRadius, false);
 
 		wheel[3] = new MyWheelNode("wheel 3 node", this, 3);
-		Spatial wheel3 = assetManager.loadModel(car.wheelModel);
-		wheel3.rotate(0, FastMath.PI, 0);
-		wheel3.center();
-		wheel[3].attachChild(wheel3);
-		addWheel(wheel[3], new Vector3f(car.w_xOff+0.05f, car.w_yOff, -car.w_zOff),
+		wheelSpat[3] = assetManager.loadModel(car.wheelModel);
+		wheelSpat[3].rotate(0, FastMath.PI, 0);
+		wheelSpat[3].center();
+		wheel[3].attachChild(wheelSpat[3]);
+		addWheel(wheel[3], new Vector3f(car.wheel_xOff+0.05f, car.wheel_yOff, -car.wheel_zOff),
 				car.wheelDirection, car.wheelAxle, car.restLength, car.wheelRadius, false);
 
 		//Their friction
@@ -117,18 +130,34 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		setupKeys();
 //		skidNode.setShadowMode(ShadowMode.Off);
 		
-	}	
+	}
+	
+	/**Used internally, creates the actual vehicle constraint when vehicle is added to phyicsspace
+     */
+    public void createVehicle(PhysicsSpace space) {
+        physicsSpace = space;
+        if (space == null) {
+            return;
+        }
+        rayCaster = new DefaultVehicleRaycaster(space.getDynamicsWorld());
+        vehicle = new MyRcV(tuning, rBody, rayCaster);
+        vehicle.setCoordinateSystem(0, 1, 2);
+        for (VehicleWheel wheel : wheels) {
+            wheel.setWheelInfo(vehicle.addWheel(Converter.convert(wheel.getLocation()), Converter.convert(wheel.getDirection()), Converter.convert(wheel.getAxle()),
+                    wheel.getRestLength(), wheel.getRadius(), tuning, wheel.isFrontWheel()));
+        }
+    }
 	
 	//controls
 	private void setupKeys() {
 		InputManager i = rally.getInputManager();
 		i.addRawInputListener(new MyKeyListener(this)); //my input class, practice for controller class
-		i.addRawInputListener(new JoystickEventListner(this));
+//		i.addRawInputListener(new JoystickEventListner(this));
 		
-		i.addListener(this, "Left");
+		i.addListener(this, "Left"); //the raw listeners above should "input" to these
 		i.addListener(this, "Right");
-		i.addListener(this, "Up");
-		i.addListener(this, "Down");
+		i.addListener(this, "Accel");
+		i.addListener(this, "Brake");
 		i.addListener(this, "Jump");
 		i.addListener(this, "Handbrake");
 		i.addListener(this, "Reset");
@@ -149,11 +178,11 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 			steerRight = tpf;
 			break;
 			
-		case "Up":
+		case "Accel":
 			accelCurrent = tpf;
 			break;
 			
-		case "Down":
+		case "Brake":
 			brakeCurrent = car.MAX_BRAKE*tpf;
 			break;
 			
@@ -183,19 +212,20 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 			ifLookBack = value;
 			break;
 			
+		case "Lookside":
+			ifLookSide = value;
+			break;
+			
 		default:
 			//nothing
+			System.err.println("unknown key");
 			break;
 		}
 	}
 	//end controls
 	
-	
 	//TODO Things taken out of physics:
 	//- handbrake
-	
-	//TODO need to add redline (which kills the engine if rpm is above redline)
-	
 	
 	////////////////////////////////////////////////////
 	
@@ -217,7 +247,7 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		}
 
 		if (velocity.z == 0) { //to avoid the divide by zero below
-			velocity.z += 0.001;
+			velocity.z += 0.0001;
 		}
 		//important angles
 		double[] slips = VehicleHelper.calcSlipAngle(velocity.x, velocity.z, yawspeed, steeringCur);
@@ -266,7 +296,17 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 
 		//////////////////////////////////////
 		//longitudinal forces
-		float accel = getEngineWheelForce(velocity.z)*accelCurrent;
+		float wheelRot = velocity.z/(2*FastMath.PI*car.wheelRadius); //w = v/(2*Pi*r) -> rad/sec
+		for (Spatial w : wheelSpat) {
+			Quaternion q = new Quaternion();
+			q.fromAngles(-wheelRot,0, 0);
+//			w.setRotation(w.getLocalRotation().inverse());
+			//TODO negate the internal wheel object rotation
+		}
+		
+		float engineForce = getEngineWheelForce(wheelRot, tpf)*accelCurrent; 
+		
+		float accel = engineForce-Math.signum(velocity.z)*car.engineCompression*curRPM;
 
 //		H.p(VehicleHelper.longitudinalForce(car, )); //TODO wait until we have the slip ratio
 		
@@ -277,27 +317,26 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		}
 			
 		if (car.driveFront) {
-			fl.z = accel;
-			fr.z = accel;
+			fl.z = fr.z = accel;
 		}
 		if (car.driveRear) {
-			rl.z = accel;
-			rr.z = accel;
+			rl.z = rr.z = accel;
 		}
 
-		float maxforceOnWheel = (float)weightperwheel*car.MAX_GRIP;
+		float latforceOnWheel = (float)weightperwheel*car.MAX_GRIP;
 		
-		wheel[0].skid = FastMath.clamp((maxforceOnWheel-fl.length())/maxforceOnWheel, 0, 1);
-		fl = new Vector3f(H.clamp(fl, maxforceOnWheel));
+		//TODO remove when skid ratio comes in, (and mix them together)
+		wheel[0].skid = FastMath.clamp((latforceOnWheel-fl.length())/latforceOnWheel, 0, 1);
+		fl = new Vector3f(H.clamp(fl, latforceOnWheel));
 		
-		wheel[1].skid = FastMath.clamp((maxforceOnWheel-fr.length())/maxforceOnWheel, 0, 1);
-		fr = new Vector3f(H.clamp(fr, maxforceOnWheel));
+		wheel[1].skid = FastMath.clamp((latforceOnWheel-fr.length())/latforceOnWheel, 0, 1);
+		fr = new Vector3f(H.clamp(fr, latforceOnWheel));
 		
-		wheel[2].skid = FastMath.clamp((maxforceOnWheel-rl.length())/maxforceOnWheel, 0, 1);
-		rl = new Vector3f(H.clamp(rl, maxforceOnWheel));
+		wheel[2].skid = FastMath.clamp((latforceOnWheel-rl.length())/latforceOnWheel, 0, 1);
+		rl = new Vector3f(H.clamp(rl, latforceOnWheel));
 		
-		wheel[3].skid = FastMath.clamp((maxforceOnWheel-rr.length())/maxforceOnWheel, 0, 1);
-		rr = new Vector3f(H.clamp(rr, maxforceOnWheel));
+		wheel[3].skid = FastMath.clamp((latforceOnWheel-rr.length())/latforceOnWheel, 0, 1);
+		rr = new Vector3f(H.clamp(rr, latforceOnWheel));
 		
 		//and finally apply forces
 		if (wheel[0].contact) 
@@ -311,13 +350,23 @@ public class MyVehicleControl extends VehicleControl implements ActionListener {
 		
 	}
 	
-	private float getEngineWheelForce(float speedForward) {
-		float wheelrot = speedForward/(2*FastMath.PI*car.wheelRadius); //w = v/(2*Pi*r) -> rad/sec
-		
+	private float getEngineWheelForce(float wheelrot, float tpf) {
 		float curGearRatio = car.gearRatios[curGear];//0 = reverse, >= 1 normal make sense
 		float diffRatio = car.diffRatio;
 		curRPM = (int)(wheelrot*curGearRatio*diffRatio*60); //rad/sec to rad/min and the drive ratios to engine
 			//wheel rad/s, gearratio, diffratio, conversion from rad/sec to rad/min
+
+		redlineKillFor -= tpf;
+		
+		if (redlineKillFor > 0) {
+			return 0;
+		}
+		
+		if (Math.abs(curRPM) > car.redline) {
+			redlineKillFor = car.redlineCutTime;
+			return 0; //kill engine if greater than redline
+		}
+		
 		autoTransmission(curRPM);
 		
 		float engineTorque = lerpTorque(curRPM);
