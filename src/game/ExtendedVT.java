@@ -1,11 +1,14 @@
 package game;
 
+import com.bulletphysics.dynamics.vehicle.VehicleTuning;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 
-public abstract class CarData {
+public abstract class ExtendedVT {
 	
 	static final String dir = "assets/models/";
+	
+	VehicleTuning vt = null;
 	
 	//model strings (can be xx.obj or xx.blend)
 	String carModel = dir+"car4.obj";
@@ -98,7 +101,7 @@ public abstract class CarData {
 
 }
 
-class NormalCar extends CarData {
+class NormalCar extends ExtendedVT {
 	//for using the default settings.
 	//probably shouldn't have a custom constructor
 	
@@ -106,7 +109,7 @@ class NormalCar extends CarData {
 	
 }
 
-class NormalFCar extends CarData {
+class NormalFCar extends ExtendedVT {
 	//for using the default settings.
 	//probably shouldn't have a custom constructor
 	
@@ -118,7 +121,7 @@ class NormalFCar extends CarData {
 }
 
 
-class RallyCar extends CarData {
+class RallyCar extends ExtendedVT {
 	
 	RallyCar() {
 		carModel = dir+"car4raid_1.obj"; //...well it is now?
@@ -169,7 +172,7 @@ class RallyCar extends CarData {
 	}
 }
 
-class TrackCar extends CarData {
+class TrackCar extends ExtendedVT {
 	
 	TrackCar() {
 		carModel = dir+"f1.blend";

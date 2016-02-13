@@ -42,7 +42,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 	Controller myJoy;
 	
 	//car data
-	protected CarData car;
+	protected ExtendedVT car;
 	protected Node carNode;
 	
 	MyWheelNode[] wheel = new MyWheelNode[4];
@@ -71,7 +71,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 	
 //	double t1, t2;
 	
-	MyPhysicsVehicle(CollisionShape col, CarData cartype, Node carNode, Rally rally) {
+	MyPhysicsVehicle(CollisionShape col, ExtendedVT cartype, Node carNode, Rally rally) {
 		super(col, cartype.mass);
 		this.car = cartype;
 		this.rally = rally;
@@ -140,7 +140,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
             return;
         }
         rayCaster = new DefaultVehicleRaycaster(space.getDynamicsWorld());
-        vehicle = new MyRcV(tuning, rBody, rayCaster);
+        vehicle = new ExtendedRcV(car, rBody, rayCaster);
         vehicle.setCoordinateSystem(0, 1, 2);
         for (VehicleWheel wheel : wheels) {
             wheel.setWheelInfo(vehicle.addWheel(Converter.convert(wheel.getLocation()), Converter.convert(wheel.getDirection()), Converter.convert(wheel.getAxle()),
@@ -499,7 +499,7 @@ class VehicleHelper {
 	
 	//TODO these fancy methods don't work
 	//http://www.gamedev.net/topic/462784-simplified-pacejka-magic-formula/
-	static double longitudinalFancyForce(CarData c, float slipRatio, float Fz) {
+	static double longitudinalFancyForce(ExtendedVT c, float slipRatio, float Fz) {
 		CarWheelData d = c.wheeldata;
 		double PeakFC = Fz*d.b1 + d.b2;
 		
@@ -516,7 +516,7 @@ class VehicleHelper {
 		return Force;
 	}
 	
-	static double lateralFancyForce(CarData c, float slipangle, float Fz) {
+	static double lateralFancyForce(ExtendedVT c, float slipangle, float Fz) {
 		CarWheelData d = c.wheeldata;
 		double PeakFC = Fz*d.b1 + d.b2;
 		double y = 0; //camber angle (is always going to be 0)
@@ -542,7 +542,7 @@ class VehicleHelper {
 	 * @param Fz Load on the tire
 	 * @return The force expected
 	 */
-	static double magicForumlaSimple(CarData c, float slip, float Fz) {
+	static double magicForumlaSimple(ExtendedVT c, float slip, float Fz) {
 		CarWheelData d = c.wheeldata;
 		double PeakFC = Fz*d.b1 + d.b2;
 

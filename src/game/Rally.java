@@ -66,7 +66,7 @@ public class Rally extends SimpleApplication {
 	//car stuff
 	private Node carNode;
 	MyVC player;
-	private CarData car = new TrackCar(); //set car here
+	private ExtendedVT car = new TrackCar(); //set car here
 	
 	//gui stuff
 	UINode uiNode;
