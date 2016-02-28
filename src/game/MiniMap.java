@@ -30,8 +30,9 @@ public class MiniMap {
 	
 	//TODO also fix the scene here so the water isn't so distracting
 	public void update(float tpf) {
-		Vector3f pos = r.player.getPhysicsLocation();
-		cam.lookAt(pos, r.player.forward);
+		Vector3f pos = r.cb.get(0).getPhysicsLocation();
+		Vector3f f = new Vector3f();
+		cam.lookAt(pos, r.cb.get(0).getForwardVector(f));
 		
 		pos.addLocal(0,height,0);
 		cam.setLocation(pos);

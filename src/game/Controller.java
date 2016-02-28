@@ -39,14 +39,14 @@ public class Controller {
 			// In this particular case, the first one is the right one so
 			// a name based lookup will find the proper one. It's a problem
 			// because the erroneous axis sends a constant stream of values.
-//			System.out.println("triggers=" + value);
+			// H.p("triggers=" + value);
 			// left is positive value and right is negative value
 			// ignore small numbers and numbers that are close to one..
 
 			cur.zAxis = value;
 			
 		} else if (axis == axis.getJoystick().getAxis(JoystickAxis.Z_ROTATION)) {
-			System.out.println("???Button 12???");
+			H.p("???Button 12???");
 
 		} else if (axis.getName().equals("Y Rotation")) { //The other stick
 			cur.yRot = value;
@@ -68,7 +68,7 @@ public class Controller {
 			}
 			cur.lastPovX = value;
 		} else if (axis == axis.getJoystick().getPovYAxis()) {
-			System.out.println(axis.getJoystick().getPovYAxis());
+//			H.p(axis.getJoystick().getPovYAxis());
 			if (cur.lastPovY < 0) {
 				cur.buttons.put("POV -Y", false); //dpad up/dwown
 			} else if (cur.lastPovY > 0) {

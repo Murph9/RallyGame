@@ -1,7 +1,6 @@
 package game;
 
 import java.util.LinkedList;
-import java.util.List;
 
 import com.bulletphysics.dynamics.vehicle.DefaultVehicleRaycaster;
 import com.bulletphysics.dynamics.vehicle.WheelInfo;
@@ -27,11 +26,11 @@ import com.jme3.scene.Spatial;
 public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 	
 	//skid stuff
-	Node skidNode = new Node();
+	Node skidNode;
 	LinkedList<Spatial> skidList = new LinkedList<Spatial>();
 	
 	//directions
-	Vector3f forward = new Vector3f();
+	Vector3f up = new Vector3f();
 	Vector3f right = new Vector3f();
 	Vector3f left = new Vector3f();
 	
@@ -40,6 +39,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 	Rally rally;
 	
 	Controller myJoy;
+	AI ai;
 	
 	//car data
 	protected ExtendedVT car;
@@ -69,14 +69,15 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 	
 	float redlineKillFor = 0;
 	
-//	double t1, t2;
-	
 	MyPhysicsVehicle(CollisionShape col, ExtendedVT cartype, Node carNode, Rally rally) {
 		super(col, cartype.mass);
 		this.car = cartype;
 		this.rally = rally;
 		this.carNode = carNode;
 		this.assetManager = rally.getAssetManager();
+		
+		this.skidNode = new Node();
+		rally.getRootNode().attachChild(skidNode);
 		
 		this.setSuspensionCompression(car.susCompression);
 		this.setSuspensionDamping(car.susDamping);
@@ -127,9 +128,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		}
 		
 		////////////////////////
-		setupKeys();
-//		skidNode.setShadowMode(ShadowMode.Off);
-		
+		if (carNode.getName().equals("0"))
+			setupKeys();
 	}
 	
 	/**Used internally, creates the actual vehicle constraint when vehicle is added to phyicsspace
@@ -140,7 +140,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
             return;
         }
         rayCaster = new DefaultVehicleRaycaster(space.getDynamicsWorld());
-        vehicle = new ExtendedRcV(car, rBody, rayCaster);
+        vehicle = new ExtendedRcV(car, rBody, rayCaster); //<-- i added it here for the change of constructor
         vehicle.setCoordinateSystem(0, 1, 2);
         for (VehicleWheel wheel : wheels) {
             wheel.setWheelInfo(vehicle.addWheel(Converter.convert(wheel.getLocation()), Converter.convert(wheel.getDirection()), Converter.convert(wheel.getAxle()),
@@ -148,13 +148,33 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
         }
     }
 	
+    
+    public void giveAI(AI a) {
+    	this.ai = a;
+    	InputManager i = rally.getInputManager();
+    	
+    	i.addRawInputListener(a);
+    	
+    	i.addListener(this, "Left"); 
+		i.addListener(this, "Right");
+		i.addListener(this, "Accel");
+		i.addListener(this, "Brake");
+		i.addListener(this, "Jump");
+		i.addListener(this, "Handbrake");
+		i.addListener(this, "Reset");
+		i.addListener(this, "Physics");
+		i.addListener(this, "LookBack");
+		i.addListener(this, "Reverse");
+    }
+    
 	//controls
 	private void setupKeys() {
 		InputManager i = rally.getInputManager();
 		i.addRawInputListener(new MyKeyListener(this)); //my input class, practice for controller class
 //		i.addRawInputListener(new JoystickEventListner(this));
 		
-		i.addListener(this, "Left"); //the raw listeners above should "input" to these
+		//maps to:
+		i.addListener(this, "Left"); 
 		i.addListener(this, "Right");
 		i.addListener(this, "Accel");
 		i.addListener(this, "Brake");
@@ -199,8 +219,12 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 			ifHandbrake = value;
 			break;
 			
+		case "Flip":
+			if (value) this.flipMe();
+			break;
+			
 		case "Reset":
-			if (value) reset();
+			if (value) this.reset();
 			break;
 			
 		case "Reverse":
@@ -218,21 +242,21 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 			
 		default:
 			//nothing
-			System.err.println("unknown key");
+			System.err.println("unknown key: "+binding);
 			break;
 		}
 	}
 	//end controls
 	
 	//TODO Things taken out of physics:
-	//- handbrake
+	//- handbrake (there is a chance that the longtitudinal magic should fix this
 	
 	////////////////////////////////////////////////////
 	
 	private void specialPhysics(float tpf) {
 		//NOTE: that z is forward, x is side
 		// - the reference notes say that x is forward and y is sideways so just be careful
-		
+
 		Matrix3f w_angle = getPhysicsRotationMatrix();
 		Vector3f w_velocity = getLinearVelocity();
 		
@@ -242,7 +266,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		Vector3f velocity = w_angle.invert().mult(w_velocity);
 		
 		float steeringCur = steeringCurrent;
-		if (velocity.z < 0) { //need to flip the steering on moving in reverse
+		if (velocity.z < 0) { //to flip the steering on moving in reverse
 			steeringCur *= -1;
 		}
 
@@ -250,19 +274,11 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 			velocity.z += 0.0001;
 		}
 		//important angles
-		double[] slips = VehicleHelper.calcSlipAngle(velocity.x, velocity.z, yawspeed, steeringCur);
+		double[] slips = VehiclePhysicsHelper.calcSlipAngle(velocity.x, velocity.z, yawspeed, steeringCur);
 		double slipanglefront = slips[0];
 		double slipanglerear = slips[1];
 		UINode.angle.setText(H.roundDecimal(Math.abs(FastMath.RAD_TO_DEG*slipanglerear), 0)+" '");
-		
-		//decay these values at slow speeds (< 2 m/s)
-		//TODO this kind of breaks slow speed turning
-		if (Math.abs(velocity.z) < 2) {
-			slipanglefront *= velocity.z*velocity.z/4; //4 because 2*2
-			slipanglerear *= velocity.z*velocity.z/4;
-		}
 
-		
 		//////////////////////////////////////////////////
 		//'Wheel'less forces (TODO braking in wheels)
 		float braking = 0;
@@ -288,11 +304,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		Vector3f rr = new Vector3f(); //rear  right
 		
 		//latitudinal forces that are calculated off the slip angle
-		fl.x = fr.x = -(float)VehicleHelper.magicForumlaSimple(car, (float)slipanglefront, (float)weightperwheel);
-		rl.x = rr.x = -(float)VehicleHelper.magicForumlaSimple(car, (float)slipanglerear, (float)weightperwheel);
-
-//		fl.x = fr.x = (float)(slipanglefront * car.CA_F*weightperwheel); //old lateral physics
-//		rl.x = rr.x = (float)(slipanglerear * car.CA_R*weightperwheel);
+		fl.x = fr.x = -(float)VehiclePhysicsHelper.tractionFormula(car.wheellatdata, (float)slipanglefront, (float)weightperwheel);
+		rl.x = rr.x = -(float)VehiclePhysicsHelper.tractionFormula(car.wheellongdata, (float)slipanglerear, (float)weightperwheel);
 
 		//////////////////////////////////////
 		//longitudinal forces
@@ -337,6 +350,17 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		
 		wheel[3].skid = FastMath.clamp((latforceOnWheel-rr.length())/latforceOnWheel, 0, 1);
 		rr = new Vector3f(H.clamp(rr, latforceOnWheel));
+		
+
+		//TODO stop the wobble (hint the basic vehicle code does this through impulses)
+		float lim = 5;
+		if (Math.abs(velocity.z) <= lim) {
+			fl.mult(velocity.length()*velocity.length()/(lim*2));
+			fr.mult(velocity.length()*velocity.length()/(lim*2));
+			rl.mult(velocity.length()*velocity.length()/(lim*2));
+			rr.mult(velocity.length()*velocity.length()/(lim*2));
+		}
+		
 		
 		//and finally apply forces
 		if (wheel[0].contact) 
@@ -395,11 +419,11 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 	//////////////////////////////////////////////////////////////
 	public void myUpdate(float tpf) {
 		distance += getLinearVelocity().length()*tpf;
-		rally.frameCount++;
 		
 		Matrix3f playerRot = new Matrix3f();
 		getPhysicsRotationMatrix(playerRot);
 		
+		up = playerRot.mult(new Vector3f(0,1,0));
 		left = playerRot.mult(new Vector3f(1,0,0));
 		right = playerRot.mult(new Vector3f(1,0,0).negate());
 		
@@ -408,10 +432,9 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 			RaycastInfo ray = wi.raycastInfo;
 			w.contact = (ray.groundObject != null);
 		}
-
+		
 		//skid marks
 		addSkidLines();
-
 		
 		specialPhysics(tpf); //yay
 		
@@ -452,24 +475,13 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 
 	private void reset() {
 		setPhysicsRotation(new Matrix3f());
-		setLinearVelocity(new Vector3f(0,0,0));
-		setAngularVelocity(new Vector3f(0,0,0));
-		resetSuspension();
-		
-		rally.arrowNode.detachAllChildren();
+		setLinearVelocity(new Vector3f());
+		setAngularVelocity(new Vector3f());
+//		resetSuspension();
 
+		rally.reset();
+		
 		if (rally.dynamicWorld) {
-			//TODO wow this is a mess
-			List<Spatial> ne = new LinkedList<Spatial>(rally.worldB.pieces);
-			for (Spatial s: ne) {
-				rally.getPhysicsSpace().remove(s.getControl(0));
-				rally.worldB.detachChild(s);
-				rally.worldB.pieces.remove(s);
-			}
-			rally.worldB.start = new Vector3f(0,0,0);
-			rally.worldB.nextPos = new Vector3f(0,0,0);
-			rally.worldB.nextRot = new Quaternion();
-			
 			setPhysicsLocation(rally.worldB.start);
 			Matrix3f p = new Matrix3f();
 			p.fromAngleAxis(FastMath.DEG_TO_RAD*90, new Vector3f(0,1,0));
@@ -486,9 +498,18 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 			w.last = new Vector3f(0,0,0);
 		}
 	}
+	
+	private void flipMe() {
+		if (this.up.y > 0) return; //if already the right way up
+		
+		Quaternion q = getPhysicsRotation(); 
+		q.multLocal(new Quaternion().fromAngleAxis(FastMath.PI, new Vector3f(0,0,1)));
+		setPhysicsRotation(q);
+		setPhysicsLocation(getPhysicsLocation().add(new Vector3f(0,1,0)));
+	}
 }
 
-class VehicleHelper {
+class VehiclePhysicsHelper {
 	
 	static double[] calcSlipAngle(double vx, double vz, double yawspeed, double steeringCur) {
 		double[] out = new double[]{
@@ -497,70 +518,20 @@ class VehicleHelper {
 		return out;
 	}
 	
-	//TODO these fancy methods don't work
 	//http://www.gamedev.net/topic/462784-simplified-pacejka-magic-formula/
-	static double longitudinalFancyForce(ExtendedVT c, float slipRatio, float Fz) {
-		CarWheelData d = c.wheeldata;
-		double PeakFC = Fz*d.b1 + d.b2;
-		
-		double C = d.b0;
-		double D = Fz*PeakFC;
-		double BCD = (d.b3*Fz*Fz + d.b4*Fz) * Math.exp(-d.b5*Fz);
-		double B = BCD/(C*D);
-		double H = d.b9*Fz + d.b10;
-		double E = (d.b6*Fz*Fz + d.b7*Fz + d.b8) * (1 - d.b13*FastMath.sign((float)(slipRatio+H)));
-		double V = d.b11*Fz + d.b12;
-		double B1 = B * (slipRatio + H);
-		
-		double Force = D * Math.sin(C * Math.atan(B1 - E * (B1 - Math.atan(B1)))) + V;
-		return Force;
-	}
+	//http://www.edy.es/dev/docs/pacejka-94-parameters-explained-a-comprehensive-guide/
 	
-	static double lateralFancyForce(ExtendedVT c, float slipangle, float Fz) {
-		CarWheelData d = c.wheeldata;
-		double PeakFC = Fz*d.b1 + d.b2;
-		double y = 0; //camber angle (is always going to be 0)
-		
-		double C = d.a0;
-		double D = Fz*PeakFC * (1 - d.a15*y*y);
-		double BCD = d.a3*Math.sin(Math.atan(Fz/d.a4) * 2) * (1 - d.a5*Math.abs(y));
-		double B = BCD/(C*D);
-		double H = d.a8*Fz + d.a9 + d.a10*y;
-		double E = (d.a6*Fz + d.a7) * (1 - (d.a16*y + d.a17)*FastMath.sign((float)(slipangle+H)));
-		double V = d.a11*Fz + d.a12 + (d.a13*Fz + d.a14)*y*Fz;
-		double B1 = B * (slipangle + H);
-		
-		double Force = D * Math.sin(C * Math.atan(B1 - E * (B1 - Math.atan(B1)))) + V;
-		return Force;
-	}
+	//There were fancy versions of the Pacejka's Formula here but there were removed.
+		//Try the git repositiory to get them back. (i should say 'removed' in the git message)
 	
-	
-	/** Pacejka's Formula simplified 
-	 * (bottom of http://www.edy.es/dev/docs/pacejka-94-parameters-explained-a-comprehensive-guide/)
-	 * @param c The constant data about the car
-	 * @param slip Slip angle or slip ratio
+	/** Pacejka's Formula simplified from the bottom of:.
+	 * http://www.edy.es/dev/docs/pacejka-94-parameters-explained-a-comprehensive-guide/
+	 * @param w Pick the lateral or longitudial version to send.
+	 * @param slip Slip angle or slip ratio (it doesn't matter except for one value changes on it)
 	 * @param Fz Load on the tire
 	 * @return The force expected
 	 */
-	static double magicForumlaSimple(ExtendedVT c, float slip, float Fz) {
-		CarWheelData d = c.wheeldata;
-		double PeakFC = Fz*d.b1 + d.b2;
-
-		double C = d.a0;
-		double D = Fz*PeakFC;
-		double BCD = d.a3*Math.sin(Math.atan(Fz/d.a4) * 2);
-		double B = BCD/(C*D);
-		double H = d.a8*Fz + d.a9;
-		double E = (d.a6*Fz + d.a7) * (1 - (d.a17)*FastMath.sign((float)(slip+H)));
-		
-		//TODO: not too sure why the above doesn't work, but here are some values from the source
-		B = 10;
-		C = 1.9;
-		D = 1;
-		E = 0.97;
-		
-		
-		double Force = Fz * D * Math.sin(C * Math.atan(B*slip - E * (B*slip - Math.atan(B*slip))));
-		return Force;
+	static float tractionFormula(CarWheelData w, float slip, float Fz) {
+		return Fz * w.D * FastMath.sin(w.C * FastMath.atan(w.B*slip - w.E * (w.B*slip - FastMath.atan(w.B*slip))));
 	}
 }

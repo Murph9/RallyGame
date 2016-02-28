@@ -7,8 +7,12 @@ import com.jme3.math.Vector3f;
 public abstract class ExtendedVT {
 	
 	static final String dir = "assets/models/";
-	
-	VehicleTuning vt = null;
+
+	//List of not primitives:
+	VehicleTuning vt = null; //TODO the original code doesn't even use it
+	//grip constants
+	CarWheelData wheellatdata = new NormalLatData();
+	CarWheelData wheellongdata = new NormalLongData();
 	
 	//model strings (can be xx.obj or xx.blend)
 	String carModel = dir+"car4.obj";
@@ -66,7 +70,6 @@ public abstract class ExtendedVT {
 	float RESISTANCE = 15.0f; //linear component
 
 	//other (debug)
-//	float MAX_ACCEL = 9000; //TODO take it out?
 	float MAX_BRAKE = 20000;
 	Vector3f JUMP_FORCE = new Vector3f(0, 5*mass, 0);
 	
@@ -90,15 +93,10 @@ public abstract class ExtendedVT {
 	//TODO i found a porsche boxter engine curve:
 //	float[] torque = new float[]{0,223,250,280,300,310,280,245,10};
 
-	/////////////////////////////////
-	//grip constants
-	CarWheelData wheeldata = new NormalWheel();
-	
 	//old constants from simpler traction
 	float CA_R = -5.3f;
 	float CA_F = -5f;
 	float MAX_GRIP = 2.5f;
-
 }
 
 class NormalCar extends ExtendedVT {
@@ -106,25 +104,20 @@ class NormalCar extends ExtendedVT {
 	//probably shouldn't have a custom constructor
 	
 	NormalCar() {}
-	
 }
 
 class NormalFCar extends ExtendedVT {
-	//for using the default settings.
-	//probably shouldn't have a custom constructor
-	
+	//Front wheel drive car
 	NormalFCar() {
 		driveFront = true;
 		driveRear = false;
 	}
-	
 }
-
 
 class RallyCar extends ExtendedVT {
 	
 	RallyCar() {
-		carModel = dir+"car4raid_1.obj"; //...well it is now?
+		carModel = dir+"car4raid_1.obj";
 		wheelModel = dir+"wheelraid1.obj";
 		
 		mass = 1400;
@@ -147,7 +140,6 @@ class RallyCar extends ExtendedVT {
 		CA_F = -7;
 		CA_R = -6;
 		MAX_GRIP = 3f;
-//		MAX_LAT_GRIP = 3f;
 		
 		stiffness  = 35.0f;
 		restLength = 0.15f;
@@ -218,4 +210,50 @@ class TrackCar extends ExtendedVT {
 	}
 }
 
+///////////////////////////////////////
+//for the runing mode
+
+class Runner extends ExtendedVT {
+	
+	Runner() {
+		
+	}
+}
+
+class Hunter extends ExtendedVT {
+	
+	Hunter() {
+		carModel = dir+"sa_hummer.blend";
+		wheelModel = dir+"sa_hummer_wheel.blend";
+		
+		mass = 2500;
+		
+		wheel_xOff = 1.0f;
+		wheel_yOff = -0.45f;
+		wheel_zOff = 1.85f;
+		
+		wheelRadius = 0.4f;
+
+		rollFraction = 0.1f;
+		
+		CA_F = -7;
+		CA_R = -6;
+		MAX_GRIP = 3f;
+				
+		susCompression = compValue * 2 * FastMath.sqrt(stiffness);
+		susDamping = dampValue * 2 * FastMath.sqrt(stiffness);
+		maxSusForce = 55000;
+		
+		torque = new float[]{0,520,680,720,760,773,520,110};
+		diffRatio = 4f;
+		
+		gearDown = 2900;
+		gearUp = 5700;
+		redline = 6500;
+		
+		transEffic = 0.75f;
+		diffRatio = 5.5f;
+		gearRatios = new float[]{-3.5f,3.66f,2.5f,1.9f,1.4f,1.02f,0.7f};
+	}
+}
 

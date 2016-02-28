@@ -10,11 +10,9 @@ import world.StaticWorld;
 import world.WorldBuilder;
 
 import com.jme3.app.SimpleApplication;
-import com.jme3.asset.TextureKey;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CollisionShape;
-import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.font.BitmapFont;
@@ -29,12 +27,10 @@ import com.jme3.post.filters.BloomFilter;
 import com.jme3.post.ssao.SSAOFilter;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.*;
-import com.jme3.scene.debug.Arrow;
 import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.shadow.EdgeFilteringMode;
 import com.jme3.system.AppSettings;
-import com.jme3.texture.Texture;
 
 //Long TODO's: 
 //i broke skidmarks again, will need to fix that :(
@@ -43,7 +39,7 @@ import com.jme3.texture.Texture;
 
 //Bugs TODO
 //maps a little weird still, probably need to remove some of the postprocessing stuff
- //tried that and got no where, they are connected for some reason
+ //tried that and got no where, they are connected for some reason [you do copy the first one]
 
 //track car is slightly off the groud by a lot
 
@@ -56,18 +52,18 @@ public class Rally extends SimpleApplication {
 	private MyCamera camNode;
 	
 	//World Model
-	StaticWorld world = StaticWorld.skyline; //Set map here
+	StaticWorld world = StaticWorld.track2; //Set map here
 	
-	boolean dynamicWorld = true;
+	boolean dynamicWorld = false;
 	WP[] type = Floating.values();
 	boolean needsMaterial = false;
 	WorldBuilder worldB;
 	
 	//car stuff
-	private Node carNode;
-	MyVC player;
-	private ExtendedVT car = new TrackCar(); //set car here
-	
+	CarBuilder cb;
+	private ExtendedVT car = new NormalCar(); //set car 1 here
+	private ExtendedVT them = new Hunter(); //set car 2 here
+		
 	//gui stuff
 	UINode uiNode;
 	MiniMap minimap;
@@ -76,9 +72,7 @@ public class Rally extends SimpleApplication {
 	Node arrowNode;
 	int frameCount = 0;
 	public boolean ifDebug = false;
-	
-	private double totaltime = 0;
-	
+		
 	//shadow stuff
 	private final boolean ifShadow = true;
 	private final boolean ifFancyShadow = false;
@@ -96,7 +90,7 @@ public class Rally extends SimpleApplication {
 		
 		Rally app = new Rally();
 		AppSettings settings = new AppSettings(true);
-		settings.setResolution(1280,720);
+		settings.setResolution(1280,720); //1280,720 //1920,1080
 		settings.setFrameRate(fps);
 		settings.setUseJoysticks(true);
 		settings.setVSync(false);
@@ -112,11 +106,12 @@ public class Rally extends SimpleApplication {
 	public void simpleInitApp() {
 		bulletAppState = new BulletAppState();
 		stateManager.attach(bulletAppState);
-//		bulletAppState.setDebugEnabled(true);
+//		bulletAppState.setDebugEnabled(true); //TODO this causes a illegal argument exception
+//		getPhysicsSpace().enableDebug(assetManager); //so does this
 		
 		createWorld();
 		
-		buildPlayer();
+		buildPlayers();
 		initCameras();
 		
 		setupGUI();
@@ -124,9 +119,9 @@ public class Rally extends SimpleApplication {
 		connectJoyStick();
 		
 		//Just getting numbers
-		Quaternion q = new Quaternion();
-		q.fromAngleAxis(FastMath.HALF_PI/2, new Vector3f(0,1,0));
-		System.out.println(q);
+//		Quaternion q = new Quaternion();
+//		q.fromAngleAxis(FastMath.HALF_PI/2, new Vector3f(0,1,0));
+//		System.out.println(q);
 	}
 
 	private void createWorld() {
@@ -169,7 +164,6 @@ public class Rally extends SimpleApplication {
 		sun.setDirection(new Vector3f(-0.3f, -0.6f, -0.5f).normalizeLocal());
 		rootNode.addLight(sun);
 		
-//		bulletAppState.getPhysicsSpace().setGravity(new Vector3f(0, -9.81f, 0)); //defaults to normal
 		viewPort.setBackgroundColor(ColorRGBA.Blue);
 		
 		arrowNode = new Node();
@@ -232,70 +226,27 @@ public class Rally extends SimpleApplication {
 	private void initCameras() {
 		flyCam.setEnabled(false);
 		
-		camNode = new MyCamera("Cam Node", cam, player, this);
+		camNode = new MyCamera("Cam Node", cam, cb.get(0));
 		rootNode.attachChild(camNode);
 	}
 	
-	private void buildPlayer() {
-		Node carmodel = (Node) assetManager.loadModel(car.carModel);
-		
-		TextureKey key = new TextureKey("Textures/Sky/Bright/BrightSky.dds", true);
-        key.setGenerateMips(true);
-        key.setAsCube(true);
-        final Texture tex = assetManager.loadTexture(key);
-        
-        for (Geometry g: getGeomList(carmodel)) {
-        	Material m = g.getMaterial();
-            m.setBoolean("UseMaterialColors",true);
-            m.setTexture("EnvMap", tex);
-            m.setVector3("FresnelParams", new Vector3f(0.05f, 0.18f, 0.11f));
-            g.setMaterial(m);
-        }
-        
-		//create a compound shape and attach CollisionShape for the car body at 0,1,0
-		//this shifts the effective center of mass of the BoxCollisionShape to 0,-1,0
-		CompoundCollisionShape compoundShape = new CompoundCollisionShape();
-		compoundShape.addChildShape(CollisionShapeFactory.createDynamicMeshShape(carmodel), new Vector3f(0,0,0));
-		
-		carNode = new Node("vehicleNode");
-		player = new MyVC(compoundShape, car, carNode, this);
-		
-		carNode.addControl(player);
-		carNode.attachChild(carmodel);
-		carNode.setShadowMode(ShadowMode.CastAndReceive);
-
-		rootNode.attachChild(carNode);
-		rootNode.attachChild(player.skidNode);
-		
-		getPhysicsSpace().add(player);
+	private void buildPlayers() {
+		Vector3f start;
+		Matrix3f dir = new Matrix3f();
 		if (dynamicWorld) {
-			player.setPhysicsLocation(worldB.start);
-			Matrix3f p = player.getPhysicsRotationMatrix();
-			p.fromAngleAxis(FastMath.DEG_TO_RAD*90, new Vector3f(0,1,0));
-			player.setPhysicsRotation(p);
+			start = worldB.start;
+			dir.fromAngleAxis(FastMath.DEG_TO_RAD*90, new Vector3f(0,1,0));
 		} else {
-			player.setPhysicsLocation(world.start);
+			start = world.start;
 		}
-	}
-	
-	private List<Geometry> getGeomList(Node n) {
-		return RGeomList(n);
-	}
-	private List<Geometry> RGeomList(Node n) {
-		List<Geometry> listg = new LinkedList<Geometry>();
 		
-		List<Spatial> list = n.getChildren();
-		if (list.isEmpty()) return listg;
+		cb = new CarBuilder();		
+		cb.addPlayer(0, this, car, start, dir, false);
 		
-		for (Spatial sp: list) {
-        	if (sp instanceof Node) {
-        		listg.addAll(getGeomList((Node)sp));
-        	}
-        	if (sp instanceof Geometry) {
-        		listg.add((Geometry)sp);
-        	}
-        }
-		return listg;
+		for (int i = 1; i < 4; i++) {
+			start = start.add(3,0,0);
+			cb.addPlayer(i, this, them, start, dir, true);
+		}
 	}
 	
 	private void connectJoyStick() {
@@ -309,25 +260,16 @@ public class Rally extends SimpleApplication {
 		uiNode = new UINode(this);
 	}
 	
-	public PhysicsSpace getPhysicsSpace(){
-		return bulletAppState.getPhysicsSpace();
-	}
-	
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	/* Physics below */
+	/* Not init below */
 	
 	@Override
 	public void simpleUpdate(float tpf) {
-		totaltime += tpf; //calc total time
+		frameCount++;
 		
-		player.myUpdate(tpf); //BIG update here
-		if (dynamicWorld) {
-			worldB.update(player.getPhysicsLocation());
-		}
-			
-		if (ifDebug) {
-			System.out.println(player.getPhysicsLocation() + "distance:"+player.distance + "time:" + totaltime);
-		}
+		cb.update(tpf);
+		
 		//////////////////////////////////
 		//Hud stuff
 		uiNode.update(tpf);
@@ -339,25 +281,6 @@ public class Rally extends SimpleApplication {
 		
 	}
 	
-	void putShapeArrow(ColorRGBA color, Vector3f dir, Vector3f pos) {
-		Arrow arrow = new Arrow(dir);
-		arrow.setLineWidth(1); // make arrow thicker
-		Geometry arrowG = createShape(arrow, color);
-		arrowG.setLocalTranslation(pos);
-		arrowG.setShadowMode(ShadowMode.Off);
-		arrowNode.attachChild(arrowG);
-	}
-	
-	Geometry createShape(Mesh shape, ColorRGBA color){
-		Geometry g = new Geometry("coordinate axis", shape);
-		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		mat.getAdditionalRenderState().setWireframe(true);
-		mat.setColor("Color", color);
-		g.setMaterial(mat);
-		g.setShadowMode(ShadowMode.Off);
-		return g;
-	}
-	
 	public BitmapFont getFont() {
 		return guiFont;
 	}
@@ -366,5 +289,25 @@ public class Rally extends SimpleApplication {
 	}
 	public com.jme3.renderer.Camera getCam() {
 		return cam;
+	}
+	
+	public PhysicsSpace getPhysicsSpace(){
+		return bulletAppState.getPhysicsSpace();
+	}
+	
+	public void reset() {
+		if (dynamicWorld) {
+			List<Spatial> ne = new LinkedList<Spatial>(worldB.pieces);
+			for (Spatial s: ne) {
+				getPhysicsSpace().remove(s.getControl(0));
+				worldB.detachChild(s);
+				worldB.pieces.remove(s);
+			}
+			worldB.start = new Vector3f(0,0,0);
+			worldB.nextPos = new Vector3f(0,0,0);
+			worldB.nextRot = new Quaternion();
+		} else {
+			
+		}
 	}
 }

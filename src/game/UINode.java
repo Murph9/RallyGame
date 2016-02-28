@@ -23,6 +23,7 @@ public class UINode {
 	 */
 	
 	Rally r; //want all the infos
+	MyPhysicsVehicle p;
 	
 	//hud stuff
 	BitmapText statsText;
@@ -63,7 +64,9 @@ public class UINode {
 	
 	UINode (Rally r) {
 		this.r = r;
-		this.redline = r.player.car.redline;
+		this.p = r.cb.get(0);
+		
+		this.redline = p.car.redline;
 		this.finalRPM = (int)FastMath.ceil(this.redline) + 1000;
 
 		BitmapFont guiFont = r.getFont();
@@ -244,18 +247,15 @@ public class UINode {
 	}
 
 	public void update(float tpf) {
-		MyPhysicsVehicle player = r.player;
 		AssetManager assetManager = r.getAssetManager();
 		
-		r.player.getForwardVector(r.player.forward);
+		float speed = p.getLinearVelocity().length();
 		
-		float speed = player.getLinearVelocity().length();
-		
-		statsText.setText("speed:"+speed + "m/s\nRPM:" + player.curRPM);
-		int speedKMH = (int)Math.abs(player.getCurrentVehicleSpeedKmHour());
+		statsText.setText("speed:"+speed + "m/s\nRPM:" + p.curRPM);
+		int speedKMH = (int)Math.abs(p.getCurrentVehicleSpeedKmHour());
 
 		setSpeedDigits(speedKMH);
-		setGearDigit(player.curGear);
+		setGearDigit(p.curGear);
 		
 		if (r.dynamicWorld) {
 			score.setText("Placed: "+r.worldB.getTotalPlaced());
@@ -263,20 +263,20 @@ public class UINode {
 		
 		//TODO slightly fancier?
 		rpmArrow.setLocalRotation(Quaternion.IDENTITY);
-		float angle = FastMath.interpolateLinear(player.curRPM/(float)finalRPM, startAng, finalAng);
+		float angle = FastMath.interpolateLinear(p.curRPM/(float)finalRPM, startAng, finalAng);
 		rpmArrow.rotate(0, 0, angle);
 		
 		Material m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		m.setColor("Color", new ColorRGBA(player.wheel[0].skid,player.wheel[0].skid,player.wheel[0].skid,1));
+		m.setColor("Color", new ColorRGBA(p.wheel[0].skid,p.wheel[0].skid,p.wheel[0].skid,1));
 		gripBox0.setMaterial(m);
 		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		m.setColor("Color", new ColorRGBA(player.wheel[1].skid,player.wheel[1].skid,player.wheel[1].skid,1));
+		m.setColor("Color", new ColorRGBA(p.wheel[1].skid,p.wheel[1].skid,p.wheel[1].skid,1));
 		gripBox1.setMaterial(m);
 		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		m.setColor("Color", new ColorRGBA(player.wheel[2].skid,player.wheel[2].skid,player.wheel[2].skid,1));
+		m.setColor("Color", new ColorRGBA(p.wheel[2].skid,p.wheel[2].skid,p.wheel[2].skid,1));
 		gripBox2.setMaterial(m);
 		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		m.setColor("Color", new ColorRGBA(player.wheel[3].skid,player.wheel[3].skid,player.wheel[3].skid,1));
+		m.setColor("Color", new ColorRGBA(p.wheel[3].skid,p.wheel[3].skid,p.wheel[3].skid,1));
 		gripBox3.setMaterial(m);
 	}
 

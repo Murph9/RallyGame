@@ -33,6 +33,7 @@ public class MyWheelNode extends Node {
 	
 	float skid;
 	ParticleEmitter smoke;
+	boolean ifSmoke = false;
 	
 	public MyWheelNode(String name, MyPhysicsVehicle mvc, int num) {
 		super(name);
@@ -42,17 +43,20 @@ public class MyWheelNode extends Node {
 		this.num = num;
 		this.last = new Vector3f(0,0,0);
 		
-		this.smoke = initSmoke();
-		attachChild(this.smoke); //TODO fix rotate with tyre
-		
+		if (this.ifSmoke) {
+			this.smoke = initSmoke();
+			attachChild(this.smoke); //TODO fix rotate with tyre
+		}
 		this.setShadowMode(ShadowMode.Off);
 	}
 	
 	public void update(float tpf) {
-		if (skid <= 0.1 && contact) {
-			smoke.setEnabled(true);
-		} else {
-			smoke.setEnabled(false);
+		if (ifSmoke) {
+			if (skid <= 0.1 && contact) {
+				smoke.setEnabled(true);
+			} else {
+				smoke.setEnabled(false);
+			}
 		}
 		
 		//TODO should probably do something more than this..

@@ -1,7 +1,19 @@
 package game;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import com.jme3.asset.AssetManager;
+import com.jme3.material.Material;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
+import com.jme3.renderer.queue.RenderQueue.ShadowMode;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
+import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
+import com.jme3.scene.debug.Arrow;
 
 
 //Its short for help, if the name was any longer it might not actually be helpful
@@ -73,5 +85,45 @@ public class H {
 	}
 	public static String roundDecimal(double num, int places) { //...
 		return roundDecimal((float)num,places);
+	}
+	
+	public static List<Geometry> getGeomList(Node n) {
+		return RGeomList(n);
+	}
+	private static List<Geometry> RGeomList(Node n) {
+		List<Geometry> listg = new LinkedList<Geometry>();
+		
+		List<Spatial> list = n.getChildren();
+		if (list.isEmpty()) return listg;
+		
+		for (Spatial sp: list) {
+        	if (sp instanceof Node) {
+        		listg.addAll(getGeomList((Node)sp));
+        	}
+        	if (sp instanceof Geometry) {
+        		listg.add((Geometry)sp);
+        	}
+        }
+		return listg;
+	}
+	
+	public static Geometry makeShapeArrow(AssetManager am, ColorRGBA color, Vector3f dir, Vector3f pos) {
+		Arrow arrow = new Arrow(dir);
+		arrow.setLineWidth(1); // make arrow thicker
+		Geometry arrowG = createShape(am, arrow, color, pos);
+		
+		arrowG.setShadowMode(ShadowMode.Off);
+		return arrowG;
+	}
+	
+	public static Geometry createShape(AssetManager am, Mesh shape, ColorRGBA color, Vector3f pos) {
+		Material mat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+		mat.getAdditionalRenderState().setWireframe(true);
+		mat.setColor("Color", color);
+		
+		Geometry g = new Geometry("coordinate axis", shape);
+		g.setMaterial(mat);
+		g.setLocalTranslation(pos);
+		return g;
 	}
 }
