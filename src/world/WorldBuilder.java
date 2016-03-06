@@ -19,6 +19,7 @@ import com.jme3.math.Plane;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
+import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -32,7 +33,7 @@ public class WorldBuilder extends Node {
 
 	//designed to generate the world infront of the player dynamically.
 	
-	static final Quaternion 
+	public static final Quaternion 
 		STRIAGHT = Quaternion.IDENTITY,
 		LEFT_90 = new Quaternion(0, 0.7071f, 0, 0.7071f),
 		LEFT_45 = new Quaternion(0, 0.3827f, 0, 0.9239f),
@@ -48,9 +49,11 @@ public class WorldBuilder extends Node {
 	Rally rally;
 	AssetManager assetManager;
 	
-	public List<Spatial> pieces = new LinkedList<Spatial>();
+	public List<Spatial> curPieces = new LinkedList<Spatial>();
 
-	WP[] wbtype;
+	private WP[] wbs;
+	private Spatial[] spats; //yay magic array indexes
+	private CollisionShape[] colls;
 	Material mat;
 
 	boolean wantWater = true;
@@ -65,17 +68,31 @@ public class WorldBuilder extends Node {
 	float distance = 150;
 	final float max_wp = 50;
 	
-	public WorldBuilder (Rally rally, AssetManager asset, WP[] type, boolean mat) {
+	public WorldBuilder (Rally rally, AssetManager asset, WP[] type, ViewPort view, boolean mat) {
 		this.rally = rally;
 		this.assetManager = asset;
-		this.wbtype = type; //kind of keeps this class generic
-		
-		this.setShadowMode(ShadowMode.CastAndReceive);
-		
+		this.wbs = type; //kind of keeps this class generic
 		if (mat) {
 			this.mat = new Material(assetManager, "Common/MatDefs/Misc/ShowNormals.j3md");		
 			this.mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		}
+		
+		this.spats = new Spatial[wbs.length];
+		this.colls = new CollisionShape[wbs.length];
+		for (int i = 0; i < wbs.length; i++) {
+			Spatial piece = assetManager.loadModel(wbs[i].getName());
+			Spatial s = ((Node)piece).getChild(0); //there is only one object in there (hopefully)
+			if (this.mat != null) {
+				s.setMaterial(this.mat); //TODO double sided objects
+			}
+			
+			spats[i] = s; //pre load spatials
+			
+			colls[i] = CollisionShapeFactory.createMeshShape(s);
+			
+		}
+		
+		this.setShadowMode(ShadowMode.CastAndReceive);
 		
         Material matfloor = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         matfloor.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
@@ -108,9 +125,9 @@ public class WorldBuilder extends Node {
         	// we create a water processor
         	SimpleWaterProcessor waterProcessor = new SimpleWaterProcessor(assetManager);
         	// we set wave properties
-        	waterProcessor.setRenderSize(256,256);    // performance boost (don't know the default)
+        	waterProcessor.setRenderSize(256,256);    // performance boost because small (don't know the defaults)
         	waterProcessor.setWaterDepth(40);         // transparency of water
-        	waterProcessor.setDistortionScale(0.5f); // strength of waves (default = 0.2)
+        	waterProcessor.setDistortionScale(0.5f);  // strength of waves (default = 0.2)
         	waterProcessor.setWaveSpeed(0.05f);       // speed of waves
         	waterProcessor.setWaterColor(ColorRGBA.Green); //TODO actually make it green
         	
@@ -119,7 +136,7 @@ public class WorldBuilder extends Node {
         	// we set the water plane
         	Vector3f waterLocation = new Vector3f(0,-6,0);
         	waterProcessor.setPlane(new Plane(Vector3f.UNIT_Y, waterLocation.dot(Vector3f.UNIT_Y)));
-        	rally.getViewPort().addProcessor(waterProcessor);
+        	view.addProcessor(waterProcessor);
         	
         	// we define the wave size by setting the size of the texture coordinates
         	Quad quad = new Quad(4000,4000);
@@ -133,9 +150,9 @@ public class WorldBuilder extends Node {
         	water.setMaterial(waterProcessor.getMaterial());
         	rally.getRootNode().attachChild(water);
         	
-        	//add lastly a plane just under it so i don't fall forever
+        	//add lastly a plane just under it so you don't fall forever
         	///* TODO
-        	Plane under = new Plane(Vector3f.UNIT_Y, waterLocation.add(0,-1,0).dot(Vector3f.UNIT_Y));
+        	Plane under = new Plane(Vector3f.UNIT_Y, waterLocation.add(0,1.75f,0).dot(Vector3f.UNIT_Y));
         	PlaneCollisionShape p = new PlaneCollisionShape(under);
         	
         	RigidBodyControl underp = new RigidBodyControl(p, 0);
@@ -151,62 +168,61 @@ public class WorldBuilder extends Node {
 		count++;
 		if (count % 10 == 0) {
 			while (nextPos.subtract(playerPos).length() < distance) {
-				int nextb = (int)(Math.random()*wbtype.length);
-				Quaternion inv = nextRot.mult(wbtype[nextb].getNewAngle()).inverse();
-				Quaternion result = Quaternion.IDENTITY.mult(inv);
-				float angle = FastMath.acos(result.getW())*2; //believe me that this gets the angle between them
-				
-				if (FastMath.abs(angle) < FastMath.PI) { //try *3/2 if its not interesting enough
-					addModel(wbtype[nextb]);
-				}
+				addNewPiece();
 			}
-			List<Spatial> temp = new LinkedList<Spatial>(pieces);
+			
+			List<Spatial> temp = new LinkedList<Spatial>(curPieces);
 			for (Spatial sp: temp) {
 				if (sp.getWorldTranslation().subtract(playerPos).length() > distance/2) {
-						//1.5 because don't delete the ones we just placed
+						//2 because don't delete the ones we just placed
 					rally.getPhysicsSpace().remove(sp.getControl(0));
 					this.detachChild(sp);
-					pieces.remove(sp);
-					System.err.println("Removing: "+sp.getName() + ", num left: "+pieces.size());
+					curPieces.remove(sp);
+					System.err.println("Removing: "+sp.getName() + ", num left: "+curPieces.size());
+				
 				} else {
-					break;
+					break; //this means only remove in order
 				}
 			}
 		}
 	}
 	
-	//test for world building
-	public void addModel(WP world) {
-		//imported model
-		Spatial worldNode = assetManager.loadModel(world.getName());
-		Spatial s = ((Node)worldNode).getChild(0); //there is only one object in there (hopefully)
-		if (mat != null) {
-			s.setMaterial(mat); //TODO double sided objects
+	
+	private void addNewPiece() {
+		int i = (int)(Math.random()*wbs.length);
+		Quaternion inv = nextRot.mult(wbs[i].getNewAngle()).inverse();
+		Quaternion result = Quaternion.IDENTITY.mult(inv);
+		float angle = FastMath.acos(result.getW())*2; //believe me that this gets the angle between them
+		
+		if (!(FastMath.abs(angle) < FastMath.PI)) { //try *3/2 if its not interesting enough
+			return;
 		}
+		WP world = wbs[i];
+		Spatial s = spats[i].clone();
+		CollisionShape coll = colls[i];
 		
 		float scale = world.getScale();
-		
 		//translate, rotate, scale
 		s.setLocalTranslation(nextPos);
 		s.rotate(nextRot);
 		s.scale(scale);
-
-		CollisionShape coll = CollisionShapeFactory.createMeshShape(s);
 		
 		RigidBodyControl landscape = new RigidBodyControl(coll, 0);
-		s.addControl(landscape);
 		landscape.setKinematic(false);
+		s.addControl(landscape);
+		
 		rally.getPhysicsSpace().add(landscape);
 		this.attachChild(s);
 
-		System.err.println("Adding: "+world.getName());
+		System.err.println("Adding: "+world.getName() + ", at: " + nextPos);
 		if (rally.ifDebug) {
 			System.err.println("at: "+nextPos+", Rot: "+nextRot+", Obj.angle: "+world.getNewAngle()+", Obj.nextPos: "+world.getNewPos());
 		}
-		pieces.add(s);
+		curPieces.add(s);
 		
 		totalPlaced++;
-		///////////////////////////////////////
+
+		
 		//setup the position of the next object
 		Vector3f cur = world.getNewPos().mult(scale);
 		nextPos.addLocal(nextRot.mult(cur));

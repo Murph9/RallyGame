@@ -52,7 +52,8 @@ public class CarBuilder extends Node {
         for (Geometry g: H.getGeomList(carmodel)) {
         	Material m = g.getMaterial();
         	m.setBoolean("UseMaterialColors", true);
-            m.setTexture("EnvMap", tex);
+        	if (!AI)
+        		m.setTexture("EnvMap", tex);
             m.setVector3("FresnelParams", new Vector3f(0.05f, 0.18f, 0.11f));
             g.setMaterial(m);
         }
@@ -70,7 +71,7 @@ public class CarBuilder extends Node {
 		carNode.attachChild(carmodel);
 		
 		if (AI) { //laggy
-			carNode.setShadowMode(ShadowMode.Off);
+			carNode.setShadowMode(ShadowMode.Receive);
 		} else {
 			carNode.setShadowMode(ShadowMode.CastAndReceive);
 		}
@@ -102,8 +103,10 @@ public class CarBuilder extends Node {
 			carList.get(i).myUpdate(tpf);
 		}
 		
-		for (AI a: AIlist) {
-			a.update(tpf);
+		if (AIlist != null) {
+			for (AI a: AIlist) {
+				a.update(tpf);
+			}
 		}
 		
 		if (r.dynamicWorld) {
@@ -116,6 +119,8 @@ public class CarBuilder extends Node {
 	}
 	
 	public MyPhysicsVehicle get(int a) {
-		return carList.get(a);
+		if (carList.containsKey(a))
+			return carList.get(a);
+		return null;
 	}
 }

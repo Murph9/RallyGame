@@ -137,9 +137,9 @@ class RallyCar extends ExtendedVT {
 		wheel_yOff = 0.2f;
 		wheel_zOff = 1.1f;
 		
-		CA_F = -7;
-		CA_R = -6;
-		MAX_GRIP = 3f;
+		CA_R = -5.3f;
+		CA_F = -5f;
+		MAX_GRIP = 2.5f;
 		
 		stiffness  = 35.0f;
 		restLength = 0.15f;
@@ -199,14 +199,45 @@ class TrackCar extends ExtendedVT {
 		wheel_yOff = 0.12f;
 		wheel_zOff = 1.63f;
 		
-		//TODO found via internet
-		torque = new float[]{0, 300,500,500,550,608, 595,580,560,540,525, 500,440,410,360,250};
+		//TODO found via internet (f1 '09)
+		torque = new float[]{0, 300,500,500,550,608, 595,580,560,540,525, 500,440,410,360,350};
 		gearDown = 9000;
 		gearUp = 13500;
 		redline = 15000;
 		
 		diffRatio = 5.5f;
-		gearRatios = new float[]{-5f,3.23f,2.19f,1.71f,1.39f,1.16f,0.93f};; //reverse,gear1,gear2,g3,g4,g5,g6,...
+		gearRatios = new float[]{-5f,3.23f,2.19f,1.71f,1.39f,1.16f,0.93f};
+	}
+}
+
+class Rocket extends ExtendedVT {
+	
+	Rocket() {
+		mass = 900;
+		steerAngle = 0.22f;
+		
+		DRAG = 0.1f;
+		RESISTANCE = 5;
+		rollFraction = 0f;
+		
+		CA_F = -10;
+		CA_R = -9.5f;
+		MAX_GRIP = 20f;
+		MAX_BRAKE = 50000;
+		
+		torque = new float[]{0, 300,500,500,550,608, 595,580,560,540,525, 500,440,410,360,250};
+		for (int i = 0; i < torque.length; i++) {
+			torque[i] *= 2;
+		}
+		gearDown = 9000;
+		gearUp = 13500;
+		redline = 15000;
+		
+		diffRatio = 5f;
+		gearRatios = new float[]{-5f,3.23f,2.19f,1.71f,1.39f,1.16f,0.93f};
+		
+		wheellatdata = new RocketWheel();
+		wheellongdata = new RocketWheel();
 	}
 }
 

@@ -76,8 +76,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		this.carNode = carNode;
 		this.assetManager = rally.getAssetManager();
 		
-		this.skidNode = new Node();
-		rally.getRootNode().attachChild(skidNode);
+		this.skidNode = new Node(); //attached in car builder
 		
 		this.setSuspensionCompression(car.susCompression);
 		this.setSuspensionDamping(car.susDamping);
@@ -128,7 +127,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		}
 		
 		////////////////////////
-		if (carNode.getName().equals("0"))
+		if (carNode.getName().equals("0")) //yes its a little hardcoded..
 			setupKeys();
 	}
 	
@@ -321,7 +320,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		
 		float accel = engineForce-Math.signum(velocity.z)*car.engineCompression*curRPM;
 
-//		H.p(VehicleHelper.longitudinalForce(car, )); //TODO wait until we have the slip ratio
+//		H.p(VehicleHelper.longitudinalForce(car, )); //TODO wait until we have the slip ratio [don't think it works like that]
 		
 		
 		accel /= 2; //per wheel because at least 2 wheels
@@ -459,6 +458,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 	
 	///////////////////////////////////////////////////////////
 	private void addSkidLines() {
+		if (ai != null) return;
+		
 		if (rally.frameCount % 4 == 0) {
 			for (MyWheelNode w: wheel) {
 				w.addSkidLine();

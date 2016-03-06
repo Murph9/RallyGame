@@ -7,6 +7,7 @@ public enum StaticWorld {
 	
 	skyline("skyline.blend", 800, new Vector3f(-27.7f, 84.5f, 111.3f), true), 
 	duct("duct.blend", 50, new Vector3f(0,-11,0), true),
+	duct2("duct.blend", 5, new Vector3f(0,0,0), true),
 	raleigh("raleigh.blend", 8, new Vector3f(34.441566f, 15.72906f, 27.334211f), true),
 
 	dragstrip("dragstrip.blend", 10, new Vector3f(0,-4.5f,0), false),
@@ -22,7 +23,8 @@ public enum StaticWorld {
 	carpark("carpark.blend", 1, new Vector3f(0,0,0), false),
 	slotcar("slotcar.blend", 200, new Vector3f(0,0,0), false), //TODO edit
 	slotcar2("slotcar2.blend", 120, new Vector3f(44.489723f, -6.9895625f, 25.498037f), true),
-	paris("paris.blend", 1, new Vector3f(0,200,0), false),
+	
+	paris1("paris1.blend", 1, new Vector3f(40,70,0), true), //be careful with this one, large
 	;
 	
 	static final String dir = "assets/staticworld/";

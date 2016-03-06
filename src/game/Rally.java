@@ -4,6 +4,7 @@ package game;
 import java.util.LinkedList;
 import java.util.List;
 
+import world.StaticWorldBuilder;
 import world.WP;
 import world.Floating;
 import world.StaticWorld;
@@ -12,25 +13,20 @@ import world.WorldBuilder;
 import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
-import com.jme3.bullet.collision.shapes.CollisionShape;
-import com.jme3.bullet.control.RigidBodyControl;
-import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.font.BitmapFont;
 import com.jme3.input.Joystick;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
-import com.jme3.material.Material;
-import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.*;
 import com.jme3.post.FilterPostProcessor;
 import com.jme3.post.filters.BloomFilter;
 import com.jme3.post.ssao.SSAOFilter;
-import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.*;
 import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.shadow.EdgeFilteringMode;
 import com.jme3.system.AppSettings;
+import com.jme3.system.NanoTimer;
 
 //Long TODO's: 
 //i broke skidmarks again, will need to fix that :(
@@ -43,16 +39,22 @@ import com.jme3.system.AppSettings;
 
 //track car is slightly off the groud by a lot
 
+////Idea for game modes:
+//being chased. (them spawning all lightning sci-fi like)
+//  time based
+//  score based (closeness to them)
+//  touch all of them once
+//the infinite road thing
+
+
 public class Rally extends SimpleApplication {
 	
 	//boiler stuff
 	private BulletAppState bulletAppState;
 	
-	//camera stuff
-	private MyCamera camNode;
-	
 	//World Model
-	StaticWorld world = StaticWorld.track2; //Set map here
+	StaticWorld world = StaticWorld.duct2; //Set map here
+	StaticWorldBuilder sWorldB;
 	
 	boolean dynamicWorld = false;
 	WP[] type = Floating.values();
@@ -61,10 +63,13 @@ public class Rally extends SimpleApplication {
 	
 	//car stuff
 	CarBuilder cb;
-	private ExtendedVT car = new NormalCar(); //set car 1 here
-	private ExtendedVT them = new Hunter(); //set car 2 here
-		
-	//gui stuff
+	private ExtendedVT car = new Runner();
+	
+	int themCount = 10;
+	private ExtendedVT them = new Hunter();
+	
+	//gui and camera stuff
+	MyCamera camNode;
 	UINode uiNode;
 	MiniMap minimap;
 	
@@ -96,7 +101,7 @@ public class Rally extends SimpleApplication {
 		settings.setVSync(false);
 		
 		app.setSettings(settings);
-
+		app.setTimer(new NanoT60(fps));
 		app.setShowSettings(false);
 		app.setDisplayStatView(false);
 		app.start();
@@ -118,40 +123,19 @@ public class Rally extends SimpleApplication {
 		
 		connectJoyStick();
 		
-		//Just getting numbers
+		//Just getting numbers for rotations
 //		Quaternion q = new Quaternion();
 //		q.fromAngleAxis(FastMath.HALF_PI/2, new Vector3f(0,1,0));
 //		System.out.println(q);
 	}
 
 	private void createWorld() {
-		minimap = new MiniMap(this);
-		
 		if (dynamicWorld) {
-			worldB = new WorldBuilder(this, assetManager, type, needsMaterial);
+			worldB = new WorldBuilder(this, assetManager, type, viewPort, needsMaterial);
 			rootNode.attachChild(worldB);
 			
 		} else {
-			Material mat = new Material(assetManager, "Common/MatDefs/Misc/ShowNormals.j3md");
-			mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
-			
-		    //imported model		
-			Spatial worldNode = assetManager.loadModel(world.name);
-			if (worldNode instanceof Node) {
-				for (Spatial s: ((Node) worldNode).getChildren()) {
-					if (world.ifNeedsTexture) {
-						s.setMaterial(mat);
-					}
-					addWorldModel(s);
-				}
-			} else {
-				Geometry worldModel = (Geometry) assetManager.loadModel(world.name);
-				
-				if (world.ifNeedsTexture) {
-					worldModel.setMaterial(mat);
-				}
-				addWorldModel(worldModel);
-			}
+			sWorldB = new StaticWorldBuilder(this, world, ifShadow);
 		}
 		
 		//lights
@@ -203,31 +187,14 @@ public class Rally extends SimpleApplication {
         }
 		
 	}
-	
-	private void addWorldModel(Spatial s) {
-		System.err.println("Adding: "+ s.getName());
-		
-		s.move(0,-5,0);
-		s.scale(world.scale);
-		
-		CollisionShape world = CollisionShapeFactory.createMeshShape(s);
-	
-		RigidBodyControl landscape = new RigidBodyControl(world, 0);
-		s.addControl(landscape);
-		if (ifShadow) {
-			s.setShadowMode(ShadowMode.Receive);
-		}
-
-		bulletAppState.getPhysicsSpace().add(landscape);
-		
-		rootNode.attachChild(s);
-	}
 
 	private void initCameras() {
 		flyCam.setEnabled(false);
 		
 		camNode = new MyCamera("Cam Node", cam, cb.get(0));
 		rootNode.attachChild(camNode);
+		
+		minimap = new MiniMap(this, cb.get(0));
 	}
 	
 	private void buildPlayers() {
@@ -243,7 +210,7 @@ public class Rally extends SimpleApplication {
 		cb = new CarBuilder();		
 		cb.addPlayer(0, this, car, start, dir, false);
 		
-		for (int i = 1; i < 4; i++) {
+		for (int i = 1; i < themCount+1; i++) {
 			start = start.add(3,0,0);
 			cb.addPlayer(i, this, them, start, dir, true);
 		}
@@ -297,11 +264,11 @@ public class Rally extends SimpleApplication {
 	
 	public void reset() {
 		if (dynamicWorld) {
-			List<Spatial> ne = new LinkedList<Spatial>(worldB.pieces);
+			List<Spatial> ne = new LinkedList<Spatial>(worldB.curPieces);
 			for (Spatial s: ne) {
 				getPhysicsSpace().remove(s.getControl(0));
 				worldB.detachChild(s);
-				worldB.pieces.remove(s);
+				worldB.curPieces.remove(s);
 			}
 			worldB.start = new Vector3f(0,0,0);
 			worldB.nextPos = new Vector3f(0,0,0);
@@ -309,5 +276,25 @@ public class Rally extends SimpleApplication {
 		} else {
 			
 		}
+	}
+	
+}
+
+class NanoT60 extends NanoTimer {
+	
+	private float frames;
+	NanoT60(float frames) {
+		super();
+		this.frames = frames;
+	}
+	
+	public void setFrames(float frames) {
+		//for setting slow mo or something..
+	}
+	
+	@Override
+	public float getTimePerFrame() {
+		//return tpf;
+	    return 1f/frames; //frame time for 60fps
 	}
 }

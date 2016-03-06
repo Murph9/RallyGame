@@ -34,7 +34,12 @@ class NormalLongData extends CarWheelData {
 }
 
 
-class TrackWheel extends CarWheelData {
+class RocketWheel extends CarWheelData {
 	
-	TrackWheel() {}
+	RocketWheel() {
+		B = 10f;
+		C = 1.9f;
+		D = 2f;
+		E = 0.97f;
+	}
 }

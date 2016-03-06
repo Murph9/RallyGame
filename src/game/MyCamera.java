@@ -1,7 +1,6 @@
 package game;
 
 import com.jme3.math.FastMath;
-import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.CameraNode;
@@ -23,6 +22,8 @@ public class MyCamera extends CameraNode {
 		lookAt(pPos.add(p.car.LOOK_AT), new Vector3f(0,1,0)); //look at car
 		
 		setControlDir(ControlDirection.SpatialToCamera);
+		
+		
 	}
 	
 	public void myUpdate(float tpf) {
@@ -38,7 +39,7 @@ public class MyCamera extends CameraNode {
 //		}
 //		wantPos = p.getPhysicsLocation().add(p.getPhysicsRotation().mult(lookPos));
 //		wantPos.y = p.getPhysicsLocation().y+p.car.CAM_OFFSET.y;//always want to be above the player.
-		Vector3f curPos = getLocalTranslation();
+//		Vector3f curPos = getLocalTranslation();
 //		
 //		Vector3f pos = FastMath.interpolateLinear(tpf*damping, curPos, wantPos);
 //		
@@ -47,6 +48,7 @@ public class MyCamera extends CameraNode {
 //		
 		
 		// try 2
+		Vector3f curPos = getLocalTranslation();
 		Vector3f back = new Vector3f();
 		p.getForwardVector(back);
 		
