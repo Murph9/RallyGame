@@ -44,6 +44,7 @@ import com.jme3.system.NanoTimer;
 //  time based
 //  score based (closeness to them)
 //  touch all of them once
+//  get them to fall in the hole
 //the infinite road thing
 
 
@@ -63,10 +64,10 @@ public class Rally extends SimpleApplication {
 	
 	//car stuff
 	CarBuilder cb;
-	private ExtendedVT car = new Runner();
+	private FancyVT car = new Runner();
 	
 	int themCount = 10;
-	private ExtendedVT them = new Hunter();
+	private FancyVT them = new Hunter();
 	
 	//gui and camera stuff
 	MyCamera camNode;

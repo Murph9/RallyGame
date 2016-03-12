@@ -3,9 +3,9 @@ package game;
 import com.bulletphysics.dynamics.vehicle.WheelInfo;
 import com.bulletphysics.dynamics.vehicle.WheelInfoConstructionInfo;
 
-public class ExtendedWheelInfo extends WheelInfo {
+public class FancyWheelInfo extends WheelInfo {
 
-	public ExtendedWheelInfo(WheelInfoConstructionInfo ci) {
+	public FancyWheelInfo(WheelInfoConstructionInfo ci) {
 		super(ci);
 	}
 	

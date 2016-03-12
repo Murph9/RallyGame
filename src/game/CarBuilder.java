@@ -27,7 +27,7 @@ public class CarBuilder extends Node {
 		carList = new HashMap<>();
 	}
 	
-	public void addPlayer(int id, Rally rally, ExtendedVT car, Vector3f start, Matrix3f rot, boolean AI) {
+	public void addPlayer(int id, Rally rally, FancyVT car, Vector3f start, Matrix3f rot, boolean AI) {
 		if (carList.containsKey(id)) {
 			try {
 				throw new Exception("A car already has that Id");

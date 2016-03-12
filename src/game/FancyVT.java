@@ -4,7 +4,7 @@ import com.bulletphysics.dynamics.vehicle.VehicleTuning;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 
-public abstract class ExtendedVT {
+public abstract class FancyVT {
 	
 	static final String dir = "assets/models/";
 
@@ -84,7 +84,7 @@ public abstract class ExtendedVT {
 	float redline = 6500;
 	
 	float engineCompression = 0.2f; //is going to be multiplied by the RPM
-	float redlineCutTime = 0.4f;
+	float redlineCutTime = 0.3f;
 	
 	float transEffic = 0.75f; //TODO apparently 0.7 is common (power is lost to rotating things
 	float diffRatio = 5.0f; //helps set the total drive ratio
@@ -99,14 +99,14 @@ public abstract class ExtendedVT {
 	float MAX_GRIP = 2.5f;
 }
 
-class NormalCar extends ExtendedVT {
+class NormalCar extends FancyVT {
 	//for using the default settings.
 	//probably shouldn't have a custom constructor
 	
 	NormalCar() {}
 }
 
-class NormalFCar extends ExtendedVT {
+class NormalFCar extends FancyVT {
 	//Front wheel drive car
 	NormalFCar() {
 		driveFront = true;
@@ -114,7 +114,7 @@ class NormalFCar extends ExtendedVT {
 	}
 }
 
-class RallyCar extends ExtendedVT {
+class RallyCar extends FancyVT {
 	
 	RallyCar() {
 		carModel = dir+"car4raid_1.obj";
@@ -164,7 +164,7 @@ class RallyCar extends ExtendedVT {
 	}
 }
 
-class TrackCar extends ExtendedVT {
+class TrackCar extends FancyVT {
 	
 	TrackCar() {
 		carModel = dir+"f1.blend";
@@ -210,7 +210,7 @@ class TrackCar extends ExtendedVT {
 	}
 }
 
-class Rocket extends ExtendedVT {
+class Rocket extends FancyVT {
 	
 	Rocket() {
 		mass = 900;
@@ -244,14 +244,14 @@ class Rocket extends ExtendedVT {
 ///////////////////////////////////////
 //for the runing mode
 
-class Runner extends ExtendedVT {
+class Runner extends FancyVT {
 	
 	Runner() {
 		
 	}
 }
 
-class Hunter extends ExtendedVT {
+class Hunter extends FancyVT {
 	
 	Hunter() {
 		carModel = dir+"sa_hummer.blend";

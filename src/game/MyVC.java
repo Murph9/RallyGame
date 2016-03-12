@@ -28,7 +28,7 @@ public class MyVC extends MyPhysicsVehicle implements PhysicsControl {
     protected PhysicsSpace space = null;
     protected boolean added = false;
 	
-    public MyVC(CollisionShape compoundShape, ExtendedVT car, Node carNode, Rally rally) {
+    public MyVC(CollisionShape compoundShape, FancyVT car, Node carNode, Rally rally) {
     	super(compoundShape, car, carNode, rally);
 	}
 

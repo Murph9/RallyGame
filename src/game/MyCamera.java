@@ -27,30 +27,13 @@ public class MyCamera extends CameraNode {
 	}
 	
 	public void myUpdate(float tpf) {
-//		Vector3f wantPos = null;
-//		Vector3f lookPos = new Vector3f(p.car.CAM_OFFSET);
-//		if (p.ifLookBack) {
-//			lookPos.x *= -1;
-//			lookPos.z *= -1;
-//		} else if (p.ifLookSide) {
-//			Matrix3f p = new Matrix3f();
-//			p.fromAngleAxis(FastMath.DEG_TO_RAD*90, new Vector3f(0,1,0));
-//			lookPos = p.mult(lookPos);
-//		}
-//		wantPos = p.getPhysicsLocation().add(p.getPhysicsRotation().mult(lookPos));
-//		wantPos.y = p.getPhysicsLocation().y+p.car.CAM_OFFSET.y;//always want to be above the player.
-//		Vector3f curPos = getLocalTranslation();
-//		
-//		Vector3f pos = FastMath.interpolateLinear(tpf*damping, curPos, wantPos);
-//		
-//		setLocalTranslation(pos);
-//		lookAt(p.getPhysicsLocation().add(p.car.LOOK_AT), new Vector3f(0,1,0));
-//		
-		
-		// try 2
 		Vector3f curPos = getLocalTranslation();
-		Vector3f back = new Vector3f();
-		p.getForwardVector(back);
+		Vector3f forw = new Vector3f();
+		Vector3f vel = new Vector3f();
+		p.getForwardVector(forw); //look in the direction you are facing
+		p.getLinearVelocity(vel); //look in the direction you are moving
+		
+		Vector3f back = forw.normalize().interpolate(vel.normalize(), 0.5f); //average of them both
 		
 		if (!p.ifLookBack)
 			back.negateLocal();

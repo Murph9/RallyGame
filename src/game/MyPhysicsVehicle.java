@@ -42,7 +42,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 	AI ai;
 	
 	//car data
-	protected ExtendedVT car;
+	protected FancyVT car;
 	protected Node carNode;
 	
 	MyWheelNode[] wheel = new MyWheelNode[4];
@@ -69,7 +69,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 	
 	float redlineKillFor = 0;
 	
-	MyPhysicsVehicle(CollisionShape col, ExtendedVT cartype, Node carNode, Rally rally) {
+	MyPhysicsVehicle(CollisionShape col, FancyVT cartype, Node carNode, Rally rally) {
 		super(col, cartype.mass);
 		this.car = cartype;
 		this.rally = rally;
@@ -133,13 +133,14 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 	
 	/**Used internally, creates the actual vehicle constraint when vehicle is added to phyicsspace
      */
+	@Override
     public void createVehicle(PhysicsSpace space) {
         physicsSpace = space;
         if (space == null) {
             return;
         }
         rayCaster = new DefaultVehicleRaycaster(space.getDynamicsWorld());
-        vehicle = new ExtendedRcV(car, rBody, rayCaster); //<-- i added it here for the change of constructor
+        vehicle = new FancyRcV(car, rBody, rayCaster); //<-- i added it here for the change of constructor
         vehicle.setCoordinateSystem(0, 1, 2);
         for (VehicleWheel wheel : wheels) {
             wheel.setWheelInfo(vehicle.addWheel(Converter.convert(wheel.getLocation()), Converter.convert(wheel.getDirection()), Converter.convert(wheel.getAxle()),
@@ -309,18 +310,11 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		//////////////////////////////////////
 		//longitudinal forces
 		float wheelRot = velocity.z/(2*FastMath.PI*car.wheelRadius); //w = v/(2*Pi*r) -> rad/sec
-		for (Spatial w : wheelSpat) {
-			Quaternion q = new Quaternion();
-			q.fromAngles(-wheelRot,0, 0);
-//			w.setRotation(w.getLocalRotation().inverse());
-			//TODO negate the internal wheel object rotation
-		}
-		
 		float engineForce = getEngineWheelForce(wheelRot, tpf)*accelCurrent; 
 		
 		float accel = engineForce-Math.signum(velocity.z)*car.engineCompression*curRPM;
 
-//		H.p(VehicleHelper.longitudinalForce(car, )); //TODO wait until we have the slip ratio [don't think it works like that]
+//		H.p(VehicleHelper.longitudinalForce(car, )); //TODO wait until we have the slip ratio
 		
 		
 		accel /= 2; //per wheel because at least 2 wheels
@@ -430,6 +424,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 			WheelInfo wi = getWheel(w.num).getWheelInfo();
 			RaycastInfo ray = wi.raycastInfo;
 			w.contact = (ray.groundObject != null);
+			
+			w.update(tpf);
 		}
 		
 		//skid marks
@@ -437,8 +433,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		
 		specialPhysics(tpf); //yay
 		
-		for (MyWheelNode wn: wheel) {
-			wn.update(tpf);
+		for (Spatial w: wheelSpat) {
+			//TODO rotate the wheels
 		}
 		
 		//wheel turning logic -TODO
@@ -478,7 +474,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		setPhysicsRotation(new Matrix3f());
 		setLinearVelocity(new Vector3f());
 		setAngularVelocity(new Vector3f());
-//		resetSuspension();
 
 		rally.reset();
 		
@@ -507,6 +502,11 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		q.multLocal(new Quaternion().fromAngleAxis(FastMath.PI, new Vector3f(0,0,1)));
 		setPhysicsRotation(q);
 		setPhysicsLocation(getPhysicsLocation().add(new Vector3f(0,1,0)));
+	}
+	
+	@Override
+	public float getCurrentVehicleSpeedKmHour() {
+		return vehicle.getCurrentSpeedKmHour();
 	}
 }
 
