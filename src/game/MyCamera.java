@@ -15,7 +15,7 @@ public class MyCamera extends CameraNode {
 		super(name, c);
 		this.p = p;
 		
-		this.damping = 50; //just high so it has no delay
+		this.damping = 20; //just high so it has no delay
 		
 		Vector3f pPos = p.getPhysicsLocation();
 		setLocalTranslation(pPos.add(p.car.CAM_OFFSET)); //starting position of the camera

@@ -40,6 +40,7 @@ public class MyWheelNode extends Node {
 		super(name);
 		tex = mvc.assetManager.loadTexture("assets/stripes.png");
 		
+		this.skid = 1;
 		this.mvc = mvc;
 		this.num = num;
 		this.last = new Vector3f(0,0,0);
@@ -103,8 +104,8 @@ public class MyWheelNode extends Node {
 		if (a.equals(new Vector3f(0,0,0)) || b.equals(new Vector3f(0,0,0))) {
 			return; //don't make a line because they aren't valid positions
 		}
-		a.y += 0.05;
-		b.y += 0.05; //z-buffering (i.e. to stop it "fighting" with the ground)
+		a.y += 0.1;
+		b.y += 0.1; //z-buffering (i.e. to stop it "fighting" with the ground)
 		
 		Mesh mesh = new Mesh(); //making a quad positions
 		Vector3f [] vertices = new Vector3f[4];

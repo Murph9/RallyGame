@@ -295,17 +295,17 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		Vector3f totalNeutral = new Vector3f(dragx, dragy, dragz);
 		applyCentralForce(w_angle.mult(totalNeutral.add(brakeVec)));
 		
-		//////////////////////////////////
-		double weightperwheel = car.mass*(-getGravity().y/1000)*0.25; //0.25 because its per wheel
-		
+		//////////////////////////////////		
 		Vector3f fl = new Vector3f(); //front left
 		Vector3f fr = new Vector3f(); //front right
 		Vector3f rl = new Vector3f(); //rear  left
 		Vector3f rr = new Vector3f(); //rear  right
 		
 		//latitudinal forces that are calculated off the slip angle
-		fl.x = fr.x = -(float)VehiclePhysicsHelper.tractionFormula(car.wheellatdata, (float)slipanglefront, (float)weightperwheel);
-		rl.x = rr.x = -(float)VehiclePhysicsHelper.tractionFormula(car.wheellongdata, (float)slipanglerear, (float)weightperwheel);
+		fl.x = -(float)VehiclePhysicsHelper.tractionFormula(car.wheellatdata, (float)slipanglefront, (float)getWheel(0).getWheelInfo().wheelsSuspensionForce); 
+		fr.x = -(float)VehiclePhysicsHelper.tractionFormula(car.wheellatdata, (float)slipanglefront, (float)getWheel(1).getWheelInfo().wheelsSuspensionForce);
+		rl.x = -(float)VehiclePhysicsHelper.tractionFormula(car.wheellongdata, (float)slipanglerear, (float)getWheel(2).getWheelInfo().wheelsSuspensionForce);
+		rr.x = -(float)VehiclePhysicsHelper.tractionFormula(car.wheellongdata, (float)slipanglerear, (float)getWheel(3).getWheelInfo().wheelsSuspensionForce);
 
 		//////////////////////////////////////
 		//longitudinal forces
@@ -328,22 +328,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		if (car.driveRear) {
 			rl.z = rr.z = accel;
 		}
-
-		float latforceOnWheel = (float)weightperwheel*car.MAX_GRIP;
 		
-		//TODO remove when skid ratio comes in, (and mix them together)
-		wheel[0].skid = FastMath.clamp((latforceOnWheel-fl.length())/latforceOnWheel, 0, 1);
-		fl = new Vector3f(H.clamp(fl, latforceOnWheel));
-		
-		wheel[1].skid = FastMath.clamp((latforceOnWheel-fr.length())/latforceOnWheel, 0, 1);
-		fr = new Vector3f(H.clamp(fr, latforceOnWheel));
-		
-		wheel[2].skid = FastMath.clamp((latforceOnWheel-rl.length())/latforceOnWheel, 0, 1);
-		rl = new Vector3f(H.clamp(rl, latforceOnWheel));
-		
-		wheel[3].skid = FastMath.clamp((latforceOnWheel-rr.length())/latforceOnWheel, 0, 1);
-		rr = new Vector3f(H.clamp(rr, latforceOnWheel));
-		
+		//TODO calculate the skid mark values		
 
 		//TODO stop the wobble (hint the basic vehicle code does this through impulses)
 		float lim = 5;
@@ -424,7 +410,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 			WheelInfo wi = getWheel(w.num).getWheelInfo();
 			RaycastInfo ray = wi.raycastInfo;
 			w.contact = (ray.groundObject != null);
-			
+		
 			w.update(tpf);
 		}
 		

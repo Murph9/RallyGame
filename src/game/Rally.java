@@ -35,11 +35,11 @@ import com.jme3.system.NanoTimer;
 
 //Bugs TODO
 //maps a little weird still, probably need to remove some of the postprocessing stuff
- //tried that and got no where, they are connected for some reason [you do copy the first one]
+ //tried that and got no where, they are connected for some reason [you do copy the first one] (thanks for that)
 
 //track car is slightly off the groud by a lot
 
-////Idea for game modes:
+////TODO Ideas for game modes:
 //being chased. (them spawning all lightning sci-fi like)
 //  time based
 //  score based (closeness to them)
@@ -112,7 +112,7 @@ public class Rally extends SimpleApplication {
 	public void simpleInitApp() {
 		bulletAppState = new BulletAppState();
 		stateManager.attach(bulletAppState);
-//		bulletAppState.setDebugEnabled(true); //TODO this causes a illegal argument exception
+//		bulletAppState.setDebugEnabled(true); //TODO this causes a illegal argument exception about a debug shape not existing
 //		getPhysicsSpace().enableDebug(assetManager); //so does this
 		
 		createWorld();
@@ -186,7 +186,6 @@ public class Rally extends SimpleApplication {
 	        
 	        viewPort.addProcessor(fpp);
         }
-		
 	}
 
 	private void initCameras() {
