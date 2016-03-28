@@ -45,16 +45,14 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 	protected FancyVT car;
 	protected Node carNode;
 	
+	//my wheel node
 	MyWheelNode[] wheel = new MyWheelNode[4];
-	Spatial[] wheelSpat = new Spatial[4];
 	
 	//driving stuff
 	int curGear = 1;
 	int curRPM = 0;
 	
 	float accelCurrent = 0;
-	float lastLongTraction = 0;
-	
 	float steeringCurrent = 0;
 	float steerLeft = 0;
 	float steerRight= 0;
@@ -86,32 +84,32 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		this.setMaxSuspensionTravelCm(car.maxSusTravel);
 		
 		wheel[0] = new MyWheelNode("wheel 0 node", this, 0);
-		wheelSpat[0] = assetManager.loadModel(car.wheelModel);
-		wheelSpat[0].center();
-		wheel[0].attachChild(wheelSpat[0]);
+		wheel[0].spat = assetManager.loadModel(car.wheelModel);
+		wheel[0].spat.center();
+		wheel[0].attachChild(wheel[0].spat);
 		addWheel(wheel[0], new Vector3f(-car.wheel_xOff, car.wheel_yOff, car.wheel_zOff),
 				car.wheelDirection, car.wheelAxle, car.restLength, car.wheelRadius, true);
 
 		wheel[1] = new MyWheelNode("wheel 1 node", this, 1);
-		wheelSpat[1] = assetManager.loadModel(car.wheelModel);
-		wheelSpat[1].rotate(0, FastMath.PI, 0);
-		wheelSpat[1].center();
-		wheel[1].attachChild(wheelSpat[1]);
+		wheel[1].spat = assetManager.loadModel(car.wheelModel);
+		wheel[1].spat.rotate(0, FastMath.PI, 0);
+		wheel[1].spat.center();
+		wheel[1].attachChild(wheel[1].spat);
 		addWheel(wheel[1], new Vector3f(car.wheel_xOff, car.wheel_yOff, car.wheel_zOff),
 				car.wheelDirection, car.wheelAxle, car.restLength, car.wheelRadius, true);
 
 		wheel[2] = new MyWheelNode("wheel 2 node", this, 2);
-		wheelSpat[2] = assetManager.loadModel(car.wheelModel);
-		wheelSpat[2].center();
-		wheel[2].attachChild(wheelSpat[2]);
+		wheel[2].spat = assetManager.loadModel(car.wheelModel);
+		wheel[2].spat.center();
+		wheel[2].attachChild(wheel[2].spat);
 		addWheel(wheel[2], new Vector3f(-car.wheel_xOff-0.05f, car.wheel_yOff, -car.wheel_zOff),
 				car.wheelDirection, car.wheelAxle, car.restLength, car.wheelRadius, false);
 
 		wheel[3] = new MyWheelNode("wheel 3 node", this, 3);
-		wheelSpat[3] = assetManager.loadModel(car.wheelModel);
-		wheelSpat[3].rotate(0, FastMath.PI, 0);
-		wheelSpat[3].center();
-		wheel[3].attachChild(wheelSpat[3]);
+		wheel[3].spat = assetManager.loadModel(car.wheelModel);
+		wheel[3].spat.rotate(0, FastMath.PI, 0);
+		wheel[3].spat.center();
+		wheel[3].attachChild(wheel[3].spat);
 		addWheel(wheel[3], new Vector3f(car.wheel_xOff+0.05f, car.wheel_yOff, -car.wheel_zOff),
 				car.wheelDirection, car.wheelAxle, car.restLength, car.wheelRadius, false);
 
@@ -313,10 +311,9 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		float wheelRot = velocity.z/(2*FastMath.PI*car.wheelRadius); //w = v/(2*Pi*r) -> rad/sec
 		float engineForce = getEngineWheelForce(wheelRot, tpf)*accelCurrent;
 		
-		float accel = engineForce;//-Math.signum(velocity.z)*car.engineCompression*curRPM;
+		float accel = engineForce;
 
 //		H.p(VehicleHelper.longitudinalForce(car, )); //TODO wait until we have the slip ratio
-		lastLongTraction = 0;
 		
 		/*
 		float slipratio = (wheelRot*car.wheelRadius - velocity.z)/Math.abs(velocity.z);
@@ -376,12 +373,12 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		curRPM = (int)(wheelrot*curGearRatio*diffRatio*60); //rad/sec to rad/min and the drive ratios to engine
 			//wheel rad/s, gearratio, diffratio, conversion from rad/sec to rad/min
 
-		redlineKillFor -= tpf;
+		curRPM = Math.max(1000, curRPM); //make sure we never stall
 		
+		redlineKillFor -= tpf; //the simulate redlining
 		if (redlineKillFor > 0) {
 			return 0;
 		}
-		
 		if (Math.abs(curRPM) > car.redline) {
 			redlineKillFor = car.redlineCutTime;
 			return 0; //kill engine if greater than redline
@@ -407,7 +404,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 	}
 	
 	private float lerpTorque(int rpm) {
-		if (rpm < 1000) rpm = 1000; //prevent stall values
+		//assumed to be a valid and useable rpm value
 		float RPM = (float)rpm / 1000;
 		return H.lerpArray(RPM, car.torque);
 	}
@@ -428,17 +425,13 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 			RaycastInfo ray = wi.raycastInfo;
 			w.contact = (ray.groundObject != null);
 		
-			w.update(tpf);
+			w.update(tpf, curRPM);
 		}
 		
 		//skid marks
 		addSkidLines();
 		
 		specialPhysics(tpf); //yay
-		
-		for (Spatial w: wheelSpat) {
-			//TODO rotate the wheels
-		}
 		
 		//wheel turning logic -TODO
 			//trying to turn less at high speed

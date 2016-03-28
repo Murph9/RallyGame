@@ -15,12 +15,15 @@ import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.texture.Texture;
 import com.jme3.util.BufferUtils;
 
 public class MyWheelNode extends Node {
 
+	Spatial spat;
+	
 	static Texture tex;
 	
 	MyPhysicsVehicle mvc;
@@ -52,7 +55,7 @@ public class MyWheelNode extends Node {
 		this.setShadowMode(ShadowMode.Off);
 	}
 	
-	public void update(float tpf) {
+	public void update(float tpf, int rpm) {
 		if (ifSmoke) {
 			if (skid <= 0.1 && contact) {
 				smoke.setEnabled(true);
@@ -61,7 +64,24 @@ public class MyWheelNode extends Node {
 			}
 		}
 		
-		//its just a node, can't rotate the model here
+		if (spat == null) {
+			try {
+				throw new Exception("No wheel spatial, in wheelnode update");
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+			}
+		}
+		
+		
+		//calc and set the wheel speed to match the rpm of the car
+		float curGearRatio = mvc.car.gearRatios[mvc.curGear];//0 = reverse, >= 1 normal make sense
+		float diffRatio = mvc.car.diffRatio;
+		float radsec = (float)(rpm)/(curGearRatio*diffRatio*60f);
+		
+		Quaternion q = new Quaternion();
+		q = q.fromAngleNormalAxis(radsec*tpf, new Vector3f(1,0,0));
+		spat.setLocalRotation(spat.getLocalRotation().mult(q));
+		
 	}
 	
 	private ParticleEmitter initSmoke() {

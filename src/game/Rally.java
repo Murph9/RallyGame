@@ -40,7 +40,7 @@ import com.jme3.system.NanoTimer;
 //track car is slightly off the groud by a lot
 
 ////TODO Ideas for game modes:
-//being chased. (them spawning all lightning sci-fi like)
+//being chased. (with them spawning all lightning sci-fi like?)
 //  time based
 //  score based (closeness to them)
 //  touch all of them in one run
@@ -55,7 +55,7 @@ public class Rally extends SimpleApplication {
 	private BulletAppState bulletAppState;
 	
 	//World Model
-	StaticWorld world = StaticWorld.duct; //Set map here
+	StaticWorld world = StaticWorld.track2; //Set map here
 	StaticWorldBuilder sWorldB;
 	
 	boolean dynamicWorld = false;
