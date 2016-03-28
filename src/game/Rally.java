@@ -43,7 +43,8 @@ import com.jme3.system.NanoTimer;
 //being chased. (them spawning all lightning sci-fi like)
 //  time based
 //  score based (closeness to them)
-//  touch all of them once
+//  touch all of them in one run
+//    or get them all the same colour (like the pads in mario galaxy)
 //  get them to fall in the hole
 //the infinite road thing
 
@@ -54,7 +55,7 @@ public class Rally extends SimpleApplication {
 	private BulletAppState bulletAppState;
 	
 	//World Model
-	StaticWorld world = StaticWorld.duct2; //Set map here
+	StaticWorld world = StaticWorld.duct; //Set map here
 	StaticWorldBuilder sWorldB;
 	
 	boolean dynamicWorld = false;
@@ -66,7 +67,7 @@ public class Rally extends SimpleApplication {
 	CarBuilder cb;
 	private FancyVT car = new Runner();
 	
-	int themCount = 10;
+	int themCount = 2;
 	private FancyVT them = new Hunter();
 	
 	//gui and camera stuff

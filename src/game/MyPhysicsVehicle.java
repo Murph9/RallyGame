@@ -53,6 +53,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 	int curRPM = 0;
 	
 	float accelCurrent = 0;
+	float lastLongTraction = 0;
 	
 	float steeringCurrent = 0;
 	float steerLeft = 0;
@@ -304,21 +305,33 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		//latitudinal forces that are calculated off the slip angle
 		fl.x = -(float)VehiclePhysicsHelper.tractionFormula(car.wheellatdata, (float)slipanglefront, (float)getWheel(0).getWheelInfo().wheelsSuspensionForce); 
 		fr.x = -(float)VehiclePhysicsHelper.tractionFormula(car.wheellatdata, (float)slipanglefront, (float)getWheel(1).getWheelInfo().wheelsSuspensionForce);
-		rl.x = -(float)VehiclePhysicsHelper.tractionFormula(car.wheellongdata, (float)slipanglerear, (float)getWheel(2).getWheelInfo().wheelsSuspensionForce);
-		rr.x = -(float)VehiclePhysicsHelper.tractionFormula(car.wheellongdata, (float)slipanglerear, (float)getWheel(3).getWheelInfo().wheelsSuspensionForce);
+		rl.x = -(float)VehiclePhysicsHelper.tractionFormula(car.wheellatdata, (float)slipanglerear, (float)getWheel(2).getWheelInfo().wheelsSuspensionForce);
+		rr.x = -(float)VehiclePhysicsHelper.tractionFormula(car.wheellatdata, (float)slipanglerear, (float)getWheel(3).getWheelInfo().wheelsSuspensionForce);
 
 		//////////////////////////////////////
 		//longitudinal forces
 		float wheelRot = velocity.z/(2*FastMath.PI*car.wheelRadius); //w = v/(2*Pi*r) -> rad/sec
-		float engineForce = getEngineWheelForce(wheelRot, tpf)*accelCurrent; 
+		float engineForce = getEngineWheelForce(wheelRot, tpf)*accelCurrent;
 		
-		float accel = engineForce-Math.signum(velocity.z)*car.engineCompression*curRPM;
+		float accel = engineForce;//-Math.signum(velocity.z)*car.engineCompression*curRPM;
 
 //		H.p(VehicleHelper.longitudinalForce(car, )); //TODO wait until we have the slip ratio
+		lastLongTraction = 0;
 		
+		/*
+		float slipratio = (wheelRot*car.wheelRadius - velocity.z)/Math.abs(velocity.z);
+		H.p(slipratio);
+		slipratio = 1;
 		
+		fl.z = (float)VehiclePhysicsHelper.tractionFormula(car.wheellongdata, (float)slipratio, (float)getWheel(0).getWheelInfo().wheelsSuspensionForce);
+		fr.z = (float)VehiclePhysicsHelper.tractionFormula(car.wheellongdata, (float)slipratio, (float)getWheel(1).getWheelInfo().wheelsSuspensionForce);
+		rl.z = (float)VehiclePhysicsHelper.tractionFormula(car.wheellongdata, (float)slipratio, (float)getWheel(2).getWheelInfo().wheelsSuspensionForce);
+		rr.z = (float)VehiclePhysicsHelper.tractionFormula(car.wheellongdata, (float)slipratio, (float)getWheel(3).getWheelInfo().wheelsSuspensionForce);
+		//*/
+		
+		///*
 		accel /= 2; //per wheel because at least 2 wheels
-		if (car.driveFront && car.driveRear) { 
+		if (car.driveFront && car.driveRear) {
 			accel /= 2; //if its split up between the front and rear axle
 		}
 			
@@ -328,16 +341,20 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		if (car.driveRear) {
 			rl.z = rr.z = accel;
 		}
+		//*/
 		
-		//TODO calculate the skid mark values		
+		//TODO calculate the skid mark values
 
 		//TODO stop the wobble (hint the basic vehicle code does this through impulses)
+			//and better code from others 'transision' between static and kinetic friction models
 		float lim = 5;
-		if (Math.abs(velocity.z) <= lim) {
-			fl.mult(velocity.length()*velocity.length()/(lim*2));
-			fr.mult(velocity.length()*velocity.length()/(lim*2));
-			rl.mult(velocity.length()*velocity.length()/(lim*2));
-			rr.mult(velocity.length()*velocity.length()/(lim*2));
+		float velz = velocity.z + 0.01f;
+		if (Math.abs(velz) <= lim) {
+//			fl.multLocal(velz*velz/(lim*lim));
+//			fr.multLocal(velz*velz/(lim*lim));
+//			rl.multLocal(velz*velz/(lim*lim));
+//			rr.multLocal(velz*velz/(lim*lim));
+			//TODO doesn't work
 		}
 		
 		

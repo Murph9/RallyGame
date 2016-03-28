@@ -27,6 +27,14 @@ public class CarBuilder extends Node {
 		carList = new HashMap<>();
 	}
 	
+	public void removePlayer(int id) {
+		try {
+			throw new Exception("not completed yet");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void addPlayer(int id, Rally rally, FancyVT car, Vector3f start, Matrix3f rot, boolean AI) {
 		if (carList.containsKey(id)) {
 			try {
@@ -62,7 +70,6 @@ public class CarBuilder extends Node {
 		//this shifts the effective center of mass of the BoxCollisionShape to 0,-1,0
 		CompoundCollisionShape compoundShape = new CompoundCollisionShape();
 		compoundShape.addChildShape(CollisionShapeFactory.createDynamicMeshShape(carmodel), new Vector3f(0,0,0));
-//		compoundShape.
 		
 		Node carNode = new Node(id+"");
 		MyVC player = new MyVC(compoundShape, car, carNode, rally);
