@@ -1,6 +1,7 @@
 package game;
 
 import com.jme3.math.FastMath;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.CameraNode;
@@ -26,6 +27,7 @@ public class MyCamera extends CameraNode {
 		
 	}
 	
+	//TODO some kind of actual stabilisation	
 	public void myUpdate(float tpf) {
 		Vector3f curPos = getLocalTranslation();
 		Vector3f forw = new Vector3f();
@@ -37,6 +39,12 @@ public class MyCamera extends CameraNode {
 		
 		if (!p.ifLookBack)
 			back.negateLocal();
+		
+		if (p.ifLookSide) {
+			Quaternion q = new Quaternion();
+			q.fromAngleAxis(90*FastMath.DEG_TO_RAD, Vector3f.UNIT_Y); 
+			back = q.mult(back);
+		}
 		
 		back.normalizeLocal();
 		back.y = 0.4f;

@@ -7,7 +7,7 @@ public enum StaticWorld {
 	
 	skyline("skyline.blend", 800, new Vector3f(-27.7f, 84.5f, 111.3f), true), 
 	duct("duct.blend", 50, new Vector3f(0,-11,0), true),
-	duct2("duct.blend", 5, new Vector3f(0,0,0), true),
+	duct2("duct.blend", 5, new Vector3f(0,-5,0), true),
 	raleigh("raleigh.blend", 8, new Vector3f(34.441566f, 15.72906f, 27.334211f), true),
 
 	dragstrip("dragstrip.blend", 10, new Vector3f(0,-4.5f,0), false),

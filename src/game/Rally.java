@@ -55,7 +55,7 @@ public class Rally extends SimpleApplication {
 	private BulletAppState bulletAppState;
 	
 	//World Model
-	StaticWorld world = StaticWorld.track2; //Set map here
+	StaticWorld world = StaticWorld.duct2; //Set map here
 	StaticWorldBuilder sWorldB;
 	
 	boolean dynamicWorld = false;
@@ -65,9 +65,9 @@ public class Rally extends SimpleApplication {
 	
 	//car stuff
 	CarBuilder cb;
-	private FancyVT car = new Runner();
+	private FancyVT car = new TrackCar();
 	
-	int themCount = 2;
+	int themCount = 0;
 	private FancyVT them = new Hunter();
 	
 	//gui and camera stuff
@@ -277,6 +277,7 @@ public class Rally extends SimpleApplication {
 		} else {
 			
 		}
+		arrowNode.detachAllChildren();
 	}
 	
 }

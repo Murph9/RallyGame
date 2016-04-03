@@ -38,7 +38,15 @@ public abstract class FancyVT {
 	float wheelWidth = 0.15f; //m
 	float wheelRadius = 0.3f; //m
 	float wheelMass = 75; //kg
-
+	
+	float engineMass = 40;
+	float engineInertia() {
+		float wheels = (wheelMass*wheelRadius*wheelRadius/2);
+		if (driveFront && driveRear) {
+			return engineMass + wheels*4;
+		}
+		return engineMass + wheels*2;
+	}
 	float rollFraction = 0.5f; //1 = full into roll, 0 = no roll
 	
 	//TODO make front and back independant
@@ -87,7 +95,7 @@ public abstract class FancyVT {
 	float redlineCutTime = 0.3f;
 	
 	float transEffic = 0.75f; //TODO apparently 0.7 is common (power is lost to rotating things
-	float diffRatio = 5.0f; //helps set the total drive ratio
+	float diffRatio = 2.5f; //helps set the total drive ratio
 	float[] gearRatios = new float[]{-2.9f,3.40f,2.5f,1.8f,1,0.74f,0.5f};; //reverse,gear1,gear2,g3,g4,g5,g6,...
 	
 	//TODO i found a porsche boxter engine curve:
@@ -152,14 +160,13 @@ class RallyCar extends FancyVT {
 		maxSusForce = 25000;
 		
 		torque = new float[]{0,420,580,620,660,673,420,10}; //starts at 0 rpm, steps every 1000rpm (until done)
-		diffRatio = 4f;
 		
 		gearDown = 2900;
 		gearUp = 5700;
 		redline = 6500;
 		
 		transEffic = 0.75f;
-		diffRatio = 5.5f;
+		diffRatio = 3f;
 		gearRatios = new float[]{-3.5f,3.66f,2.5f,1.9f,1.4f,1.02f,0.7f};
 	}
 }
@@ -204,8 +211,9 @@ class TrackCar extends FancyVT {
 		gearDown = 9000;
 		gearUp = 13500;
 		redline = 15000;
+		redlineCutTime = 0.005f;
 		
-		diffRatio = 5.5f;
+		diffRatio = 3.2f;
 		gearRatios = new float[]{-5f,3.23f,2.19f,1.71f,1.39f,1.16f,0.93f};
 	}
 }
@@ -233,7 +241,7 @@ class Rocket extends FancyVT {
 		gearUp = 13500;
 		redline = 15000;
 		
-		diffRatio = 5f;
+		diffRatio = 2.5f;
 		gearRatios = new float[]{-5f,3.23f,2.19f,1.71f,1.39f,1.16f,0.93f};
 		
 		wheellatdata = new RocketWheel();
@@ -276,14 +284,13 @@ class Hunter extends FancyVT {
 		maxSusForce = 55000;
 		
 		torque = new float[]{0,520,680,720,760,773,520,110};
-		diffRatio = 4f;
 		
 		gearDown = 2900;
 		gearUp = 5700;
 		redline = 6500;
 		
 		transEffic = 0.75f;
-		diffRatio = 5.5f;
+		diffRatio = 3f;
 		gearRatios = new float[]{-3.5f,3.66f,2.5f,1.9f,1.4f,1.02f,0.7f};
 	}
 }

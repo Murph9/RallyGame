@@ -7,7 +7,7 @@ public abstract class CarWheelData {
 	
 	//these are the 'nice' defaults.
 	float B = 10f;
-	float C = 1.9f;
+	float C = 1.8f;
 	float D = 1f;
 	float E = 0.97f;
     
@@ -17,7 +17,7 @@ class NormalLatData extends CarWheelData {
 
 	NormalLatData() {
 		B = 10f;
-		C = 1.9f;
+		C = 1.8f;
 		D = 1f;
 		E = 0.97f;
 	}
@@ -27,7 +27,7 @@ class NormalLongData extends CarWheelData {
 
 	NormalLongData() {
 		B = 10f;
-		C = 1.9f;
+		C = 1.99f;
 		D = 1f;
 		E = 0.97f;
 	}
