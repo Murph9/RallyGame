@@ -28,6 +28,7 @@ public class MyWheelNode extends Node {
 	
 	MyPhysicsVehicle mvc;
 	int num;
+	float radSec;
 	
 	Material mat;
 	int[] indexes = { 2,0,1, 1,3,2 };
@@ -72,14 +73,8 @@ public class MyWheelNode extends Node {
 			}
 		}
 		
-		
-		//calc and set the wheel speed to match the rpm of the car
-		float curGearRatio = mvc.car.gearRatios[mvc.curGear];//0 = reverse, >= 1 normal make sense
-		float diffRatio = mvc.car.diffRatio;
-		float radsec = (float)(rpm)/(curGearRatio*diffRatio*60f);
-		
 		Quaternion q = new Quaternion();
-		q = q.fromAngleNormalAxis(radsec*tpf, new Vector3f(1,0,0));
+		q = q.fromAngleNormalAxis(radSec*-tpf, new Vector3f(1,0,0));
 		spat.setLocalRotation(spat.getLocalRotation().mult(q));
 		
 	}

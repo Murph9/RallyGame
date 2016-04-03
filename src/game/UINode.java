@@ -78,7 +78,7 @@ public class UINode {
 		statsText.setSize(guiFont.getCharSet().getRenderedSize());	  		// font size
 		statsText.setColor(ColorRGBA.White);								// font color
 		statsText.setText("");												// the text
-		statsText.setLocalTranslation(settings.getWidth()-200, 300, 0); // position
+		statsText.setLocalTranslation(settings.getWidth()-200, 500, 0); // position
 		guiNode.attachChild(statsText);
 		
 		score = new BitmapText(guiFont, false);		  
@@ -251,7 +251,8 @@ public class UINode {
 		
 		float speed = p.getLinearVelocity().length();
 		
-		statsText.setText("speed:"+speed + "m/s\nRPM:" + p.curRPM);
+		statsText.setText("speed:"+speed + "m/s\nRPM:" + p.curRPM +"\na:"+p.accelCurrent+"\nb:"+p.brakeCurrent+
+				"\nengine:"+p.engineTorque+"\ntraction:"+p.totalTraction + "\nwheelRot:"+p.wheelRot);
 		int speedKMH = (int)Math.abs(p.getCurrentVehicleSpeedKmHour());
 
 		setSpeedDigits(speedKMH);
