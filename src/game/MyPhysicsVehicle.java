@@ -255,6 +255,9 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 	//TODO Things taken out of physics:
 	//- handbrake (there is a chance that the longtitudinal magic should fix this
 	
+	
+	//good info:
+	//https://www.sae.org/images/books/toc_pdfs/R146.pdf
 	////////////////////////////////////////////////////
 	
 	private void specialPhysics(float tpf) {
@@ -388,7 +391,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		//TODO calculate the skid mark values
 
 		//TODO stop the wobble (hint the basic vehicle code does this through impulses (integration of forces)
-
+			// try 'rolling resistance function'
+		
 		float lim = 5;
 		float velz = velocity.z + 0.01f;
 		if (Math.abs(velz) <= lim) {
@@ -441,7 +445,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 			return 0; //kill engine if greater than redline
 		}
 		
-//		autoTransmission(curRPM);
+		autoTransmission(curRPM);
 		float engineTorque = lerpTorque(curRPM)*accelCurrent;
 		
 		float engineOutTorque = engineTorque*curGearRatio*diffRatio*car.transEffic;

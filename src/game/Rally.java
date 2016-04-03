@@ -65,7 +65,7 @@ public class Rally extends SimpleApplication {
 	
 	//car stuff
 	CarBuilder cb;
-	private FancyVT car = new TrackCar();
+	private FancyVT car = new NormalCar();
 	
 	int themCount = 0;
 	private FancyVT them = new Hunter();
