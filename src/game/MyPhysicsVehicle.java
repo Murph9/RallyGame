@@ -6,6 +6,7 @@ import com.bulletphysics.dynamics.vehicle.DefaultVehicleRaycaster;
 import com.bulletphysics.dynamics.vehicle.WheelInfo;
 import com.bulletphysics.dynamics.vehicle.WheelInfo.RaycastInfo;
 import com.jme3.asset.AssetManager;
+import com.jme3.audio.AudioNode;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.objects.PhysicsVehicle;
@@ -29,6 +30,9 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 	//skid stuff
 	Node skidNode;
 	LinkedList<Spatial> skidList = new LinkedList<Spatial>();
+	
+	//sound stuff
+	AudioNode engineSound; //TODO
 	
 	//directions
 	Vector3f up = new Vector3f();
@@ -124,15 +128,21 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		setFrictionSlip(2, car.wheel2Slip);
 		setFrictionSlip(3, car.wheel3Slip);
 		
-		
+	
 		for (MyWheelNode w: wheel) {
 			//attaching all the things (wheels)
 			carNode.attachChild(w);
 		}
 		
 		////////////////////////
-		if (carNode.getName().equals("0")) //yes its a little hardcoded..
+		if (carNode.getName().equals("0")) {//yes its a little hardcoded..
 			setupKeys();
+			
+			//only player gets sound
+			engineSound = new AudioNode(assetManager, "assets/sound/engine2.wav");
+			engineSound.setLooping(true);
+			engineSound.play();
+		}
 	}
 	
 	/**Used internally, creates the actual vehicle constraint when vehicle is added to phyicsspace
@@ -417,9 +427,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		
 	}
 	
-	/**
-	 * TODO: Logic needed
-	 */
 	private float getEngineWheelTorque(float tpf) {
 		float wheelrot = 0;
 		if (car.driveFront)
@@ -462,6 +469,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		} else if (rpm < car.gearDown && curGear > 1) {
 			curGear--;
 		}
+		//TODO you could probably calculate the speed at each gear change point and work it out from there
 	}
 	
 	private float lerpTorque(int rpm) {
@@ -507,6 +515,10 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		}
 		steer(steeringCurrent);
 		H.pUI(steeringCurrent);
+		
+		//sound
+		float pitch = FastMath.clamp(0.5f+1.5f*(curRPM/car.redline), 0.5f, 2);
+		engineSound.setPitch(pitch);
 	}
 	
 	///////////////////////////////////////////////////////////
