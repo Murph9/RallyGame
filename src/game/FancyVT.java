@@ -92,7 +92,6 @@ public abstract class FancyVT {
 	float redline = 6500;
 	
 	float engineCompression = 0.2f; //is going to be multiplied by the RPM
-	float redlineCutTime = 0.3f;
 	
 	float transEffic = 0.75f; //TODO apparently 0.7 is common (power is lost to rotating things
 	float diffRatio = 2.5f; //helps set the total drive ratio
@@ -211,7 +210,6 @@ class TrackCar extends FancyVT {
 		gearDown = 9000;
 		gearUp = 13500;
 		redline = 15000;
-		redlineCutTime = 0.005f;
 		
 		diffRatio = 3.2f;
 		gearRatios = new float[]{-5f,3.23f,2.19f,1.71f,1.39f,1.16f,0.93f};

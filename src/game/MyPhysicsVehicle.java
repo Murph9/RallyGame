@@ -321,7 +321,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 
 		//////////////////////////////////////
 		//longitudinal forces
-		engineTorque = getEngineWheelTorque(tpf);
+		engineTorque = getEngineWheelTorque(tpf, velocity.z);
 		float engineTorque0, engineTorque1, engineTorque2, engineTorque3;
 		engineTorque0 = engineTorque1 = engineTorque2 = engineTorque3 = 0;
 		
@@ -363,6 +363,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		float totF2 = engineTorque2 - rl.z - brakeCurrent*3000;
 		float totF3 = engineTorque3 - rr.z - brakeCurrent*3000;
 		
+		
+		//TODO doesn't work because of curve stuff
 		/*Logic on the combining of the formulas: (called friction circle)
 		 * http://www.racer.nl/reference/pacejka.htm 
 		 * Fy=Fy0*sqrt(1-(Fx/Fx0)^2)
@@ -397,6 +399,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		this.wheelRot /= 4;
 		
 		//TODO: !HARD! better code from others 'transision' between static and kinetic friction models
+			// i have no static model
 		
 		//TODO calculate the skid mark values
 
@@ -427,12 +430,12 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		
 	}
 	
-	private float getEngineWheelTorque(float tpf) {
+	private float getEngineWheelTorque(float tpf, float vz) {
 		float wheelrot = 0;
 		if (car.driveFront)
 			wheelrot = wheel[0].radSec; //get the drive wheels rotation speed
 		if (car.driveRear) 
-			wheelrot = wheel[2].radSec; //because the wheels are rpm locked it doesn't matter which one
+			wheelrot = wheel[2].radSec; //because both the wheels are rpm locked it doesn't matter which one
 		
 		float curGearRatio = car.gearRatios[curGear];//0 = reverse, >= 1 normal make sense
 		float diffRatio = car.diffRatio;
@@ -441,18 +444,13 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 			//wheel rad/s, gearratio, diffratio, conversion from rad/sec to rad/min
 		
 		curRPM = H.clamp(curRPM, 800, 50000);//make sure we never stall (or get rediculous)
-		
-		//TODO redline bounce back is a little slow
-		redlineKillFor -= tpf; //the simulate redlining
-		if (redlineKillFor > 0) {
-			return 0;
-		}
+		//TODO use engine compression value
+
 		if (Math.abs(curRPM) > car.redline) {
-			redlineKillFor = car.redlineCutTime;
 			return 0; //kill engine if greater than redline
 		}
 		
-		autoTransmission(curRPM);
+		autoTransmission(curRPM, vz);
 		float engineTorque = lerpTorque(curRPM)*accelCurrent;
 		
 		float engineOutTorque = engineTorque*curGearRatio*diffRatio*car.transEffic;
@@ -461,19 +459,23 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		return totalTorque;
 	}
 	
-	private void autoTransmission(int rpm) {
+	private void autoTransmission(int rpm, float vz) {
 		if (curGear == 0) return; //no changing out of reverse on me please..
 		
-		if (rpm > car.gearUp && curGear < car.gearRatios.length-1) {
+		float gearUpSpeed = car.gearUp/(car.gearRatios[curGear]*car.diffRatio*60);
+		float gearDownSpeed = car.gearDown/(car.gearRatios[curGear]*car.diffRatio*60);
+		//TODO: error checking on making sure the one we change to doesn't instantly change back
+		
+		
+		if (vz > gearUpSpeed && curGear < car.gearRatios.length-1) {
 			curGear++;
-		} else if (rpm < car.gearDown && curGear > 1) {
+		} else if (vz < gearDownSpeed && curGear > 1) {
 			curGear--;
 		}
-		//TODO you could probably calculate the speed at each gear change point and work it out from there
 	}
-	
+
+	//assumed to be a valid and useable rpm value
 	private float lerpTorque(int rpm) {
-		//assumed to be a valid and useable rpm value
 		float RPM = (float)rpm / 1000;
 		return H.lerpArray(RPM, car.torque);
 	}

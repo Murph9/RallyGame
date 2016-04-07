@@ -55,7 +55,7 @@ public class Rally extends SimpleApplication {
 	private BulletAppState bulletAppState;
 	
 	//World Model
-	StaticWorld world = StaticWorld.duct2; //Set map here
+	StaticWorld world = StaticWorld.dragstrip; //Set map here
 	StaticWorldBuilder sWorldB;
 	
 	boolean dynamicWorld = false;

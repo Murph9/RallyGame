@@ -69,7 +69,6 @@ public class MyWheelNode extends Node {
 			try {
 				throw new Exception("No wheel spatial, in wheelnode update");
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 			}
 		}
 		
