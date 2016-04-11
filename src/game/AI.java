@@ -13,18 +13,16 @@ import com.jme3.math.Vector3f;
 public class AI implements RawInputListener {
 
 	MyVC car;
-	Rally r;
-	
-	AI (Rally r, MyVC car) {
+
+	AI (MyVC car) {
 		this.car = car;
-		this.r = r;
 	}
 
 	public void update(float tpf) {
 		//i think aim at player wouldn't be a bad one
 		
 		//second move towards player 1
-		MyPhysicsVehicle player1 = r.cb.get(0);
+		MyPhysicsVehicle player1 = App.rally.cb.get(0);
 		Vector3f target = player1.getPhysicsLocation();//.add(player1.getLinearVelocity().normalize());
 		
 		Vector3f pos = car.getPhysicsLocation();

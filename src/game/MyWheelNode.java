@@ -42,7 +42,7 @@ public class MyWheelNode extends Node {
 	
 	public MyWheelNode(String name, MyPhysicsVehicle mvc, int num) {
 		super(name);
-		tex = mvc.assetManager.loadTexture("assets/stripes.png");
+		tex = App.rally.getAssetManager().loadTexture("assets/stripes.png");
 		
 		this.skid = 1;
 		this.mvc = mvc;
@@ -95,8 +95,8 @@ public class MyWheelNode extends Node {
 //		smoke.getParticleInfluencer().setInitialVelocity(new Vector3f(0,9,0));
 //		smoke.getParticleInfluencer().setVelocityVariation(0.05f);
 
-	    Material emit = new Material(mvc.assetManager, "Common/MatDefs/Misc/Particle.j3md");
-	    emit.setTexture("Texture", mvc.assetManager.loadTexture("Effects/Smoke/Smoke.png"));
+	    Material emit = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Particle.j3md");
+	    emit.setTexture("Texture", App.rally.getAssetManager().loadTexture("Effects/Smoke/Smoke.png"));
 	    smoke.setMaterial(emit);
     	return smoke;
 	}
@@ -142,7 +142,7 @@ public class MyWheelNode extends Node {
 		
 		Geometry geo = new Geometry("MyMesh", mesh);
 		
-		Material mat = new Material(mvc.assetManager, "Common/MatDefs/Light/Lighting.j3md");
+		Material mat = new Material(App.rally.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md");
 		mat.setTexture("DiffuseMap", tex);
 		mat.setBoolean("UseMaterialColors", true);
 		

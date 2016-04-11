@@ -1,5 +1,6 @@
 package world;
 
+import game.App;
 import game.Rally;
 
 import com.jme3.asset.AssetManager;
@@ -17,9 +18,9 @@ public class StaticWorldBuilder extends Node {
 
 	StaticWorld world;
 	
-	public StaticWorldBuilder(Rally r, StaticWorld world, boolean ifShadow) {
+	public StaticWorldBuilder(StaticWorld world, boolean ifShadow) {
 		this.world = world;
-		AssetManager as = r.getAssetManager();
+		AssetManager as = App.rally.getAssetManager();
 		
 		Material mat = new Material(as, "Common/MatDefs/Misc/ShowNormals.j3md");
 		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
@@ -31,7 +32,7 @@ public class StaticWorldBuilder extends Node {
 				if (world.ifNeedsTexture) {
 					s.setMaterial(mat);
 				}
-				addWorldModel(r, s, ifShadow);
+				addWorldModel(s, ifShadow);
 			}
 		} else {
 			Geometry worldModel = (Geometry) as.loadModel(world.name);
@@ -39,11 +40,11 @@ public class StaticWorldBuilder extends Node {
 			if (world.ifNeedsTexture) {
 				worldModel.setMaterial(mat);
 			}
-			addWorldModel(r, worldModel, ifShadow);
+			addWorldModel(worldModel, ifShadow);
 		}
 	}
 	
-	private void addWorldModel(Rally r, Spatial s, boolean ifShadow) {
+	private void addWorldModel(Spatial s, boolean ifShadow) {
 		System.err.println("Adding: "+ s.getName());
 		
 		s.move(0,-5,0);
@@ -56,8 +57,8 @@ public class StaticWorldBuilder extends Node {
 			s.setShadowMode(ShadowMode.Receive);
 		}
 
-		r.getPhysicsSpace().add(landscape);
+		App.rally.getPhysicsSpace().add(landscape);
 		
-		r.getRootNode().attachChild(s);
+		App.rally.getRootNode().attachChild(s);
 	}
 }

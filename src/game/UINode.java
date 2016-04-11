@@ -22,7 +22,6 @@ public class UINode {
 	 * red near the redline?
 	 */
 	
-	Rally r; //want all the infos
 	MyPhysicsVehicle p;
 	
 	//hud stuff
@@ -62,8 +61,8 @@ public class UINode {
 	
 	int centerx, centery = 64+22, radius = 118;
 	
-	UINode (Rally r) {
-		this.r = r;
+	UINode () {
+		Rally r = App.rally;	
 		this.p = r.cb.get(0);
 		
 		this.redline = p.car.redline;
@@ -188,11 +187,11 @@ public class UINode {
 		gear.setMaterial(matset[1]);
 		guiNode.attachChild(gear);
 		
-		makeSpeedo(r, guiNode);
+		makeSpeedo(guiNode);
 		
 	}
 
-	private void makeSpeedo(Rally r2, Node guiNode) {
+	private void makeSpeedo(Node guiNode) {
 		Node speedoNode = new Node("Speedo");
 		guiNode.attachChild(speedoNode);
 		
@@ -200,9 +199,9 @@ public class UINode {
 		l.setLineWidth(2);
 		Quad quad = new Quad(20, 20);
 		
-		centerx = r2.getSettings().getWidth()-128;
+		centerx = App.rally.getSettings().getWidth()-128;
 		
-		Material m = new Material(r.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+		Material m = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 		m.setColor("Color", ColorRGBA.Black);
 		
 		for (int i = 0; i <= finalRPM; i += 1000) {
@@ -247,7 +246,7 @@ public class UINode {
 	}
 
 	public void update(float tpf) {
-		AssetManager assetManager = r.getAssetManager();
+		AssetManager assetManager = App.rally.getAssetManager();
 		
 		float speed = p.getLinearVelocity().length();
 		
@@ -258,8 +257,8 @@ public class UINode {
 		setSpeedDigits(speedKMH);
 		setGearDigit(p.curGear);
 		
-		if (r.dynamicWorld) {
-			score.setText("Placed: "+r.worldB.getTotalPlaced());
+		if (App.rally.dynamicWorld) {
+			score.setText("Placed: "+App.rally.worldB.getTotalPlaced());
 		}
 		
 		//TODO slightly fancier?

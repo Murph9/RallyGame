@@ -11,6 +11,7 @@ import world.StaticWorld;
 import world.WorldBuilder;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.font.BitmapFont;
@@ -50,8 +51,7 @@ import com.jme3.system.NanoTimer;
 
 
 public class Rally extends SimpleApplication {
-	
-	//boiler stuff
+		
 	private BulletAppState bulletAppState;
 	
 	//World Model
@@ -65,7 +65,7 @@ public class Rally extends SimpleApplication {
 	
 	//car stuff
 	CarBuilder cb;
-	private FancyVT car = new TrackCar();
+	private FancyVT car = new NormalCar();
 	
 	int themCount = 0;
 	private FancyVT them = new Hunter();
@@ -111,8 +111,11 @@ public class Rally extends SimpleApplication {
 	
 	@Override
 	public void simpleInitApp() {
+		App.rally = this;
+		
 		bulletAppState = new BulletAppState();
 		stateManager.attach(bulletAppState);
+		
 //		bulletAppState.setDebugEnabled(true); //TODO this causes a illegal argument exception about a debug shape not existing
 //		getPhysicsSpace().enableDebug(assetManager); //so does this
 		
@@ -133,11 +136,11 @@ public class Rally extends SimpleApplication {
 
 	private void createWorld() {
 		if (dynamicWorld) {
-			worldB = new WorldBuilder(this, assetManager, type, viewPort, needsMaterial);
+			worldB = new WorldBuilder(type, viewPort, needsMaterial);
 			rootNode.attachChild(worldB);
 			
 		} else {
-			sWorldB = new StaticWorldBuilder(this, world, ifShadow);
+			sWorldB = new StaticWorldBuilder(world, ifShadow);
 		}
 		
 		//lights
@@ -195,7 +198,7 @@ public class Rally extends SimpleApplication {
 		camNode = new MyCamera("Cam Node", cam, cb.get(0));
 		rootNode.attachChild(camNode);
 		
-		minimap = new MiniMap(this, cb.get(0));
+		minimap = new MiniMap(cb.get(0));
 	}
 	
 	private void buildPlayers() {
@@ -209,11 +212,11 @@ public class Rally extends SimpleApplication {
 		}
 		
 		cb = new CarBuilder();		
-		cb.addPlayer(0, this, car, start, dir, false);
+		cb.addPlayer(0, car, start, dir, false);
 		
 		for (int i = 1; i < themCount+1; i++) {
 			start = start.add(3,0,0);
-			cb.addPlayer(i, this, them, start, dir, true);
+			cb.addPlayer(i, them, start, dir, true);
 		}
 	}
 	
@@ -225,7 +228,7 @@ public class Rally extends SimpleApplication {
 	}
 	
 	private void setupGUI() {
-		uiNode = new UINode(this);
+		uiNode = new UINode();
 	}
 	
 
@@ -259,10 +262,6 @@ public class Rally extends SimpleApplication {
 		return cam;
 	}
 	
-	public PhysicsSpace getPhysicsSpace(){
-		return bulletAppState.getPhysicsSpace();
-	}
-	
 	public void reset() {
 		if (dynamicWorld) {
 			List<Spatial> ne = new LinkedList<Spatial>(worldB.curPieces);
@@ -278,6 +277,10 @@ public class Rally extends SimpleApplication {
 			
 		}
 		arrowNode.detachAllChildren();
+	}
+
+	public PhysicsSpace getPhysicsSpace() {
+		return bulletAppState.getPhysicsSpace();
 	}
 	
 }

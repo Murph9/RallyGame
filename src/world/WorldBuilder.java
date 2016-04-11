@@ -1,5 +1,6 @@
 package world;
 
+import game.App;
 import game.Rally;
 
 import java.util.LinkedList;
@@ -46,9 +47,6 @@ public class WorldBuilder extends Node {
 	//hard - try and just make a curver to drive on instead of the loaded segments
 		//bezier curve stuffs..
 	
-	Rally rally;
-	AssetManager assetManager;
-	
 	public List<Spatial> curPieces = new LinkedList<Spatial>();
 
 	private WP[] wbs;
@@ -68,19 +66,17 @@ public class WorldBuilder extends Node {
 	float distance = 150;
 	final float max_wp = 50;
 	
-	public WorldBuilder (Rally rally, AssetManager asset, WP[] type, ViewPort view, boolean mat) {
-		this.rally = rally;
-		this.assetManager = asset;
+	public WorldBuilder (WP[] type, ViewPort view, boolean mat) {
 		this.wbs = type; //kind of keeps this class generic
 		if (mat) {
-			this.mat = new Material(assetManager, "Common/MatDefs/Misc/ShowNormals.j3md");		
+			this.mat = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/ShowNormals.j3md");		
 			this.mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		}
 		
 		this.spats = new Spatial[wbs.length];
 		this.colls = new CollisionShape[wbs.length];
 		for (int i = 0; i < wbs.length; i++) {
-			Spatial piece = assetManager.loadModel(wbs[i].getName());
+			Spatial piece = App.rally.getAssetManager().loadModel(wbs[i].getName());
 			Spatial s = ((Node)piece).getChild(0); //there is only one object in there (hopefully)
 			if (this.mat != null) {
 				s.setMaterial(this.mat); //TODO double sided objects
@@ -94,7 +90,7 @@ public class WorldBuilder extends Node {
 		
 		this.setShadowMode(ShadowMode.CastAndReceive);
 		
-        Material matfloor = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        Material matfloor = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
         matfloor.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
         matfloor.setColor("Color", ColorRGBA.Green);
         
@@ -104,10 +100,10 @@ public class WorldBuilder extends Node {
         startGeometry.setLocalTranslation(0, -0.1f, 0);
         startGeometry.addControl(new RigidBodyControl(0));
         this.attachChild(startGeometry);
-        rally.getPhysicsSpace().add(startGeometry);
+        App.rally.getPhysicsSpace().add(startGeometry);
 
         
-        rally.getRootNode().attachChild(SkyFactory.createSky(assetManager, "Textures/Sky/Bright/BrightSky.dds", false));
+        App.rally.getRootNode().attachChild(SkyFactory.createSky(App.rally.getAssetManager(), "Textures/Sky/Bright/BrightSky.dds", false));
         boolean mine = false; //TODO my try (note, the images need to rotate around one, so that the sky and floor match
         if (mine) {
 	        TextureKey keye = new TextureKey("assets/east.png", true);
@@ -116,14 +112,15 @@ public class WorldBuilder extends Node {
 	        TextureKey keys = new TextureKey("assets/south.png", true);
 	        TextureKey keyt = new TextureKey("assets/top.png", true);
 	        TextureKey keyb = new TextureKey("assets/bottom.png", true);
-	        rally.getRootNode().attachChild(SkyFactory.createSky(assetManager, assetManager.loadTexture(keyw), 
-	        		assetManager.loadTexture(keye), assetManager.loadTexture(keyn), 
-	        		assetManager.loadTexture(keys), assetManager.loadTexture(keyt), assetManager.loadTexture(keyb)));
+	        App.rally.getRootNode().attachChild(SkyFactory.createSky(App.rally.getAssetManager(), App.rally.getAssetManager().loadTexture(keyw), 
+	        		App.rally.getAssetManager().loadTexture(keye), App.rally.getAssetManager().loadTexture(keyn), 
+	        		App.rally.getAssetManager().loadTexture(keys), App.rally.getAssetManager().loadTexture(keyt), 
+	        		App.rally.getAssetManager().loadTexture(keyb)));
         }
         
         if (type[0] instanceof Floating && wantWater) { //this is the nice floating looking one
         	// we create a water processor
-        	SimpleWaterProcessor waterProcessor = new SimpleWaterProcessor(assetManager);
+        	SimpleWaterProcessor waterProcessor = new SimpleWaterProcessor(App.rally.getAssetManager());
         	// we set wave properties
         	waterProcessor.setRenderSize(256,256);    // performance boost because small (don't know the defaults)
         	waterProcessor.setWaterDepth(40);         // transparency of water
@@ -131,7 +128,7 @@ public class WorldBuilder extends Node {
         	waterProcessor.setWaveSpeed(0.05f);       // speed of waves
         	waterProcessor.setWaterColor(ColorRGBA.Green); //TODO actually make it green
         	
-        	waterProcessor.setReflectionScene(rally.getRootNode());
+        	waterProcessor.setReflectionScene(App.rally.getRootNode());
         	
         	// we set the water plane
         	Vector3f waterLocation = new Vector3f(0,-6,0);
@@ -148,7 +145,7 @@ public class WorldBuilder extends Node {
         	water.setLocalTranslation(-2000, -4, 2000);
         	water.setShadowMode(ShadowMode.Receive);
         	water.setMaterial(waterProcessor.getMaterial());
-        	rally.getRootNode().attachChild(water);
+        	App.rally.getRootNode().attachChild(water);
         	
         	//add lastly a plane just under it so you don't fall forever
         	///* TODO
@@ -158,7 +155,7 @@ public class WorldBuilder extends Node {
         	RigidBodyControl underp = new RigidBodyControl(p, 0);
 //        	p.addControl(underp);
     		underp.setKinematic(false);
-    		rally.getPhysicsSpace().add(underp);
+    		App.rally.getPhysicsSpace().add(underp);
 //    		this.attachChild(p);
     		//*/
         }
@@ -175,7 +172,7 @@ public class WorldBuilder extends Node {
 			for (Spatial sp: temp) {
 				if (sp.getWorldTranslation().subtract(playerPos).length() > distance/2) {
 						//2 because don't delete the ones we just placed
-					rally.getPhysicsSpace().remove(sp.getControl(0));
+					App.rally.getPhysicsSpace().remove(sp.getControl(0));
 					this.detachChild(sp);
 					curPieces.remove(sp);
 					System.err.println("Removing: "+sp.getName() + ", num left: "+curPieces.size());
@@ -211,11 +208,11 @@ public class WorldBuilder extends Node {
 		landscape.setKinematic(false);
 		s.addControl(landscape);
 		
-		rally.getPhysicsSpace().add(landscape);
+		App.rally.getPhysicsSpace().add(landscape);
 		this.attachChild(s);
 
 		System.err.println("Adding: "+world.getName() + ", at: " + nextPos);
-		if (rally.ifDebug) {
+		if (App.rally.ifDebug) {
 			System.err.println("at: "+nextPos+", Rot: "+nextRot+", Obj.angle: "+world.getNewAngle()+", Obj.nextPos: "+world.getNewPos());
 		}
 		curPieces.add(s);

@@ -18,10 +18,10 @@ import com.jme3.texture.Texture;
 
 public class CarBuilder extends Node {
 	
-	Rally r;
-	
 	HashMap<Integer, MyVC> carList;
 	List<AI> AIlist;
+	
+	boolean noCarsYet = true;
 	
 	CarBuilder() {
 		carList = new HashMap<>();
@@ -35,7 +35,7 @@ public class CarBuilder extends Node {
 		}
 	}
 	
-	public void addPlayer(int id, Rally rally, FancyVT car, Vector3f start, Matrix3f rot, boolean AI) {
+	public void addPlayer(int id, FancyVT car, Vector3f start, Matrix3f rot, boolean AI) {
 		if (carList.containsKey(id)) {
 			try {
 				throw new Exception("A car already has that Id");
@@ -43,19 +43,18 @@ public class CarBuilder extends Node {
 				e.printStackTrace();
 			}
 		}
-		
-		if (r == null) {
-			r = rally;
+		Rally r = App.rally;
+		if (noCarsYet) {
+			r = App.rally;
 			r.getRootNode().attachChild(this);
 		}
 		
-		AssetManager am = rally.getAssetManager();
-		Node carmodel = (Node) am.loadModel(car.carModel);
+		Node carmodel = (Node) r.getAssetManager().loadModel(car.carModel);
 		
 		TextureKey key = new TextureKey("Textures/Sky/Bright/BrightSky.dds", true);
         key.setGenerateMips(true);
         key.setAsCube(true);
-        final Texture tex = am.loadTexture(key);
+        final Texture tex = r.getAssetManager().loadTexture(key);
         
         for (Geometry g: H.getGeomList(carmodel)) {
         	Material m = g.getMaterial();
@@ -72,7 +71,7 @@ public class CarBuilder extends Node {
 		compoundShape.addChildShape(CollisionShapeFactory.createDynamicMeshShape(carmodel), new Vector3f(0,0,0));
 		
 		Node carNode = new Node(id+"");
-		MyVC player = new MyVC(compoundShape, car, carNode, rally);
+		MyVC player = new MyVC(compoundShape, car, carNode);
 		
 		carNode.addControl(player);
 		carNode.attachChild(carmodel);
@@ -96,7 +95,7 @@ public class CarBuilder extends Node {
 			if (this.AIlist == null){
 				this.AIlist = new LinkedList<AI>();
 			}
-			AI a = new AI(rally, player);
+			AI a = new AI(player);
 			this.AIlist.add(a);
 			player.giveAI(a);
 		}
@@ -116,11 +115,11 @@ public class CarBuilder extends Node {
 			}
 		}
 		
-		if (r.dynamicWorld) {
-			r.worldB.update(carList.get(0).getPhysicsLocation());
+		if (App.rally.dynamicWorld) {
+			App.rally.worldB.update(carList.get(0).getPhysicsLocation());
 		}
 			
-		if (r.ifDebug) {
+		if (App.rally.ifDebug) {
 			H.p(carList.get(0).getPhysicsLocation() + "distance:"+carList.get(0).distance);
 		}
 	}

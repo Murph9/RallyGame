@@ -27,7 +27,7 @@ public class MyCamera extends CameraNode {
 		
 	}
 	
-	//TODO some kind of actual stabilisation	
+	//TODO some kind of actual stabilisation
 	public void myUpdate(float tpf) {
 		Vector3f curPos = getLocalTranslation();
 		Vector3f forw = new Vector3f();
