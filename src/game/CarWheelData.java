@@ -17,7 +17,7 @@ class NormalLatData extends CarWheelData {
 
 	NormalLatData() {
 		B = 10f;
-		C = 1.8f;
+		C = 1.75f;
 		D = 1f;
 		E = 0.97f;
 	}
@@ -27,7 +27,7 @@ class NormalLongData extends CarWheelData {
 
 	NormalLongData() {
 		B = 10f;
-		C = 1.99f;
+		C = 1.8f;
 		D = 1f;
 		E = 0.97f;
 	}
@@ -38,7 +38,7 @@ class RocketWheel extends CarWheelData {
 	
 	RocketWheel() {
 		B = 10f;
-		C = 1.9f;
+		C = 1.6f;
 		D = 2f;
 		E = 0.97f;
 	}
