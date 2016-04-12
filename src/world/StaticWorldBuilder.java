@@ -1,7 +1,6 @@
 package world;
 
 import game.App;
-import game.Rally;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.collision.shapes.CollisionShape;

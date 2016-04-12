@@ -95,7 +95,7 @@ public abstract class FancyVT {
 	
 	float transEffic = 0.75f; //TODO apparently 0.7 is common (power is lost to rotating things
 	float diffRatio = 2.5f; //helps set the total drive ratio
-	float[] gearRatios = new float[]{-2.9f,3.40f,2.5f,1.8f,1,0.74f,0.5f};; //reverse,gear1,gear2,g3,g4,g5,g6,...
+	float[] gearRatios = new float[]{-2.9f,3.40f,2.5f,1.8f,1.3f,1.0f,0.74f};; //reverse,gear1,gear2,g3,g4,g5,g6,...
 	
 	//TODO i found a porsche boxter engine curve:
 //	float[] torque = new float[]{0,223,250,280,300,310,280,245,10};

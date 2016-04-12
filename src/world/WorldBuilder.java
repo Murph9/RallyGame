@@ -1,12 +1,10 @@
 package world;
 
 import game.App;
-import game.Rally;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import com.jme3.asset.AssetManager;
 import com.jme3.asset.TextureKey;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.collision.shapes.PlaneCollisionShape;

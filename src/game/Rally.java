@@ -11,7 +11,6 @@ import world.StaticWorld;
 import world.WorldBuilder;
 
 import com.jme3.app.SimpleApplication;
-import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.font.BitmapFont;
@@ -32,11 +31,10 @@ import com.jme3.system.NanoTimer;
 //Long TODO's: 
 //i broke skidmarks again, will need to fix that :(
 
-//ENGINE stuff
 
 //Bugs TODO
-//maps a little weird still, probably need to remove some of the postprocessing stuff
- //tried that and got no where, they are connected for some reason [you do copy the first one] (thanks for that)
+//minimap is still a little weird, probably need to remove some of the postprocessing stuff
+//  tried that and got no where, they are connected for some reason [you do copy the first one] (thanks for that)
 
 //track car is slightly off the groud by a lot
 
@@ -48,6 +46,7 @@ import com.jme3.system.NanoTimer;
 //    or get them all the same colour (like the pads in mario galaxy)
 //  get them to fall in the hole
 //the infinite road thing
+//  at night time or something because loadings easier
 
 
 public class Rally extends SimpleApplication {
