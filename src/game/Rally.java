@@ -29,8 +29,7 @@ import com.jme3.system.AppSettings;
 import com.jme3.system.NanoTimer;
 
 //Long TODO's: 
-//i broke skidmarks again, will need to fix that :(
-
+//long running skidmark issue is in effect
 
 //Bugs TODO
 //minimap is still a little weird, probably need to remove some of the postprocessing stuff
