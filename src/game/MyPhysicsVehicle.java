@@ -135,7 +135,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 			setupKeys();
 			
 			//only player gets sound
-			engineSound = new AudioNode(am, "assets/sound/engine2.wav");
+			engineSound = new AudioNode(am, "assets/sound/engine.wav");
 			engineSound.setLooping(true);
 			engineSound.play();
 		}
@@ -331,10 +331,10 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		
 		//braking
 		if (brakeCurrent != 0) {
-			wheel[0].radSec = 0;
-			wheel[1].radSec = 0; //TODO do it properly
-			wheel[2].radSec = 0;
-			wheel[3].radSec = 0;
+//			wheel[0].radSec = 0;
+//			wheel[1].radSec = 0; //TODO do it properly
+//			wheel[2].radSec = 0;
+//			wheel[3].radSec = 0;
 		}
 		
 		//http://web.archive.org/web/20050308061534/home.planet.nl/~monstrous/tutstab.html
@@ -349,43 +349,39 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 			//calc the longitudinal force from the slip ratio
 			wf[i].z = VehiclePhysicsHelper.tractionFormula(car.wheellongdata, slipratio) * susforce;
 			
-			float totalLongForce = torques[i] - wf[i].z - brakeCurrent*3000; //TODO magic number
-			wheel[i].radSec += tpf*totalLongForce/(car.engineInertia()/4); //TODO actually get the total wheels or something
+			float totalLongForce = torques[i] - wf[i].z - brakeCurrent*4*susforce; //TODO braking properly
+			wheel[i].radSec += tpf*totalLongForce/(car.engineWheelInertia());
 			
 			float slipangle = 0;
 			if (i < 2) //front
-				slipangle = VehiclePhysicsHelper.calcFrontSlipAngle(velocity.x, velocity.z, yawspeed, steeringCur);
+				slipangle = (float)(Math.atan((velocity.x + yawspeed) / Math.abs(velocity.z)) - steeringCur);
 			else //rear
-				slipangle = VehiclePhysicsHelper.calcRearSlipAngle(velocity.x, velocity.z, yawspeed);
+				slipangle = (float)(Math.atan((velocity.x - yawspeed) / Math.abs(velocity.z)));
 			
 			//calculate the max lat traction value here
-			float tractionLeft = slipratio / this.maxlong;
-			if (tractionLeft > 1) slipangle = 0; //TODO a bit hard but it will do
+			float tractionLeft = FastMath.clamp(1 - Math.abs(slipratio/this.maxlong), 0, 1);
+			float maxslipangle = tractionLeft*this.maxlat;
+			//clamp the slipangle to this value
+			slipangle = FastMath.clamp(slipangle, -maxslipangle, maxslipangle);
 			
 			//latitudinal force that is calculated off the slip angle
 			wf[i].x = -VehiclePhysicsHelper.tractionFormula(car.wheellatdata, slipangle) * susforce;
 			
-			wheel[i].skid = FastMath.sqrt(slipangle*slipangle + slipratio*slipratio);
+			wheel[i].skid = FastMath.clamp(FastMath.sqrt(slipangle*slipangle + slipratio*slipratio), 0, 1);
 		}
-		
-		//TODO merge the lat and long traction values
 				
 		//TODO: !HARD! better code from others 'transision' between static and kinetic friction models
-			// i have no static model
-		
-		//TODO calculate the skid mark values
+			// i have no static model (yet)
 
 		//TODO stop the wobble (hint the basic vehicle code does this through impulses (integration of forces)
-			// try 'rolling resistance function'
 		
 		float lim = 5;
 		float velz = velocity.z + 0.01f;
-		if (Math.abs(velz) <= lim) {
+		if (Math.abs(velz) <= lim) {//TODO doesn't work
 //			fl.multLocal(velz*velz/(lim*lim));
 //			fr.multLocal(velz*velz/(lim*lim));
 //			rl.multLocal(velz*velz/(lim*lim));
 //			rr.multLocal(velz*velz/(lim*lim));
-			//TODO doesn't work
 		}
 		
 		//ui based values
@@ -560,13 +556,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 }
 
 class VehiclePhysicsHelper {
-	
-	static float calcFrontSlipAngle(double vx, double vz, double yawspeed, double steeringCur) {
-		return (float)(Math.atan((vx + yawspeed) / Math.abs(vz)) - steeringCur);
-	}
-	static float calcRearSlipAngle(double vx, double vz, double yawspeed) {
-		return (float)(Math.atan((vx - yawspeed) / Math.abs(vz)));
-	}
 	//http://www.gamedev.net/topic/462784-simplified-pacejka-magic-formula/
 	//http://www.edy.es/dev/docs/pacejka-94-parameters-explained-a-comprehensive-guide/
 	
@@ -583,7 +572,7 @@ class VehiclePhysicsHelper {
 		return w.D * FastMath.sin(w.C * FastMath.atan(w.B*slip - w.E * (w.B*slip - FastMath.atan(w.B*slip))));
 	}
 	
-	//returns the slip value that gives the closest to 1 from the magic formula
+	//returns the slip value that gives the closest to 1 from the magic formula (should be called twice, lat and long)
 	static float calcSlipMax(CarWheelData w) {
 		double error = 0.0005f; //our fixed error, we don't really care how close it is past 3 or 4 decimals
 		
@@ -608,11 +597,10 @@ class VehiclePhysicsHelper {
 	
 	//TODO fix (use http://phors.locost7.info/phors25.htm)
 	//basically gets fraction of maximum for each force and limits the total value by it
-	static float[] mergeSlips(float slipangle, float slipratio) {
+	static float mergeSlips(float slipangle, float slipratio) {
 		//TODO calculate the slip* max values, and use it to limit the other
 		
-		//TODO will also help us get the skid stuff too
 		
-		return new float[] { };
+		return 1f;
 	}
 }

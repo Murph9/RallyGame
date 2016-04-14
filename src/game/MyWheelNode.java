@@ -22,6 +22,8 @@ import com.jme3.util.BufferUtils;
 
 public class MyWheelNode extends Node {
 
+	public static final boolean ifSmoke = true;
+	
 	Spatial spat;
 	
 	static Texture tex;
@@ -38,7 +40,6 @@ public class MyWheelNode extends Node {
 	
 	float skid;
 	ParticleEmitter smoke;
-	boolean ifSmoke = false;
 	
 	public MyWheelNode(String name, MyPhysicsVehicle mvc, int num) {
 		super(name);
@@ -49,19 +50,21 @@ public class MyWheelNode extends Node {
 		this.num = num;
 		this.last = new Vector3f(0,0,0);
 		
-		if (this.ifSmoke) {
+		if (ifSmoke) {
 			this.smoke = initSmoke();
+			smoke.setEnabled(true);
 			attachChild(this.smoke); //TODO fix rotate with tyre
 		}
-		this.setShadowMode(ShadowMode.Off);
+		this.setShadowMode(ShadowMode.Cast);
 	}
 	
 	public void update(float tpf, int rpm) {
 		if (ifSmoke) {
-			if (skid <= 0.1 && contact) {
-				smoke.setEnabled(true);
+			H.p(skid);
+			if (skid > 0.9 && contact) {
+				smoke.setParticlesPerSec(10);
 			} else {
-				smoke.setEnabled(false);
+				smoke.setParticlesPerSec(0);
 			}
 		}
 		
@@ -80,6 +83,7 @@ public class MyWheelNode extends Node {
 	
 	private ParticleEmitter initSmoke() {
 		ParticleEmitter smoke = new ParticleEmitter("Emitter", ParticleMesh.Type.Triangle, 40);
+		smoke.setNumParticles(90);
 		smoke.setParticlesPerSec(10);
 		smoke.setInWorldSpace(true);
 		smoke.setRotateSpeed(FastMath.QUARTER_PI);
@@ -107,7 +111,7 @@ public class MyWheelNode extends Node {
 	
 	public void addSkidLine() {
 		if (contact) {
-			addSkidLine(last, mvc.getWheel(num).getCollisionLocation(), (1-skid));
+			addSkidLine(last, mvc.getWheel(num).getCollisionLocation(), (skid));
 			last = mvc.getWheel(num).getCollisionLocation();
 		} else {
 			last = new Vector3f(0,0,0);

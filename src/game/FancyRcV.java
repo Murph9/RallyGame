@@ -67,6 +67,7 @@ public class FancyRcV extends RaycastVehicle {
 
 		int i = 0;
 		for (i = 0; i < wheelInfo.size(); i++) {
+			@SuppressWarnings("unused")
 			float depth;
 			depth = rayCast(wheelInfo.getQuick(i));
 		}

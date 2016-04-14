@@ -40,7 +40,7 @@ public abstract class FancyVT {
 	float wheelMass = 75; //kg
 	
 	float engineMass = 40;
-	float engineInertia() {
+	float engineWheelInertia() {
 		float wheels = (wheelMass*wheelRadius*wheelRadius/2);
 		if (driveFront && driveRear) {
 			return engineMass + wheels*4;

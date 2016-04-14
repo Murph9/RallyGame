@@ -85,7 +85,7 @@ public class Rally extends SimpleApplication {
     private DirectionalLightShadowFilter dlsf;
     
     //glowing stuff
-    private final boolean ifGlow = false;
+    private final boolean ifGlow = false; //TODO does this work?
 //    FilterPostProcessor fpp;
 //    BloomFilter bloom;
     
