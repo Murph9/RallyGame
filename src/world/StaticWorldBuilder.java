@@ -1,6 +1,7 @@
 package world;
 
 import game.App;
+import game.H;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.collision.shapes.CollisionShape;
@@ -31,6 +32,7 @@ public class StaticWorldBuilder extends Node {
 				if (world.ifNeedsTexture) {
 					s.setMaterial(mat);
 				}
+				H.p(mat);
 				addWorldModel(s, ifShadow);
 			}
 		} else {
@@ -49,14 +51,14 @@ public class StaticWorldBuilder extends Node {
 		s.move(0,-5,0);
 		s.scale(world.scale);
 		
-		CollisionShape world = CollisionShapeFactory.createMeshShape(s);
-		RigidBodyControl landscape = new RigidBodyControl(world, 0);
+		CollisionShape col = CollisionShapeFactory.createMeshShape(s);
+		RigidBodyControl landscape = new RigidBodyControl(col, 0);
 		s.addControl(landscape);
 		if (ifShadow) {
 			s.setShadowMode(ShadowMode.Receive);
 		}
 
-		App.rally.getPhysicsSpace().add(landscape);
+		App.rally.drive.getPhysicsSpace().add(landscape);
 		
 		App.rally.getRootNode().attachChild(s);
 	}

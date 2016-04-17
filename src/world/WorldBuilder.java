@@ -98,7 +98,7 @@ public class WorldBuilder extends Node {
         startGeometry.setLocalTranslation(0, -0.1f, 0);
         startGeometry.addControl(new RigidBodyControl(0));
         this.attachChild(startGeometry);
-        App.rally.getPhysicsSpace().add(startGeometry);
+        App.rally.drive.getPhysicsSpace().add(startGeometry);
 
         
         App.rally.getRootNode().attachChild(SkyFactory.createSky(App.rally.getAssetManager(), "Textures/Sky/Bright/BrightSky.dds", false));
@@ -153,7 +153,7 @@ public class WorldBuilder extends Node {
         	RigidBodyControl underp = new RigidBodyControl(p, 0);
 //        	p.addControl(underp);
     		underp.setKinematic(false);
-    		App.rally.getPhysicsSpace().add(underp);
+    		App.rally.drive.getPhysicsSpace().add(underp);
 //    		this.attachChild(p);
     		//*/
         }
@@ -170,7 +170,7 @@ public class WorldBuilder extends Node {
 			for (Spatial sp: temp) {
 				if (sp.getWorldTranslation().subtract(playerPos).length() > distance/2) {
 						//2 because don't delete the ones we just placed
-					App.rally.getPhysicsSpace().remove(sp.getControl(0));
+					App.rally.drive.getPhysicsSpace().remove(sp.getControl(0));
 					this.detachChild(sp);
 					curPieces.remove(sp);
 					System.err.println("Removing: "+sp.getName() + ", num left: "+curPieces.size());
@@ -206,11 +206,11 @@ public class WorldBuilder extends Node {
 		landscape.setKinematic(false);
 		s.addControl(landscape);
 		
-		App.rally.getPhysicsSpace().add(landscape);
+		App.rally.drive.getPhysicsSpace().add(landscape);
 		this.attachChild(s);
 
 		System.err.println("Adding: "+world.getName() + ", at: " + nextPos);
-		if (App.rally.ifDebug) {
+		if (App.rally.drive.ifDebug) {
 			System.err.println("at: "+nextPos+", Rot: "+nextRot+", Obj.angle: "+world.getNewAngle()+", Obj.nextPos: "+world.getNewPos());
 		}
 		curPieces.add(s);

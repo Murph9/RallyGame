@@ -22,7 +22,7 @@ public class AI implements RawInputListener {
 		//i think aim at player wouldn't be a bad one
 		
 		//second move towards player 1
-		MyPhysicsVehicle player1 = App.rally.cb.get(0);
+		MyPhysicsVehicle player1 = App.rally.drive.cb.get(0);
 		Vector3f target = player1.getPhysicsLocation();//.add(player1.getLinearVelocity().normalize());
 		
 		Vector3f pos = car.getPhysicsLocation();

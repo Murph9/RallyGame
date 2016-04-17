@@ -82,8 +82,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		
 		this.skidNode = new Node(); //attached in car builder
 		
-		this.setSuspensionCompression(car.susCompression);
-		this.setSuspensionDamping(car.susDamping);
+		this.setSuspensionCompression(car.susCompression());
+		this.setSuspensionDamping(car.susDamping());
 		this.setSuspensionStiffness(car.stiffness);
 		this.setMaxSuspensionForce(car.maxSusForce);
 		this.setMaxSuspensionTravelCm(car.maxSusTravel);
@@ -144,7 +144,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		this.maxlat = VehiclePhysicsHelper.calcSlipMax(car.wheellatdata);
 		this.maxlong = VehiclePhysicsHelper.calcSlipMax(car.wheellongdata);
 		
-		H.p(this.maxlat + " " + this.maxlong);
+		System.err.println("Traction values for the cars: " + this.maxlat + " " + this.maxlong);
 	}
 	
 	/**Used internally, creates the actual vehicle constraint when vehicle is added to phyicsspace
@@ -265,7 +265,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 	//end controls
 	
 	//TODO Things taken out of physics:
-	//- handbrake (there is a chance that the longtitudinal magic should fix this
+	//- handbrake (there is a chance that the longtitudinal magic should fix this)
 
 	//TODO find SAE950311 
 	//Millikin & Millikin's Race Car Vehicle Dynamics
@@ -349,7 +349,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 			//calc the longitudinal force from the slip ratio
 			wf[i].z = VehiclePhysicsHelper.tractionFormula(car.wheellongdata, slipratio) * susforce;
 			
-			float totalLongForce = torques[i] - wf[i].z - brakeCurrent*4*susforce; //TODO braking properly
+			float totalLongForce = torques[i] - wf[i].z - (brakeCurrent*susforce*Math.signum(velocity.z)); //TODO braking properly
 			wheel[i].radSec += tpf*totalLongForce/(car.engineWheelInertia());
 			
 			float slipangle = 0;
@@ -368,12 +368,14 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 			wf[i].x = -VehiclePhysicsHelper.tractionFormula(car.wheellatdata, slipangle) * susforce;
 			
 			wheel[i].skid = FastMath.clamp(FastMath.sqrt(slipangle*slipangle + slipratio*slipratio), 0, 1);
+			
+			//TODO handbrake
 		}
 				
 		//TODO: !HARD! better code from others 'transision' between static and kinetic friction models
 			// i have no static model (yet)
 
-		//TODO stop the wobble (hint the basic vehicle code does this through impulses (integration of forces)
+		//TODO stop the slow speed wobble (hint the basic vehicle code does this through impulses (integration of forces)
 		
 		float lim = 5;
 		float velz = velocity.z + 0.01f;
@@ -501,7 +503,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 	private void addSkidLines() {
 		if (ai != null) return;
 		
-		if (App.rally.frameCount % 4 == 0) {
+		if (App.rally.drive.frameCount % 4 == 0) {
 			for (MyWheelNode w: wheel) {
 				w.addSkidLine();
 			}
@@ -520,17 +522,17 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		setLinearVelocity(new Vector3f());
 		setAngularVelocity(new Vector3f());
 
-		App.rally.reset();
+		App.rally.drive.reset();
 		
-		if (App.rally.dynamicWorld) {
-			setPhysicsLocation(App.rally.worldB.start);
+		if (App.rally.drive.dynamicWorld) {
+			setPhysicsLocation(App.rally.drive.worldB.start);
 			Matrix3f p = new Matrix3f();
 			p.fromAngleAxis(FastMath.DEG_TO_RAD*90, new Vector3f(0,1,0));
 			setPhysicsRotation(p);
 
 			setAngularVelocity(new Vector3f());
 		} else {
-			setPhysicsLocation(App.rally.world.start);
+			setPhysicsLocation(App.rally.drive.world.start);
 		}
 		
 		skidNode.detachAllChildren();

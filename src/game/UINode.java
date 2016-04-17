@@ -63,7 +63,7 @@ public class UINode {
 	
 	UINode () {
 		Rally r = App.rally;	
-		this.p = r.cb.get(0);
+		this.p = r.drive.cb.get(0);
 		
 		this.redline = p.car.redline;
 		this.finalRPM = (int)FastMath.ceil(this.redline) + 1000;
@@ -257,8 +257,8 @@ public class UINode {
 		setSpeedDigits(speedKMH);
 		setGearDigit(p.curGear);
 		
-		if (App.rally.dynamicWorld) {
-			score.setText("Placed: "+App.rally.worldB.getTotalPlaced());
+		if (App.rally.drive.dynamicWorld) {
+			score.setText("Placed: "+App.rally.drive.worldB.getTotalPlaced());
 		}
 		
 		//TODO slightly fancier?
