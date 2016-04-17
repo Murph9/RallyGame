@@ -6,7 +6,7 @@ import com.jme3.math.Vector3f;
 
 public abstract class FancyVT {
 	
-	static final String dir = "assets/models/";
+	public static final String dir = "assets/models/";
 
 	//List of not primitives:
 	VehicleTuning vt = null; //TODO the original code doesn't even use it
@@ -61,10 +61,10 @@ public abstract class FancyVT {
 	float dampValue = 0.7f;
 	float restLength = 0f;
 	
-	float susCompression = compValue * 2 * FastMath.sqrt(stiffness);
-	float susDamping = dampValue * 2 * FastMath.sqrt(stiffness);
+	float susCompression() { return compValue * 2 * FastMath.sqrt(stiffness); }
+	float susDamping() { return dampValue * 2 * FastMath.sqrt(stiffness); }
 	float maxSusForce = 25*mass; //TODO '25' is a random number.
-	float maxSusTravel = 50;
+	float maxSusTravel = 50; //cms
 	
 	//jme3 grip constants
 	//my physics works with 0f, but feels tighter with: 1.0f
@@ -99,11 +99,6 @@ public abstract class FancyVT {
 	
 	//TODO i found a porsche boxter engine curve:
 //	float[] torque = new float[]{0,223,250,280,300,310,280,245,10};
-
-	//old constants from simpler traction
-	float CA_R = -5.3f;
-	float CA_F = -5f;
-	float MAX_GRIP = 2.5f;
 }
 
 class NormalCar extends FancyVT {
@@ -144,18 +139,11 @@ class RallyCar extends FancyVT {
 		wheel_yOff = 0.2f;
 		wheel_zOff = 1.1f;
 		
-		CA_R = -5.3f;
-		CA_F = -5f;
-		MAX_GRIP = 2.5f;
-		
 		stiffness  = 35.0f;
 		restLength = 0.15f;
 		compValue  = 0.4f;
 		dampValue  = 0.7f;
 		rollFraction = 0.6f;
-		
-		susCompression = compValue * 2 * FastMath.sqrt(stiffness);
-		susDamping = dampValue * 2 * FastMath.sqrt(stiffness);
 		maxSusForce = 25000;
 		
 		torque = new float[]{0,420,580,620,660,673,420,10}; //starts at 0 rpm, steps every 1000rpm (until done)
@@ -183,18 +171,11 @@ class TrackCar extends FancyVT {
 		RESISTANCE = 5;
 		
 		steerAngle = 0.25f;
-
-		CA_F = -7;
-		CA_R = -6.5f;
-		MAX_GRIP = 3f;
 		
 		stiffness  = 200.0f;
 		restLength = 0.05f;
 		compValue  = 0.8f;
 		dampValue  = 0.9f;
-		
-		susCompression = compValue * 2 * FastMath.sqrt(stiffness);
-		susDamping = dampValue * 2 * FastMath.sqrt(stiffness);
 		
 		width = 1.5f;
 		height = 0.7f;
@@ -226,9 +207,6 @@ class Rocket extends FancyVT {
 		RESISTANCE = 5;
 		rollFraction = 0f;
 		
-		CA_F = -10;
-		CA_R = -9.5f;
-		MAX_GRIP = 20f;
 		MAX_BRAKE = 50000;
 		
 		torque = new float[]{0, 300,500,500,550,608, 595,580,560,540,525, 500,440,410,360,250};
@@ -253,6 +231,22 @@ class Rocket extends FancyVT {
 class Runner extends FancyVT {
 	
 	Runner() {
+		carModel = dir+"car5.obj";
+		
+		wheel_zOff = 1.3f;
+		
+		torque = new float[] {0, 300, 450, 500, 530, 550, 500, 1};
+		
+		gearDown = 3000;
+		gearUp = 6200;
+		redline = 7000;
+		
+		stiffness = 10.0f; //200=f1 car
+		compValue = 0.5f; //(should be lower than damp)
+		dampValue = 1.0f;
+		restLength = 0.1f;
+		
+		maxSusForce = 100000;
 		
 	}
 }
@@ -272,13 +266,6 @@ class Hunter extends FancyVT {
 		wheelRadius = 0.4f;
 
 		rollFraction = 0.1f;
-		
-		CA_F = -7;
-		CA_R = -6;
-		MAX_GRIP = 3f;
-				
-		susCompression = compValue * 2 * FastMath.sqrt(stiffness);
-		susDamping = dampValue * 2 * FastMath.sqrt(stiffness);
 		maxSusForce = 55000;
 		
 		torque = new float[]{0,520,680,720,760,773,520,110};

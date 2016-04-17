@@ -13,6 +13,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.texture.Texture;
 
 public class CarBuilder extends Node {
@@ -48,21 +49,26 @@ public class CarBuilder extends Node {
 			r.getRootNode().attachChild(this);
 		}
 		
-		Node carmodel = (Node) r.getAssetManager().loadModel(car.carModel);
-		
-		TextureKey key = new TextureKey("Textures/Sky/Bright/BrightSky.dds", true);
-        key.setGenerateMips(true);
-        key.setAsCube(true);
-        final Texture tex = r.getAssetManager().loadTexture(key);
-        
-        for (Geometry g: H.getGeomList(carmodel)) {
-        	Material m = g.getMaterial();
-        	m.setBoolean("UseMaterialColors", true);
-        	if (!AI)
-        		m.setTexture("EnvMap", tex);
-            m.setVector3("FresnelParams", new Vector3f(0.05f, 0.18f, 0.11f));
-            g.setMaterial(m);
-        }
+		Spatial carmodel = r.getAssetManager().loadModel(car.carModel);
+		if (carmodel instanceof Geometry) {
+			
+		} else {
+			carmodel = (Node) r.getAssetManager().loadModel(car.carModel);
+			
+			TextureKey key = new TextureKey("Textures/Sky/Bright/BrightSky.dds", true);
+		    key.setGenerateMips(true);
+		    key.setAsCube(true);
+		    final Texture tex = r.getAssetManager().loadTexture(key);
+		    
+		    for (Geometry g: H.getGeomList((Node)carmodel)) {
+		    	Material m = g.getMaterial();
+		    	m.setBoolean("UseMaterialColors", true);
+		    	if (!AI)
+		    		m.setTexture("EnvMap", tex);
+		        m.setVector3("FresnelParams", new Vector3f(0.05f, 0.18f, 0.11f));
+		        g.setMaterial(m);
+		    }
+		}
         
 		//create a compound shape and attach CollisionShape for the car body at 0,1,0
 		//this shifts the effective center of mass of the BoxCollisionShape to 0,-1,0
@@ -86,7 +92,7 @@ public class CarBuilder extends Node {
 		player.setPhysicsLocation(start);
 		player.setPhysicsRotation(rot);
 		
-		r.getPhysicsSpace().add(player);
+		r.drive.getPhysicsSpace().add(player);
 		
 		carList.put(id, player);
 		
@@ -114,11 +120,11 @@ public class CarBuilder extends Node {
 			}
 		}
 		
-		if (App.rally.dynamicWorld) {
-			App.rally.worldB.update(carList.get(0).getPhysicsLocation());
+		if (App.rally.drive.dynamicWorld) {
+			App.rally.drive.worldB.update(carList.get(0).getPhysicsLocation());
 		}
 			
-		if (App.rally.ifDebug) {
+		if (App.rally.drive.ifDebug) {
 			H.p(carList.get(0).getPhysicsLocation() + "distance:"+carList.get(0).distance);
 		}
 	}
