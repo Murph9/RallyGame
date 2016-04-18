@@ -234,6 +234,7 @@ class Runner extends FancyVT {
 		carModel = dir+"car5.obj";
 		
 		wheel_zOff = 1.3f;
+		wheel_yOff = 0.2f;
 		
 		torque = new float[] {0, 300, 450, 500, 530, 550, 500, 1};
 		
@@ -241,12 +242,12 @@ class Runner extends FancyVT {
 		gearUp = 6200;
 		redline = 7000;
 		
-		stiffness = 10.0f; //200=f1 car
+		stiffness = 12.0f; //20 is fairly stiff
 		compValue = 0.5f; //(should be lower than damp)
-		dampValue = 1.0f;
-		restLength = 0.1f;
+		dampValue = 0.6f;
+		restLength = 0.3f;
 		
-		maxSusForce = 100000;
+		maxSusForce = 40000;
 		
 	}
 }
@@ -267,6 +268,9 @@ class Hunter extends FancyVT {
 
 		rollFraction = 0.1f;
 		maxSusForce = 55000;
+		
+		driveFront = true;
+		driveRear = true;
 		
 		torque = new float[]{0,520,680,720,760,773,520,110};
 		

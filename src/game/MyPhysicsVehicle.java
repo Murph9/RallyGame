@@ -33,7 +33,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 	private float maxlong;	
 	
 	//sound stuff
-	AudioNode engineSound; //TODO
+	AudioNode engineSound; //TODO on pause stop car sound
 	
 	//directions
 	Vector3f up = new Vector3f();
@@ -494,9 +494,11 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 		steer(steeringCurrent);
 		H.pUI(steeringCurrent);
 		
-		//sound
-		float pitch = FastMath.clamp(0.5f+1.5f*(curRPM/car.redline), 0.5f, 2);
-		engineSound.setPitch(pitch);
+		if (carNode.getName().equals("0")) {
+			//sound
+			float pitch = FastMath.clamp(0.5f+1.5f*(curRPM/car.redline), 0.5f, 2);
+			engineSound.setPitch(pitch);
+		}
 	}
 	
 	///////////////////////////////////////////////////////////

@@ -50,7 +50,7 @@ public class DriveState extends AbstractAppState {
 	private BulletAppState bulletAppState;
 	
 	//World Model
-	StaticWorld world = StaticWorld.duct; //Set map here
+	StaticWorld world = StaticWorld.duct2; //Set map here
 	StaticWorldBuilder sWorldB;
 	
 	boolean dynamicWorld = false;
@@ -62,7 +62,7 @@ public class DriveState extends AbstractAppState {
 	CarBuilder cb;
 	private FancyVT car = new Runner();
 	
-	int themCount = 0;
+	int themCount = 3;
 	private FancyVT them = new Hunter();
 	
 	//gui and camera stuff
@@ -86,10 +86,13 @@ public class DriveState extends AbstractAppState {
 //    FilterPostProcessor fpp;
 //    BloomFilter bloom;
     
-    public DriveState () { }
+    public DriveState () { super(); }
     
+    @Override
     public void initialize(AppStateManager stateManager, Application app) {
-		bulletAppState = new BulletAppState();
+    	super.initialize(stateManager, app);
+    	
+    	bulletAppState = new BulletAppState();
 		app.getStateManager().attach(bulletAppState);
 		
 		createWorld();
@@ -202,8 +205,20 @@ public class DriveState extends AbstractAppState {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Not init below
 	
+
+	@Override
+	public void setEnabled(boolean enabled) {
+		super.setEnabled(enabled);
+		bulletAppState.setEnabled(enabled); //we kinda don't want the physics running while paused
+		
+		//TODO particles and sound don't stop
+	}
+	
 	@Override
 	public void update(float tpf) {
+		if (!isEnabled()) return; //appstate stuff
+		super.update(tpf);
+		
 		frameCount++;
 		
 		cb.update(tpf);
@@ -216,8 +231,8 @@ public class DriveState extends AbstractAppState {
 		/////////////////////////////////
 		//camera
 		camNode.myUpdate(tpf);
-		
 	}
+	
 	
 	public void reset() {
 		if (dynamicWorld) {
@@ -239,5 +254,4 @@ public class DriveState extends AbstractAppState {
 	public PhysicsSpace getPhysicsSpace() {
 		return bulletAppState.getPhysicsSpace();
 	}
-
 }
