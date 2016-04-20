@@ -5,6 +5,8 @@ import com.jme3.math.Vector3f;
 //Simple class that makes changing static world quite easy
 public enum StaticWorld {
 	
+	choose("plane.obj", 1, Vector3f.ZERO, false),
+	
 	skyline("skyline.blend", 800, new Vector3f(-27.7f, 84.5f, 111.3f), true), 
 	duct("duct.blend", 50, new Vector3f(0,-11,0), true),
 	duct2("duct.blend", 5, new Vector3f(0,-5,0), true),

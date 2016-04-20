@@ -4,6 +4,7 @@ import game.App;
 import game.H;
 
 import com.jme3.asset.AssetManager;
+import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
@@ -16,10 +17,13 @@ import com.jme3.scene.Spatial;
 
 public class StaticWorldBuilder extends Node {
 
-	StaticWorld world;
+	PhysicsSpace phys;
+	private StaticWorld world;
 	
-	public StaticWorldBuilder(StaticWorld world, boolean ifShadow) {
+	public StaticWorldBuilder(PhysicsSpace phys, StaticWorld world, boolean ifShadow) {
+		this.phys = phys;
 		this.world = world;
+		
 		AssetManager as = App.rally.getAssetManager();
 		
 		Material mat = new Material(as, "Common/MatDefs/Misc/ShowNormals.j3md");
@@ -58,7 +62,7 @@ public class StaticWorldBuilder extends Node {
 			s.setShadowMode(ShadowMode.Receive);
 		}
 
-		App.rally.drive.getPhysicsSpace().add(landscape);
+		phys.add(landscape);
 		
 		App.rally.getRootNode().attachChild(s);
 	}

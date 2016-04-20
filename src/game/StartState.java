@@ -10,8 +10,8 @@ public class StartState extends AbstractAppState implements ScreenController {
 
 	
 	public void start() {
-		App.rally.startDrive();
-		App.nifty.gotoScreen("noop");
+		App.rally.startChoose();
+		App.nifty.gotoScreen("choose");
 	}
 	
 	@Override

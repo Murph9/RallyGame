@@ -22,7 +22,7 @@ import com.jme3.util.BufferUtils;
 
 public class MyWheelNode extends Node {
 
-	public static final boolean ifSmoke = true;
+	public static final boolean ifSmoke = false; //TODO fix on all pausing
 	
 	Spatial spat;
 	

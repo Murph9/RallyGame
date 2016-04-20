@@ -557,6 +557,11 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements ActionListener {
 	public float getCurrentVehicleSpeedKmHour() {
 		return vehicle.getCurrentSpeedKmHour();
 	}
+
+	public void cleanup() {
+		if (engineSound != null)
+			App.rally.getAudioRenderer().stopSource(engineSound);
+	}
 }
 
 class VehiclePhysicsHelper {

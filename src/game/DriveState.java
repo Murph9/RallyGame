@@ -26,8 +26,6 @@ import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.shadow.EdgeFilteringMode;
 
-import de.lessvoid.nifty.Nifty;
-
 //Long TODO's: 
 //long running skidmark issue is in effect
 
@@ -113,7 +111,7 @@ public class DriveState extends AbstractAppState {
 			App.rally.getRootNode().attachChild(worldB);
 			
 		} else {
-			sWorldB = new StaticWorldBuilder(world, ifShadow);
+			sWorldB = new StaticWorldBuilder(getPhysicsSpace(), world, ifShadow);
 		}
 		
 		//lights
@@ -183,12 +181,12 @@ public class DriveState extends AbstractAppState {
 			start = world.start;
 		}
 		
-		cb = new CarBuilder();		
-		cb.addPlayer(0, car, start, dir, false);
+		cb = new CarBuilder();
+		cb.addPlayer(getPhysicsSpace(), 0, car, start, dir, false);
 		
 		for (int i = 1; i < themCount+1; i++) {
 			start = start.add(3,0,0);
-			cb.addPlayer(i, them, start, dir, true);
+			cb.addPlayer(getPhysicsSpace(), i, them, start, dir, true);
 		}
 	}
 	
@@ -255,5 +253,9 @@ public class DriveState extends AbstractAppState {
 
 	public PhysicsSpace getPhysicsSpace() {
 		return bulletAppState.getPhysicsSpace();
+	}
+	
+	public void cleanup() {
+		cb.cleanup();
 	}
 }

@@ -85,15 +85,7 @@ public class MenuState extends AbstractAppState implements ScreenController {
 		r.getGuiNode().detachChild(localGuiNode);
 	}
 
-	public void bind(Nifty arg0, Screen arg1) { 
-		DropDown<String> e = findDropDownControl(arg1, "dropdown");
-		if (e != null) {
-			e.addItem("Nifty GUI");
-			e.addItem("Slick2d");
-			e.addItem("Lwjgl"); //TODO focus issue
-			e.selectItemByIndex(0);
-		}
-	}
+	public void bind(Nifty arg0, Screen arg1) { }
 	public void onEndScreen() { }
 	public void onStartScreen() { }
 
