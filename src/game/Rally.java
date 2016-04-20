@@ -1,5 +1,7 @@
 package game;
 
+import java.util.logging.Logger;
+
 import com.jme3.app.SimpleApplication;
 import com.jme3.font.BitmapFont;
 import com.jme3.niftygui.NiftyJmeDisplay;
@@ -10,11 +12,10 @@ import de.lessvoid.nifty.Nifty;
 
 public class Rally extends SimpleApplication {
 
+	public StartState start;
+	
 	public DriveState drive;
 	public MenuState menu;
-	
-	private Nifty nifty;
-	public boolean paused;
 	
 	public static void main(String[] args) {
 		int fps = 60; //default is 60
@@ -37,23 +38,34 @@ public class Rally extends SimpleApplication {
 	@Override
 	public void simpleInitApp() {
 		App.rally = this;
-		paused = false;
+		
+//		Logger.getLogger("").setLevel(Level.WARNING); //remove warnings here
+		inputManager.deleteMapping(SimpleApplication.INPUT_MAPPING_EXIT);
 		
 		NiftyJmeDisplay niftyDisplay = new NiftyJmeDisplay(assetManager, inputManager, audioRenderer, guiViewPort);
-		nifty = niftyDisplay.getNifty();
+		Nifty nifty = niftyDisplay.getNifty();
+		App.nifty = nifty;
 		try { //check if its valid, very important
-			nifty.validateXml("assets/menu/pauseScreen.xml");
+			nifty.validateXml("assets/ui/nifty.xml");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		menu = new MenuState(nifty);
-		getStateManager().attach(menu);
+		start = new StartState();
+		getStateManager().attach(start);
 		
-		nifty.fromXml("assets/menu/pauseScreen.xml", "start", menu);
+		nifty.fromXml("assets/ui/nifty.xml", "start", start);
 		guiViewPort.addProcessor(niftyDisplay);
 		inputManager.setCursorVisible(true);
 		flyCam.setEnabled(false);
+	}
+	public void startDrive() {
+		if (menu != null || drive != null) return;
+		
+		getStateManager().detach(start);
+		
+		menu = new MenuState();
+		getStateManager().attach(menu);
 		
 		drive = new DriveState();
 		getStateManager().attach(drive);
@@ -71,26 +83,13 @@ public class Rally extends SimpleApplication {
 		super.simpleUpdate(tpf);
 		stateManager.update(tpf);
 	}
+	
 
 	/////////////// menu
-	public boolean togglePause() {
-		paused = !paused;
-		if (paused) {
-			drive.setEnabled(false);
-			menu.setEnabled(true);
-		} else {
-			drive.setEnabled(true);
-			menu.setEnabled(false);
-		}
-	
-		return paused;
-	}
-
 	public com.jme3.system.Timer getTimer() {
 		return timer;
 	}
 
-	
 }
 
 class NanoT60 extends NanoTimer {

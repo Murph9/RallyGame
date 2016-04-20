@@ -26,6 +26,8 @@ import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.shadow.EdgeFilteringMode;
 
+import de.lessvoid.nifty.Nifty;
+
 //Long TODO's: 
 //long running skidmark issue is in effect
 

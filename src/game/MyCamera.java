@@ -28,7 +28,10 @@ public class MyCamera extends CameraNode {
 	}
 	
 	//TODO some kind of actual stabilisation
+	//TODO maybe get it to be attached to the car or something
 	public void myUpdate(float tpf) {
+		if (p.getLinearVelocity().length() < 3) return;
+		
 		Vector3f curPos = getLocalTranslation();
 		Vector3f forw = new Vector3f();
 		Vector3f vel = new Vector3f();
