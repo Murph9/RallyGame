@@ -15,10 +15,12 @@
 		</layer>
 	</screen>
 
-	<screen id="choose" controller="game.ChooseState">
+	<screen id="choose" controller="game.ChooseCarAppState">
 		<layer backgroundColor="#0000" childLayout="horizontal">
 			<panel id="panel_2" height="10%" width="85%" align="left" childLayout="center" style="nifty-panel">
-				<control id="dropdown" name="dropDown" />
+				<control id="dropdown" name="dropDown"> 
+					<interact onClick="change()" />
+				</control>
 			</panel>
 			<panel id="panel_1" height="10%" width="15%" align="right" childLayout="center" style="nifty-panel">
 				<control name="button" label="Start" id="StartButton" align="center"

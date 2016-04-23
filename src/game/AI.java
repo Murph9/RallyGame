@@ -1,20 +1,13 @@
 package game;
 
-import com.jme3.input.RawInputListener;
-import com.jme3.input.event.JoyAxisEvent;
-import com.jme3.input.event.JoyButtonEvent;
-import com.jme3.input.event.KeyInputEvent;
-import com.jme3.input.event.MouseButtonEvent;
-import com.jme3.input.event.MouseMotionEvent;
-import com.jme3.input.event.TouchEvent;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 
-public class AI implements RawInputListener {
+public class AI {
 
-	MyVC car;
+	MyPhysicsVehicle car;
 
-	AI (MyVC car) {
+	AI (MyPhysicsVehicle car) {
 		this.car = car;
 	}
 
@@ -66,14 +59,4 @@ public class AI implements RawInputListener {
 	public void onEvent(String act, boolean ifdown, float amnt) {
 		car.onAction(act, ifdown, amnt);
 	}
-	
-	public void beginInput() {}
-	public void endInput() {}
-	public void onJoyAxisEvent(JoyAxisEvent arg0) {}
-	public void onJoyButtonEvent(JoyButtonEvent arg0) {}
-	public void onKeyEvent(KeyInputEvent arg0) {}
-	public void onMouseButtonEvent(MouseButtonEvent arg0) {}
-	public void onMouseMotionEvent(MouseMotionEvent arg0) {}
-	public void onTouchEvent(TouchEvent arg0) {}
-
 }

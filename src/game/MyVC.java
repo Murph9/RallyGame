@@ -28,7 +28,7 @@ public class MyVC extends MyPhysicsVehicle implements PhysicsControl {
     protected PhysicsSpace space = null;
     protected boolean added = false;
 	
-    public MyVC(CollisionShape compoundShape, FancyVT car, Node carNode) {
+    public MyVC(CollisionShape compoundShape, CarData car, Node carNode) {
     	super(compoundShape, car, carNode);
 	}
 
@@ -63,7 +63,7 @@ public class MyVC extends MyPhysicsVehicle implements PhysicsControl {
     }
 
     public Control cloneForSpatial(Spatial spatial) {
-        MyVC control = new MyVC(collisionShape, car, carNode);
+        MyVC control = new MyVC(collisionShape, car, carRootNode);
         control.setAngularFactor(getAngularFactor());
         control.setAngularSleepingThreshold(getAngularSleepingThreshold());
         control.setAngularVelocity(getAngularVelocity());

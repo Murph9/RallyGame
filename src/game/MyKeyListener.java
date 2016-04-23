@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.jme3.input.KeyInput;
 import com.jme3.input.RawInputListener;
-import com.jme3.input.controls.ActionListener;
 import com.jme3.input.event.JoyAxisEvent;
 import com.jme3.input.event.JoyButtonEvent;
 import com.jme3.input.event.KeyInputEvent;
@@ -15,10 +14,10 @@ import com.jme3.input.event.TouchEvent;
 
 public class MyKeyListener implements RawInputListener {
 
-	ActionListener a;
+	MyPhysicsVehicle a;
 	Map<Integer, String> layout = new HashMap<Integer, String>();
 	
-	public MyKeyListener(ActionListener a) {
+	public MyKeyListener(MyPhysicsVehicle a) {
 		this.a = a;
 		
 		layout.put(KeyInput.KEY_LEFT, "Left");

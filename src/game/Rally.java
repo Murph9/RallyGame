@@ -13,7 +13,7 @@ import de.lessvoid.nifty.Nifty;
 public class Rally extends SimpleApplication {
 
 	public StartState start;
-	public ChooseAppState choose;
+	public ChooseCarAppState choose;
 	
 	public DriveState drive;
 	public MenuState menu;
@@ -64,11 +64,11 @@ public class Rally extends SimpleApplication {
 	public void startChoose() {
 		getStateManager().detach(start);
 		
-		choose = new ChooseAppState();
+		choose = new ChooseCarAppState();
 		getStateManager().attach(choose);
 	}
 	
-	public void startDrive() {
+	public void startDrive(CarData car) {
 		if (menu != null || drive != null) return;
 		
 		getStateManager().detach(choose);
@@ -76,7 +76,7 @@ public class Rally extends SimpleApplication {
 		menu = new MenuState();
 		getStateManager().attach(menu);
 		
-		drive = new DriveState();
+		drive = new DriveState(car);
 		getStateManager().attach(drive);
 	}
 

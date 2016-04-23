@@ -60,10 +60,10 @@ public class DriveState extends AbstractAppState {
 	
 	//car stuff
 	CarBuilder cb;
-	private FancyVT car = new Runner();
+	private CarData car;
 	
 	int themCount = 3;
-	private FancyVT them = new Hunter();
+	private CarData them = Car.Hunter.get();
 	
 	//gui and camera stuff
 	MyCamera camNode;
@@ -86,7 +86,10 @@ public class DriveState extends AbstractAppState {
 //    FilterPostProcessor fpp;
 //    BloomFilter bloom;
     
-    public DriveState () { super(); }
+    public DriveState (CarData car) {
+    	super();
+    	this.car = car;
+    }
     
     @Override
     public void initialize(AppStateManager stateManager, Application app) {
@@ -111,7 +114,7 @@ public class DriveState extends AbstractAppState {
 			App.rally.getRootNode().attachChild(worldB);
 			
 		} else {
-			sWorldB = new StaticWorldBuilder(getPhysicsSpace(), world, ifShadow);
+			StaticWorldBuilder.addStaticWorld(getPhysicsSpace(), world, ifShadow);
 		}
 		
 		//lights
@@ -182,11 +185,11 @@ public class DriveState extends AbstractAppState {
 		}
 		
 		cb = new CarBuilder();
-		cb.addPlayer(getPhysicsSpace(), 0, car, start, dir, false);
+		cb.addPlayer(getPhysicsSpace(), 0, car, start, dir, true);
 		
 		for (int i = 1; i < themCount+1; i++) {
 			start = start.add(3,0,0);
-			cb.addPlayer(getPhysicsSpace(), i, them, start, dir, true);
+			cb.addPlayer(getPhysicsSpace(), i, them, start, dir, false);
 		}
 	}
 	

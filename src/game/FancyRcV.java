@@ -22,7 +22,7 @@ public class FancyRcV extends RaycastVehicle {
 	
 	private float curkm = 0;
 	
-	public FancyRcV(FancyVT tuning, RigidBody chassis, VehicleRaycaster raycaster) {
+	public FancyRcV(CarData tuning, RigidBody chassis, VehicleRaycaster raycaster) {
 		super(tuning.vt, chassis, raycaster);
 	}
 	

@@ -17,13 +17,7 @@ import com.jme3.scene.Spatial;
 
 public class StaticWorldBuilder extends Node {
 
-	PhysicsSpace phys;
-	private StaticWorld world;
-	
-	public StaticWorldBuilder(PhysicsSpace phys, StaticWorld world, boolean ifShadow) {
-		this.phys = phys;
-		this.world = world;
-		
+	public static void addStaticWorld(PhysicsSpace phys, StaticWorld world, boolean ifShadow) {
 		AssetManager as = App.rally.getAssetManager();
 		
 		Material mat = new Material(as, "Common/MatDefs/Misc/ShowNormals.j3md");
@@ -37,7 +31,7 @@ public class StaticWorldBuilder extends Node {
 					s.setMaterial(mat);
 				}
 				H.p(mat);
-				addWorldModel(s, ifShadow);
+				addWorldModel(phys, world, s, ifShadow);
 			}
 		} else {
 			Geometry worldModel = (Geometry) as.loadModel(world.name);
@@ -45,11 +39,11 @@ public class StaticWorldBuilder extends Node {
 			if (world.ifNeedsTexture) {
 				worldModel.setMaterial(mat);
 			}
-			addWorldModel(worldModel, ifShadow);
+			addWorldModel(phys, world, worldModel, ifShadow);
 		}
 	}
 	
-	private void addWorldModel(Spatial s, boolean ifShadow) {
+	private static void addWorldModel(PhysicsSpace phys, StaticWorld world, Spatial s, boolean ifShadow) {
 		System.err.println("Adding: "+ s.getName());
 		
 		s.move(0,-5,0);
