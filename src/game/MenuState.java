@@ -72,6 +72,10 @@ public class MenuState extends AbstractAppState implements ScreenController {
 			App.nifty.gotoScreen("tabmenu");
 		}
 	}
+	
+	public void mainMenu() {
+		//TODO, basically reset everything, detach all children and the sun and other things..
+	}
 
 	public void update(float tpf) {
 		super.update(tpf);

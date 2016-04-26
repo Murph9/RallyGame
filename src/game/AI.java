@@ -12,7 +12,7 @@ public class AI {
 	}
 
 	public void update(float tpf) {
-		//i think aim at player wouldn't be a bad one
+		//i think aim at player wouldn't be a bad one:
 		
 		//second move towards player 1
 		MyPhysicsVehicle player1 = App.rally.drive.cb.get(0);
@@ -54,6 +54,8 @@ public class AI {
 				onEvent("Flip", true, 1);
 			}
 		}
+		
+		//TODO some kind of ray cast so they can drive properly
 	}
 
 	public void onEvent(String act, boolean ifdown, float amnt) {

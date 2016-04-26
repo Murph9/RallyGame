@@ -208,7 +208,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		engineSound = audio;
 		engineSound.setLooping(true);
 		engineSound.play();
-		carRootNode.attachChild(engineSound);
+		App.rally.getRootNode().attachChild(engineSound);
 	}
 
 	public void makeAI() {
@@ -286,7 +286,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			torques[3] = engineTorque;
 		}
 
-
 		//http://web.archive.org/web/20050308061534/home.planet.nl/~monstrous/tutstab.html
 		//http://phors.locost7.info/contents.htm
 
@@ -294,6 +293,9 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		for (int i = 0; i < 4; i++) {
 			float susforce = (float)getWheel(i).getWheelInfo().wheelsSuspensionForce;
 
+			if (ifHandbrake && i > 1) //rearwheels
+				wheel[i].radSec = 0; //put the handbrake on
+				
 			float slipratio = (wheel[i].radSec*car.wheelRadius - velocity.z)/Math.abs(velocity.z);
 			//calc the longitudinal force from the slip ratio
 			wf[i].z = VehiclePhysicsHelper.tractionFormula(car.wheellongdata, slipratio) * susforce;

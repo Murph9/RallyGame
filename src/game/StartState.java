@@ -8,10 +8,13 @@ import de.lessvoid.nifty.screen.ScreenController;
 
 public class StartState extends AbstractAppState implements ScreenController {
 
-	
 	public void start() {
-		App.rally.startChoose();
-		App.nifty.gotoScreen("choose");
+		//TODO, should be something that gives options for actual games
+		H.p("Not done yet");
+	}
+	
+	public void startBasic() {
+		App.rally.next(this);
 	}
 	
 	@Override

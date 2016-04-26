@@ -111,8 +111,12 @@ public enum Car {
 
 	private static class Rocket extends CarData {
 		Rocket() {
-			mass = 900;
-			steerAngle = 0.22f;
+			carModel = dir + "rocket1.obj";
+			wheel_zOff = 1.2f;
+			wheel_xOff = 0.71f;
+			
+			mass = 1500;
+			steerAngle = 0.5f;
 
 			DRAG = 0.1f;
 			RESISTANCE = 5;

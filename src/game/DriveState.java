@@ -35,23 +35,16 @@ import com.jme3.shadow.EdgeFilteringMode;
 
 //track car is slightly off the groud by a lot
 
-////TODO Ideas for game modes:
-//being chased. (with them spawning all lightning sci-fi like?)
-//time based
-//score based (closeness to them)
-//touch all of them in one run
-//  or get them all the same colour (like the pads in mario galaxy)
-//get them to fall in the hole
-//the infinite road thing
-//at night time or something because loadings easier
-
 public class DriveState extends AbstractAppState {
 	
 	private BulletAppState bulletAppState;
 	
 	//World Model
-	StaticWorld world = StaticWorld.duct2; //Set map here
+	StaticWorld world;
 	StaticWorldBuilder sWorldB;
+	
+	DirectionalLight sun;
+	AmbientLight amb;
 	
 	boolean dynamicWorld = false;
 	WP[] type = Floating.values();
@@ -86,9 +79,10 @@ public class DriveState extends AbstractAppState {
 //    FilterPostProcessor fpp;
 //    BloomFilter bloom;
     
-    public DriveState (CarData car) {
+    public DriveState (CarData car, StaticWorld world) {
     	super();
     	this.car = car;
+    	this.world = world;
     }
     
     @Override
@@ -118,11 +112,11 @@ public class DriveState extends AbstractAppState {
 		}
 		
 		//lights
-		AmbientLight al = new AmbientLight();
-		al.setColor(ColorRGBA.Blue.mult(0.3f));
-		App.rally.getRootNode().addLight(al);
+		amb = new AmbientLight();
+		amb.setColor(ColorRGBA.Blue.mult(0.3f));
+		App.rally.getRootNode().addLight(amb);
 
-		DirectionalLight sun = new DirectionalLight();
+		sun = new DirectionalLight();
 		sun.setColor(new ColorRGBA(0.9f, 0.9f, 1f, 1f));
 		sun.setDirection(new Vector3f(-0.3f, -0.6f, -0.5f).normalizeLocal());
 		App.rally.getRootNode().addLight(sun);
@@ -146,7 +140,7 @@ public class DriveState extends AbstractAppState {
 	        dlsf.setLambda(0.55f);
 	        dlsf.setShadowIntensity(0.6f);
 	        dlsf.setEdgeFilteringMode(EdgeFilteringMode.Nearest);
-	        dlsf.setEnabled(false);	
+	        dlsf.setEnabled(false);
 	
 	        FilterPostProcessor fpp = new FilterPostProcessor(App.rally.getAssetManager());
 	        fpp.addFilter(dlsf);

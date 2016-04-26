@@ -40,7 +40,7 @@ public class CarBuilder extends Node {
 		CarEntry e = cars.get(id);
 		
 		if (e.audio != null)
-			this.detachChild(e.audio);
+			App.rally.getRootNode().detachChild(e.audio);
 		this.detachChild(e.car.skidNode);
 		
 		e.car.cleanup();

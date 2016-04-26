@@ -11,6 +11,8 @@ public class MyCamera extends CameraNode {
 
 	private MyPhysicsVehicle p;
 	private float damping;
+	
+	private String mode; //TODO use
 
 	MyCamera(String name, Camera c, MyPhysicsVehicle p) {
 		super(name, c);
@@ -30,8 +32,6 @@ public class MyCamera extends CameraNode {
 	//TODO maybe get it to be attached to the car or something
 	public void myUpdate(float tpf) {
 		if (p == null) {
-			setLocalTranslation(5,-3,5);
-			lookAt(new Vector3f(0,-4,0), new Vector3f(0,1,0));
 			return;
 		}
 

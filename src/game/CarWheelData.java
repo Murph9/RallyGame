@@ -39,7 +39,7 @@ class RocketWheel extends CarWheelData {
 	RocketWheel() {
 		B = 10f;
 		C = 1.6f;
-		D = 2f;
+		D = 1f;
 		E = 0.97f;
 	}
 }

@@ -3,20 +3,35 @@ package game;
 import java.util.logging.Logger;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.app.state.AppState;
 import com.jme3.font.BitmapFont;
 import com.jme3.niftygui.NiftyJmeDisplay;
 import com.jme3.system.AppSettings;
 import com.jme3.system.NanoTimer;
 
 import de.lessvoid.nifty.Nifty;
+import world.StaticWorld;
+
+////TODO Ideas for game modes:
+//being chased. (with them spawning all lightning sci-fi like?)
+//time based
+//score based (closeness to them)
+//touch all of them in one run
+//or get them all the same colour (like the pads in mario galaxy)
+//get them to fall in the hole
+//the infinite road thing
+//at night time or something because loadings easier
+//follow points for being close
 
 public class Rally extends SimpleApplication {
 
 	public StartState start;
-	public ChooseCarAppState choose;
+	public ChooseCarAppState chooseCar;
+	public ChooseMapAppState chooseMap;
 	
 	public DriveState drive;
 	public MenuState menu;
+	
 	
 	public static void main(String[] args) {
 		int fps = 60; //default is 60
@@ -61,25 +76,57 @@ public class Rally extends SimpleApplication {
 		flyCam.setEnabled(false);
 	}
 	
-	public void startChoose() {
-		getStateManager().detach(start);
+	//the thing you call when the app state is done
+	public void next(AppState app) {
+		//maybe remove all the app states?
 		
-		choose = new ChooseCarAppState();
-		getStateManager().attach(choose);
+		
+		if (app instanceof StartState) {
+			startChooseCar();
+			App.nifty.gotoScreen("chooseCar");
+			
+		} else if (app instanceof ChooseCarAppState) {
+			getStateManager().detach(chooseCar);
+			
+			startChooseMap();
+			App.nifty.gotoScreen("chooseMap");
+			
+		} else if (app instanceof ChooseMapAppState) {
+			getStateManager().detach(chooseMap);
+			
+			startDrive(chooseCar.getCarData(), chooseMap.getMap());
+			App.nifty.gotoScreen("noop");
+			
+		} else {
+			H.p("not done yet. - rally.next()");
+		}
 	}
 	
-	public void startDrive(CarData car) {
-		if (menu != null || drive != null) return;
+	
+	
+	private void startChooseCar() {
+		getStateManager().detach(start);
 		
-		getStateManager().detach(choose);
+		chooseCar = new ChooseCarAppState();
+		getStateManager().attach(chooseCar);
+	}
+	
+	private void startChooseMap() {
+		chooseMap = new ChooseMapAppState();
+		getStateManager().attach(chooseMap);
+	}
+	
+	private void startDrive(CarData car, StaticWorld world) {
+		if (menu != null || drive != null) return; //no sure what this is actually hoping to stop
 		
 		menu = new MenuState();
 		getStateManager().attach(menu);
 		
-		drive = new DriveState(car);
+		drive = new DriveState(car, world);
 		getStateManager().attach(drive);
 	}
 
+	/////////////////////
 	public BitmapFont getFont() {
 		return guiFont;
 	}
