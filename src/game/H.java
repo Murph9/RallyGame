@@ -15,6 +15,9 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.debug.Arrow;
 
+import de.lessvoid.nifty.controls.DropDown;
+import de.lessvoid.nifty.screen.Screen;
+
 
 //Its short for help, if the name was any longer it might not actually be helpful
 public class H {
@@ -125,5 +128,9 @@ public class H {
 		g.setMaterial(mat);
 		g.setLocalTranslation(pos);
 		return g;
+	}
+	
+	public static <T> DropDown<T> findDropDownControl(Screen screen, final String id) {
+		return screen.findNiftyControl(id, DropDown.class);
 	}
 }

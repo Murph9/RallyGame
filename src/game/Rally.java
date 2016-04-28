@@ -10,24 +10,29 @@ import com.jme3.system.AppSettings;
 import com.jme3.system.NanoTimer;
 
 import de.lessvoid.nifty.Nifty;
+import world.City;
 import world.StaticWorld;
+import world.WP;
 
 ////TODO Ideas for game modes:
 //being chased. (with them spawning all lightning sci-fi like?)
-//time based
-//score based (closeness to them)
-//touch all of them in one run
-//or get them all the same colour (like the pads in mario galaxy)
-//get them to fall in the hole
+//  time based
+//  score based (closeness to them)
+//  touch all of them in one run
+//    or get them all the same colour (like the pads in mario galaxy)
+//  get them to fall in a hole
+//  follow points for being close
 //the infinite road thing
-//at night time or something because loadings easier
-//follow points for being close
+//  at night time or something because loadings easier
+//  overtake as many as you can
 
 public class Rally extends SimpleApplication {
 
+	private Settings set;
+	
 	public StartState start;
-	public ChooseCarAppState chooseCar;
-	public ChooseMapAppState chooseMap;
+	public ChooseCar chooseCar;
+	public ChooseMap chooseMap;
 	
 	public DriveState drive;
 	public MenuState menu;
@@ -53,6 +58,8 @@ public class Rally extends SimpleApplication {
 
 	@Override
 	public void simpleInitApp() {
+		this.set = new Settings();
+		set.car = null; //get rid of warning
 		App.rally = this;
 		
 //		Logger.getLogger("").setLevel(Level.WARNING); //remove warnings here
@@ -61,7 +68,7 @@ public class Rally extends SimpleApplication {
 		NiftyJmeDisplay niftyDisplay = new NiftyJmeDisplay(assetManager, inputManager, audioRenderer, guiViewPort);
 		Nifty nifty = niftyDisplay.getNifty();
 		App.nifty = nifty;
-		try { //check if its valid, very important
+		try { //check if its valid, very important (why doesn't it do this by itself?)
 			nifty.validateXml("assets/ui/nifty.xml");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -70,59 +77,62 @@ public class Rally extends SimpleApplication {
 		start = new StartState();
 		getStateManager().attach(start);
 		
+		
 		nifty.fromXml("assets/ui/nifty.xml", "start", start);
 		guiViewPort.addProcessor(niftyDisplay);
 		inputManager.setCursorVisible(true);
 		flyCam.setEnabled(false);
 	}
 	
+	//HERE is the logic for the app progress., TODO: need a toMainMenu() at some point
 	//the thing you call when the app state is done
 	public void next(AppState app) {
-		//maybe remove all the app states?
-		
-		
 		if (app instanceof StartState) {
 			startChooseCar();
 			App.nifty.gotoScreen("chooseCar");
 			
-		} else if (app instanceof ChooseCarAppState) {
+		} else if (app instanceof ChooseCar) {
 			getStateManager().detach(chooseCar);
 			
 			startChooseMap();
-			App.nifty.gotoScreen("chooseMap");
+			App.nifty.gotoScreen("chooseMapType");
 			
-		} else if (app instanceof ChooseMapAppState) {
+		} else if (app instanceof ChooseMap) {
 			getStateManager().detach(chooseMap);
 			
-			startDrive(chooseCar.getCarData(), chooseMap.getMap());
-			App.nifty.gotoScreen("noop");
+			startDrive(chooseCar.getCarData(), chooseMap.getMapS(), chooseMap.getMapD());
+			App.nifty.gotoScreen("drive-noop");
 			
 		} else {
 			H.p("not done yet. - rally.next()");
 		}
 	}
 	
-	
-	
 	private void startChooseCar() {
 		getStateManager().detach(start);
 		
-		chooseCar = new ChooseCarAppState();
+		chooseCar = new ChooseCar();
 		getStateManager().attach(chooseCar);
 	}
 	
 	private void startChooseMap() {
-		chooseMap = new ChooseMapAppState();
+		getStateManager().detach(chooseCar);
+		
+		chooseMap = new ChooseMap();
 		getStateManager().attach(chooseMap);
 	}
 	
-	private void startDrive(CarData car, StaticWorld world) {
+	private void startDrive(CarData car, StaticWorld world, WP[] dworld) {
 		if (menu != null || drive != null) return; //no sure what this is actually hoping to stop
+		
+		set.car = car;
+		set.sworld = world;
+		set.dworld = dworld;
 		
 		menu = new MenuState();
 		getStateManager().attach(menu);
 		
-		drive = new DriveState(car, world);
+		drive = new DriveState(set);
 		getStateManager().attach(drive);
 	}
 
@@ -139,7 +149,6 @@ public class Rally extends SimpleApplication {
 		super.simpleUpdate(tpf);
 		stateManager.update(tpf);
 	}
-	
 
 	/////////////// menu
 	public com.jme3.system.Timer getTimer() {

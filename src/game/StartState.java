@@ -9,8 +9,7 @@ import de.lessvoid.nifty.screen.ScreenController;
 public class StartState extends AbstractAppState implements ScreenController {
 
 	public void start() {
-		//TODO, should be something that gives options for actual games
-		H.p("Not done yet");
+				
 	}
 	
 	public void startBasic() {

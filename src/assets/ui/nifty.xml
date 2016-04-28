@@ -7,9 +7,6 @@
 		<layer id="foreground" backgroundColor="#0000" childLayout="center">
 			<panel id="panel_mid" height="25%" width="20%" align="center"
 				childLayout="vertical" style="nifty-panel">
-				<control name="button" label="Start" id="StartButton" align="center" visibleToMouse="true">
-					<interact onClick="start()" />
-				</control>
 				<control name="button" label="Start Basic" id="StartBasicButton" align="center" visibleToMouse="true">
 					<interact onClick="startBasic()" />
 				</control>
@@ -17,7 +14,42 @@
 		</layer>
 	</screen>
 	
-	<screen id="chooseMap" controller="game.ChooseMapAppState">
+	<screen id="chooseCar" controller="game.ChooseCar">
+		<layer backgroundColor="#0000" childLayout="horizontal">
+			<panel height="10%" width="85%" align="left" childLayout="center" style="nifty-panel">
+				<control id="cardropdown" name="dropDown"> 
+					<interact onClick="change()" />
+				</control>
+			</panel>
+			<panel height="10%" width="15%" align="right" childLayout="center" style="nifty-panel">
+				<control name="button" label="Choose Car" id="CarButton" align="center"
+					valign="center" visibleToMouse="true">
+					<interact onClick="chooseCar()" />
+				</control>
+			</panel>
+		</layer>
+		<layer backgroundColor="#0000" childLayout="vertical">
+			<panel height="20%" width="20%" align="left" childLayout="center">
+			</panel>
+			<panel height="80%" width="20%" align="left" childLayout="center" style="nifty-panel">
+				<text text="Car info" font="Interface/Fonts/Default.fnt" id="carinfo" width="100%" height="100%" wrap="true" textHAlign="left"/>
+			</panel>
+		</layer>
+	</screen>
+
+	<screen id="chooseMapType" controller="game.ChooseMap">
+		<layer backgroundColor="#0000" childLayout="vertical">
+			<panel height="25%" width="20%" align="center" childLayout="vertical" style="nifty-panel">
+				<control name="button" label="Static" id="staticButton" align="center" visibleToMouse="true">
+					<interact onClick="staticWorld()" />
+				</control>
+				<control name="button" label="Dynamic" id="dynamicButton" align="center" visibleToMouse="true">
+					<interact onClick="dynamicWorld()" />
+				</control>
+			</panel>
+		</layer> 
+	</screen>
+	<screen id="chooseMap" controller="game.ChooseMap">
 		<layer backgroundColor="#0000" childLayout="horizontal">
 			<panel height="10%" width="85%" align="left" childLayout="center" style="nifty-panel">
 				<control id="mapdropdown" name="dropDown"> 
@@ -32,24 +64,8 @@
 			</panel>
 		</layer>
 	</screen>
-	
-	<screen id="chooseCar" controller="game.ChooseCarAppState">
-		<layer backgroundColor="#0000" childLayout="horizontal">
-			<panel height="10%" width="85%" align="left" childLayout="center" style="nifty-panel">
-				<control id="cardropdown" name="dropDown"> 
-					<interact onClick="change()" />
-				</control>
-			</panel>
-			<panel height="10%" width="15%" align="right" childLayout="center" style="nifty-panel">
-				<control name="button" label="Choose Car" id="CarButton" align="center"
-					valign="center" visibleToMouse="true">
-					<interact onClick="chooseCar()" />
-				</control>
-			</panel>
-		</layer>
-	</screen>
 
-	<screen id="noop" controller="game.MenuState">
+	<screen id="drive-noop" controller="game.MenuState">
 		<!-- This is THE default screen when the game is being played-->
 		<layer backgroundColor="#3330" childLayout="horizontal">
 			<panel height="7%" width="10%" align="left" childLayout="center" style="nifty-panel">
@@ -58,7 +74,7 @@
 		</layer>
 	</screen>
 
-	<screen id="paused" controller="game.MenuState">
+	<screen id="drive-paused" controller="game.MenuState">
 		<layer backgroundColor="#0000" childLayout="center">
 			<panel height="25%" width="20%" align="center" childLayout="vertical" backgroundColor="#fff8">
 				<control name="button" label="Un pause" id="StartButton" align="center" valign="center" visibleToMouse="true">
@@ -71,7 +87,7 @@
 		</layer>
 	</screen>
 	
-	<screen id="tabmenu" controller="game.MenuState">
+	<screen id="drive-tabmenu" controller="game.MenuState">
 		<layer backgroundColor="#3330" childLayout="vertical">
 			<panel height="25%" width="15%" align="left"
 				childLayout="center" backgroundColor="#bbbf">
@@ -81,7 +97,7 @@
 		</layer>
 	</screen>
 	
-	<screen id="console_s" controller="game.MenuState">
+	<screen id="drive-console" controller="game.MenuState">
 		<layer backgroundColor="#3330" childLayout="vertical">
 			<panel height="5%" width="10%" childLayout="center">
 				<control id="console" name="nifty-console" lines="25" align="center" valign="center" />

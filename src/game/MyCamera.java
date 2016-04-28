@@ -12,8 +12,6 @@ public class MyCamera extends CameraNode {
 	private MyPhysicsVehicle p;
 	private float damping;
 	
-	private String mode; //TODO use
-
 	MyCamera(String name, Camera c, MyPhysicsVehicle p) {
 		super(name, c);
 		if (p != null) {

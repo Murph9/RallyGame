@@ -79,10 +79,16 @@ public class DriveState extends AbstractAppState {
 //    FilterPostProcessor fpp;
 //    BloomFilter bloom;
     
-    public DriveState (CarData car, StaticWorld world) {
+    public DriveState (State set) {
     	super();
-    	this.car = car;
-    	this.world = world;
+    	this.car = set.getCar();
+    	
+    	if (set.isDynamicWorld()) {
+    		this.dynamicWorld = true;
+    		this.type = set.getDynamicWorld();
+    	} else { 
+    		this.world = set.getStaticWorld();
+    	}
     }
     
     @Override
@@ -104,7 +110,7 @@ public class DriveState extends AbstractAppState {
     
 	private void createWorld() {
 		if (dynamicWorld) {
-			worldB = new WorldBuilder(type, App.rally.getViewPort(), needsMaterial);
+			worldB = new WorldBuilder(type, getPhysicsSpace(), App.rally.getViewPort(), needsMaterial);
 			App.rally.getRootNode().attachChild(worldB);
 			
 		} else {

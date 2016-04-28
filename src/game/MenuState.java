@@ -10,8 +10,6 @@ import com.jme3.input.controls.KeyTrigger;
 import com.jme3.scene.Node;
 
 import de.lessvoid.nifty.Nifty;
-import de.lessvoid.nifty.controls.DropDown;
-import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 
@@ -54,11 +52,11 @@ public class MenuState extends AbstractAppState implements ScreenController {
 		Screen cur = App.nifty.getCurrentScreen();
 		if (cur.getScreenId().equals("paused")) {
 			//then un pause
-			App.nifty.gotoScreen("noop");
+			App.nifty.gotoScreen("drive-noop");
 			App.rally.drive.setEnabled(true);
 		} else {
 			//then pause
-			App.nifty.gotoScreen("paused");
+			App.nifty.gotoScreen("drive-paused");
 			App.rally.drive.setEnabled(false);
 		}
 	}
@@ -67,9 +65,9 @@ public class MenuState extends AbstractAppState implements ScreenController {
 		if (cur.getScreenId().equals("pause")) return; //can't open the menu on the pause screen
 		
 		if (cur.getScreenId().equals("tabmenu")) {
-			App.nifty.gotoScreen("noop");
+			App.nifty.gotoScreen("drive-noop");
 		} else {
-			App.nifty.gotoScreen("tabmenu");
+			App.nifty.gotoScreen("drive-tabmenu");
 		}
 	}
 	
@@ -93,10 +91,6 @@ public class MenuState extends AbstractAppState implements ScreenController {
 	public void onEndScreen() { }
 	public void onStartScreen() { }
 
-	private DropDown<String> findDropDownControl(Screen screen, final String id) {
-		return screen.findNiftyControl(id, DropDown.class);
-	}
-	
 	//////////////////
 	//test
 	public String speed() {

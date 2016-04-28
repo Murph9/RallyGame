@@ -39,7 +39,7 @@ public abstract class CarData {
 	float wheelRadius = 0.3f; //m
 	float wheelMass = 75; //kg
 	
-	float engineMass = 40;
+	float engineMass = 100;
 	float engineWheelInertia() {
 		float wheels = (wheelMass*wheelRadius*wheelRadius/2);
 		if (driveFront && driveRear) {
@@ -97,6 +97,19 @@ public abstract class CarData {
 	//TODO i found a porsche boxter engine curve:
 //	float[] torque = new float[]{0,223,250,280,300,310,280,245,10};
 
+	
+	
+	///////////////////
+	//usefulMethods
+	
+	//get the max power
+	float getMaxPower() {
+		float max = 0;
+		for (int i = 0; i < torque.length; i++) {
+			max = Math.max(max, torque[i]*(1000*i)/9549);
+		} //http://www.autospeed.com/cms/article.html?&title=Power-versus-Torque-Part-1&A=108647
+		return max;
+	}
 }
 
 

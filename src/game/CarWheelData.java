@@ -33,6 +33,22 @@ class NormalLongData extends CarWheelData {
 	}
 }
 
+class RallyLatWheel extends CarWheelData {
+	RallyLatWheel() {
+		B = 6f;
+		C = 1.65f;
+		D = 1f;
+		E = 0.95f;
+	}
+}
+class RallyLongWheel extends CarWheelData {
+	RallyLongWheel() {
+		B = 4f;
+		C = 1.65f;
+		D = 1f;
+		E = 0.95f;
+	}
+}
 
 class RocketWheel extends CarWheelData {
 	

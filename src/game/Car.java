@@ -41,7 +41,9 @@ public enum Car {
 			wheelModel = dir+"wheelraid1.obj";
 
 			mass = 1400;
-
+			DRAG = 0.7f;
+			RESISTANCE = 10;
+			
 			wheelWidth = 0.25f;
 			wheelRadius = 0.4f;
 
@@ -54,20 +56,23 @@ public enum Car {
 
 			stiffness  = 35.0f;
 			restLength = 0.15f;
-			compValue  = 0.4f;
-			dampValue  = 0.7f;
+			compValue  = 0.2f;
+			dampValue  = 0.2f;
 			rollFraction = 0.6f;
 			maxSusForce = 25000;
 
-			torque = new float[]{0,420,580,620,660,673,420,10}; //starts at 0 rpm, steps every 1000rpm (until done)
+			torque = new float[]{0,520,580,620,680,720,870,820,0};
 
-			gearDown = 2900;
-			gearUp = 5700;
-			redline = 6500;
+			gearDown = 3500;
+			gearUp = 6800;
+			redline = 7200;
 
 			transEffic = 0.75f;
-			diffRatio = 3f;
-			gearRatios = new float[]{-3.5f,3.66f,2.5f,1.9f,1.4f,1.02f,0.7f};
+			diffRatio = 2.5f;
+			gearRatios = new float[]{-3.5f,3.0f,2.3f,1.6f,1.2f,0.87f,0.7f};
+			
+			wheellatdata = new RallyLatWheel();
+			wheellongdata = new RallyLongWheel();
 		}
 	}
 

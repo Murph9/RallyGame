@@ -18,12 +18,14 @@ import com.jme3.shadow.EdgeFilteringMode;
 
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.controls.DropDown;
+import de.lessvoid.nifty.elements.Element;
+import de.lessvoid.nifty.elements.render.TextRenderer;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 import world.StaticWorld;
 import world.StaticWorldBuilder;
 
-public class ChooseCarAppState extends AbstractAppState implements ScreenController {
+public class ChooseCar extends AbstractAppState implements ScreenController {
 
 	private BulletAppState bulletAppState;
 
@@ -37,13 +39,14 @@ public class ChooseCarAppState extends AbstractAppState implements ScreenControl
 	static CarData car; //current car
 
 	private DropDown<String> dropdown;
+	private Element info;
 	private MyCamera camNode;
 
 	private HashMap<String, CarData> carset;
 	
 	private DirectionalLightShadowRenderer dlsr;
 
-	public ChooseCarAppState() {
+	public ChooseCar() {
 		world = StaticWorld.garage;
 
 		carset = new HashMap<>();
@@ -61,8 +64,10 @@ public class ChooseCarAppState extends AbstractAppState implements ScreenControl
 		bulletAppState = new BulletAppState();
 		app.getStateManager().attach(bulletAppState);
 
-		dropdown = findDropDownControl(App.nifty.getCurrentScreen(), "cardropdown");
-
+		dropdown = H.findDropDownControl(App.nifty.getCurrentScreen(), "cardropdown");
+		info = App.nifty.getCurrentScreen().findElementByName("carinfo");
+		info.getRenderer(TextRenderer.class).setLineWrapping(true);
+		
 		createWorld();
 		buildPlayers();
 		initCamera();
@@ -122,6 +127,8 @@ public class ChooseCarAppState extends AbstractAppState implements ScreenControl
 				cb.addPlayer(getPhysicsSpace(), 0, c, world.start, new Matrix3f(), true);
 				
 				car = c;
+				String carinfotext = getCarInfoText(dropdown.getSelection(), car); 
+				info.getRenderer(TextRenderer.class).setText(carinfotext);
 			}
 		}
 
@@ -130,6 +137,16 @@ public class ChooseCarAppState extends AbstractAppState implements ScreenControl
 		MyPhysicsVehicle car = cb.get(0);
 		Vector3f pos = car.getPhysicsLocation();
 		car.setPhysicsLocation(new Vector3f(0, pos.y, 0));
+	}
+
+	private String getCarInfoText(String name, CarData car) {
+		String out = "Name: "+ name + "\n";
+		out += "Max Power: "+car.getMaxPower()+"\n";
+		out += "Weight: "+car.mass*9.81f + "\n";
+		out += "Drag(linear): " + car.DRAG + "("+car.RESISTANCE+")\n";
+		out += "Redline: "+ car.redline +"\n";
+		
+		return out;
 	}
 
 	public PhysicsSpace getPhysicsSpace() {
@@ -163,7 +180,7 @@ public class ChooseCarAppState extends AbstractAppState implements ScreenControl
 	
 	@Override
 	public void bind(Nifty arg0, Screen arg1) {
-		DropDown<String> dropdown = findDropDownControl(arg1, "cardropdown");
+		DropDown<String> dropdown = H.findDropDownControl(arg1, "cardropdown");
 		if (dropdown != null) {
 			//TODO get list of car types
 			for (String s : carset.keySet()) {
@@ -171,9 +188,6 @@ public class ChooseCarAppState extends AbstractAppState implements ScreenControl
 			}
 			dropdown.selectItemByIndex(0);
 		}
-	}
-	private <T> DropDown<T> findDropDownControl(Screen screen, final String id) {
-		return screen.findNiftyControl(id, DropDown.class);
 	}
 
 	public void onEndScreen() { }
