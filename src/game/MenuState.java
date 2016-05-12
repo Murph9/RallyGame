@@ -50,7 +50,7 @@ public class MenuState extends AbstractAppState implements ScreenController {
 
 	public void togglePause() {
 		Screen cur = App.nifty.getCurrentScreen();
-		if (cur.getScreenId().equals("paused")) {
+		if (cur.getScreenId().equals("drive-paused")) {
 			//then un pause
 			App.nifty.gotoScreen("drive-noop");
 			App.rally.drive.setEnabled(true);
@@ -62,9 +62,9 @@ public class MenuState extends AbstractAppState implements ScreenController {
 	}
 	public void toggleMenu() {
 		Screen cur = App.nifty.getCurrentScreen();
-		if (cur.getScreenId().equals("pause")) return; //can't open the menu on the pause screen
+		if (cur.getScreenId().equals("drive-pause")) return; //can't open the menu on the pause screen
 		
-		if (cur.getScreenId().equals("tabmenu")) {
+		if (cur.getScreenId().equals("drive-tabmenu")) {
 			App.nifty.gotoScreen("drive-noop");
 		} else {
 			App.nifty.gotoScreen("drive-tabmenu");
@@ -73,6 +73,7 @@ public class MenuState extends AbstractAppState implements ScreenController {
 	
 	public void mainMenu() {
 		//TODO, basically reset everything, detach all children and the sun and other things..
+		//rootnode.detachAllChildren();
 	}
 
 	public void update(float tpf) {

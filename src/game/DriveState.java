@@ -110,7 +110,7 @@ public class DriveState extends AbstractAppState {
     
 	private void createWorld() {
 		if (dynamicWorld) {
-			worldB = new WorldBuilder(type, getPhysicsSpace(), App.rally.getViewPort(), needsMaterial);
+			worldB = new WorldBuilder(type, getPhysicsSpace(), App.rally.getViewPort());
 			App.rally.getRootNode().attachChild(worldB);
 			
 		} else {

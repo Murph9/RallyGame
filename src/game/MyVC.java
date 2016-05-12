@@ -98,7 +98,6 @@ public class MyVC extends MyPhysicsVehicle implements PhysicsControl {
             newWheel.setWheelsDampingRelaxation(wheel.getWheelsDampingRelaxation());
             newWheel.setMaxSuspensionForce(wheel.getMaxSuspensionForce());
 
-            //TODO: bad way finding children!
             if (spatial instanceof Node) {
                 Node node = (Node) spatial;
                 Spatial wheelSpat = node.getChild(wheel.getWheelSpatial().getName());

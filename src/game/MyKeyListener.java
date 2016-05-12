@@ -24,6 +24,12 @@ public class MyKeyListener implements RawInputListener {
 		layout.put(KeyInput.KEY_RIGHT, "Right");
 		layout.put(KeyInput.KEY_UP, "Accel");
 		layout.put(KeyInput.KEY_DOWN, "Brake");
+
+		layout.put(KeyInput.KEY_A, "Left");
+		layout.put(KeyInput.KEY_D, "Right");
+		layout.put(KeyInput.KEY_W, "Accel");
+		layout.put(KeyInput.KEY_S, "Brake");
+		
 		layout.put(KeyInput.KEY_Q, "Jump");
 		layout.put(KeyInput.KEY_SPACE, "Handbrake");
 		layout.put(KeyInput.KEY_F, "Flip");

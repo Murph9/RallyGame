@@ -217,9 +217,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	}
 
 
-	//TODO Things taken out of physics:
-	//- handbrake
-
 	//TODO find SAE950311 
 	//Millikin & Millikin's Race Car Vehicle Dynamics
 
@@ -296,8 +293,13 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			//calc the longitudinal force from the slip ratio
 			wf[i].z = VehiclePhysicsHelper.tractionFormula(car.wheellongdata, slipratio) * susforce;
 
-			float totalLongForce = torques[i] - wf[i].z - (brakeCurrent*susforce*Math.signum(velocity.z)); //TODO braking properly
-			wheel[i].radSec += tpf*totalLongForce/(car.engineWheelInertia());
+			float totalLongForce = torques[i] - wf[i].z - (brakeCurrent*car.brakeMaxTorque*Math.signum(wheel[i].radSec)); //TODO braking properly
+			if (Math.signum(totalLongForce - (brakeCurrent*car.brakeMaxTorque*Math.signum(velocity.z))) != Math.signum(totalLongForce)) {
+				//we maxed out the forces with braking
+				wheel[i].radSec = 0;
+			} else {
+				wheel[i].radSec += tpf*totalLongForce/(car.engineWheelInertia());				
+			}
 
 			float slipangle = 0;
 			if (i < 2) //front
@@ -316,7 +318,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 			wheel[i].skid = FastMath.clamp(FastMath.sqrt(slipangle*slipangle + slipratio*slipratio), 0, 1);
 
-			//TODO handbrake
 		}
 
 		//TODO: !HARD! better code from others 'transision' between static and kinetic friction models
@@ -356,9 +357,9 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	private float getEngineWheelTorque(float tpf, float vz) {
 		float wheelrot = 0;
 		if (car.driveFront)
-			wheelrot = wheel[0].radSec; //get the drive wheels rotation speed
+			wheelrot = (wheel[0].radSec + wheel[1].radSec)/2; //get the drive wheels rotation speed
 		if (car.driveRear) 
-			wheelrot = wheel[2].radSec; //because both the wheels are rpm locked it doesn't matter which one
+			wheelrot = (wheel[2].radSec + wheel[3].radSec)/2; //get the average to pretend there is a diff
 
 		float curGearRatio = car.gearRatios[curGear];//0 = reverse, >= 1 normal make sense
 		float diffRatio = car.diffRatio;
@@ -369,13 +370,13 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		curRPM = H.clamp(curRPM, 800, 50000);//make sure we never stall (or get rediculous)
 		//TODO use engine compression value
 
+		autoTransmission(curRPM, vz);
+		
 		if (Math.abs(curRPM) > car.redline) {
 			return 0; //kill engine if greater than redline
 		}
 
-		autoTransmission(curRPM, vz);
 		float engineTorque = lerpTorque(curRPM)*accelCurrent;
-
 		float engineOutTorque = engineTorque*curGearRatio*diffRatio*car.transEffic;
 
 		float totalTorque = engineOutTorque/car.wheelRadius;
@@ -439,7 +440,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			steeringCurrent -= car.steerAngle*speedFactor*steerRight; //maxangle*speedFactor*turnfraction
 		}
 		steer(steeringCurrent);
-		H.pUI(steeringCurrent);
+		H.pUI("steering: "+steeringCurrent);
 
 		
 		//update ai if any

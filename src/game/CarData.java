@@ -29,7 +29,7 @@ public abstract class CarData {
 	float length = 3f; //z size meter, from front to back
 	
 	float steerAngle = 0.5f; //radians
-	float steerFactor = 10f; //TODO ??
+	float steerFactor = 10f; //TODO meant to change the max turn angle based on speed and this
 	
 	//wheels axles directions
 	Vector3f wheelDirection = new Vector3f(0, -1, 0); //vertical
@@ -49,7 +49,7 @@ public abstract class CarData {
 	}
 	float rollFraction = 0.5f; //1 = full into roll, 0 = no roll
 	
-	//TODO make front and back independant
+	//TODO make front and back independant (maybe even each wheel)
 	float wheel_xOff = 0.68f; //wheels x offset (side), meters
 	float wheel_yOff = 0f; //wheels y offest (height), meters
 	float wheel_zOff = 1.1f; //wheels z offset (front and back), meters
@@ -74,23 +74,22 @@ public abstract class CarData {
 	float DRAG = 1.5f; //squared component
 	float RESISTANCE = 15.0f; //linear component
 
-	//other (debug)
-	float MAX_BRAKE = 20000;
+	float brakeMaxTorque = 4000; 
 	Vector3f JUMP_FORCE = new Vector3f(0, 5*mass, 0);
 	
 	boolean driveFront = false, driveRear = true; //this would be rear wheel drive
 	
 	//this one is from the notes, is a ~1999 corvette c6 
 	float[] torque = new float[]{0,390,445,460,480,475,360,10}; //starts at 0 rpm, steps every 1000rpm (until done)
-		//TODO maybe 500 rpm splits (will get better peaks, good for testing grip)
+		//TODO maybe 500 rpm splits (will get better peaks)
 	
-	float gearDown = 2400;//TODO find good numbers for all of these gear numbers
+	float gearDown = 2400; //rpm triggering a gear down
 	float gearUp = 5500;
 	float redline = 6500;
 	
 	float engineCompression = 0.2f; //is going to be multiplied by the RPM
 	
-	float transEffic = 0.75f; //TODO apparently 0.7 is common (power is lost to rotating things
+	float transEffic = 0.75f; //TODO apparently 0.7 is common (power is lost to rotating things)
 	float diffRatio = 2.5f; //helps set the total drive ratio
 	float[] gearRatios = new float[]{-2.9f,3.40f,2.5f,1.8f,1.3f,1.0f,0.74f};; //reverse,gear1,gear2,g3,g4,g5,g6,...
 	

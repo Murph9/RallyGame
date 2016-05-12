@@ -171,7 +171,6 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 	//UI stuff
 	public void chooseCar() {
 		if (car == null) { /*not really sure*/ };
-		//TODO this.cleanup(); //set return value
 		App.rally.next(this);
 	}
 	public CarData getCarData() {
@@ -182,7 +181,6 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 	public void bind(Nifty arg0, Screen arg1) {
 		DropDown<String> dropdown = H.findDropDownControl(arg1, "cardropdown");
 		if (dropdown != null) {
-			//TODO get list of car types
 			for (String s : carset.keySet()) {
 				dropdown.addItem(s);
 			}

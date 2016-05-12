@@ -103,7 +103,7 @@ public enum Car {
 			wheel_yOff = 0.12f;
 			wheel_zOff = 1.63f;
 
-			//TODO found via internet (f1 '09)
+			//found via internet (f1 '09)
 			torque = new float[]{0, 300,500,500,550,608, 595,580,560,540,525, 500,440,410,360,350};
 			gearDown = 9000;
 			gearUp = 13500;
@@ -127,7 +127,7 @@ public enum Car {
 			RESISTANCE = 5;
 			rollFraction = 0f;
 
-			MAX_BRAKE = 50000;
+			brakeMaxTorque = 50000;
 
 			torque = new float[]{0, 300,500,500,550,608, 595,580,560,540,525, 500,440,410,360,250};
 			for (int i = 0; i < torque.length; i++) {

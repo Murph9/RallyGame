@@ -1,6 +1,7 @@
 package game;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
@@ -17,10 +18,11 @@ import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.controls.DropDown;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
-import world.City;
+import world.Simple2;
+import world.Cliff;
 import world.Floating;
 import world.Simple;
-import world.Simple2;
+import world.City;
 import world.StaticWorld;
 import world.StaticWorldBuilder;
 import world.WP;
@@ -66,11 +68,12 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 		}
 		
 		//init dynamic
-		dSet = new HashMap<>();
-		dSet.put("City", City.STRAIGHT);
+		dSet = new LinkedHashMap<>(); //ordered hashmap
+		dSet.put("Floating", Floating.STRAIGHT);
+		dSet.put("Cliff", Cliff.STRAIGHT);
 		dSet.put("Simple", Simple.STRAIGHT);
 		dSet.put("Simple2", Simple2.STRAIGHT);
-		dSet.put("Floating", Floating.STRAIGHT);
+		dSet.put("City", City.STRAIGHT);
 	}
 
 	@Override

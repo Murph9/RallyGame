@@ -10,7 +10,6 @@ import com.jme3.system.AppSettings;
 import com.jme3.system.NanoTimer;
 
 import de.lessvoid.nifty.Nifty;
-import world.City;
 import world.StaticWorld;
 import world.WP;
 
@@ -25,6 +24,9 @@ import world.WP;
 //the infinite road thing
 //  at night time or something because loadings easier
 //  overtake as many as you can
+
+//Using eclipse: why isn't this a default?
+//http://stackoverflow.com/questions/3915961/how-to-view-hierarchical-package-structure-in-eclipse-package-explorer
 
 public class Rally extends SimpleApplication {
 
@@ -54,6 +56,10 @@ public class Rally extends SimpleApplication {
 		app.setDisplayStatView(false);
 		app.start();
 
+		 //Just getting numbers for rotations
+//		 Quaternion q = new Quaternion();
+//		 q = q.fromAngleAxis(-3*FastMath.HALF_PI/2, new Vector3f(0,1,0));
+//		 H.p(q);
 	}
 
 	@Override

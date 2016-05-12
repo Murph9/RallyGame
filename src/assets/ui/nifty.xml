@@ -91,7 +91,7 @@
 		<layer backgroundColor="#3330" childLayout="vertical">
 			<panel height="25%" width="15%" align="left"
 				childLayout="center" backgroundColor="#bbbf">
-				<text text="Controls: arrows move, q is jump, e,z both camera, tab is this, esc is pause, enter is reset, f is flip, space is handbrake" 
+				<text text="Controls: wasd and arrows move, q is jump, e,z both camera, tab is this, esc is pause, enter is reset, f is flip, space is handbrake, shift is reverse" 
         			font="Interface/Fonts/Default.fnt" width="100%" height="100%" wrap="true" />
 			</panel>
 		</layer>
