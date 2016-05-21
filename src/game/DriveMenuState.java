@@ -9,16 +9,17 @@ import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.scene.Node;
 
+import car.MyPhysicsVehicle;
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 
-public class MenuState extends AbstractAppState implements ScreenController {
+public class DriveMenuState extends AbstractAppState implements ScreenController {
 
 	private Node localRootNode = new Node("Pause Screen RootNode");
 	private Node localGuiNode = new Node("Pause Screen GuiNode");
 	
-	public MenuState() {
+	public DriveMenuState() {
 		super();
 	}
 

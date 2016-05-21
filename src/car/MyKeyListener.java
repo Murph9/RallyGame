@@ -1,4 +1,4 @@
-package game;
+package car;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,22 +21,28 @@ public class MyKeyListener implements RawInputListener {
 		this.a = a;
 		
 		layout.put(KeyInput.KEY_LEFT, "Left");
-		layout.put(KeyInput.KEY_RIGHT, "Right");
-		layout.put(KeyInput.KEY_UP, "Accel");
-		layout.put(KeyInput.KEY_DOWN, "Brake");
-
 		layout.put(KeyInput.KEY_A, "Left");
+		
+		layout.put(KeyInput.KEY_RIGHT, "Right");
 		layout.put(KeyInput.KEY_D, "Right");
+		
+		layout.put(KeyInput.KEY_UP, "Accel");
 		layout.put(KeyInput.KEY_W, "Accel");
+		
+		layout.put(KeyInput.KEY_DOWN, "Brake");
 		layout.put(KeyInput.KEY_S, "Brake");
 		
-		layout.put(KeyInput.KEY_Q, "Jump");
+		layout.put(KeyInput.KEY_LSHIFT, "Reverse");
 		layout.put(KeyInput.KEY_SPACE, "Handbrake");
+
+		layout.put(KeyInput.KEY_LCONTROL, "Nitro");
+		
 		layout.put(KeyInput.KEY_F, "Flip");
 		layout.put(KeyInput.KEY_RETURN, "Reset");
 		layout.put(KeyInput.KEY_Z, "Lookback");
 		layout.put(KeyInput.KEY_E, "Lookside");
-		layout.put(KeyInput.KEY_LSHIFT, "Reverse");
+		
+		layout.put(KeyInput.KEY_Q, "Jump");
 	}
 	
 	public void beginInput() {}

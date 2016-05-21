@@ -1,7 +1,6 @@
 package world;
 
 import game.App;
-import game.H;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +24,7 @@ public class StaticWorldBuilder extends Node {
 	private static List<Spatial> models = new ArrayList<Spatial>(5); //at least 5
 	
 	public static void addStaticWorld(PhysicsSpace phys, StaticWorld world, boolean ifShadow) {
-		if (curWorld != null) { H.p("can't make a world until you remove the last one"); return; }
+		if (curWorld != null) { System.err.println("can't make a world until you remove the last one"); return; }
 		curWorld = world;
 		
 		AssetManager as = App.rally.getAssetManager();

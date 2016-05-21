@@ -9,6 +9,8 @@ import com.jme3.niftygui.NiftyJmeDisplay;
 import com.jme3.system.AppSettings;
 import com.jme3.system.NanoTimer;
 
+import car.Car;
+import car.CarData;
 import de.lessvoid.nifty.Nifty;
 import world.StaticWorld;
 import world.WP;
@@ -22,11 +24,20 @@ import world.WP;
 //  get them to fall in a hole
 //  follow points for being close
 //the infinite road thing
-//  at night time or something because loadings easier
+//  still need to get fog working..
+//  at night time or something because loading looks easier
 //  overtake as many as you can
+//like the crew
+//  get away from the start
+//  stay on road at speed thing 
+
 
 //Using eclipse: why isn't this a default?
 //http://stackoverflow.com/questions/3915961/how-to-view-hierarchical-package-structure-in-eclipse-package-explorer
+
+//TODO
+//nifty styles.
+//tacko (with the added stuff)
 
 public class Rally extends SimpleApplication {
 
@@ -37,8 +48,12 @@ public class Rally extends SimpleApplication {
 	public ChooseMap chooseMap;
 	
 	public DriveState drive;
-	public MenuState menu;
+	public DriveMenuState menu;
+	public SkyState sky;
 	
+	private Settings defaultSet = new Settings();
+	private CarData defaultCar = Car.Runner.get();
+	private StaticWorld defaultsworld = StaticWorld.track2;
 	
 	public static void main(String[] args) {
 		int fps = 60; //default is 60
@@ -83,17 +98,37 @@ public class Rally extends SimpleApplication {
 		start = new StartState();
 		getStateManager().attach(start);
 		
+		sky = new SkyState(); //lighting and shadow stuff is global
+		getStateManager().attach(sky);
 		
 		nifty.fromXml("assets/ui/nifty.xml", "start", start);
 		guiViewPort.addProcessor(niftyDisplay);
 		inputManager.setCursorVisible(true);
 		flyCam.setEnabled(false);
+
+		//set the default option
+		defaultSet.car = defaultCar;
+		defaultSet.sworld = defaultsworld;
+	}
+	
+	public void startFast() {
+		//use the default option and just init straight away
+		getStateManager().detach(start);
+		
+		if (defaultSet.car == null || (defaultSet.sworld == null && defaultSet.dworld == null)) {
+			System.err.println("Defaults not set.");
+		}
+		
+		startDrive(defaultSet.car, defaultSet.sworld, defaultSet.dworld);
+		App.nifty.gotoScreen("drive-noop");
 	}
 	
 	//HERE is the logic for the app progress., TODO: need a toMainMenu() at some point
-	//the thing you call when the app state is done
+	//  (the thing you call when the app state is done)
 	public void next(AppState app) {
 		if (app instanceof StartState) {
+			getStateManager().detach(start);
+			
 			startChooseCar();
 			App.nifty.gotoScreen("chooseCar");
 			
@@ -109,33 +144,33 @@ public class Rally extends SimpleApplication {
 			startDrive(chooseCar.getCarData(), chooseMap.getMapS(), chooseMap.getMapD());
 			App.nifty.gotoScreen("drive-noop");
 			
+		} else if (app instanceof DriveMenuState) {
+			H.p("how did you call this?, rally.next()");
+			
+			
 		} else {
 			H.p("not done yet. - rally.next()");
 		}
 	}
 	
 	private void startChooseCar() {
-		getStateManager().detach(start);
-		
 		chooseCar = new ChooseCar();
 		getStateManager().attach(chooseCar);
 	}
 	
 	private void startChooseMap() {
-		getStateManager().detach(chooseCar);
-		
 		chooseMap = new ChooseMap();
 		getStateManager().attach(chooseMap);
 	}
 	
 	private void startDrive(CarData car, StaticWorld world, WP[] dworld) {
-		if (menu != null || drive != null) return; //no sure what this is actually hoping to stop
+		if (menu != null || drive != null) return; //not sure what this is actually hoping to stop
 		
 		set.car = car;
 		set.sworld = world;
 		set.dworld = dworld;
 		
-		menu = new MenuState();
+		menu = new DriveMenuState();
 		getStateManager().attach(menu);
 		
 		drive = new DriveState(set);

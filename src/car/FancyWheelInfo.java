@@ -1,4 +1,4 @@
-package game;
+package car;
 
 import com.bulletphysics.dynamics.vehicle.WheelInfo;
 import com.bulletphysics.dynamics.vehicle.WheelInfoConstructionInfo;

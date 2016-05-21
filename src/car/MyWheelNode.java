@@ -1,4 +1,4 @@
-package game;
+package car;
 
 import com.jme3.effect.ParticleEmitter;
 import com.jme3.effect.ParticleMesh;
@@ -19,6 +19,8 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.texture.Texture;
 import com.jme3.util.BufferUtils;
+
+import game.App;
 
 public class MyWheelNode extends Node {
 
@@ -75,7 +77,7 @@ public class MyWheelNode extends Node {
 		}
 		
 		Quaternion q = new Quaternion();
-		q = q.fromAngleNormalAxis(radSec*-tpf, new Vector3f(1,0,0));
+		q = q.fromAngleNormalAxis(radSec*tpf, new Vector3f(1,0,0));
 		spat.setLocalRotation(spat.getLocalRotation().mult(q));
 		
 	}
@@ -126,10 +128,10 @@ public class MyWheelNode extends Node {
 		
 		Mesh mesh = new Mesh(); //making a quad positions
 		Vector3f [] vertices = new Vector3f[4];
-		vertices[0] = a.add(mvc.right.mult(mvc.car.wheelWidth));
-		vertices[1] = b.add(mvc.right.mult(mvc.car.wheelWidth));
-		vertices[2] = a.add(mvc.left.mult(mvc.car.wheelWidth));
-		vertices[3] = b.add(mvc.left.mult(mvc.car.wheelWidth));
+		vertices[0] = a.add(mvc.right.mult(mvc.car.w_width));
+		vertices[1] = b.add(mvc.right.mult(mvc.car.w_width));
+		vertices[2] = a.add(mvc.left.mult(mvc.car.w_width));
+		vertices[3] = b.add(mvc.left.mult(mvc.car.w_width));
 		
 		Vector2f[] texCoord = new Vector2f[4]; //texture of quad
 		texCoord[0] = new Vector2f(0, 0);

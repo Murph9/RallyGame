@@ -8,8 +8,8 @@ import de.lessvoid.nifty.screen.ScreenController;
 
 public class StartState extends AbstractAppState implements ScreenController {
 
-	public void start() {
-				
+	public void startFast() {
+		App.rally.startFast();
 	}
 	
 	public void startBasic() {

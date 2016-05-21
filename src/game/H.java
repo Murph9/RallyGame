@@ -29,9 +29,6 @@ public class H {
 	public static void p(Object o) {
 		System.out.println(o);
 	}
-	public static void pUI(Object o) {
-		UINode.setDebugText(o.toString());
-	}
 	
 	public static Vector3f clamp(Vector3f v, float value) {
 		float length = v.length();

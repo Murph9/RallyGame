@@ -1,4 +1,4 @@
-package game;
+package car;
 
 import java.util.HashMap;
 
@@ -17,11 +17,15 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.texture.Texture;
 
+import game.App;
+import game.H;
+import game.Rally;
+
 public class CarBuilder extends Node {
 
-	HashMap<Integer, CarEntry> cars;
+	HashMap<Integer, MyVC> cars;
 
-	CarBuilder() { //TODO maybe some state stuff, like menu or game type. something please
+	public CarBuilder() {
 		cars = new HashMap<>();
 		
 		App.rally.getRootNode().attachChild(this);
@@ -36,18 +40,16 @@ public class CarBuilder extends Node {
 			}
 		}
 		this.detachChildNamed(id+"");
-		CarEntry e = cars.get(id);
+		MyVC e = cars.get(id);
 		
-		if (e.audio != null)
-			App.rally.getRootNode().detachChild(e.audio);
-		this.detachChild(e.car.skidNode);
+		this.detachChild(e.skidNode);
 		
-		e.car.cleanup();
-		space.remove(e.car);
+		e.cleanup();
+		space.remove(e);
 		cars.remove(id);
 	}
 
-	public void addPlayer(PhysicsSpace space, int id, CarData car, Vector3f start, Matrix3f rot, boolean aPlayer) {
+	public void addCar(PhysicsSpace space, int id, CarData car, Vector3f start, Matrix3f rot, boolean aPlayer) {
 		if (cars.containsKey(id)) {
 			try {
 				throw new Exception("A car already has that Id");
@@ -114,8 +116,7 @@ public class CarBuilder extends Node {
 			player.giveSound(new AudioNode(am, "assets/sound/engine.wav"));
 		}
 		
-		CarEntry entry = new CarEntry(player, null);
-		cars.put(id, entry);
+		cars.put(id, player);
 
 		space.add(player);
 	}
@@ -125,40 +126,23 @@ public class CarBuilder extends Node {
 			return;
 
 		for (Integer i : cars.keySet()) {
-			cars.get(i).car.myUpdate(tpf);
-		}
-
-		if (App.rally.drive.dynamicWorld) { //TODO this logic should probably not be here
-			App.rally.drive.worldB.update(cars.get(0).car.getPhysicsLocation());
-		}
-
-		if (App.rally.drive.ifDebug) {
-			H.p(cars.get(0).car.getPhysicsLocation() + "distance:"+cars.get(0).car.distance);
+			cars.get(i).myUpdate(tpf);
 		}
 	}
 
 	public MyPhysicsVehicle get(int a) {
 		if (cars.containsKey(a))
-			return cars.get(a).car;
+			return cars.get(a);
 		return null;
 	}
 
 	public void cleanup() {
 		for (int key : cars.keySet()) {
-			CarEntry car = cars.get(key);
+			MyVC car = cars.get(key);
 			
-			car.car.cleanup();
+			car.cleanup();
 		}
-	}
-	
-	private class CarEntry {
 		
-		MyVC car;
-		AudioNode audio;
-		
-		CarEntry(MyVC car, AudioNode audio) {
-			this.car = car;
-			this.audio = audio;
-		}
+		App.rally.getRootNode().detachChild(this);
 	}
 }

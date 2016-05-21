@@ -1,4 +1,4 @@
-package game;
+package car;
 
 import java.util.LinkedList;
 
@@ -19,14 +19,17 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
+import game.App;
+import game.H;
+
 //extends:
 //https://github.com/jMonkeyEngine/jmonkeyengine/blob/master/jme3-jbullet/src/main/java/com/jme3/bullet/objects/PhysicsVehicle.java
 
 public class MyPhysicsVehicle extends PhysicsVehicle {
 
 	//skid stuff
-	Node skidNode;
-	LinkedList<Spatial> skidList = new LinkedList<Spatial>();
+	public Node skidNode;
+	protected LinkedList<Spatial> skidList = new LinkedList<Spatial>();
 	private float maxlat;
 	private float maxlong;
 
@@ -43,8 +46,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	private AI ai;
 
 	//car data
-	protected CarData car;
-	protected Node carRootNode;
+	public CarData car;
+	public Node carRootNode;
 
 	//my wheel node
 	MyWheelNode[] wheel = new MyWheelNode[4];
@@ -60,18 +63,22 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	float steerLeft = 0;
 	float steerRight= 0;
 
+	boolean ifNitro = false;
+	float nitro = 0;
+
 	float engineTorque = 0;
-	float totalTraction = 0;
+	String totalTraction = "";
 	float wheelRot = 0;
 
 	boolean ifHandbrake = false;
 	//- driving stuff
 
 	float distance = 0;
-	boolean ifLookBack = false;
-	boolean ifLookSide = false;
+	public boolean ifLookBack = false;
+	public boolean ifLookSide = false;
 
 	float redlineKillFor = 0;
+	int driftangle = 0;
 
 	MyPhysicsVehicle(CollisionShape col, CarData cartype, Node carNode) {
 		super(col, cartype.mass);
@@ -83,9 +90,9 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 		this.setSuspensionCompression(car.susCompression());
 		this.setSuspensionDamping(car.susDamping());
-		this.setSuspensionStiffness(car.stiffness);
-		this.setMaxSuspensionForce(car.maxSusForce);
-		this.setMaxSuspensionTravelCm(car.maxSusTravel);
+		this.setSuspensionStiffness(car.sus_stiffness);
+		this.setMaxSuspensionForce(car.sus_maxForce);
+		this.setMaxSuspensionTravelCm(car.sus_maxTravel);
 
 		//for each wheel
 		for (int i = 0; i < 4; i++) {
@@ -97,13 +104,13 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 			wheel[i].attachChild(wheel[i].spat);
 
-			float xoff = (i % 2 == 1) ? car.wheel_xOff : -car.wheel_xOff; //left side is positive
-			float yoff = car.wheel_yOff; //all the same height
-			float zoff = (i < 2) ? car.wheel_zOff : -car.wheel_zOff; //front is positive
+			float xoff = (i % 2 == 1) ? car.w_xOff : -car.w_xOff; //left side is positive
+			float yoff = car.w_yOff; //all the same height
+			float zoff = (i < 2) ? car.w_zOff : -car.w_zOff; //front is positive
 			boolean front = (i < 2) ? true : false; //only the front turns
 
 			addWheel(wheel[i], new Vector3f(xoff, yoff, zoff),
-					car.wheelDirection, car.wheelAxle, car.restLength, car.wheelRadius, front);
+					car.w_vertical, car.w_axle, car.sus_restLength, car.w_radius, front);
 
 			//Their friction (usually zero)
 			setFrictionSlip(i, car.wheelBasicSlip);
@@ -111,11 +118,22 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			carNode.attachChild(wheel[i]);
 		}
 
-		//generate the slip* max force from the car wheel data
-		this.maxlat = VehiclePhysicsHelper.calcSlipMax(car.wheellatdata);
-		if (maxlat == Float.NaN) System.err.println("maxlat was NaN");
-		this.maxlong = VehiclePhysicsHelper.calcSlipMax(car.wheellongdata);
-		if (maxlong == Float.NaN) System.err.println("maxlong was NaN");
+		try {
+			//generate the slip* max force from the car wheel data
+			double error = 0.0005f; //our fixed error, we don't really care how close it is past 3 or 4 decimals
+			
+			this.maxlat = VehiclePhysicsHelper.calcSlipMax(car.w_flatdata, error);
+			if (Float.isNaN(maxlat))
+				throw new Exception("maxlat was NaN or 0");
+			this.maxlong = VehiclePhysicsHelper.calcSlipMax(car.w_flongdata, error);
+			if (Float.isNaN(maxlong)) 
+				throw new Exception("maxlong was NaN");
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			H.p("error in calculating max(lat|long) values: "+ maxlat + " or " + maxlong);
+			System.exit(1);
+		}
 	}
 
 	public void onAction(String binding, boolean value, float tpf) {
@@ -126,7 +144,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			steerLeft = tpf;
 			break;
 
-		case "Right": 
+		case "Right":
 			steerRight = tpf;
 			break;
 
@@ -136,6 +154,11 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 		case "Brake":
 			brakeCurrent = tpf;
+			break;
+
+		case "Nitro":
+			if (car.nitro_on)
+				ifNitro = value;
 			break;
 
 		case "Jump":
@@ -200,7 +223,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 	public void giveSound(AudioNode audio) {
 		if (engineSound != null) carRootNode.detachChild(engineSound); //incase we have 2 sounds running
-		
+
 		engineSound = audio;
 		engineSound.setLooping(true);
 		engineSound.play();
@@ -219,8 +242,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 	//TODO find SAE950311 
 	//Millikin & Millikin's Race Car Vehicle Dynamics
-
-	//TODO good info to actually read:
 	//https://www.sae.org/images/books/toc_pdfs/R146.pdf
 	////////////////////////////////////////////////////
 
@@ -244,11 +265,12 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		//////////////////////////////////////////////////
 		//'Wheel'less forces		
 		//linear resistance and quadratic drag
-		float dragx = (float)(-(car.RESISTANCE * velocity.x + car.DRAG * velocity.x * Math.abs(velocity.x)));
-		float dragy = (float)(-(car.RESISTANCE * velocity.y + car.DRAG * velocity.y * Math.abs(velocity.y)));
-		float dragz = (float)(-(car.RESISTANCE * velocity.z + car.DRAG * velocity.z * Math.abs(velocity.z)));
+		float rr = car.resistance();
+		float dragx = -(rr * velocity.x + car.drag * velocity.x * FastMath.abs(velocity.x));
+		float dragy = -(rr * velocity.y + car.drag * velocity.y * FastMath.abs(velocity.y));
+		float dragz = -(rr * velocity.z + car.drag * velocity.z * FastMath.abs(velocity.z));
 
-		Vector3f totalNeutral = new Vector3f(dragx, dragy, dragz);
+		Vector3f totalNeutral = new Vector3f(dragx, dragy, dragz).multLocal(tpf);
 		applyCentralForce(w_angle.mult(totalNeutral));
 
 		//////////////////////////////////
@@ -263,12 +285,12 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 		//////////////////////////////////////
 		//longitudinal forces
-		engineTorque = getEngineWheelTorque(tpf, velocity.z);
+		engineTorque = getEngineWheelTorque(tpf, velocity.z, ifNitro);
 		float[] torques = new float[] { 0, 0, 0, 0 };
 
-		engineTorque /= 2; //probably on at least one axle
+		engineTorque /= 2;
 		if (car.driveFront && car.driveRear)
-			engineTorque /= 2; //split up into 2 more wheels
+			engineTorque /= 2; //split up into 2 axels
 
 		if (car.driveFront) {
 			torques[0] = engineTorque;
@@ -285,21 +307,14 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		//LARGE LOOP for each wheel
 		for (int i = 0; i < 4; i++) {
 			float susforce = (float)getWheel(i).getWheelInfo().wheelsSuspensionForce;
+			susforce = Math.min(susforce, car.mass*3); //[*3] HACK: to stop weird harsh physics after landing
 
 			if (ifHandbrake && i > 1) //rearwheels
-				wheel[i].radSec = 0; //put the handbrake on
-				
-			float slipratio = (wheel[i].radSec*car.wheelRadius - velocity.z)/Math.abs(velocity.z);
-			//calc the longitudinal force from the slip ratio
-			wf[i].z = VehiclePhysicsHelper.tractionFormula(car.wheellongdata, slipratio) * susforce;
+				wheel[i].radSec = 0; //put the handbrake on (TODO not so aggressive please?)
 
-			float totalLongForce = torques[i] - wf[i].z - (brakeCurrent*car.brakeMaxTorque*Math.signum(wheel[i].radSec)); //TODO braking properly
-			if (Math.signum(totalLongForce - (brakeCurrent*car.brakeMaxTorque*Math.signum(velocity.z))) != Math.signum(totalLongForce)) {
-				//we maxed out the forces with braking
-				wheel[i].radSec = 0;
-			} else {
-				wheel[i].radSec += tpf*totalLongForce/(car.engineWheelInertia());				
-			}
+			float slipratio = (wheel[i].radSec*car.w_radius - velocity.z)/Math.abs(velocity.z);
+			//calc the longitudinal force from the slip ratio
+			wf[i].z = VehiclePhysicsHelper.tractionFormula(car.w_flongdata, slipratio) * susforce;
 
 			float slipangle = 0;
 			if (i < 2) //front
@@ -307,35 +322,36 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			else //rear
 				slipangle = (float)(Math.atan((velocity.x - yawspeed) / Math.abs(velocity.z)));
 
-			//calculate the max lat traction value here
-			float tractionLeft = FastMath.clamp(1 - Math.abs(slipratio/this.maxlong), 0, 1);
-			float maxslipangle = tractionLeft*this.maxlat;
-			//clamp the slipangle to this value
-			slipangle = FastMath.clamp(slipangle, -maxslipangle, maxslipangle);
+			if (i == 2) //a rear wheel
+				driftangle = (int)FastMath.abs(slipangle*FastMath.RAD_TO_DEG);
 
 			//latitudinal force that is calculated off the slip angle
-			wf[i].x = -VehiclePhysicsHelper.tractionFormula(car.wheellatdata, slipangle) * susforce;
+			wf[i].x = -VehiclePhysicsHelper.tractionFormula(car.w_flatdata, slipangle) * susforce;
 
+			//combine the two traction forces
+			float zd = slipratio/maxlong, xd = slipangle/maxlat;
+			float p = FastMath.sqrt(zd*zd + xd*xd);
+			if (p > 1) {
+				wf[i].z *= Math.abs(zd)/p;
+				wf[i].x *= Math.abs(xd)/p;
+			}
 			wheel[i].skid = FastMath.clamp(FastMath.sqrt(slipangle*slipangle + slipratio*slipratio), 0, 1);
 
+			//add the wheel force after merging the forces
+			float totalLongForce = torques[i] - wf[i].z - (brakeCurrent*car.brakeMaxTorque*Math.signum(wheel[i].radSec)); //TODO braking properly
+			if (Math.signum(totalLongForce - (brakeCurrent*car.brakeMaxTorque*Math.signum(velocity.z))) != Math.signum(totalLongForce)) {
+				//we maxed out the forces with braking
+				wheel[i].radSec = 0;
+			} else {
+				wheel[i].radSec += tpf*totalLongForce/(car.e_inertia());
+			}
 		}
 
-		//TODO: !HARD! better code from others 'transision' between static and kinetic friction models
-		// i have no static model (yet)
-
-		//TODO stop the slow speed wobble (hint the basic vehicle code does this through impulses (integration of forces)
-
-		float lim = 5;
-		float velz = velocity.z + 0.01f;
-		if (Math.abs(velz) <= lim) {//TODO doesn't work
-			//			fl.multLocal(velz*velz/(lim*lim));
-			//			fr.multLocal(velz*velz/(lim*lim));
-			//			rl.multLocal(velz*velz/(lim*lim));
-			//			rr.multLocal(velz*velz/(lim*lim));
-		}
+		//HARD TODO: better code from others 'transision' between basic and advanced friction models at slow speeds
+		//i have no static model (yet)
 
 		//ui based values
-		totalTraction = wf[0].length() + wf[1].length() + wf[2].length() + wf[3].length();  
+		totalTraction = "\nf: "+(wf[0].length() + wf[1].length())+", \nb:" + (wf[2].length() + wf[3].length());
 		this.wheelRot = 0;
 		for (MyWheelNode w: wheel) {
 			this.wheelRot += w.radSec;
@@ -344,54 +360,68 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 		//and finally apply forces
 		if (wheel[0].contact)
-			applyForce(w_angle.mult(wf[0]), w_angle.mult(wheel[0].getContactPoint(car.wheelRadius, car.rollFraction)));
+			applyForce(w_angle.mult(wf[0]), w_angle.mult(wheel[0].getContactPoint(car.w_radius, car.rollFraction)));
 		if (wheel[1].contact) 
-			applyForce(w_angle.mult(wf[1]), w_angle.mult(wheel[1].getContactPoint(car.wheelRadius, car.rollFraction)));
+			applyForce(w_angle.mult(wf[1]), w_angle.mult(wheel[1].getContactPoint(car.w_radius, car.rollFraction)));
 		if (wheel[2].contact) 
-			applyForce(w_angle.mult(wf[2]), w_angle.mult(wheel[2].getContactPoint(car.wheelRadius, car.rollFraction)));
+			applyForce(w_angle.mult(wf[2]), w_angle.mult(wheel[2].getContactPoint(car.w_radius, car.rollFraction)));
 		if (wheel[3].contact) 
-			applyForce(w_angle.mult(wf[3]), w_angle.mult(wheel[3].getContactPoint(car.wheelRadius, car.rollFraction)));
+			applyForce(w_angle.mult(wf[3]), w_angle.mult(wheel[3].getContactPoint(car.w_radius, car.rollFraction)));
 
 	}
 
-	private float getEngineWheelTorque(float tpf, float vz) {
+	private float getEngineWheelTorque(float tpf, float vz, boolean ifNitro) {
 		float wheelrot = 0;
 		if (car.driveFront)
 			wheelrot = (wheel[0].radSec + wheel[1].radSec)/2; //get the drive wheels rotation speed
 		if (car.driveRear) 
 			wheelrot = (wheel[2].radSec + wheel[3].radSec)/2; //get the average to pretend there is a diff
 
-		float curGearRatio = car.gearRatios[curGear];//0 = reverse, >= 1 normal make sense
-		float diffRatio = car.diffRatio;
+		float curGearRatio = car.trans_gearRatios[curGear];//0 = reverse, >= 1 make normal sense
+		float diffRatio = car.trans_finaldrive/2; //the 2 makes it fit the real world for some reason?
 
-		curRPM = (int)(wheelrot*curGearRatio*diffRatio*60*car.wheelRadius); //rad/(m*sec) to rad/min and the drive ratios to engine
+		curRPM = (int)(wheelrot*curGearRatio*diffRatio*60*car.w_radius); //rad/(m*sec) to rad/min and the drive ratios to engine
 		//wheel rad/s, gearratio, diffratio, conversion from rad/sec to rad/min
 
-		curRPM = H.clamp(curRPM, 800, 50000);//make sure we never stall (or get rediculous)
-		//TODO use engine compression value
+		curRPM = Math.max(curRPM, 1000); //no stall please, its bad enough that we don't have to torque here
 
 		autoTransmission(curRPM, vz);
-		
-		if (Math.abs(curRPM) > car.redline) {
+
+		if (Math.abs(curRPM) > car.e_redline) {
 			return 0; //kill engine if greater than redline
 		}
 
-		float engineTorque = lerpTorque(curRPM)*accelCurrent;
-		float engineOutTorque = engineTorque*curGearRatio*diffRatio*car.transEffic;
+		float nitroForce = 0;
+		if (car.nitro_on) {
+			if (ifNitro && this.nitro > 0) {
+				nitroForce = car.nitro_force;
+				this.nitro -= tpf*car.nitro_rate;
+				if (this.nitro < 0) this.nitro = 0; //no more nitro :(
+			} else {
+				this.nitro += 2*tpf; //TODO some timeout before 'reloading'
+			}
+		}
 
-		float totalTorque = engineOutTorque/car.wheelRadius;
+		float engineTorque = (lerpTorque(curRPM) + nitroForce)*accelCurrent;
+		float engineDrag = 0;
+		if (accelCurrent < 0.1f) { //so compression only happens on no accel
+			engineDrag = curRPM*car.e_compression;
+		}
+		float engineOutTorque = engineTorque*curGearRatio*diffRatio*car.trans_effic - engineDrag;
+
+		float totalTorque = engineOutTorque/car.w_radius;
 		return totalTorque;
 	}
 
 	private void autoTransmission(int rpm, float vz) {
 		if (curGear == 0) return; //no changing out of reverse on me please..
 
-		float gearUpSpeed = car.gearUp/(car.gearRatios[curGear]*car.diffRatio*60);
-		float gearDownSpeed = car.gearDown/(car.gearRatios[curGear]*car.diffRatio*60);
+		float driveSpeed = (car.trans_gearRatios[curGear]*car.trans_finaldrive/2*60);
+		float gearUpSpeed = car.auto_gearUp/driveSpeed;
+		float gearDownSpeed = car.auto_gearDown/driveSpeed;
 		//TODO: error checking on making sure the one we change to doesn't instantly change back
 
-
-		if (vz > gearUpSpeed && curGear < car.gearRatios.length-1) {
+		if (vz > gearUpSpeed && curGear < car.trans_gearRatios.length-1) {
 			curGear++;
 		} else if (vz < gearDownSpeed && curGear > 1) {
 			curGear--;
@@ -401,7 +431,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	//assumed to be a valid and useable rpm value
 	private float lerpTorque(int rpm) {
 		float RPM = (float)rpm / 1000;
-		return H.lerpArray(RPM, car.torque);
+		return H.lerpArray(RPM, car.e_torque);
 	}
 
 	//////////////////////////////////////////////////////////////
@@ -428,21 +458,18 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 		specialPhysics(tpf); //yay
 
+
 		//wheel turning logic -TODO
 		//trying to turn less at high speed
 		steeringCurrent = 0;
-		float speedFactor = 1;
-		//		speedFactor = car.steerFactor/(getLinearVelocity().length()*10);
 		if (steerLeft != 0) { //left
-			steeringCurrent += car.steerAngle*speedFactor*steerLeft; //maxangle*speedFactor*turnfraction
+			steeringCurrent += car.w_steerAngle*steerLeft;
 		}
 		if (steerRight != 0) { //right
-			steeringCurrent -= car.steerAngle*speedFactor*steerRight; //maxangle*speedFactor*turnfraction
+			steeringCurrent -= car.w_steerAngle*steerRight;
 		}
 		steer(steeringCurrent);
-		H.pUI("steering: "+steeringCurrent);
 
-		
 		//update ai if any
 		if (ai != null) {
 			ai.update(tpf);
@@ -450,9 +477,10 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 		if (engineSound != null) {
 			//if sound exists
-			float pitch = FastMath.clamp(0.5f+1.5f*(curRPM/car.redline), 0.5f, 2);
+			float pitch = FastMath.clamp(0.5f+1.5f*((float)curRPM/(float)car.e_redline), 0.5f, 2);
 			engineSound.setPitch(pitch);
 		}
+		
 	}
 
 	///////////////////////////////////////////////////////////
@@ -521,7 +549,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			App.rally.getInputManager().removeRawInputListener(this.control);
 			this.control = null;
 		}
-		
+
 		if (this.engineSound != null) {
 			carRootNode.detachChild(this.engineSound);
 			App.rally.getAudioRenderer().stopSource(engineSound);
@@ -534,8 +562,8 @@ class VehiclePhysicsHelper {
 	//http://www.gamedev.net/topic/462784-simplified-pacejka-magic-formula/
 	//http://www.edy.es/dev/docs/pacejka-94-parameters-explained-a-comprehensive-guide/
 
-	//There were fancy versions of the Pacejka's Formula here but there were removed.
-	//Try the git repositiory to get them back. (i should say 'removed' in the git message)
+	//There were fancy versions of the Pacejka's Formula here but there were removed
+	//Try the git repositiory to get them back. (it should say 'removed' in the git message)
 
 	/** Pacejka's Formula simplified from the bottom of:.
 	 * http://www.edy.es/dev/docs/pacejka-94-parameters-explained-a-comprehensive-guide/
@@ -548,21 +576,18 @@ class VehiclePhysicsHelper {
 	}
 
 	//returns the slip value that gives the closest to 1 from the magic formula (should be called twice, lat and long)
-	static float calcSlipMax(CarWheelData w) {
-		double error = 0.0005f; //our fixed error, we don't really care how close it is past 3 or 4 decimals
-
-		double lastX = 0.2f; //0.2 is always our first guess (12 deg or so is good)
+	static float calcSlipMax(CarWheelData w, double error) {
+		double lastX = 1f; //0.2 is always our first guess (12 deg or so is good)
 		double nextX = lastX + 10*error; //just so its a larger diff that error
 
 		while (Math.abs(lastX - nextX) > error) {
 			lastX = nextX;
 			nextX = iterate(w, lastX, error);
 		}
-
 		return (float)nextX;
 	}
 	private static double iterate(CarWheelData w, double x, double error) {
-		return x - ((tractionFormula(w, (float)x)-1) / dtractionFormula(w, (float)x, error)); 
+		return x - ((tractionFormula(w, (float)x)-w.D) / dtractionFormula(w, (float)x, error)); 
 		//-1 because we are trying to find a max (which happens to be 1)
 	}
 	private static double dtractionFormula(CarWheelData w, double slip, double error) {
@@ -570,12 +595,9 @@ class VehiclePhysicsHelper {
 	}
 
 
-	//TODO fix (use http://phors.locost7.info/phors25.htm)
+	//TODO fix (use http://phors.locost7.info/phors25.htm), its hard ok
 	//basically gets fraction of maximum for each force and limits the total value by it
-	static float mergeSlips(float slipangle, float slipratio) {
-		//TODO calculate the slip* max values, and use it to limit the other
-
-
-		return 1f;
+	static float[] mergeSlips(float o, float alpha, float ohat, float alphahat) {
+		return null;
 	}
 }

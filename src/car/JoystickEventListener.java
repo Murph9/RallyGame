@@ -1,4 +1,4 @@
-package game;
+package car;
 
 import java.util.HashMap;
 import java.util.Map;

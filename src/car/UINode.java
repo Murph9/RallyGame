@@ -1,4 +1,4 @@
-package game;
+package car;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.font.BitmapFont;
@@ -16,9 +16,13 @@ import com.jme3.scene.shape.Line;
 import com.jme3.scene.shape.Quad;
 import com.jme3.system.AppSettings;
 
+import game.App;
+import game.Rally;
+
 public class UINode {
 
 	/*TODO:
+	 * get it all to kinda look like the forza one
 	 * red near the redline?
 	 */
 	
@@ -27,8 +31,8 @@ public class UINode {
 	//hud stuff
 	BitmapText statsText;
 	BitmapText score;
-	static BitmapText debugtext;
-	static BitmapText angle;
+	BitmapText angle;
+	BitmapText nitro;
 	
 	Geometry rpmArrow;
 	Geometry redlineArrow;
@@ -61,11 +65,11 @@ public class UINode {
 	
 	int centerx, centery = 64+22, radius = 118;
 	
-	UINode () {
+	public UINode () {
 		Rally r = App.rally;	
 		this.p = r.drive.cb.get(0);
 		
-		this.redline = p.car.redline;
+		this.redline = p.car.e_redline;
 		this.finalRPM = (int)FastMath.ceil(this.redline) + 1000;
 
 		BitmapFont guiFont = r.getFont();
@@ -80,12 +84,19 @@ public class UINode {
 		statsText.setLocalTranslation(settings.getWidth()-200, 500, 0); // position
 		guiNode.attachChild(statsText);
 		
-		score = new BitmapText(guiFont, false);		  
+		score = new BitmapText(guiFont, false);
 		score.setSize(guiFont.getCharSet().getRenderedSize());
 		score.setColor(ColorRGBA.White);
 		score.setText("");
 		score.setLocalTranslation(settings.getWidth()-200, settings.getHeight(), 0); // position
 		guiNode.attachChild(score);
+		
+		nitro = new BitmapText(guiFont, false);		  
+		nitro.setSize(guiFont.getCharSet().getRenderedSize());
+		nitro.setColor(ColorRGBA.White);
+		nitro.setText("blaj");
+		nitro.setLocalTranslation(settings.getWidth()-300, 50, 0); // position
+		guiNode.attachChild(nitro);
 		
 		angle = new BitmapText(guiFont, false);		  
 		angle.setSize(guiFont.getCharSet().getRenderedSize());
@@ -93,13 +104,6 @@ public class UINode {
 		angle.setText("blaj");
 		angle.setLocalTranslation(settings.getWidth()-300, 30, 0); // position
 		guiNode.attachChild(angle);
-		
-		debugtext = new BitmapText(guiFont, false);		  
-		debugtext.setSize(guiFont.getCharSet().getRenderedSize());
-		debugtext.setColor(ColorRGBA.White);
-		debugtext.setText("Hey");
-		debugtext.setLocalTranslation(200, 30, 0); // position
-		guiNode.attachChild(debugtext);
 		
 		///////////////////////////////////////////////
 		Material m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -251,7 +255,7 @@ public class UINode {
 		float speed = p.getLinearVelocity().length();
 		
 		statsText.setText("speed:"+speed + "m/s\nRPM:" + p.curRPM +"\na:"+p.accelCurrent+"\nb:"+p.brakeCurrent+
-				"\nengine:"+p.engineTorque+"\ntraction:"+p.totalTraction + "\nwheelRot:"+p.wheelRot);
+				"\nengine:"+p.engineTorque+"\ntraction:"+p.totalTraction + "\nwheelRot:"+p.wheelRot +"\nisDay:"+App.rally.sky.isDay);
 		int speedKMH = (int)Math.abs(p.getCurrentVehicleSpeedKmHour());
 
 		setSpeedDigits(speedKMH);
@@ -265,6 +269,9 @@ public class UINode {
 		rpmArrow.setLocalRotation(Quaternion.IDENTITY);
 		float angle = FastMath.interpolateLinear(p.curRPM/(float)finalRPM, startAng, finalAng);
 		rpmArrow.rotate(0, 0, angle);
+		
+		this.angle.setText(p.driftangle+"'");
+		this.nitro.setText(p.nitro+" nitro");
 		
 		Material m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 		m.setColor("Color", new ColorRGBA(p.wheel[0].skid,p.wheel[0].skid,p.wheel[0].skid,1));
@@ -299,10 +306,5 @@ public class UINode {
 	private void setGearDigit(int gearIn) {
 		gearIn = (int)FastMath.clamp(gearIn, 0, 9); //so we don't go off the end of the texture array
 		gear.setMaterial(matset[gearIn]);
-	}
-	
-	
-	public static void setDebugText(String text) {
-		debugtext.setText(text);
 	}
 }

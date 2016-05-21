@@ -1,5 +1,6 @@
 package game;
 
+import car.CarData;
 import world.*;
 
 interface State {

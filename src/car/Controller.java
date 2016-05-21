@@ -1,8 +1,10 @@
-package game;
+package car;
 
 import com.jme3.input.Joystick;
 import com.jme3.input.JoystickAxis;
 import com.jme3.input.JoystickButton;
+
+import game.H;
 
 import java.util.HashMap;
 import java.util.Map;

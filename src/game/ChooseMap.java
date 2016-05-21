@@ -8,11 +8,7 @@ import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
-import com.jme3.light.AmbientLight;
-import com.jme3.light.DirectionalLight;
-import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Node;
 
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.controls.DropDown;
@@ -35,9 +31,6 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 
 	private BulletAppState bulletAppState;
 
-	private DirectionalLight sun;
-	private AmbientLight al;
-
 	private static boolean worldIsSet = false;
 	private static WorldType worldType = WorldType.nothing;
 
@@ -45,8 +38,6 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 	private HashMap<String, StaticWorld> sSet;
 	private static WP dMap;
 	private HashMap<String, WP> dSet;
-
-	private final boolean ifShadow = true;
 
 	private static DropDown<String> dropdown;
 	private MyCamera camNode;
@@ -90,18 +81,8 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 
 	private void createWorld() {
 		if (worldType == WorldType.staticW) {
-			StaticWorldBuilder.addStaticWorld(getPhysicsSpace(), sMap, ifShadow);
+			StaticWorldBuilder.addStaticWorld(getPhysicsSpace(), sMap, App.rally.sky.ifShadow);
 		}
-		
-		//lights
-		al = new AmbientLight();
-		al.setColor(ColorRGBA.Blue.mult(0.3f));
-		App.rally.getRootNode().addLight(al);
-
-		sun = new DirectionalLight();
-		sun.setColor(new ColorRGBA(0.9f, 0.9f, 1f, 1f));
-		sun.setDirection(new Vector3f(-0.3f, -0.6f, -0.5f).normalizeLocal());
-		App.rally.getRootNode().addLight(sun);
 	}
 
 	public void update(float tpf) {
@@ -124,7 +105,7 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 					StaticWorldBuilder.removeStaticWorld(getPhysicsSpace(), sMap);
 
 					sMap = w;
-					StaticWorldBuilder.addStaticWorld(getPhysicsSpace(), sMap, ifShadow);
+					StaticWorldBuilder.addStaticWorld(getPhysicsSpace(), sMap, App.rally.sky.ifShadow);
 				}
 				
 			} else if (worldType == WorldType.dynamicW) {
@@ -145,11 +126,7 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 	public void cleanup() {
 		StaticWorldBuilder.removeStaticWorld(getPhysicsSpace(), sMap);
 
-		Node root = App.rally.getRootNode();
-		root.detachAllChildren();
-		root.removeLight(sun);
-		root.removeLight(al);
-
+		App.rally.getRootNode().detachChild(camNode);
 		//TODO more
 	}
 

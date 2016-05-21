@@ -7,15 +7,13 @@ import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
-import com.jme3.light.AmbientLight;
-import com.jme3.light.DirectionalLight;
-import com.jme3.math.ColorRGBA;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Node;
-import com.jme3.shadow.DirectionalLightShadowRenderer;
-import com.jme3.shadow.EdgeFilteringMode;
 
+import car.Car;
+import car.CarBuilder;
+import car.CarData;
+import car.MyPhysicsVehicle;
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.controls.DropDown;
 import de.lessvoid.nifty.elements.Element;
@@ -29,11 +27,7 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 
 	private BulletAppState bulletAppState;
 
-	private DirectionalLight sun;
-	private AmbientLight al;
-	
 	private StaticWorld world;
-	private final boolean ifShadow = true;
 
 	private CarBuilder cb;
 	static CarData car; //current car
@@ -44,8 +38,6 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 
 	private HashMap<String, CarData> carset;
 	
-	private DirectionalLightShadowRenderer dlsr;
-
 	public ChooseCar() {
 		world = StaticWorld.garage;
 
@@ -74,29 +66,7 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 	}
 
 	private void createWorld() {
-		StaticWorldBuilder.addStaticWorld(getPhysicsSpace(), world, ifShadow);
-
-		//lights
-		al = new AmbientLight();
-		al.setColor(ColorRGBA.Blue.mult(0.3f));
-		App.rally.getRootNode().addLight(al);
-
-		sun = new DirectionalLight();
-		sun.setColor(new ColorRGBA(0.9f, 0.9f, 1f, 1f));
-		sun.setDirection(new Vector3f(-0.3f, -0.6f, -0.5f).normalizeLocal());
-		App.rally.getRootNode().addLight(sun);
-
-		App.rally.getViewPort().setBackgroundColor(ColorRGBA.Blue);
-		
-		if (ifShadow) {
-	        //Shadows and lights
-	        dlsr = new DirectionalLightShadowRenderer(App.rally.getAssetManager(), 2048, 3);
-	        dlsr.setLight(sun);
-	        dlsr.setLambda(0.55f);
-	        dlsr.setShadowIntensity(0.6f);
-	        dlsr.setEdgeFilteringMode(EdgeFilteringMode.Nearest);
-	        App.rally.getViewPort().addProcessor(dlsr);
-		}
+		StaticWorldBuilder.addStaticWorld(getPhysicsSpace(), world, App.rally.sky.ifShadow);
 	}
 
 	private void buildPlayers() {
@@ -104,7 +74,7 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 		Matrix3f dir = new Matrix3f();
 
 		cb = new CarBuilder();
-		cb.addPlayer(getPhysicsSpace(), 0, car, start, dir, true);
+		cb.addCar(getPhysicsSpace(), 0, car, start, dir, true);
 	}
 
 	private void initCamera() {
@@ -124,7 +94,7 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 			CarData c = carset.get(dropdown.getSelection());
 			if (c != null && c != car) {
 				cb.removePlayer(this.getPhysicsSpace(), 0);
-				cb.addPlayer(getPhysicsSpace(), 0, c, world.start, new Matrix3f(), true);
+				cb.addCar(getPhysicsSpace(), 0, c, world.start, new Matrix3f(), true);
 				
 				car = c;
 				String carinfotext = getCarInfoText(dropdown.getSelection(), car); 
@@ -141,10 +111,11 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 
 	private String getCarInfoText(String name, CarData car) {
 		String out = "Name: "+ name + "\n";
-		out += "Max Power: "+car.getMaxPower()+"\n";
-		out += "Weight: "+car.mass*9.81f + "\n";
-		out += "Drag(linear): " + car.DRAG + "("+car.RESISTANCE+")\n";
-		out += "Redline: "+ car.redline +"\n";
+		float[] data = car.getMaxPower();
+		out += "Max Power: "+data[0] +"kW? @ "+data[1]+" rpm \n";
+		out += "Weight: "+car.mass + "kg\n";
+		out += "Drag(linear): " + car.drag + "("+car.resistance()+")\n";
+		out += "Redline: "+ car.e_redline +"\n";
 		
 		return out;
 	}
@@ -158,13 +129,9 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 		//TODO i know theres got to be something.
 		StaticWorldBuilder.removeStaticWorld(getPhysicsSpace(), world);
 
-		App.rally.getViewPort().removeProcessor(dlsr);
-		Node root = App.rally.getRootNode();
-		root.detachAllChildren();
-		root.removeLight(sun);
-		root.removeLight(al);
-
 		cb.cleanup();
+		
+		App.rally.getRootNode().detachChild(camNode);
 	}
 
 	/////////////////////////////

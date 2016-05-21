@@ -7,6 +7,8 @@ import com.jme3.renderer.Camera;
 import com.jme3.scene.CameraNode;
 import com.jme3.scene.control.CameraControl.ControlDirection;
 
+import car.MyPhysicsVehicle;
+
 public class MyCamera extends CameraNode {
 
 	private MyPhysicsVehicle p;
@@ -20,8 +22,8 @@ public class MyCamera extends CameraNode {
 			this.damping = 15; //just high so it has no delay
 
 			Vector3f pPos = p.getPhysicsLocation();
-			setLocalTranslation(pPos.add(p.car.CAM_OFFSET)); //starting position of the camera
-			lookAt(pPos.add(p.car.LOOK_AT), new Vector3f(0,1,0)); //look at car
+			setLocalTranslation(pPos.add(p.car.cam_offset)); //starting position of the camera
+			lookAt(pPos.add(p.car.cam_lookAt), new Vector3f(0,1,0)); //look at car
 		}
 		setControlDir(ControlDirection.SpatialToCamera);
 	}
@@ -41,7 +43,8 @@ public class MyCamera extends CameraNode {
 		p.getForwardVector(forw); //look in the direction you are facing
 		p.getLinearVelocity(vel); //look in the direction you are moving
 
-		Vector3f back = forw.normalize().interpolate(vel.normalize(), 0.5f); //average of them both
+//		Vector3f back = forw.normalize().interpolate(vel.normalize(), 0.5f); //average of them both
+		Vector3f back = forw.normalize().interpolate(vel.normalize(), 1f); //just moving direction
 
 		if (!p.ifLookBack)
 			back.negateLocal();
@@ -53,15 +56,15 @@ public class MyCamera extends CameraNode {
 		}
 
 		back.normalizeLocal();
-		back.y = 0.4f;
+		back.y = p.car.cam_offset.y/(p.car.cam_offset.z*-1);
 		back.normalizeLocal();
-		back.multLocal(8);
+		back.multLocal(p.car.cam_offset.z*-1);
 
 		Vector3f wantPos = p.getPhysicsLocation().add(back);
 		Vector3f pos = FastMath.interpolateLinear(tpf*damping, curPos, wantPos);
 		setLocalTranslation(pos);
 
-		lookAt(p.getPhysicsLocation().add(p.car.LOOK_AT), new Vector3f(0,1,0));
+		lookAt(p.getPhysicsLocation().add(p.car.cam_lookAt), new Vector3f(0,1,0));
 	}
 
 }

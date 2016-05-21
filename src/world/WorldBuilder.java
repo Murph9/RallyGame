@@ -1,7 +1,6 @@
 package world;
 
 import game.App;
-import game.H;
 import world.WP.NodeType;
 
 import java.util.ArrayList;
@@ -9,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.jme3.asset.AssetManager;
-import com.jme3.asset.TextureKey;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.collision.shapes.PlaneCollisionShape;
@@ -32,7 +30,6 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Quad;
-import com.jme3.util.SkyFactory;
 import com.jme3.water.SimpleWaterProcessor;
 
 public class WorldBuilder extends Node {
@@ -109,21 +106,6 @@ public class WorldBuilder extends Node {
 		this.attachChild(startGeometry);
 		this.space.add(startGeometry);
 
-
-		App.rally.getRootNode().attachChild(SkyFactory.createSky(am, "Textures/Sky/Bright/BrightSky.dds", false));
-		boolean mine = false; //TODO my try (note, the images need to rotate around one, so that the sky and floor match
-		if (mine) {
-			TextureKey keye = new TextureKey("assets/east.png", true);
-			TextureKey keyw = new TextureKey("assets/west.png", true);
-			TextureKey keyn = new TextureKey("assets/north.png", true);
-			TextureKey keys = new TextureKey("assets/south.png", true);
-			TextureKey keyt = new TextureKey("assets/top.png", true);
-			TextureKey keyb = new TextureKey("assets/bottom.png", true);
-			App.rally.getRootNode().attachChild(SkyFactory.createSky(am, am.loadTexture(keyw), 
-					am.loadTexture(keye), am.loadTexture(keyn), 
-					am.loadTexture(keys), am.loadTexture(keyt), 
-					am.loadTexture(keyb)));
-		}
 
 		if (type[0] instanceof Floating && wantWater) { //this is the nice floating looking one
 			// we create a water processor

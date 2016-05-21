@@ -5,6 +5,8 @@ import com.jme3.renderer.Camera;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Node;
 
+import car.MyPhysicsVehicle;
+
 public class MiniMap {
 
 	//TODO aspect is off
