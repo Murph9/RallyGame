@@ -210,13 +210,13 @@ public enum Car {
 			w_zOff = 1.3f;
 			w_yOff = 0.2f;
 
-			e_torque = new float[] {0, 300, 450, 500, 530, 550, 500, 1};
+			e_torque = new float[] {0, 300, 450, 500, 530, 550, 500, 400};
 
-			auto_gearDown = 3000;
-			auto_gearUp = 6200;
+			auto_gearDown = 2800;
+			auto_gearUp = 5800;
 			e_redline = 7000;
 
-			sus_stiffness = 12.0f; //20 is fairly stiff
+			sus_stiffness = 18.0f; //40 is fairly stiff
 			sus_compValue = 0.5f; //(should be lower than damp)
 			sus_dampValue = 0.6f;
 			sus_restLength = 0.3f;
@@ -233,7 +233,10 @@ public enum Car {
 			wheelModel = dir+"sa_hummer_wheel.blend";
 
 			mass = 2500;
-
+			width = 1.8f;
+			height = 1.5f;
+			length = 5f;
+			
 			w_xOff = 1.0f;
 			w_yOff = -0.45f;
 			w_zOff = 1.85f;

@@ -4,14 +4,12 @@ import com.jme3.asset.AssetManager;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
-import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 import game.App;
-import game.H;
 import game.Rally;
 
-public class CarModelaaaaData {
+public class CarModelData {
 	
 	boolean simple = false;
 
@@ -21,14 +19,15 @@ public class CarModelaaaaData {
 	//chassis data
 	CarModelPiece chassis;
 	
-	CarModelaaaaData(String car, String wheel) {
+	CarModelData(String car, String wheel) {
 		this.carModel = car;
 		this.wheelModel = wheel;
 		Rally r = App.rally;
 		AssetManager am = r.getAssetManager();
 		
 		Spatial rootSpat = am.loadModel(carModel);
-		if (rootSpat instanceof Geometry) {
+		if (rootSpat instanceof Geometry) { }
+		/*
 			//not a fancy model, i.e. just one model no tree structure
 			simple = true;
 			chassis = new CarModelPiece((Geometry)rootSpat, Vector3f.ZERO, Matrix3f.IDENTITY);
@@ -59,7 +58,8 @@ public class CarModelaaaaData {
 				}
 				H.p("found");
 			}
-		}
+		}*/
+		//TODO
 	}
 	
 	class CarModelPiece {

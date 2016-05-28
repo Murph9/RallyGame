@@ -20,7 +20,7 @@ class NormalLatData extends CarWheelData {
 	NormalLatData() {
 		B = 10f;
 		C = 1.75f;
-		E = 0.97f;
+		E = 0.95f;
 	}
 }
 
@@ -29,7 +29,7 @@ class NormalLongData extends CarWheelData {
 	NormalLongData() {
 		B = 10f;
 		C = 1.8f;
-		E = 0.97f;
+		E = 0.95f;
 	}
 }
 

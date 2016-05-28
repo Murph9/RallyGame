@@ -14,14 +14,8 @@ import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.controls.DropDown;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
-import world.Simple2;
-import world.Cliff;
-import world.Floating;
-import world.Simple;
-import world.City;
-import world.StaticWorld;
-import world.StaticWorldBuilder;
-import world.WP;
+
+import world.*;
 
 public class ChooseMap extends AbstractAppState implements ScreenController {
 
@@ -65,6 +59,7 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 		dSet.put("Simple", Simple.STRAIGHT);
 		dSet.put("Simple2", Simple2.STRAIGHT);
 		dSet.put("City", City.STRAIGHT);
+		dSet.put("Track", Track.STRAIGHT);
 	}
 
 	@Override

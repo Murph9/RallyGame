@@ -1,10 +1,13 @@
 package game;
 
-import java.util.logging.Logger;
+//import java.util.logging.Logger;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AppState;
 import com.jme3.font.BitmapFont;
+import com.jme3.math.FastMath;
+import com.jme3.math.Quaternion;
+import com.jme3.math.Vector3f;
 import com.jme3.niftygui.NiftyJmeDisplay;
 import com.jme3.system.AppSettings;
 import com.jme3.system.NanoTimer;
@@ -13,6 +16,7 @@ import car.Car;
 import car.CarData;
 import de.lessvoid.nifty.Nifty;
 import world.StaticWorld;
+import world.Track;
 import world.WP;
 
 ////TODO Ideas for game modes:
@@ -36,8 +40,7 @@ import world.WP;
 //http://stackoverflow.com/questions/3915961/how-to-view-hierarchical-package-structure-in-eclipse-package-explorer
 
 //TODO
-//nifty styles.
-//tacko (with the added stuff)
+//nifty new default style
 
 public class Rally extends SimpleApplication {
 
@@ -53,7 +56,8 @@ public class Rally extends SimpleApplication {
 	
 	private Settings defaultSet = new Settings();
 	private CarData defaultCar = Car.Runner.get();
-	private StaticWorld defaultsworld = StaticWorld.track2;
+	private StaticWorld defaultsworld = null;//StaticWorld.track2;
+	private WP[] defaultdworld = Track.values();
 	
 	public static void main(String[] args) {
 		int fps = 60; //default is 60
@@ -72,9 +76,9 @@ public class Rally extends SimpleApplication {
 		app.start();
 
 		 //Just getting numbers for rotations
-//		 Quaternion q = new Quaternion();
-//		 q = q.fromAngleAxis(-3*FastMath.HALF_PI/2, new Vector3f(0,1,0));
-//		 H.p(q);
+		 Quaternion q = new Quaternion();
+		 q = q.fromAngleAxis(FastMath.PI, new Vector3f(0,1,0));
+		 H.p(q);
 	}
 
 	@Override
@@ -109,6 +113,7 @@ public class Rally extends SimpleApplication {
 		//set the default option
 		defaultSet.car = defaultCar;
 		defaultSet.sworld = defaultsworld;
+		defaultSet.dworld = defaultdworld;
 	}
 	
 	public void startFast() {

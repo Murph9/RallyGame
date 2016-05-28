@@ -9,11 +9,13 @@ import com.jme3.math.Vector3f;
 public interface WP {
 	
 	enum NodeType {
-		A, B, C, D, E, F; //for defining what can connect to the end of the previous piece
+		A, B, C, D, E, F, G, H; //for defining what can connect to the end of the previous piece
 	}
 	
 	static final Quaternion
 		STRIAGHT = Quaternion.IDENTITY,
+		LR_180 = new Quaternion(0, 1, 0, 0),
+		
 		LEFT_90 = new Quaternion(0, 0.7071f, 0, 0.7071f),
 		LEFT_45 = new Quaternion(0, 0.3827f, 0, 0.9239f),
 

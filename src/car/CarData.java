@@ -102,6 +102,7 @@ public abstract class CarData {
 	public boolean nitro_on = true;
 	public float nitro_force = 300; //TODO find a good number
 	public float nitro_rate = 1;
+	public float nitro_max = 15;
 	
 	///////////////////
 	//usefulMethods

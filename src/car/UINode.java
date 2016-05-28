@@ -1,5 +1,8 @@
 package car;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.jme3.asset.AssetManager;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
@@ -7,14 +10,17 @@ import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
-import com.jme3.math.Quaternion;
+import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
+import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Line;
 import com.jme3.scene.shape.Quad;
 import com.jme3.system.AppSettings;
+import com.jme3.util.BufferUtils;
 
 import game.App;
 import game.Rally;
@@ -22,33 +28,38 @@ import game.Rally;
 public class UINode {
 
 	/*TODO:
-	 * get it all to kinda look like the forza one
-	 * red near the redline?
+	 * get it all to kinda look like the forza 6 one
+	 * - their text is white infront of black so that you can see it always
 	 */
-	
 	MyPhysicsVehicle p;
 	
 	//hud stuff
+	Geometry background;
 	BitmapText statsText;
 	BitmapText score;
 	BitmapText angle;
-	BitmapText nitro;
 	
-	Geometry rpmArrow;
-	Geometry redlineArrow;
-	Geometry rpmBackground;
+	//rpm
+	List<Geometry> rpmBar;
+	float rpmBarStep = 50;
+	private Material rpmBarOff; //default state
+	
+	private Material rpmBarOn; //less than rpm
+	private Material rpmBarOnAlt; //for the increment marking (and in rpm)
+	
+	private Material rpmBarRedLine; //marking the rpm
+	private Material rpmBarRedLineOn; //for past redline
 	
 	//displays the skid value, TODO make better
-	Geometry gripBox0;
-	Geometry gripBox1;
-	Geometry gripBox2;
-	Geometry gripBox3;
+	Geometry gripBox[];
 	
-	//texture location
-	final String dir = "assets/digital/";
+	//quad that displays nitro
+	Geometry nitro;
+	Geometry nitroOff;
 	
-	//texture set
-	Material[] matset = new Material[10];
+	//texture
+	final String numDir = "assets/number/"; //texture location
+	Material[] numMats = new Material[10]; //texture set
 	
 	//speed squares
 	Geometry[] speedo = new Geometry[3];
@@ -56,14 +67,14 @@ public class UINode {
 	Geometry gear = new Geometry();
 	
 	//speedo numbers
-	float startAng = -FastMath.PI;
+	float startAng = FastMath.PI*5/4;
 	int startRPM = 0; //because sometimes it might not be
-	
-	float finalAng = -FastMath.TWO_PI;
+
+	float finalAng = 0;
 	int finalRPM; //should be more than redline
 	float redline;
 	
-	int centerx, centery = 64+22, radius = 118;
+	int centerx, centery = 64+22, radius = 100;
 	
 	public UINode () {
 		Rally r = App.rally;	
@@ -91,13 +102,6 @@ public class UINode {
 		score.setLocalTranslation(settings.getWidth()-200, settings.getHeight(), 0); // position
 		guiNode.attachChild(score);
 		
-		nitro = new BitmapText(guiFont, false);		  
-		nitro.setSize(guiFont.getCharSet().getRenderedSize());
-		nitro.setColor(ColorRGBA.White);
-		nitro.setText("blaj");
-		nitro.setLocalTranslation(settings.getWidth()-300, 50, 0); // position
-		guiNode.attachChild(nitro);
-		
 		angle = new BitmapText(guiFont, false);		  
 		angle.setSize(guiFont.getCharSet().getRenderedSize());
 		angle.setColor(ColorRGBA.White);
@@ -106,156 +110,212 @@ public class UINode {
 		guiNode.attachChild(angle);
 		
 		///////////////////////////////////////////////
-		Material m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+		
+		makeGripQuads(assetManager, guiNode);
+		
+		//////////////////////////////
+		//seven segment textures
+		for (int i = 0 ; i < 10; i++) {
+			numMats[i] = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+			numMats[i].setTexture("ColorMap", assetManager.loadTexture(numDir+i+".png"));
+			numMats[i].getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
+		}
+		
+		makeSpeedo(assetManager, settings, guiNode);
+	}
+	
+	private void makeGripQuads(AssetManager am, Node guiNode) {
+		Material m = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+		m.setColor("Color", ColorRGBA.White);
+		
+		this.gripBox = new Geometry[4];
+		
+		float width = 300;
+		Box b = new Box(10, 10, 1);
+		gripBox[0] = new Geometry("frontleft", b);
+		gripBox[0].setLocalTranslation(width, 50, 0);
+		gripBox[0].setMaterial(m);
+		guiNode.attachChild(gripBox[0]);
+		
+		gripBox[1] = new Geometry("frontright", b);
+		gripBox[1].setLocalTranslation(width +25, 50, 0);
+		gripBox[1].setMaterial(m);
+		guiNode.attachChild(gripBox[1]);
+		
+		gripBox[2] = new Geometry("rearleft", b);
+		gripBox[2].setLocalTranslation(width, 25, 0);
+		gripBox[2].setMaterial(m);
+		guiNode.attachChild(gripBox[2]);
+		
+		gripBox[3] = new Geometry("rearright", b);
+		gripBox[3].setLocalTranslation(width + 25, 25, 0);
+		gripBox[3].setMaterial(m);
+		guiNode.attachChild(gripBox[3]);
+	}
+	
+	private void makeSpeedo(AssetManager am, AppSettings settings, Node guiNode) {
+		makeKmH(settings, guiNode);
+		
+		Material m = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
 		m.setColor("Color", ColorRGBA.Black);
 
 		Line l = new Line(Vector3f.ZERO, Vector3f.UNIT_X);
 		l.setLineWidth(4);
 		
-		int width = settings.getWidth()-128;
-		rpmArrow = new Geometry("RPM", l);
-		rpmArrow.setLocalTranslation(width, -40+128, 0);
-		rpmArrow.scale(100);
-		rpmArrow.setMaterial(m);
-		guiNode.attachChild(rpmArrow);
+		///////////////
+		//make the variable parts:
+		Node speedoNode = new Node("Speedo");
+		guiNode.attachChild(speedoNode);
 		
-		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		m.setTexture("ColorMap", assetManager.loadTexture(dir+"speedo3.png"));
-		m.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
+		//TODO
+		Quad qback = new Quad(270, 200);
+		background = new Geometry("ui-background", qback);
+//		Material trans = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+//		trans.setColor("Color", new ColorRGBA(0,0,0,0.3f));
+//		background.setMaterial(trans);
+//		background.setLocalTranslation(settings.getWidth()-270, 0, -10);
+//		speedoNode.attachChild(background);
 		
-		Quad qrpm = new Quad(128,128);
-		rpmBackground = new Geometry("SpeedoBackground", qrpm);
-		rpmBackground.setLocalTranslation(width-128, -40, -1);
-		rpmBackground.scale(2);
-		rpmBackground.setMaterial(m);
-		guiNode.attachChild(rpmBackground);
+		//rpm bars
+		l = new Line(Vector3f.ZERO, Vector3f.UNIT_X.negate()); //inwards
+		l.setLineWidth(2);
+		Quad quad = new Quad(20, 20);
+		
+		centerx = App.rally.getSettings().getWidth()-127;
+		
+		rpmBarOn = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+		rpmBarOn.setColor("Color", ColorRGBA.White);
+		
+		rpmBarOnAlt = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+		rpmBarOnAlt.setColor("Color", ColorRGBA.LightGray);
+		
+		rpmBarOff = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+		rpmBarOff.setColor("Color", ColorRGBA.Gray);
+		
+		rpmBarRedLine = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+		rpmBarRedLine.setColor("Color", new ColorRGBA(ColorRGBA.Red).mult(0.7f));
+		
+		rpmBarRedLineOn = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+		rpmBarRedLineOn.setColor("Color", ColorRGBA.Red);
+		
+		this.rpmBar = new ArrayList<Geometry>();
+		
+		for (int i = 0; i < finalRPM+1; i += rpmBarStep) {
+			float angle = FastMath.interpolateLinear(i/(float)finalRPM, startAng, finalAng);
+			float angle2 = FastMath.interpolateLinear((i+rpmBarStep)/(float)finalRPM, startAng, finalAng);
+			
+			Mesh rpmM = new Mesh();
+			Vector3f [] vs = new Vector3f[4]; //order is inside vertex then outside
+			vs[0] = new Vector3f(FastMath.cos(angle)*radius*0.9f, FastMath.sin(angle)*radius*0.9f, -1);
+			vs[1] = new Vector3f(FastMath.cos(angle2)*radius*0.9f, FastMath.sin(angle2)*radius*0.9f, -1);
+			vs[2] = new Vector3f(FastMath.cos(angle)*radius, FastMath.sin(angle)*radius, 1);
+			vs[3] = new Vector3f(FastMath.cos(angle2)*radius, FastMath.sin(angle2)*radius, 1);
+			
+			Vector2f[] texCoord = new Vector2f[4];
+			texCoord[0] = new Vector2f(0,0);
+			texCoord[1] = new Vector2f(1,0);
+			texCoord[2] = new Vector2f(0,1);
+			texCoord[3] = new Vector2f(1,1);
+			int [] indexes = { 2,0,1, 1,3,2 };
+			
+			rpmM.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(vs));
+			rpmM.setBuffer(Type.TexCoord, 2, BufferUtils.createFloatBuffer(texCoord));
+			rpmM.setBuffer(Type.Index,    3, BufferUtils.createIntBuffer(indexes));
+			rpmM.updateBound();
 
-		
-		///////////////////////////////////
-		//grip boxes
-		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		m.setColor("Color", ColorRGBA.White);
-		
-		width = settings.getWidth() - 350;
-		Box b = new Box(10, 10, 1);
-		gripBox0 = new Geometry("frontleft", b);
-		gripBox0.setLocalTranslation(width, 50, 0);
-		gripBox0.setMaterial(m);
-		guiNode.attachChild(gripBox0);
-		
-		gripBox1 = new Geometry("frontright", b);
-		gripBox1.setLocalTranslation(width +25, 50, 0);
-		gripBox1.setMaterial(m);
-		guiNode.attachChild(gripBox1);
-		
-		gripBox2 = new Geometry("rearleft", b);
-		gripBox2.setLocalTranslation(width, 25, 0);
-		gripBox2.setMaterial(m);
-		guiNode.attachChild(gripBox2);
-		
-		gripBox3 = new Geometry("rearright", b);
-		gripBox3.setLocalTranslation(width + 25, 25, 0);
-		gripBox3.setMaterial(m);
-		guiNode.attachChild(gripBox3);
-		
-		//////////////////////////////
-		//seven segment textures
-		for (int i = 0 ; i < 10; i++) {
-			matset[i] = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-			matset[i].setTexture("ColorMap", assetManager.loadTexture(dir+i+".png"));
-			matset[i].getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
+			//add physics space and mesh
+			Geometry rpmB = new Geometry("rpmBar"+i, rpmM);
+			rpmB.setLocalTranslation(centerx, centery, -1);//behind other things
+			speedoNode.attachChild(rpmB);
+			rpmBar.add(rpmB);
+			
+			if (i % 1000 == 0) {
+				Node g = addRPMNumber(angle, (int)i/1000, quad, centerx-10, centery-10);
+				speedoNode.attachChild(g);
+			} 
+			
+			rpmB.setMaterial(rpmBarOff); //no idea until the physics starts
 		}
 		
+		
+		//nitro 
+		Quad q = new Quad(10, 80);
+		nitroOff = new Geometry("nitroback", q);
+		Material nitroM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+		nitroM.setColor("Color", new ColorRGBA(ColorRGBA.Green).mult(0.5f));
+		nitroOff.setMaterial(nitroM);
+		nitroOff.setLocalTranslation(centerx - (settings.getWidth() - centerx), 10, 0);
+		speedoNode.attachChild(nitroOff);
+		
+		nitro = new Geometry("nitro", q);
+		nitroM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+		nitroM.setColor("Color", new ColorRGBA(ColorRGBA.Green));
+		nitro.setMaterial(nitroM);
+		nitro.setLocalTranslation(centerx - (settings.getWidth() - centerx), 10, 0);
+		speedoNode.attachChild(nitro);
+	}
+
+	private void makeKmH(AppSettings settings, Node guiNode) {
 		//speed scores
-		Quad quad = new Quad(29,49);
-		width = settings.getWidth()-130;
+		Quad quad = new Quad(30,50);
+		int width = settings.getWidth()-70;
 		
 		speedo[0] = new Geometry("ones", quad);
 		speedo[0].setLocalTranslation(width, 8, -1);
-		speedo[0].scale(1);
-		speedo[0].setMaterial(matset[0]);
+		speedo[0].setMaterial(numMats[0]);
 		guiNode.attachChild(speedo[0]);
 		
 		speedo[1] = new Geometry("tens", quad);
 		speedo[1].setLocalTranslation(width-32, 8, -1);
-		speedo[1].setMaterial(matset[0]);
+		speedo[1].setMaterial(numMats[0]);
 		guiNode.attachChild(speedo[1]);
 		
 		speedo[2] = new Geometry("hundereds", quad);
 		speedo[2].setLocalTranslation(width-64, 8, -1);
-		speedo[2].setMaterial(matset[0]);
+		speedo[2].setMaterial(numMats[0]);
 		guiNode.attachChild(speedo[2]);
 		
 		gear = new Geometry("gear", quad);
 		gear.setLocalTranslation(width-64, 68, -1);
-		gear.setMaterial(matset[1]);
+		gear.setMaterial(numMats[1]);
 		guiNode.attachChild(gear);
-		
-		makeSpeedo(guiNode);
-		
 	}
 
-	private void makeSpeedo(Node guiNode) {
-		Node speedoNode = new Node("Speedo");
-		guiNode.attachChild(speedoNode);
-		
-		Line l = new Line(Vector3f.ZERO, Vector3f.UNIT_X.negate()); //inwards
-		l.setLineWidth(2);
-		Quad quad = new Quad(20, 20);
-		
-		centerx = App.rally.getSettings().getWidth()-128;
-		
-		Material m = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-		m.setColor("Color", ColorRGBA.Black);
-		
-		for (int i = 0; i <= finalRPM; i += 1000) {
-			float angle = FastMath.interpolateLinear(i/(float)finalRPM, startAng, finalAng);;
-			
-			Geometry line = new Geometry("RPM", l);
-			line.setLocalTranslation(centerx+FastMath.cos(angle)*radius, centery+FastMath.sin(angle)*radius, 0);
-			Quaternion q = new Quaternion();
-			q.fromAngleAxis(angle, Vector3f.UNIT_Z);
-			line.setLocalRotation(q);
-			line.scale(20);
-			line.setMaterial(m);
-			speedoNode.attachChild(line);
-			
-			Node g = addNumber(angle, (int)i/1000, quad);
-			speedoNode.attachChild(g);
-		}
-	}
 	
-	private Node addNumber(float angle, int i, Quad quad) {
+	private Node addRPMNumber(float angle, int i, Quad quad, float x, float y) {
 		Node n = new Node("rpm "+i);
-		n.setLocalTranslation(centerx-10, centery-10, 0);
+		n.setLocalTranslation(x, y, 0);
+		float offset = 25;
 		
 		Geometry g = new Geometry("speedoNumber "+i, quad);
 		if (i > 9) { //multinumber
-			g.setLocalTranslation(FastMath.cos(angle)*(radius-20), FastMath.sin(angle)*(radius-20), 0);
-			g.setMaterial(matset[i % 10]);
+			g.setLocalTranslation(FastMath.cos(angle)*(radius-offset), FastMath.sin(angle)*(radius-offset), 0);
+			g.setMaterial(numMats[i % 10]);
 			n.attachChild(g);
 			
 			Geometry g2 = new Geometry("speedoNumber "+i+"+", quad);
-			g2.setLocalTranslation(-20+FastMath.cos(angle)*(radius-20), FastMath.sin(angle)*(radius-20), 0);
-			g2.setMaterial(matset[i/10]);
+			g2.setLocalTranslation(-20+FastMath.cos(angle)*(radius-offset), FastMath.sin(angle)*(radius-offset), 0);
+			g2.setMaterial(numMats[i/10]);
 			n.attachChild(g2);
 			
 		} else { //normal number
-			g.setLocalTranslation(FastMath.cos(angle)*(radius-20), FastMath.sin(angle)*(radius-20), 0);
-			g.setMaterial(matset[i]);
+			g.setLocalTranslation(FastMath.cos(angle)*(radius-offset), FastMath.sin(angle)*(radius-offset), 0);
+			g.setMaterial(numMats[i]);
 			n.attachChild(g);
 		}
 		
 		return n;
 	}
 
+	
+	//main update method
 	public void update(float tpf) {
 		AssetManager assetManager = App.rally.getAssetManager();
 		
 		float speed = p.getLinearVelocity().length();
 		
 		statsText.setText("speed:"+speed + "m/s\nRPM:" + p.curRPM +"\na:"+p.accelCurrent+"\nb:"+p.brakeCurrent+
-				"\nengine:"+p.engineTorque+"\ntraction:"+p.totalTraction + "\nwheelRot:"+p.wheelRot +"\nisDay:"+App.rally.sky.isDay);
+				"\nengine:"+p.engineTorque+"\ntraction:"+p.totalTraction + "\nwheelRot:"+p.totalWheelRot +"\nisDay:"+App.rally.sky.isDay);
 		int speedKMH = (int)Math.abs(p.getCurrentVehicleSpeedKmHour());
 
 		setSpeedDigits(speedKMH);
@@ -265,39 +325,46 @@ public class UINode {
 			score.setText("Placed: "+App.rally.drive.worldB.getTotalPlaced());
 		}
 		
-		//TODO slightly fancier?
-		rpmArrow.setLocalRotation(Quaternion.IDENTITY);
-		float angle = FastMath.interpolateLinear(p.curRPM/(float)finalRPM, startAng, finalAng);
-		rpmArrow.rotate(0, 0, angle);
+		//highlight the rpmBar the right amout
+		for (int i = 0; i < rpmBar.size(); i++) {
+			if (i*rpmBarStep >= redline) { //its a red one
+				if (p.curRPM < i*rpmBarStep + rpmBarStep/2)
+					rpmBar.get(i).setMaterial(rpmBarRedLine);
+				else
+					rpmBar.get(i).setMaterial(rpmBarRedLineOn);
+			} else {
+				if (p.curRPM < i*rpmBarStep + rpmBarStep/2)
+					rpmBar.get(i).setMaterial(rpmBarOff);
+				else
+					if (i*rpmBarStep % 500 == 0)
+						rpmBar.get(i).setMaterial(rpmBarOnAlt);
+					else 
+						rpmBar.get(i).setMaterial(rpmBarOn);
+			}
+		}
 		
 		this.angle.setText(p.driftangle+"'");
-		this.nitro.setText(p.nitro+" nitro");
+		this.nitro.setLocalScale(1, p.nitro/p.car.nitro_max, 1); 
 		
-		Material m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		m.setColor("Color", new ColorRGBA(p.wheel[0].skid,p.wheel[0].skid,p.wheel[0].skid,1));
-		gripBox0.setMaterial(m);
-		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		m.setColor("Color", new ColorRGBA(p.wheel[1].skid,p.wheel[1].skid,p.wheel[1].skid,1));
-		gripBox1.setMaterial(m);
-		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		m.setColor("Color", new ColorRGBA(p.wheel[2].skid,p.wheel[2].skid,p.wheel[2].skid,1));
-		gripBox2.setMaterial(m);
-		m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		m.setColor("Color", new ColorRGBA(p.wheel[3].skid,p.wheel[3].skid,p.wheel[3].skid,1));
-		gripBox3.setMaterial(m);
+		//grip boxes
+		for (int i = 0 ; i < 4; i++) {
+			Material m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+			m.setColor("Color", new ColorRGBA(p.wheel[i].skid, p.wheel[i].skid, p.wheel[i].skid, 1));
+			gripBox[i].setMaterial(m);
+		}
 	}
 
 	private void setSpeedDigits(int speedKMH) {
 		int count = 0;
 		while (count < 3) {
-			speedo[count].setMaterial(matset[0]);
+			speedo[count].setMaterial(numMats[0]);
 			count++;
 		}
 		
 		count = 0;
 		speedKMH %= 1000; //not more than 999
 		while (speedKMH > 0) {
-			speedo[count].setMaterial(matset[speedKMH % 10]);
+			speedo[count].setMaterial(numMats[speedKMH % 10]);
 			speedKMH /= 10;
 			count++;
 		}
@@ -305,6 +372,6 @@ public class UINode {
 	
 	private void setGearDigit(int gearIn) {
 		gearIn = (int)FastMath.clamp(gearIn, 0, 9); //so we don't go off the end of the texture array
-		gear.setMaterial(matset[gearIn]);
+		gear.setMaterial(numMats[gearIn]);
 	}
 }

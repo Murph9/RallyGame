@@ -60,7 +60,7 @@ public class MyWheelNode extends Node {
 		this.setShadowMode(ShadowMode.Cast);
 	}
 	
-	public void update(float tpf, int rpm) {
+	public void update(float tpf, int reverse) {
 		if (ifSmoke) {
 			if (skid > 0.9 && contact) {
 				smoke.setParticlesPerSec(10);
@@ -68,7 +68,7 @@ public class MyWheelNode extends Node {
 				smoke.setParticlesPerSec(0);
 			}
 		}
-		
+		reverse = FastMath.sign(reverse);
 		if (spat == null) {
 			try {
 				throw new Exception("No wheel spatial, in wheelnode update");
@@ -77,7 +77,7 @@ public class MyWheelNode extends Node {
 		}
 		
 		Quaternion q = new Quaternion();
-		q = q.fromAngleNormalAxis(radSec*tpf, new Vector3f(1,0,0));
+		q = q.fromAngleNormalAxis(radSec*tpf*reverse, new Vector3f(1,0,0));
 		spat.setLocalRotation(spat.getLocalRotation().mult(q));
 		
 	}

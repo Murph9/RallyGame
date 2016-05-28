@@ -66,7 +66,7 @@
 		</layer>
 	</screen>
 
-	<screen id="drive-noop" controller="game.MenuState">
+	<screen id="drive-noop" controller="game.DriveMenuState">
 		<!-- This is THE default screen when the game is being played-->
 		<layer backgroundColor="#3330" childLayout="horizontal">
 			<panel height="7%" width="10%" align="left" childLayout="center" style="nifty-panel">
@@ -75,7 +75,7 @@
 		</layer>
 	</screen>
 
-	<screen id="drive-paused" controller="game.MenuState">
+	<screen id="drive-paused" controller="game.DriveMenuState">
 		<layer backgroundColor="#0000" childLayout="center">
 			<panel height="25%" width="20%" align="center" childLayout="vertical" backgroundColor="#fff8">
 				<control name="button" label="Un pause" id="StartButton" align="center" valign="center" visibleToMouse="true">
@@ -88,7 +88,7 @@
 		</layer>
 	</screen>
 	
-	<screen id="drive-tabmenu" controller="game.MenuState">
+	<screen id="drive-tabmenu" controller="game.DriveMenuState">
 		<layer backgroundColor="#3330" childLayout="vertical">
 			<panel height="25%" width="15%" align="left"
 				childLayout="center" backgroundColor="#bbbf">
@@ -98,7 +98,7 @@
 		</layer>
 	</screen>
 	
-	<screen id="drive-console" controller="game.MenuState">
+	<screen id="drive-console" controller="game.DriveMenuState">
 		<layer backgroundColor="#3330" childLayout="vertical">
 			<panel height="5%" width="10%" childLayout="center">
 				<control id="console" name="nifty-console" lines="25" align="center" valign="center" />

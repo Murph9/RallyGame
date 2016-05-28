@@ -126,7 +126,7 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 
 
 	public void cleanup() {
-		//TODO i know theres got to be something.
+		//TODO i know theres got to be something else.
 		StaticWorldBuilder.removeStaticWorld(getPhysicsSpace(), world);
 
 		cb.cleanup();

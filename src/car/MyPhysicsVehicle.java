@@ -48,6 +48,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	//car data
 	public CarData car;
 	public Node carRootNode;
+	public CarModelData model;
 
 	//my wheel node
 	MyWheelNode[] wheel = new MyWheelNode[4];
@@ -63,15 +64,22 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	float steerLeft = 0;
 	float steerRight= 0;
 
+	float nitroTimeout = 0;
 	boolean ifNitro = false;
 	float nitro = 0;
 
+	boolean ifHandbrake = false;
+	
+	//TODO use
+	float clutch = 0;//0 = can drive, 1 = can't drive
+	int gearChangeTo = 0;
+	float gearChangeTime = 0;
+	//- state stuff
+	
+	//ui stuff
 	float engineTorque = 0;
 	String totalTraction = "";
-	float wheelRot = 0;
-
-	boolean ifHandbrake = false;
-	//- driving stuff
+	float totalWheelRot = 0;
 
 	float distance = 0;
 	public boolean ifLookBack = false;
@@ -84,6 +92,10 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		super(col, cartype.mass);
 		this.car = cartype;
 		this.carRootNode = carNode;
+		
+		//init the car model
+		this.model = new CarModelData(cartype.carModel, cartype.wheelModel);
+		
 		AssetManager am = App.rally.getAssetManager();
 
 		this.skidNode = new Node(); //attached in car builder
@@ -116,6 +128,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			setFrictionSlip(i, car.wheelBasicSlip);
 
 			carNode.attachChild(wheel[i]);
+			
+			//TODO wheels rotate the wrong direction on the other side of the car
 		}
 
 		try {
@@ -157,8 +171,11 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			break;
 
 		case "Nitro":
-			if (car.nitro_on)
+			if (car.nitro_on) {
 				ifNitro = value;
+				if (!ifNitro)
+					this.nitroTimeout = 2;
+			}
 			break;
 
 		case "Jump":
@@ -204,7 +221,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	//end controls
 
 
-	/**Used internally, creates the actual vehicle constraint when vehicle is added to phyicsspace
+	/**Used internally (in jme), creates the actual vehicle constraint when vehicle is added to phyicsspace
 	 */
 	@Override
 	public void createVehicle(PhysicsSpace space) {
@@ -240,7 +257,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	}
 
 
-	//TODO find SAE950311 
+	//TODO find SAE950311
 	//Millikin & Millikin's Race Car Vehicle Dynamics
 	//https://www.sae.org/images/books/toc_pdfs/R146.pdf
 	////////////////////////////////////////////////////
@@ -279,18 +296,18 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 				new Vector3f(),new Vector3f(),new Vector3f(),new Vector3f(),
 		};
 
-		if (velocity.z == 0) { //to avoid the divide by zero below
-			velocity.z += 0.0001;
+		if (velocity.z == 0) { //to avoid all the divide by zeros below
+			velocity.z += 0.00001;
 		}
 
 		//////////////////////////////////////
 		//longitudinal forces
-		engineTorque = getEngineWheelTorque(tpf, velocity.z, ifNitro);
+		engineTorque = getEngineWheelTorque(tpf, velocity.z);
 		float[] torques = new float[] { 0, 0, 0, 0 };
 
 		engineTorque /= 2;
 		if (car.driveFront && car.driveRear)
-			engineTorque /= 2; //split up into 2 axels
+			engineTorque /= 2; //split up into 2 axles
 
 		if (car.driveFront) {
 			torques[0] = engineTorque;
@@ -338,7 +355,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			wheel[i].skid = FastMath.clamp(FastMath.sqrt(slipangle*slipangle + slipratio*slipratio), 0, 1);
 
 			//add the wheel force after merging the forces
-			float totalLongForce = torques[i] - wf[i].z - (brakeCurrent*car.brakeMaxTorque*Math.signum(wheel[i].radSec)); //TODO braking properly
+			float totalLongForce = torques[i] - wf[i].z - (brakeCurrent*car.brakeMaxTorque*Math.signum(wheel[i].radSec));
 			if (Math.signum(totalLongForce - (brakeCurrent*car.brakeMaxTorque*Math.signum(velocity.z))) != Math.signum(totalLongForce)) {
 				//we maxed out the forces with braking
 				wheel[i].radSec = 0;
@@ -352,11 +369,11 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 		//ui based values
 		totalTraction = "\nf: "+(wf[0].length() + wf[1].length())+", \nb:" + (wf[2].length() + wf[3].length());
-		this.wheelRot = 0;
+		this.totalWheelRot = 0;
 		for (MyWheelNode w: wheel) {
-			this.wheelRot += w.radSec;
+			this.totalWheelRot += w.radSec;
 		}
-		this.wheelRot /= 4;
+		this.totalWheelRot /= 4;
 
 		//and finally apply forces
 		if (wheel[0].contact)
@@ -370,7 +387,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 	}
 
-	private float getEngineWheelTorque(float tpf, float vz, boolean ifNitro) {
+	private float getEngineWheelTorque(float tpf, float vz) {
 		float wheelrot = 0;
 		if (car.driveFront)
 			wheelrot = (wheel[0].radSec + wheel[1].radSec)/2; //get the drive wheels rotation speed
@@ -387,26 +404,33 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 		autoTransmission(curRPM, vz);
 
-		if (Math.abs(curRPM) > car.e_redline) {
-			return 0; //kill engine if greater than redline
-		}
-
 		float nitroForce = 0;
 		if (car.nitro_on) {
 			if (ifNitro && this.nitro > 0) {
 				nitroForce = car.nitro_force;
-				this.nitro -= tpf*car.nitro_rate;
-				if (this.nitro < 0) this.nitro = 0; //no more nitro :(
+				this.nitro -= 2*tpf*car.nitro_rate;
+				if (this.nitro < 0)
+					this.nitro = 0; //no more nitro :(
+			} else if (this.nitroTimeout > 0) { //start the timeout to start growing again
+				this.nitroTimeout -= tpf;
+				if (this.nitroTimeout < 0)
+					this.nitroTimeout = 0;
 			} else {
-				this.nitro += 2*tpf; //TODO some timeout before 'reloading'
+				this.nitro += car.nitro_rate*tpf;
+				if (this.nitro > car.nitro_max) 
+					this.nitro = this.car.nitro_max;
 			}
 		}
 
 		float engineTorque = (lerpTorque(curRPM) + nitroForce)*accelCurrent;
 		float engineDrag = 0;
-		if (accelCurrent < 0.1f) { //so compression only happens on no accel
+		if (accelCurrent < 0.05f || curRPM > car.e_redline) { //so compression only happens on no accel
 			engineDrag = curRPM*car.e_compression;
 		}
+		if (Math.abs(curRPM) > car.e_redline) {
+			return - engineDrag; //kill engine if greater than redline, and only apply compression
+		}
+		
 		float engineOutTorque = engineTorque*curGearRatio*diffRatio*car.trans_effic - engineDrag;
 
 		float totalTorque = engineOutTorque/car.w_radius;
@@ -450,17 +474,20 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			RaycastInfo ray = wi.raycastInfo;
 			w.contact = (ray.groundObject != null);
 
-			w.update(tpf, curRPM);
+			if (w.num % 2 == 1) 
+				w.update(tpf, 1);
+			else 
+				w.update(tpf, -1);
 		}
 
 		//skid marks
 		addSkidLines();
 
+		////Important call here
 		specialPhysics(tpf); //yay
 
 
-		//wheel turning logic -TODO
-		//trying to turn less at high speed
+		//wheel turning logic -TODO try to turn less at high speed and more while drifting
 		steeringCurrent = 0;
 		if (steerLeft != 0) { //left
 			steeringCurrent += car.w_steerAngle*steerLeft;
@@ -468,6 +495,12 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		if (steerRight != 0) { //right
 			steeringCurrent -= car.w_steerAngle*steerRight;
 		}
+		
+		//TODO use (please its actually amazing to use) (you never spin out)
+		if (driftangle > 10 && driftangle*FastMath.DEG_TO_RAD > car.w_steerAngle) { 
+			steeringCurrent = FastMath.sign(steeringCurrent)*driftangle*FastMath.DEG_TO_RAD;
+		}
+		steeringCurrent = FastMath.clamp(steeringCurrent, -FastMath.HALF_PI, FastMath.HALF_PI);
 		steer(steeringCurrent);
 
 		//update ai if any
@@ -592,12 +625,5 @@ class VehiclePhysicsHelper {
 	}
 	private static double dtractionFormula(CarWheelData w, double slip, double error) {
 		return (tractionFormula(w, (float)(slip+error)) - tractionFormula(w , (float)(slip-error)))/ (2*error);
-	}
-
-
-	//TODO fix (use http://phors.locost7.info/phors25.htm), its hard ok
-	//basically gets fraction of maximum for each force and limits the total value by it
-	static float[] mergeSlips(float o, float alpha, float ohat, float alphahat) {
-		return null;
 	}
 }

@@ -13,7 +13,7 @@ public enum Cliff implements WP {
 	SHARTRIGHTDOWN("sharpright.blend", new Vector3f(9.537f,-13.124f,48.31f), WP.RIGHT_135, NodeType.A, NodeType.A),
 	SHARTLEFTDOWN("sharpleft.blend", new Vector3f(35,-4.5671f,-30), WP.LEFT_90, NodeType.A, NodeType.A),
 	;
-	private static String dir = "assets/wb/cliff/";
+	public static String dir = "assets/wb/cliff/";
 	
 	String name;
 	Vector3f newPos; //what the piece does to the track
