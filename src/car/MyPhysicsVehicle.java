@@ -55,38 +55,39 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 	//state stuff
 	int curGear = 1;
-	int curRPM = 0;
+	int curRPM = 1000;
 
-	float accelCurrent = 0;
-	float steeringCurrent = 0;
-	float brakeCurrent = 0;
+	float accelCurrent;
+	float steeringCurrent;
+	float brakeCurrent;
 
-	float steerLeft = 0;
-	float steerRight= 0;
+	float steerLeft;
+	float steerRight;
 
-	float nitroTimeout = 0;
+	float nitroTimeout;
 	boolean ifNitro = false;
-	float nitro = 0;
+	float nitro;
 
 	boolean ifHandbrake = false;
 	
 	//TODO use
-	float clutch = 0;//0 = can drive, 1 = can't drive
-	int gearChangeTo = 0;
-	float gearChangeTime = 0;
+	float clutch;//0 = can drive, 1 = can't drive
+	int gearChangeTo;
+	float gearChangeTime;
 	//- state stuff
 	
 	//ui stuff
-	float engineTorque = 0;
+	float engineTorque;
 	String totalTraction = "";
-	float totalWheelRot = 0;
+	float totalWheelRot;
 
-	float distance = 0;
+	float distance;
 	public boolean ifLookBack = false;
 	public boolean ifLookSide = false;
 
-	float redlineKillFor = 0;
-	int driftangle = 0;
+	float redlineKillFor;
+	private float driftangle;
+	public int getAngle() { return (int)(Math.abs(driftangle)*FastMath.RAD_TO_DEG); }
 
 	MyPhysicsVehicle(CollisionShape col, CarData cartype, Node carNode) {
 		super(col, cartype.mass);
@@ -106,6 +107,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		this.setMaxSuspensionForce(car.sus_maxForce);
 		this.setMaxSuspensionTravelCm(car.sus_maxTravel);
 
+		this.nitro = car.nitro_max;
+		
 		//for each wheel
 		for (int i = 0; i < 4; i++) {
 			wheel[i] = new MyWheelNode("wheel "+i+" node", this, i);
@@ -299,7 +302,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		if (velocity.z == 0) { //to avoid all the divide by zeros below
 			velocity.z += 0.00001;
 		}
-
+		
 		//////////////////////////////////////
 		//longitudinal forces
 		engineTorque = getEngineWheelTorque(tpf, velocity.z);
@@ -309,13 +312,28 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		if (car.driveFront && car.driveRear)
 			engineTorque /= 2; //split up into 2 axles
 
+		//limited diff keeps the different between the values under a maximum - TODO
 		if (car.driveFront) {
 			torques[0] = engineTorque;
 			torques[1] = engineTorque;
+
+			//calculate front diff
+			float total = wheel[0].skid + wheel[1].skid;
+			if (total != 0) { //check for total != 0 because divide by zero
+				torques[0] *= wheel[0].skid / (total * 2) + 0.5f;
+				torques[1] *= wheel[1].skid / (total * 2) + 0.5f;
+			}
 		}
 		if (car.driveRear) {
 			torques[2] = engineTorque;
 			torques[3] = engineTorque;
+			
+			//calc rear diff
+			float total = wheel[2].skid + wheel[3].skid;
+			if (total != 0) { //check for total != 0 because divide by zero
+				torques[2] *= wheel[2].skid / (total * 2) + 0.5f;
+				torques[3] *= wheel[3].skid / (total * 2) + 0.5f;
+			}
 		}
 
 		//http://web.archive.org/web/20050308061534/home.planet.nl/~monstrous/tutstab.html
@@ -326,10 +344,10 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			float susforce = (float)getWheel(i).getWheelInfo().wheelsSuspensionForce;
 			susforce = Math.min(susforce, car.mass*3); //[*3] HACK: to stop weird harsh physics after landing
 
-			if (ifHandbrake && i > 1) //rearwheels
-				wheel[i].radSec = 0; //put the handbrake on (TODO not so aggressive please?)
-
 			float slipratio = (wheel[i].radSec*car.w_radius - velocity.z)/Math.abs(velocity.z);
+			if (ifHandbrake && i > 1) //rearwheels, handbrake like this keeps engine speed and still slips (TODO needs work)
+				slipratio = (0*car.w_radius - velocity.z)/Math.abs(velocity.z);
+			
 			//calc the longitudinal force from the slip ratio
 			wf[i].z = VehiclePhysicsHelper.tractionFormula(car.w_flongdata, slipratio) * susforce;
 
@@ -340,7 +358,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 				slipangle = (float)(Math.atan((velocity.x - yawspeed) / Math.abs(velocity.z)));
 
 			if (i == 2) //a rear wheel
-				driftangle = (int)FastMath.abs(slipangle*FastMath.RAD_TO_DEG);
+				driftangle = slipangle;
 
 			//latitudinal force that is calculated off the slip angle
 			wf[i].x = -VehiclePhysicsHelper.tractionFormula(car.w_flatdata, slipangle) * susforce;
@@ -353,7 +371,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 				wf[i].x *= Math.abs(xd)/p;
 			}
 			wheel[i].skid = FastMath.clamp(FastMath.sqrt(slipangle*slipangle + slipratio*slipratio), 0, 1);
-
+			
 			//add the wheel force after merging the forces
 			float totalLongForce = torques[i] - wf[i].z - (brakeCurrent*car.brakeMaxTorque*Math.signum(wheel[i].radSec));
 			if (Math.signum(totalLongForce - (brakeCurrent*car.brakeMaxTorque*Math.signum(velocity.z))) != Math.signum(totalLongForce)) {
@@ -388,17 +406,19 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	}
 
 	private float getEngineWheelTorque(float tpf, float vz) {
-		float wheelrot = 0;
-		if (car.driveFront)
-			wheelrot = (wheel[0].radSec + wheel[1].radSec)/2; //get the drive wheels rotation speed
-		if (car.driveRear) 
-			wheelrot = (wheel[2].radSec + wheel[3].radSec)/2; //get the average to pretend there is a diff
-
 		float curGearRatio = car.trans_gearRatios[curGear];//0 = reverse, >= 1 make normal sense
 		float diffRatio = car.trans_finaldrive/2; //the 2 makes it fit the real world for some reason?
-
-		curRPM = (int)(wheelrot*curGearRatio*diffRatio*60*car.w_radius); //rad/(m*sec) to rad/min and the drive ratios to engine
-		//wheel rad/s, gearratio, diffratio, conversion from rad/sec to rad/min
+		
+		float wheelrot = 0;
+		if (clutch == 0) { //TODO let the engine rev
+			if (car.driveFront)
+				wheelrot = (wheel[0].radSec + wheel[1].radSec)/2; //get the drive wheels rotation speed
+			if (car.driveRear) 
+				wheelrot = (wheel[2].radSec + wheel[3].radSec)/2; //get the average to pretend there is a diff
+			
+			curRPM = (int)(wheelrot*curGearRatio*diffRatio*60*car.w_radius); //rad/(m*sec) to rad/min and the drive ratios to engine
+			//wheel rad/s, gearratio, diffratio, conversion from rad/sec to rad/min
+		} //don't set the rpm if the clutch is in
 
 		curRPM = Math.max(curRPM, 1000); //no stall please, its bad enough that we don't have to torque here
 
@@ -417,7 +437,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 					this.nitroTimeout = 0;
 			} else {
 				this.nitro += car.nitro_rate*tpf;
-				if (this.nitro > car.nitro_max) 
+				if (this.nitro > car.nitro_max)
 					this.nitro = this.car.nitro_max;
 			}
 		}
@@ -443,7 +463,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		float driveSpeed = (car.trans_gearRatios[curGear]*car.trans_finaldrive/2*60);
 		float gearUpSpeed = car.auto_gearUp/driveSpeed;
 		float gearDownSpeed = car.auto_gearDown/driveSpeed;
-		//TODO: error checking on making sure the one we change to doesn't instantly change back
+		//TODO: error checking that there isn't over lap  [2-----[3--2]----3] not [2------2]--[3-----3]
 
 		if (vz > gearUpSpeed && curGear < car.trans_gearRatios.length-1) {
 			curGear++;
@@ -487,7 +507,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		specialPhysics(tpf); //yay
 
 
-		//wheel turning logic -TODO try to turn less at high speed and more while drifting
+		//wheel turning logic
 		steeringCurrent = 0;
 		if (steerLeft != 0) { //left
 			steeringCurrent += car.w_steerAngle*steerLeft;
@@ -496,11 +516,20 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			steeringCurrent -= car.w_steerAngle*steerRight;
 		}
 		
-		//TODO use (please its actually amazing to use) (you never spin out)
-		if (driftangle > 10 && driftangle*FastMath.DEG_TO_RAD > car.w_steerAngle) { 
-			steeringCurrent = FastMath.sign(steeringCurrent)*driftangle*FastMath.DEG_TO_RAD;
+//		steeringCurrent = (float)VehiclePhysicsHelper.linearise(steeringCurrent, 0.5f); 
+		//TODO use function correctly
+		//TODO balance number
+		
+		//TODO use better [please its actually amazing to use]
+		float absdangle = Math.abs(driftangle);
+		if (absdangle > FastMath.DEG_TO_RAD*10 && absdangle > car.w_steerAngle) { 
+			steeringCurrent = FastMath.sign(steeringCurrent)*absdangle;
 		}
-		steeringCurrent = FastMath.clamp(steeringCurrent, -FastMath.HALF_PI, FastMath.HALF_PI);
+		//TODO it seems that having a 'drift angle' for steering is a good idea
+		
+		//TODO 0.3 - 0.4 seconds from lock to lock seems okay from what ive seen
+		
+		steeringCurrent = FastMath.clamp(steeringCurrent, -FastMath.PI*3f/8f, FastMath.PI*3f/8f);
 		steer(steeringCurrent);
 
 		//update ai if any
@@ -625,5 +654,10 @@ class VehiclePhysicsHelper {
 	}
 	private static double dtractionFormula(CarWheelData w, double slip, double error) {
 		return (tractionFormula(w, (float)(slip+error)) - tractionFormula(w , (float)(slip-error)))/ (2*error);
+	}
+	
+	//steering factor from: http://www.racer.nl/reference/carphys.htm#linearity
+	static double linearise(double input, double factor) {
+		return input*factor + (1 - factor) * Math.pow(input, 3);
 	}
 }
