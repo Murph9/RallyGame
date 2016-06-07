@@ -133,22 +133,22 @@ public class UINode {
 		float width = 300;
 		Box b = new Box(10, 10, 1);
 		gripBox[0] = new Geometry("frontleft", b);
-		gripBox[0].setLocalTranslation(width, 50, 0);
+		gripBox[0].setLocalTranslation(width + 25, 50, 0);
 		gripBox[0].setMaterial(m);
 		guiNode.attachChild(gripBox[0]);
 		
 		gripBox[1] = new Geometry("frontright", b);
-		gripBox[1].setLocalTranslation(width +25, 50, 0);
+		gripBox[1].setLocalTranslation(width, 50, 0);
 		gripBox[1].setMaterial(m);
 		guiNode.attachChild(gripBox[1]);
 		
 		gripBox[2] = new Geometry("rearleft", b);
-		gripBox[2].setLocalTranslation(width, 25, 0);
+		gripBox[2].setLocalTranslation(width + 25, 25, 0);
 		gripBox[2].setMaterial(m);
 		guiNode.attachChild(gripBox[2]);
 		
 		gripBox[3] = new Geometry("rearright", b);
-		gripBox[3].setLocalTranslation(width + 25, 25, 0);
+		gripBox[3].setLocalTranslation(width, 25, 0);
 		gripBox[3].setMaterial(m);
 		guiNode.attachChild(gripBox[3]);
 	}
@@ -343,7 +343,7 @@ public class UINode {
 			}
 		}
 		
-		this.angle.setText(p.driftangle+"'");
+		this.angle.setText(p.getAngle()+"'");
 		this.nitro.setLocalScale(1, p.nitro/p.car.nitro_max, 1); 
 		
 		//grip boxes
