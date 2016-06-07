@@ -54,7 +54,7 @@ public class Rally extends SimpleApplication {
 	public DriveMenuState menu;
 	public SkyState sky;
 	
-	private Settings defaultSet = new Settings();
+	public Settings defaultSet = new Settings();
 	private CarData defaultCar = Car.Runner.get();
 	private StaticWorld defaultsworld = null;//StaticWorld.track2;
 	private WP[] defaultdworld = Track.values();
