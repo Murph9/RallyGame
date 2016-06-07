@@ -59,7 +59,6 @@ public class SkyState extends AbstractAppState {
 
 	//glowing stuff
 	private final boolean ifGlow = false; //TODO does this even work?
-//	FilterPostProcessor fpp;
 //	BloomFilter bloom;
 
 	
@@ -81,6 +80,7 @@ public class SkyState extends AbstractAppState {
 
 		sunL = new DirectionalLight();
 		sunL.setColor(new ColorRGBA(0.9f, 0.9f, 1f, 1f)); //maybe too bright?
+		
 		sunL.setDirection(new Vector3f(0f, 0.4f, 0f).normalizeLocal());
 		skyRoot.addLight(sunL);
 
@@ -141,9 +141,9 @@ public class SkyState extends AbstractAppState {
 
 			FilterPostProcessor fpp = new FilterPostProcessor(am);
 			fpp.addFilter(dlsf);
+			fpp.setNumSamples(1);
 
 			if (ifFancyShadow) {
-				fpp = new FilterPostProcessor(am);
 				SSAOFilter ssaoFilter = new SSAOFilter(12.94f, 43.92f, 0.33f, 0.61f);
 				fpp.addFilter(ssaoFilter);
 			}
@@ -254,9 +254,6 @@ public class SkyState extends AbstractAppState {
 			
 			i++;
 		}
-		for (float f : colours) {
-			H.p(f);
-		}
 		
 		skyM.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(vs));
 		skyM.setBuffer(Type.TexCoord, 2, BufferUtils.createFloatBuffer(texCoord));
@@ -338,8 +335,8 @@ public class SkyState extends AbstractAppState {
 		sunNode.setLocalRotation(new Quaternion().fromAngles(-sunRot, 0, 0));
 
 		Vector3f sunPos = sun.getWorldTranslation();
-		sunL.setDirection(camPos.subtract(sunPos).normalizeLocal());
-		moonL.setDirection(sunPos.subtract(camPos).normalizeLocal());
+		sunL.setDirection(camPos.subtract(sunPos).normalize());
+		moonL.setDirection(sunPos.subtract(camPos).normalize());
 		
 		float dayish = (sunPos.y-camPos.y)/(200*2) + 0.5f; //TODO use an actual field
 		updateDynSky(camPos, dayish);
