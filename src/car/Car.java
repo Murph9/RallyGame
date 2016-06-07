@@ -32,7 +32,8 @@ public enum Car {
 		//for using the default settings.
 		//probably shouldn't have a custom constructor
 		Ricer() {
-			carModel = dir+"car5.obj";
+			wheelModel = dir+"wheel3.blend";
+			carModel = dir+"ricer.blend";
 			
 			w_flatdata = new RicerLatWheel();
 			w_flongdata = new RicerLongWheel();
@@ -43,10 +44,11 @@ public enum Car {
 			height = 1.295f;
 			length = 4.52f;
 			
+			rollFraction = 0.1f;
 			w_steerAngle += 0.25f;
 			
-			w_zOff = 1.3f;
-			w_yOff = 0.2f;
+			w_zOff = 1.32f;
+			w_yOff = -0.15f;
 			
 			//https://en.wikipedia.org/wiki/Automobile_drag_coefficient
 			drag = 0.33f;
@@ -212,7 +214,10 @@ public enum Car {
 
 			e_torque = new float[] {0, 300, 450, 500, 530, 550, 500, 400};
 
-			auto_gearDown = 2800;
+			e_mass = 10; //TODO underground 2 seems to have very low values like these
+			w_mass = 20;
+			
+			auto_gearDown = 4000;
 			auto_gearUp = 5800;
 			e_redline = 7000;
 

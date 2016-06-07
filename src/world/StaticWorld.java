@@ -4,8 +4,9 @@ import com.jme3.math.Vector3f;
 
 //Simple class that makes changing static world quite easy
 public enum StaticWorld {
-	
+	//special
 	garage("garage.blend", 1, new Vector3f(0,1,0), false),
+	garage2("garage_2.blend", 1, new Vector3f(0,1,0), false),
 	
 //	skyline("skyline.blend", 800, new Vector3f(-27.7f, 89.5f, 111.3f), true), //large
 	duct("duct.blend", 50, new Vector3f(0,-6,0), true),
