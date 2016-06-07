@@ -15,24 +15,24 @@ public abstract class CarWheelData {
     
 }
 
+//normal
 class NormalLatData extends CarWheelData {
-
 	NormalLatData() {
-		B = 10f;
-		C = 1.75f;
-		E = 0.95f;
-	}
-}
-
-class NormalLongData extends CarWheelData {
-
-	NormalLongData() {
-		B = 10f;
+		B = 12f;
 		C = 1.8f;
 		E = 0.95f;
 	}
 }
 
+class NormalLongData extends CarWheelData {
+	NormalLongData() {
+		B = 12f;
+		C = 1.85f;
+		E = 0.92f;
+	}
+}
+
+//rally
 class RallyLatWheel extends CarWheelData {
 	RallyLatWheel() {
 		B = 6f;
@@ -48,15 +48,17 @@ class RallyLongWheel extends CarWheelData {
 	}
 }
 
+//rocket
 class RocketWheel extends CarWheelData {
 	
 	RocketWheel() {
 		B = 10f;
 		C = 1.6f;
-		E = 0.97f;
+		E = 0.98f;
 	}
 }
 
+//ricer
 class RicerLatWheel extends CarWheelData {
 	RicerLatWheel() {
 		//default

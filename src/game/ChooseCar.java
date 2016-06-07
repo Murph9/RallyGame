@@ -7,7 +7,9 @@ import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
+import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
 import car.Car;
@@ -31,7 +33,8 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 
 	private CarBuilder cb;
 	static CarData car; //current car
-
+	private float rotation; 
+	
 	private DropDown<String> dropdown;
 	private Element info;
 	private MyCamera camNode;
@@ -39,7 +42,7 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 	private HashMap<String, CarData> carset;
 	
 	public ChooseCar() {
-		world = StaticWorld.garage;
+		world = StaticWorld.garage2;
 
 		carset = new HashMap<>();
 		Car[] a = Car.values();
@@ -79,8 +82,8 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 
 	private void initCamera() {
 		camNode = new MyCamera("Cam Node 2", App.rally.getCamera(), null);
-		camNode.setLocalTranslation(5,4,5);
-		camNode.lookAt(new Vector3f(0,1,0), new Vector3f(0,1,0));
+		camNode.setLocalTranslation(0, 3, 7);
+		camNode.lookAt(new Vector3f(0,1.2f,0), new Vector3f(0,1,0));
 		
 		App.rally.getRootNode().attachChild(camNode);
 	}
@@ -102,11 +105,15 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 			}
 		}
 
-		camNode.myUpdate(tpf);
-
 		MyPhysicsVehicle car = cb.get(0);
 		Vector3f pos = car.getPhysicsLocation();
 		car.setPhysicsLocation(new Vector3f(0, pos.y, 0));
+		
+		rotation += FastMath.DEG_TO_RAD*tpf;
+		
+		Quaternion q = new Quaternion();
+		q.fromAngleAxis(rotation, Vector3f.UNIT_Y);
+		car.setPhysicsRotation(q);
 	}
 
 	private String getCarInfoText(String name, CarData car) {
@@ -120,7 +127,7 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 		return out;
 	}
 
-	public PhysicsSpace getPhysicsSpace() {
+	private PhysicsSpace getPhysicsSpace() {
 		return bulletAppState.getPhysicsSpace();
 	}
 
