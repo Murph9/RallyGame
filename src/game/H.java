@@ -19,7 +19,7 @@ import de.lessvoid.nifty.controls.DropDown;
 import de.lessvoid.nifty.screen.Screen;
 
 
-//Its short for help, if the name was any longer it might not actually be helpful
+//Its short for help, name length was a concern (see H.p())
 public class H {
 
 	/**
@@ -28,6 +28,29 @@ public class H {
 	 */
 	public static void p(Object o) {
 		System.out.println(o);
+	}
+	public static void p(Object[] ol, String sep) {
+		if (sep == null) sep = "\n";
+		for (Object o: ol)
+			System.out.print(o+sep);
+		System.out.println();
+	}
+	public static void p(Iterable<Object> ol, String sep) {
+		H.p(ol, sep);
+	}
+	
+	//System.err
+	public static void e(Object o) {
+		System.err.println(o);
+	}
+	public static void e(Object[] ol, String sep) {
+		if (sep == null) sep = "\n";
+		for (Object o: ol)
+			System.err.print(o+sep);
+		System.out.println();
+	}
+	public static void e(Iterable<Object> ol, String sep) {
+		H.e(ol, sep);
 	}
 	
 	public static Vector3f clamp(Vector3f v, float value) {
@@ -127,7 +150,47 @@ public class H {
 		return g;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static <T> DropDown<T> findDropDownControl(Screen screen, final String id) {
 		return screen.findNiftyControl(id, DropDown.class);
+	}
+	
+	//http://stackoverflow.com/a/677248
+	public static class Pair<A, B> {
+		public final A first;
+	    public final B second;
+
+	    public Pair(A first, B second) {
+	    	super();
+	    	this.first = first;
+	    	this.second = second;
+	    }
+
+	    public int hashCode() {
+	    	int hashFirst = first != null ? first.hashCode() : 0;
+	    	int hashSecond = second != null ? second.hashCode() : 0;
+	    	return (hashFirst + hashSecond) * hashSecond + hashFirst;
+	    }
+
+	    public boolean equals(Object other) {
+	    	if (other instanceof Pair<?, ?>) {
+				@SuppressWarnings("unchecked")
+				Pair<A, B> otherPair = (Pair<A, B>) other;
+	    		return 
+	    		((  this.first == otherPair.first ||
+	    			( this.first != null && otherPair.first != null &&
+	    			  this.first.equals(otherPair.first))) &&
+	    		 (	this.second == otherPair.second ||
+	    			( this.second != null && otherPair.second != null &&
+	    			  this.second.equals(otherPair.second))) );
+	    	}
+
+	    	return false;
+	    }
+
+	    public String toString()
+	    { 
+	           return "(" + first + ", " + second + ")"; 
+	    }
 	}
 }

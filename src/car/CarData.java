@@ -4,6 +4,9 @@ import com.bulletphysics.dynamics.vehicle.VehicleTuning;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 
+import game.H;
+import game.H.Pair;
+
 public abstract class CarData {
 	
 	public static final String dir = "assets/models/";
@@ -41,9 +44,16 @@ public abstract class CarData {
 	public float w_mass = 75; //kg
 	
 	//TODO make front and back independant (maybe even each wheel)
-	public float w_xOff = 0.68f; //wheels x offset (side), meters
-	public float w_yOff = 0f; //wheels y offest (height), meters
-	public float w_zOff = 1.1f; //wheels z offset (front and back), meters
+	public Vector3f[] w_pos = new Vector3f[4];
+	protected float w_xOff = 0.68f; //wheels x offset (side), meters
+	protected float w_yOff = 0f; //wheels y offest (height), meters
+	protected float w_zOff = 1.1f; //wheels z offset (front and back), meters
+	protected void setw_Pos() {
+		w_pos[0] = new Vector3f(w_xOff, w_yOff, w_zOff);
+		w_pos[1] = new Vector3f(-w_xOff, w_yOff, w_zOff);
+		w_pos[2] = new Vector3f(w_xOff, w_yOff, -w_zOff);
+		w_pos[3] = new Vector3f(-w_xOff, w_yOff, -w_zOff);
+	}
 	
 	//suspension
 	//see for details: https://docs.google.com/Doc?docid=0AXVUZ5xw6XpKZGNuZG56a3FfMzU0Z2NyZnF4Zmo&hl=en
@@ -64,9 +74,6 @@ public abstract class CarData {
 	//drag constants
 	public float drag = 1.0f; //squared component
 	public float lineardrag = 0.02f;
-	public float resistance() {//linear component (https://en.wikipedia.org/wiki/Rolling_resistance)
-		return 9.81f*mass*lineardrag/w_radius;
-	}
 
 	public float brakeMaxTorque = 4000; 
 	public Vector3f JUMP_FORCE = new Vector3f(0, 5*mass, 0);
@@ -78,19 +85,11 @@ public abstract class CarData {
 		//TODO maybe 500 rpm splits (will get better peaks)
 	
 	public int auto_gearDown = 2400; //rpm triggering a gear down
-	public int auto_gearUp = 5500;
+	public int auto_gearUp = 5500; //rpm triggering a gear up
 	public int e_redline = 6500;
 	
 	public float e_compression = 0.1f; //is going to be multiplied by the RPM
-	public float e_mass = 100; //kg
-	public float e_inertia() { 
-		float wheels = (w_mass*w_radius*w_radius/2);
-		if (driveFront && driveRear) {
-			return e_mass + wheels*4;
-		}
-		return e_mass + wheels*2;
-	}
-	
+	public float e_mass = 100; //kg	
 	
 	public float trans_effic = 0.75f; //TODO apparently 0.7 is common (power is lost to rotating things)
 	public float trans_finaldrive = 2.5f; //helps set the total drive ratio
@@ -100,15 +99,40 @@ public abstract class CarData {
 //	public float[] torque = new float[]{0,223,250,280,300,310,280,245,10};
 
 	public boolean nitro_on = true;
-	public float nitro_force = 300; //TODO find a good number
+	public float nitro_force = 300; //TODO find a good number (this is torque as far as i can tell)
 	public float nitro_rate = 1;
 	public float nitro_max = 15;
 	
-	///////////////////
+	//Constructor (when we don't have model data)
+	protected CarData() {
+		setw_Pos();
+	}
+	
+	////////////////////////////////////////////////////////
 	//usefulMethods
 	
-	//get the max power
-	public float[] getMaxPower() {
+	public float e_inertia() { //car internal engine inertia
+		float wheels = (w_mass*w_radius*w_radius/2);
+		if (driveFront && driveRear) {
+			return e_mass + wheels*4;
+		}
+		return e_mass + wheels*2;
+	}
+	
+	//linear drag component (https://en.wikipedia.org/wiki/Rolling_resistance)
+	public float resistance(float gravity) {
+		return gravity*mass*lineardrag/w_radius;
+	}
+	
+	//compute the torque at rpm
+	//assumed to be a valid and useable rpm value
+	public float lerpTorque(int rpm) {
+		float RPM = (float)rpm / 1000;
+		return H.lerpArray(RPM, this.e_torque);
+	} 
+
+	//get the max power and rpm
+	public Pair<Float, Float> getMaxPower() {
 		float max = 0;
 		float maxrpm = 0;
 		for (int i = 0; i < e_torque.length; i++) {
@@ -116,7 +140,7 @@ public abstract class CarData {
 			max = Math.max(max, e_torque[i]*(1000*i)/9549);
 			if (prevmax != max) maxrpm = i;
 		} //http://www.autospeed.com/cms/article.html?&title=Power-versus-Torque-Part-1&A=108647
-		return new float[]{max, maxrpm*1000};
+		return new Pair<Float, Float>(max, maxrpm*1000);
 	}
 }
 

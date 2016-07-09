@@ -43,7 +43,7 @@ public class MiniMap {
 		cam.update();
 	}
 	
-	//TODO also fix the scene here so the water isn't so distracting
+	//TODO also fix the water so it isn't so distracting
 	public void update(float tpf) {
 		Vector3f pos = target.getPhysicsLocation();
 		Vector3f f = new Vector3f();

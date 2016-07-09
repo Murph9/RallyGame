@@ -22,6 +22,7 @@ import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.elements.render.TextRenderer;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
+import game.H.Pair;
 import world.StaticWorld;
 import world.StaticWorldBuilder;
 
@@ -118,10 +119,10 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 
 	private String getCarInfoText(String name, CarData car) {
 		String out = "Name: "+ name + "\n";
-		float[] data = car.getMaxPower();
-		out += "Max Power: "+data[0] +"kW? @ "+data[1]+" rpm \n";
+		Pair<Float, Float> data = car.getMaxPower();
+		out += "Max Power: " + data.first + "kW? @ " + data.second + " rpm \n";
 		out += "Weight: "+car.mass + "kg\n";
-		out += "Drag(linear): " + car.drag + "("+car.resistance()+")\n";
+		out += "Drag(linear): " + car.drag + "("+car.resistance(9.81f)+")\n";
 		out += "Redline: "+ car.e_redline +"\n";
 		
 		return out;

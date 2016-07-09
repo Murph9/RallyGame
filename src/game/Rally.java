@@ -16,7 +16,7 @@ import car.Car;
 import car.CarData;
 import de.lessvoid.nifty.Nifty;
 import world.StaticWorld;
-import world.Track;
+import world.Underground;
 import world.WP;
 
 ////TODO Ideas for game modes:
@@ -28,19 +28,19 @@ import world.WP;
 //  get them to fall in a hole
 //  follow points for being close
 //the infinite road thing
-//  still need to get fog working..
-//  at night time or something because loading looks easier
 //  overtake as many as you can
-//like the crew
-//  get away from the start
-//  stay on road at speed thing 
+//  like the crew
+//    get away from the start
+//    stay on road at speed thing
 
 
 //Using eclipse: why isn't this a default?
 //http://stackoverflow.com/questions/3915961/how-to-view-hierarchical-package-structure-in-eclipse-package-explorer
 
 //TODO
-//nifty new default style
+//set a nifty new default style
+//still need to get fog working..
+//at night time or something because loading looks easier
 
 public class Rally extends SimpleApplication {
 
@@ -57,7 +57,7 @@ public class Rally extends SimpleApplication {
 	public Settings defaultSet = new Settings();
 	private CarData defaultCar = Car.Runner.get();
 	private StaticWorld defaultsworld = null;//StaticWorld.track2;
-	private WP[] defaultdworld = Track.values();
+	private WP[] defaultdworld = Underground.values();
 	
 	public static void main(String[] args) {
 		int fps = 60; //default is 60
@@ -70,7 +70,7 @@ public class Rally extends SimpleApplication {
 		settings.setVSync(false);
 
 		app.setSettings(settings);
-		app.setTimer(new NanoT60(fps));
+		app.setTimer(new NanoTN(fps));
 		app.setShowSettings(false);
 		app.setDisplayStatView(false);
 		app.start();
@@ -203,10 +203,10 @@ public class Rally extends SimpleApplication {
 
 }
 
-class NanoT60 extends NanoTimer {
+class NanoTN extends NanoTimer {
 
 	private float frames;
-	NanoT60(float frames) {
+	NanoTN(float frames) {
 		super();
 		this.frames = frames;
 	}

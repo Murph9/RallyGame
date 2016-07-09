@@ -19,6 +19,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
+import car.CarModelData.CarPart;
 import game.App;
 import game.H;
 
@@ -51,15 +52,15 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	public CarModelData model;
 
 	//my wheel node
-	MyWheelNode[] wheel = new MyWheelNode[4];
+	public MyWheelNode[] wheel = new MyWheelNode[4];
 
 	//state stuff
-	int curGear = 1;
-	int curRPM = 1000;
+	public int curGear = 1;
+	public int curRPM = 1000;
 
-	float accelCurrent;
-	float steeringCurrent;
-	float brakeCurrent;
+	public float accelCurrent;
+	public float steeringCurrent;
+	public float brakeCurrent;
 
 	float steerLeft;
 	float steerRight;
@@ -71,17 +72,17 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	boolean ifHandbrake = false;
 	
 	//TODO use
-	float clutch;//0 = can drive, 1 = can't drive
+	float clutch; //0 = can drive, 1 = can't drive
 	int gearChangeTo;
 	float gearChangeTime;
-	//- state stuff
+	// /state stuff
 	
 	//ui stuff
-	float engineTorque;
-	String totalTraction = "";
-	float totalWheelRot;
+	public float engineTorque;
+	public String totalTraction = "";
+	public float totalWheelRot;
 
-	float distance;
+	public float distance;
 	public boolean ifLookBack = false;
 	public boolean ifLookSide = false;
 
@@ -96,10 +97,9 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		
 		//init the car model
 		this.model = new CarModelData(cartype.carModel, cartype.wheelModel);
+		this.skidNode = new Node(); //attached in car builder
 		
 		AssetManager am = App.rally.getAssetManager();
-
-		this.skidNode = new Node(); //attached in car builder
 
 		this.setSuspensionCompression(car.susCompression());
 		this.setSuspensionDamping(car.susDamping());
@@ -109,22 +109,32 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 		this.nitro = car.nitro_max;
 		
+		//get wheel positions from the model data if possible
+		Vector3f[] poss = new Vector3f[4];
+		poss[0] = model.getPosOf(CarPart.Wheel_FL);
+		poss[1] = model.getPosOf(CarPart.Wheel_FR);
+		poss[2] = model.getPosOf(CarPart.Wheel_RL);
+		poss[3] = model.getPosOf(CarPart.Wheel_RR);
+		
+		for (int i = 0; i < 4; i++) {
+			if (poss[i] != null) {
+				car.w_pos[i] = poss[i];
+			}
+		}
+		
 		//for each wheel
 		for (int i = 0; i < 4; i++) {
 			wheel[i] = new MyWheelNode("wheel "+i+" node", this, i);
 			wheel[i].spat = am.loadModel(car.wheelModel);
-			if (i % 2 == 1) //odd side needs fliping
+			if (i % 2 == 0) //odd side needs fliping
 				wheel[i].spat.rotate(0, FastMath.PI, 0);
 			wheel[i].spat.center();
 
 			wheel[i].attachChild(wheel[i].spat);
 
-			float xoff = (i % 2 == 1) ? car.w_xOff : -car.w_xOff; //left side is positive
-			float yoff = car.w_yOff; //all the same height
-			float zoff = (i < 2) ? car.w_zOff : -car.w_zOff; //front is positive
 			boolean front = (i < 2) ? true : false; //only the front turns
 
-			addWheel(wheel[i], new Vector3f(xoff, yoff, zoff),
+			addWheel(wheel[i], car.w_pos[i],
 					car.w_vertical, car.w_axle, car.sus_restLength, car.w_radius, front);
 
 			//Their friction (usually zero)
@@ -283,9 +293,9 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		}
 
 		//////////////////////////////////////////////////
-		//'Wheel'less forces		
+		//'Wheel'less forces
 		//linear resistance and quadratic drag
-		float rr = car.resistance();
+		float rr = car.resistance(9.81f);
 		float dragx = -(rr * velocity.x + car.drag * velocity.x * FastMath.abs(velocity.x));
 		float dragy = -(rr * velocity.y + car.drag * velocity.y * FastMath.abs(velocity.y));
 		float dragz = -(rr * velocity.z + car.drag * velocity.z * FastMath.abs(velocity.z));
@@ -299,7 +309,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 				new Vector3f(),new Vector3f(),new Vector3f(),new Vector3f(),
 		};
 
-		if (velocity.z == 0) { //to avoid all the divide by zeros below
+		if (velocity.z == 0) { //to avoid all the divide by zeros
 			velocity.z += 0.00001;
 		}
 		
@@ -312,7 +322,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		if (car.driveFront && car.driveRear)
 			engineTorque /= 2; //split up into 2 axles
 
-		//limited diff keeps the different between the values under a maximum - TODO
 		if (car.driveFront) {
 			torques[0] = engineTorque;
 			torques[1] = engineTorque;
@@ -320,8 +329,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			//calculate front diff
 			float total = wheel[0].skid + wheel[1].skid;
 			if (total != 0) { //check for total != 0 because divide by zero
-				torques[0] *= wheel[0].skid / (total * 2) + 0.5f;
-				torques[1] *= wheel[1].skid / (total * 2) + 0.5f;
+				torques[0] *= wheel[0].skid / (total * 2) + 0.5f; //limited slip:
+				torques[1] *= wheel[1].skid / (total * 2) + 0.5f; //make sure the difference not greater than 0.5
 			}
 		}
 		if (car.driveRear) {
@@ -342,11 +351,12 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		//LARGE LOOP for each wheel
 		for (int i = 0; i < 4; i++) {
 			float susforce = (float)getWheel(i).getWheelInfo().wheelsSuspensionForce;
-			susforce = Math.min(susforce, car.mass*3); //[*3] HACK: to stop weird harsh physics after landing
+			susforce = Math.min(susforce, car.mass*3); //[*3] HACK: to stop weird harsh physics on large normal forces
 
 			float slipratio = (wheel[i].radSec*car.w_radius - velocity.z)/Math.abs(velocity.z);
-			if (ifHandbrake && i > 1) //rearwheels, handbrake like this keeps engine speed and still slips (TODO needs work)
-				slipratio = (0*car.w_radius - velocity.z)/Math.abs(velocity.z);
+			if (ifHandbrake && i > 1) //rearwheels, handbrake like this keeps engine speed and still slips 
+//				slipratio = (0*car.w_radius - velocity.z)/Math.abs(velocity.z); //(TODO needs work)
+				wheel[i].radSec = 0;
 			
 			//calc the longitudinal force from the slip ratio
 			wf[i].z = VehiclePhysicsHelper.tractionFormula(car.w_flongdata, slipratio) * susforce;
@@ -363,7 +373,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			//latitudinal force that is calculated off the slip angle
 			wf[i].x = -VehiclePhysicsHelper.tractionFormula(car.w_flatdata, slipangle) * susforce;
 
-			//combine the two traction forces
+			//combine the two traction forces - TODO maybe not correct
 			float zd = slipratio/maxlong, xd = slipangle/maxlat;
 			float p = FastMath.sqrt(zd*zd + xd*xd);
 			if (p > 1) {
@@ -380,10 +390,13 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			} else {
 				wheel[i].radSec += tpf*totalLongForce/(car.e_inertia());
 			}
+			
+			wheel[i].susF = susforce;
+			wheel[i].gripF = wf[i].mult(1/susforce);
 		}
 
 		//HARD TODO: better code from others 'transision' between basic and advanced friction models at slow speeds
-		//i have no static model (yet)
+		//	i have no static model (yet)
 
 		//ui based values
 		totalTraction = "\nf: "+(wf[0].length() + wf[1].length())+", \nb:" + (wf[2].length() + wf[3].length());
@@ -442,7 +455,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			}
 		}
 
-		float engineTorque = (lerpTorque(curRPM) + nitroForce)*accelCurrent;
+		float engineTorque = (car.lerpTorque(curRPM) + nitroForce)*accelCurrent;
 		float engineDrag = 0;
 		if (accelCurrent < 0.05f || curRPM > car.e_redline) { //so compression only happens on no accel
 			engineDrag = curRPM*car.e_compression;
@@ -472,11 +485,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		}
 	}
 
-	//assumed to be a valid and useable rpm value
-	private float lerpTorque(int rpm) {
-		float RPM = (float)rpm / 1000;
-		return H.lerpArray(RPM, car.e_torque);
-	}
 
 	//////////////////////////////////////////////////////////////
 	public void myUpdate(float tpf) {
@@ -487,7 +495,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 		up = playerRot.mult(new Vector3f(0,1,0));
 		left = playerRot.mult(new Vector3f(1,0,0));
-		right = playerRot.mult(new Vector3f(1,0,0).negate());
+		right = playerRot.mult(new Vector3f(-1,0,0));
 
 		for (MyWheelNode w: wheel) {
 			WheelInfo wi = getWheel(w.num).getWheelInfo();
@@ -520,13 +528,12 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		//TODO use function correctly
 		//TODO balance number
 		
-		//TODO use better [please its actually amazing to use]
+		//TODO make better [please its actually amazing to use]
 		float absdangle = Math.abs(driftangle);
 		if (absdangle > FastMath.DEG_TO_RAD*10 && absdangle > car.w_steerAngle) { 
 			steeringCurrent = FastMath.sign(steeringCurrent)*absdangle;
 		}
-		//TODO it seems that having a 'drift angle' for steering is a good idea
-		
+
 		//TODO 0.3 - 0.4 seconds from lock to lock seems okay from what ive seen
 		
 		steeringCurrent = FastMath.clamp(steeringCurrent, -FastMath.PI*3f/8f, FastMath.PI*3f/8f);
@@ -639,7 +646,7 @@ class VehiclePhysicsHelper {
 
 	//returns the slip value that gives the closest to 1 from the magic formula (should be called twice, lat and long)
 	static float calcSlipMax(CarWheelData w, double error) {
-		double lastX = 1f; //0.2 is always our first guess (12 deg or so is good)
+		double lastX = 1f; //our first guess (usually finishes about 0.25f)
 		double nextX = lastX + 10*error; //just so its a larger diff that error
 
 		while (Math.abs(lastX - nextX) > error) {
@@ -657,6 +664,7 @@ class VehiclePhysicsHelper {
 	}
 	
 	//steering factor from: http://www.racer.nl/reference/carphys.htm#linearity
+	//TODO use
 	static double linearise(double input, double factor) {
 		return input*factor + (1 - factor) * Math.pow(input, 3);
 	}

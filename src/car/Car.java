@@ -11,6 +11,8 @@ public enum Car {
 	Runner(new Runner()),
 	Hunter(new Hunter()),
 	Ricer(new Ricer()),
+	
+//	Test(new Test()),
 	;
 	
 	private CarData car;
@@ -28,6 +30,14 @@ public enum Car {
 		NormalCar() {}
 	}
 
+	/*
+	private static class Test extends CarData {
+		Test() {
+			carModel = dir+"base.blend";
+		}
+	}
+	*/
+	
 	private static class Ricer extends CarData {
 		//for using the default settings.
 		//probably shouldn't have a custom constructor
@@ -49,6 +59,7 @@ public enum Car {
 			
 			w_zOff = 1.32f;
 			w_yOff = -0.15f;
+			setw_Pos();
 			
 			//https://en.wikipedia.org/wiki/Automobile_drag_coefficient
 			drag = 0.33f;
@@ -108,6 +119,7 @@ public enum Car {
 			w_xOff = 0.7f;
 			w_yOff = 0.2f;
 			w_zOff = 1.1f;
+			setw_Pos();
 
 			sus_stiffness  = 35.0f;
 			sus_restLength = 0.15f;
@@ -139,7 +151,7 @@ public enum Car {
 
 			mass = 900;
 
-			drag = 0.3f; //engine is stopping before these values...
+			drag = 0.3f;
 
 			w_steerAngle = 0.25f;
 
@@ -156,6 +168,7 @@ public enum Car {
 			w_xOff = 0.62f;
 			w_yOff = 0.12f;
 			w_zOff = 1.63f;
+			setw_Pos();
 
 			//found via internet (f1 '09)
 			e_torque = new float[]{0, 300,500,500,550,608, 595,580,560,540,525, 500,440,410,360,350};
@@ -173,6 +186,7 @@ public enum Car {
 			carModel = dir + "rocket1.obj";
 			w_zOff = 1.2f;
 			w_xOff = 0.71f;
+			setw_Pos();
 			
 			mass = 1500;
 			w_steerAngle = 0.5f;
@@ -207,11 +221,12 @@ public enum Car {
 
 	private static class Runner extends CarData {
 		Runner() {
-			carModel = dir+"car5.obj";
-
-			w_zOff = 1.3f;
-			w_yOff = 0.2f;
-
+			carModel = dir+"track1_2.blend";
+//
+//			w_zOff = 1.3f;
+//			w_yOff = 0.2f;
+//			setw_Pos();
+			
 			e_torque = new float[] {0, 300, 450, 500, 530, 550, 500, 400};
 
 			e_mass = 10; //TODO underground 2 seems to have very low values like these
@@ -245,6 +260,7 @@ public enum Car {
 			w_xOff = 1.0f;
 			w_yOff = -0.45f;
 			w_zOff = 1.85f;
+			setw_Pos();
 
 			w_radius = 0.4f;
 

@@ -16,7 +16,6 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.VertexBuffer.Type;
-import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Line;
 import com.jme3.scene.shape.Quad;
 import com.jme3.system.AppSettings;
@@ -35,7 +34,6 @@ public class UINode {
 	
 	//hud stuff
 	Geometry background;
-	BitmapText statsText;
 	BitmapText score;
 	BitmapText angle;
 	
@@ -49,9 +47,6 @@ public class UINode {
 	
 	private Material rpmBarRedLine; //marking the rpm
 	private Material rpmBarRedLineOn; //for past redline
-	
-	//displays the skid value, TODO make better
-	Geometry gripBox[];
 	
 	//quad that displays nitro
 	Geometry nitro;
@@ -88,13 +83,6 @@ public class UINode {
 		Node guiNode = r.getGuiNode();
 		AssetManager assetManager = r.getAssetManager();
 		
-		statsText = new BitmapText(r.getFont(), false);		  
-		statsText.setSize(guiFont.getCharSet().getRenderedSize());	  		// font size
-		statsText.setColor(ColorRGBA.White);								// font color
-		statsText.setText("");												// the text
-		statsText.setLocalTranslation(settings.getWidth()-200, 500, 0); // position
-		guiNode.attachChild(statsText);
-		
 		score = new BitmapText(guiFont, false);
 		score.setSize(guiFont.getCharSet().getRenderedSize());
 		score.setColor(ColorRGBA.White);
@@ -109,12 +97,8 @@ public class UINode {
 		angle.setLocalTranslation(settings.getWidth()-300, 30, 0); // position
 		guiNode.attachChild(angle);
 		
-		///////////////////////////////////////////////
-		
-		makeGripQuads(assetManager, guiNode);
-		
 		//////////////////////////////
-		//seven segment textures
+		//speedo number textures
 		for (int i = 0 ; i < 10; i++) {
 			numMats[i] = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 			numMats[i].setTexture("ColorMap", assetManager.loadTexture(numDir+i+".png"));
@@ -122,35 +106,6 @@ public class UINode {
 		}
 		
 		makeSpeedo(assetManager, settings, guiNode);
-	}
-	
-	private void makeGripQuads(AssetManager am, Node guiNode) {
-		Material m = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-		m.setColor("Color", ColorRGBA.White);
-		
-		this.gripBox = new Geometry[4];
-		
-		float width = 300;
-		Box b = new Box(10, 10, 1);
-		gripBox[0] = new Geometry("frontleft", b);
-		gripBox[0].setLocalTranslation(width + 25, 50, 0);
-		gripBox[0].setMaterial(m);
-		guiNode.attachChild(gripBox[0]);
-		
-		gripBox[1] = new Geometry("frontright", b);
-		gripBox[1].setLocalTranslation(width, 50, 0);
-		gripBox[1].setMaterial(m);
-		guiNode.attachChild(gripBox[1]);
-		
-		gripBox[2] = new Geometry("rearleft", b);
-		gripBox[2].setLocalTranslation(width + 25, 25, 0);
-		gripBox[2].setMaterial(m);
-		guiNode.attachChild(gripBox[2]);
-		
-		gripBox[3] = new Geometry("rearright", b);
-		gripBox[3].setLocalTranslation(width, 25, 0);
-		gripBox[3].setMaterial(m);
-		guiNode.attachChild(gripBox[3]);
 	}
 	
 	private void makeSpeedo(AssetManager am, AppSettings settings, Node guiNode) {
@@ -310,12 +265,6 @@ public class UINode {
 	
 	//main update method
 	public void update(float tpf) {
-		AssetManager assetManager = App.rally.getAssetManager();
-		
-		float speed = p.getLinearVelocity().length();
-		
-		statsText.setText("speed:"+speed + "m/s\nRPM:" + p.curRPM +"\na:"+p.accelCurrent+"\nb:"+p.brakeCurrent+
-				"\nengine:"+p.engineTorque+"\ntraction:"+p.totalTraction + "\nwheelRot:"+p.totalWheelRot +"\nisDay:"+App.rally.sky.isDay);
 		int speedKMH = (int)Math.abs(p.getCurrentVehicleSpeedKmHour());
 
 		setSpeedDigits(speedKMH);
@@ -344,14 +293,7 @@ public class UINode {
 		}
 		
 		this.angle.setText(p.getAngle()+"'");
-		this.nitro.setLocalScale(1, p.nitro/p.car.nitro_max, 1); 
-		
-		//grip boxes
-		for (int i = 0 ; i < 4; i++) {
-			Material m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-			m.setColor("Color", new ColorRGBA(p.wheel[i].skid, p.wheel[i].skid, p.wheel[i].skid, 1));
-			gripBox[i].setMaterial(m);
-		}
+		this.nitro.setLocalScale(1, p.nitro/p.car.nitro_max, 1);
 	}
 
 	private void setSpeedDigits(int speedKMH) {

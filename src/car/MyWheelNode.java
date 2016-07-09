@@ -40,7 +40,9 @@ public class MyWheelNode extends Node {
 	boolean contact;
 	Vector3f last;
 	
-	float skid;
+	public float susF;
+	public Vector3f gripF;
+	public float skid;
 	ParticleEmitter smoke;
 	
 	public MyWheelNode(String name, MyPhysicsVehicle mvc, int num) {
@@ -77,7 +79,7 @@ public class MyWheelNode extends Node {
 		}
 		
 		Quaternion q = new Quaternion();
-		q = q.fromAngleNormalAxis(radSec*tpf*reverse, new Vector3f(1,0,0));
+		q = q.fromAngleNormalAxis(-radSec*tpf*reverse, new Vector3f(1,0,0));
 		spat.setLocalRotation(spat.getLocalRotation().mult(q));
 		
 	}

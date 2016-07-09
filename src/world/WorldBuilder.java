@@ -61,7 +61,7 @@ public class WorldBuilder extends Node {
 
 	int totalPlaced = 0;
 	float distance = 500; //TODO find a good number
-
+	
 	public WorldBuilder (WP[] type, PhysicsSpace space, ViewPort view) {
 		this.space = space;
 		AssetManager am = App.rally.getAssetManager();
@@ -84,7 +84,7 @@ public class WorldBuilder extends Node {
 				wpo.sp.setMaterial(this.mat); //TODO double sided objects
 			}
 
-			//pre scale spatials so that the collision shape size is correct
+			//scale and unscale spatials so that the collision shape size is correct
 			wpo.sp.scale(type[i].getScale());
 			wpo.col = CollisionShapeFactory.createMeshShape(wpo.sp);
 			wpo.sp.scale(1/type[i].getScale());
@@ -262,5 +262,34 @@ public class WorldBuilder extends Node {
 		WP wp;
 		Spatial sp;
 		CollisionShape col;
+	}
+	
+	
+	public static Spatial curPiece;
+	public static void placeOnePiece(WP wp) {
+		if (curPiece != null) {
+			App.rally.getRootNode().detachChild(curPiece); 
+		}
+		
+		if (wp == null) {
+			H.e("Why was 'wp' null?");
+			return;
+		}
+		
+		AssetManager am = App.rally.getAssetManager();
+				
+		curPiece = am.loadModel(wp.getName());
+		curPiece.setCullHint(CullHint.Never);
+		Spatial sp = ((Node)curPiece).getChild(0);
+		
+		boolean needsMat = wp.needsMaterial();
+		Material mat;
+		if (needsMat) {
+			mat = new Material(am, "Common/MatDefs/Misc/ShowNormals.j3md");
+			mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
+			sp.setMaterial(mat);
+		}
+		
+		App.rally.getRootNode().attachChild(curPiece);
 	}
 }

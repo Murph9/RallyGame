@@ -30,6 +30,7 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 
 	private static StaticWorld sMap;
 	private HashMap<String, StaticWorld> sSet;
+	
 	private static WP dMap;
 	private HashMap<String, WP> dSet;
 
@@ -45,13 +46,12 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 		App.rally.getRootNode().attachChild(camNode);
 		
 		//init static
-		sSet = new HashMap<>();
+		sSet = new LinkedHashMap<>();
 		StaticWorld[] list  = StaticWorld.values();
-		sMap = list[0];
 		for (StaticWorld s: list) {
 			sSet.put(s.name(), s);
 		}
-		
+
 		//init dynamic
 		dSet = new LinkedHashMap<>(); //ordered hashmap
 		dSet.put("Floating", Floating.STRAIGHT);
@@ -60,6 +60,10 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 		dSet.put("Simple2", Simple2.STRAIGHT);
 		dSet.put("City", City.STRAIGHT);
 		dSet.put("Track", Track.STRAIGHT);
+		
+		//set initial values
+		sMap = list[0];
+		dMap = Floating.STRAIGHT;
 	}
 
 	@Override
@@ -77,6 +81,8 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 	private void createWorld() {
 		if (worldType == WorldType.staticW) {
 			StaticWorldBuilder.addStaticWorld(getPhysicsSpace(), sMap, App.rally.sky.ifShadow);
+		} else if (worldType == WorldType.dynamicW) {
+			WorldBuilder.placeOnePiece(dMap);
 		}
 	}
 
@@ -107,6 +113,8 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 				WP w = dSet.get(option);
 				if (w != null && w != dMap) {
 					dMap = w;
+					
+					WorldBuilder.placeOnePiece(dMap);
 				}
 			}
 		}
@@ -120,7 +128,8 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 
 	public void cleanup() {
 		StaticWorldBuilder.removeStaticWorld(getPhysicsSpace(), sMap);
-
+		WorldBuilder.placeOnePiece(null); // add nothing, makes it remove previous
+		
 		App.rally.getRootNode().detachChild(camNode);
 		//TODO more
 	}
@@ -144,7 +153,7 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 	public StaticWorld getMapS() {
 		if (worldType == WorldType.staticW)
 			return sMap;
-		else 
+		else
 			return null;
 	}
 	public WP[] getMapD() {
