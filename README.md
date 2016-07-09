@@ -1,10 +1,10 @@
 # RallyGame
 
 Requires:
-JME3
+Java 8
 
 A simple 3D rally like game in Java.
-See my webpage at murph9.com 
+Can be played on my webpage at murph9.com under my games
 
 Currently still very much in testing, you can drive around in many different car types. From normal cars, a 4x4, a track car and an impossible hyper-super-car.
 
