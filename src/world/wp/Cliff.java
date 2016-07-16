@@ -1,8 +1,7 @@
-package world;
+package world.wp;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-
 
 public enum Cliff implements WP {
 	STRAIGHT("straight.blend", new Vector3f(20,0,0), WP.STRIAGHT, NodeType.A, NodeType.A),

@@ -17,8 +17,8 @@ import car.Car;
 import car.CarData;
 import de.lessvoid.nifty.Nifty;
 import world.StaticWorld;
-import world.Underground;
-import world.WP;
+import world.wp.Underground;
+import world.wp.WP;
 
 ////TODO Ideas for game modes:
 //being chased. (with them spawning all lightning sci-fi like?)

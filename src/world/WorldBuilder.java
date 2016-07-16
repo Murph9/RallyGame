@@ -2,7 +2,10 @@ package world;
 
 import game.App;
 import game.H;
-import world.WP.NodeType;
+import world.wp.Cliff;
+import world.wp.Floating;
+import world.wp.WP;
+import world.wp.WP.NodeType;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

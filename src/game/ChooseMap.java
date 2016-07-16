@@ -16,6 +16,13 @@ import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 
 import world.*;
+import world.wp.City;
+import world.wp.Cliff;
+import world.wp.Floating;
+import world.wp.Simple;
+import world.wp.Simple2;
+import world.wp.Track;
+import world.wp.WP;
 
 public class ChooseMap extends AbstractAppState implements ScreenController {
 

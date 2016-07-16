@@ -4,10 +4,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 import world.StaticWorldBuilder;
-import world.WP;
-import world.Floating;
 import world.StaticWorld;
 import world.WorldBuilder;
+import world.wp.Floating;
+import world.wp.WP;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;

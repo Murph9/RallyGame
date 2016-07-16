@@ -2,6 +2,7 @@ package game;
 
 import car.CarData;
 import world.*;
+import world.wp.WP;
 
 interface State {
 	CarData getCar();
