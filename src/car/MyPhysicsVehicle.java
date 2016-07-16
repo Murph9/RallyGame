@@ -55,6 +55,9 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	public MyWheelNode[] wheel = new MyWheelNode[4];
 
 	//state stuff
+	public Vector3f vel;
+	public Vector3f gForce;
+	
 	public int curGear = 1;
 	public int curRPM = 1000;
 
@@ -108,6 +111,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		this.setMaxSuspensionTravelCm(car.sus_maxTravel);
 
 		this.nitro = car.nitro_max;
+		this.vel = new Vector3f();
+		this.gForce = new Vector3f();
 		
 		//get wheel positions from the model data if possible
 		Vector3f[] poss = new Vector3f[4];
@@ -287,6 +292,11 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 		Vector3f velocity = w_angle.invert().mult(w_velocity);
 
+		//calculate g Forces on the car (calc in world then convert to local)
+		gForce = w_angle.invert().mult(vel.subtract(w_velocity).mult(1/(tpf*9.81f))); //mult by inverse time step and gravity
+		vel = w_velocity; //set it to the current one
+		
+		
 		float steeringCur = steeringCurrent;
 		if (velocity.z < 0) { //to flip the steering on moving in reverse
 			steeringCur *= -1;
@@ -373,7 +383,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			//latitudinal force that is calculated off the slip angle
 			wf[i].x = -VehiclePhysicsHelper.tractionFormula(car.w_flatdata, slipangle) * susforce;
 
-			//combine the two traction forces - TODO maybe not correct
+			//combine the two traction forces - TODO maybe not correct, doesn't get rotation right
 			float zd = slipratio/maxlong, xd = slipangle/maxlat;
 			float p = FastMath.sqrt(zd*zd + xd*xd);
 			if (p > 1) {
@@ -511,9 +521,10 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		//skid marks
 		addSkidLines();
 
-		////Important call here
+		//********************************************//
+		//Important call here
 		specialPhysics(tpf); //yay
-
+		//********************************************//
 
 		//wheel turning logic
 		steeringCurrent = 0;

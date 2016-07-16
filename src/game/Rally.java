@@ -4,6 +4,7 @@ package game;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AppState;
+import com.jme3.app.state.AppStateManager;
 import com.jme3.font.BitmapFont;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
@@ -46,12 +47,12 @@ public class Rally extends SimpleApplication {
 
 	private Settings set;
 	
-	public StartState start;
+	public Start start;
 	public ChooseCar chooseCar;
 	public ChooseMap chooseMap;
 	
-	public DriveState drive;
-	public DriveMenuState menu;
+	public Drive drive;
+	public DriveMenu menu;
 	public SkyState sky;
 	
 	public Settings defaultSet = new Settings();
@@ -99,7 +100,7 @@ public class Rally extends SimpleApplication {
 			e.printStackTrace();
 		}
 		
-		start = new StartState();
+		start = new Start();
 		getStateManager().attach(start);
 		
 		sky = new SkyState(); //lighting and shadow stuff is global
@@ -128,30 +129,40 @@ public class Rally extends SimpleApplication {
 		App.nifty.gotoScreen("drive-noop");
 	}
 	
-	//HERE is the logic for the app progress., TODO: need a toMainMenu() at some point
-	//  (the thing you call when the app state is done)
+	//HERE is the logic for the app progress.
+	// its the thing you call when the app state is done
+	// TODO: need a toMainMenu() at some point 
 	public void next(AppState app) {
-		if (app instanceof StartState) {
-			getStateManager().detach(start);
+		AppStateManager state = getStateManager();
+		
+		if (app instanceof Start) {
+			state.detach(start);
 			
 			startChooseCar();
 			App.nifty.gotoScreen("chooseCar");
 			
 		} else if (app instanceof ChooseCar) {
-			getStateManager().detach(chooseCar);
+			state.detach(chooseCar);
 			
 			startChooseMap();
 			App.nifty.gotoScreen("chooseMapType");
 			
 		} else if (app instanceof ChooseMap) {
-			getStateManager().detach(chooseMap);
+			state.detach(chooseMap);
 			
 			startDrive(chooseCar.getCarData(), chooseMap.getMapS(), chooseMap.getMapD());
 			App.nifty.gotoScreen("drive-noop");
 			
-		} else if (app instanceof DriveMenuState) {
-			H.p("how did you call this?, rally.next()");
+		} else if (app instanceof DriveMenu) {
+			state.detach(drive); //no need to call drive.cleanup because it can do that itself
+			drive = null;
+			state.detach(menu);
+			menu.cleanup();
+			menu = null;
 			
+			start = new Start();
+			state.attach(start);
+			App.nifty.gotoScreen("start");
 			
 		} else {
 			H.p("not done yet. - rally.next()");
@@ -175,10 +186,10 @@ public class Rally extends SimpleApplication {
 		set.sworld = world;
 		set.dworld = dworld;
 		
-		menu = new DriveMenuState();
+		menu = new DriveMenu();
 		getStateManager().attach(menu);
 		
-		drive = new DriveState(set);
+		drive = new Drive(set);
 		getStateManager().attach(drive);
 	}
 

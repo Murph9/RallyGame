@@ -29,7 +29,7 @@ import car.*;
 
 //track car is slightly off the groud by a lot
 
-public class DriveState extends AbstractAppState {
+public class Drive extends AbstractAppState {
 	
 	private BulletAppState bulletAppState;
 	
@@ -59,7 +59,7 @@ public class DriveState extends AbstractAppState {
 	public int frameCount = 0;
 	public boolean ifDebug = false;
 		
-    public DriveState (State set) {
+    public Drive (State set) {
     	super();
     	this.car = set.getCar();
     	this.cb = new CarBuilder();
@@ -201,6 +201,20 @@ public class DriveState extends AbstractAppState {
 	}
 	
 	public void cleanup() {
+		super.cleanup();
+		
+		H.p("cleaning");
 		cb.cleanup();
+		cb = null;
+		uiNode.cleanup();
+		uiNode = null;
+		
+		App.rally.getStateManager().detach(bulletAppState);
+		
+		if (dynamicWorld)
+			App.rally.getRootNode().detachChild(worldB);
+		App.rally.getRootNode().detachChild(arrowNode);
+		
+		App.rally.getRootNode().detachChild(camNode);
 	}
 }

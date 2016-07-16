@@ -32,6 +32,8 @@ public class UINode {
 	 */
 	MyPhysicsVehicle p;
 	
+	Node localRootNode;
+	
 	//hud stuff
 	Geometry background;
 	BitmapText score;
@@ -80,7 +82,8 @@ public class UINode {
 
 		BitmapFont guiFont = r.getFont();
 		AppSettings settings = r.getSettings();
-		Node guiNode = r.getGuiNode();
+		localRootNode = new Node("local root");
+		r.getGuiNode().attachChild(localRootNode);
 		AssetManager assetManager = r.getAssetManager();
 		
 		score = new BitmapText(guiFont, false);
@@ -88,14 +91,14 @@ public class UINode {
 		score.setColor(ColorRGBA.White);
 		score.setText("");
 		score.setLocalTranslation(settings.getWidth()-200, settings.getHeight(), 0); // position
-		guiNode.attachChild(score);
+		localRootNode.attachChild(score);
 		
 		angle = new BitmapText(guiFont, false);		  
 		angle.setSize(guiFont.getCharSet().getRenderedSize());
 		angle.setColor(ColorRGBA.White);
 		angle.setText("blaj");
 		angle.setLocalTranslation(settings.getWidth()-300, 30, 0); // position
-		guiNode.attachChild(angle);
+		localRootNode.attachChild(angle);
 		
 		//////////////////////////////
 		//speedo number textures
@@ -105,11 +108,11 @@ public class UINode {
 			numMats[i].getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
 		}
 		
-		makeSpeedo(assetManager, settings, guiNode);
+		makeSpeedo(assetManager, settings);
 	}
 	
-	private void makeSpeedo(AssetManager am, AppSettings settings, Node guiNode) {
-		makeKmH(settings, guiNode);
+	private void makeSpeedo(AssetManager am, AppSettings settings) {
+		makeKmH(settings);
 		
 		Material m = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
 		m.setColor("Color", ColorRGBA.Black);
@@ -120,9 +123,9 @@ public class UINode {
 		///////////////
 		//make the variable parts:
 		Node speedoNode = new Node("Speedo");
-		guiNode.attachChild(speedoNode);
+		localRootNode.attachChild(speedoNode);
 		
-		//TODO
+		//TODO better contrast on speedo
 		Quad qback = new Quad(270, 200);
 		background = new Geometry("ui-background", qback);
 //		Material trans = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -210,7 +213,7 @@ public class UINode {
 		speedoNode.attachChild(nitro);
 	}
 
-	private void makeKmH(AppSettings settings, Node guiNode) {
+	private void makeKmH(AppSettings settings) {
 		//speed scores
 		Quad quad = new Quad(30,50);
 		int width = settings.getWidth()-70;
@@ -218,22 +221,22 @@ public class UINode {
 		speedo[0] = new Geometry("ones", quad);
 		speedo[0].setLocalTranslation(width, 8, -1);
 		speedo[0].setMaterial(numMats[0]);
-		guiNode.attachChild(speedo[0]);
+		localRootNode.attachChild(speedo[0]);
 		
 		speedo[1] = new Geometry("tens", quad);
 		speedo[1].setLocalTranslation(width-32, 8, -1);
 		speedo[1].setMaterial(numMats[0]);
-		guiNode.attachChild(speedo[1]);
+		localRootNode.attachChild(speedo[1]);
 		
 		speedo[2] = new Geometry("hundereds", quad);
 		speedo[2].setLocalTranslation(width-64, 8, -1);
 		speedo[2].setMaterial(numMats[0]);
-		guiNode.attachChild(speedo[2]);
+		localRootNode.attachChild(speedo[2]);
 		
 		gear = new Geometry("gear", quad);
 		gear.setLocalTranslation(width-64, 68, -1);
 		gear.setMaterial(numMats[1]);
-		guiNode.attachChild(gear);
+		localRootNode.attachChild(gear);
 	}
 
 	
@@ -292,8 +295,8 @@ public class UINode {
 			}
 		}
 		
-		this.angle.setText(p.getAngle()+"'");
-		this.nitro.setLocalScale(1, p.nitro/p.car.nitro_max, 1);
+		angle.setText(p.getAngle()+"'");
+		nitro.setLocalScale(1, p.nitro/p.car.nitro_max, 1);
 	}
 
 	private void setSpeedDigits(int speedKMH) {
@@ -315,5 +318,9 @@ public class UINode {
 	private void setGearDigit(int gearIn) {
 		gearIn = (int)FastMath.clamp(gearIn, 0, 9); //so we don't go off the end of the texture array
 		gear.setMaterial(numMats[gearIn]);
+	}
+	
+	public void cleanup() {
+		App.rally.getGuiNode().detachChild(localRootNode);
 	}
 }

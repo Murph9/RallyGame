@@ -25,7 +25,7 @@ import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 
-public class DriveMenuState extends AbstractAppState implements ScreenController {
+public class DriveMenu extends AbstractAppState implements ScreenController {
 
 	private Node localRootNode = new Node("Pause Screen RootNode");
 	private Node localGuiNode = new Node("Pause Screen GuiNode");
@@ -42,11 +42,16 @@ public class DriveMenuState extends AbstractAppState implements ScreenController
 			new Vector3f(60, 180, 0),
 			new Vector3f(140, 180, 0),
 		};
+	//the g force meter circles
+	private Geometry g1;
+	private Geometry g2;
+	private Vector3f gcenter;
+	BitmapText gText;
 	
 	//some debug text
 	BitmapText statsText;
 	
-	public DriveMenuState() {
+	public DriveMenu() {
 		super();
 		AssetManager am = App.rally.getAssetManager();
 		
@@ -93,6 +98,27 @@ public class DriveMenuState extends AbstractAppState implements ScreenController
 		statsText.setText("");												// the text
 		statsText.setLocalTranslation(App.rally.getSettings().getWidth()-200, 500, 0); // position
 		n.attachChild(statsText);
+		
+		//g force
+		gcenter = new Vector3f(100, 400, 0);
+		
+		b = new Box(5, 5, 1);
+		g1 = new Geometry("g-circle1", b);
+		g1.setLocalTranslation(gcenter);
+		g1.setMaterial(white);
+		n.attachChild(g1);
+		
+		g2 = new Geometry("g-circle2", b);
+		g2.setLocalTranslation(gcenter);
+		g2.setMaterial(white);
+		n.attachChild(g2);
+		
+		gText = new BitmapText(guiFont, false);
+		gText.setSize(guiFont.getCharSet().getRenderedSize());	  		// font size
+		gText.setColor(ColorRGBA.Black);								// font color
+		gText.setText("...");												// the text
+		gText.setLocalTranslation(gcenter.subtract(40, 5, 0)); 			// position
+		n.attachChild(gText);
 	}
 
 	private ActionListener actionListener = new ActionListener() {
@@ -161,7 +187,7 @@ public class DriveMenuState extends AbstractAppState implements ScreenController
 	}
 	
 	public void mainMenu() {
-		//call rally.mainmenu() and cleanup()
+		App.rally.next(this);
 	}
 
 	public void update(float tpf) {
@@ -175,7 +201,8 @@ public class DriveMenuState extends AbstractAppState implements ScreenController
 			//stats
 			float speed = p.getLinearVelocity().length();
 			statsText.setText("speed:"+speed + "m/s\nRPM:" + p.curRPM +"\na:"+p.accelCurrent+"\nb:"+p.brakeCurrent+
-					"\nengine:"+p.engineTorque+"\ntraction:"+p.totalTraction + "\nwheelRot:"+p.totalWheelRot +"\nisDay:"+App.rally.sky.isDay);
+					"\nengine:"+p.engineTorque+"\ntraction:"+p.totalTraction + "\nwheelRot:"+p.totalWheelRot +"\nisDay:"+App.rally.sky.isDay
+					+ "\nG Forces:"+p.gForce);
 			
 			//grips
 			for (int i = 0 ; i < 4; i++) {
@@ -195,14 +222,35 @@ public class DriveMenuState extends AbstractAppState implements ScreenController
 					gripDir[i].setLocalRotation(q);
 				}
 			}
+			
+			//gees (g forces)
+			//needs to be translated from local into screen axis
+			Vector3f gs = p.gForce;
+			gs.y = gs.z; //z is front back
+			gs.z = 0; //screen has no depth 
+			g2.setLocalTranslation(gcenter.add(gs.mult(50))); //because screen pixels
+			
+			gText.setText("x: " + H.roundDecimal(gs.x, 2) +", y: " + H.roundDecimal(gs.y, 2));
 		}
 	}
 	
 	@Override
 	public void cleanup() {
+		super.cleanup();
+		
 		Rally r = App.rally;
 		r.getRootNode().detachChild(localRootNode);
+		
+		localGuiNode.detachChild(telemetry);
 		r.getGuiNode().detachChild(localGuiNode);
+		
+		
+		InputManager i = App.rally.getInputManager();
+		i.deleteMapping("Pause");
+		i.deleteMapping("TabMenu");
+		i.deleteMapping("Telemetry");
+		
+		i.removeListener(actionListener);
 	}
 
 	public void bind(Nifty arg0, Screen arg1) { }

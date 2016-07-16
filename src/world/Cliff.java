@@ -29,7 +29,7 @@ public enum Cliff implements WP {
 		this.endNode = end;
 	}
 	
-	public float getScale() { return 1; }
+	public float getScale() { return 2.5f; }
 	public boolean needsMaterial() { return false; }
 	
 	public String getName() { return dir+name;}

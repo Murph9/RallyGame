@@ -18,7 +18,7 @@ import de.lessvoid.nifty.screen.ScreenController;
 import world.StaticWorld;
 import world.StaticWorldBuilder;
 
-public class StartState extends AbstractAppState implements ScreenController {
+public class Start extends AbstractAppState implements ScreenController {
 
 	private BulletAppState bulletAppState;
 	private StaticWorld world;
@@ -27,7 +27,7 @@ public class StartState extends AbstractAppState implements ScreenController {
 	
 	private MyCamera camNode;
 	
-	public StartState() {
+	public Start() {
 		world = StaticWorld.garage2;
 		
 		Car[] c = Car.values();
