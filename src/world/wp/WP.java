@@ -14,15 +14,20 @@ public interface WP {
 	
 	static final Quaternion
 		STRIAGHT = Quaternion.IDENTITY,
-		LR_180 = new Quaternion(0, 1, 0, 0),
+		BACK = new Quaternion(0, 1, 0, 0),
 		
-		LEFT_90 = new Quaternion(0, 0.7071f, 0, 0.7071f),
+		LEFT_15 = new Quaternion(0.0f, 0.13052f, 0.0f, 0.99144f),
 		LEFT_45 = new Quaternion(0, 0.3827f, 0, 0.9239f),
-
-		RIGHT_90 = new Quaternion(0, -0.7071f, 0, 0.7071f),
+		LEFT_90 = new Quaternion(0, 0.7071f, 0, 0.7071f),
+		
+		RIGHT_15 = new Quaternion(0.0f, -0.13052f, 0.0f, 0.99144f),
 		RIGHT_45 = new Quaternion(0, -0.3827f, 0, 0.9239f),
-		RIGHT_135 = new Quaternion(0, -0.9239f, 0, 0.3827f)
-	;
+		RIGHT_90 = new Quaternion(0, -0.7071f, 0, 0.7071f),
+		RIGHT_135 = new Quaternion(0, -0.9239f, 0, 0.3827f),
+		
+		DOWN_8 = new Quaternion(0.0f, 0.0f, -0.06975647f, 0.9975641f),
+		UP_8 = new Quaternion(0.0f, 0.0f, 0.06975647f, 0.9975641f)
+		;
 	
 	//shouldn't change per model in the set
 	float getScale(); //TODO scaling screws with blender piece collision

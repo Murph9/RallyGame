@@ -122,7 +122,7 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 		Pair<Float, Float> data = car.getMaxPower();
 		out += "Max Power: " + data.first + "kW? @ " + data.second + " rpm \n";
 		out += "Weight: "+car.mass + "kg\n";
-		out += "Drag(linear): " + car.drag + "("+car.resistance(9.81f)+")\n";
+		out += "Drag(linear): " + car.areo_drag + "("+car.resistance(9.81f)+")\n";
 		out += "Redline: "+ car.e_redline +"\n";
 		
 		return out;

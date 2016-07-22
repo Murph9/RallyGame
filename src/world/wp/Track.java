@@ -16,8 +16,8 @@ public enum Track implements WP {
 	RIGHT_TIGHT("right_tight.blend", new Vector3f(7.7202f,0,8f), WP.RIGHT_90, NodeType.A, NodeType.A),
 	LEFT_TIGHT("left_tight.blend", new Vector3f(7.7202f,0,-8f), WP.LEFT_90, NodeType.A, NodeType.A),
 	
-	LEFT_HAIRPIN("left_hairpin.blend", new Vector3f(0,0,-4f), WP.LR_180, NodeType.A, NodeType.A),
-	RIGHT_HAIRPIN("right_hairpin.blend", new Vector3f(0,0,4f), WP.LR_180, NodeType.A, NodeType.A),
+	LEFT_HAIRPIN("left_hairpin.blend", new Vector3f(0,0,-4f), WP.BACK, NodeType.A, NodeType.A),
+	RIGHT_HAIRPIN("right_hairpin.blend", new Vector3f(0,0,4f), WP.BACK, NodeType.A, NodeType.A),
 	
 	TUNNEL_IN("tunnel_in.blend", new Vector3f(3f,0,0), WP.STRIAGHT, NodeType.A, NodeType.B),
 	TUNNEL_OUT("tunnel_out.blend", new Vector3f(3f,0,0), WP.STRIAGHT, NodeType.B, NodeType.A),

@@ -17,7 +17,7 @@ import car.Car;
 import car.CarData;
 import de.lessvoid.nifty.Nifty;
 import world.StaticWorld;
-import world.wp.Underground;
+import world.wp.*;
 import world.wp.WP;
 
 ////TODO Ideas for game modes:
@@ -56,9 +56,9 @@ public class Rally extends SimpleApplication {
 	public SkyState sky;
 	
 	public Settings defaultSet = new Settings();
-	private CarData defaultCar = Car.Runner.get();
+	private CarData defaultCar = Car.Rocket.get();
 	private StaticWorld defaultsworld = null;//StaticWorld.track2;
-	private WP[] defaultdworld = Underground.values();
+	private WP[] defaultdworld = Valley.values();
 	
 	public static void main(String[] args) {
 		int fps = 60; //default is 60
@@ -78,8 +78,13 @@ public class Rally extends SimpleApplication {
 
 		 //Just getting numbers for rotations
 		 Quaternion q = new Quaternion();
-		 q = q.fromAngleAxis(FastMath.PI, new Vector3f(0,1,0));
+		 q = q.fromAngleAxis(FastMath.DEG_TO_RAD*(-8), new Vector3f(0,0,1));
 		 H.p(q);
+		 
+		 //note in the 0,0,0 -> a,b,c
+		 //b = turning right and left
+		 //a = barrel roll
+		 //c = up and down a hill
 	}
 
 	@Override
