@@ -23,6 +23,7 @@ import com.jme3.util.BufferUtils;
 
 import game.App;
 import game.Rally;
+import world.WorldType;
 
 public class UINode {
 
@@ -273,7 +274,7 @@ public class UINode {
 		setSpeedDigits(speedKMH);
 		setGearDigit(p.curGear);
 		
-		if (App.rally.drive.dynamicWorld) {
+		if (App.rally.drive.type == WorldType.DYNAMIC) {
 			score.setText("Placed: "+App.rally.drive.worldB.getTotalPlaced());
 		}
 		

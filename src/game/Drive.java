@@ -6,6 +6,7 @@ import java.util.List;
 import world.StaticWorldBuilder;
 import world.StaticWorld;
 import world.WorldBuilder;
+import world.WorldType;
 import world.wp.Floating;
 import world.wp.WP;
 
@@ -34,11 +35,12 @@ public class Drive extends AbstractAppState {
 	private BulletAppState bulletAppState;
 	
 	//World Model
+	public WorldType type;
+	
 	public StaticWorld world;
 	StaticWorldBuilder sWorldB;
 	
-	public boolean dynamicWorld = false;
-	WP[] type = Floating.values();
+	WP[] wpType = Floating.values();
 	boolean needsMaterial = false;
 	public WorldBuilder worldB;
 	
@@ -64,11 +66,17 @@ public class Drive extends AbstractAppState {
     	this.car = set.getCar();
     	this.cb = new CarBuilder();
     	
-    	if (set.isDynamicWorld()) {
-    		this.dynamicWorld = true;
-    		this.type = set.getDynamicWorld();
-    	} else { 
+    	type = set.getWorldType(); 
+    	switch(type) {
+    	case STATIC:
     		this.world = set.getStaticWorld();
+    		break;
+    	case DYNAMIC:
+    		this.wpType = set.getDynamicWorld();
+    		break;
+    	case OTHER:
+    	default:
+    		H.p("not sure what world you want");
     	}
     }
     
@@ -90,11 +98,11 @@ public class Drive extends AbstractAppState {
 	}
     
 	private void createWorld() {
-		if (dynamicWorld) {
-			worldB = new WorldBuilder(type, getPhysicsSpace(), App.rally.getViewPort());
+		if (type == WorldType.DYNAMIC) {
+			worldB = new WorldBuilder(wpType, getPhysicsSpace(), App.rally.getViewPort());
 			App.rally.getRootNode().attachChild(worldB);
 			
-		} else {
+		} else if (type == WorldType.STATIC) {
 			StaticWorldBuilder.addStaticWorld(getPhysicsSpace(), world, true);
 		}
 
@@ -113,11 +121,13 @@ public class Drive extends AbstractAppState {
 	private void buildCars() {
 		Vector3f start;
 		Matrix3f dir = new Matrix3f();
-		if (dynamicWorld) {
+		if (type == WorldType.DYNAMIC) {
 			start = worldB.start;
 			dir.fromAngleAxis(FastMath.DEG_TO_RAD*90, new Vector3f(0,1,0));
-		} else {
+		} else if (type == WorldType.STATIC) {
 			start = world.start;
+		} else {
+			start = new Vector3f();
 		}
 		
 		cb.addCar(getPhysicsSpace(), 0, car, start, dir, true);
@@ -163,7 +173,7 @@ public class Drive extends AbstractAppState {
 		cb.update(tpf);
 		
 		//update world
-		if (dynamicWorld) {
+		if (type == WorldType.DYNAMIC) {
 			worldB.update(cb.get(0).getPhysicsLocation());
 		}
 		if (App.rally.drive.ifDebug) {
@@ -180,7 +190,7 @@ public class Drive extends AbstractAppState {
 	
 	
 	public void reset() {
-		if (dynamicWorld) {
+		if (type == WorldType.DYNAMIC) {
 			List<Spatial> ne = new LinkedList<Spatial>(worldB.curPieces);
 			for (Spatial s: ne) {
 				getPhysicsSpace().remove(s.getControl(0));
@@ -190,9 +200,8 @@ public class Drive extends AbstractAppState {
 			worldB.start = new Vector3f(0,0,0);
 			worldB.nextPos = new Vector3f(0,0,0);
 			worldB.nextRot = new Quaternion();
-		} else {
-			
 		}
+		
 		arrowNode.detachAllChildren();
 	}
 
@@ -211,10 +220,11 @@ public class Drive extends AbstractAppState {
 		
 		App.rally.getStateManager().detach(bulletAppState);
 		
-		if (dynamicWorld)
-			App.rally.getRootNode().detachChild(worldB);
-		App.rally.getRootNode().detachChild(arrowNode);
+		Node rn = App.rally.getRootNode();
+		if (type == WorldType.DYNAMIC)
+			rn.detachChild(worldB);
 		
-		App.rally.getRootNode().detachChild(camNode);
+		rn.detachChild(arrowNode);
+		rn.detachChild(camNode);
 	}
 }
