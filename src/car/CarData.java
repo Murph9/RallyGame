@@ -72,8 +72,9 @@ public abstract class CarData {
 	public float wheelBasicSlip = 0;
 	
 	//drag constants
-	public float drag = 1.0f; //squared component
-	public float lineardrag = 0.02f;
+	public float areo_drag = 1.0f; //squared component
+	public float areo_lineardrag = 0.02f;
+	public float areo_downforce = 0.0f;
 
 	public float brakeMaxTorque = 4000; 
 	public Vector3f JUMP_FORCE = new Vector3f(0, 5*mass, 0);
@@ -103,6 +104,7 @@ public abstract class CarData {
 	public float nitro_rate = 1;
 	public float nitro_max = 15;
 	
+	
 	//Constructor (when we don't have model data)
 	protected CarData() {
 		setw_Pos();
@@ -121,7 +123,7 @@ public abstract class CarData {
 	
 	//linear drag component (https://en.wikipedia.org/wiki/Rolling_resistance)
 	public float resistance(float gravity) {
-		return gravity*mass*lineardrag/w_radius;
+		return gravity*mass*areo_lineardrag/w_radius;
 	}
 	
 	//compute the torque at rpm

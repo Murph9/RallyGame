@@ -22,6 +22,7 @@ import com.jme3.scene.Spatial;
 import car.CarModelData.CarPart;
 import game.App;
 import game.H;
+import world.WorldType;
 
 //extends:
 //https://github.com/jMonkeyEngine/jmonkeyengine/blob/master/jme3-jbullet/src/main/java/com/jme3/bullet/objects/PhysicsVehicle.java
@@ -306,11 +307,13 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		//'Wheel'less forces
 		//linear resistance and quadratic drag
 		float rr = car.resistance(9.81f);
-		float dragx = -(rr * velocity.x + car.drag * velocity.x * FastMath.abs(velocity.x));
-		float dragy = -(rr * velocity.y + car.drag * velocity.y * FastMath.abs(velocity.y));
-		float dragz = -(rr * velocity.z + car.drag * velocity.z * FastMath.abs(velocity.z));
+		float dragx = -(rr * velocity.x + car.areo_drag * velocity.x * FastMath.abs(velocity.x));
+		float dragy = -(rr * velocity.y + car.areo_drag * velocity.y * FastMath.abs(velocity.y));
+		float dragz = -(rr * velocity.z + car.areo_drag * velocity.z * FastMath.abs(velocity.z));
 
-		Vector3f totalNeutral = new Vector3f(dragx, dragy, dragz).multLocal(tpf);
+		float dragDown = -0.5f * car.areo_downforce * 1.225f * (velocity.z*velocity.z); //is the formula from wiki
+		
+		Vector3f totalNeutral = new Vector3f(dragx, dragy + dragDown, dragz).multLocal(tpf);
 		applyCentralForce(w_angle.mult(totalNeutral));
 
 		//////////////////////////////////
@@ -590,7 +593,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 		App.rally.drive.reset();
 
-		if (App.rally.drive.dynamicWorld) {
+		if (App.rally.drive.type == WorldType.DYNAMIC) {
 			setPhysicsLocation(App.rally.drive.worldB.start);
 			Matrix3f p = new Matrix3f();
 			p.fromAngleAxis(FastMath.DEG_TO_RAD*90, new Vector3f(0,1,0));

@@ -62,7 +62,7 @@ public enum Car {
 			setw_Pos();
 			
 			//https://en.wikipedia.org/wiki/Automobile_drag_coefficient
-			drag = 0.33f;
+			areo_drag = 0.33f;
 
 			driveFront = false;
 			driveRear = true;
@@ -108,7 +108,7 @@ public enum Car {
 			wheelModel = dir+"wheelraid1.obj";
 
 			mass = 1400;
-			drag = 0.7f;
+			areo_drag = 0.7f;
 			
 			w_width = 0.25f;
 			w_radius = 0.4f;
@@ -151,7 +151,7 @@ public enum Car {
 
 			mass = 900;
 
-			drag = 0.3f;
+			areo_drag = 0.3f;
 
 			w_steerAngle = 0.25f;
 
@@ -188,15 +188,19 @@ public enum Car {
 			w_xOff = 0.71f;
 			setw_Pos();
 			
-			mass = 1500;
+			driveFront = true;
+			driveRear = true;
+			
+			mass = 3000;
 			w_steerAngle = 0.5f;
 
-			drag = 0.1f;
+			areo_drag = 0.1f;
+			areo_downforce = 200;
 			rollFraction = 0f;
 
 			brakeMaxTorque = 50000;
 
-			e_torque = new float[]{0, 300,500,500,550,608, 595,580,560,540,525, 500,440,410,360,250};
+			e_torque = new float[]{0,210,310,390,460,520,565,600,625,640,650,645,625,580,460,200};
 			for (int i = 0; i < e_torque.length; i++) {
 				e_torque[i] *= 2;
 			}
@@ -206,7 +210,7 @@ public enum Car {
 			
 			e_mass = 30;
 
-			trans_finaldrive = 2.5f;
+			trans_finaldrive = 3.0f;
 			trans_gearRatios = new float[]{-5f,3.23f,2.19f,1.71f,1.39f,1.16f,0.93f};
 
 			w_flatdata = new RocketWheel();
@@ -233,17 +237,17 @@ public enum Car {
 			w_mass = 20;
 			
 			auto_gearDown = 4000;
-			auto_gearUp = 5800;
+			auto_gearUp = 6500;
 			e_redline = 7000;
 
-			sus_stiffness = 18.0f; //40 is fairly stiff
+			sus_stiffness = 40.0f; //40 is fairly stiff //18.0
 			sus_compValue = 0.5f; //(should be lower than damp)
 			sus_dampValue = 0.6f;
-			sus_restLength = 0.3f;
+			sus_restLength = 0.1f;
 
 			sus_maxForce = 40000;
 
-			drag = 0.6f;
+			areo_drag = 0.6f;
 		}
 	}
 
