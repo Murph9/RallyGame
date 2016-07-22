@@ -52,4 +52,10 @@ public enum Track implements WP {
 	public NodeType startNode() { return startNode; }
 	public NodeType endNode() { return endNode; }
 
+	
+	static class Builder extends DefaultBuilder implements DynamicBuilder {
+		Builder() {
+			super(Track.values());
+		}
+	}
 }

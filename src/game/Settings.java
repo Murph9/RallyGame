@@ -2,14 +2,14 @@ package game;
 
 import car.CarData;
 import world.*;
-import world.wp.WP;
+import world.wp.WP.DynamicType;
 
 interface State {
 	CarData getCar();
 	
 	WorldType getWorldType();
 	StaticWorld getStaticWorld();
-	WP[] getDynamicWorld();
+	DynamicType getDynamicWorld();
 }
 
 
@@ -18,7 +18,7 @@ public class Settings implements State {
 	CarData car;
 	
 	StaticWorld sworld; //static world type
-	WP[] dworld; //dynamic world type
+	DynamicType dworld; //dynamic world type
 	
 	public CarData getCar() {
 		return car;
@@ -36,7 +36,7 @@ public class Settings implements State {
 	public StaticWorld getStaticWorld() {
 		return sworld;
 	}
-	public WP[] getDynamicWorld() {
+	public DynamicType getDynamicWorld() {
 		return dworld;
 	}
 }

@@ -44,4 +44,10 @@ public enum Simple2 implements WP {
 	public NodeType endNode() {
 		return endNode;
 	}
+	
+	static class Builder extends DefaultBuilder implements DynamicBuilder {
+		Builder() {
+			super(Simple2.values());
+		}
+	}
 }

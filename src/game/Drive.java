@@ -1,14 +1,11 @@
 package game;
 
-import java.util.LinkedList;
-import java.util.List;
 
 import world.StaticWorldBuilder;
 import world.StaticWorld;
-import world.WorldBuilder;
 import world.WorldType;
-import world.wp.Floating;
-import world.wp.WP;
+import world.wp.WP.DynamicBuilder;
+import world.wp.WP.DynamicType;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
@@ -40,9 +37,9 @@ public class Drive extends AbstractAppState {
 	public StaticWorld world;
 	StaticWorldBuilder sWorldB;
 	
-	WP[] wpType = Floating.values();
+	DynamicType wpType = DynamicType.Floating; //some value so no nulls
 	boolean needsMaterial = false;
-	public WorldBuilder worldB;
+	public DynamicBuilder worldB;
 	
 	//car stuff
 	public CarBuilder cb;
@@ -99,8 +96,10 @@ public class Drive extends AbstractAppState {
     
 	private void createWorld() {
 		if (type == WorldType.DYNAMIC) {
-			worldB = new WorldBuilder(wpType, getPhysicsSpace(), App.rally.getViewPort());
-			App.rally.getRootNode().attachChild(worldB);
+			
+			worldB = wpType.getAndInitBuilder(getPhysicsSpace(), App.rally.getViewPort());
+			//worldB = new WorldBuilder(wpType, getPhysicsSpace(), App.rally.getViewPort());
+			App.rally.getRootNode().attachChild(worldB.getRootNode());
 			
 		} else if (type == WorldType.STATIC) {
 			StaticWorldBuilder.addStaticWorld(getPhysicsSpace(), world, true);
@@ -122,7 +121,7 @@ public class Drive extends AbstractAppState {
 		Vector3f start;
 		Matrix3f dir = new Matrix3f();
 		if (type == WorldType.DYNAMIC) {
-			start = worldB.start;
+			start = worldB.getWorldStart();
 			dir.fromAngleAxis(FastMath.DEG_TO_RAD*90, new Vector3f(0,1,0));
 		} else if (type == WorldType.STATIC) {
 			start = world.start;
@@ -191,15 +190,7 @@ public class Drive extends AbstractAppState {
 	
 	public void reset() {
 		if (type == WorldType.DYNAMIC) {
-			List<Spatial> ne = new LinkedList<Spatial>(worldB.curPieces);
-			for (Spatial s: ne) {
-				getPhysicsSpace().remove(s.getControl(0));
-				worldB.detachChild(s);
-				worldB.curPieces.remove(s);
-			}
-			worldB.start = new Vector3f(0,0,0);
-			worldB.nextPos = new Vector3f(0,0,0);
-			worldB.nextRot = new Quaternion();
+			worldB.reset();
 		}
 		
 		arrowNode.detachAllChildren();
@@ -222,7 +213,7 @@ public class Drive extends AbstractAppState {
 		
 		Node rn = App.rally.getRootNode();
 		if (type == WorldType.DYNAMIC)
-			rn.detachChild(worldB);
+			rn.detachChild(worldB.getRootNode());
 		
 		rn.detachChild(arrowNode);
 		rn.detachChild(camNode);

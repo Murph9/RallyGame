@@ -594,7 +594,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		App.rally.drive.reset();
 
 		if (App.rally.drive.type == WorldType.DYNAMIC) {
-			setPhysicsLocation(App.rally.drive.worldB.start);
+			setPhysicsLocation(App.rally.drive.worldB.getWorldStart());
 			Matrix3f p = new Matrix3f();
 			p.fromAngleAxis(FastMath.DEG_TO_RAD*90, new Vector3f(0,1,0));
 			setPhysicsRotation(p);

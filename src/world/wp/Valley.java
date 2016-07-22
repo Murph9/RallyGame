@@ -46,4 +46,11 @@ public enum Valley implements WP {
 	
 	//TODO textures
 	//TODO no upside down please?
+	
+	static class Builder extends DefaultBuilder implements DynamicBuilder {
+		Builder() {
+			super(Valley.values());
+			//TODO better than default please
+		}
+	}
 }

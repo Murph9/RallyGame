@@ -57,4 +57,11 @@ public enum Simple implements WP {
 	public NodeType endNode() {
 		return endNode;
 	}
+	
+	
+	static class Builder extends DefaultBuilder implements DynamicBuilder {
+		Builder() {
+			super(Simple.values());
+		}
+	}
 }

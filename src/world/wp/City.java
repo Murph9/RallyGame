@@ -47,4 +47,10 @@ public enum City implements WP {
 	public NodeType endNode() {
 		return endNode;
 	}
+	
+	static class Builder extends DefaultBuilder implements DynamicBuilder {
+		Builder() {
+			super(City.values());
+		}
+	}
 }

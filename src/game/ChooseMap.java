@@ -16,13 +16,7 @@ import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 
 import world.*;
-import world.wp.City;
-import world.wp.Cliff;
-import world.wp.Floating;
-import world.wp.Simple;
-import world.wp.Simple2;
-import world.wp.Track;
-import world.wp.WP;
+import world.wp.WP.DynamicType;
 
 public class ChooseMap extends AbstractAppState implements ScreenController {
 
@@ -38,8 +32,8 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 	private static StaticWorld sMap;
 	private HashMap<String, StaticWorld> sSet;
 	
-	private static WP dMap;
-	private HashMap<String, WP> dSet;
+	private static DynamicType dMap;
+	private HashMap<String, DynamicType> dSet;
 
 	private static DropDown<String> dropdown;
 	private MyCamera camNode;
@@ -61,16 +55,14 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 
 		//init dynamic
 		dSet = new LinkedHashMap<>(); //ordered hashmap
-		dSet.put("Floating", Floating.STRAIGHT);
-		dSet.put("Cliff", Cliff.STRAIGHT);
-		dSet.put("Simple", Simple.STRAIGHT);
-		dSet.put("Simple2", Simple2.STRAIGHT);
-		dSet.put("City", City.STRAIGHT);
-		dSet.put("Track", Track.STRAIGHT);
+		DynamicType[] worlds = DynamicType.values();
+		for (DynamicType dt: worlds) {
+			dSet.put(dt.name(), dt);
+		}
 		
 		//set initial values
 		sMap = list[0];
-		dMap = Floating.STRAIGHT;
+		dMap = worlds[0];
 	}
 
 	@Override
@@ -89,7 +81,7 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 		if (worldType == WorldType.staticW) {
 			StaticWorldBuilder.addStaticWorld(getPhysicsSpace(), sMap, App.rally.sky.ifShadow);
 		} else if (worldType == WorldType.dynamicW) {
-			WorldBuilder.placeOnePiece(dMap);
+			//WorldBuilder.placeOnePiece(dMap); //TODO
 		}
 	}
 
@@ -117,11 +109,11 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 				}
 				
 			} else if (worldType == WorldType.dynamicW) {
-				WP w = dSet.get(option);
+				DynamicType w = dSet.get(option);
 				if (w != null && w != dMap) {
 					dMap = w;
 					
-					WorldBuilder.placeOnePiece(dMap);
+					//WorldBuilder.placeOnePiece(dMap); //TODO
 				}
 			}
 		}
@@ -135,7 +127,7 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 
 	public void cleanup() {
 		StaticWorldBuilder.removeStaticWorld(getPhysicsSpace(), sMap);
-		WorldBuilder.placeOnePiece(null); // add nothing, makes it remove previous
+//		WorldBuilder.placeOnePiece(null); // add nothing, makes it remove previous
 		
 		App.rally.getRootNode().detachChild(camNode);
 		//TODO more
@@ -163,9 +155,9 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 		else
 			return null;
 	}
-	public WP[] getMapD() {
+	public DynamicType getMapD() {
 		if (worldType == WorldType.dynamicW)
-			return dMap.getClass().getEnumConstants();
+			return dMap;
 		else 
 			return null;
 	}

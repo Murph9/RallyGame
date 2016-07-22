@@ -275,7 +275,7 @@ public class UINode {
 		setGearDigit(p.curGear);
 		
 		if (App.rally.drive.type == WorldType.DYNAMIC) {
-			score.setText("Placed: "+App.rally.drive.worldB.getTotalPlaced());
+			score.setText("Placed: ??");
 		}
 		
 		//highlight the rpmBar the right amout

@@ -1,7 +1,10 @@
 package world.wp;
 
+import com.jme3.bullet.PhysicsSpace;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.renderer.ViewPort;
+import com.jme3.scene.Spatial;
 
 /** World Piece
  * @author Jake
@@ -10,6 +13,38 @@ public interface WP {
 	
 	enum NodeType {
 		A, B, C, D, E, F, G, H; //for defining what can connect to the end of the previous piece
+	}
+
+	//Add a type here when you want one
+	public enum DynamicType {
+		Simple(new Simple.Builder()),
+		Simple2(new Simple2.Builder()),
+		Floating(new Floating.Builder()),
+		City(new City.Builder()),
+		Cliff(new Cliff.Builder()),
+		Track(new Track.Builder()),
+		Underground(new Underground.Builder()),
+		Valley(new Valley.Builder()),
+		;
+		
+		private DynamicBuilder builder;
+		DynamicType(DynamicBuilder db) {
+			this.builder = db;
+		}
+		
+		public DynamicBuilder getAndInitBuilder(PhysicsSpace space, ViewPort view) {
+			builder.init(space, view);
+			return builder;
+		}
+	}
+	
+	public interface DynamicBuilder {
+		void init(PhysicsSpace space, ViewPort view);
+		void update(Vector3f playerPos);
+
+		Spatial getRootNode();
+		Vector3f getWorldStart();
+		void reset();
 	}
 	
 	static final Quaternion

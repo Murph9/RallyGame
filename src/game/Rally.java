@@ -17,8 +17,7 @@ import car.Car;
 import car.CarData;
 import de.lessvoid.nifty.Nifty;
 import world.StaticWorld;
-import world.wp.*;
-import world.wp.WP;
+import world.wp.WP.DynamicType;
 
 ////TODO Ideas for game modes:
 //being chased. (with them spawning all lightning sci-fi like?)
@@ -58,7 +57,7 @@ public class Rally extends SimpleApplication {
 	public Settings defaultSet = new Settings();
 	private CarData defaultCar = Car.Rocket.get();
 	private StaticWorld defaultsworld = null;//StaticWorld.track2;
-	private WP[] defaultdworld = Valley.values();
+	private DynamicType defaultdworld = DynamicType.Valley;
 	
 	public static void main(String[] args) {
 		int fps = 60; //default is 60
@@ -184,7 +183,7 @@ public class Rally extends SimpleApplication {
 		getStateManager().attach(chooseMap);
 	}
 	
-	private void startDrive(CarData car, StaticWorld world, WP[] dworld) {
+	private void startDrive(CarData car, StaticWorld world, DynamicType dworld) {
 		if (menu != null || drive != null) return; //not sure what this is actually hoping to stop
 		
 		set.car = car;
