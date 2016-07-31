@@ -9,6 +9,7 @@ import com.jme3.app.state.AppStateManager;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Spatial;
 
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.controls.DropDown;
@@ -34,6 +35,7 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 	
 	private static DynamicType dMap;
 	private HashMap<String, DynamicType> dSet;
+	private Spatial dnode;
 
 	private static DropDown<String> dropdown;
 	private MyCamera camNode;
@@ -71,17 +73,20 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 
 		bulletAppState = new BulletAppState();
 		app.getStateManager().attach(bulletAppState);
-
-	}
-	private void initWorld() {
-		createWorld();
 	}
 
 	private void createWorld() {
 		if (worldType == WorldType.staticW) {
 			StaticWorldBuilder.addStaticWorld(getPhysicsSpace(), sMap, App.rally.sky.ifShadow);
 		} else if (worldType == WorldType.dynamicW) {
-			//WorldBuilder.placeOnePiece(dMap); //TODO
+			if (dnode != null)
+				App.rally.getRootNode().detachChild(dnode);
+			
+			dnode = dMap.PlaceDemoSet(getPhysicsSpace(), App.rally.getGuiViewPort());
+			App.rally.getRootNode().attachChild(dnode);
+			
+			camNode.setLocalTranslation(-70, 50, 0);
+			camNode.lookAt(new Vector3f(20,1,0), new Vector3f(0,1,0));
 		}
 	}
 
@@ -91,7 +96,7 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 
 		if (worldType != WorldType.nothing && !worldIsSet) { //keep checking if the ui changed something
 			//if the worldtype has been set, init the apprpriate world type
-			initWorld();
+			createWorld();
 			worldIsSet = true;
 			return;
 		}
@@ -113,7 +118,10 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 				if (w != null && w != dMap) {
 					dMap = w;
 					
-					//WorldBuilder.placeOnePiece(dMap); //TODO
+					App.rally.getRootNode().detachChild(dnode);
+					dnode = dMap.PlaceDemoSet(getPhysicsSpace(), App.rally.getGuiViewPort());
+					App.rally.getRootNode().attachChild(dnode);
+					H.p(dnode);
 				}
 			}
 		}
@@ -127,10 +135,11 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 
 	public void cleanup() {
 		StaticWorldBuilder.removeStaticWorld(getPhysicsSpace(), sMap);
-//		WorldBuilder.placeOnePiece(null); // add nothing, makes it remove previous
+		if (dnode != null) //remove current demo
+			App.rally.getRootNode().detachChild(dnode);
+		
 		
 		App.rally.getRootNode().detachChild(camNode);
-		//TODO more
 	}
 
 	////////////////////////

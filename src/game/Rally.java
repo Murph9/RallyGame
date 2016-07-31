@@ -41,6 +41,7 @@ import world.wp.WP.DynamicType;
 //set a nifty new default style
 //still need to get fog working..
 //at night time or something because loading looks easier
+//stop the car sound on the menus
 
 public class Rally extends SimpleApplication {
 
@@ -55,7 +56,7 @@ public class Rally extends SimpleApplication {
 	public SkyState sky;
 	
 	public Settings defaultSet = new Settings();
-	private CarData defaultCar = Car.Rocket.get();
+	private CarData defaultCar = Car.Runner.get();
 	private StaticWorld defaultsworld = null;//StaticWorld.track2;
 	private DynamicType defaultdworld = DynamicType.Valley;
 	
@@ -75,15 +76,16 @@ public class Rally extends SimpleApplication {
 		app.setDisplayStatView(false);
 		app.start();
 
-		 //Just getting numbers for rotations
-		 Quaternion q = new Quaternion();
-		 q = q.fromAngleAxis(FastMath.DEG_TO_RAD*(-8), new Vector3f(0,0,1));
-		 H.p(q);
+		
+		//Just getting numbers for rotations
+		Quaternion q = new Quaternion();
+		q = q.fromAngleAxis(FastMath.DEG_TO_RAD*(-8), new Vector3f(0,0,1));
+		H.p(q);
 		 
-		 //note in the 0,0,0 -> a,b,c
-		 //b = turning right and left
-		 //a = barrel roll
-		 //c = up and down a hill
+		//note in the 0,0,0 -> a,b,c
+		//b = turning right and left
+		//a = barrel roll
+		//c = up and down a hill
 	}
 
 	@Override
@@ -169,7 +171,7 @@ public class Rally extends SimpleApplication {
 			App.nifty.gotoScreen("start");
 			
 		} else {
-			H.p("not done yet. - rally.next()");
+			H.p("Unexpected state called me '" + app + "' - rally.next()");
 		}
 	}
 	

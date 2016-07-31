@@ -342,8 +342,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			//calculate front diff
 			float total = wheel[0].skid + wheel[1].skid;
 			if (total != 0) { //check for total != 0 because divide by zero
-				torques[0] *= wheel[0].skid / (total * 2) + 0.5f; //limited slip:
-				torques[1] *= wheel[1].skid / (total * 2) + 0.5f; //make sure the difference not greater than 0.5
+				torques[0] *= wheel[0].skid / (total * 2) + car.w_difflock; //limited slip:
+				torques[1] *= wheel[1].skid / (total * 2) + car.w_difflock; //make sure the difference not greater than w_difflock
 			}
 		}
 		if (car.driveRear) {

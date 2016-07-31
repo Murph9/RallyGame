@@ -42,6 +42,7 @@ public abstract class CarData {
 	public float w_width = 0.15f; //m
 	public float w_radius = 0.3f; //m
 	public float w_mass = 75; //kg
+	public float w_difflock = 0.5f; //percentage speed difference on one axle //TODO not working right
 	
 	//TODO make front and back independant (maybe even each wheel)
 	public Vector3f[] w_pos = new Vector3f[4];
@@ -57,24 +58,24 @@ public abstract class CarData {
 	
 	//suspension
 	//see for details: https://docs.google.com/Doc?docid=0AXVUZ5xw6XpKZGNuZG56a3FfMzU0Z2NyZnF4Zmo&hl=en
-	public float sus_stiffness = 60.0f; //200=f1 car
-	public float sus_compValue = 0.6f; //(should be lower than damp)
-	public float sus_dampValue = 0.7f;
+	public float sus_stiffness = 50.0f; //200=f1 car
+	public float sus_compValue = 0.5f; //(should be lower than damp)
+	public float sus_dampValue = 0.6f;
 	public float sus_restLength = 0f;
 	
 	public float susCompression() { return sus_compValue * 2 * FastMath.sqrt(sus_stiffness); }
 	public float susDamping() { return sus_dampValue * 2 * FastMath.sqrt(sus_stiffness); }
-	public float sus_maxForce = 25*mass; //TODO '25' is a random number.
+	public float sus_maxForce = 50*mass; //TODO '50' is a random number (v2 was 25)
 	public float sus_maxTravel = 50; //cms
 	
 	//jme3 grip constants
-	//my physics works with 0f, but feels tighter with: 1.0f
+	//my physics works with 0f, but feels 'tighter' with it: 1.0f because i don't really have slow physics yet
 	public float wheelBasicSlip = 0;
 	
 	//drag constants
 	public float areo_drag = 1.0f; //squared component
 	public float areo_lineardrag = 0.02f;
-	public float areo_downforce = 0.0f;
+	public float areo_downforce = 0.0f; //no cars start with it
 
 	public float brakeMaxTorque = 4000; 
 	public Vector3f JUMP_FORCE = new Vector3f(0, 5*mass, 0);

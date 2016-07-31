@@ -23,7 +23,7 @@ import car.*;
 
 //Bugs TODO
 //minimap is still a little weird, probably need to remove some of the postprocessing stuff
-//tried that and got no where, they are connected for some reason [you do copy the first one] (thanks for that)
+//tried that and got nowhere, they are connected for some reason [you do copy the first one] (thanks for that)
 
 //track car is slightly off the groud by a lot
 
@@ -37,7 +37,7 @@ public class Drive extends AbstractAppState {
 	public StaticWorld world;
 	StaticWorldBuilder sWorldB;
 	
-	DynamicType wpType = DynamicType.Floating; //some value so no nulls
+	DynamicType wpType = DynamicType.Simple; //some value so no nulls
 	boolean needsMaterial = false;
 	public DynamicBuilder worldB;
 	
@@ -45,8 +45,8 @@ public class Drive extends AbstractAppState {
 	public CarBuilder cb;
 	private CarData car;
 	
-	int themCount = 0;
-	private CarData them = Car.Hunter.get();
+	int themCount = 4;
+	private CarData them = Car.Rocket.get();
 	
 	//gui and camera stuff
 	MyCamera camNode;
@@ -98,7 +98,6 @@ public class Drive extends AbstractAppState {
 		if (type == WorldType.DYNAMIC) {
 			
 			worldB = wpType.getAndInitBuilder(getPhysicsSpace(), App.rally.getViewPort());
-			//worldB = new WorldBuilder(wpType, getPhysicsSpace(), App.rally.getViewPort());
 			App.rally.getRootNode().attachChild(worldB.getRootNode());
 			
 		} else if (type == WorldType.STATIC) {
@@ -132,7 +131,7 @@ public class Drive extends AbstractAppState {
 		cb.addCar(getPhysicsSpace(), 0, car, start, dir, true);
 		
 		for (int i = 1; i < themCount+1; i++) {
-			start = start.add(3,0,0);
+			start = start.add(0,0,2);
 			cb.addCar(getPhysicsSpace(), i, them, start, dir, false);
 		}
 	}
@@ -173,7 +172,7 @@ public class Drive extends AbstractAppState {
 		
 		//update world
 		if (type == WorldType.DYNAMIC) {
-			worldB.update(cb.get(0).getPhysicsLocation());
+			worldB.update(cb.get(0).getPhysicsLocation(), false);
 		}
 		if (App.rally.drive.ifDebug) {
 			H.p(cb.get(0).getPhysicsLocation());

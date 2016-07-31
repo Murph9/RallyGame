@@ -15,7 +15,7 @@ public class MiniMap {
 	ViewPort viewport;
 	Camera cam;
 	
-	final float height = 50;
+	final float height = 100;
 	
 	MiniMap(MyPhysicsVehicle target) {
 		this.target = target;

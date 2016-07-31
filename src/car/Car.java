@@ -198,6 +198,8 @@ public enum Car {
 			areo_downforce = 200;
 			rollFraction = 0f;
 
+			sus_maxForce = 100*mass;
+			
 			brakeMaxTorque = 50000;
 
 			e_torque = new float[]{0,210,310,390,460,520,565,600,625,640,650,645,625,580,460,200};
@@ -213,8 +215,8 @@ public enum Car {
 			trans_finaldrive = 3.0f;
 			trans_gearRatios = new float[]{-5f,3.23f,2.19f,1.71f,1.39f,1.16f,0.93f};
 
-			w_flatdata = new RocketWheel();
-			w_flongdata = new RocketWheel();
+			w_flatdata = new RocketLatWheel();
+			w_flongdata = new RocketLongWheel();
 			
 			nitro_force *= 10;
 		}

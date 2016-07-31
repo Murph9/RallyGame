@@ -16,6 +16,7 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.ViewPort;
+import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -34,26 +35,27 @@ public abstract class DefaultBuilder implements DynamicBuilder {
 	//hard - try and just make a curver to drive on instead of the loaded segments
 	//bezier curve stuffs..
 	
-	private WP[] type;
-	private PhysicsSpace space;
+	protected WP[] type;
+	protected PhysicsSpace space;
 	
-	private Node rootNode;
+	protected Node rootNode;
 	
-	List<Spatial> curPieces = new ArrayList<Spatial>();
-	private List<WPObject> wpos;
-	Material mat;
+	protected List<Spatial> curPieces = new ArrayList<Spatial>();
+	protected List<WPObject> wpos;
+	protected Material mat;
 	
-	Vector3f start = new Vector3f();
-	Vector3f nextPos = new Vector3f();
-	Quaternion nextRot = new Quaternion();
-	NodeType nextNode = null;
+	protected Vector3f start = new Vector3f();
+	protected Vector3f nextPos = new Vector3f();
+	protected Quaternion nextRot = new Quaternion();
+	protected NodeType nextNode = null;
 	
-	int count = 0;
-	float distance = 500; //TODO find a good number
+	protected int count = 0;
+	protected float distance = 500; //TODO find a good number
 	
 	DefaultBuilder(WP[] type) {
 		this.type = type;
 		this.rootNode = new Node("builder root node");
+		rootNode.setShadowMode(ShadowMode.CastAndReceive); //performance concern 1
 	}
 	
 	@Override
@@ -96,17 +98,18 @@ public abstract class DefaultBuilder implements DynamicBuilder {
 		startGeometry.setMaterial(matfloor);
 		startGeometry.setLocalTranslation(0, -0.1f, 0);
 		startGeometry.addControl(new RigidBodyControl(0));
-		rootNode.attachChild(startGeometry);
+		
+		this.rootNode.attachChild(startGeometry);
 		this.space.add(startGeometry);
 	}
 
 	@Override
-	public void update(Vector3f playerPos) {
+	public void update(Vector3f playerPos, boolean force) {
 		count++;
-		if (count % 10 != 0) return; //only on every 10th frame to save lag
+		if (!force && count % 10 != 0) return; //only on every 10th frame to save lag
 		
 		while (nextPos.subtract(playerPos).length() < distance) {
-			addNewPiece();
+			selectNewPiece();
 		}
 		
 		List<Spatial> temp = new LinkedList<Spatial>(curPieces);
@@ -123,7 +126,7 @@ public abstract class DefaultBuilder implements DynamicBuilder {
 		}
 	}
 
-	private void addNewPiece() {
+	protected void selectNewPiece() {
 		//get list of valid pieces (i.e. pieces with the correct node type)
 		List<WPObject> wpoList = new ArrayList<>();
 		for (WPObject w: wpos) {
@@ -142,7 +145,17 @@ public abstract class DefaultBuilder implements DynamicBuilder {
 
 		int i = (int)(Math.random()*wpoList.size());
 		WPObject wpo = wpoList.get(i);
-
+		int count = 0;
+		while (!PlacePiece(wpo)) {
+			i = (int)(Math.random()*wpoList.size()); //so select a new one
+			count++;
+			if (count > 100) {
+				break; //please no loops huh?
+			}
+		}
+	}
+	
+	protected boolean PlacePiece(WPObject wpo) {
 		WP world = wpo.wp;
 		Spatial s = wpo.sp.clone();
 		CollisionShape coll = wpo.col;
@@ -152,7 +165,7 @@ public abstract class DefaultBuilder implements DynamicBuilder {
 		float angle = FastMath.acos(result.getW())*2; //believe me that this gets the angle between them
 
 		if (!(FastMath.abs(angle) < FastMath.PI)) { //try *3/2 if its not interesting enough
-			return;
+			return false;
 		}
 
 		float scale = world.getScale();
@@ -179,6 +192,8 @@ public abstract class DefaultBuilder implements DynamicBuilder {
 		nextRot.multLocal(rot);
 		
 		nextNode = world.endNode();
+		
+		return true;
 	}
 	
 	public void reset() {
@@ -201,10 +216,29 @@ public abstract class DefaultBuilder implements DynamicBuilder {
 
 	@Override
 	public Vector3f getWorldStart() {
-		return new Vector3f(0,0,0); //TODO
+		return new Vector3f(0,1,0); //TODO better
 	}
 	
-	private class WPObject {
+	@Override
+	public Vector3f getNextPieceClosestTo(Vector3f myPos) {
+		float minDistance = Float.MAX_VALUE;
+		int index = -1;
+		for (int i = 0; i < curPieces.size() - 1; i++) {
+			Vector3f pos = curPieces.get(i).getWorldTranslation();
+			float len = pos.subtract(myPos).length();
+			if (len < minDistance) {
+				minDistance = len;
+				index = i;
+			}
+		}
+		if (index != -1) {
+			return curPieces.get(index + 1).getWorldTranslation();
+		}
+		
+		return null;
+	}
+	
+	protected class WPObject {
 		WP wp;
 		Spatial sp;
 		CollisionShape col;

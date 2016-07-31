@@ -31,6 +31,7 @@ public class UINode {
 	 * get it all to kinda look like the forza 6 one
 	 * - their text is white infront of black so that you can see it always
 	 */
+	//TODO scale it with monitor size (forza doesn't deal with this)
 	MyPhysicsVehicle p;
 	
 	Node localRootNode;
@@ -51,9 +52,18 @@ public class UINode {
 	private Material rpmBarRedLine; //marking the rpm
 	private Material rpmBarRedLineOn; //for past redline
 	
-	//quad that displays nitro
-	Geometry nitro;
-	Geometry nitroOff;
+	//quads that display nitro
+	Geometry nitro, nitroOff;
+	
+	//quads that display throttle
+	Geometry throttle, throttleOff;
+		
+	//quads that display braking
+	Geometry brake, brakeOff;
+	
+	//quads that display turn value
+	Geometry steer, steerOff;
+		
 	
 	//texture
 	final String numDir = "assets/number/"; //texture location
@@ -72,7 +82,7 @@ public class UINode {
 	int finalRPM; //should be more than redline
 	float redline;
 	
-	int centerx, centery = 64+22, radius = 100;
+	int centerx, centery = 86, radius = 100;
 	
 	public UINode () {
 		Rally r = App.rally;	
@@ -201,7 +211,7 @@ public class UINode {
 		Quad q = new Quad(10, 80);
 		nitroOff = new Geometry("nitroback", q);
 		Material nitroM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-		nitroM.setColor("Color", new ColorRGBA(ColorRGBA.Green).mult(0.5f));
+		nitroM.setColor("Color", new ColorRGBA(ColorRGBA.Green).mult(0.2f));
 		nitroOff.setMaterial(nitroM);
 		nitroOff.setLocalTranslation(centerx - (settings.getWidth() - centerx), 10, 0);
 		speedoNode.attachChild(nitroOff);
@@ -212,6 +222,55 @@ public class UINode {
 		nitro.setMaterial(nitroM);
 		nitro.setLocalTranslation(centerx - (settings.getWidth() - centerx), 10, 0);
 		speedoNode.attachChild(nitro);
+		
+		//throttle
+		q = new Quad(6, 60);
+		throttleOff = new Geometry("throttleback", q);
+		Material throttleM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+		throttleM.setColor("Color", new ColorRGBA(ColorRGBA.Blue).mult(0.2f));
+		throttleOff.setMaterial(throttleM);
+		throttleOff.setLocalTranslation(centerx - 30, centery - 30, 0);
+		speedoNode.attachChild(throttleOff);
+		
+		throttle = new Geometry("throttle", q);
+		throttleM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+		throttleM.setColor("Color", new ColorRGBA(ColorRGBA.Blue));
+		throttle.setMaterial(throttleM);
+		throttle.setLocalTranslation(centerx - 30, centery - 30, 0);
+		speedoNode.attachChild(throttle);
+		
+		//brake
+		brakeOff = new Geometry("brakeback", q);
+		Material brakeM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+		brakeM.setColor("Color", new ColorRGBA(ColorRGBA.Red).mult(0.2f));
+		brakeOff.setMaterial(brakeM);
+		brakeOff.setLocalTranslation(centerx - 45, centery - 30, 0);
+		speedoNode.attachChild(brakeOff);
+		
+		brake = new Geometry("brake", q);
+		brakeM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+		brakeM.setColor("Color", new ColorRGBA(ColorRGBA.Red));
+		brake.setMaterial(brakeM);
+		brake.setLocalTranslation(centerx - 45, centery - 30, 0);
+		speedoNode.attachChild(brake);
+		
+		//steer
+		q = new Quad(60, 6);
+		steerOff = new Geometry("steerback", q);
+		Material steerM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+		steerM.setColor("Color", new ColorRGBA(ColorRGBA.White).mult(0.2f));
+		steerOff.setMaterial(steerM);
+		steerOff.setLocalTranslation(centerx - 35, centery + 40, 0);
+		speedoNode.attachChild(steerOff);
+		
+		int width = 6;
+		q = new Quad(width, 6);
+		steer = new Geometry("steer", q);
+		steerM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+		steerM.setColor("Color", new ColorRGBA(ColorRGBA.White));
+		steer.setMaterial(steerM);
+		steer.setLocalTranslation(centerx - 35 + (60-width)/2, centery + 40, 0);
+		speedoNode.attachChild(steer);
 	}
 
 	private void makeKmH(AppSettings settings) {
@@ -234,8 +293,9 @@ public class UINode {
 		speedo[2].setMaterial(numMats[0]);
 		localRootNode.attachChild(speedo[2]);
 		
+		quad = new Quad(35,55);
 		gear = new Geometry("gear", quad);
-		gear.setLocalTranslation(width-64, 68, -1);
+		gear.setLocalTranslation(width-50, 68, -1);
 		gear.setMaterial(numMats[1]);
 		localRootNode.attachChild(gear);
 	}
@@ -298,6 +358,10 @@ public class UINode {
 		
 		angle.setText(p.getAngle()+"'");
 		nitro.setLocalScale(1, p.nitro/p.car.nitro_max, 1);
+		throttle.setLocalScale(p.accelCurrent, 1, 1);
+		brake.setLocalScale(p.brakeCurrent, 1, 1);
+		steer.setLocalTranslation(centerx - 35 + (p.steeringCurrent*-1 + 0.5f)*60 - 6/2, centery + 40, 0); //steering is a translated square
+	
 	}
 
 	private void setSpeedDigits(int speedKMH) {

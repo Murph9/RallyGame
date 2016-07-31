@@ -33,15 +33,24 @@ public interface WP {
 		}
 		
 		public DynamicBuilder getAndInitBuilder(PhysicsSpace space, ViewPort view) {
+			builder.reset(); //just incase its already been used, space is probably wrong for example
 			builder.init(space, view);
 			return builder;
+		}
+		public Spatial PlaceDemoSet(PhysicsSpace space, ViewPort view) {
+			builder.reset(); //just incase its already been used
+			
+			builder.init(space, view);
+			builder.update(new Vector3f(), true); //update once
+			return builder.getRootNode();
 		}
 	}
 	
 	public interface DynamicBuilder {
 		void init(PhysicsSpace space, ViewPort view);
-		void update(Vector3f playerPos);
+		void update(Vector3f playerPos, boolean force);
 
+		Vector3f getNextPieceClosestTo(Vector3f myPos);
 		Spatial getRootNode();
 		Vector3f getWorldStart();
 		void reset();

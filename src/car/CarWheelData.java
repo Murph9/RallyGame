@@ -7,7 +7,7 @@ public abstract class CarWheelData {
 	
 	//im currently using values that make sense for my game, its a simplified pacejka 
 	
-	//these are the 'nice' defaults.
+	//these are the recommened defaults.
 	float B = 10f;
 	float C = 1.8f;
 	float D = 1f;
@@ -18,7 +18,7 @@ public abstract class CarWheelData {
 //normal
 class NormalLatData extends CarWheelData {
 	NormalLatData() {
-		B = 12f;
+		B = 14f;
 		C = 1.8f;
 		E = 0.95f;
 	}
@@ -28,7 +28,7 @@ class NormalLongData extends CarWheelData {
 	NormalLongData() {
 		B = 12f;
 		C = 1.85f;
-		E = 0.92f;
+		E = 0.94f;
 	}
 }
 
@@ -49,14 +49,23 @@ class RallyLongWheel extends CarWheelData {
 }
 
 //rocket
-class RocketWheel extends CarWheelData {
-	
-	RocketWheel() {
+class RocketLatWheel extends CarWheelData {
+	RocketLatWheel() {
 		B = 10f;
-		C = 1.6f;
-		E = 0.98f;
+		C = 1.8f;
+		D = 1.3f;
+		E = 0.95f;
 	}
 }
+class RocketLongWheel extends CarWheelData {
+	RocketLongWheel() {
+		B = 10f;
+		C = 1.85f;
+		D = 1.3f;
+		E = 0.92f;
+	}
+}
+
 
 //ricer
 class RicerLatWheel extends CarWheelData {

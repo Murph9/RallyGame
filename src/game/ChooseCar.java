@@ -65,7 +65,7 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 		info.getRenderer(TextRenderer.class).setLineWrapping(true);
 		
 		createWorld();
-		buildPlayers();
+		buildPlayer();
 		initCamera();
 	}
 
@@ -73,7 +73,7 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 		StaticWorldBuilder.addStaticWorld(getPhysicsSpace(), world, App.rally.sky.ifShadow);
 	}
 
-	private void buildPlayers() {
+	private void buildPlayer() {
 		Vector3f start = world.start;
 		Matrix3f dir = new Matrix3f();
 
