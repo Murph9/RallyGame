@@ -75,6 +75,6 @@ class RicerLatWheel extends CarWheelData {
 }
 class RicerLongWheel extends CarWheelData {
 	RicerLongWheel() {
-		D = 0.5f; //slippery
+		D = 0.8f; //slippery
 	}
 }

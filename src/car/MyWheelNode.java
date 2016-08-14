@@ -25,29 +25,26 @@ import game.App;
 public class MyWheelNode extends Node {
 
 	public static final boolean ifSmoke = false; //TODO fix on all pausing
+	static int[] indexes = { 2,0,1, 1,3,2 }; //tyre marks vertex order
+	static Texture skidTex; //texture for the tyre marks
 	
-	Spatial spat;
-	
-	static Texture tex;
-	
+	Spatial spat; //the actual wheel model
+	Material mat;
+
 	MyPhysicsVehicle mvc;
 	int num;
-	float radSec;
-	
-	Material mat;
-	int[] indexes = { 2,0,1, 1,3,2 };
 	
 	boolean contact;
 	Vector3f last;
-	
-	public float susF;
-	public Vector3f gripF;
+	float radSec;
+
+	public float susForce;
+	public Vector3f gripDir;
 	public float skid;
-	ParticleEmitter smoke;
+	ParticleEmitter smokEmit;
 	
 	public MyWheelNode(String name, MyPhysicsVehicle mvc, int num) {
 		super(name);
-		tex = App.rally.getAssetManager().loadTexture("assets/stripes.png");
 		
 		this.skid = 1;
 		this.mvc = mvc;
@@ -55,9 +52,9 @@ public class MyWheelNode extends Node {
 		this.last = new Vector3f(0,0,0);
 		
 		if (ifSmoke) {
-			this.smoke = initSmoke();
-			smoke.setEnabled(true);
-			attachChild(this.smoke); //TODO fix rotate with tyre
+			this.smokEmit = initSmoke();
+			smokEmit.setEnabled(true);
+			attachChild(this.smokEmit); //TODO fix rotate with tyre
 		}
 		this.setShadowMode(ShadowMode.Cast);
 	}
@@ -65,9 +62,9 @@ public class MyWheelNode extends Node {
 	public void update(float tpf, int reverse) {
 		if (ifSmoke) {
 			if (skid > 0.9 && contact) {
-				smoke.setParticlesPerSec(10);
+				smokEmit.setParticlesPerSec(10);
 			} else {
-				smoke.setParticlesPerSec(0);
+				smokEmit.setParticlesPerSec(0);
 			}
 		}
 		reverse = FastMath.sign(reverse);
@@ -150,7 +147,7 @@ public class MyWheelNode extends Node {
 		Geometry geo = new Geometry("MyMesh", mesh);
 		
 		Material mat = new Material(App.rally.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md");
-		mat.setTexture("DiffuseMap", tex);
+		mat.setTexture("DiffuseMap", skidTex);
 		mat.setBoolean("UseMaterialColors", true);
 		
 		mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);

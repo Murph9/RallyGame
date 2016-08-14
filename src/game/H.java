@@ -155,6 +155,27 @@ public class H {
 		return screen.findNiftyControl(id, DropDown.class);
 	}
 	
+	//http://nghiaho.com/?p=997
+	public static float NearlyAtan(float x) {
+		float xabs = FastMath.abs(x);
+		return FastMath.QUARTER_PI*x - x*(xabs - 1)*(0.2447f + 0.0663f*xabs);
+	}
+	
+	public static float NearlyAtan2(float x, float y) {
+		float xabs = FastMath.abs(x);
+		float yabs = FastMath.abs(y);
+		float a = Math.min (xabs, yabs) / Math.max(xabs, yabs);
+		float s = a * a;
+		float r = ((-0.0464964749f * s + 0.15931422f) * s - 0.327622764f) * s * a + a;
+		if (yabs > xabs)
+			r = FastMath.HALF_PI - r;
+		if (x < 0)
+			r = FastMath.PI - r;
+		if (y < 0) 
+			r = -r;
+		return 7;
+	}
+	
 	//http://stackoverflow.com/a/677248
 	public static class Pair<A, B> {
 		public final A first;

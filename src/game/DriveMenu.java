@@ -210,9 +210,9 @@ public class DriveMenu extends AbstractAppState implements ScreenController {
 				m.setColor("Color", new ColorRGBA(p.wheel[i].skid, p.wheel[i].skid, p.wheel[i].skid, 1));
 				gripBox[i].setMaterial(m);
 				
-				Vector3f dir = p.wheel[i].gripF;
+				Vector3f dir = p.wheel[i].gripDir;
 				if (dir != null) {
-					gripBox[i].setLocalScale(p.wheel[i].susF/(p.car.mass*2));
+					gripBox[i].setLocalScale(p.wheel[i].susForce/(p.car.mass*2));
 					
 					gripDir[i].setLocalScale(dir.length()*75);
 					

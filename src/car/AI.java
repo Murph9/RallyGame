@@ -24,15 +24,17 @@ public class AI {
 		MyPhysicsVehicle player1 = App.rally.drive.cb.get(0);
 		Vector3f player1Pos = player1.getPhysicsLocation();
 		
-		//move towards player 1
+
 		Vector3f target;
 		if (type == WorldType.DYNAMIC) {
+			//follow the path
 			target = App.rally.drive.worldB.getNextPieceClosestTo(pos);
 			if (target == null) {
 				target = player1Pos;
 			}
 			
 		} else {
+			//move towards player 1
 			target = player1Pos;//.add(player1.getLinearVelocity().normalize());
 		}
 		
@@ -43,6 +45,15 @@ public class AI {
 		float ang = car.left.normalize().angleBetween((target.subtract(pos)).normalize());
 		
 		float turndeg = (angF > FastMath.QUARTER_PI) ? 1 : angF/FastMath.QUARTER_PI;
+		
+		/*
+		if (ang < FastMath.PI/8) {
+			H.p(car.car+"nitro o");
+			onEvent("Nitro", true, 1);
+		} else {
+			onEvent("Nitro", false, 0);
+		}
+		*/
 		
 		//turn towards player
 		if (ang > FastMath.HALF_PI) {
@@ -71,7 +82,7 @@ public class AI {
 			}
 		}
 		
-		//TODO some kind of ray cast so they can drive properly
+		//TODO some kind of ray cast so they can drive around things properly
 		//yeah..
 		
 		//hack so they don't lose too bad

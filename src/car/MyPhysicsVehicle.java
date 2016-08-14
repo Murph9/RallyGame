@@ -128,6 +128,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			}
 		}
 		
+		MyWheelNode.skidTex = am.loadTexture("assets/stripes.png");
+		
 		//for each wheel
 		for (int i = 0; i < 4; i++) {
 			wheel[i] = new MyWheelNode("wheel "+i+" node", this, i);
@@ -289,7 +291,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		Vector3f w_velocity = getLinearVelocity();
 
 		//* Linear Accelerations: = player.car.length * player.car.yawrate (in rad/sec)
-		double yawspeed = car.length * getAngularVelocity().y;
+		float yawspeed = car.length * getAngularVelocity().y;
 
 		Vector3f velocity = w_angle.invert().mult(w_velocity);
 
@@ -361,39 +363,52 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		//http://web.archive.org/web/20050308061534/home.planet.nl/~monstrous/tutstab.html
 		//http://phors.locost7.info/contents.htm
 
+		float slowslipspeed = 9;
+		
 		//LARGE LOOP for each wheel
 		for (int i = 0; i < 4; i++) {
 			float susforce = (float)getWheel(i).getWheelInfo().wheelsSuspensionForce;
 			susforce = Math.min(susforce, car.mass*3); //[*3] HACK: to stop weird harsh physics on large normal forces
 
-			float slipratio = (wheel[i].radSec*car.w_radius - velocity.z)/Math.abs(velocity.z);
+			//http://au.mathworks.com/help/physmod/sdl/ref/tiremagicformula.html
+			float slip_const = 1;
+			float slip_div = Math.abs(velocity.length());
+			if (velocity.length() <= slowslipspeed) {
+				slip_const = 2;
+				slip_div = slowslipspeed + (velocity.length()*velocity.length())/slowslipspeed;
+			}
+
+			float slipr = slip_const*(wheel[i].radSec*car.w_radius - velocity.z);
+			float slipratio = slipr/slip_div;
+
 			if (ifHandbrake && i > 1) //rearwheels, handbrake like this keeps engine speed and still slips 
 //				slipratio = (0*car.w_radius - velocity.z)/Math.abs(velocity.z); //(TODO needs work)
 				wheel[i].radSec = 0;
-			
-			//calc the longitudinal force from the slip ratio
-			wf[i].z = VehiclePhysicsHelper.tractionFormula(car.w_flongdata, slipratio) * susforce;
 
 			float slipangle = 0;
-			if (i < 2) //front
-				slipangle = (float)(Math.atan((velocity.x + yawspeed) / Math.abs(velocity.z)) - steeringCur);
-			else //rear
-				slipangle = (float)(Math.atan((velocity.x - yawspeed) / Math.abs(velocity.z)));
-
+			if (i < 2) {//front
+				float slipa_front = (velocity.x + yawspeed*car.w_zOff);
+				slipangle = (float)(FastMath.atan(slipa_front / slip_div) - steeringCur);
+			} else { //rear
+				float slipa_rear = (velocity.x - yawspeed*car.w_zOff);
+				slipangle = (float)(FastMath.atan(slipa_rear / slip_div)); //slip_div is questionable here
+			}
+			slipangle *= slip_const;
+			
 			if (i == 2) //a rear wheel
 				driftangle = slipangle;
 
+			float ratiofract = slipratio/maxlong;
+			float anglefract = slipangle/maxlat;
+			float p = FastMath.sqrt(ratiofract*ratiofract + anglefract*anglefract);
+			
+			//calc the longitudinal force from the slip ratio			
+			wf[i].z = (ratiofract/p)*VehiclePhysicsHelper.tractionFormula(car.w_flongdata, p*maxlong) * susforce;
+			
 			//latitudinal force that is calculated off the slip angle
-			wf[i].x = -VehiclePhysicsHelper.tractionFormula(car.w_flatdata, slipangle) * susforce;
+			wf[i].x = -(anglefract/p)*VehiclePhysicsHelper.tractionFormula(car.w_flatdata, p*maxlat) * susforce;
 
-			//combine the two traction forces - TODO maybe not correct, doesn't get rotation right
-			float zd = slipratio/maxlong, xd = slipangle/maxlat;
-			float p = FastMath.sqrt(zd*zd + xd*xd);
-			if (p > 1) {
-				wf[i].z *= Math.abs(zd)/p;
-				wf[i].x *= Math.abs(xd)/p;
-			}
-			wheel[i].skid = FastMath.clamp(FastMath.sqrt(slipangle*slipangle + slipratio*slipratio), 0, 1);
+			wheel[i].skid = FastMath.clamp(p, 0, 1); //TODO make a better guess on what tyres should do
 			
 			//add the wheel force after merging the forces
 			float totalLongForce = torques[i] - wf[i].z - (brakeCurrent*car.brakeMaxTorque*Math.signum(wheel[i].radSec));
@@ -404,8 +419,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 				wheel[i].radSec += tpf*totalLongForce/(car.e_inertia());
 			}
 			
-			wheel[i].susF = susforce;
-			wheel[i].gripF = wf[i].mult(1/susforce);
+			wheel[i].susForce = susforce;
+			wheel[i].gripDir = wf[i].mult(1/susforce);
 		}
 
 		//HARD TODO: better code from others 'transision' between basic and advanced friction models at slow speeds
@@ -643,7 +658,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 class VehiclePhysicsHelper {
 	//http://www.gamedev.net/topic/462784-simplified-pacejka-magic-formula/
-	//http://www.edy.es/dev/docs/pacejka-94-parameters-explained-a-comprehensive-guide/
 
 	//There were fancy versions of the Pacejka's Formula here but there were removed
 	//Try the git repositiory to get them back. (it should say 'removed' in the git message)
