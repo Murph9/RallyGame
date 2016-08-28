@@ -16,6 +16,7 @@ import com.jme3.system.NanoTimer;
 import car.Car;
 import car.CarData;
 import de.lessvoid.nifty.Nifty;
+import settings.Configuration;
 import world.StaticWorld;
 import world.wp.WP.DynamicType;
 
@@ -45,8 +46,6 @@ import world.wp.WP.DynamicType;
 
 public class Rally extends SimpleApplication {
 
-	private Settings set;
-	
 	public Start start;
 	public ChooseCar chooseCar;
 	public ChooseMap chooseMap;
@@ -55,23 +54,29 @@ public class Rally extends SimpleApplication {
 	public DriveMenu menu;
 	public SkyState sky;
 	
-	public Settings defaultSet = new Settings();
-	private CarData defaultCar = Car.Runner.get();
-	private StaticWorld defaultsworld = null;//StaticWorld.track2;
-	private DynamicType defaultdworld = DynamicType.Valley;
+	private final CarData defaultCar = Car.Runner.get();
+	private final StaticWorld defaultsworld = null;//StaticWorld.track2;
+	private final DynamicType defaultdworld = DynamicType.Valley;
+	
+	private CarData car;
+	private StaticWorld sworld;
+	private DynamicType dworld;
 	
 	public static void main(String[] args) {
-		int fps = 60; //default is 60
+		Configuration setts = Configuration.Read();
 
+		H.p(setts.getWidth());
+		
 		Rally app = new Rally();
 		AppSettings settings = new AppSettings(true);
-		settings.setResolution(1280,720); //1280,720 //1920,1080
-		settings.setFrameRate(fps);
+		settings.setResolution(setts.getWidth(),setts.getHeight());
+		settings.setFrameRate(setts.getFrameRate());
 		settings.setUseJoysticks(true);
-		settings.setVSync(false);
+		settings.setTitle(setts.getTitle());
+		settings.setVSync(setts.ifVsnyc());
 
 		app.setSettings(settings);
-		app.setTimer(new NanoTN(fps));
+		app.setTimer(new NanoTN(setts.getFrameRate()));
 		app.setShowSettings(false);
 		app.setDisplayStatView(false);
 		app.start();
@@ -90,8 +95,6 @@ public class Rally extends SimpleApplication {
 
 	@Override
 	public void simpleInitApp() {
-		this.set = new Settings();
-		set.car = null; //get rid of warning
 		App.rally = this;
 		
 //		Logger.getLogger("").setLevel(Level.WARNING); //remove warnings here
@@ -118,20 +121,20 @@ public class Rally extends SimpleApplication {
 		flyCam.setEnabled(false);
 
 		//set the default option
-		defaultSet.car = defaultCar;
-		defaultSet.sworld = defaultsworld;
-		defaultSet.dworld = defaultdworld;
+		car = defaultCar;
+		sworld = defaultsworld;
+		dworld = defaultdworld;
 	}
 	
 	public void startFast() {
 		//use the default option and just init straight away
 		getStateManager().detach(start);
 		
-		if (defaultSet.car == null || (defaultSet.sworld == null && defaultSet.dworld == null)) {
+		if (car == null || (sworld == null && dworld == null)) {
 			System.err.println("Defaults not set.");
 		}
 		
-		startDrive(defaultSet.car, defaultSet.sworld, defaultSet.dworld);
+		startDrive(car, sworld, dworld);
 		App.nifty.gotoScreen("drive-noop");
 	}
 	
@@ -185,17 +188,13 @@ public class Rally extends SimpleApplication {
 		getStateManager().attach(chooseMap);
 	}
 	
-	private void startDrive(CarData car, StaticWorld world, DynamicType dworld) {
+	private void startDrive(CarData car, StaticWorld sworld, DynamicType dworld) {
 		if (menu != null || drive != null) return; //not sure what this is actually hoping to stop
-		
-		set.car = car;
-		set.sworld = world;
-		set.dworld = dworld;
 		
 		menu = new DriveMenu();
 		getStateManager().attach(menu);
 		
-		drive = new Drive(set);
+		drive = new Drive(car, sworld, dworld);
 		getStateManager().attach(drive);
 	}
 

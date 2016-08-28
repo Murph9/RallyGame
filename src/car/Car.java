@@ -45,9 +45,6 @@ public enum Car {
 			wheelModel = dir+"wheel3.blend";
 			carModel = dir+"ricer.blend";
 			
-			w_flatdata = new RicerLatWheel();
-			w_flongdata = new RicerLongWheel();
-			
 			//trying my best: http://www.cars-data.com/en/nissan-200-sx-turbo-specs/26930
 			mass = 1240;
 			width = 1.74f;

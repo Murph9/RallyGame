@@ -45,7 +45,7 @@ public class Drive extends AbstractAppState {
 	public CarBuilder cb;
 	private CarData car;
 	
-	int themCount = 4;
+	int themCount = 0;
 	private CarData them = Car.Rocket.get();
 	
 	//gui and camera stuff
@@ -57,23 +57,24 @@ public class Drive extends AbstractAppState {
 	Node arrowNode;
 	public int frameCount = 0;
 	public boolean ifDebug = false;
-		
-    public Drive (State set) {
+	
+    public Drive (CarData car, StaticWorld sworld, DynamicType dworld) {
     	super();
-    	this.car = set.getCar();
+    	this.car = car;
     	this.cb = new CarBuilder();
     	
-    	type = set.getWorldType(); 
+    	type = (sworld != null ? WorldType.STATIC : dworld != null ? WorldType.DYNAMIC : WorldType.OTHER); 
     	switch(type) {
     	case STATIC:
-    		this.world = set.getStaticWorld();
+    		this.world = sworld;
     		break;
     	case DYNAMIC:
-    		this.wpType = set.getDynamicWorld();
+    		this.wpType = dworld;
     		break;
     	case OTHER:
     	default:
-    		H.p("not sure what world you want");
+    		H.p("not sure what world type you want");
+    		System.exit(-1);
     	}
     }
     
@@ -83,6 +84,7 @@ public class Drive extends AbstractAppState {
     	
     	bulletAppState = new BulletAppState();
 		app.getStateManager().attach(bulletAppState);
+		getPhysicsSpace().setMaxSubSteps(4);
 		
 		createWorld();
 		

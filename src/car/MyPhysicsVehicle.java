@@ -157,16 +157,16 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			//generate the slip* max force from the car wheel data
 			double error = 0.0005f; //our fixed error, we don't really care how close it is past 3 or 4 decimals
 			
-			this.maxlat = VehiclePhysicsHelper.calcSlipMax(car.w_flatdata, error);
+			this.maxlat = VehicleGripHelper.calcSlipMax(car.w_flatdata, error);
 			if (Float.isNaN(maxlat))
-				throw new Exception("maxlat was NaN or 0");
-			this.maxlong = VehiclePhysicsHelper.calcSlipMax(car.w_flongdata, error);
+				throw new Exception("maxlat was: '" + maxlat +"'.");
+			this.maxlong = VehicleGripHelper.calcSlipMax(car.w_flongdata, error);
 			if (Float.isNaN(maxlong)) 
-				throw new Exception("maxlong was NaN");
+				throw new Exception("maxlong was: '" + maxlong +"'.");
 			
 		} catch (Exception e) {
 			e.printStackTrace();
-			H.p("error in calculating max(lat|long) values: "+ maxlat + " or " + maxlong);
+			H.p("error in calculating max(lat|long) values of: "+car.getClass());
 			System.exit(1);
 		}
 	}
@@ -378,6 +378,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 				slip_div = slowslipspeed + (velocity.length()*velocity.length())/slowslipspeed;
 			}
 
+			// TODO note that the bottom turn could be max of vel and radsec: http://www.menet.umn.edu/~gurkan/Tire%20Modeling%20%20Lecture.pdf 
 			float slipr = slip_const*(wheel[i].radSec*car.w_radius - velocity.z);
 			float slipratio = slipr/slip_div;
 
@@ -403,12 +404,12 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			float p = FastMath.sqrt(ratiofract*ratiofract + anglefract*anglefract);
 			
 			//calc the longitudinal force from the slip ratio			
-			wf[i].z = (ratiofract/p)*VehiclePhysicsHelper.tractionFormula(car.w_flongdata, p*maxlong) * susforce;
+			wf[i].z = (ratiofract/p)*VehicleGripHelper.tractionFormula(car.w_flongdata, p*maxlong) * susforce;
 			
 			//latitudinal force that is calculated off the slip angle
-			wf[i].x = -(anglefract/p)*VehiclePhysicsHelper.tractionFormula(car.w_flatdata, p*maxlat) * susforce;
+			wf[i].x = -(anglefract/p)*VehicleGripHelper.tractionFormula(car.w_flatdata, p*maxlat) * susforce;
 
-			wheel[i].skid = FastMath.clamp(p, 0, 1); //TODO make a better guess on what tyres should do
+			wheel[i].skid = FastMath.clamp(p, 0, 1); //TODO make a better guess on what tyres should colour the groud with
 			
 			//add the wheel force after merging the forces
 			float totalLongForce = torques[i] - wf[i].z - (brakeCurrent*car.brakeMaxTorque*Math.signum(wheel[i].radSec));
@@ -560,7 +561,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		//TODO make better [please its actually amazing to use]
 		float absdangle = Math.abs(driftangle);
 		if (absdangle > FastMath.DEG_TO_RAD*10 && absdangle > car.w_steerAngle) { 
-			steeringCurrent = FastMath.sign(steeringCurrent)*absdangle;
+//			steeringCurrent = FastMath.sign(steeringCurrent)*absdangle;
 		}
 
 		//TODO 0.3 - 0.4 seconds from lock to lock seems okay from what ive seen
@@ -656,7 +657,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	}
 }
 
-class VehiclePhysicsHelper {
+class VehicleGripHelper {
 	//http://www.gamedev.net/topic/462784-simplified-pacejka-magic-formula/
 
 	//There were fancy versions of the Pacejka's Formula here but there were removed
@@ -668,14 +669,14 @@ class VehiclePhysicsHelper {
 	 * @param slip Slip angle or slip ratio (it doesn't matter except for one value changes on it)
 	 * @return The force expected
 	 */
-	static float tractionFormula(CarWheelData w, float slip) {
+	static float tractionFormula(WheelData w, float slip) {
 		return w.D * FastMath.sin(w.C * FastMath.atan(w.B*slip - w.E * (w.B*slip - FastMath.atan(w.B*slip))));
 	}
 
 	//returns the slip value that gives the closest to 1 from the magic formula (should be called twice, lat and long)
-	static float calcSlipMax(CarWheelData w, double error) {
-		double lastX = 1f; //our first guess (usually finishes about 0.25f)
-		double nextX = lastX + 10*error; //just so its a larger diff that error
+	static float calcSlipMax(WheelData w, double error) {
+		double lastX = 0.2f; //our first guess (usually finishes about 0.25f)
+		double nextX = lastX + 5*error; //just so its a larger diff that error
 
 		while (Math.abs(lastX - nextX) > error) {
 			lastX = nextX;
@@ -683,11 +684,11 @@ class VehiclePhysicsHelper {
 		}
 		return (float)nextX;
 	}
-	private static double iterate(CarWheelData w, double x, double error) {
+	private static double iterate(WheelData w, double x, double error) {
 		return x - ((tractionFormula(w, (float)x)-w.D) / dtractionFormula(w, (float)x, error)); 
 		//-1 because we are trying to find a max (which happens to be 1)
 	}
-	private static double dtractionFormula(CarWheelData w, double slip, double error) {
+	private static double dtractionFormula(WheelData w, double slip, double error) {
 		return (tractionFormula(w, (float)(slip+error)) - tractionFormula(w , (float)(slip-error)))/ (2*error);
 	}
 	
@@ -696,4 +697,6 @@ class VehiclePhysicsHelper {
 	static double linearise(double input, double factor) {
 		return input*factor + (1 - factor) * Math.pow(input, 3);
 	}
+	
+	//TODO could look into the brush tyre model
 }

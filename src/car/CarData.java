@@ -14,8 +14,8 @@ public abstract class CarData {
 	//List of not primitives:
 	public VehicleTuning vt = null; //the original code doesn't even use it
 	//grip constants
-	public CarWheelData w_flatdata = new NormalLatData();
-	public CarWheelData w_flongdata = new NormalLongData();
+	public WheelData w_flatdata = new WheelDataLat();
+	public WheelData w_flongdata = new WheelDataLong();
 	
 	//model strings (can be xx.obj or xx.blend)
 	public String carModel = dir+"car4.obj";
