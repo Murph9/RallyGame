@@ -1,11 +1,8 @@
 package game;
 
 
-import world.StaticWorldBuilder;
-import world.StaticWorld;
+import world.World;
 import world.WorldType;
-import world.wp.WP.DynamicBuilder;
-import world.wp.WP.DynamicType;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
@@ -32,14 +29,17 @@ public class Drive extends AbstractAppState {
 	private BulletAppState bulletAppState;
 	
 	//World Model
-	public WorldType type;
+//	public WorldType type;
 	
-	public StaticWorld world;
-	StaticWorldBuilder sWorldB;
+	public World world;
+	private Node worldNode;
 	
-	DynamicType wpType = DynamicType.Simple; //some value so no nulls
-	boolean needsMaterial = false;
-	public DynamicBuilder worldB;
+	//public StaticWorld world;
+//	StaticWorldBuilder sWorldB;
+	
+//	DynamicType wpType = DynamicType.Simple; //some value so no nulls
+//	boolean needsMaterial = false;
+//	public DynamicBuilder worldB;
 	
 	//car stuff
 	public CarBuilder cb;
@@ -58,18 +58,17 @@ public class Drive extends AbstractAppState {
 	public int frameCount = 0;
 	public boolean ifDebug = false;
 	
-    public Drive (CarData car, StaticWorld sworld, DynamicType dworld) {
+    public Drive (CarData car, World world) {
     	super();
     	this.car = car;
+    	this.world = world;
     	this.cb = new CarBuilder();
     	
-    	type = (sworld != null ? WorldType.STATIC : dworld != null ? WorldType.DYNAMIC : WorldType.OTHER); 
+    	
+    	WorldType type = world.getType();
     	switch(type) {
     	case STATIC:
-    		this.world = sworld;
-    		break;
     	case DYNAMIC:
-    		this.wpType = dworld;
     		break;
     	case OTHER:
     	default:
@@ -97,6 +96,8 @@ public class Drive extends AbstractAppState {
 	}
     
 	private void createWorld() {
+		worldNode = world.init(getPhysicsSpace(), App.rally.getViewPort()); 
+		/*
 		if (type == WorldType.DYNAMIC) {
 			
 			worldB = wpType.getAndInitBuilder(getPhysicsSpace(), App.rally.getViewPort());
@@ -105,6 +106,8 @@ public class Drive extends AbstractAppState {
 		} else if (type == WorldType.STATIC) {
 			StaticWorldBuilder.addStaticWorld(getPhysicsSpace(), world, true);
 		}
+		*/
+		App.rally.getRootNode().attachChild(worldNode);
 
 		arrowNode = new Node();
 		App.rally.getRootNode().attachChild(arrowNode);
@@ -119,8 +122,9 @@ public class Drive extends AbstractAppState {
 	}
 	
 	private void buildCars() {
-		Vector3f start;
-		Matrix3f dir = new Matrix3f();
+		Vector3f start = world.getWorldStart();
+		Matrix3f dir = world.getWorldRot();
+		/*
 		if (type == WorldType.DYNAMIC) {
 			start = worldB.getWorldStart();
 			dir.fromAngleAxis(FastMath.DEG_TO_RAD*90, new Vector3f(0,1,0));
@@ -129,7 +133,7 @@ public class Drive extends AbstractAppState {
 		} else {
 			start = new Vector3f();
 		}
-		
+		*/
 		cb.addCar(getPhysicsSpace(), 0, car, start, dir, true);
 		
 		for (int i = 1; i < themCount+1; i++) {
@@ -173,9 +177,12 @@ public class Drive extends AbstractAppState {
 		cb.update(tpf);
 		
 		//update world
+		world.update(tpf, cb.get(0).getPhysicsLocation(), false);
+		/*
 		if (type == WorldType.DYNAMIC) {
 			worldB.update(cb.get(0).getPhysicsLocation(), false);
 		}
+		*/
 		if (App.rally.drive.ifDebug) {
 			H.p(cb.get(0).getPhysicsLocation());
 		}
@@ -190,9 +197,12 @@ public class Drive extends AbstractAppState {
 	
 	
 	public void reset() {
+		world.reset();
+		/*
 		if (type == WorldType.DYNAMIC) {
 			worldB.reset();
 		}
+		*/
 		
 		arrowNode.detachAllChildren();
 	}
@@ -213,9 +223,13 @@ public class Drive extends AbstractAppState {
 		App.rally.getStateManager().detach(bulletAppState);
 		
 		Node rn = App.rally.getRootNode();
+		
+		rn.detachChild(worldNode);
+		world.cleanup();
+		/*
 		if (type == WorldType.DYNAMIC)
 			rn.detachChild(worldB.getRootNode());
-		
+		*/
 		rn.detachChild(arrowNode);
 		rn.detachChild(camNode);
 	}

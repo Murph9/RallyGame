@@ -39,28 +39,22 @@
 		</layer>
 	</screen>
 
-	<screen id="chooseMapType" controller="game.ChooseMap">
-		<layer backgroundColor="#0000" childLayout="vertical">
-			<panel height="25%" width="20%" align="center" childLayout="vertical" style="nifty-panel">
-				<control name="button" label="Static" id="staticButton" align="center" visibleToMouse="true">
-					<interact onClick="staticWorld()" />
-				</control>
-				<control name="button" label="Dynamic" id="dynamicButton" align="center" visibleToMouse="true">
-					<interact onClick="dynamicWorld()" />
-				</control>
-			</panel>
-		</layer> 
-	</screen>
 	<screen id="chooseMap" controller="game.ChooseMap">
-		<layer backgroundColor="#0000" childLayout="horizontal">
-			<panel height="10%" width="85%" align="left" childLayout="center" style="nifty-panel">
-				<control id="mapdropdown" name="dropDown"> 
-					<interact onClick="change()" />
-				</control>
+		<layer backgroundColor="#0000" childLayout="vertical">
+			<panel height="8%" width="50%" align="left" childLayout="horizontal" id="staticLabel" backgroundColor="#0000">
+				<text font="aurulent-sans-16.fnt" text="Static Worlds" />
 			</panel>
-			<panel height="10%" width="15%" align="right" childLayout="center" style="nifty-panel">
-				<control name="button" label="Choose Map" id="MapButton" align="center"
-					valign="center" visibleToMouse="true">
+			<panel height="30%" width="50%" align="left" childLayout="horizontal" id="staticPanel" backgroundColor="#0000">
+				<!-- For the static world buttons [should probably map to change()] -->
+			</panel>
+			<panel height="8%" width="50%" align="left" childLayout="horizontal" id="dynLabel" backgroundColor="#0000">
+				<text font="aurulent-sans-16.fnt" text="Dynamic Worlds" />
+			</panel>
+			<panel height="30%" width="50%" align="left" childLayout="horizontal" id="dynPanel" backgroundColor="#0000">
+				<!-- For the dynamic world buttons [should probably map to change()] -->
+			</panel>
+			<panel height="10%" width="15%" align="left" childLayout="center" style="nifty-panel">
+				<control name="button" label="Choose Map" id="MapButton" align="center" valign="center" visibleToMouse="true">
 					<interact onClick="chooseMap()" />
 				</control>
 			</panel>

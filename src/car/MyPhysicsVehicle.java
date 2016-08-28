@@ -22,7 +22,6 @@ import com.jme3.scene.Spatial;
 import car.CarModelData.CarPart;
 import game.App;
 import game.H;
-import world.WorldType;
 
 //extends:
 //https://github.com/jMonkeyEngine/jmonkeyengine/blob/master/jme3-jbullet/src/main/java/com/jme3/bullet/objects/PhysicsVehicle.java
@@ -607,8 +606,13 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		setLinearVelocity(new Vector3f());
 		setAngularVelocity(new Vector3f());
 
+		
+		setPhysicsLocation(App.rally.drive.world.getWorldStart());
+		setPhysicsRotation(App.rally.drive.world.getWorldRot());
+		setAngularVelocity(new Vector3f());
+		
 		App.rally.drive.reset();
-
+/*
 		if (App.rally.drive.type == WorldType.DYNAMIC) {
 			setPhysicsLocation(App.rally.drive.worldB.getWorldStart());
 			Matrix3f p = new Matrix3f();
@@ -619,7 +623,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		} else {
 			setPhysicsLocation(App.rally.drive.world.start);
 		}
-
+*/	
 		skidNode.detachAllChildren();
 		skidList.clear();
 		for (MyWheelNode w: wheel) {

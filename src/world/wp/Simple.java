@@ -3,6 +3,8 @@ package world.wp;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
+import world.World;
+
 //stands for world piece simple, as in its a simple piece of the world
 public enum Simple implements WP {
 	
@@ -58,8 +60,7 @@ public enum Simple implements WP {
 		return endNode;
 	}
 	
-	
-	static class Builder extends DefaultBuilder implements DynamicBuilder {
+	static class Builder extends DefaultBuilder implements World {
 		Builder() {
 			super(Simple.values());
 		}

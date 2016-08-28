@@ -13,6 +13,7 @@ import com.jme3.material.Material;
 import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
+import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.ViewPort;
@@ -24,16 +25,20 @@ import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.shape.Box;
 
 import game.App;
-import world.wp.WP.DynamicBuilder;
+import game.H;
+import world.World;
+import world.WorldType;
 import world.wp.WP.NodeType;
 
-public abstract class DefaultBuilder implements DynamicBuilder {
+public abstract class DefaultBuilder implements World {
 
 	//designed to generate the world infront of the player dynamically.
 
 	//TODO's
 	//hard - try and just make a curver to drive on instead of the loaded segments
 	//bezier curve stuffs..
+	
+	protected boolean isInit;
 	
 	protected WP[] type;
 	protected PhysicsSpace space;
@@ -59,7 +64,12 @@ public abstract class DefaultBuilder implements DynamicBuilder {
 	}
 	
 	@Override
-	public void init(PhysicsSpace space, ViewPort view) {
+	public Node init(PhysicsSpace space, ViewPort view) {
+		if (isInit) {
+			H.p("WAS INITED TWICE");
+		}
+		
+		this.isInit = true;
 		this.space = space;
 		
 		AssetManager am = App.rally.getAssetManager();
@@ -101,10 +111,12 @@ public abstract class DefaultBuilder implements DynamicBuilder {
 		
 		this.rootNode.attachChild(startGeometry);
 		this.space.add(startGeometry);
+		
+		return rootNode;
 	}
 
 	@Override
-	public void update(Vector3f playerPos, boolean force) {
+	public void update(float tpf, Vector3f playerPos, boolean force) {
 		count++;
 		if (!force && count % 10 != 0) return; //only on every 10th frame to save lag
 		
@@ -210,13 +222,20 @@ public abstract class DefaultBuilder implements DynamicBuilder {
 	}
 
 	@Override
-	public Spatial getRootNode() {
+	public Node getRootNode() {
 		return rootNode;
 	}
 
 	@Override
 	public Vector3f getWorldStart() {
 		return new Vector3f(0,1,0); //TODO better
+	}
+	
+	@Override
+	public Matrix3f getWorldRot() {
+		Matrix3f rot = new Matrix3f();
+		rot.fromAngleAxis(FastMath.DEG_TO_RAD*90, new Vector3f(0,1,0));
+		return rot;
 	}
 	
 	@Override
@@ -236,6 +255,17 @@ public abstract class DefaultBuilder implements DynamicBuilder {
 		}
 		
 		return null;
+	}
+	
+	public void cleanup() {
+		//TODO
+	}
+	
+	public boolean isInit() {
+		return isInit;
+	}
+	public WorldType getType() {
+		return WorldType.DYNAMIC;
 	}
 	
 	protected class WPObject {

@@ -1,10 +1,9 @@
 package world.wp;
 
-import com.jme3.bullet.PhysicsSpace;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import com.jme3.renderer.ViewPort;
-import com.jme3.scene.Spatial;
+
+import world.World;
 
 /** World Piece
  * @author Jake
@@ -27,33 +26,16 @@ public interface WP {
 		Valley(new Valley.Builder()),
 		;
 		
-		private DynamicBuilder builder;
-		DynamicType(DynamicBuilder db) {
+		private World builder;
+		DynamicType(World db) {
 			this.builder = db;
 		}
 		
-		public DynamicBuilder getAndInitBuilder(PhysicsSpace space, ViewPort view) {
-			builder.reset(); //just incase its already been used, space is probably wrong for example
-			builder.init(space, view);
+		public World getBuilder(/*PhysicsSpace space, ViewPort view*/) {
+			builder.reset(); //just incase its already been used, physics space is probably wrong for example
+			//builder.init(space, view);
 			return builder;
 		}
-		public Spatial PlaceDemoSet(PhysicsSpace space, ViewPort view) {
-			builder.reset(); //just incase its already been used
-			
-			builder.init(space, view);
-			builder.update(new Vector3f(), true); //update once
-			return builder.getRootNode();
-		}
-	}
-	
-	public interface DynamicBuilder {
-		void init(PhysicsSpace space, ViewPort view);
-		void update(Vector3f playerPos, boolean force);
-
-		Vector3f getNextPieceClosestTo(Vector3f myPos);
-		Spatial getRootNode();
-		Vector3f getWorldStart();
-		void reset();
 	}
 	
 	static final Quaternion

@@ -18,6 +18,8 @@ import car.CarData;
 import de.lessvoid.nifty.Nifty;
 import settings.Configuration;
 import world.StaticWorld;
+import world.StaticWorldBuilder;
+import world.World;
 import world.wp.WP.DynamicType;
 
 ////TODO Ideas for game modes:
@@ -63,20 +65,18 @@ public class Rally extends SimpleApplication {
 	private DynamicType dworld;
 	
 	public static void main(String[] args) {
-		Configuration setts = Configuration.Read();
-
-		H.p(setts.getWidth());
+		Configuration config = Configuration.Read();
 		
 		Rally app = new Rally();
 		AppSettings settings = new AppSettings(true);
-		settings.setResolution(setts.getWidth(),setts.getHeight());
-		settings.setFrameRate(setts.getFrameRate());
+		settings.setResolution(config.getWidth(),config.getHeight());
+		settings.setFrameRate(config.getFrameRate());
 		settings.setUseJoysticks(true);
-		settings.setTitle(setts.getTitle());
-		settings.setVSync(setts.ifVsnyc());
+		settings.setTitle(config.getTitle());
+		settings.setVSync(config.ifVsnyc());
 
 		app.setSettings(settings);
-		app.setTimer(new NanoTN(setts.getFrameRate()));
+		app.setTimer(new NanoTN(config.getFrameRate()));
 		app.setShowSettings(false);
 		app.setDisplayStatView(false);
 		app.start();
@@ -109,11 +109,11 @@ public class Rally extends SimpleApplication {
 			e.printStackTrace();
 		}
 		
-		start = new Start();
-		getStateManager().attach(start);
-		
 		sky = new SkyState(); //lighting and shadow stuff is global
 		getStateManager().attach(sky);
+		
+		start = new Start();
+		getStateManager().attach(start);
 		
 		nifty.fromXml("assets/ui/nifty.xml", "start", start);
 		guiViewPort.addProcessor(niftyDisplay);
@@ -133,14 +133,20 @@ public class Rally extends SimpleApplication {
 		if (car == null || (sworld == null && dworld == null)) {
 			System.err.println("Defaults not set.");
 		}
+		World world = null;
+		if (sworld != null)
+			world = new StaticWorldBuilder(sworld);
+		else if (dworld != null)
+			world = dworld.getBuilder();
+		else
+			H.e("World generation error occured.");
 		
-		startDrive(car, sworld, dworld);
+		startDrive(car, world);
 		App.nifty.gotoScreen("drive-noop");
 	}
 	
 	//HERE is the logic for the app progress.
-	// its the thing you call when the app state is done
-	// TODO: need a toMainMenu() at some point 
+	// its the thing you call when the app state is done with itself
 	public void next(AppState app) {
 		AppStateManager state = getStateManager();
 		
@@ -148,19 +154,15 @@ public class Rally extends SimpleApplication {
 			state.detach(start);
 			
 			startChooseCar();
-			App.nifty.gotoScreen("chooseCar");
 			
 		} else if (app instanceof ChooseCar) {
 			state.detach(chooseCar);
-			
 			startChooseMap();
-			App.nifty.gotoScreen("chooseMapType");
 			
 		} else if (app instanceof ChooseMap) {
 			state.detach(chooseMap);
 			
-			startDrive(chooseCar.getCarData(), chooseMap.getMapS(), chooseMap.getMapD());
-			App.nifty.gotoScreen("drive-noop");
+			startDrive(chooseCar.getCarData(), chooseMap.getWorld());
 			
 		} else if (app instanceof DriveMenu) {
 			state.detach(drive); //no need to call drive.cleanup because it can do that itself
@@ -181,21 +183,27 @@ public class Rally extends SimpleApplication {
 	private void startChooseCar() {
 		chooseCar = new ChooseCar();
 		getStateManager().attach(chooseCar);
+		App.nifty.gotoScreen("chooseCar");
 	}
 	
 	private void startChooseMap() {
 		chooseMap = new ChooseMap();
 		getStateManager().attach(chooseMap);
+		App.nifty.gotoScreen("chooseMap");
 	}
 	
-	private void startDrive(CarData car, StaticWorld sworld, DynamicType dworld) {
+	private void startDrive(CarData car, World world) {
 		if (menu != null || drive != null) return; //not sure what this is actually hoping to stop
 		
 		menu = new DriveMenu();
 		getStateManager().attach(menu);
 		
-		drive = new Drive(car, sworld, dworld);
+		H.p(world.getType() + " " + sworld + " " + dworld);
+		
+		drive = new Drive(car, world);
 		getStateManager().attach(drive);
+		
+		App.nifty.gotoScreen("drive-noop");
 	}
 
 	/////////////////////

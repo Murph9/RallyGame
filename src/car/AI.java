@@ -9,12 +9,10 @@ import world.WorldType;
 
 public class AI {
 
-	WorldType type;
 	MyPhysicsVehicle car;
 
 	AI (MyPhysicsVehicle car) {
 		this.car = car;
-		this.type = App.rally.drive.type;
 	}
 
 	public void update(float tpf) {
@@ -26,16 +24,16 @@ public class AI {
 		
 
 		Vector3f target;
-		if (type == WorldType.DYNAMIC) {
+		if (App.rally.drive.world.getType() == WorldType.DYNAMIC) {
 			//follow the path
-			target = App.rally.drive.worldB.getNextPieceClosestTo(pos);
+			target = App.rally.drive.world.getNextPieceClosestTo(pos);
 			if (target == null) {
 				target = player1Pos;
 			}
 			
 		} else {
 			//move towards player 1
-			target = player1Pos;//.add(player1.getLinearVelocity().normalize());
+			target = player1Pos;
 		}
 		
 		Vector3f myforward = new Vector3f();

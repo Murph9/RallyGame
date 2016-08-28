@@ -24,11 +24,11 @@ import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 import game.H.Pair;
 import world.StaticWorld;
-import world.StaticWorldBuilder;
+import world.StaticWorldHelper;
 
 public class ChooseCar extends AbstractAppState implements ScreenController {
 
-	private BulletAppState bulletAppState;
+	private static BulletAppState bulletAppState;
 
 	private StaticWorld world;
 
@@ -43,7 +43,7 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 	private HashMap<String, CarData> carset;
 	
 	public ChooseCar() {
-		world = StaticWorld.garage2;
+		world = StaticWorld.garage2; //good default
 
 		carset = new HashMap<>();
 		Car[] a = Car.values();
@@ -64,24 +64,17 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 		info = App.nifty.getCurrentScreen().findElementByName("carinfo");
 		info.getRenderer(TextRenderer.class).setLineWrapping(true);
 		
-		createWorld();
-		buildPlayer();
-		initCamera();
-	}
+		//create world
+		StaticWorldHelper.addStaticWorld(App.rally.getRootNode(), getPhysicsSpace(), world, App.rally.sky.ifShadow);
 
-	private void createWorld() {
-		StaticWorldBuilder.addStaticWorld(getPhysicsSpace(), world, App.rally.sky.ifShadow);
-	}
-
-	private void buildPlayer() {
+		//init player
 		Vector3f start = world.start;
 		Matrix3f dir = new Matrix3f();
 
 		cb = new CarBuilder();
 		cb.addCar(getPhysicsSpace(), 0, car, start, dir, true);
-	}
 
-	private void initCamera() {
+		//make camera
 		camNode = new MyCamera("Cam Node 2", App.rally.getCamera(), null);
 		camNode.setLocalTranslation(0, 3, 7);
 		camNode.lookAt(new Vector3f(0,1.2f,0), new Vector3f(0,1,0));
@@ -135,8 +128,10 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 
 	public void cleanup() {
 		//TODO i know theres got to be something else.
-		StaticWorldBuilder.removeStaticWorld(getPhysicsSpace(), world);
+		StaticWorldHelper.removeStaticWorld(App.rally.getRootNode(),getPhysicsSpace(), world);
 
+		App.rally.getStateManager().detach(bulletAppState);
+		
 		cb.cleanup();
 		
 		App.rally.getRootNode().detachChild(camNode);
@@ -145,7 +140,7 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 	/////////////////////////////
 	//UI stuff
 	public void chooseCar() {
-		if (car == null) { /*not really sure*/ };
+		if (car == null) { H.p("no return value for ChooseCar()"); };
 		App.rally.next(this);
 	}
 	public CarData getCarData() {

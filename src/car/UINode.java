@@ -23,7 +23,6 @@ import com.jme3.util.BufferUtils;
 
 import game.App;
 import game.Rally;
-import world.WorldType;
 
 public class UINode {
 
@@ -334,9 +333,7 @@ public class UINode {
 		setSpeedDigits(speedKMH);
 		setGearDigit(p.curGear);
 		
-		if (App.rally.drive.type == WorldType.DYNAMIC) {
-			score.setText("Placed: ??");
-		}
+		score.setText("??");
 		
 		//highlight the rpmBar the right amout
 		for (int i = 0; i < rpmBar.size(); i++) {

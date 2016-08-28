@@ -3,6 +3,8 @@ package world.wp;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
+import world.World;
+
 public enum Underground implements WP {
 	
 	STRAIGHT("straight.blend", new Vector3f(20,0,0), WP.STRIAGHT, NodeType.A, NodeType.A),
@@ -48,7 +50,7 @@ public enum Underground implements WP {
 		return endNode;
 	}
 	
-	static class Builder extends DefaultBuilder implements DynamicBuilder {
+	static class Builder extends DefaultBuilder implements World {
 		Builder() {
 			super(Underground.values());
 		}

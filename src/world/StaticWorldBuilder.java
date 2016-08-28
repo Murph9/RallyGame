@@ -1,85 +1,85 @@
 package world;
 
-import game.App;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import com.jme3.asset.AssetManager;
 import com.jme3.bullet.PhysicsSpace;
-import com.jme3.bullet.collision.shapes.CollisionShape;
-import com.jme3.bullet.control.RigidBodyControl;
-import com.jme3.bullet.util.CollisionShapeFactory;
-import com.jme3.material.Material;
-import com.jme3.material.RenderState.FaceCullMode;
-import com.jme3.renderer.queue.RenderQueue.ShadowMode;
-import com.jme3.scene.Geometry;
+import com.jme3.math.Matrix3f;
+import com.jme3.math.Vector3f;
+import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
 
-public class StaticWorldBuilder extends Node {
+import game.H;
 
-	private static StaticWorld curWorld; //assuming you can't have 2
-	private static List<RigidBodyControl> landscapes = new ArrayList<RigidBodyControl>(5);
-	private static List<Spatial> models = new ArrayList<Spatial>(5); //at least 5
+public class StaticWorldBuilder implements World {
+
+	private boolean isInit;
 	
-	public static void addStaticWorld(PhysicsSpace phys, StaticWorld world, boolean ifShadow) {
-		if (curWorld != null) { System.err.println("can't make a world until you remove the last one"); return; }
-		curWorld = world;
-		
-		AssetManager as = App.rally.getAssetManager();
-		
-		Material mat = new Material(as, "Common/MatDefs/Misc/ShowNormals.j3md");
-		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
-		
-	    //imported model
-		Spatial worldNode = as.loadModel(curWorld.name);
-		if (worldNode instanceof Node) {
-			for (Spatial s: ((Node) worldNode).getChildren()) {
-				if (curWorld.ifNeedsTexture) {
-					s.setMaterial(mat);
-				}
-				addWorldModel(phys, s, ifShadow);
-			}
-		} else {
-			Geometry worldModel = (Geometry) as.loadModel(curWorld.name);
-			
-			if (curWorld.ifNeedsTexture) {
-				worldModel.setMaterial(mat);
-			}
-			addWorldModel(phys, worldModel, ifShadow);
-		}
-		
-		System.err.println("Adding: "+ curWorld.name);
+	private Node rootNode;
+	private StaticWorld world;
+	private PhysicsSpace phys;
+	
+	public StaticWorldBuilder(StaticWorld world) {
+		this.world = world;
 	}
 	
-	private static void addWorldModel(PhysicsSpace phys, Spatial s, boolean ifShadow) {
-		s.scale(curWorld.scale);
-		
-		CollisionShape col = CollisionShapeFactory.createMeshShape(s);
-		RigidBodyControl landscape = new RigidBodyControl(col, 0);
-		s.addControl(landscape);
-		if (ifShadow) {
-			s.setShadowMode(ShadowMode.Receive);
-		}
+	public WorldType getType() {
+		return WorldType.STATIC;
+	}
 
-		landscapes.add(landscape);
-		models.add(s);
-		
-		phys.add(landscape);
-		App.rally.getRootNode().attachChild(s);
-	}
-	
-	
-	public static void removeStaticWorld(PhysicsSpace phys, StaticWorld world) {
-		for (RigidBodyControl r: landscapes) {
-			phys.remove(r);
-		}
-		for (Spatial s: models) {
-			App.rally.getRootNode().detachChild(s);
+	@Override
+	public Node init(PhysicsSpace phys, ViewPort view) {
+		if (isInit) {
+			H.e("WAS INITED TWICE");
 		}
 		
-//		App.rally.getRootNode().detachChild();
-		curWorld = null;
+		this.isInit = true;
+		this.phys = phys;
+		this.rootNode = new Node();
+		
+		StaticWorldHelper.addStaticWorld(rootNode, phys, world, true);
+		return rootNode;
 	}
+
+	@Override
+	public Vector3f getWorldStart() {
+		return world.start;
+	}
+
+	@Override
+	public Matrix3f getWorldRot() {
+		return new Matrix3f();
+	}
+
+	@Override
+	public void update(float tpf, Vector3f playerPos, boolean force) {
+		//doesn't ever need to update yet
+	}
+
+	@Override
+	public void reset() {
+		//reset is a play action, so its usually reset dynamic stuff which this doesn't have
+	}
+
+	@Override
+	public void cleanup() {
+		StaticWorldHelper.removeStaticWorld(rootNode, phys, world);
+		rootNode.detachAllChildren();
+	}
+
+	@Override
+	public Vector3f getNextPieceClosestTo(Vector3f pos) {
+		return null;
+	}
+
+	@Override
+	public Node getRootNode() {
+		return rootNode;
+	}
+
+	@Override
+	public boolean isInit() {
+		return isInit;
+	}
+	
 }
+
+
+

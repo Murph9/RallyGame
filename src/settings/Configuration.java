@@ -92,6 +92,7 @@ public class Configuration implements UserSettings {
 	//TODO more
 	//default car, ai car
 	//default map, dynamic map
+	//shadow
 	
 	private Configuration(Properties prop) {
 		if (prop == null) {

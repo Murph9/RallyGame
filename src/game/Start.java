@@ -16,7 +16,7 @@ import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 import world.StaticWorld;
-import world.StaticWorldBuilder;
+import world.StaticWorldHelper;
 
 public class Start extends AbstractAppState implements ScreenController {
 
@@ -52,10 +52,10 @@ public class Start extends AbstractAppState implements ScreenController {
 		bulletAppState = new BulletAppState();
 		app.getStateManager().attach(bulletAppState);
 		
-		StaticWorldBuilder.addStaticWorld(getPhysicsSpace(), world, App.rally.sky.ifShadow);
+		StaticWorldHelper.addStaticWorld(App.rally.getRootNode(), getPhysicsSpace(), world, App.rally.sky.ifShadow);
 		
 		cb = new CarBuilder();
-		cb.addCar(getPhysicsSpace(), 0, car, world.start, Matrix3f.IDENTITY, true);
+		cb.addCar(getPhysicsSpace(), 0, car, world.start, Matrix3f.IDENTITY, false);
 		
 		camNode = new MyCamera("Cam Node 2", App.rally.getCamera(), null);
 		camNode.setLocalTranslation(0, 3, 7);
@@ -67,7 +67,7 @@ public class Start extends AbstractAppState implements ScreenController {
 	}
 	
 	public void cleanup() {
-		StaticWorldBuilder.removeStaticWorld(getPhysicsSpace(), world);
+		StaticWorldHelper.removeStaticWorld(App.rally.getRootNode(), getPhysicsSpace(), world);
 		cb.cleanup();
 		
 		App.rally.getRootNode().detachChild(camNode);

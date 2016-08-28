@@ -9,10 +9,11 @@ import com.jme3.app.state.AppStateManager;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Spatial;
+import com.jme3.scene.Node;
 
 import de.lessvoid.nifty.Nifty;
-import de.lessvoid.nifty.controls.DropDown;
+import de.lessvoid.nifty.builder.ControlBuilder;
+import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 
@@ -21,33 +22,21 @@ import world.wp.WP.DynamicType;
 
 public class ChooseMap extends AbstractAppState implements ScreenController {
 
-	private enum WorldType {
-		nothing, staticW, dynamicW;
-	}
-
-	private BulletAppState bulletAppState;
+	private static BulletAppState bulletAppState;
 
 	private static boolean worldIsSet = false;
-	private static WorldType worldType = WorldType.nothing;
-
-	private static StaticWorld sMap;
-	private HashMap<String, StaticWorld> sSet;
+	private static WorldType worldType = WorldType.OTHER;
+	private static World world = null;
 	
-	private static DynamicType dMap;
+	private HashMap<String, StaticWorld> sSet;
 	private HashMap<String, DynamicType> dSet;
-	private Spatial dnode;
 
-	private static DropDown<String> dropdown;
+	private static Element staticPanel;
+	private static Element dynPanel;
+	
 	private MyCamera camNode;
 
 	public ChooseMap() {
-		//camera
-		camNode = new MyCamera("Cam Node 2", App.rally.getCamera(), null);
-		camNode.setLocalTranslation(100, 140, 100);
-		camNode.lookAt(new Vector3f(0,1,0), new Vector3f(0,1,0));
-
-		App.rally.getRootNode().attachChild(camNode);
-		
 		//init static
 		sSet = new LinkedHashMap<>();
 		StaticWorld[] list  = StaticWorld.values();
@@ -61,10 +50,6 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 		for (DynamicType dt: worlds) {
 			dSet.put(dt.name(), dt);
 		}
-		
-		//set initial values
-		sMap = list[0];
-		dMap = worlds[0];
 	}
 
 	@Override
@@ -72,59 +57,27 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 		super.initialize(stateManager, app);
 
 		bulletAppState = new BulletAppState();
-		app.getStateManager().attach(bulletAppState);
-	}
-
-	private void createWorld() {
-		if (worldType == WorldType.staticW) {
-			StaticWorldBuilder.addStaticWorld(getPhysicsSpace(), sMap, App.rally.sky.ifShadow);
-		} else if (worldType == WorldType.dynamicW) {
-			if (dnode != null)
-				App.rally.getRootNode().detachChild(dnode);
-			
-			dnode = dMap.PlaceDemoSet(getPhysicsSpace(), App.rally.getGuiViewPort());
-			App.rally.getRootNode().attachChild(dnode);
-			
-			camNode.setLocalTranslation(-70, 50, 0);
-			camNode.lookAt(new Vector3f(20,1,0), new Vector3f(0,1,0));
-		}
+		stateManager.attach(bulletAppState);
+		
+		camNode = new MyCamera("Cam Node - Choose Map", App.rally.getCamera(), null);
+		camNode.setLocalTranslation(-70, 50, 0);
+		camNode.lookAt(new Vector3f(20,1,0), new Vector3f(0,1,0));
+		
+		App.rally.getRootNode().attachChild(camNode);
 	}
 
 	public void update(float tpf) {
 		if (!isEnabled()) return;
 		super.update(tpf);
 
-		if (worldType != WorldType.nothing && !worldIsSet) { //keep checking if the ui changed something
+		if (worldType != WorldType.OTHER && !worldIsSet) { //keep checking if the ui changed something
 			//if the worldtype has been set, init the apprpriate world type
-			createWorld();
 			worldIsSet = true;
 			return;
 		}
-
-		if (dropdown != null) {
-			String option = dropdown.getSelection();
-			if (worldType == WorldType.staticW) {
-				StaticWorld w = sSet.get(option);
-				if (w != null && w != sMap) {
-					//remove previous map
-					StaticWorldBuilder.removeStaticWorld(getPhysicsSpace(), sMap);
-
-					sMap = w;
-					StaticWorldBuilder.addStaticWorld(getPhysicsSpace(), sMap, App.rally.sky.ifShadow);
-				}
-				
-			} else if (worldType == WorldType.dynamicW) {
-				DynamicType w = dSet.get(option);
-				if (w != null && w != dMap) {
-					dMap = w;
-					
-					App.rally.getRootNode().detachChild(dnode);
-					dnode = dMap.PlaceDemoSet(getPhysicsSpace(), App.rally.getGuiViewPort());
-					App.rally.getRootNode().attachChild(dnode);
-					H.p(dnode);
-				}
-			}
-		}
+		
+		if (world != null && world.isInit())
+			world.update(tpf, new Vector3f(0,0,0), false);
 
 		camNode.myUpdate(tpf);
 	}
@@ -134,62 +87,82 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 	}
 
 	public void cleanup() {
-		StaticWorldBuilder.removeStaticWorld(getPhysicsSpace(), sMap);
-		if (dnode != null) //remove current demo
-			App.rally.getRootNode().detachChild(dnode);
-		
-		
+		App.rally.getStateManager().detach(bulletAppState);
 		App.rally.getRootNode().detachChild(camNode);
+		App.rally.getRootNode().detachChild(world.getRootNode());
 	}
 
 	////////////////////////
 	//UI stuff
-	public void staticWorld() {
-		worldType = WorldType.staticW;
-		App.nifty.gotoScreen("chooseMap");
-	}
-	public void dynamicWorld() {
-		worldType = WorldType.dynamicW;
-		App.nifty.gotoScreen("chooseMap");
-	}
-
 	public void chooseMap() {
-		if (sMap == null && dMap == null) { H.p("no return value for ChooseMap()"); }
+		if (world == null) { H.p("no return value for ChooseMap()"); }
 		App.rally.next(this);
 	}
-
-	public StaticWorld getMapS() {
-		if (worldType == WorldType.staticW)
-			return sMap;
-		else
-			return null;
-	}
-	public DynamicType getMapD() {
-		if (worldType == WorldType.dynamicW)
-			return dMap;
-		else 
-			return null;
+	public World getWorld() {
+		world.reset();
+		world.cleanup();
+		return world;
 	}
 
 	@Override
-	public void bind(Nifty arg0, Screen arg1) {
-		if (arg1.getScreenId().equals("chooseMap")) {
-			dropdown = H.findDropDownControl(arg1, "mapdropdown");
-			if (dropdown != null) {
-				if (worldType == WorldType.staticW) {
-					for (String s : sSet.keySet()) {
-						dropdown.addItem(s);
-					}
-					dropdown.selectItemByIndex(0);
-				
-				} else if (worldType == WorldType.dynamicW) {
-					for (String s : dSet.keySet()) {
-						dropdown.addItem(s);
-					}
-					dropdown.selectItemByIndex(0);
+	public void bind(Nifty nifty, Screen screen) {
+		if (screen.getScreenId().equals("chooseMap")) {
+			staticPanel = screen.findElementByName("staticPanel");
+			if (staticPanel != null) {
+				for (String s : sSet.keySet()) {
+					MakeButton(nifty, screen, staticPanel, WorldType.STATIC, s);
+				}
+			}
+			
+			dynPanel = screen.findElementByName("dynPanel");
+			if (dynPanel != null) {
+				for (String s : dSet.keySet()) {
+					MakeButton(nifty, screen, dynPanel, WorldType.DYNAMIC, s);
 				}
 			}
 		}
+	}
+	
+	private void MakeButton(Nifty nifty, Screen screen, Element panel, WorldType type, String name) {
+		ControlBuilder cb = new ControlBuilder("button") {{
+			id(name);
+			alignLeft();
+			style("nifty-button");
+			padding("10px");
+
+			interactOnClick("setWorld(" + type + "," + name + ")");
+			
+			parameter("label", name);
+		}};
+		
+		
+		cb.build(nifty, screen, panel);
+	}
+	
+	public void setWorld(String typeStr, String subType) {
+		if (world != null && world.isInit()) {
+			App.rally.getRootNode().detachChild(world.getRootNode());
+			world.cleanup();
+		}
+		
+		//TODO find how to get the button clicked 
+		
+		worldType = WorldType.valueOf(WorldType.class, typeStr);
+		if (worldType == WorldType.STATIC) {
+			StaticWorld sworld = StaticWorld.valueOf(StaticWorld.class, subType);
+			
+			world = new StaticWorldBuilder(sworld);
+		} else if (worldType == WorldType.DYNAMIC) {
+			DynamicType dworld = DynamicType.valueOf(DynamicType.class, subType);
+			
+			world = dworld.getBuilder();
+		} else {
+			H.e("Non valid world type in setWorld() method");
+			return;
+		}
+		
+		Node n = world.init(getPhysicsSpace(), App.rally.getViewPort());
+		App.rally.getRootNode().attachChild(n);
 	}
 
 	public void onEndScreen() { }

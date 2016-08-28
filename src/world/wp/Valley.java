@@ -7,6 +7,8 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
+import world.World;
+
 public enum Valley implements WP {
 	STRAIGHT("straight.blend", new Vector3f(25,0,0), WP.STRIAGHT),
 	STRAIGHT_DOWN("straight_down.blend", new Vector3f(20,-1.33697f, 0), WP.DOWN_8),
@@ -50,7 +52,7 @@ public enum Valley implements WP {
 	
 	//TODO textures
 	
-	static class Builder extends DefaultBuilder implements DynamicBuilder {
+	static class Builder extends DefaultBuilder implements World {
 		Builder() {
 			super(Valley.values());
 		}
