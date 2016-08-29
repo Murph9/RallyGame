@@ -44,7 +44,7 @@ import world.wp.WP.DynamicType;
 //set a nifty new default style
 //still need to get fog working..
 //at night time or something because loading looks easier
-//stop the car sound on the menus
+//stop the car sound on the menus [please]
 
 public class Rally extends SimpleApplication {
 
@@ -197,8 +197,6 @@ public class Rally extends SimpleApplication {
 		
 		menu = new DriveMenu();
 		getStateManager().attach(menu);
-		
-		H.p(world.getType() + " " + sworld + " " + dworld);
 		
 		drive = new Drive(car, world);
 		getStateManager().attach(drive);

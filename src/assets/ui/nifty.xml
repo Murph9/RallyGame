@@ -41,16 +41,22 @@
 
 	<screen id="chooseMap" controller="game.ChooseMap">
 		<layer backgroundColor="#0000" childLayout="vertical">
-			<panel height="8%" width="50%" align="left" childLayout="horizontal" id="staticLabel" backgroundColor="#0000">
+			<panel height="2%" width="50%" align="left" childLayout="horizontal" id="staticLabel" backgroundColor="#0000">
 				<text font="aurulent-sans-16.fnt" text="Static Worlds" />
 			</panel>
-			<panel height="30%" width="50%" align="left" childLayout="horizontal" id="staticPanel" backgroundColor="#0000">
+			<panel height="10%" width="50%" align="left" childLayout="horizontal" id="staticPanel" backgroundColor="#0000">
 				<!-- For the static world buttons [should probably map to change()] -->
 			</panel>
-			<panel height="8%" width="50%" align="left" childLayout="horizontal" id="dynLabel" backgroundColor="#0000">
+			<panel height="2%" width="50%" align="left" childLayout="horizontal" id="dynLabel" backgroundColor="#0000">
 				<text font="aurulent-sans-16.fnt" text="Dynamic Worlds" />
 			</panel>
-			<panel height="30%" width="50%" align="left" childLayout="horizontal" id="dynPanel" backgroundColor="#0000">
+			<panel height="10%" width="50%" align="left" childLayout="horizontal" id="dynPanel" backgroundColor="#0000">
+				<!-- For the dynamic world buttons [should probably map to change()] -->
+			</panel>
+			<panel height="2%" width="50%" align="left" childLayout="horizontal" id="otherLabel" backgroundColor="#0000">
+				<text font="aurulent-sans-16.fnt" text="Other Worlds" />
+			</panel>
+			<panel height="10%" width="50%" align="left" childLayout="horizontal" id="otherPanel" backgroundColor="#0000">
 				<!-- For the dynamic world buttons [should probably map to change()] -->
 			</panel>
 			<panel height="10%" width="15%" align="left" childLayout="center" style="nifty-panel">

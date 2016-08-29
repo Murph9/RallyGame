@@ -25,7 +25,7 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 	private static BulletAppState bulletAppState;
 
 	private static boolean worldIsSet = false;
-	private static WorldType worldType = WorldType.OTHER;
+	private static WorldType worldType = WorldType.NONE;
 	private static World world = null;
 	
 	private HashMap<String, StaticWorld> sSet;
@@ -33,6 +33,7 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 
 	private static Element staticPanel;
 	private static Element dynPanel;
+	private static Element otherPanel;
 	
 	private MyCamera camNode;
 
@@ -50,6 +51,9 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 		for (DynamicType dt: worlds) {
 			dSet.put(dt.name(), dt);
 		}
+		
+		bulletAppState = new BulletAppState();
+		App.rally.getStateManager().attach(bulletAppState);
 	}
 
 	@Override
@@ -70,14 +74,20 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 		if (!isEnabled()) return;
 		super.update(tpf);
 
-		if (worldType != WorldType.OTHER && !worldIsSet) { //keep checking if the ui changed something
+		if (worldType != WorldType.NONE && !worldIsSet) { //keep checking if the ui changed something
 			//if the worldtype has been set, init the apprpriate world type
 			worldIsSet = true;
 			return;
 		}
 		
-		if (world != null && world.isInit())
-			world.update(tpf, new Vector3f(0,0,0), false);
+		if (world != null) {
+			if (world.isInit()) {
+				world.update(tpf, new Vector3f(0,0,0), false);
+			} else {
+				Node n = world.init(getPhysicsSpace(), App.rally.getViewPort());
+				App.rally.getRootNode().attachChild(n);
+			}
+		}
 
 		camNode.myUpdate(tpf);
 	}
@@ -120,6 +130,11 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 					MakeButton(nifty, screen, dynPanel, WorldType.DYNAMIC, s);
 				}
 			}
+			
+			otherPanel = screen.findElementByName("otherPanel"); 
+			if (otherPanel != null){
+				MakeButton(nifty, screen, otherPanel, WorldType.TERRAIN, "Terrain based");
+			}
 		}
 	}
 	
@@ -134,7 +149,6 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 			
 			parameter("label", name);
 		}};
-		
 		
 		cb.build(nifty, screen, panel);
 	}
@@ -156,13 +170,15 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 			DynamicType dworld = DynamicType.valueOf(DynamicType.class, subType);
 			
 			world = dworld.getBuilder();
+		} else if (worldType == WorldType.TERRAIN) {
+			world = new TerrainWorld();
 		} else {
 			H.e("Non valid world type in setWorld() method");
 			return;
 		}
 		
-		Node n = world.init(getPhysicsSpace(), App.rally.getViewPort());
-		App.rally.getRootNode().attachChild(n);
+		
+		
 	}
 
 	public void onEndScreen() { }

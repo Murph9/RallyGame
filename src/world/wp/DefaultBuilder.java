@@ -25,7 +25,6 @@ import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.shape.Box;
 
 import game.App;
-import game.H;
 import world.World;
 import world.WorldType;
 import world.wp.WP.NodeType;
@@ -65,10 +64,6 @@ public abstract class DefaultBuilder implements World {
 	
 	@Override
 	public Node init(PhysicsSpace space, ViewPort view) {
-		if (isInit) {
-			H.p("WAS INITED TWICE");
-		}
-		
 		this.isInit = true;
 		this.space = space;
 		

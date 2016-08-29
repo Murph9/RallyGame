@@ -66,12 +66,8 @@ public class Drive extends AbstractAppState {
     	
     	
     	WorldType type = world.getType();
-    	switch(type) {
-    	case STATIC:
-    	case DYNAMIC:
-    		break;
-    	case OTHER:
-    	default:
+    	if (type == WorldType.NONE)
+    	{
     		H.p("not sure what world type you want");
     		System.exit(-1);
     	}
@@ -214,7 +210,7 @@ public class Drive extends AbstractAppState {
 	public void cleanup() {
 		super.cleanup();
 		
-		H.p("cleaning");
+		H.p("cleaning drive class");
 		cb.cleanup();
 		cb = null;
 		uiNode.cleanup();

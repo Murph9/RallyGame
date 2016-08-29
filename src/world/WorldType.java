@@ -3,6 +3,8 @@ package world;
 public enum WorldType {
 	DYNAMIC,
 	STATIC,
-	OTHER,
+	TERRAIN,
+	
+	NONE,
 	;
 }
