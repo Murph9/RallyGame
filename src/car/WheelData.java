@@ -9,9 +9,9 @@ public abstract class WheelData {
 
 class WheelDataLat extends WheelData {
 	WheelDataLat() {
-		B = 16f; // i made these up
-		C = 2.2f;
-		D = 1.1f;
+		B = 12f; // i made these up
+		C = 1.9f;
+		D = 1.5f;
 		E = 1;
 	}
 }

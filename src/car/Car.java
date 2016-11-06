@@ -11,8 +11,6 @@ public enum Car {
 	Runner(new Runner()),
 	Hunter(new Hunter()),
 	Ricer(new Ricer()),
-	
-//	Test(new Test()),
 	;
 	
 	private CarData car;
@@ -26,18 +24,10 @@ public enum Car {
 	
 	private static class NormalCar extends CarData {
 		//for using the default settings.
-		//probably shouldn't have a custom constructor
-		NormalCar() {}
 	}
-
-	/*
-	private static class Test extends CarData {
-		Test() {
-			carModel = dir+"base.blend";
-		}
-	}
-	*/
 	
+	
+	//TODO it rolls realy easy compared to the runner car
 	private static class Ricer extends CarData {
 		//for using the default settings.
 		//probably shouldn't have a custom constructor
@@ -45,14 +35,13 @@ public enum Car {
 			wheelModel = dir+"wheel3.blend";
 			carModel = dir+"ricer.blend";
 			
-			//trying my best: http://www.cars-data.com/en/nissan-200-sx-turbo-specs/26930
+			//trying my best from: http://www.cars-data.com/en/nissan-200-sx-turbo-specs/26930
 			mass = 1240;
 			width = 1.74f;
 			height = 1.295f;
 			length = 4.52f;
 			
 			rollFraction = 0.1f;
-			w_steerAngle += 0.25f;
 			
 			w_zOff = 1.32f;
 			w_yOff = -0.15f;
@@ -85,8 +74,6 @@ public enum Car {
 			sus_restLength = 0.2f;
 
 			sus_maxForce = mass*4*9.81f;
-
-			
 		}
 	}
 
@@ -243,10 +230,14 @@ public enum Car {
 			sus_compValue = 0.5f; //(should be lower than damp)
 			sus_dampValue = 0.6f;
 			sus_restLength = 0.1f;
+			
+			rollFraction = 1.3f;
 
 			sus_maxForce = 40000;
 
 			areo_drag = 0.6f;
+			
+			brakeMaxTorque = 2500;
 		}
 	}
 
