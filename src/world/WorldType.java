@@ -5,6 +5,11 @@ public enum WorldType {
 	STATIC,
 	TERRAIN,
 	
+	OBJECT,
+	FULLCITY,
+	CURVE,
+	
+	BASIC,
 	NONE,
 	;
 }

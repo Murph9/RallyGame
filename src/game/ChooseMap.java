@@ -18,6 +18,7 @@ import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 
 import world.*;
+import world.curve.CurveWorld;
 import world.wp.WP.DynamicType;
 
 public class ChooseMap extends AbstractAppState implements ScreenController {
@@ -81,12 +82,11 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 		}
 		
 		if (world != null) {
-			if (world.isInit()) {
-				world.update(tpf, new Vector3f(0,0,0), false);
-			} else {
+			if (!world.isInit()) {
 				Node n = world.init(getPhysicsSpace(), App.rally.getViewPort());
 				App.rally.getRootNode().attachChild(n);
 			}
+			world.update(tpf, new Vector3f(0,0,0), false);
 		}
 
 		camNode.myUpdate(tpf);
@@ -134,6 +134,9 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 			otherPanel = screen.findElementByName("otherPanel"); 
 			if (otherPanel != null){
 				MakeButton(nifty, screen, otherPanel, WorldType.TERRAIN, "Terrain based");
+				MakeButton(nifty, screen, otherPanel, WorldType.OBJECT, "Object based");
+				MakeButton(nifty, screen, otherPanel, WorldType.FULLCITY, "City tile based");
+				MakeButton(nifty, screen, otherPanel, WorldType.CURVE, "Bezier Curve based");
 			}
 		}
 	}
@@ -158,27 +161,34 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 			App.rally.getRootNode().detachChild(world.getRootNode());
 			world.cleanup();
 		}
-		
-		//TODO find how to get the button clicked 
-		
 		worldType = WorldType.valueOf(WorldType.class, typeStr);
-		if (worldType == WorldType.STATIC) {
-			StaticWorld sworld = StaticWorld.valueOf(StaticWorld.class, subType);
-			
-			world = new StaticWorldBuilder(sworld);
-		} else if (worldType == WorldType.DYNAMIC) {
-			DynamicType dworld = DynamicType.valueOf(DynamicType.class, subType);
-			
-			world = dworld.getBuilder();
-		} else if (worldType == WorldType.TERRAIN) {
-			world = new TerrainWorld();
-		} else {
-			H.e("Non valid world type in setWorld() method");
-			return;
+		
+		switch (worldType) {
+			case STATIC:
+				StaticWorld sworld = StaticWorld.valueOf(StaticWorld.class, subType);
+				world = new StaticWorldBuilder(sworld);
+				break;
+			case DYNAMIC:
+				DynamicType dworld = DynamicType.valueOf(DynamicType.class, subType);
+				world = dworld.getBuilder();
+				break;
+			case TERRAIN:
+				world = new TerrainWorld();
+				break;
+			case OBJECT:
+				world = new ObjectWorld();
+				break;
+			case FULLCITY:
+				world = new FullCityWorld();
+				break;
+			case CURVE:
+				world = new CurveWorld();
+				break;
+				
+			default:
+				H.e("Non valid world type in ChooseMap.setWorld() method");
+				return;
 		}
-		
-		
-		
 	}
 
 	public void onEndScreen() { }

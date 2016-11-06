@@ -340,11 +340,16 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			torques[0] = engineTorque;
 			torques[1] = engineTorque;
 
+			//https://en.wikipedia.org/wiki/Limited-slip_differential#Basic_principle_of_operation
+			//TODO this all just feels wrong (you also lose a lot of power)
 			//calculate front diff
-			float total = wheel[0].skid + wheel[1].skid;
-			if (total != 0) { //check for total != 0 because divide by zero
-				torques[0] *= wheel[0].skid / (total * 2) + car.w_difflock; //limited slip:
-				torques[1] *= wheel[1].skid / (total * 2) + car.w_difflock; //make sure the difference not greater than w_difflock
+			float diff = wheel[0].radSec - wheel[1].radSec; //positive when 0 is faster
+			if (diff > 0) { //check for total != 0 because divide by zero
+//				torques[0] = 0.5f*torques[0] - 0.5f*diff; //limited slip:
+//				torques[1] = 0.5f*torques[1] + 0.5f*diff; //make sure the difference not greater than w_difflock
+			} else {
+//				torques[0] = 0.5f*torques[0] + 0.5f*diff;
+//				torques[1] = 0.5f*torques[1] - 0.5f*diff;
 			}
 		}
 		if (car.driveRear) {
@@ -352,30 +357,53 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			torques[3] = engineTorque;
 			
 			//calc rear diff
-			float total = wheel[2].skid + wheel[3].skid;
-			if (total != 0) { //check for total != 0 because divide by zero
-				torques[2] *= wheel[2].skid / (total * 2) + 0.5f;
-				torques[3] *= wheel[3].skid / (total * 2) + 0.5f;
+			float diff = wheel[2].radSec - wheel[3].radSec; //positive when 0 is faster
+			if (diff > 0) { //check for total != 0 because divide by zero
+//				torques[2] = 0.5f*torques[2] - 0.5f*diff; //limited slip:
+//				torques[3] = 0.5f*torques[3] + 0.5f*diff; //make sure the difference not greater than w_difflock
+			} else {
+//				torques[2] = 0.5f*torques[2] + 0.5f*diff;
+//				torques[3] = 0.5f*torques[3] - 0.5f*diff;
 			}
 		}
 
-		//http://web.archive.org/web/20050308061534/home.planet.nl/~monstrous/tutstab.html
-		//http://phors.locost7.info/contents.htm
 
-		float slowslipspeed = 9;
+		float maxSlowLat = Float.MAX_VALUE;
 		
-		//LARGE LOOP for each wheel
+		//http://au.mathworks.com/help/physmod/sdl/ref/tiremagicformula.html
+		float slip_const = 1;
+		boolean slowSpeed = false;
+		float rearSteeringCur = 0;
+		float slowslipspeed = 9;
+		if (velocity.length() <= slowslipspeed) {
+			slowSpeed = true;
+			slip_const = 2;
+			
+			//we want the force centre inline with the rear wheels at high speed and inline with the center at slow speeds
+			steeringCur /= 2;
+			rearSteeringCur = -steeringCur;
+			
+			if (steeringCur != 0) {
+				float radius = car.w_zOff*2/FastMath.sin(steeringCur);
+				
+				float forceToKeepCircle = car.mass*velocity.lengthSquared()/radius;
+				maxSlowLat = FastMath.abs(forceToKeepCircle/4);
+			}
+		}		
+
+		//http://web.archive.org/web/20050308061534/home.planet.nl/~monstrous/tutstab.html
+		//http://phors.locost7.info/contents.htm		
+
+		//for each wheel
 		for (int i = 0; i < 4; i++) {
 			float susforce = (float)getWheel(i).getWheelInfo().wheelsSuspensionForce;
-			susforce = Math.min(susforce, car.mass*3); //[*3] HACK: to stop weird harsh physics on large normal forces
+			susforce = Math.min(susforce, car.mass*3); //[*3] HACK: to stop weird harsh physics on large normal suspension forces
 
-			//http://au.mathworks.com/help/physmod/sdl/ref/tiremagicformula.html
-			float slip_const = 1;
 			float slip_div = Math.abs(velocity.length());
-			if (velocity.length() <= slowslipspeed) {
-				slip_const = 2;
+			if (slowSpeed) {
 				slip_div = slowslipspeed + (velocity.length()*velocity.length())/slowslipspeed;
 			}
+			// TODO thought about how to make slow speeds fit, try and make tyres only push with movement
 
 			// TODO note that the bottom turn could be max of vel and radsec: http://www.menet.umn.edu/~gurkan/Tire%20Modeling%20%20Lecture.pdf 
 			float slipr = slip_const*(wheel[i].radSec*car.w_radius - velocity.z);
@@ -391,7 +419,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 				slipangle = (float)(FastMath.atan(slipa_front / slip_div) - steeringCur);
 			} else { //rear
 				float slipa_rear = (velocity.x - yawspeed*car.w_zOff);
-				slipangle = (float)(FastMath.atan(slipa_rear / slip_div)); //slip_div is questionable here
+				slipangle = (float)(FastMath.atan(slipa_rear / slip_div) - rearSteeringCur); //slip_div is questionable here
 			}
 			slipangle *= slip_const;
 			
@@ -408,7 +436,17 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			//latitudinal force that is calculated off the slip angle
 			wf[i].x = -(anglefract/p)*VehicleGripHelper.tractionFormula(car.w_flatdata, p*maxlat) * susforce;
 
-			wheel[i].skid = FastMath.clamp(p, 0, 1); //TODO make a better guess on what tyres should colour the groud with
+			
+			//prevents the force from exceeding the centripetal force TODO breaks all other forces
+			//TODO also note the 4 wheel steering that the other slowspeed code does
+			if (slowSpeed) {
+				if (Math.abs(wf[i].x) > maxSlowLat) {
+					wf[i].x = FastMath.clamp(wf[i].x, -maxSlowLat, maxSlowLat);
+				}
+			}
+				
+			
+			wheel[i].skid = p;
 			
 			//add the wheel force after merging the forces
 			float totalLongForce = torques[i] - wf[i].z - (brakeCurrent*car.brakeMaxTorque*Math.signum(wheel[i].radSec));
@@ -506,7 +544,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		float gearDownSpeed = car.auto_gearDown/driveSpeed;
 		//TODO: error checking that there isn't over lap  [2-----[3--2]----3] not [2------2]--[3-----3]
 
-		if (vz > gearUpSpeed && curGear < car.trans_gearRatios.length-1) {
+		if (vz > gearUpSpeed && curGear < car.trans_gearRatios.length-1) { //TODO should also work off speed so you can redline (both up and down)
 			curGear++;
 		} else if (vz < gearDownSpeed && curGear > 1) {
 			curGear--;

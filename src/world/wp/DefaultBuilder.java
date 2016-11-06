@@ -3,6 +3,7 @@ package world.wp;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.PhysicsSpace;
@@ -53,13 +54,20 @@ public abstract class DefaultBuilder implements World {
 	protected Quaternion nextRot = new Quaternion();
 	protected NodeType nextNode = null;
 	
+	protected Random rand;
+	
 	protected int count = 0;
-	protected float distance = 500; //TODO find a good number
+	protected float distance = 500;
 	
 	DefaultBuilder(WP[] type) {
+		this(type, (long)(Math.random()*Long.MAX_VALUE));
+	}
+	DefaultBuilder(WP[] type, long seed) {
 		this.type = type;
 		this.rootNode = new Node("builder root node");
 		rootNode.setShadowMode(ShadowMode.CastAndReceive); //performance concern 1
+		
+		this.rand = new Random(seed);
 	}
 	
 	@Override
@@ -150,11 +158,11 @@ public abstract class DefaultBuilder implements World {
 			}
 		}
 
-		int i = (int)(Math.random()*wpoList.size());
+		int i = (int)(rand.nextDouble()*wpoList.size());
 		WPObject wpo = wpoList.get(i);
 		int count = 0;
 		while (!PlacePiece(wpo)) {
-			i = (int)(Math.random()*wpoList.size()); //so select a new one
+			i = (int)(rand.nextDouble()*wpoList.size()); //so select a new one
 			count++;
 			if (count > 100) {
 				break; //please no loops huh?
@@ -253,7 +261,7 @@ public abstract class DefaultBuilder implements World {
 	}
 	
 	public void cleanup() {
-		//TODO
+		isInit = false;
 	}
 	
 	public boolean isInit() {

@@ -36,6 +36,7 @@ public class DriveMenu extends AbstractAppState implements ScreenController {
 	//displays the skid value, TODO make better
 	private Geometry gripBox[];
 	private Geometry gripDir[];
+	private BitmapText gripValue[];
 	private Vector3f[] ps = new Vector3f[] { 
 			new Vector3f(60, 250, 0),
 			new Vector3f(140, 250, 0),
@@ -71,8 +72,11 @@ public class DriveMenu extends AbstractAppState implements ScreenController {
 		Material black = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
 		black.setColor("Color", ColorRGBA.Black);
 		
+		BitmapFont guiFont = App.rally.getFont();
+		
 		this.gripBox = new Geometry[4];
 		this.gripDir = new Geometry[4];
+		this.gripValue = new BitmapText[4];
 
 		Box b = new Box(20, 20, 1);
 		Line l = new Line(new Vector3f(0,0,10), new Vector3f(1,0,10));
@@ -88,10 +92,16 @@ public class DriveMenu extends AbstractAppState implements ScreenController {
 			gripDir[i].setLocalTranslation(ps[i]);
 			gripDir[i].setMaterial(black);
 			n.attachChild(gripDir[i]);
+			
+			gripValue[i] = new BitmapText(guiFont, false);
+			gripValue[i].setSize(guiFont.getCharSet().getRenderedSize());
+			gripValue[i].setColor(ColorRGBA.Black);
+			gripValue[i].setText("");
+			gripValue[i].setLocalTranslation(ps[i]);
+			n.attachChild(gripValue[i]);
 		}
 		
 		//stats text 
-		BitmapFont guiFont = App.rally.getFont();
 		statsText = new BitmapText(guiFont, false);		  
 		statsText.setSize(guiFont.getCharSet().getRenderedSize());	  		// font size
 		statsText.setColor(ColorRGBA.White);								// font color
@@ -204,10 +214,13 @@ public class DriveMenu extends AbstractAppState implements ScreenController {
 					"\nengine:"+p.engineTorque+"\ntraction:"+p.totalTraction + "\nwheelRot:"+p.totalWheelRot +"\nisDay:"+App.rally.sky.isDay
 					+ "\nG Forces:"+p.gForce);
 			
+			float curGrip = 0;
 			//grips
 			for (int i = 0 ; i < 4; i++) {
 				Material m = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-				m.setColor("Color", new ColorRGBA(p.wheel[i].skid, p.wheel[i].skid, p.wheel[i].skid, 1));
+				gripValue[i].setText(String.format("%.2f", p.wheel[i].skid));
+				curGrip = FastMath.clamp(p.wheel[i].skid, 0, 1);
+				m.setColor("Color", new ColorRGBA(curGrip, curGrip, curGrip, 1));
 				gripBox[i].setMaterial(m);
 				
 				Vector3f dir = p.wheel[i].gripDir;

@@ -11,6 +11,7 @@ import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.renderer.ViewPort;
+import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Node;
 import com.jme3.terrain.geomipmap.TerrainLodControl;
 import com.jme3.terrain.geomipmap.TerrainQuad;
@@ -24,11 +25,14 @@ import game.App;
 public class TerrainWorld implements World {
 
 	//http://wiki.jmonkeyengine.org/jme3/beginner/hello_terrain.html
+	//TODO try the other modes at: http://javadoc.jmonkeyengine.org/com/jme3/terrain/heightmap/AbstractHeightMap.html
 	
 	private boolean isInit;
 	
 	private Node rootNode;
 	private PhysicsSpace phys;
+	
+	AbstractHeightMap heightMap;
 	private TerrainQuad terrain;
 	
 	public TerrainWorld() {
@@ -48,42 +52,41 @@ public class TerrainWorld implements World {
 	@Override
 	public Node init(PhysicsSpace space, ViewPort view) {
 		isInit = true;
+		phys = space;
 		
-		this.phys = space;
+		AssetManager am = App.rally.getAssetManager();
 		
-		AssetManager assetManager = App.rally.getAssetManager();
-		
-		/** 1. Create terrain material and load four textures into it. */
-	    Material mat_terrain = new Material(assetManager, "Common/MatDefs/Terrain/Terrain.j3md");
+		// 1. Create terrain material and load four textures into it.
+	    Material mat_terrain = new Material(am, "Common/MatDefs/Terrain/Terrain.j3md");
 
-	    /** 1.1) Add ALPHA map (for red-blue-green coded splat textures) */
-	    mat_terrain.setTexture("Alpha", assetManager.loadTexture("Textures/Terrain/splat/alphamap.png"));
+	    // 1.1) Add ALPHA map (for red-blue-green coded splat textures)
+	    mat_terrain.setTexture("Alpha", am.loadTexture("Textures/Terrain/splat/alphamap.png"));
 
-	    /** 1.2) Add GRASS texture into the red layer (Tex1). */
-	    Texture grass = assetManager.loadTexture("Textures/Terrain/splat/grass.jpg");
+	    // 1.2) Add GRASS texture into the red layer (Tex1).
+	    Texture grass = am.loadTexture("Textures/Terrain/splat/grass.jpg");
 	    grass.setWrap(WrapMode.Repeat);
 	    mat_terrain.setTexture("Tex1", grass);
 	    mat_terrain.setFloat("Tex1Scale", 64f);
 
-	    /** 1.3) Add DIRT texture into the green layer (Tex2) */
-	    Texture dirt = assetManager.loadTexture("Textures/Terrain/splat/dirt.jpg");
+	    // 1.3) Add DIRT texture into the green layer (Tex2)
+	    Texture dirt = am.loadTexture("Textures/Terrain/splat/dirt.jpg");
 	    dirt.setWrap(WrapMode.Repeat);
 	    mat_terrain.setTexture("Tex2", dirt);
 	    mat_terrain.setFloat("Tex2Scale", 32f);
 
-	    /** 1.4) Add ROAD texture into the blue layer (Tex3) */
-	    Texture rock = assetManager.loadTexture("Textures/Terrain/splat/road.jpg");
+	    // 1.4) Add ROAD texture into the blue layer (Tex3)
+	    Texture rock = am.loadTexture("Textures/Terrain/splat/road.jpg");
 	    rock.setWrap(WrapMode.Repeat);
 	    mat_terrain.setTexture("Tex3", rock);
 	    mat_terrain.setFloat("Tex3Scale", 128f);
 
-	    /** 2. Create the height map */
-	    AbstractHeightMap heightmap = null;
-	    Texture heightMapImage = assetManager.loadTexture("Textures/Terrain/splat/mountains512.png");
-	    heightmap = new ImageBasedHeightMap(heightMapImage.getImage());
-	    heightmap.load();
+	    // 2. Create the height map 
+	    Texture heightMapImage = am.loadTexture("Textures/Terrain/splat/mountains512.png");
+	    heightMap = new ImageBasedHeightMap(heightMapImage.getImage());
+	    heightMap.setHeightScale(0.3f);
+	    heightMap.load();
 
-	    /** 3. We have prepared material and heightmap.
+	    /*  3. We have prepared material and heightmap.
 	     * Now we create the actual terrain:
 	     * 3.1) Create a TerrainQuad and name it "my terrain".
 	     * 3.2) A good value for terrain tiles is 64x64 -- so we supply 64+1=65.
@@ -91,12 +94,13 @@ public class TerrainWorld implements World {
 	     * 3.4) As LOD step scale we supply Vector3f(1,1,1).
 	     * 3.5) We supply the prepared heightmap itself.
 	     */
-	    terrain = new TerrainQuad("my terrain", 65, 513, heightmap.getHeightMap());
+	    terrain = new TerrainQuad("my terrain", 65, 513, heightMap.getHeightMap());
 
-	    /** 4. We give the terrain its material, position & scale it, and attach it. */
+	    // 4. We give the terrain its material, position & scale it, and attach it.
 	    terrain.setMaterial(mat_terrain);
 	    terrain.setLocalTranslation(0, -100, 0);
 	    terrain.setLocalScale(2f, 1f, 2f);
+	    terrain.setShadowMode(ShadowMode.Receive);
 	    rootNode.attachChild(terrain);
 
 	    // 5. The LOD (level of detail) depends on were the camera is:
@@ -119,7 +123,8 @@ public class TerrainWorld implements World {
 
 	@Override
 	public Vector3f getWorldStart() {
-		return new Vector3f(-141.7f, -30.7f, 40.6f);
+//		float height = heightMap.getTrueHeightAtPoint(0, 0);
+		return new Vector3f(0, -57.586773f, 0);
 	}
 
 	@Override

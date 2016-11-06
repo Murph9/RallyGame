@@ -57,7 +57,7 @@
 				<text font="aurulent-sans-16.fnt" text="Other Worlds" />
 			</panel>
 			<panel height="10%" width="50%" align="left" childLayout="horizontal" id="otherPanel" backgroundColor="#0000">
-				<!-- For the dynamic world buttons [should probably map to change()] -->
+				<!-- For the other world buttons [should probably map to change()] -->
 			</panel>
 			<panel height="10%" width="15%" align="left" childLayout="center" style="nifty-panel">
 				<control name="button" label="Choose Map" id="MapButton" align="center" valign="center" visibleToMouse="true">

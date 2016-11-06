@@ -17,10 +17,8 @@ import car.Car;
 import car.CarData;
 import de.lessvoid.nifty.Nifty;
 import settings.Configuration;
-import world.StaticWorld;
-import world.StaticWorldBuilder;
-import world.World;
-import world.wp.WP.DynamicType;
+import world.*;
+import world.curve.CurveWorld;
 
 ////TODO Ideas for game modes:
 //being chased. (with them spawning all lightning sci-fi like?)
@@ -57,12 +55,10 @@ public class Rally extends SimpleApplication {
 	public SkyState sky;
 	
 	private final CarData defaultCar = Car.Runner.get();
-	private final StaticWorld defaultsworld = null;//StaticWorld.track2;
-	private final DynamicType defaultdworld = DynamicType.Valley;
+	private final World defaultWorld = new CurveWorld();
 	
 	private CarData car;
-	private StaticWorld sworld;
-	private DynamicType dworld;
+	private World world;
 	
 	public static void main(String[] args) {
 		Configuration config = Configuration.Read();
@@ -122,24 +118,16 @@ public class Rally extends SimpleApplication {
 
 		//set the default option
 		car = defaultCar;
-		sworld = defaultsworld;
-		dworld = defaultdworld;
+		world = defaultWorld;
 	}
 	
 	public void startFast() {
 		//use the default option and just init straight away
 		getStateManager().detach(start);
 		
-		if (car == null || (sworld == null && dworld == null)) {
+		if (car == null || world == null) {
 			System.err.println("Defaults not set.");
 		}
-		World world = null;
-		if (sworld != null)
-			world = new StaticWorldBuilder(sworld);
-		else if (dworld != null)
-			world = dworld.getBuilder();
-		else
-			H.e("World generation error occured.");
 		
 		startDrive(car, world);
 		App.nifty.gotoScreen("drive-noop");
