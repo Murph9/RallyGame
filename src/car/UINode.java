@@ -15,6 +15,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.scene.shape.Line;
 import com.jme3.scene.shape.Quad;
@@ -138,11 +139,14 @@ public class UINode {
 		//TODO better contrast on speedo
 		Quad qback = new Quad(270, 200);
 		background = new Geometry("ui-background", qback);
-//		Material trans = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-//		trans.setColor("Color", new ColorRGBA(0,0,0,0.3f));
-//		background.setMaterial(trans);
-//		background.setLocalTranslation(settings.getWidth()-270, 0, -10);
-//		speedoNode.attachChild(background);
+		background.setCullHint(CullHint.Never);
+		Material trans = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+		trans.setColor("Color", new ColorRGBA(0,0,0,0.5f));
+		trans.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
+		background.setMaterial(trans);
+		background.setLocalTranslation(settings.getWidth()-270, 0, -10);
+		
+		speedoNode.attachChild(background);
 		
 		//rpm bars
 		l = new Line(Vector3f.ZERO, Vector3f.UNIT_X.negate()); //inwards

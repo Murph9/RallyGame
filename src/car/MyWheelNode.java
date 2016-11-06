@@ -61,7 +61,7 @@ public class MyWheelNode extends Node {
 	
 	public void update(float tpf, int reverse) {
 		if (ifSmoke) {
-			if (skid > 0.9 && contact) {
+			if (skid > 1.5 && contact) {
 				smokEmit.setParticlesPerSec(10);
 			} else {
 				smokEmit.setParticlesPerSec(0);
@@ -153,6 +153,7 @@ public class MyWheelNode extends Node {
 		mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
 		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		mat.setFloat("AlphaDiscardThreshold", 0.05f);
+		grip = FastMath.clamp(grip - 0.5f, 0, 1);
 		mat.setColor("Diffuse", new ColorRGBA(0,0,0,grip));
 		
 		geo.setMaterial(mat);
