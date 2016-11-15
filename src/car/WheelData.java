@@ -11,7 +11,7 @@ class WheelDataLat extends WheelData {
 	WheelDataLat() {
 		B = 12f; // i made these up
 		C = 1.9f;
-		D = 1.5f;
+		D = 1.1f;
 		E = 1;
 	}
 }

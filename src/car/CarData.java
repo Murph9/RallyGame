@@ -94,7 +94,7 @@ public abstract class CarData {
 	public float e_mass = 100; //kg	
 	
 	public float trans_effic = 0.75f; //TODO apparently 0.7 is common (power is lost to rotating things)
-	public float trans_finaldrive = 2.5f; //helps set the total drive ratio
+	public float trans_finaldrive = 3.0f; //helps set the total drive ratio
 	public float[] trans_gearRatios = new float[]{-2.9f,3.6f,2.5f,1.8f,1.3f,1.0f,0.74f}; //reverse,gear1,gear2,g3,g4,g5,g6,...
 	
 	//TODO i found a porsche boxter engine curve:

@@ -168,6 +168,9 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			H.p("error in calculating max(lat|long) values of: "+car.getClass());
 			System.exit(1);
 		}
+		
+		//then finally set the gravity to 1.5 times because gameplay
+		setGravity(getGravity().mult(1.5f));
 	}
 
 	public void onAction(String binding, boolean value, float tpf) {

@@ -119,7 +119,7 @@ public enum Car {
 			e_redline = 7200;
 
 			trans_effic = 0.75f;
-			trans_finaldrive = 2.5f;
+			trans_finaldrive = 4f;
 			trans_gearRatios = new float[]{-3.5f,3.0f,2.3f,1.6f,1.2f,0.87f,0.7f};
 			
 			w_flatdata = new RallyLatWheel();
