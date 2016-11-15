@@ -65,11 +65,18 @@ public class Rally extends SimpleApplication {
 		
 		Rally app = new Rally();
 		AppSettings settings = new AppSettings(true);
-		settings.setResolution(config.getWidth(),config.getHeight());
+		if (config.ifFullscreen()) {
+			settings.setFullscreen(true);
+			//TODO untested
+			//will probably cause some resolution issues
+		} else {
+			settings.setResolution(config.getWidth(),config.getHeight());
+		}
 		settings.setFrameRate(config.getFrameRate());
 		settings.setUseJoysticks(true);
 		settings.setTitle(config.getTitle());
 		settings.setVSync(config.ifVsnyc());
+		
 
 		app.setSettings(settings);
 		app.setTimer(new NanoTN(config.getFrameRate()));
