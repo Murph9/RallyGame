@@ -5,8 +5,6 @@ import java.util.Random;
 import com.jme3.math.FastMath;
 import com.jme3.terrain.heightmap.AbstractHeightMap;
 
-import game.H;
-
 public class DiamondSquareMap extends AbstractHeightMap {
 
 	public DiamondSquareMap(int size) {

@@ -25,22 +25,23 @@ import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Line;
 import com.jme3.terrain.geomipmap.TerrainLodControl;
 import com.jme3.terrain.geomipmap.TerrainQuad;
 import com.jme3.terrain.heightmap.AbstractHeightMap;
-import com.jme3.terrain.heightmap.HillHeightMap;
-import com.jme3.terrain.heightmap.ImageBasedHeightMap;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture.WrapMode;
 import com.jme3.util.BufferUtils;
 
 import game.App;
 import game.H;
+import jme3tools.optimize.GeometryBatchFactory;
 import world.World;
 import world.WorldType;
+import world.curve.BSegment.BType;
 
 /*
 Basic idea is:
@@ -81,6 +82,11 @@ public class CurveWorld implements World {
 	
 	private RigidBodyControl c;
 	
+	private static final String Tree_String = "assets/objects/tree.blend";
+	private Node treeNode;
+	private Spatial treeGeom;
+	
+	
 	public CurveWorld() {
 		rootNode = new Node("curveWorldRoot");
 	}
@@ -98,11 +104,14 @@ public class CurveWorld implements World {
 	public BiFunction<Vector3f, Vector3f, BSegment> funct() { 
 		return (Vector3f off, Vector3f tang) -> { 
 	
+			Vector3f angleOff = new Vector3f(0, -1, 0);
 			Vector3f normal = new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y).mult(tang.normalize());
-			return new BSegment(new Vector3f[] { 
-					off, //disabled for nice textures
-					off.add(normal.mult(5)), 
-					off.add(normal.mult(-1*5)),
+			return new BSegment(BType.BASIC, new Vector3f[] { 
+					off, //center of the road, not used for collision just position
+					off.add(normal.mult(6f)).add(angleOff),
+					off.add(normal.mult(5.5f)),
+					off.add(normal.mult(-5.5f)),
+					off.add(normal.mult(-6f)).add(angleOff),
 			});
 		};
 	}
@@ -116,17 +125,17 @@ public class CurveWorld implements World {
 		
 		generateTerrain(am, view);
 		
-		float height = terrain.getHeight(new Vector2f());
+		float height = terrain.getHeight(new Vector2f(0,0.001f));
 		float height2 = terrain.getHeight(new Vector2f(0,75));
-		Vector3f[] points = new Vector3f[] { 
-				new Vector3f(0,height,0), 
+		Vector3f[] points = new Vector3f[] {
+				new Vector3f(0,height,0),
 				new Vector3f(0,height,50), 
-				new Vector3f(0,height2,25), 
+				new Vector3f(0,height2,25),
 				new Vector3f(0,height2,75),
 			};
 		Curve curve = null;
 //		curve = new StraightCurve(new Vector3f[] {points[0], points[3] }, funct());
-		curve = new BezierCurve(points, funct());
+		curve = new BeizerCurve(points, funct());
 		drawMeACurve(curve, true);
 		adjustHeights(curve);
 		
@@ -134,11 +143,11 @@ public class CurveWorld implements World {
 			points[1] = points[3].add(points[3].subtract(points[2]));
 			points[0] = points[3];
 			
-			int x = FastMath.rand.nextInt(100)+50;
-			int z = FastMath.rand.nextInt(100)+50;
+			int x = FastMath.rand.nextInt(50)+100;
+			int z = FastMath.rand.nextInt(50)+100;
 			
-			int xm = x - (FastMath.rand.nextInt(20)+50);
-			int zm = z - (FastMath.rand.nextInt(20)+50);
+			int xm = x - (FastMath.rand.nextInt(20)+30);
+			int zm = z - (FastMath.rand.nextInt(20)+30);
 
 			//set the height of the road
 			float y = rayHeightAt(x+points[0].x, z+points[0].z,null);
@@ -150,14 +159,78 @@ public class CurveWorld implements World {
 			points[2].y = y;
 
 //			curve = new StraightCurve(new Vector3f[] {points[0], points[3] }, funct());
-			curve = new BezierCurve(points, funct());
+			curve = new BeizerCurve(points, funct());
 			drawMeACurve(curve, true);
 
 			//set the height of the terrain to this
 			adjustHeights(curve);
 		}
 		
+		generateRandomTrees(am);
+		
 		return rootNode;
+	}
+	
+	private void saveTerrainToFile() {
+		//print the terrain to file (for debugging)
+		/*
+		float[] height_map = terrain.getHeightMap();
+		double p = Math.sqrt(height_map.length);
+		
+		int q = (int) p;
+		int counter = 0;
+		BufferedImage image = new BufferedImage(q, q, BufferedImage.TYPE_INT_RGB);
+
+		for (int x = 0; x < q; x++) {
+			for (int y = 0; y < q; y++) {
+				double value = Math.round(height_map[counter]);
+
+				int qq = (int) value; // OR int qq = 255- (int) value;
+				image.setRGB(x, y, new Color(qq, qq, qq).getRGB());
+				counter = counter + 1;
+			}
+		}
+		File outputfile = new File("saved.png");
+		try {
+			ImageIO.write(image, "png", outputfile);
+		} catch (IOException ex) {
+			//
+		}
+		*/
+	}
+	
+	private void generateRandomTrees(AssetManager am) {
+		Spatial spat = am.loadModel(CurveWorld.Tree_String);
+		if (spat instanceof Node) {
+			for (Spatial s: ((Node) spat).getChildren()) {
+				this.treeGeom = s;
+			}
+		} else {
+			this.treeGeom = (Geometry) spat;
+		}
+		
+		treeNode = new Node("curveWorldTreeNode");
+		
+		rootNode.attachChild(treeNode);
+		
+		int count = 1000;
+		for (int i = 0; i < count; i++) {
+			Spatial s = treeGeom.clone();
+			int x = FastMath.rand.nextInt(2048) - 1024;
+			int z = FastMath.rand.nextInt(2048) - 1024;
+			
+			if (rayHeightAt(x, z, "Quad") != 0)
+				continue; //don't place on road
+			
+			Vector3f newPos = new Vector3f(x, terrain.getHeight(new Vector2f(x,z)), z);
+			s.setLocalTranslation(newPos);
+			s.addControl(new RigidBodyControl(0));
+			rootNode.attachChild(s);
+			phys.add(s);
+		}
+		
+		//If you remove this line: fps = fps/n for large n
+		GeometryBatchFactory.optimize(treeNode);
 	}
 	
 	public void generateTerrain(AssetManager am, ViewPort view) {
@@ -181,7 +254,6 @@ public class CurveWorld implements World {
         terrainMaterial.setVector3("region2", new Vector3f(0, 23, dirtScale));//0,90
 
         // ROCK texture
-
         Texture rock = am.loadTexture("Textures/Terrain/Rock/Rock.PNG");
         rock.setWrap(WrapMode.Repeat);
         terrainMaterial.setTexture("region3ColorMap", rock);
@@ -210,6 +282,11 @@ public class CurveWorld implements World {
 	    terrain = new TerrainQuad("my terrain", 65, 1025, map.getHeightMap());
 	    terrain.setMaterial(terrainMaterial);
 	    terrain.setShadowMode(ShadowMode.CastAndReceive);
+	    terrain.setLocalScale(2.5f, 1, 2.5f); //its 1:1 without this (terrain point per meter)
+	    
+	    Material m_debug = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+	    m_debug.setColor("Color", ColorRGBA.Black);
+	    
 	    rootNode.attachChild(terrain);
 	    List<Camera> cameras = new ArrayList<Camera>();
 	    cameras.add(view.getCamera());
@@ -277,7 +354,7 @@ public class CurveWorld implements World {
 		BSegment[] nodes = bc.calcPoints();
 		
 		for (int i = 1; i < nodes.length; i++) {
-			for (int j = 2; j < nodes[i].v.length; j++) {
+			for (int j = 2; j < nodes[i].v.length; j++) { //avoid the first one
 				Vector3f[] vs = new Vector3f[] {
 					nodes[i-1].v[j-1],
 					nodes[i-1].v[j],
@@ -299,29 +376,32 @@ public class CurveWorld implements World {
 	}
 		
 	private void drawMeAVerySmallBox(Vector3f pos, ColorRGBA colour) {
-		Box b = new Box(pos, 0.1f, 0.1f, 0.1f);
+		Box b = new Box(0.1f, 0.1f, 0.1f);
 		Geometry geometry = new Geometry("box", b);
 		Material mat = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 		mat.setColor("Color", colour);
 		geometry.setMaterial(mat);
+		geometry.setLocalTranslation(pos);
 		rootNode.attachChild(geometry);
 	}
-	
+	/*
 	private void drawMeALine(Vector3f start, Vector3f end, ColorRGBA colour) {
 		Line line = new Line(start, end);
-		line.setLineWidth(2);
 		Geometry geometry = new Geometry("line", line);
 		Material mat = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 		mat.setColor("Color", colour);
+		mat.getAdditionalRenderState().setLineWidth(2);
 		geometry.setMaterial(mat);
 		rootNode.attachChild(geometry);
 	}
+	*/
 
 	private void drawMeAQuad(Vector3f[] v, ColorRGBA colour) {
 		if (v == null || v.length != 4) {
 			H.e("CurveWorld: Not the correct length drawMeAQuad()");
 			return;
 		}
+		//TODO use BType from BSegment
 		
 		Mesh mesh = new Mesh(); //making a quad positions
 		
@@ -369,7 +449,7 @@ public class CurveWorld implements World {
 		for ( int i = 0; i < bseg.length; i++)
 			nodes[i] = bseg[i].v[0];
 		
-		Vector3f off = new Vector3f(0,0,0.05f); //prevent raying to nothing by skimming the edges
+		Vector3f off = new Vector3f(0,0,0.1f); //prevent the ground from poking through
 		for (Vector3f p : nodes) {
 			adjustHeight(p.add(off), 25); //TODO get all the points THEN scale the heights
 		}
@@ -396,14 +476,14 @@ public class CurveWorld implements World {
                 
                 float h = rayHeightAt(posX, posZ, "Quad");
                 if (h != 0) {
-                	heights.add(h - terrain.getHeight(npos) - 0.01f);
+                	heights.add(h - 0.05f);
                 	locs.add(npos);
                 }
             }
         }
 
         //update visuals
-        terrain.adjustHeight(locs, heights);
+        terrain.setHeight(locs, heights);
         terrain.updateModelBound();
 
         //update physics
@@ -412,9 +492,11 @@ public class CurveWorld implements World {
 	    terrain.addControl(c);
 	    phys.add(c);
 	}
+	/*
 	private boolean isInRadius(float x, float y, float radius) {
         Vector2f point = new Vector2f(x, y);
         // return true if the distance is less than equal to the radius
         return point.length() <= radius;
     }
+    */
 }
