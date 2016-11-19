@@ -44,7 +44,7 @@ public class MyCamera extends CameraNode {
 		
 		Vector3f diff = carPos.subtract(camPos);
 		if (diff.length() > distance) {
-			diff.normalizeLocal().multLocal(distance);
+			diff = diff.normalize().mult(distance);
 		}
 
 		prevPos = carPos.add(diff.add(0, p.car.cam_offset.y*2, 0));
@@ -61,5 +61,4 @@ public class MyCamera extends CameraNode {
 
 		lookAt(p.getPhysicsLocation().add(p.car.cam_lookAt), new Vector3f(0,1,0));
 	}
-
 }

@@ -117,21 +117,21 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 	@Override
 	public void bind(Nifty nifty, Screen screen) {
 		if (screen.getScreenId().equals("chooseMap")) {
-			staticPanel = screen.findElementByName("staticPanel");
+			staticPanel = screen.findElementById("staticPanel");
 			if (staticPanel != null) {
 				for (String s : sSet.keySet()) {
 					MakeButton(nifty, screen, staticPanel, WorldType.STATIC, s);
 				}
 			}
 			
-			dynPanel = screen.findElementByName("dynPanel");
+			dynPanel = screen.findElementById("dynPanel");
 			if (dynPanel != null) {
 				for (String s : dSet.keySet()) {
 					MakeButton(nifty, screen, dynPanel, WorldType.DYNAMIC, s);
 				}
 			}
 			
-			otherPanel = screen.findElementByName("otherPanel"); 
+			otherPanel = screen.findElementById("otherPanel"); 
 			if (otherPanel != null){
 				MakeButton(nifty, screen, otherPanel, WorldType.TERRAIN, "Terrain based");
 				MakeButton(nifty, screen, otherPanel, WorldType.OBJECT, "Object based");

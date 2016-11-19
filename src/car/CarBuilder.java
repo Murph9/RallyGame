@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.TextureKey;
+import com.jme3.audio.AudioData;
 import com.jme3.audio.AudioNode;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
@@ -69,7 +70,7 @@ public class CarBuilder extends Node {
 
 			TextureKey key = new TextureKey("Textures/Sky/Bright/BrightSky.dds", true);
 			key.setGenerateMips(true);
-			key.setAsCube(true);
+			//key.setAsCube(true); //TODO 3.1 not valid
 			final Texture tex = am.loadTexture(key);
 
 			for (Geometry g: H.getGeomList((Node)carmodel)) {
@@ -82,11 +83,11 @@ public class CarBuilder extends Node {
 			}
 		}
 
-		//create a compound shape and attach CollisionShape for the car body at 0,1,0
-		//this shifts the effective center of mass of the BoxCollisionShape to 0,-1,0
+		//its possible to shift the center of gravity here (TODO add to CarData possibly)
+		//Convex collision shape or hull might be faster here)
 		CompoundCollisionShape compoundShape = new CompoundCollisionShape();
 		compoundShape.addChildShape(CollisionShapeFactory.createDynamicMeshShape(carmodel), new Vector3f(0,0,0));
-
+		
 		Node carNode = new Node(id+"");
 		MyVC player = new MyVC(compoundShape, car, carNode);
 		
@@ -113,7 +114,7 @@ public class CarBuilder extends Node {
 		}
 		
 		if (aPlayer) {
-			player.giveSound(new AudioNode(am, "assets/sound/engine.wav"));
+			player.giveSound(new AudioNode(am, "assets/sound/engine.wav", AudioData.DataType.Buffer));
 		}
 		
 		cars.put(id, player);

@@ -169,8 +169,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			System.exit(1);
 		}
 		
-		//then finally set the gravity to 1.5 times because gameplay
-		setGravity(getGravity().mult(1.5f));
+		//then finally set the gravity to 2 times because gameplay
+		setGravity(getGravity().mult(2));
 	}
 
 	public void onAction(String binding, boolean value, float tpf) {
@@ -267,7 +267,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		engineSound = audio;
 		engineSound.setLooping(true);
 		engineSound.play();
-		App.rally.getRootNode().attachChild(engineSound);
+		carRootNode.attachChild(engineSound);
 	}
 
 	public void makeAI() {

@@ -78,6 +78,7 @@ public class Drive extends AbstractAppState {
     	super.initialize(stateManager, app);
     	
     	bulletAppState = new BulletAppState();
+    	//bulletAppState.setDebugEnabled(true); //TODO 3.1 beta-1 still broken
 		app.getStateManager().attach(bulletAppState);
 		getPhysicsSpace().setMaxSubSteps(4);
 		

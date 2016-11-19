@@ -132,9 +132,7 @@ public class H {
 	
 	public static Geometry makeShapeArrow(AssetManager am, ColorRGBA color, Vector3f dir, Vector3f pos) {
 		Arrow arrow = new Arrow(dir);
-		arrow.setLineWidth(1); // make arrow thicker
 		Geometry arrowG = createShape(am, arrow, color, pos);
-		
 		arrowG.setShadowMode(ShadowMode.Off);
 		return arrowG;
 	}

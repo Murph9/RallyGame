@@ -29,6 +29,7 @@ import com.jme3.scene.shape.Quad;
 import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.shadow.EdgeFilteringMode;
+import com.jme3.texture.Texture;
 import com.jme3.util.BufferUtils;
 import com.jme3.util.SkyFactory;
 
@@ -163,7 +164,8 @@ public class SkyState extends AbstractAppState {
 			//sky cube map
 			boolean theirs = true; //TODO my try (note, the images need to rotate around one, so that the sky and floor match
 			if (theirs) {
-				skyRoot.attachChild(SkyFactory.createSky(am, "Textures/Sky/Bright/BrightSky.dds", false));	
+				Texture t = am.loadTexture("Textures/Sky/Bright/BrightSky.dds");
+				skyRoot.attachChild(SkyFactory.createSky(am, t, Vector3f.UNIT_XYZ, SkyFactory.EnvMapType.CubeMap));
 			} else {
 				TextureKey keye = new TextureKey("assets/east.png", true);
 				TextureKey keyw = new TextureKey("assets/west.png", true);

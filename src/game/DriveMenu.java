@@ -69,8 +69,10 @@ public class DriveMenu extends AbstractAppState implements ScreenController {
 	private void makeTelemetry(AssetManager am, Node n) {
 		Material white = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
 		white.setColor("Color", ColorRGBA.White);
+		white.getAdditionalRenderState().setLineWidth(3);
 		Material black = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
 		black.setColor("Color", ColorRGBA.Black);
+		black.getAdditionalRenderState().setLineWidth(3);
 		
 		BitmapFont guiFont = App.rally.getFont();
 		
@@ -80,7 +82,6 @@ public class DriveMenu extends AbstractAppState implements ScreenController {
 
 		Box b = new Box(20, 20, 1);
 		Line l = new Line(new Vector3f(0,0,10), new Vector3f(1,0,10));
-		l.setLineWidth(3);
 		
 		for (int i = 0; i < 4; i++) {
 			gripBox[i] = new Geometry("box-"+i, b);

@@ -17,7 +17,6 @@ import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.VertexBuffer.Type;
-import com.jme3.scene.shape.Line;
 import com.jme3.scene.shape.Quad;
 import com.jme3.system.AppSettings;
 import com.jme3.util.BufferUtils;
@@ -128,9 +127,6 @@ public class UINode {
 		Material m = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
 		m.setColor("Color", ColorRGBA.Black);
 
-		Line l = new Line(Vector3f.ZERO, Vector3f.UNIT_X);
-		l.setLineWidth(4);
-		
 		///////////////
 		//make the variable parts:
 		Node speedoNode = new Node("Speedo");
@@ -149,8 +145,6 @@ public class UINode {
 		speedoNode.attachChild(background);
 		
 		//rpm bars
-		l = new Line(Vector3f.ZERO, Vector3f.UNIT_X.negate()); //inwards
-		l.setLineWidth(2);
 		Quad quad = new Quad(20, 20);
 		
 		centerx = App.rally.getSettings().getWidth()-127;

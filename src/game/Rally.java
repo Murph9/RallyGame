@@ -1,5 +1,8 @@
 package game;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 //import java.util.logging.Logger;
 
 import com.jme3.app.SimpleApplication;
@@ -100,7 +103,11 @@ public class Rally extends SimpleApplication {
 	public void simpleInitApp() {
 		App.rally = this;
 		
-//		Logger.getLogger("").setLevel(Level.WARNING); //remove warnings here
+		boolean ignoreWarnings = false;
+		if (ignoreWarnings) {
+			Logger.getLogger("com.jme3").setLevel(Level.SEVERE); //remove warnings here
+			H.e("!!!! IGNORING IMPORTANT WARNINGS !!!!!");
+		}
 		inputManager.deleteMapping(SimpleApplication.INPUT_MAPPING_EXIT);
 		
 		NiftyJmeDisplay niftyDisplay = new NiftyJmeDisplay(assetManager, inputManager, audioRenderer, guiViewPort);

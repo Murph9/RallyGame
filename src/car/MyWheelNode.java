@@ -118,6 +118,7 @@ public class MyWheelNode extends Node {
 		}
 	}
 	
+	//TODO probably not working
 	private void addSkidLine(Vector3f a, Vector3f b, float grip) {
 		if (a.equals(new Vector3f(0,0,0)) || b.equals(new Vector3f(0,0,0))) {
 			return; //don't make a line because they aren't valid positions
@@ -156,9 +157,10 @@ public class MyWheelNode extends Node {
 		grip = FastMath.clamp(grip - 0.5f, 0, 1);
 		mat.setColor("Diffuse", new ColorRGBA(0,0,0,grip));
 		
-		geo.setMaterial(mat);
 		geo.setShadowMode(ShadowMode.Off);
 		geo.setQueueBucket(Bucket.Transparent);
+		geo.setMaterial(mat);
+
 		mvc.skidNode.attachChild(geo);
 		mvc.skidList.add(geo);
 	}
