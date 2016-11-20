@@ -21,7 +21,6 @@ import car.CarData;
 import de.lessvoid.nifty.Nifty;
 import settings.Configuration;
 import world.*;
-import world.curve.CurveWorld;
 
 ////TODO Ideas for game modes:
 //being chased. (with them spawning all lightning sci-fi like?)
@@ -57,8 +56,8 @@ public class Rally extends SimpleApplication {
 	public DriveMenu menu;
 	public SkyState sky;
 	
-	private final CarData defaultCar = Car.Runner.get();
-	private final World defaultWorld = new CurveWorld();
+	private final CarData defaultCar = Car.WhiteSloth.get();
+	private final World defaultWorld = new StaticWorldBuilder(StaticWorld.track2);//new CurveWorld();
 	
 	private CarData car;
 	private World world;

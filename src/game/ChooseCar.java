@@ -18,7 +18,8 @@ import car.CarData;
 import car.MyPhysicsVehicle;
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.controls.DropDown;
-import de.lessvoid.nifty.controls.Label;
+import de.lessvoid.nifty.elements.Element;
+import de.lessvoid.nifty.elements.render.TextRenderer;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 import game.H.Pair;
@@ -36,7 +37,7 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 	private float rotation; 
 	
 	private DropDown<String> dropdown;
-	private Label info;
+	private Element info;
 	private MyCamera camNode;
 
 	private HashMap<String, CarData> carset;
@@ -60,8 +61,8 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 		app.getStateManager().attach(bulletAppState);
 
 		dropdown = H.findDropDownControl(App.nifty.getCurrentScreen(), "cardropdown");
-		info = App.nifty.getCurrentScreen().findNiftyControl("carinfo", Label.class);
-		//info.getRenderer(TextRenderer.class).setLineWrapping(true); //TODO now this doesn't work
+		info = App.nifty.getCurrentScreen().findElementById("carinfo");
+//		info.getRenderer(TextRenderer.class).setLineWrapping(true); //TODO now this doesn't work
 		info.setFocusable(false);
 		
 		//create world
@@ -95,7 +96,7 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 				
 				car = c;
 				String carinfotext = getCarInfoText(dropdown.getSelection(), car); 
-				info.setText(carinfotext);
+				info.getRenderer(TextRenderer.class).setText(carinfotext);
 			}
 		}
 

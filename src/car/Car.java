@@ -4,7 +4,7 @@ import com.jme3.math.Vector3f;
 
 public enum Car {
 	Normal(new NormalCar()),
-	Normalf(new NormalFCar()),
+	WhiteSloth(new WhiteSloth()),
 	Rally(new RallyCar()),
 	Track(new TrackCar()),
 	Rocket(new Rocket()),
@@ -78,11 +78,39 @@ public enum Car {
 	}
 
 	
-	private static class NormalFCar extends CarData {
-		//Front wheel drive car
-		NormalFCar() {
+	private static class WhiteSloth extends CarData {
+		//http://www.automobile-catalog.com/auta_details1.php
+		WhiteSloth() {
+			carModel = dir+"Mazda_121_Metro_2.blend";
+			
 			driveFront = true;
 			driveRear = false;
+			
+			mass = 960;
+			areo_drag = 0.38f;
+			
+			w_yOff = 1f;
+			w_zOff = 1.1f;
+			
+			width = 1.67f;
+			height = 1.535f;
+			length = 3.8f;
+			
+			//change wheel size
+			w_radius = 0.575f/2f;
+			
+			auto_gearDown = 2000;
+			auto_gearUp = 5600; //guessed
+			e_redline = 6200; //guessed
+			
+			e_torque = new float[] {0, 50, 85, 102, 110, 107, 95, 40};
+			
+			trans_effic = 0.85f;
+			trans_finaldrive = 4.105f;
+			trans_gearRatios = new float[] { -3.214f, 3.416f, 1.842f, 1.29f, 0.972f, 0.775f };
+			
+			//just for kaz:
+			nitro_force *= 10;
 		}
 	}
 
