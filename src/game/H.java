@@ -175,11 +175,11 @@ public class H {
 	}
 	
 	//http://stackoverflow.com/a/677248
-	public static class Pair<A, B> {
+	public static class Duo<A, B> {
 		public final A first;
 	    public final B second;
 
-	    public Pair(A first, B second) {
+	    public Duo(A first, B second) {
 	    	super();
 	    	this.first = first;
 	    	this.second = second;
@@ -192,9 +192,9 @@ public class H {
 	    }
 
 	    public boolean equals(Object other) {
-	    	if (other instanceof Pair<?, ?>) {
+	    	if (other instanceof Duo<?, ?>) {
 				@SuppressWarnings("unchecked")
-				Pair<A, B> otherPair = (Pair<A, B>) other;
+				Duo<A, B> otherPair = (Duo<A, B>) other;
 	    		return 
 	    		((  this.first == otherPair.first ||
 	    			( this.first != null && otherPair.first != null &&

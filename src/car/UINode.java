@@ -51,27 +51,17 @@ public class UINode {
 	private Material rpmBarRedLine; //marking the rpm
 	private Material rpmBarRedLineOn; //for past redline
 	
-	//quads that display nitro
-	Geometry nitro, nitroOff;
-	
-	//quads that display throttle
-	Geometry throttle, throttleOff;
-		
-	//quads that display braking
-	Geometry brake, brakeOff;
-	
-	//quads that display turn value
-	Geometry steer, steerOff;
-		
+	Geometry nitro, nitroOff; //quads that display nitro
+	Geometry throttle, throttleOff; //quads that display throttle 
+	Geometry brake, brakeOff; //quads that display braking
+	Geometry steer, steerOff; //quads that display turn value
 	
 	//texture
 	final String numDir = "assets/number/"; //texture location
 	Material[] numMats = new Material[10]; //texture set
 	
-	//speed squares
-	Geometry[] speedo = new Geometry[3];
-	//gear label
-	Geometry gear = new Geometry();
+	Geometry[] speedo = new Geometry[3]; //speed squares
+	Geometry gear = new Geometry(); //gear label
 	
 	//speedo numbers
 	float startAng = FastMath.PI*5/4;

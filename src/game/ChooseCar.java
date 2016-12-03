@@ -1,7 +1,5 @@
 package game;
 
-import java.util.HashMap;
-
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
@@ -12,47 +10,39 @@ import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
+import com.simsilica.lemur.Button;
+import com.simsilica.lemur.Command;
+import com.simsilica.lemur.Container;
+import com.simsilica.lemur.Label;
+
 import car.Car;
 import car.CarBuilder;
 import car.CarData;
 import car.MyPhysicsVehicle;
-import de.lessvoid.nifty.Nifty;
-import de.lessvoid.nifty.controls.DropDown;
-import de.lessvoid.nifty.elements.Element;
-import de.lessvoid.nifty.elements.render.TextRenderer;
-import de.lessvoid.nifty.screen.Screen;
-import de.lessvoid.nifty.screen.ScreenController;
-import game.H.Pair;
+import game.H.Duo;
 import world.StaticWorld;
 import world.StaticWorldHelper;
 
-public class ChooseCar extends AbstractAppState implements ScreenController {
+public class ChooseCar extends AbstractAppState {
 
 	private static BulletAppState bulletAppState;
 
 	private StaticWorld world;
 
 	private CarBuilder cb;
-	static CarData car; //current car
+	private CarData car;
+	private Label label;
+	
 	private float rotation; 
 	
-	private DropDown<String> dropdown;
-	private Element info;
 	private MyCamera camNode;
 
-	private HashMap<String, CarData> carset;
-	
 	public ChooseCar() {
 		world = StaticWorld.garage2; //good default
-
-		carset = new HashMap<>();
-		Car[] a = Car.values();
-		car = a[0].get(); //hardcoded start yay TODO setting
-		for (Car c: a) {
-			carset.put(c.name(), c.get());
-		}
+		car = Car.values()[0].get();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void initialize(AppStateManager stateManager, Application app) {
 		super.initialize(stateManager, app);
@@ -60,11 +50,6 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 		bulletAppState = new BulletAppState();
 		app.getStateManager().attach(bulletAppState);
 
-		dropdown = H.findDropDownControl(App.nifty.getCurrentScreen(), "cardropdown");
-		info = App.nifty.getCurrentScreen().findElementById("carinfo");
-//		info.getRenderer(TextRenderer.class).setLineWrapping(true); //TODO now this doesn't work
-		info.setFocusable(false);
-		
 		//create world
 		StaticWorldHelper.addStaticWorld(App.rally.getRootNode(), getPhysicsSpace(), world, App.rally.sky.ifShadow);
 
@@ -81,24 +66,52 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 		camNode.lookAt(new Vector3f(0,1.2f,0), new Vector3f(0,1,0));
 		
 		App.rally.getRootNode().attachChild(camNode);
+		
+		//init gui
+		//info window first so the event listeners can delete it (TODO make this a field)
+		Container infoWindow = new Container();
+        App.rally.getGuiNode().attachChild(infoWindow);
+        infoWindow.setLocalTranslation(200, 200, 0);
+		label = new Label(getCarInfoText(Car.values()[0].name(), car)); //TODO not keen about enum thing here
+        infoWindow.addChild(label, 0, 0);
+		
+		Container myWindow = new Container();
+		App.rally.getGuiNode().attachChild(myWindow);
+		myWindow.setLocalTranslation(300, 300, 0);
+		myWindow.addChild(new Label("Choose Car"), 0, 0);
+		int i = 0;
+        for (Car c: Car.values()) {
+        	Button carB = myWindow.addChild(new Button(c.name()), 1, i);
+        	carB.addClickCommands(new Command<Button>() {
+                @Override
+                public void execute( Button source ) {
+                    car = c.get();
+
+                    cb.removePlayer(getPhysicsSpace(), 0);
+    				cb.addCar(getPhysicsSpace(), 0, car, world.start, new Matrix3f(), true);
+    				
+    				String carinfotext = getCarInfoText(c.name(), car);
+    				label.setText(carinfotext);
+                }
+            });
+        	i++;
+        }
+        
+        Button select = myWindow.addChild(new Button("Choose"));
+        select.addClickCommands(new Command<Button>() {
+            @Override
+            public void execute( Button source ) {
+            	chooseCar();
+            	App.rally.getGuiNode().detachChild(myWindow);
+            	App.rally.getGuiNode().detachChild(infoWindow);
+            }
+        });
 	}
 
 
 	public void update(float tpf) {
 		if (!isEnabled()) return; //appstate stuff
 		super.update(tpf);
-
-		if (dropdown != null) {
-			CarData c = carset.get(dropdown.getSelection());
-			if (c != null && c != car) {
-				cb.removePlayer(this.getPhysicsSpace(), 0);
-				cb.addCar(getPhysicsSpace(), 0, c, world.start, new Matrix3f(), true);
-				
-				car = c;
-				String carinfotext = getCarInfoText(dropdown.getSelection(), car); 
-				info.getRenderer(TextRenderer.class).setText(carinfotext);
-			}
-		}
 
 		MyPhysicsVehicle car = cb.get(0);
 		Vector3f pos = car.getPhysicsLocation();
@@ -113,7 +126,7 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 
 	private String getCarInfoText(String name, CarData car) {
 		String out = "Name: "+ name + "\n";
-		Pair<Float, Float> data = car.getMaxPower();
+		Duo<Float, Float> data = car.getMaxPower();
 		out += "Max Power: " + data.first + "kW? @ " + data.second + " rpm \n";
 		out += "Weight: "+car.mass + "kg\n";
 		out += "Drag(linear): " + car.areo_drag + "("+car.resistance(9.81f)+")\n";
@@ -147,18 +160,4 @@ public class ChooseCar extends AbstractAppState implements ScreenController {
 	public CarData getCarData() {
 		return car;
 	}
-	
-	@Override
-	public void bind(Nifty arg0, Screen arg1) {
-		DropDown<String> dropdown = H.findDropDownControl(arg1, "cardropdown");
-		if (dropdown != null) {
-			for (String s : carset.keySet()) {
-				dropdown.addItem(s);
-			}
-			dropdown.selectItemByIndex(0);
-		}
-	}
-
-	public void onEndScreen() { }
-	public void onStartScreen() { }
 }

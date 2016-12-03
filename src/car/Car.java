@@ -6,7 +6,7 @@ public enum Car {
 	Normal(new NormalCar()),
 	WhiteSloth(new WhiteSloth()),
 	Rally(new RallyCar()),
-	Track(new TrackCar()),
+//	Track(new TrackCar()), //TODO removed because lag
 	Rocket(new Rocket()),
 	Runner(new Runner()),
 	Hunter(new Hunter()),

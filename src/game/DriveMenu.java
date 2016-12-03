@@ -19,6 +19,9 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Line;
+import com.simsilica.lemur.Button;
+import com.simsilica.lemur.Command;
+import com.simsilica.lemur.Container;
 
 import car.MyPhysicsVehicle;
 import de.lessvoid.nifty.Nifty;
@@ -33,16 +36,13 @@ public class DriveMenu extends AbstractAppState implements ScreenController {
 	private MyPhysicsVehicle p;
 	private boolean showTelemetry;
 	private Node telemetry;
+
 	//displays the skid value, TODO make better
 	private Geometry gripBox[];
 	private Geometry gripDir[];
 	private BitmapText gripValue[];
-	private Vector3f[] ps = new Vector3f[] { 
-			new Vector3f(60, 250, 0),
-			new Vector3f(140, 250, 0),
-			new Vector3f(60, 180, 0),
-			new Vector3f(140, 180, 0),
-		};
+	private Vector3f[] ps;
+	
 	//the g force meter circles
 	private Geometry g1;
 	private Geometry g2;
@@ -75,6 +75,15 @@ public class DriveMenu extends AbstractAppState implements ScreenController {
 		black.getAdditionalRenderState().setLineWidth(3);
 		
 		BitmapFont guiFont = App.rally.getFont();
+
+
+		int height = App.rally.getCamera().getHeight();
+		ps = new Vector3f[] {
+				new Vector3f(60, height*0.4f, 0), //60,250,0
+				new Vector3f(140, height*0.4f, 0),
+				new Vector3f(60, height*0.3f, 0),
+				new Vector3f(140, height*0.3f, 0), //140,180,0
+			};
 		
 		this.gripBox = new Geometry[4];
 		this.gripDir = new Geometry[4];
@@ -111,7 +120,7 @@ public class DriveMenu extends AbstractAppState implements ScreenController {
 		n.attachChild(statsText);
 		
 		//g force
-		gcenter = new Vector3f(100, 400, 0);
+		gcenter = new Vector3f(100, height*0.5f, 0);
 		
 		b = new Box(5, 5, 1);
 		g1 = new Geometry("g-circle1", b);
@@ -147,6 +156,7 @@ public class DriveMenu extends AbstractAppState implements ScreenController {
 		}
 	};
 
+	@SuppressWarnings("unchecked")
 	public void initialize(AppStateManager stateManager, Application app) {
 		super.initialize(stateManager, app);
 
@@ -163,10 +173,37 @@ public class DriveMenu extends AbstractAppState implements ScreenController {
 		Rally r = App.rally;
 		r.getRootNode().attachChild(localRootNode);
 		r.getGuiNode().attachChild(localGuiNode);
+		
+		//init gui
+		Container myWindow = new Container();
+		App.rally.getGuiNode().attachChild(myWindow);
+		myWindow.setLocalTranslation(300, 300, 0);
+		
+		Button button = myWindow.addChild(new Button("UnPause"));
+		button.addClickCommands(new Command<Button>() {
+            @Override
+            public void execute( Button source ) {
+            	togglePause();
+            }
+        });
+		
+		Button button2 = myWindow.addChild(new Button("MainMenu"));
+		button2.addClickCommands(new Command<Button>() {
+            @Override
+            public void execute( Button source ) {
+            	mainMenu();
+            	App.rally.getGuiNode().detachChild(myWindow);
+            }
+        });
+		
+		Container myWindow2 = new Container();
+		App.rally.getGuiNode().attachChild(myWindow2);
+		
+		myWindow.setLocalTranslation(300, 100, 0);
 	}
 
 	public void togglePause() {
-		Screen cur = App.nifty.getCurrentScreen();
+		/*Screen cur = App.nifty.getCurrentScreen();
 		if (cur.getScreenId().equals("drive-paused")) {
 			//then un pause
 			App.nifty.gotoScreen("drive-noop");
@@ -175,17 +212,17 @@ public class DriveMenu extends AbstractAppState implements ScreenController {
 			//then pause
 			App.nifty.gotoScreen("drive-paused");
 			App.rally.drive.setEnabled(false);
-		}
+		}*/
 	}
 	public void toggleMenu() {
-		Screen cur = App.nifty.getCurrentScreen();
+		/*Screen cur = App.nifty.getCurrentScreen();
 		if (cur.getScreenId().equals("drive-pause")) return; //can't open the menu on the pause screen
 		
 		if (cur.getScreenId().equals("drive-tabmenu")) {
 			App.nifty.gotoScreen("drive-noop");
 		} else {
 			App.nifty.gotoScreen("drive-tabmenu");
-		}
+		}*/
 	}
 	
 	public void toggleTelemetry() {

@@ -5,7 +5,7 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 
 import game.H;
-import game.H.Pair;
+import game.H.Duo;
 
 public abstract class CarData {
 	
@@ -135,7 +135,7 @@ public abstract class CarData {
 	} 
 
 	//get the max power and rpm
-	public Pair<Float, Float> getMaxPower() {
+	public Duo<Float, Float> getMaxPower() {
 		float max = 0;
 		float maxrpm = 0;
 		for (int i = 0; i < e_torque.length; i++) {
@@ -143,7 +143,7 @@ public abstract class CarData {
 			max = Math.max(max, e_torque[i]*(1000*i)/9549);
 			if (prevmax != max) maxrpm = i;
 		} //http://www.autospeed.com/cms/article.html?&title=Power-versus-Torque-Part-1&A=108647
-		return new Pair<Float, Float>(max, maxrpm*1000);
+		return new Duo<Float, Float>(max, maxrpm*1000);
 	}
 }
 

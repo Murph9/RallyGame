@@ -557,6 +557,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 	//////////////////////////////////////////////////////////////
 	public void myUpdate(float tpf) {
+		//TODO need some kind of 'if paused' check to prevent physics from applying
+		
 		distance += getLinearVelocity().length()*tpf;
 
 		Matrix3f playerRot = new Matrix3f();

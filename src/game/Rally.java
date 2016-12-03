@@ -12,15 +12,17 @@ import com.jme3.font.BitmapFont;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import com.jme3.niftygui.NiftyJmeDisplay;
 import com.jme3.system.AppSettings;
 import com.jme3.system.NanoTimer;
+import com.simsilica.lemur.GuiGlobals;
+import com.simsilica.lemur.input.InputMapper;
+import com.simsilica.lemur.style.BaseStyles;
 
 import car.Car;
 import car.CarData;
-import de.lessvoid.nifty.Nifty;
 import settings.Configuration;
 import world.*;
+import world.curve.*;
 
 ////TODO Ideas for game modes:
 //being chased. (with them spawning all lightning sci-fi like?)
@@ -41,7 +43,6 @@ import world.*;
 //http://stackoverflow.com/questions/3915961/how-to-view-hierarchical-package-structure-in-eclipse-package-explorer
 
 //TODO
-//set a nifty new default style
 //still need to get fog working..
 //at night time or something because loading looks easier
 //stop the car sound on the menus [please]
@@ -56,8 +57,8 @@ public class Rally extends SimpleApplication {
 	public DriveMenu menu;
 	public SkyState sky;
 	
-	private final CarData defaultCar = Car.WhiteSloth.get();
-	private final World defaultWorld = new StaticWorldBuilder(StaticWorld.track2);//new CurveWorld();
+	private final CarData defaultCar = Car.Runner.get();
+	private final World defaultWorld = new CurveWorld();//new StaticWorldBuilder(StaticWorld.track2);
 	
 	private CarData car;
 	private World world;
@@ -70,7 +71,7 @@ public class Rally extends SimpleApplication {
 		if (config.ifFullscreen()) {
 			settings.setFullscreen(true);
 			//TODO untested
-			//will probably cause some resolution issues
+			//will probably cause some resolution issues if it doesn't match
 		} else {
 			settings.setResolution(config.getWidth(),config.getHeight());
 		}
@@ -83,7 +84,7 @@ public class Rally extends SimpleApplication {
 		app.setSettings(settings);
 		app.setTimer(new NanoTN(config.getFrameRate()));
 		app.setShowSettings(false);
-		app.setDisplayStatView(false);
+//		app.setDisplayStatView(false); //shows the triangle count and stuff
 		app.start();
 
 		
@@ -103,20 +104,26 @@ public class Rally extends SimpleApplication {
 		App.rally = this;
 		
 		boolean ignoreWarnings = false;
+		boolean ignoreOthers = true;
 		if (ignoreWarnings) {
 			Logger.getLogger("com.jme3").setLevel(Level.SEVERE); //remove warnings here
 			H.e("!!!! IGNORING IMPORTANT WARNINGS !!!!!");
 		}
+		if (ignoreOthers) {
+			Logger.getLogger("com.jme3.scene.plugins.").setLevel(Level.SEVERE);//remove warnings here
+			H.e("!!!! IGNORING (some) IMPORTANT WARNINGS !!!!!");	
+		}
 		inputManager.deleteMapping(SimpleApplication.INPUT_MAPPING_EXIT);
 		
-		NiftyJmeDisplay niftyDisplay = new NiftyJmeDisplay(assetManager, inputManager, audioRenderer, guiViewPort);
-		Nifty nifty = niftyDisplay.getNifty();
-		App.nifty = nifty;
-		try { //check if its valid, very important (why doesn't it do this by itself?)
-			nifty.validateXml("assets/ui/nifty.xml");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		//initialize Lemur (GUI thing)
+		GuiGlobals.initialize(this);
+		//Load the 'glass' style
+		BaseStyles.loadGlassStyle();
+		//Set 'glass' as the default style when not specified
+		GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
+		
+		InputMapper inputMapper = GuiGlobals.getInstance().getInputMapper();
+		inputMapper.release(); //TODO no keyboard please (causes weird issues)
 		
 		sky = new SkyState(); //lighting and shadow stuff is global
 		getStateManager().attach(sky);
@@ -124,8 +131,6 @@ public class Rally extends SimpleApplication {
 		start = new Start();
 		getStateManager().attach(start);
 		
-		nifty.fromXml("assets/ui/nifty.xml", "start", start);
-		guiViewPort.addProcessor(niftyDisplay);
 		inputManager.setCursorVisible(true);
 		flyCam.setEnabled(false);
 
@@ -143,7 +148,6 @@ public class Rally extends SimpleApplication {
 		}
 		
 		startDrive(car, world);
-		App.nifty.gotoScreen("drive-noop");
 	}
 	
 	//HERE is the logic for the app progress.
@@ -174,8 +178,6 @@ public class Rally extends SimpleApplication {
 			
 			start = new Start();
 			state.attach(start);
-			App.nifty.gotoScreen("start");
-			
 		} else {
 			H.p("Unexpected state called me '" + app + "' - rally.next()");
 		}
@@ -184,13 +186,11 @@ public class Rally extends SimpleApplication {
 	private void startChooseCar() {
 		chooseCar = new ChooseCar();
 		getStateManager().attach(chooseCar);
-		App.nifty.gotoScreen("chooseCar");
 	}
 	
 	private void startChooseMap() {
 		chooseMap = new ChooseMap();
 		getStateManager().attach(chooseMap);
-		App.nifty.gotoScreen("chooseMap");
 	}
 	
 	private void startDrive(CarData car, World world) {
@@ -201,8 +201,6 @@ public class Rally extends SimpleApplication {
 		
 		drive = new Drive(car, world);
 		getStateManager().attach(drive);
-		
-		App.nifty.gotoScreen("drive-noop");
 	}
 
 	/////////////////////

@@ -1,8 +1,5 @@
 package game;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
@@ -10,18 +7,16 @@ import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
-
-import de.lessvoid.nifty.Nifty;
-import de.lessvoid.nifty.builder.ControlBuilder;
-import de.lessvoid.nifty.elements.Element;
-import de.lessvoid.nifty.screen.Screen;
-import de.lessvoid.nifty.screen.ScreenController;
+import com.simsilica.lemur.Button;
+import com.simsilica.lemur.Command;
+import com.simsilica.lemur.Container;
+import com.simsilica.lemur.Label;
 
 import world.*;
 import world.curve.CurveWorld;
 import world.wp.WP.DynamicType;
 
-public class ChooseMap extends AbstractAppState implements ScreenController {
+public class ChooseMap extends AbstractAppState {
 
 	private static BulletAppState bulletAppState;
 
@@ -29,34 +24,14 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 	private static WorldType worldType = WorldType.NONE;
 	private static World world = null;
 	
-	private HashMap<String, StaticWorld> sSet;
-	private HashMap<String, DynamicType> dSet;
-
-	private static Element staticPanel;
-	private static Element dynPanel;
-	private static Element otherPanel;
-	
 	private MyCamera camNode;
 
 	public ChooseMap() {
-		//init static
-		sSet = new LinkedHashMap<>();
-		StaticWorld[] list  = StaticWorld.values();
-		for (StaticWorld s: list) {
-			sSet.put(s.name(), s);
-		}
-
-		//init dynamic
-		dSet = new LinkedHashMap<>(); //ordered hashmap
-		DynamicType[] worlds = DynamicType.values();
-		for (DynamicType dt: worlds) {
-			dSet.put(dt.name(), dt);
-		}
-		
 		bulletAppState = new BulletAppState();
 		App.rally.getStateManager().attach(bulletAppState);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void initialize(AppStateManager stateManager, Application app) {
 		super.initialize(stateManager, app);
@@ -69,6 +44,62 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 		camNode.lookAt(new Vector3f(20,1,0), new Vector3f(0,1,0));
 		
 		App.rally.getRootNode().attachChild(camNode);
+		
+		//init gui
+		Container myWindow = new Container();
+		App.rally.getGuiNode().attachChild(myWindow);
+		myWindow.setLocalTranslation(30, 900, 0);
+		
+		//these values are not x and y because they are causing confusion
+		int i = 0;
+		int j = 0;
+		myWindow.addChild(new Label("Choose Map"), j, i);
+		j++;
+		myWindow.addChild(new Label("Static"), j, i);
+		j++;
+		for (StaticWorld s : StaticWorld.values()) {
+			addButton(myWindow, WorldType.STATIC, s.name(), j, i);
+			i++;
+		}
+		i = 0;
+		j++;
+		myWindow.addChild(new Label("Dynamic"), j, i);
+		j++;
+		for (DynamicType d : DynamicType.values()) {
+			addButton(myWindow, WorldType.DYNAMIC, d.name(), j, i);
+			i++;
+		}
+		i = 0;
+		j++;
+		myWindow.addChild(new Label("Other"), j, i);
+		j++;
+		for (WorldType t: WorldType.values()) {
+			if (t != WorldType.STATIC && t != WorldType.DYNAMIC && t != WorldType.NONE) {
+				addButton(myWindow, t, t.name(), j, i);
+				i++;
+			}
+		}
+		i = 0;
+		j++;
+		Button button = myWindow.addChild(new Button("Choose"), j, i);
+		button.addClickCommands(new Command<Button>() {
+            @Override
+            public void execute( Button source ) {
+            	chooseMap();
+            	App.rally.getGuiNode().detachChild(myWindow);
+            }
+        });
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void addButton(Container myWindow, WorldType world, String s, int j, int i) {
+		Button button = myWindow.addChild(new Button(s), j, i);
+		button.addClickCommands(new Command<Button>() {
+            @Override
+            public void execute( Button source ) {
+            	setWorld(world.name(), s);
+            }
+        });
 	}
 
 	public void update(float tpf) {
@@ -114,48 +145,6 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 		return world;
 	}
 
-	@Override
-	public void bind(Nifty nifty, Screen screen) {
-		if (screen.getScreenId().equals("chooseMap")) {
-			staticPanel = screen.findElementById("staticPanel");
-			if (staticPanel != null) {
-				for (String s : sSet.keySet()) {
-					MakeButton(nifty, screen, staticPanel, WorldType.STATIC, s);
-				}
-			}
-			
-			dynPanel = screen.findElementById("dynPanel");
-			if (dynPanel != null) {
-				for (String s : dSet.keySet()) {
-					MakeButton(nifty, screen, dynPanel, WorldType.DYNAMIC, s);
-				}
-			}
-			
-			otherPanel = screen.findElementById("otherPanel"); 
-			if (otherPanel != null){
-				MakeButton(nifty, screen, otherPanel, WorldType.TERRAIN, "Terrain based");
-				MakeButton(nifty, screen, otherPanel, WorldType.OBJECT, "Object based");
-				MakeButton(nifty, screen, otherPanel, WorldType.FULLCITY, "City tile based");
-				MakeButton(nifty, screen, otherPanel, WorldType.CURVE, "Bezier Curve based");
-			}
-		}
-	}
-	
-	private void MakeButton(Nifty nifty, Screen screen, Element panel, WorldType type, String name) {
-		ControlBuilder cb = new ControlBuilder("button") {{
-			id(name);
-			alignLeft();
-			style("nifty-button");
-			padding("10px");
-
-			interactOnClick("setWorld(" + type + "," + name + ")");
-			
-			parameter("label", name);
-		}};
-		
-		cb.build(nifty, screen, panel);
-	}
-	
 	public void setWorld(String typeStr, String subType) {
 		if (world != null && world.isInit()) {
 			App.rally.getRootNode().detachChild(world.getRootNode());
@@ -190,7 +179,4 @@ public class ChooseMap extends AbstractAppState implements ScreenController {
 				return;
 		}
 	}
-
-	public void onEndScreen() { }
-	public void onStartScreen() { }
 }
