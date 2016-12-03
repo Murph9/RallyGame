@@ -31,7 +31,7 @@ public class BeizerCurve implements Curve {
 			return output;
 		}
 		
-		int N = 20;
+		int N = 5;
 		output = new BSegment[N + 1];
 		
 		//point on curve at t
