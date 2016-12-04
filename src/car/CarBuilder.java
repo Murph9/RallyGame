@@ -126,8 +126,10 @@ public class CarBuilder extends Node {
 		if (cars.isEmpty()) 
 			return;
 
-		for (Integer i : cars.keySet()) {
-			cars.get(i).myUpdate(tpf);
+		if (App.rally.drive.isEnabled()) { //otherwise they update while paused..
+			for (Integer i : cars.keySet()) {
+				cars.get(i).myUpdate(tpf);
+			}
 		}
 	}
 

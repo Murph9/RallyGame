@@ -71,7 +71,7 @@ public class ChooseCar extends AbstractAppState {
 		//info window first so the event listeners can delete it (TODO make this a field)
 		Container infoWindow = new Container();
         App.rally.getGuiNode().attachChild(infoWindow);
-        infoWindow.setLocalTranslation(200, 200, 0);
+        infoWindow.setLocalTranslation(H.screenTopLeft());
 		label = new Label(getCarInfoText(Car.values()[0].name(), car)); //TODO not keen about enum thing here
         infoWindow.addChild(label, 0, 0);
 		

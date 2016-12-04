@@ -22,13 +22,11 @@ import com.jme3.scene.shape.Line;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
+import com.simsilica.lemur.Label;
 
 import car.MyPhysicsVehicle;
-import de.lessvoid.nifty.Nifty;
-import de.lessvoid.nifty.screen.Screen;
-import de.lessvoid.nifty.screen.ScreenController;
 
-public class DriveMenu extends AbstractAppState implements ScreenController {
+public class DriveMenu extends AbstractAppState {
 
 	private Node localRootNode = new Node("Pause Screen RootNode");
 	private Node localGuiNode = new Node("Pause Screen GuiNode");
@@ -51,6 +49,11 @@ public class DriveMenu extends AbstractAppState implements ScreenController {
 	
 	//some debug text
 	BitmapText statsText;
+	
+	//GUI objects
+	Container pauseMenu;
+	Container infoHint;
+	Container info;
 	
 	public DriveMenu() {
 		super();
@@ -175,11 +178,8 @@ public class DriveMenu extends AbstractAppState implements ScreenController {
 		r.getGuiNode().attachChild(localGuiNode);
 		
 		//init gui
-		Container myWindow = new Container();
-		App.rally.getGuiNode().attachChild(myWindow);
-		myWindow.setLocalTranslation(300, 300, 0);
-		
-		Button button = myWindow.addChild(new Button("UnPause"));
+		pauseMenu = new Container();
+		Button button = pauseMenu.addChild(new Button("UnPause"));
 		button.addClickCommands(new Command<Button>() {
             @Override
             public void execute( Button source ) {
@@ -187,42 +187,45 @@ public class DriveMenu extends AbstractAppState implements ScreenController {
             }
         });
 		
-		Button button2 = myWindow.addChild(new Button("MainMenu"));
+		Button button2 = pauseMenu.addChild(new Button("MainMenu"));
 		button2.addClickCommands(new Command<Button>() {
             @Override
             public void execute( Button source ) {
             	mainMenu();
-            	App.rally.getGuiNode().detachChild(myWindow);
+            	App.rally.getGuiNode().detachChild(pauseMenu);
             }
         });
+		pauseMenu.setLocalTranslation(H.screenMiddle().add(pauseMenu.getPreferredSize().mult(-0.5f)));
 		
-		Container myWindow2 = new Container();
-		App.rally.getGuiNode().attachChild(myWindow2);
+		infoHint = new Container();
+		infoHint.attachChild(new Label("TAB for info"));
+		infoHint.setLocalTranslation(H.screenTopLeft());
+		App.rally.getGuiNode().attachChild(infoHint);
 		
-		myWindow.setLocalTranslation(300, 100, 0);
+		info = new Container();
+		info.attachChild(new Label("Controls: move: wasd and arrows , flip: f, handbrake: space, reverse: leftshift, camera: e,z, tab: this, pause: esc, reset: enter, jump: q, nitro: leftcontrol, telemetry: home"));
+		info.setLocalTranslation(H.screenTopLeft());
 	}
 
 	public void togglePause() {
-		/*Screen cur = App.nifty.getCurrentScreen();
-		if (cur.getScreenId().equals("drive-paused")) {
-			//then un pause
-			App.nifty.gotoScreen("drive-noop");
-			App.rally.drive.setEnabled(true);
+		Node guiRoot = App.rally.getGuiNode();
+		if (guiRoot.hasChild(pauseMenu)) {
+			guiRoot.detachChild(pauseMenu);
+            App.rally.drive.setEnabled(true);
 		} else {
-			//then pause
-			App.nifty.gotoScreen("drive-paused");
+			guiRoot.attachChild(pauseMenu);
 			App.rally.drive.setEnabled(false);
-		}*/
+		}
 	}
 	public void toggleMenu() {
-		/*Screen cur = App.nifty.getCurrentScreen();
-		if (cur.getScreenId().equals("drive-pause")) return; //can't open the menu on the pause screen
-		
-		if (cur.getScreenId().equals("drive-tabmenu")) {
-			App.nifty.gotoScreen("drive-noop");
+		Node guiRoot = App.rally.getGuiNode();
+		if (guiRoot.hasChild(info)) {
+			guiRoot.attachChild(infoHint);
+			guiRoot.detachChild(info);
 		} else {
-			App.nifty.gotoScreen("drive-tabmenu");
-		}*/
+			guiRoot.attachChild(info);
+			guiRoot.detachChild(infoHint);
+		}
 	}
 	
 	public void toggleTelemetry() {
@@ -303,8 +306,4 @@ public class DriveMenu extends AbstractAppState implements ScreenController {
 		
 		i.removeListener(actionListener);
 	}
-
-	public void bind(Nifty arg0, Screen arg1) { }
-	public void onEndScreen() { }
-	public void onStartScreen() { }
 }

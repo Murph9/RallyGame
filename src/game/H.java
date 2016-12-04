@@ -15,10 +15,6 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.debug.Arrow;
 
-import de.lessvoid.nifty.controls.DropDown;
-import de.lessvoid.nifty.screen.Screen;
-
-
 //Its short for help, name length was a concern (see H.p())
 public class H {
 
@@ -111,9 +107,9 @@ public class H {
 	}
 	
 	public static List<Geometry> getGeomList(Node n) {
-		return RGeomList(n);
+		return rGeomList(n);
 	}
-	private static List<Geometry> RGeomList(Node n) {
+	private static List<Geometry> rGeomList(Node n) {
 		List<Geometry> listg = new LinkedList<Geometry>();
 		
 		List<Spatial> list = n.getChildren();
@@ -148,18 +144,13 @@ public class H {
 		return g;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public static <T> DropDown<T> findDropDownControl(Screen screen, final String id) {
-		return screen.findNiftyControl(id, DropDown.class);
-	}
-	
 	//http://nghiaho.com/?p=997
-	public static float NearlyAtan(float x) {
+	public static float nearlyAtan(float x) {
 		float xabs = FastMath.abs(x);
 		return FastMath.QUARTER_PI*x - x*(xabs - 1)*(0.2447f + 0.0663f*xabs);
 	}
 	
-	public static float NearlyAtan2(float x, float y) {
+	public static float nearlyAtan2(float x, float y) {
 		float xabs = FastMath.abs(x);
 		float yabs = FastMath.abs(y);
 		float a = Math.min (xabs, yabs) / Math.max(xabs, yabs);
@@ -172,6 +163,13 @@ public class H {
 		if (y < 0) 
 			r = -r;
 		return 7;
+	}
+	
+	public static Vector3f screenTopLeft() {
+		return new Vector3f(0, App.rally.getSettings().getHeight(), 0);
+	}
+	public static Vector3f screenMiddle() {
+		return new Vector3f(App.rally.getSettings().getWidth()/2, App.rally.getSettings().getHeight()/2, 0);
 	}
 	
 	//http://stackoverflow.com/a/677248
@@ -209,7 +207,7 @@ public class H {
 
 	    public String toString()
 	    { 
-	           return "(" + first + ", " + second + ")"; 
+	    	return "(" + first + ", " + second + ")"; 
 	    }
 	}
 }

@@ -48,7 +48,7 @@ public class ChooseMap extends AbstractAppState {
 		//init gui
 		Container myWindow = new Container();
 		App.rally.getGuiNode().attachChild(myWindow);
-		myWindow.setLocalTranslation(30, 900, 0);
+		myWindow.setLocalTranslation(H.screenTopLeft());
 		
 		//these values are not x and y because they are causing confusion
 		int i = 0;
