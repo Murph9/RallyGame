@@ -1,0 +1,17 @@
+MaterialDef Solid Color2 {
+
+	MaterialParameters {
+		Vector4 Color
+	}
+	
+	Technique {
+		VertexShader GLSL100: assets/mat/SolidColor.vert
+		FragmentShader GLSL100: assets/mat/SolidColor.frag
+		
+		WorldParameters {
+            WorldViewProjectionMatrix
+        }
+    }
+    Technique FixedFunc {
+    }
+}
