@@ -9,7 +9,8 @@ import car.MyPhysicsVehicle;
 
 public class MiniMap {
 
-	//TODO aspect is off
+	//TODO (how do we keep this fixed?)
+	//	might have to map it onto a an actual object as a texture
 	
 	MyPhysicsVehicle target;
 	ViewPort viewport;
@@ -43,7 +44,6 @@ public class MiniMap {
 		cam.update();
 	}
 	
-	//TODO also fix the water so it isn't so distracting
 	public void update(float tpf) {
 		Vector3f pos = target.getPhysicsLocation();
 		Vector3f f = new Vector3f();

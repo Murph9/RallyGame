@@ -35,7 +35,7 @@ public class DriveMenu extends AbstractAppState {
 	private boolean showTelemetry;
 	private Node telemetry;
 
-	//displays the skid value, TODO make better
+	//displays the skid value, TODO make better (as in show something different past 1)
 	private Geometry gripBox[];
 	private Geometry gripDir[];
 	private BitmapText gripValue[];

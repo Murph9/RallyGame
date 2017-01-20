@@ -32,12 +32,8 @@ import world.wp.WP.NodeType;
 
 public abstract class DefaultBuilder implements World {
 
-	//designed to generate the world infront of the player dynamically.
+	//designed to generate the world infront of the player dynamically from static pieces
 
-	//TODO's
-	//hard - try and just make a curver to drive on instead of the loaded segments
-	//bezier curve stuffs..
-	
 	protected boolean isInit;
 	
 	protected WP[] type;
@@ -91,7 +87,7 @@ public abstract class DefaultBuilder implements World {
 			piece.setCullHint(CullHint.Never);
 			wpo.sp = ((Node)piece).getChild(0); //there is only one object in there (hopefully)
 			if (this.mat != null) {
-				wpo.sp.setMaterial(this.mat); //TODO double sided objects
+				wpo.sp.setMaterial(this.mat);
 			}
 
 			//scale and unscale spatials so that the collision shape size is correct
@@ -231,7 +227,7 @@ public abstract class DefaultBuilder implements World {
 
 	@Override
 	public Vector3f getWorldStart() {
-		return new Vector3f(0,1,0); //TODO better
+		return new Vector3f(0,1,0);
 	}
 	
 	@Override

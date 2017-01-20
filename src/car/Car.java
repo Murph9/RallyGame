@@ -6,7 +6,7 @@ public enum Car {
 	Normal(new NormalCar()),
 	WhiteSloth(new WhiteSloth()),
 	Rally(new RallyCar()),
-//	Track(new TrackCar()), //TODO removed because lag
+//	Track(new TrackCar()),
 	Rocket(new Rocket()),
 	Runner(new Runner()),
 	Hunter(new Hunter()),
@@ -82,22 +82,22 @@ public enum Car {
 		//http://www.automobile-catalog.com/auta_details1.php
 		WhiteSloth() {
 			carModel = dir+"Mazda_121_Metro_2.blend";
+			wheelModel = dir+"Mazda_121_Metro_wheel.blend";
 			
 			driveFront = true;
 			driveRear = false;
 			
 			mass = 960;
 			areo_drag = 0.38f;
-			
-			w_yOff = 1f;
-			w_zOff = 1.1f;
-			
+						
 			width = 1.67f;
 			height = 1.535f;
 			length = 3.8f;
 			
 			//change wheel size
 			w_radius = 0.575f/2f;
+			sus_restLength = 0.2f;
+			rollFraction = 0.1f;
 			
 			auto_gearDown = 2000;
 			auto_gearUp = 5600; //guessed
@@ -155,6 +155,7 @@ public enum Car {
 		}
 	}
 
+	//TODO use ridge racer cars here
 	private static class TrackCar extends CarData {
 		TrackCar() {
 			carModel = dir+"f1.blend";

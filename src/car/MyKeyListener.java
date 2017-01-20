@@ -39,8 +39,6 @@ public class MyKeyListener implements RawInputListener {
 		
 		layout.put(KeyInput.KEY_F, "Flip");
 		layout.put(KeyInput.KEY_RETURN, "Reset");
-		layout.put(KeyInput.KEY_Z, "Lookback");
-		layout.put(KeyInput.KEY_E, "Lookside");
 		
 		layout.put(KeyInput.KEY_Q, "Jump");
 	}

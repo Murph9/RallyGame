@@ -24,7 +24,7 @@ public class ChooseMap extends AbstractAppState {
 	private static WorldType worldType = WorldType.NONE;
 	private static World world = null;
 	
-	private MyCamera camNode;
+	private BasicCamera camera;
 
 	public ChooseMap() {
 		bulletAppState = new BulletAppState();
@@ -39,11 +39,8 @@ public class ChooseMap extends AbstractAppState {
 		bulletAppState = new BulletAppState();
 		stateManager.attach(bulletAppState);
 		
-		camNode = new MyCamera("Cam Node - Choose Map", App.rally.getCamera(), null);
-		camNode.setLocalTranslation(-70, 50, 0);
-		camNode.lookAt(new Vector3f(20,1,0), new Vector3f(0,1,0));
-		
-		App.rally.getRootNode().attachChild(camNode);
+		camera = new BasicCamera("Camera", App.rally.getCamera(), new Vector3f(-70,50,0), new Vector3f(20,1,0));
+		App.rally.getRootNode().attachChild(camera);
 		
 		//init gui
 		Container myWindow = new Container();
@@ -119,8 +116,6 @@ public class ChooseMap extends AbstractAppState {
 			}
 			world.update(tpf, new Vector3f(0,0,0), false);
 		}
-
-		camNode.myUpdate(tpf);
 	}
 
 	public PhysicsSpace getPhysicsSpace() {
@@ -129,7 +124,7 @@ public class ChooseMap extends AbstractAppState {
 
 	public void cleanup() {
 		App.rally.getStateManager().detach(bulletAppState);
-		App.rally.getRootNode().detachChild(camNode);
+		App.rally.getRootNode().detachChild(camera);
 		App.rally.getRootNode().detachChild(world.getRootNode());
 	}
 

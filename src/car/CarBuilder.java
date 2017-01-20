@@ -26,8 +26,12 @@ public class CarBuilder extends Node {
 
 	HashMap<Integer, MyVC> cars;
 
+	//settings
+	boolean soundEnabled;
+	
 	public CarBuilder() {
 		cars = new HashMap<>();
+		soundEnabled = true;
 		
 		App.rally.getRootNode().attachChild(this);
 	}
@@ -50,7 +54,11 @@ public class CarBuilder extends Node {
 		cars.remove(id);
 	}
 
-	public void addCar(PhysicsSpace space, int id, CarData car, Vector3f start, Matrix3f rot, boolean aPlayer) {
+	public void sound(boolean sound) {
+		soundEnabled = sound;
+	}
+	
+	public MyVC addCar(PhysicsSpace space, int id, CarData car, Vector3f start, Matrix3f rot, boolean aPlayer) {
 		if (cars.containsKey(id)) {
 			try {
 				throw new Exception("A car already has that Id");
@@ -60,7 +68,6 @@ public class CarBuilder extends Node {
 		}
 		Rally r = App.rally;
 		AssetManager am = r.getAssetManager();
-		
 
 		Spatial carmodel = am.loadModel(car.carModel);
 		if (carmodel instanceof Geometry) {
@@ -83,7 +90,7 @@ public class CarBuilder extends Node {
 			}
 		}
 
-		//its possible to shift the center of gravity here (TODO add to CarData possibly)
+		//its possible to shift the center of gravity offset (TODO add to CarData possibly)
 		//Convex collision shape or hull might be faster here)
 		CompoundCollisionShape compoundShape = new CompoundCollisionShape();
 		compoundShape.addChildShape(CollisionShapeFactory.createDynamicMeshShape(carmodel), new Vector3f(0,0,0));
@@ -113,23 +120,26 @@ public class CarBuilder extends Node {
 			player.makeAI();
 		}
 		
-		if (aPlayer) {
+		if (aPlayer && soundEnabled) {
 			player.giveSound(new AudioNode(am, "assets/sound/engine.wav", AudioData.DataType.Buffer));
 		}
 		
 		cars.put(id, player);
 
 		space.add(player);
+		return player;
 	}
 
 	public void update(float tpf) {
-		if (cars.isEmpty()) 
+		if (cars.isEmpty())
 			return;
 
 		if (App.rally.drive.isEnabled()) { //otherwise they update while paused..
 			for (Integer i : cars.keySet()) {
 				cars.get(i).myUpdate(tpf);
 			}
+		} else {
+			//something like disable sound
 		}
 	}
 

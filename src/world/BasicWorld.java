@@ -91,7 +91,6 @@ public class BasicWorld implements World {
 
 	@Override
 	public void update(float tpf, Vector3f playerPos, boolean force) {
-		// TODO Auto-generated method stub
-		
+		//nothing
 	}
 }

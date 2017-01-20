@@ -30,16 +30,16 @@ public class ChooseCar extends AbstractAppState {
 	private StaticWorld world;
 
 	private CarBuilder cb;
-	private CarData car;
+	private Car car;
 	private Label label;
 	
 	private float rotation; 
 	
-	private MyCamera camNode;
+	private BasicCamera camera;
 
 	public ChooseCar() {
 		world = StaticWorld.garage2; //good default
-		car = Car.values()[0].get();
+		car = Car.values()[0];
 	}
 
 	@SuppressWarnings("unchecked")
@@ -58,21 +58,19 @@ public class ChooseCar extends AbstractAppState {
 		Matrix3f dir = new Matrix3f();
 
 		cb = new CarBuilder();
-		cb.addCar(getPhysicsSpace(), 0, car, start, dir, true);
+		cb.sound(false);
+		cb.addCar(getPhysicsSpace(), 0, car.get(), start, dir, true);
 
 		//make camera
-		camNode = new MyCamera("Cam Node 2", App.rally.getCamera(), null);
-		camNode.setLocalTranslation(0, 3, 7);
-		camNode.lookAt(new Vector3f(0,1.2f,0), new Vector3f(0,1,0));
-		
-		App.rally.getRootNode().attachChild(camNode);
+		camera = new BasicCamera("Camera", App.rally.getCamera(), new Vector3f(0,3,7), new Vector3f(0,1.2f, 0));
+		App.rally.getRootNode().attachChild(camera);
 		
 		//init gui
-		//info window first so the event listeners can delete it (TODO make this a field)
+		//info window first so the event listeners can delete it
 		Container infoWindow = new Container();
         App.rally.getGuiNode().attachChild(infoWindow);
         infoWindow.setLocalTranslation(H.screenTopLeft());
-		label = new Label(getCarInfoText(Car.values()[0].name(), car)); //TODO not keen about enum thing here
+		label = new Label(getCarInfoText(car));
         infoWindow.addChild(label, 0, 0);
 		
 		Container myWindow = new Container();
@@ -85,12 +83,12 @@ public class ChooseCar extends AbstractAppState {
         	carB.addClickCommands(new Command<Button>() {
                 @Override
                 public void execute( Button source ) {
-                    car = c.get();
+                    car = c;
 
                     cb.removePlayer(getPhysicsSpace(), 0);
-    				cb.addCar(getPhysicsSpace(), 0, car, world.start, new Matrix3f(), true);
+    				cb.addCar(getPhysicsSpace(), 0, car.get(), world.start, new Matrix3f(), true);
     				
-    				String carinfotext = getCarInfoText(c.name(), car);
+    				String carinfotext = getCarInfoText(car);
     				label.setText(carinfotext);
                 }
             });
@@ -124,13 +122,14 @@ public class ChooseCar extends AbstractAppState {
 		car.setPhysicsRotation(q);
 	}
 
-	private String getCarInfoText(String name, CarData car) {
-		String out = "Name: "+ name + "\n";
-		Duo<Float, Float> data = car.getMaxPower();
+	private String getCarInfoText(Car car) {
+		CarData cd = car.get();
+		String out = "Name: "+ car.name() + "\n";
+		Duo<Float, Float> data = cd.getMaxPower();
 		out += "Max Power: " + data.first + "kW? @ " + data.second + " rpm \n";
-		out += "Weight: "+car.mass + "kg\n";
-		out += "Drag(linear): " + car.areo_drag + "("+car.resistance(9.81f)+")\n";
-		out += "Redline: "+ car.e_redline +"\n";
+		out += "Weight: "+ cd.mass + "kg\n";
+		out += "Drag(linear): " + cd.areo_drag + "(" + cd.resistance(9.81f) + ")\n";
+		out += "Redline: "+ cd.e_redline +"\n";
 		
 		return out;
 	}
@@ -148,7 +147,7 @@ public class ChooseCar extends AbstractAppState {
 		
 		cb.cleanup();
 		
-		App.rally.getRootNode().detachChild(camNode);
+		App.rally.getRootNode().detachChild(camera);
 	}
 
 	/////////////////////////////
@@ -158,6 +157,6 @@ public class ChooseCar extends AbstractAppState {
 		App.rally.next(this);
 	}
 	public CarData getCarData() {
-		return car;
+		return car.get();
 	}
 }

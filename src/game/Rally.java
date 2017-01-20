@@ -71,7 +71,7 @@ public class Rally extends SimpleApplication {
 		if (config.ifFullscreen()) {
 			settings.setFullscreen(true);
 			//TODO untested
-			//will probably cause some resolution issues if it doesn't match
+			//will probably cause some resolution issues if it doesn't match nice
 		} else {
 			settings.setResolution(config.getWidth(),config.getHeight());
 		}
@@ -123,7 +123,7 @@ public class Rally extends SimpleApplication {
 		GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
 		
 		InputMapper inputMapper = GuiGlobals.getInstance().getInputMapper();
-		inputMapper.release(); //TODO no keyboard please (causes weird issues)
+		inputMapper.release(); //TODO no keyboard inputs please (causes weird issues)
 		
 		sky = new SkyState(); //lighting and shadow stuff is global
 		getStateManager().attach(sky);

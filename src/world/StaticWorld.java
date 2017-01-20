@@ -7,27 +7,25 @@ public enum StaticWorld {
 	//special
 	garage("garage.blend", 1, new Vector3f(0,1,0), false),
 	garage2("garage_2.blend", 1, new Vector3f(0,1,0), false),
-	
-//	skyline("skyline.blend", 800, new Vector3f(-27.7f, 89.5f, 111.3f), true), //large
+
+	//normal
 	duct("duct.blend", 50, new Vector3f(0,-6,0), true),
 	duct2("duct.blend", 5, new Vector3f(0,0,0), true),
 	raleigh("raleigh.blend", 8, new Vector3f(34.441566f, 20.72906f, 27.334211f), true),
 
 	dragstrip("dragstrip.blend", 10, new Vector3f(0,0,0), false),
 	
-	//mine("minecraft_world1.obj", 30, new Vector3f(0,15,0), false),
-	
 	//other peoples:
-//	track1("track1.blend", 1, new Vector3f(255.12906f, 0.7663503f, -40.224197f), false),
 	track2("track2.blend", 1, new Vector3f(0,0,0), false),
+	carpark("carpark.blend", 1, new Vector3f(0,0,0), false),
+	
+	//debug ones: (not working now)
+//	paris1("paris1.blend", 1, new Vector3f(40,75,0), true), //be careful with this one, large
+//	track1("track1.blend", 1, new Vector3f(255.12906f, 0.7663503f, -40.224197f), false),
 //	track3("track3.blend", 1, new Vector3f(-24.227085f, 0.7908745f, 98.21415f), false),
 //	track4("track4.blend", 0.4f, new Vector3f(721.67365f, 0.84544f, -404.1729f), false),
-
-	carpark("carpark.blend", 1, new Vector3f(0,0,0), false),
-//	slotcar("slotcar.blend", 200, new Vector3f(0,5,0), false), //TODO edit
-//	slotcar2("slotcar2.blend", 120, new Vector3f(44.489723f, -1.9895625f, 25.498037f), true),
-	
-	//paris1("paris1.blend", 1, new Vector3f(40,75,0), true), //be careful with this one, large
+//	skyline("skyline.blend", 800, new Vector3f(-27.7f, 89.5f, 111.3f), true), //large
+//	mine("minecraft_world1.obj", 30, new Vector3f(0,15,0), false),
 	;
 	
 	static final String dir = "assets/staticworld/";

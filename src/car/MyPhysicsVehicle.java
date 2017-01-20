@@ -31,6 +31,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	//skid stuff
 	public Node skidNode;
 	protected LinkedList<Spatial> skidList = new LinkedList<Spatial>();
+	private static final int SKID_LENGTH = 100;
+	
 	private float maxlat;
 	private float maxlong;
 
@@ -86,8 +88,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	public float totalWheelRot;
 
 	public float distance;
-	public boolean ifLookBack = false;
-	public boolean ifLookSide = false;
 
 	float redlineKillFor;
 	private float driftangle;
@@ -148,8 +148,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			setFrictionSlip(i, car.wheelBasicSlip);
 
 			carNode.attachChild(wheel[i]);
-			
-			//TODO wheels rotate the wrong direction on the other side of the car
 		}
 
 		try {
@@ -225,14 +223,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		case "Reverse":
 			if (value) curGear = 0;
 			else curGear = 1;
-			break;
-
-		case "Lookback":
-			ifLookBack = value;
-			break;
-
-		case "Lookside":
-			ifLookSide = value;
 			break;
 
 		default:
@@ -557,8 +547,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 	//////////////////////////////////////////////////////////////
 	public void myUpdate(float tpf) {
-		//TODO need some kind of 'if paused' check to prevent physics from applying
-		
 		distance += getLinearVelocity().length()*tpf;
 
 		Matrix3f playerRot = new Matrix3f();
@@ -633,7 +621,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 				w.addSkidLine();
 			}
 
-			int extra = skidList.size() - 500; //so i can remove more than one (like all 4 that frame)
+			int extra = skidList.size() - SKID_LENGTH; //so i can remove more than one (like all 4 that frame)
 			for (int i = 0; i < extra; i++) {
 				skidNode.detachChild(skidList.getFirst());
 				skidList.removeFirst();
@@ -649,6 +637,10 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		setLinearVelocity(new Vector3f());
 		setAngularVelocity(new Vector3f());
 
+		this.curRPM = 1000; //TODO create idle value in cardata
+		for (MyWheelNode w: this.wheel) {
+			w.radSec = 0; //stop rotation of the wheels
+		}
 		
 		setPhysicsLocation(App.rally.drive.world.getWorldStart());
 		setPhysicsRotation(App.rally.drive.world.getWorldRot());

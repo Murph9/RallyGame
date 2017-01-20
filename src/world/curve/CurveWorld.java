@@ -125,8 +125,8 @@ public class CurveWorld implements World {
 	}
 	
 	private void generateLargeFlatBox(AssetManager am, ViewPort view) {
-//		Material matfloor = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-		Material matfloor = new Material(am, "assets/mat/SolidColor2.j3md");
+		Material matfloor = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+//		Material matfloor = new Material(am, "assets/mat/SolidColor2.j3md");
 		matfloor.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		matfloor.setColor("Color", ColorRGBA.Green);
 		

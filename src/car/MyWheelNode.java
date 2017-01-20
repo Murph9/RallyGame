@@ -123,8 +123,8 @@ public class MyWheelNode extends Node {
 		if (a.equals(new Vector3f(0,0,0)) || b.equals(new Vector3f(0,0,0))) {
 			return; //don't make a line because they aren't valid positions
 		}
-		a.y += 0.1;
-		b.y += 0.1; //z-buffering (i.e. to stop it "fighting" with the ground)
+		a.y += 0.02f;
+		b.y += 0.02f; //z-buffering (i.e. to stop it "fighting" with the ground)
 		
 		Mesh mesh = new Mesh(); //making a quad positions
 		Vector3f [] vertices = new Vector3f[4];
@@ -147,7 +147,7 @@ public class MyWheelNode extends Node {
 		
 		Geometry geo = new Geometry("MyMesh", mesh);
 		
-		Material mat = new Material(App.rally.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md");
+		Material mat = new Material(App.rally.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md"); //TODO make own material for this
 		mat.setTexture("DiffuseMap", skidTex);
 		mat.setBoolean("UseMaterialColors", true);
 		

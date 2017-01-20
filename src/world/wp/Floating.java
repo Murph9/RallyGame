@@ -1,8 +1,19 @@
 package world.wp;
 
+import com.jme3.bullet.collision.shapes.PlaneCollisionShape;
+import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
+import com.jme3.math.Plane;
 import com.jme3.math.Quaternion;
+import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
+import com.jme3.renderer.queue.RenderQueue.ShadowMode;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.shape.Quad;
+import com.jme3.water.SimpleWaterProcessor;
 
+import game.App;
 import world.World;
 
 public enum Floating implements WP {
@@ -46,8 +57,59 @@ public enum Floating implements WP {
 	}
 	
 	static class Builder extends DefaultBuilder implements World {
+		SimpleWaterProcessor waterProcessor;
+		Geometry water;
+		
 		Builder() {
 			super(Floating.values());
+			
+        	// we create a water processor
+        	waterProcessor = new SimpleWaterProcessor(App.rally.getAssetManager());
+        	// we set wave properties
+        	waterProcessor.setRenderSize(256,256);    // performance boost because small (don't know the defaults)
+        	waterProcessor.setWaterDepth(40);         // transparency of water
+        	waterProcessor.setDistortionScale(0.5f);  // strength of waves (default = 0.2)
+        	waterProcessor.setWaveSpeed(0.05f);       // speed of waves
+        	waterProcessor.setWaterColor(ColorRGBA.Green); //TODO actually make it green
+        	
+        	waterProcessor.setReflectionScene(App.rally.getRootNode());
+        	
+        	// we set the water plane
+        	Vector3f waterLocation = new Vector3f(0,-6,0);
+        	waterProcessor.setPlane(new Plane(Vector3f.UNIT_Y, waterLocation.dot(Vector3f.UNIT_Y)));
+        	App.rally.getViewPort().addProcessor(waterProcessor);
+        	
+        	// we define the wave size by setting the size of the texture coordinates
+        	Quad quad = new Quad(4000,4000);
+        	quad.scaleTextureCoordinates(new Vector2f(50f,50f));
+        	 
+        	// we create the water geometry from the quad
+        	water = new Geometry("water", quad);
+        	water.setLocalRotation(new Quaternion().fromAngleAxis(-FastMath.HALF_PI, Vector3f.UNIT_X));
+        	water.setLocalTranslation(-2000, -4, 2000);
+        	water.setShadowMode(ShadowMode.Receive);
+        	water.setMaterial(waterProcessor.getMaterial());
+        	App.rally.getRootNode().attachChild(water);
+        	
+        	//add lastly a plane just under it so you don't fall forever
+        	///* TODO
+        	Plane under = new Plane(Vector3f.UNIT_Y, waterLocation.add(0,1.75f,0).dot(Vector3f.UNIT_Y));
+        	PlaneCollisionShape p = new PlaneCollisionShape(under);
+        	
+        	RigidBodyControl underp = new RigidBodyControl(p, 0);
+//	        	p.addControl(underp);
+    		underp.setKinematic(false);
+//    		App.rally.drive.getPhysicsSpace().add(underp); //TODO add back in
+//	    		this.attachChild(p);
+    		//*/
 		}
+		
+		public void cleanup() {
+			super.cleanup();
+			
+			App.rally.getRootNode().detachChild(water);
+			App.rally.getViewPort().removeProcessor(waterProcessor);
+		}
+		
 	}
 }

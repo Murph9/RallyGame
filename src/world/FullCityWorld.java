@@ -142,7 +142,7 @@ public class FullCityWorld implements World {
 
 	@Override
 	public Vector3f getNextPieceClosestTo(Vector3f pos) {
-		return null; //TODO ai for this?
+		return null;
 	}
 
 	

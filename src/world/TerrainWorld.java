@@ -25,7 +25,6 @@ import game.App;
 public class TerrainWorld implements World {
 
 	//http://wiki.jmonkeyengine.org/jme3/beginner/hello_terrain.html
-	//TODO try the other modes at: http://javadoc.jmonkeyengine.org/com/jme3/terrain/heightmap/AbstractHeightMap.html
 	
 	private boolean isInit;
 	

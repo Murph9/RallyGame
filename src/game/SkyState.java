@@ -41,7 +41,7 @@ public class SkyState extends AbstractAppState {
 	private float sunRot;
 	private float rotateSpeed = 0.01f; //0.01 seem ok for a game (maybe slower)
 	
-	public boolean isDay = false;
+	public boolean isDay = true;
 	
 	//skymap
 	Geometry skymap;
@@ -80,7 +80,7 @@ public class SkyState extends AbstractAppState {
 		skyRoot.addLight(ambL);
 
 		sunL = new DirectionalLight();
-		sunL.setColor(new ColorRGBA(0.9f, 0.9f, 1f, 1f)); //maybe too bright?
+		sunL.setColor(new ColorRGBA(0.88f, 0.88f, 0.97f, 1f)); //maybe too bright?
 		
 		sunL.setDirection(new Vector3f(0f, 0.4f, 0f).normalizeLocal());
 		skyRoot.addLight(sunL);
@@ -89,7 +89,7 @@ public class SkyState extends AbstractAppState {
 		moonL.setColor(new ColorRGBA(0.4f, 0.4f, 0.4f, 1f));
 		moonL.setDirection(new Vector3f(0f, -1f, 0f).normalizeLocal());
 		skyRoot.addLight(moonL);
-
+		H.p("init sun");
 		
 		//TODO moon object and light
 		//sun 'object'
@@ -126,18 +126,18 @@ public class SkyState extends AbstractAppState {
 
 		if (ifShadow) {
 			//Shadows and lights
-			dlsr = new DirectionalLightShadowRenderer(am, 2048, 3);
+			dlsr = new DirectionalLightShadowRenderer(am, 2048, 4);
 			dlsr.setLight(sunL);
 			dlsr.setLambda(0.55f);
 			dlsr.setShadowIntensity(0.6f);
-			dlsr.setEdgeFilteringMode(EdgeFilteringMode.Nearest);
+			dlsr.setEdgeFilteringMode(EdgeFilteringMode.Bilinear);
 			vp.addProcessor(dlsr);
 
-			dlsf = new DirectionalLightShadowFilter(am, 2048, 3);
+			dlsf = new DirectionalLightShadowFilter(am, 2048, 4);
 			dlsf.setLight(sunL);
 			dlsf.setLambda(0.55f);
 			dlsf.setShadowIntensity(0.6f);
-			dlsf.setEdgeFilteringMode(EdgeFilteringMode.Nearest);
+			dlsf.setEdgeFilteringMode(EdgeFilteringMode.Bilinear);
 			dlsf.setEnabled(false);
 
 			FilterPostProcessor fpp = new FilterPostProcessor(am);
@@ -145,7 +145,7 @@ public class SkyState extends AbstractAppState {
 			fpp.setNumSamples(1);
 
 			if (ifFancyShadow) {
-				SSAOFilter ssaoFilter = new SSAOFilter(12.94f, 43.92f, 0.33f, 0.61f);
+				SSAOFilter ssaoFilter = new SSAOFilter(12f, 20f, 0.33f, 0.61f);
 				fpp.addFilter(ssaoFilter);
 			}
 

@@ -26,10 +26,6 @@ import game.Rally;
 
 public class UINode {
 
-	/*TODO:
-	 * get it all to kinda look like the forza 6 one
-	 * - their text is white infront of black so that you can see it always
-	 */
 	//TODO scale it with monitor size (forza doesn't deal with this)
 	MyPhysicsVehicle p;
 	
@@ -42,7 +38,7 @@ public class UINode {
 	
 	//rpm
 	List<Geometry> rpmBar;
-	float rpmBarStep = 50;
+	float rpmBarStep = 200;
 	private Material rpmBarOff; //default state
 	
 	private Material rpmBarOn; //less than rpm
@@ -122,7 +118,6 @@ public class UINode {
 		Node speedoNode = new Node("Speedo");
 		localRootNode.attachChild(speedoNode);
 		
-		//TODO better contrast on speedo
 		Quad qback = new Quad(270, 200);
 		background = new Geometry("ui-background", qback);
 		background.setCullHint(CullHint.Never);
