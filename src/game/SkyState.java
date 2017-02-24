@@ -35,6 +35,14 @@ import com.jme3.util.SkyFactory;
 
 public class SkyState extends AbstractAppState {
 
+	private static final ColorRGBA DAY_TOP = new ColorRGBA(0,0,1,1);
+	private static final ColorRGBA DAY_SIDE = new ColorRGBA(0.3f,0.6f,1,1);
+	private static final ColorRGBA DAY_BOTTOM = new ColorRGBA(0.3f,0.6f,1,1);
+
+	private static final ColorRGBA NIGHT_TOP = new ColorRGBA(0,0,0.3f,1);
+	private static final ColorRGBA NIGHT_SIDE = new ColorRGBA(0.15f,0.3f,0.5f,1);
+	private static final ColorRGBA NIGHT_BOTTOM = new ColorRGBA(0.15f,0.3f,0.5f,1);
+	
 	private Geometry sun;
 	private Geometry moon;
 	private Node sunNode;
@@ -277,50 +285,63 @@ public class SkyState extends AbstractAppState {
 	private void generateCubeMapColours() {
 		float[] colours = new float[2 * sideCount * 3 * 4];
 		
+		ColorRGBA top, side, bottom;
+		
+		if (isDay) {
+			top = DAY_TOP;
+			side = DAY_SIDE;
+			bottom = DAY_BOTTOM;
+		} else {
+			top = NIGHT_TOP;
+			side = NIGHT_SIDE;
+			bottom = NIGHT_BOTTOM;
+		}
+		
+		
 		int i = 0;
 		//top
 		while (i < sideCount*3) {
-			colours[i*4 + 0] = 0f;
-			colours[i*4 + 1] = 0f;
-			colours[i*4 + 2] = 1.0f;
-			colours[i*4 + 3] = 1.0f; //alpha = full no see through
+			colours[i*4 + 0] = top.r;
+			colours[i*4 + 1] = top.g;
+			colours[i*4 + 2] = top.b;
+			colours[i*4 + 3] = top.a;
 
 			i++;
 			
-			colours[i*4 + 0] = 0.3f;
-			colours[i*4 + 1] = 0.6f;
-			colours[i*4 + 2] = 1.0f;
-			colours[i*4 + 3] = 1.0f;
+			colours[i*4 + 0] = side.r;
+			colours[i*4 + 1] = side.g;
+			colours[i*4 + 2] = side.b;
+			colours[i*4 + 3] = side.a;
 
 			i++;
 			
-			colours[i*4 + 0] = 0.3f;
-			colours[i*4 + 1] = 0.6f;
-			colours[i*4 + 2] = 1.0f;
-			colours[i*4 + 3] = 1.0f;
+			colours[i*4 + 0] = side.r;
+			colours[i*4 + 1] = side.g;
+			colours[i*4 + 2] = side.b;
+			colours[i*4 + 3] = side.a;
 
 			i++;
 		}
 		//bottom
 		while (i < 2*sideCount*3) {
-			colours[i*4 + 0] = 0f;
-			colours[i*4 + 1] = 0f;
-			colours[i*4 + 2] = 0f;
-			colours[i*4 + 3] = 1.0f;
+			colours[i*4 + 0] = bottom.r;
+			colours[i*4 + 1] = bottom.g;
+			colours[i*4 + 2] = bottom.b;
+			colours[i*4 + 3] = bottom.a;
 
 			i++;
 			
-			colours[i*4 + 0] = 0.3f;
-			colours[i*4 + 1] = 0.6f;
-			colours[i*4 + 2] = 1.0f;
-			colours[i*4 + 3] = 1.0f;
+			colours[i*4 + 0] = side.r;
+			colours[i*4 + 1] = side.g;
+			colours[i*4 + 2] = side.b;
+			colours[i*4 + 3] = side.a;
 
 			i++;
 			
-			colours[i*4 + 0] = 0.3f;
-			colours[i*4 + 1] = 0.6f;
-			colours[i*4 + 2] = 1.0f;
-			colours[i*4 + 3] = 1.0f;
+			colours[i*4 + 0] = side.r;
+			colours[i*4 + 1] = side.g;
+			colours[i*4 + 2] = side.b;
+			colours[i*4 + 3] = side.a;
 
 			i++;
 		}
