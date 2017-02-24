@@ -23,7 +23,7 @@ public class StraightCurve implements Curve {
 	@Override
 	public BSegment[] calcPoints() {
 		if (nodes == null || nodes.length != 2) {
-			H.e("Incorrect starting points given, need 2");
+			H.e("Incorrect starting points given " + (nodes == null ? 0 : nodes.length) + ", need 2");
 			return null;
 		}
 		if (output != null){

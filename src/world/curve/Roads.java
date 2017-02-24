@@ -33,7 +33,7 @@ public class Roads {
 	
 	//TODO use actual curves
 	
-	public Roads(BiFunction<Vector3f, Vector3f, BSegment> funct) {
+	public Roads() {
 		//TODO use the input function
 	}
 
@@ -43,11 +43,11 @@ public class Roads {
 				new Vector3f(0, terrain.getHeight(new Vector2f(0,10)), 10),
 				new Vector3f(0, terrain.getHeight(new Vector2f(0,40)), 40),
 				new Vector3f(0, terrain.getHeight(new Vector2f(0,50)), 50)
-			}, curveFunction());
+			}, CurveFunction());
 		return new CurveQueueObj(FastMath.nextRandomFloat()*0.2f, curve, "+");
 	}
 	
-	public BiFunction<Vector3f, Vector3f, BSegment> curveFunction() { 
+	public static BiFunction<Vector3f, Vector3f, BSegment> CurveFunction() { 
 		return (Vector3f off, Vector3f tang) -> {
 	
 			Vector3f angleOff = new Vector3f(0, -1, 0);
@@ -65,9 +65,9 @@ public class Roads {
 	public void placePiece(CurveQueueObj cqo, Node rootNode, PhysicsSpace phys, boolean helpPoints) {
 		BSegment[] nodes = cqo.curve.calcPoints();
 		
-		Vector3f[] curveNodes = cqo.curve.getNodes(); 
+		Vector3f[] curveNodes = cqo.curve.getNodes();
 		
-		if (cqo.rule.equals("+")) {
+		if (cqo.rule != null && cqo.rule.equals("+")) {
 			Vector3f a = curveNodes[0];
 			Vector3f dir = curveNodes[3].subtract(a).normalize();
 			drawMeAnArrow(rootNode, a.add(0,2,0), dir);
@@ -92,7 +92,7 @@ public class Roads {
 		}
 		
 		Vector3f a = curveNodes[0];
-		Vector3f dir = curveNodes[3].subtract(a);
+		Vector3f dir = curveNodes[curveNodes.length-1].subtract(a);
 		dir.y = 0; //no height please
 		dir.normalizeLocal();
 		drawMeAnArrow(rootNode, a.add(0,2,0), dir);
@@ -131,7 +131,7 @@ public class Roads {
 			dir.normalizeLocal();
 			Vector3f b = a.add(dir.mult(50));
 			b.y = terrain.getHeight(new Vector2f(b.x,b.z));
-			Curve curve = new BeizerCurve(new Vector3f[] { a, a.add(dir.mult(10)), b.subtract(dir.mult(10)), b }, curveFunction());
+			Curve curve = new BeizerCurve(new Vector3f[] { a, a.add(dir.mult(10)), b.subtract(dir.mult(10)), b }, CurveFunction());
 			
 			int val = FastMath.nextRandomInt(0, 1);
 			String rule = null;
@@ -158,17 +158,17 @@ public class Roads {
 			Vector3f l = a.add(left.mult(10)).add(dir.mult(10));
 			Vector3f l2 = l.add(left.mult(50+20));
 			l2.y = terrain.getHeight(new Vector2f(l2.x,l2.z));
-			Curve curveL = new BeizerCurve(new Vector3f[] { l, l.add(left.mult(10)), l2.subtract(left.mult(10)), l2 }, curveFunction());
+			Curve curveL = new BeizerCurve(new Vector3f[] { l, l.add(left.mult(10)), l2.subtract(left.mult(10)), l2 }, CurveFunction());
 			
 			Vector3f r = a.add(left.mult(-10)).add(dir.mult(10));
 			Vector3f r2 = r.add(left.mult(-50-10));
 			r2.y = terrain.getHeight(new Vector2f(r2.x,r2.z));
-			Curve curveR = new BeizerCurve(new Vector3f[] { r, r.add(left.mult(-10)), r2.subtract(left.mult(-10)), r2 }, curveFunction());
+			Curve curveR = new BeizerCurve(new Vector3f[] { r, r.add(left.mult(-10)), r2.subtract(left.mult(-10)), r2 }, CurveFunction());
 			
 			Vector3f t = a.add(dir.mult(20));
 			Vector3f t2 = t.add(dir.mult(50+20));
 			t2.y = terrain.getHeight(new Vector2f(t2.x, t2.z));
-			Curve curveT = new BeizerCurve(new Vector3f[] { t, t.add(dir.mult(10)), t2.subtract(dir.mult(10)), t2 }, curveFunction());
+			Curve curveT = new BeizerCurve(new Vector3f[] { t, t.add(dir.mult(10)), t2.subtract(dir.mult(10)), t2 }, CurveFunction());
 			
 			return new CurveQueueObj[] { 
 					new CurveQueueObj(cqo.time + FastMath.nextRandomFloat()*0.2f + cqo.time, curveL, "A"),

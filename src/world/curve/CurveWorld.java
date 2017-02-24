@@ -1,8 +1,14 @@
 package world.curve;
 
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
+
+import javax.imageio.ImageIO;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.PhysicsSpace;
@@ -64,6 +70,8 @@ Later Things:
 //Main notes: http://www.tmwhere.com/city_generation.html
 //Other: https://www.reddit.com/r/gamedev/comments/19ic3j/procedural_content_generation_how_to_generate/
 
+
+//TODO other terrain generation method called PerlinNoise
 public class CurveWorld implements World {
 	private boolean isInit;
 	
@@ -85,7 +93,7 @@ public class CurveWorld implements World {
 	
 	public CurveWorld() {
 		rootNode = new Node("curveWorldRoot");
-		road = new Roads(null);
+		road = new Roads();
 	}
 	
 	@Override
@@ -105,8 +113,9 @@ public class CurveWorld implements World {
 		
 		AssetManager am = App.rally.getAssetManager();
 		
-		/* TODO this all has all been removed until we sort out the l-system stuff
+//		/* TODO this all has all been removed until we sort out the l-system stuff
 		generateTerrain(am, view);
+		/*
 		boolean roadPlease = true; //SET the type here
 		if (roadPlease)
 			generateRoads(am, view);
@@ -118,8 +127,10 @@ public class CurveWorld implements World {
 		*/
 
 		generateLargeFlatBox(am, view);
-		lrg = new LRoadGenerator(rootNode, 0.2f);
-		lrg.init();
+//		lrg = new LRoadGenerator(rootNode, 0.2f);
+//		lrg.init();
+		
+		saveTerrainToFile();
 		
 		return rootNode;
 	}
@@ -181,7 +192,8 @@ public class CurveWorld implements World {
 //		map = new ImageBasedHeightMap(heightMapImage.getImage());
 //		map = new HillHeightMap(1025, 1000, 50, 200, FastMath.rand.nextLong());
 		
-		map = new DiamondSquareMap(1025);
+//		map = new DiamondSquareMap(1025);
+		map = new PerlinNoise(1025);
 	    map.load();
 	    
 	    map.normalizeTerrain(100); //TODO affects the terrain textures
@@ -217,7 +229,7 @@ public class CurveWorld implements World {
 				new Vector3f(0,height2,75),
 			};
 		Curve curve = null;
-		curve = new BeizerCurve(points, road.curveFunction());
+		curve = new BeizerCurve(points, Roads.CurveFunction());
 		road.placePiece(new CurveQueueObj(0, curve, null), rootNode, phys, true);
 		
 		for (int i = 0; i < 10; i++) {
@@ -238,7 +250,7 @@ public class CurveWorld implements World {
 			points[2] = points[0].add(new Vector3f(xm, 0, zm));
 			points[2].y = y;
 
-			curve = new BeizerCurve(points, road.curveFunction());
+			curve = new BeizerCurve(points, Roads.CurveFunction());
 			road.placePiece(new CurveQueueObj(0, curve, null), rootNode, phys, true);
 		}
 	}
@@ -343,10 +355,9 @@ public class CurveWorld implements World {
 	    phys.add(c);
 	}
 	
-	@SuppressWarnings("unused")
 	private void saveTerrainToFile() {
 		//print the terrain to file (for debugging)
-		/*
+		
 		float[] height_map = terrain.getHeightMap();
 		double p = Math.sqrt(height_map.length);
 		
@@ -370,7 +381,7 @@ public class CurveWorld implements World {
 			//this is debug code so, oh well
 			H.e("Image from terrain failed");
 		}
-		*/
+//		*/
 	}
 	
 	//interface nodes
@@ -387,7 +398,7 @@ public class CurveWorld implements World {
 	public Matrix3f getWorldRot() { return new Matrix3f(Matrix3f.IDENTITY); }
 	@Override
 	public void update(float tpf, Vector3f playerPos, boolean force) {
-		lrg.update(tpf);
+		if (lrg != null) lrg.update(tpf);
 	}
 	@Override
 	public void reset() { }
