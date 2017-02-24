@@ -36,6 +36,10 @@ public class UINode {
 	BitmapText score;
 	BitmapText angle;
 	
+	//rpm2
+	Geometry rpmQuad;
+	Material rpmMat;
+	
 	//rpm
 	List<Geometry> rpmBar;
 	float rpmBarStep = 200;
@@ -128,6 +132,20 @@ public class UINode {
 		background.setLocalTranslation(settings.getWidth()-270, 0, -10);
 		
 		speedoNode.attachChild(background);
+		
+		//rpm bars 2
+		Quad rpmQ = new Quad(220, 220);
+		rpmQuad = new Geometry("ui-background", rpmQ);
+		background.setCullHint(CullHint.Never);
+		rpmMat = new Material(am, "assets/mat/Radial.j3md");
+		rpmMat.setTransparent(true);
+		rpmMat.setTexture("ThresholdMap", am.loadTexture("assets/image/radialgradient.png"));
+		rpmMat.setFloat("Threshold", FastMath.nextRandomFloat());
+		rpmMat.setColor("Color", ColorRGBA.White);
+		rpmMat.getAdditionalRenderState().setBlendMode(BlendMode.AlphaAdditive);
+		rpmQuad.setMaterial(rpmMat);
+		rpmQuad.setLocalTranslation(App.rally.getSettings().getWidth()-240, -25, -10);
+		speedoNode.attachChild(rpmQuad);
 		
 		//rpm bars
 		Quad quad = new Quad(20, 20);
@@ -335,6 +353,9 @@ public class UINode {
 						rpmBar.get(i).setMaterial(rpmBarOn);
 			}
 		}
+		
+		//rpm bar 2
+		rpmMat.setFloat("Threshold", 1 - (p.curRPM/(float)Math.ceil(redline+1000))*(5/(float)8));
 		
 		angle.setText(p.getAngle()+"'");
 		nitro.setLocalScale(1, p.nitro/p.car.nitro_max, 1);
