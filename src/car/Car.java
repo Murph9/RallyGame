@@ -28,6 +28,7 @@ public enum Car {
 	
 	
 	//TODO it rolls realy easy compared to the runner car
+	//TODO tune in general
 	private static class Ricer extends CarData {
 		//for using the default settings.
 		//probably shouldn't have a custom constructor
@@ -97,7 +98,7 @@ public enum Car {
 			//change wheel size
 			w_radius = 0.575f/2f;
 			sus_restLength = 0.2f;
-			rollFraction = 0.1f;
+			rollFraction = 0.1f; //TODO not enough
 			
 			auto_gearDown = 2000;
 			auto_gearUp = 5600; //guessed
@@ -156,6 +157,7 @@ public enum Car {
 	}
 
 	//TODO use ridge racer cars here
+	@SuppressWarnings("unused")
 	private static class TrackCar extends CarData {
 		TrackCar() {
 			carModel = dir+"f1.blend";
@@ -196,7 +198,7 @@ public enum Car {
 
 	private static class Rocket extends CarData {
 		Rocket() {
-			carModel = dir + "rocket1.obj";
+			carModel = dir + "rocket1_1.blend";
 			w_zOff = 1.2f;
 			w_xOff = 0.71f;
 			setw_Pos();
@@ -226,7 +228,7 @@ public enum Car {
 			e_mass = 30;
 
 			trans_finaldrive = 3.0f;
-			trans_gearRatios = new float[]{-5f,3.23f,2.19f,1.71f,1.39f,1.16f,0.93f};
+			trans_gearRatios = new float[]{-5f,5,3.23f,2.19f,1.71f,1.39f,1.16f,0.93f};
 
 			w_flatdata = new RocketLatWheel();
 			w_flongdata = new RocketLongWheel();
@@ -302,6 +304,8 @@ public enum Car {
 			trans_effic = 0.75f;
 			trans_finaldrive = 3f;
 			trans_gearRatios = new float[]{-3.5f,3.66f,2.5f,1.9f,1.4f,1.02f,0.7f};
+			
+			cam_offset.mult(2);
 		}
 
 	}
