@@ -58,7 +58,7 @@ public class Rally extends SimpleApplication {
 	public SkyState sky;
 	
 	private final CarData defaultCar = Car.Runner.get();
-	private final World defaultWorld = new CurveWorld();//new StaticWorldBuilder(StaticWorld.track2);
+	private final World defaultWorld = new HighwayWorld();//new StaticWorldBuilder(StaticWorld.track2);
 	
 	private CarData car;
 	private World world;

@@ -7,7 +7,9 @@ public enum WorldType {
 	
 	OBJECT,
 	FULLCITY,
+	
 	CURVE,
+	HIGHWAY,
 	
 	BASIC,
 	NONE,
