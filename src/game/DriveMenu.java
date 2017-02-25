@@ -42,7 +42,7 @@ public class DriveMenu extends AbstractAppState {
 	private Vector3f[] ps;
 	
 	//the g force meter circles
-	private Geometry g1;
+	private Geometry g1; //TODO move to UINode
 	private Geometry g2;
 	private Vector3f gcenter;
 	BitmapText gText;

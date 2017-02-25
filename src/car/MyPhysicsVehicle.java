@@ -167,8 +167,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			System.exit(1);
 		}
 		
-		//then finally set the gravity to 2 times because gameplay
-		setGravity(getGravity().mult(2));
+		//then finally set the gravity to 3 times because gameplay
+		setGravity(getGravity().mult(3));
 	}
 
 	public void onAction(String binding, boolean value, float tpf) {
@@ -288,7 +288,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		Vector3f velocity = w_angle.invert().mult(w_velocity);
 
 		//calculate g Forces on the car (calc in world then convert to local)
-		gForce = w_angle.invert().mult(vel.subtract(w_velocity).mult(1/(tpf*9.81f))); //mult by inverse time step and gravity
+		gForce = w_angle.invert().mult(vel.subtract(w_velocity).mult(1/(tpf*getGravity().length()))); //mult by inverse time step and gravity
 		vel = w_velocity; //set it to the current one
 		
 		
