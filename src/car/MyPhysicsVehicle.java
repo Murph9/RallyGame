@@ -55,6 +55,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 	//my wheel node
 	public MyWheelNode[] wheel = new MyWheelNode[4];
+	//TODO average the wheel forces from the last few frames, maybe?
 
 	//state stuff
 	public Vector3f vel;
@@ -93,7 +94,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	private float driftangle;
 	public int getAngle() { return (int)(Math.abs(driftangle)*FastMath.RAD_TO_DEG); }
 
-	MyPhysicsVehicle(CollisionShape col, CarData cartype, Node carNode) {
+	public MyPhysicsVehicle(CollisionShape col, CarData cartype, Node carNode) {
 		super(col, cartype.mass);
 		this.car = cartype;
 		this.carRootNode = carNode;
@@ -166,9 +167,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			H.p("error in calculating max(lat|long) values of: "+car.getClass());
 			System.exit(1);
 		}
-		
-		//then finally set the gravity to 3 times because gameplay
-		setGravity(getGravity().mult(3));
 	}
 
 	public void onAction(String binding, boolean value, float tpf) {
@@ -289,8 +287,9 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 		//calculate g Forces on the car (calc in world then convert to local)
 		gForce = w_angle.invert().mult(vel.subtract(w_velocity).mult(1/(tpf*getGravity().length()))); //mult by inverse time step and gravity
-		vel = w_velocity; //set it to the current one
 		
+		//after prev step stuff is over set it to the current one
+		vel = w_velocity; 		
 		
 		float steeringCur = steeringCurrent;
 		if (velocity.z < 0) { //to flip the steering on moving in reverse
@@ -310,17 +309,17 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		Vector3f totalNeutral = new Vector3f(dragx, dragy + dragDown, dragz).multLocal(tpf);
 		applyCentralForce(w_angle.mult(totalNeutral));
 
-		//////////////////////////////////
+		//////////////////////////////////////////////////
 		//Wheel Forces
 		Vector3f[] wf = new Vector3f[] {
-				new Vector3f(),new Vector3f(),new Vector3f(),new Vector3f(),
+				new Vector3f(), new Vector3f(), new Vector3f(), new Vector3f(),
 		};
 
 		if (velocity.z == 0) { //to avoid all the divide by zeros
-			velocity.z += 0.00001;
+			velocity.z += 0.0001*FastMath.sign(FastMath.nextRandomFloat());
 		}
 		
-		//////////////////////////////////////
+		////////////////////////
 		//longitudinal forces
 		engineTorque = getEngineWheelTorque(tpf, velocity.z);
 		float[] torques = new float[] { 0, 0, 0, 0 };
@@ -329,6 +328,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		if (car.driveFront && car.driveRear)
 			engineTorque /= 2; //split up into 2 axles
 
+		//TODO differential
 		if (car.driveFront) {
 			torques[0] = engineTorque;
 			torques[1] = engineTorque;
@@ -373,19 +373,20 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			slip_const = 2;
 			
 			//we want the force centre inline with the rear wheels at high speed and inline with the center at slow speeds
-			steeringCur /= 2;
+//			steeringCur /= 2;
 			rearSteeringCur = -steeringCur;
 			
 			if (steeringCur != 0) {
 				float radius = car.w_zOff*2/FastMath.sin(steeringCur);
 				
-				float forceToKeepCircle = car.mass*velocity.lengthSquared()/radius;
+				float forceToKeepCircle = (car.mass*9.81f/4)*velocity.lengthSquared()/radius;
 				maxSlowLat = FastMath.abs(forceToKeepCircle/4);
 			}
-		}		
+		}
 
 		//http://web.archive.org/web/20050308061534/home.planet.nl/~monstrous/tutstab.html
-		//http://phors.locost7.info/contents.htm		
+		//http://phors.locost7.info/contents.htm
+		//http://www.edy.es/dev/2011/12/facts-and-myths-on-the-pacejka-curves/
 
 		//for each wheel
 		for (int i = 0; i < 4; i++) {
@@ -393,17 +394,13 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			susforce = Math.min(susforce, car.mass*3); //[*3] HACK: to stop weird harsh physics on large normal suspension forces
 
 			float slip_div = Math.abs(velocity.length());
-			if (slowSpeed) {
-				slip_div = slowslipspeed + (velocity.length()*velocity.length())/slowslipspeed;
-			}
-			// TODO thought about how to make slow speeds fit, try and make tyres only push with movement
 
-			// TODO note that the bottom turn could be max of vel and radsec: http://www.menet.umn.edu/~gurkan/Tire%20Modeling%20%20Lecture.pdf 
+			// note that the bottom turn could be max of vel and radsec: http://www.menet.umn.edu/~gurkan/Tire%20Modeling%20%20Lecture.pdf 
 			float slipr = slip_const*(wheel[i].radSec*car.w_radius - velocity.z);
 			float slipratio = slipr/slip_div;
 
 			if (ifHandbrake && i > 1) //rearwheels, handbrake like this keeps engine speed and still slips 
-//				slipratio = (0*car.w_radius - velocity.z)/Math.abs(velocity.z); //(TODO needs work)
+//				slipratio = (0*car.w_radius - velocity.z)/Math.abs(velocity.z);
 				wheel[i].radSec = 0;
 
 			float slipangle = 0;
@@ -419,37 +416,36 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			if (i == 2) //a rear wheel
 				driftangle = slipangle;
 
+			//start work on merging the forces into a traction circle
 			float ratiofract = slipratio/maxlong;
 			float anglefract = slipangle/maxlat;
 			float p = FastMath.sqrt(ratiofract*ratiofract + anglefract*anglefract);
 			
-			//calc the longitudinal force from the slip ratio			
+			//calc the longitudinal force from the slip ratio
 			wf[i].z = (ratiofract/p)*VehicleGripHelper.tractionFormula(car.w_flongdata, p*maxlong) * susforce;
 			
 			//latitudinal force that is calculated off the slip angle
 			wf[i].x = -(anglefract/p)*VehicleGripHelper.tractionFormula(car.w_flatdata, p*maxlat) * susforce;
-
 			
-			//prevents the force from exceeding the centripetal force TODO breaks all other forces
-			//TODO also note the 4 wheel steering that the other slowspeed code does
+			//prevents the force from exceeding the centripetal force
 			if (slowSpeed) {
 				if (Math.abs(wf[i].x) > maxSlowLat) {
 					wf[i].x = FastMath.clamp(wf[i].x, -maxSlowLat, maxSlowLat);
 				}
+				if (accelCurrent == 0 && brakeCurrent == 0) {
+					wf[i].mult(0.5f); //TODO add massive dampening force to prevent any weird things at slow speeds
+				}
 			}
 				
-			
 			wheel[i].skid = p;
 			
 			//add the wheel force after merging the forces
 			float totalLongForce = torques[i] - wf[i].z - (brakeCurrent*car.brakeMaxTorque*Math.signum(wheel[i].radSec));
-			if (Math.signum(totalLongForce - (brakeCurrent*car.brakeMaxTorque*Math.signum(velocity.z))) != Math.signum(totalLongForce)) {
-				//we maxed out the forces with braking
-				wheel[i].radSec = 0;
-			} else {
+			if (Math.signum(totalLongForce - (brakeCurrent*car.brakeMaxTorque*Math.signum(velocity.z))) != Math.signum(totalLongForce))
+				wheel[i].radSec = 0; //maxed out the forces with braking
+			else
 				wheel[i].radSec += tpf*totalLongForce/(car.e_inertia());
-			}
-			
+						
 			wheel[i].susForce = susforce;
 			wheel[i].gripDir = wf[i].mult(1/susforce);
 		}
@@ -578,10 +574,10 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		//wheel turning logic
 		steeringCurrent = 0;
 		if (steerLeft != 0) { //left
-			steeringCurrent += car.w_steerAngle*steerLeft;
+			steeringCurrent += getMaxSteerAngle()*steerLeft;
 		}
 		if (steerRight != 0) { //right
-			steeringCurrent -= car.w_steerAngle*steerRight;
+			steeringCurrent -= getMaxSteerAngle()*steerRight;
 		}
 		
 //		steeringCurrent = (float)VehiclePhysicsHelper.linearise(steeringCurrent, 0.5f); 
@@ -612,6 +608,20 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		
 	}
 
+	//TODO put some kind of brakes on when going slow
+	
+	private float getMaxSteerAngle() {
+//		/* comment here to toggle
+		float maxAngle = car.w_steerAngle/2;
+		float offset = 1;
+		return -maxAngle*FastMath.atan(0.12f*vel.length() - offset) + maxAngle*FastMath.HALF_PI + this.maxlat;
+//		*/
+		/* comment here to toggle
+		return car.w_steerAngle;
+		//*/ 
+		//TODO needs some kind of turn back help now
+	}
+	
 	///////////////////////////////////////////////////////////
 	private void addSkidLines() {
 		if (ai != null) return;
