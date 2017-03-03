@@ -1,5 +1,6 @@
 package world.curve;
 
+import java.util.Arrays;
 import java.util.function.BiFunction;
 
 import com.jme3.asset.AssetManager;
@@ -205,7 +206,11 @@ public class Roads {
 	
 	private void drawMeAQuad(Node rootNode, PhysicsSpace phys, Vector3f[] v, ColorRGBA colour) {
 		if (v == null || v.length != 4) {
-			H.e("CurveWorld: Not the correct length drawMeAQuad()");
+			H.e("Roads-drawMeAQuad: Not the correct length drawMeAQuad()");
+			return;
+		}
+		if (Arrays.asList(v).stream().anyMatch(x -> !Vector3f.isValidVector(x))) {
+			H.e("Roads-drawMeAQuad: Invalid vector given");
 			return;
 		}
 		
