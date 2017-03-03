@@ -192,6 +192,7 @@ public class LRoadGenerator {
 	
 	//http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
 	//also another way for reference: http://stackoverflow.com/a/16260220
+	@SuppressWarnings("unused")
 	private boolean pointInQuad(Vector3f p, Vector3f[] quad) {
 		int i, j;
 		boolean result = false;

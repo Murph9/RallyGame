@@ -92,39 +92,5 @@ public class FancyRcV extends RaycastVehicle {
 		}
 
 		updateFriction(step);
-
-		
-		//the code for rotating tyres has been commented out:
-		/*
-		for (i = 0; i < wheelInfo.size(); i++) {
-			WheelInfo wheel = wheelInfo.getQuick(i);
-			Vector3f relpos = new Vector3f();
-			relpos.sub(wheel.raycastInfo.hardPointWS, getRigidBody().getCenterOfMassPosition(tmp));
-			Vector3f vel = getRigidBody().getVelocityInLocalPoint(relpos, new Vector3f());
-
-			if (wheel.raycastInfo.isInContact) {
-				Transform chassisWorldTransform = getChassisWorldTransform(new Transform());
-
-				Vector3f fwd = new Vector3f();
-				fwd.set(
-						chassisWorldTransform.basis.getElement(0, indexUpAxis),
-						chassisWorldTransform.basis.getElement(1, indexForwardAxis),
-						chassisWorldTransform.basis.getElement(2, indexRightAxis));
-
-				float proj = fwd.dot(wheel.raycastInfo.contactNormalWS);
-				tmp.scale(proj, wheel.raycastInfo.contactNormalWS);
-				fwd.sub(tmp);
-
-				float proj2 = fwd.dot(vel);
-
-				wheel.deltaRotation = (proj2 * step) / (wheel.wheelsRadius);
-				wheel.rotation += wheel.deltaRotation;
-			}
-			else {
-				wheel.rotation += wheel.deltaRotation;
-			}
-
-			wheel.deltaRotation *= 0.99f; // damping of rotation when not in contact
-		}*/
 	}
 }

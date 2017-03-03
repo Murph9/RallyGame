@@ -192,8 +192,8 @@ public class CurveWorld implements World {
 //		map = new ImageBasedHeightMap(heightMapImage.getImage());
 //		map = new HillHeightMap(1025, 1000, 50, 200, FastMath.rand.nextLong());
 		
-//		map = new DiamondSquareMap(1025);
-		map = new PerlinNoise(1025);
+		map = new DiamondSquareMap(1025);
+//		map = new PerlinNoise(1025);
 	    map.load();
 	    
 	    map.normalizeTerrain(100); //TODO affects the terrain textures
@@ -219,6 +219,7 @@ public class CurveWorld implements World {
 	    //end terrain
 	}
 
+	@SuppressWarnings("unused")
 	private void generateRoads(AssetManager am, ViewPort view) {
 		float height = terrain.getHeight(new Vector2f(0,0.001f));
 		float height2 = terrain.getHeight(new Vector2f(0,75));
@@ -280,6 +281,7 @@ public class CurveWorld implements World {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void generateRandomTrees(AssetManager am) {
 		Spatial spat = am.loadModel(CurveWorld.Tree_String);
 		if (spat instanceof Node) {
@@ -314,6 +316,7 @@ public class CurveWorld implements World {
 		GeometryBatchFactory.optimize(treeNode);
 	}
 	
+	@SuppressWarnings("unused")
 	private void fixTerrainHeights() {
 		//TODO fix: very slow
 		
