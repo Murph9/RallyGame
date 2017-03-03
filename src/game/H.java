@@ -34,6 +34,20 @@ public class H {
 	public static void p(Iterable<Object> ol, String sep) {
 		H.p(ol, sep);
 	}
+	public static void p(Object[][] matrix, String sep) {
+		if (matrix == null)
+			return;
+		if (matrix.length == 0)
+			return;
+		
+		System.out.println("Matrix:");
+		for (int i = 0; i < matrix.length; i++) {
+			for (int j = 0; j < matrix[0].length; j++) {
+				System.out.print(matrix[i][j] + sep);
+			}
+			System.out.println();
+		}
+	}
 	
 	//System.err
 	public static void e(Object o) {
@@ -75,6 +89,15 @@ public class H {
 		float before = array[clamp(intrpm, 0, array.length-1)];
 		float after = array[clamp(intrpm+1, 0, array.length-1)];
 		return FastMath.interpolateLinear(remrpm, before, after);
+	}
+	
+	public static ColorRGBA lerpColor(float value, ColorRGBA a, ColorRGBA b) {
+		return new ColorRGBA(
+				FastMath.interpolateLinear(value, a.r, b.r),
+				FastMath.interpolateLinear(value, a.g, b.g),
+				FastMath.interpolateLinear(value, a.b, b.b),
+				1
+			);
 	}
 	
 	public static int clamp(int input, int low, int high) {

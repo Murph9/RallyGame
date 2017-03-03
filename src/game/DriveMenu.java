@@ -255,13 +255,11 @@ public class DriveMenu extends AbstractAppState {
 					"\nengine:"+p.engineTorque+"\ntraction:"+p.totalTraction + "\nwheelRot:"+p.totalWheelRot +"\nisDay:"+App.rally.sky.isDay
 					+ "\nG Forces:"+p.gForce);
 			
-			float curGrip = 0;
 			//grips
 			for (int i = 0 ; i < 4; i++) {
 				Material m = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
 				gripValue[i].setText(String.format("%.2f", p.wheel[i].skid));
-				curGrip = FastMath.clamp(p.wheel[i].skid, 0, 1);
-				m.setColor("Color", new ColorRGBA(curGrip, curGrip, curGrip, 1));
+				m.setColor("Color", getGripBoxColour(p.wheel[i].skid));
 				gripBox[i].setMaterial(m);
 				
 				Vector3f dir = p.wheel[i].gripDir;
@@ -282,11 +280,26 @@ public class DriveMenu extends AbstractAppState {
 			Vector3f gs = p.gForce;
 			gs.y = gs.z; //z is front back
 			gs.z = 0; //screen has no depth 
-			g2.setLocalTranslation(gcenter.add(gs.mult(50))); //because screen pixels
+			g2.setLocalTranslation(gcenter.add(gs.mult(25))); //because screen pixels
 			
 			gText.setText("x: " + H.roundDecimal(gs.x, 2) +", y: " + H.roundDecimal(gs.y, 2));
 		}
 	}
+	
+	
+	private ColorRGBA getGripBoxColour(float value) {
+		//0 is white, 1 is green, 2 is red, 5 is blue
+		value = Math.abs(value);
+		if (value < 1)
+			return H.lerpColor(value, ColorRGBA.White, ColorRGBA.Green);
+		else if (value < 2)
+			return H.lerpColor((value - 1f), ColorRGBA.Green, ColorRGBA.Red);
+		else if (value < 5.0)
+			return H.lerpColor((value - 2f)/(3f), ColorRGBA.Red, ColorRGBA.Blue);
+		
+		return ColorRGBA.Blue;
+	}
+	
 	
 	@Override
 	public void cleanup() {
