@@ -3,7 +3,7 @@ package car;
 public abstract class WheelData {
 
 	//http://www.edy.es/dev/docs/pacejka-94-parameters-explained-a-comprehensive-guide/
-	//if you ever need the values a<N> and b<N> in here again go there ^ for the proper values
+	//if you ever need the values a# and b# in here again go there ^ for the proper values
 	float B = 10, C = 2, D = 1, E = 1;
 }
 

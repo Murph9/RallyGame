@@ -243,10 +243,13 @@ public enum Car {
 	private static class Runner extends CarData {
 		Runner() {
 			carModel = dir+"track1_2.blend";
-//
+
+			
 //			w_zOff = 1.3f;
 //			w_yOff = 0.2f;
 //			setw_Pos();
+			
+			//TODO you can fix the oversteer at high speeds with a diff and different downforce scaling at higher speeds  
 			
 			e_torque = new float[] {0, 300, 450, 500, 530, 550, 500, 400};
 
@@ -262,7 +265,7 @@ public enum Car {
 			sus_dampValue = 0.6f;
 			sus_restLength = 0.1f;
 			
-			rollFraction = 1.3f;
+			rollFraction = 0.4f; //matters a lot when it comes to holding grip in corners
 
 			sus_maxForce = 40000;
 
