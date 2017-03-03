@@ -327,7 +327,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		engineTorque /= 2;
 		if (car.driveFront && car.driveRear)
 			engineTorque /= 2; //split up into 2 axles
-
+		
 		//TODO differential
 		if (car.driveFront) {
 			torques[0] = engineTorque;
@@ -433,12 +433,12 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 					wf[i].x = FastMath.clamp(wf[i].x, -maxSlowLat, maxSlowLat);
 				}
 				if (accelCurrent == 0 && brakeCurrent == 0) {
-					wf[i].mult(0.5f); //TODO add massive dampening force to prevent any weird things at slow speeds
+					float absT = FastMath.abs(torques[i]);
+					wf[i].z = FastMath.clamp(wf[i].z, -absT, absT);
 				}
 			}
 				
 			wheel[i].skid = p;
-			
 			//add the wheel force after merging the forces
 			float totalLongForce = torques[i] - wf[i].z - (brakeCurrent*car.brakeMaxTorque*Math.signum(wheel[i].radSec));
 			if (Math.signum(totalLongForce - (brakeCurrent*car.brakeMaxTorque*Math.signum(velocity.z))) != Math.signum(totalLongForce))
@@ -488,7 +488,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			//wheel rad/s, gearratio, diffratio, conversion from rad/sec to rad/min
 		} //don't set the rpm if the clutch is in
 
-		curRPM = Math.max(curRPM, 1000); //no stall please, its bad enough that we don't have to torque here
+		int idleRPM = 1000;
+		curRPM = Math.max(curRPM, idleRPM); //no stall please, its bad enough that we don't have to torque here
 
 		autoTransmission(curRPM, vz);
 
@@ -512,12 +513,11 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 		float engineTorque = (car.lerpTorque(curRPM) + nitroForce)*accelCurrent;
 		float engineDrag = 0;
-		if (accelCurrent < 0.05f || curRPM > car.e_redline) { //so compression only happens on no accel
-			engineDrag = curRPM*car.e_compression;
-		}
-		if (Math.abs(curRPM) > car.e_redline) {
-			return - engineDrag; //kill engine if greater than redline, and only apply compression
-		}
+		if (accelCurrent < 0.05f || curRPM > car.e_redline) //so compression only happens on no accel
+			engineDrag = (curRPM-idleRPM)*car.e_compression;
+		
+		if (Math.abs(curRPM) > car.e_redline)
+			return -engineDrag; //kill engine if greater than redline, and only apply compression
 		
 		float engineOutTorque = engineTorque*curGearRatio*diffRatio*car.trans_effic - engineDrag;
 
