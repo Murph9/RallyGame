@@ -93,6 +93,13 @@ public class Start extends AbstractAppState {
                     App.rally.getGuiNode().detachChild(myWindow);
                 }
             });
+        Button exit = myWindow.addChild(new Button("Exit"));
+        exit.addClickCommands(new Command<Button>() {
+                @Override
+                public void execute( Button source ) {
+                    App.rally.stop();
+                }
+            });
 	}
 	
 	private PhysicsSpace getPhysicsSpace() {
