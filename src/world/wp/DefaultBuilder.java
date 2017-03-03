@@ -26,6 +26,7 @@ import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.shape.Box;
 
 import game.App;
+import game.H;
 import world.World;
 import world.WorldType;
 import world.wp.WP.NodeType;

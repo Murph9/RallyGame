@@ -15,7 +15,7 @@ public interface WP {
 	}
 	
 	static final Quaternion
-		STRIAGHT = Quaternion.IDENTITY,
+		STRIAGHT = new Quaternion(0, 0, 0, 1),
 		BACK = new Quaternion(0, 1, 0, 0),
 		
 		LEFT_15 = new Quaternion(0.0f, 0.13052f, 0.0f, 0.99144f),

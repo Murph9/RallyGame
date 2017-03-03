@@ -22,7 +22,7 @@ import car.Car;
 import car.CarData;
 import settings.Configuration;
 import world.*;
-import world.curve.*;
+import world.wp.WP.DynamicType;
 
 ////TODO Ideas for game modes:
 //being chased. (with them spawning all lightning sci-fi like?)
@@ -58,7 +58,10 @@ public class Rally extends SimpleApplication {
 	public SkyState sky;
 	
 	private final CarData defaultCar = Car.Runner.get();
-	private final World defaultWorld = new HighwayWorld();//new StaticWorldBuilder(StaticWorld.track2);
+	private final World defaultWorld = DynamicType.Simple.getBuilder();
+			//new HighwayWorld();
+			//new StaticWorldBuilder(StaticWorld.track2);
+			//DynamicType.Simple.getBuilder();
 	
 	private CarData car;
 	private World world;
