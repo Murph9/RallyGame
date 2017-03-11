@@ -16,15 +16,8 @@ import com.jme3.scene.*;
 import car.*;
 import helper.H;
 
-//Long TODO's: 
-//long running skidmark issue is in effect (but only for my computer)
-
-//Bugs TODO
-//minimap is still a little weird, probably need to remove some of the water postprocessing stuff
-//tried that and got nowhere, they are connected for some reason [you do copy the first one] (thanks for that)
-
 //TODO there is another appstate to try here called (base|basic?)appstate
-public class Drive extends AbstractAppState {
+public class DriveSimple extends AbstractAppState {
 	
 	private BulletAppState bulletAppState;
 	
@@ -34,9 +27,6 @@ public class Drive extends AbstractAppState {
 	//car stuff
 	public CarBuilder cb;
 	private CarData car;
-	
-	int themCount = 0;
-	private CarData them = Car.WhiteSloth.get();
 	
 	//gui and camera stuff
 	CarCamera camera;
@@ -48,7 +38,7 @@ public class Drive extends AbstractAppState {
 	public int frameCount = 0;
 	public boolean ifDebug = false;
 	
-    public Drive (CarData car, World world) {
+    public DriveSimple (CarData car, World world) {
     	super();
     	this.car = car;
     	this.world = world;
@@ -105,11 +95,6 @@ public class Drive extends AbstractAppState {
 		Vector3f start = world.getWorldStart();
 		Matrix3f dir = world.getWorldRot();
 		cb.addCar(getPhysicsSpace(), 0, car, start, dir, true);
-		
-		for (int i = 1; i < themCount+1; i++) {
-			start = start.add(0,0,2);
-			cb.addCar(getPhysicsSpace(), i, them, start, dir, false);
-		}
 	}
 	
 	private void connectJoyStick() {

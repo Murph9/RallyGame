@@ -51,6 +51,14 @@ import world.wp.WP.DynamicType;
 //at night time or something because loading looks easier
 //stop the car sound on the menus [please]
 
+//Long TODO's: 
+//long running skidmark issue is in effect (but only for my computer)
+
+//Bugs TODO
+//minimap is still a little weird, probably need to remove some of the water postprocessing stuff
+//tried that and got nowhere, they are connected for some reason [you do copy the first one] (thanks for that)
+
+
 @SuppressWarnings("unused")
 public class Main extends SimpleApplication {
 
@@ -58,7 +66,7 @@ public class Main extends SimpleApplication {
 	public ChooseCar chooseCar;
 	public ChooseMap chooseMap;
 	
-	public Drive drive;
+	public DriveSimple drive;
 	public DriveMenu menu;
 	public SkyState sky;
 	
@@ -208,7 +216,7 @@ public class Main extends SimpleApplication {
 		menu = new DriveMenu();
 		getStateManager().attach(menu);
 		
-		drive = new Drive(car, world);
+		drive = new DriveSimple(car, world);
 		getStateManager().attach(drive);
 	}
 
