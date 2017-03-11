@@ -9,7 +9,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 import game.App;
-import game.Rally;
+import game.Main;
 import helper.H;
 
 public class CarModelData {
@@ -28,7 +28,7 @@ public class CarModelData {
 		this.wheelModel = wheel;
 		this.pieces = new HashMap<>();
 		
-		Rally r = App.rally;
+		Main r = App.rally;
 		AssetManager am = r.getAssetManager();
 		
 		possibleParts = CarPart.GetNames();

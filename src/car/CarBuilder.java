@@ -20,7 +20,7 @@ import com.jme3.scene.Spatial;
 import com.jme3.texture.Texture;
 
 import game.App;
-import game.Rally;
+import game.Main;
 import helper.H;
 
 public class CarBuilder extends AbstractAppState {
@@ -69,7 +69,7 @@ public class CarBuilder extends AbstractAppState {
 				e.printStackTrace();
 			}
 		}
-		Rally r = App.rally;
+		Main r = App.rally;
 		AssetManager am = r.getAssetManager();
 
 		Spatial carmodel = am.loadModel(car.carModel);

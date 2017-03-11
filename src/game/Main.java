@@ -52,7 +52,7 @@ import world.wp.WP.DynamicType;
 //stop the car sound on the menus [please]
 
 @SuppressWarnings("unused")
-public class Rally extends SimpleApplication {
+public class Main extends SimpleApplication {
 
 	public Start start;
 	public ChooseCar chooseCar;
@@ -75,7 +75,7 @@ public class Rally extends SimpleApplication {
 	public static void main(String[] args) {
 		Configuration config = Configuration.Read();
 		
-		Rally app = new Rally();
+		Main app = new Main();
 		AppSettings settings = new AppSettings(true);
 		if (config.ifFullscreen()) {
 			settings.setFullscreen(true);

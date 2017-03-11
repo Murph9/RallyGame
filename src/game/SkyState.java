@@ -78,7 +78,7 @@ public class SkyState extends AbstractAppState {
 
 	@Override
 	public void initialize(AppStateManager stateManager, Application app) {
-		Rally r = App.rally;
+		Main r = App.rally;
 		AssetManager am = r.getAssetManager();
 		ViewPort vp = r.getViewPort();
 		Node skyRoot = r.getRootNode(); //can't have a sub root because the lights only effect things in their tree

@@ -30,7 +30,7 @@ import com.jme3.system.AppSettings;
 import com.jme3.util.BufferUtils;
 
 import game.App;
-import game.Rally;
+import game.Main;
 import helper.H;
 
 public class UINode extends AbstractAppState {
@@ -111,7 +111,7 @@ public class UINode extends AbstractAppState {
 	};
 	
 	public UINode (MyPhysicsVehicle p) {
-		Rally r = App.rally;
+		Main r = App.rally;
 		this.p = p;
 		
 		this.redline = p.car.e_redline;

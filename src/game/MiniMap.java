@@ -20,7 +20,7 @@ public class MiniMap {
 	
 	MiniMap(MyPhysicsVehicle target) {
 		this.target = target;
-		Rally r = App.rally;
+		Main r = App.rally;
 		
 		Camera c = r.getCamera();
 		cam = new Camera((int)(c.getWidth()*0.2),(int)(c.getHeight()*0.2f)); 
