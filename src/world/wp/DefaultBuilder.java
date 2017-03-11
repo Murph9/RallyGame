@@ -26,21 +26,15 @@ import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.shape.Box;
 
 import game.App;
-import game.H;
 import world.World;
 import world.WorldType;
 import world.wp.WP.NodeType;
 
-public abstract class DefaultBuilder implements World {
+public abstract class DefaultBuilder extends World {
 
 	//designed to generate the world infront of the player dynamically from static pieces
 
-	protected boolean isInit;
-	
 	protected WP[] type;
-	protected PhysicsSpace space;
-	
-	protected Node rootNode;
 	
 	protected List<Spatial> curPieces = new ArrayList<Spatial>();
 	protected List<WPObject> wpos;
@@ -70,7 +64,7 @@ public abstract class DefaultBuilder implements World {
 	@Override
 	public Node init(PhysicsSpace space, ViewPort view) {
 		this.isInit = true;
-		this.space = space;
+		this.phys = space;
 		
 		AssetManager am = App.rally.getAssetManager();
 		boolean mat = type[0].needsMaterial();
@@ -110,7 +104,7 @@ public abstract class DefaultBuilder implements World {
 		startGeometry.addControl(new RigidBodyControl(0));
 		
 		this.rootNode.attachChild(startGeometry);
-		this.space.add(startGeometry);
+		this.phys.add(startGeometry);
 		
 		return rootNode;
 	}
@@ -129,7 +123,7 @@ public abstract class DefaultBuilder implements World {
 			Vector3f endSpPos = sp.getWorldTranslation();
 			if (endSpPos.subtract(playerPos).length() > distance/2) {
 				//2 because don't delete the ones we just placed
-				this.space.remove(sp.getControl(0));
+				this.phys.remove(sp.getControl(0));
 				rootNode.detachChild(sp);
 				curPieces.remove(sp);
 			} else {
@@ -190,7 +184,7 @@ public abstract class DefaultBuilder implements World {
 		landscape.setKinematic(false);
 		s.addControl(landscape);
 
-		this.space.add(landscape);
+		this.phys.add(landscape);
 		rootNode.attachChild(s);
 
 		curPieces.add(s);
@@ -211,7 +205,7 @@ public abstract class DefaultBuilder implements World {
 	public void reset() {
 		List<Spatial> ne = new LinkedList<Spatial>(curPieces);
 		for (Spatial s: ne) {
-			space.remove(s.getControl(0));
+			phys.remove(s.getControl(0));
 			rootNode.detachChild(s);
 			curPieces.remove(s);
 		}
@@ -219,11 +213,6 @@ public abstract class DefaultBuilder implements World {
 		start = new Vector3f(0,0,0);
 		nextPos = new Vector3f(0,0,0);
 		nextRot = new Quaternion();
-	}
-
-	@Override
-	public Node getRootNode() {
-		return rootNode;
 	}
 
 	@Override
@@ -261,9 +250,6 @@ public abstract class DefaultBuilder implements World {
 		isInit = false;
 	}
 	
-	public boolean isInit() {
-		return isInit;
-	}
 	public WorldType getType() {
 		return WorldType.DYNAMIC;
 	}

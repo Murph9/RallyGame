@@ -1,9 +1,8 @@
 package game;
 
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-//import java.util.logging.Logger;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AppState;
@@ -20,8 +19,11 @@ import com.simsilica.lemur.style.BaseStyles;
 
 import car.Car;
 import car.CarData;
+import game.*;
+import helper.H;
 import settings.Configuration;
 import world.*;
+import world.highway.HighwayWorld;
 import world.wp.WP.DynamicType;
 
 ////TODO Ideas for game modes:
@@ -38,6 +40,8 @@ import world.wp.WP.DynamicType;
 //    get away from the start
 //    stay on road at speed thing
 
+//kind of like the the snowboarding phone game, where you do challenges on the way down
+//	might work well going down one road
 
 //Using eclipse: why isn't this a default?
 //http://stackoverflow.com/questions/3915961/how-to-view-hierarchical-package-structure-in-eclipse-package-explorer
@@ -47,6 +51,7 @@ import world.wp.WP.DynamicType;
 //at night time or something because loading looks easier
 //stop the car sound on the menus [please]
 
+@SuppressWarnings("unused")
 public class Rally extends SimpleApplication {
 
 	public Start start;
@@ -58,7 +63,8 @@ public class Rally extends SimpleApplication {
 	public SkyState sky;
 	
 	private final CarData defaultCar = Car.Runner.get();
-	private final World defaultWorld = DynamicType.Simple.getBuilder();
+	private final World defaultWorld = new HighwayWorld(); 
+			//Options:
 			//new HighwayWorld();
 			//new StaticWorldBuilder(StaticWorld.track2);
 			//DynamicType.Simple.getBuilder();

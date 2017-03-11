@@ -4,7 +4,7 @@ import java.util.function.BiFunction;
 
 import com.jme3.math.Vector3f;
 
-import game.H;
+import helper.H;
 
 //https://en.wikipedia.org/wiki/B%C3%A9zier_curve#Linear_B.C3.A9zier_curves
 public class StraightCurve implements Curve {

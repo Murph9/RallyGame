@@ -8,7 +8,7 @@ public class CurveQueueObj implements Comparable<CurveQueueObj> {
 	Curve curve; //actual data to place with
 	String rule; //probably contains the split instructions for the next elements
 	
-	CurveQueueObj(float t, Curve curve, String rule) {
+	public CurveQueueObj(float t, Curve curve, String rule) {
 		this.time = t;
 		this.curve = curve;
 		this.rule = rule;

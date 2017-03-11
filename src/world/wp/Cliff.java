@@ -3,8 +3,6 @@ package world.wp;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
-import world.World;
-
 public enum Cliff implements WP {
 	STRAIGHT("straight.blend", new Vector3f(20,0,0), WP.STRIAGHT, NodeType.A, NodeType.A),
 	RIGHT("right.blend", new Vector3f(35.35f,0,14.6f), WP.RIGHT_45, NodeType.A, NodeType.A),
@@ -40,7 +38,7 @@ public enum Cliff implements WP {
 	public NodeType startNode() { return startNode; }
 	public NodeType endNode() { return endNode; }
 	
-	static class Builder extends DefaultBuilder implements World {
+	static class Builder extends DefaultBuilder {
 		Builder() {
 			super(Cliff.values());
 		}

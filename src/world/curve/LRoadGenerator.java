@@ -15,7 +15,7 @@ import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Line;
 
 import game.App;
-import game.H;
+import helper.H;
 import jme3tools.optimize.GeometryBatchFactory;
 
 public class LRoadGenerator {

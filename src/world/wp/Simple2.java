@@ -3,8 +3,6 @@ package world.wp;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
-import world.World;
-
 public enum Simple2 implements WP {
 	STRAIGHT("small_straight.blend", new Vector3f(20,0,0), WP.STRIAGHT),
 	SMALL_HILL_UP("small_hill_up.blend", new Vector3f(10,0.5f,0), WP.STRIAGHT),
@@ -47,7 +45,7 @@ public enum Simple2 implements WP {
 		return endNode;
 	}
 	
-	static class Builder extends DefaultBuilder implements World {
+	static class Builder extends DefaultBuilder {
 		Builder() {
 			super(Simple2.values());
 		}

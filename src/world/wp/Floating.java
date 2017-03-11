@@ -17,7 +17,6 @@ import com.jme3.scene.shape.Quad;
 import com.jme3.water.SimpleWaterProcessor;
 
 import game.App;
-import world.World;
 
 public enum Floating implements WP {
 	STRAIGHT("straight.blend", new Vector3f(20,0,0), Quaternion.IDENTITY),
@@ -59,14 +58,12 @@ public enum Floating implements WP {
 		return endNode;
 	}
 	
-	static class Builder extends DefaultBuilder implements World {
+	static class Builder extends DefaultBuilder {
 		SimpleWaterProcessor waterProcessor;
 		Geometry water;
 		
 		Builder() {
 			super(Floating.values());
-			
-        	
 		}
 		
 		public Node init(PhysicsSpace space, ViewPort view) {
@@ -119,6 +116,5 @@ public enum Floating implements WP {
 			App.rally.getRootNode().detachChild(water);
 			App.rally.getViewPort().removeProcessor(waterProcessor);
 		}
-		
 	}
 }

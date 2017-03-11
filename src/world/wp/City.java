@@ -3,8 +3,6 @@ package world.wp;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
-import world.World;
-
 public enum City implements WP {
 	CROSS("cross.blend", new Vector3f(2,0,0), WP.STRIAGHT),
 	STRAIGHT("straight.blend", new Vector3f(3,0,0), WP.STRIAGHT),
@@ -50,7 +48,7 @@ public enum City implements WP {
 		return endNode;
 	}
 	
-	static class Builder extends DefaultBuilder implements World {
+	static class Builder extends DefaultBuilder {
 		Builder() {
 			super(City.values());
 		}

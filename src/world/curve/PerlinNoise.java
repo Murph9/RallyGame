@@ -1,9 +1,10 @@
 package world.curve;
 
 import com.jme3.math.Vector2f;
+import com.jme3.math.Vector3f;
 import com.jme3.terrain.heightmap.AbstractHeightMap;
 
-import game.H;
+import helper.H;
 
 public class PerlinNoise extends AbstractHeightMap {
 
@@ -26,6 +27,9 @@ public class PerlinNoise extends AbstractHeightMap {
 		this.origin = Vector2f.ZERO;
 	}
 	
+	public void SetOrigin(Vector3f org) {
+		SetOrigin(new Vector2f(org.x, org.z));
+	}
 	public void SetOrigin(Vector2f org) {
 		if (org == null)
 			throw new IllegalArgumentException();

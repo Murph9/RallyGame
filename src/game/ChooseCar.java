@@ -19,7 +19,8 @@ import car.Car;
 import car.CarBuilder;
 import car.CarData;
 import car.MyPhysicsVehicle;
-import game.H.Duo;
+import helper.H;
+import helper.H.Duo;
 import world.StaticWorld;
 import world.StaticWorldHelper;
 

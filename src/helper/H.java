@@ -1,4 +1,4 @@
-package game;
+package helper;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -14,6 +14,8 @@ import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.debug.Arrow;
+
+import game.App;
 
 //Its short for help, name length was a concern (see H.p())
 public class H {

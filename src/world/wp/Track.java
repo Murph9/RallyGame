@@ -3,8 +3,6 @@ package world.wp;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
-import world.World;
-
 public enum Track implements WP {
 
 	STRAIGHT("straight.blend", new Vector3f(5,0,0), WP.STRIAGHT, NodeType.A, NodeType.A),
@@ -55,7 +53,7 @@ public enum Track implements WP {
 	public NodeType endNode() { return endNode; }
 
 	
-	static class Builder extends DefaultBuilder implements World {
+	static class Builder extends DefaultBuilder {
 		Builder() {
 			super(Track.values());
 		}

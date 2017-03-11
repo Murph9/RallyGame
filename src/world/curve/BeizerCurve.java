@@ -4,7 +4,7 @@ import java.util.function.BiFunction;
 
 import com.jme3.math.Vector3f;
 
-import game.H;
+import helper.H;
 
 public class BeizerCurve implements Curve {
 
@@ -13,7 +13,7 @@ public class BeizerCurve implements Curve {
 	
 	private BiFunction<Vector3f, Vector3f, BSegment> funct;
 	
-	BeizerCurve(Vector3f[] beizerNodes, BiFunction<Vector3f, Vector3f, BSegment> funct) {
+	public BeizerCurve(Vector3f[] beizerNodes, BiFunction<Vector3f, Vector3f, BSegment> funct) {
 		this.nodes = beizerNodes;
 		this.funct = funct;
 	}

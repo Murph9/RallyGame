@@ -21,7 +21,7 @@ import com.jme3.scene.Spatial;
 
 import car.CarModelData.CarPart;
 import game.App;
-import game.H;
+import helper.H;
 
 //extends:
 //https://github.com/jMonkeyEngine/jmonkeyengine/blob/master/jme3-jbullet/src/main/java/com/jme3/bullet/objects/PhysicsVehicle.java
@@ -127,8 +127,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 				car.w_pos[i] = poss[i];
 			}
 		}
-		
-		MyWheelNode.skidTex = am.loadTexture("assets/stripes.png");
 		
 		//for each wheel
 		for (int i = 0; i < 4; i++) {
@@ -691,7 +689,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	}
 
 	public void cleanup() {
-		//TODO more
 		this.ai = null;
 		if (this.control != null) {
 			App.rally.getInputManager().removeRawInputListener(this.control);
@@ -703,6 +700,14 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			App.rally.getAudioRenderer().stopSource(engineSound);
 			engineSound = null;
 		}
+	}
+	
+	//TODO format in grid
+	public String statsString() {
+		Vector3f pos = this.getPhysicsLocation();
+		return "x:"+H.roundDecimal(pos.x, 2) + ", y:"+H.roundDecimal(pos.y, 2)+", z:"+H.roundDecimal(pos.z, 2) +
+				"\nspeed:"+ H.roundDecimal(vel.length(), 2) + "m/s\nRPM:" + curRPM +
+				"\nengine:" + engineTorque + "\ntraction:" + totalTraction + "\nwheelRot:" + H.roundDecimal(totalWheelRot, 2) + "\nG Forces:"+gForce;
 	}
 }
 

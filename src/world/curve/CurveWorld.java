@@ -19,7 +19,6 @@ import com.jme3.material.Material;
 import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
-import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
@@ -37,7 +36,7 @@ import com.jme3.texture.Texture;
 import com.jme3.texture.Texture.WrapMode;
 
 import game.App;
-import game.H;
+import helper.H;
 import jme3tools.optimize.GeometryBatchFactory;
 import world.World;
 import world.WorldType;
@@ -72,12 +71,7 @@ Later Things:
 
 
 //TODO other terrain generation method called PerlinNoise
-public class CurveWorld implements World {
-	private boolean isInit;
-	
-	private Node rootNode;
-	private PhysicsSpace phys;
-	
+public class CurveWorld extends World {
 	private AbstractHeightMap map;
 	private TerrainQuad terrain;
 	
@@ -99,11 +93,6 @@ public class CurveWorld implements World {
 	@Override
 	public WorldType getType() {
 		return WorldType.CURVE;
-	}
-
-	@Override
-	public boolean isInit() {
-		return isInit;
 	}
 	
 	@Override
@@ -387,9 +376,6 @@ public class CurveWorld implements World {
 //		*/
 	}
 	
-	//interface nodes
-	@Override
-	public Node getRootNode() { return rootNode; }
 	@Override
 	public Vector3f getWorldStart() {
 		if (terrain != null)
@@ -398,8 +384,6 @@ public class CurveWorld implements World {
 			return new Vector3f(0,0.5f,0);
 	}
 	@Override
-	public Matrix3f getWorldRot() { return new Matrix3f(Matrix3f.IDENTITY); }
-	@Override
 	public void update(float tpf, Vector3f playerPos, boolean force) {
 		if (lrg != null) lrg.update(tpf);
 	}
@@ -407,8 +391,6 @@ public class CurveWorld implements World {
 	public void reset() { }
 	@Override
 	public void cleanup() { isInit = false; }
-	@Override
-	public Vector3f getNextPieceClosestTo(Vector3f pos) { return null; }
 
 	private float rayHeightAt(float x, float z, String target) {
 		CollisionResults results = new CollisionResults();

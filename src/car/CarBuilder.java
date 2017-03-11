@@ -2,6 +2,7 @@ package car;
 
 import java.util.HashMap;
 
+import com.jme3.app.state.AbstractAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.TextureKey;
 import com.jme3.audio.AudioData;
@@ -19,12 +20,13 @@ import com.jme3.scene.Spatial;
 import com.jme3.texture.Texture;
 
 import game.App;
-import game.H;
 import game.Rally;
+import helper.H;
 
-public class CarBuilder extends Node {
+public class CarBuilder extends AbstractAppState {
 
 	HashMap<Integer, MyVC> cars;
+	Node rootNode;
 
 	//settings
 	boolean soundEnabled;
@@ -32,8 +34,9 @@ public class CarBuilder extends Node {
 	public CarBuilder() {
 		cars = new HashMap<>();
 		soundEnabled = true;
+		rootNode = new Node("Car Builder Root");
 		
-		App.rally.getRootNode().attachChild(this);
+		App.rally.getRootNode().attachChild(rootNode);
 	}
 
 	public void removePlayer(PhysicsSpace space, int id) {
@@ -44,10 +47,10 @@ public class CarBuilder extends Node {
 				e.printStackTrace();
 			}
 		}
-		this.detachChildNamed(id+"");
+		rootNode.detachChildNamed(id+"");
 		MyVC e = cars.get(id);
 		
-		this.detachChild(e.skidNode);
+		rootNode.detachChild(e.skidNode);
 		
 		e.cleanup();
 		space.remove(e);
@@ -109,8 +112,8 @@ public class CarBuilder extends Node {
 			carNode.setShadowMode(ShadowMode.Receive);
 		}
 
-		this.attachChild(carNode);
-		this.attachChild(player.skidNode);
+		rootNode.attachChild(carNode);
+		rootNode.attachChild(player.skidNode);
 		player.setPhysicsLocation(start);
 		player.setPhysicsRotation(rot);
 
@@ -134,6 +137,7 @@ public class CarBuilder extends Node {
 		if (cars.isEmpty())
 			return;
 
+		//TODO it can pause me itself thanks
 		if (App.rally.drive.isEnabled()) { //otherwise they update while paused..
 			for (Integer i : cars.keySet()) {
 				cars.get(i).myUpdate(tpf);
@@ -156,6 +160,6 @@ public class CarBuilder extends Node {
 			car.cleanup();
 		}
 		
-		App.rally.getRootNode().detachChild(this);
+		App.rally.getRootNode().detachChild(rootNode);
 	}
 }

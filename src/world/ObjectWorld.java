@@ -9,7 +9,6 @@ import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
@@ -21,7 +20,7 @@ import com.jme3.scene.shape.Box;
 import game.App;
 import jme3tools.optimize.GeometryBatchFactory;
 
-public class ObjectWorld implements World {
+public class ObjectWorld extends World {
 	
 	private static final int 
 		COUNT_A_TILE = 10,
@@ -31,13 +30,8 @@ public class ObjectWorld implements World {
 	
 	private static final String ITEM = "assets/objects/tree.blend";
 	
-	private boolean isInit;
-
 	private Geometry floor;
 	
-	private Node rootNode;
-	private PhysicsSpace space;
-
 	private Spatial geomI;
 	private List<Spatial> addedObjects;
 	
@@ -57,14 +51,9 @@ public class ObjectWorld implements World {
 	}
 
 	@Override
-	public boolean isInit() {
-		return isInit;
-	}
-
-	@Override
 	public Node init(PhysicsSpace space, ViewPort view) {
 		isInit = true;
-		this.space = space;
+		this.phys = space;
 		
 		AssetManager am = App.rally.getAssetManager();
 		
@@ -140,7 +129,7 @@ public class ObjectWorld implements World {
 		
 		addedObjects.add(f);
 		rootNode.attachChild(f);
-		space.add(f);
+		phys.add(f);
 		
 		for (int i = 0; i < COUNT_A_TILE; i++) {
 			Spatial s = geomI.clone();
@@ -152,7 +141,7 @@ public class ObjectWorld implements World {
 			
 			addedObjects.add(s);
 			rootNode.attachChild(s);
-			space.add(s);
+			phys.add(s);
 		}
 		
 		//If you remove this line: fps = fps/n for large n
@@ -160,18 +149,8 @@ public class ObjectWorld implements World {
 	}
 
 	@Override
-	public Node getRootNode() {
-		return rootNode;
-	}
-
-	@Override
 	public Vector3f getWorldStart() {
 		return new Vector3f(0,2,0);
-	}
-
-	@Override
-	public Matrix3f getWorldRot() {
-		return new Matrix3f(Matrix3f.IDENTITY);
 	}
 
 	@Override
@@ -183,7 +162,7 @@ public class ObjectWorld implements World {
 	public void reset() {
 		rootNode.detachAllChildren();
 		for (Spatial g: addedObjects) {
-			space.remove(g); //not really sure why removing the rootNode thing doesn't work from the loop
+			phys.remove(g); //not really sure why removing the rootNode thing doesn't work from the loop
 		}
 		addedObjects.clear();
 		
@@ -197,10 +176,5 @@ public class ObjectWorld implements World {
 	@Override
 	public void cleanup() {
 		isInit = false;
-	}
-
-	@Override
-	public Vector3f getNextPieceClosestTo(Vector3f pos) {
-		return null;
 	}
 }

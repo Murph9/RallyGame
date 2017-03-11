@@ -10,6 +10,7 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
+import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
@@ -23,12 +24,12 @@ import game.App;
 
 public class MyWheelNode extends Node {
 
-	public static final boolean ifSmoke = false; //TODO fix on all pausing
-	static int[] indexes = { 2,0,1, 1,3,2 }; //tyre marks vertex order
-	Vector2f[] texCoord = new Vector2f[] { //texture of quad with order
+	public static final boolean ifSmoke = false; //TODO fix on pausing
+	private static final int[] indexes = { 2,0,1, 1,3,2 }; //tyre marks vertex order
+	private static final Vector2f[] texCoord = new Vector2f[] { //texture of quad with order
 		new Vector2f(0, 0), new Vector2f(0, 1), new Vector2f(1, 0), new Vector2f(1, 1),
 	};
-	static Texture skidTex; //texture for the tyre marks
+	private static Texture skidTex = App.rally.getAssetManager().loadTexture("assets/stripes.png"); //texture for the tyre marks
 	
 	Spatial spat; //the actual wheel model
 	Material mat;
@@ -70,13 +71,7 @@ public class MyWheelNode extends Node {
 			}
 		}
 		reverse = FastMath.sign(reverse);
-		if (spat == null) {
-			try {
-				throw new Exception("No wheel spatial, in wheelnode update");
-			} catch (Exception e) {
-			}
-		}
-		
+
 		Quaternion q = new Quaternion();
 		q = q.fromAngleNormalAxis(-radSec*tpf*reverse, new Vector3f(1,0,0));
 		spat.setLocalRotation(spat.getLocalRotation().mult(q));
@@ -154,7 +149,7 @@ public class MyWheelNode extends Node {
 		mat.setColor("Diffuse", new ColorRGBA(0,0,0,grip));
 		
 		geo.setShadowMode(ShadowMode.Off);
-//		geo.setQueueBucket(Bucket.Transparent);
+		geo.setQueueBucket(Bucket.Transparent);
 		geo.setMaterial(mat);
 
 		mvc.skidNode.attachChild(geo);

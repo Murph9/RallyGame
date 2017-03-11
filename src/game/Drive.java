@@ -14,6 +14,7 @@ import com.jme3.math.*;
 import com.jme3.scene.*;
 
 import car.*;
+import helper.H;
 
 //Long TODO's: 
 //long running skidmark issue is in effect (but only for my computer)
@@ -52,7 +53,7 @@ public class Drive extends AbstractAppState {
     	this.car = car;
     	this.world = world;
     	this.cb = new CarBuilder();
-    	
+    	App.rally.getStateManager().attach(cb);
     	
     	WorldType type = world.getType();
     	if (type == WorldType.NONE)
@@ -76,7 +77,9 @@ public class Drive extends AbstractAppState {
 		buildCars();
 		initCameras();
 		
-		setupGUI();
+		//setup GUI
+		uiNode = new UINode(cb.get(0));
+		App.rally.getStateManager().attach(uiNode);
 		
 		connectJoyStick();
 	}
@@ -115,11 +118,6 @@ public class Drive extends AbstractAppState {
 			H.e("There are no joysticks :( .");
 		}
 	}
-	
-	private void setupGUI() {
-		uiNode = new UINode();
-	}
-	
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Not init below
@@ -138,18 +136,10 @@ public class Drive extends AbstractAppState {
 		
 		frameCount++;
 		
-		//update cars
-		cb.update(tpf);
-		
 		//update world
 		world.update(tpf, cb.get(0).getPhysicsLocation(), false);
 
-		if (App.rally.drive.ifDebug) {
-			H.p(cb.get(0).getPhysicsLocation());
-		}
-		
 		//Hud stuff
-		uiNode.update(tpf);
 		minimap.update(tpf);
 		
 		//camera
@@ -170,9 +160,10 @@ public class Drive extends AbstractAppState {
 		super.cleanup();
 		
 		H.p("cleaning drive class");
-		cb.cleanup();
+		App.rally.getStateManager().detach(cb);
 		cb = null;
-		uiNode.cleanup();
+		
+		App.rally.getStateManager().detach(uiNode);
 		uiNode = null;
 		
 		App.rally.getStateManager().detach(bulletAppState);

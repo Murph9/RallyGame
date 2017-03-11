@@ -33,6 +33,8 @@ import com.jme3.texture.Texture;
 import com.jme3.util.BufferUtils;
 import com.jme3.util.SkyFactory;
 
+import helper.H;
+
 public class SkyState extends AbstractAppState {
 
 	private static final ColorRGBA DAY_TOP = new ColorRGBA(0,0,1,1);

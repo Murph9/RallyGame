@@ -4,8 +4,8 @@ import com.bulletphysics.dynamics.vehicle.VehicleTuning;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 
-import game.H;
-import game.H.Duo;
+import helper.H;
+import helper.H.Duo;
 
 public abstract class CarData {
 	

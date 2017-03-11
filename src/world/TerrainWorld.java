@@ -7,7 +7,6 @@ import com.jme3.asset.AssetManager;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.material.Material;
-import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.renderer.ViewPort;
@@ -22,14 +21,9 @@ import com.jme3.texture.Texture.WrapMode;
 
 import game.App;
 
-public class TerrainWorld implements World {
+public class TerrainWorld extends World {
 
 	//http://wiki.jmonkeyengine.org/jme3/beginner/hello_terrain.html
-	
-	private boolean isInit;
-	
-	private Node rootNode;
-	private PhysicsSpace phys;
 	
 	AbstractHeightMap heightMap;
 	private TerrainQuad terrain;
@@ -41,11 +35,6 @@ public class TerrainWorld implements World {
 	@Override
 	public WorldType getType() {
 		return WorldType.TERRAIN;
-	}
-
-	@Override
-	public boolean isInit() {
-		return isInit;
 	}
 
 	@Override
@@ -115,20 +104,11 @@ public class TerrainWorld implements World {
 		return rootNode;
 	}
 
-	@Override
-	public Node getRootNode() {
-		return rootNode;
-	}
 
 	@Override
 	public Vector3f getWorldStart() {
 //		float height = heightMap.getTrueHeightAtPoint(0, 0);
 		return new Vector3f(0, -57.586773f, 0);
-	}
-
-	@Override
-	public Matrix3f getWorldRot() {
-		return new Matrix3f();
 	}
 
 	@Override
@@ -144,11 +124,6 @@ public class TerrainWorld implements World {
 	@Override
 	public void cleanup() {
 		rootNode.detachChild(terrain);
-	}
-
-	@Override
-	public Vector3f getNextPieceClosestTo(Vector3f pos) {
-		return null;
 	}
 
 }

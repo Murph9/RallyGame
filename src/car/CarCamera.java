@@ -15,6 +15,9 @@ import com.jme3.scene.control.CameraControl.ControlDirection;
 
 public class CarCamera extends CameraNode implements RawInputListener {
 
+	//TODO:
+	//seems like nfs most wanted is (velocity + some gforce value) 
+	
 	private MyPhysicsVehicle p;
 	private Vector3f prevPos;
 	

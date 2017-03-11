@@ -9,8 +9,8 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 import game.App;
-import game.H;
 import game.Rally;
+import helper.H;
 
 public class CarModelData {
 	

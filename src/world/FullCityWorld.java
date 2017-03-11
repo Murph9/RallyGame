@@ -5,7 +5,6 @@ import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.math.FastMath;
-import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
@@ -15,12 +14,8 @@ import com.jme3.scene.Spatial;
 import game.App;
 import jme3tools.optimize.GeometryBatchFactory;
 
-public class FullCityWorld implements World {
+public class FullCityWorld extends World {
 
-	private boolean isInit;
-	private Node rootNode;
-	private PhysicsSpace space;
-	
 	private static final int 
 			GRID_SIZE = 40,
 			SPAWN_RANGE = 40,
@@ -40,14 +35,9 @@ public class FullCityWorld implements World {
 	}
 
 	@Override
-	public boolean isInit() {
-		return isInit;
-	}
-
-	@Override
 	public Node init(PhysicsSpace space, ViewPort view) {
 		isInit = true;
-		this.space = space;
+		this.phys = space;
 		
 		//AssetManager am = App.rally.getAssetManager();
 		return rootNode;
@@ -99,7 +89,7 @@ public class FullCityWorld implements World {
 		spat.addControl(new RigidBodyControl(coll, 0));
 		
 		rootNode.attachChild(spat);
-		space.add(spat);
+		phys.add(spat);
 		
 		//If you remove this line: fps = fps/n for large n
 		GeometryBatchFactory.optimize(rootNode);
@@ -111,11 +101,7 @@ public class FullCityWorld implements World {
 	}
 
 	@Override
-	public Node getRootNode() { return rootNode; }
-	@Override
 	public Vector3f getWorldStart() { return new Vector3f(0,2,0); }
-	@Override
-	public Matrix3f getWorldRot() { return new Matrix3f(Matrix3f.IDENTITY); }
 
 	@Override
 	public void update(float tpf, Vector3f playerPos, boolean force) {
@@ -139,12 +125,6 @@ public class FullCityWorld implements World {
 			e.printStackTrace();
 		}
 	}
-
-	@Override
-	public Vector3f getNextPieceClosestTo(Vector3f pos) {
-		return null;
-	}
-
 	
 	private class CityPiece {
 		
