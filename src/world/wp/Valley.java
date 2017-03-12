@@ -100,5 +100,10 @@ public enum Valley implements WP {
 			//should probably not care about what xy direction im going along the plane, should only deal with the z changes 
 			return FastMath.tan(res.x/res.y);
 		}
+		
+
+		public DefaultBuilder copy() {
+			return new Builder();
+		}
 	}
 }

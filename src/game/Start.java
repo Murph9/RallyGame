@@ -3,10 +3,7 @@ package game;
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
-import com.jme3.bullet.BulletAppState;
-import com.jme3.bullet.PhysicsSpace;
 import com.jme3.math.FastMath;
-import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.simsilica.lemur.Button;
@@ -20,14 +17,14 @@ import car.CarCamera;
 import car.CarData;
 import car.MyPhysicsVehicle;
 import world.StaticWorld;
-import world.StaticWorldHelper;
+import world.StaticWorldBuilder;
 
 public class Start extends AbstractAppState {
 
-	private BulletAppState bulletAppState;
-	private StaticWorld world;
+	private StaticWorldBuilder world;
+	
+	private StaticWorld worldType;
 	private CarBuilder cb;
-	private MyPhysicsVehicle car;
 	private static CarData carData;
 	
 	private CarCamera camera;
@@ -35,15 +32,16 @@ public class Start extends AbstractAppState {
 	private final float speed = 4;
 	private float rotation;
 	
+	private Container myWindow;
 	
 	public Start() {
-		world = StaticWorld.garage2;
-		
 		Car[] c = Car.values();
 		carData = c[FastMath.rand.nextInt(c.length)].get();
 		
 		StaticWorld[] w = StaticWorld.values();
-		world = w[FastMath.rand.nextInt(w.length)];
+		worldType = w[FastMath.rand.nextInt(w.length)];
+		
+		world = new StaticWorldBuilder(worldType);
 	}
 	
 	public void startFast() {
@@ -59,20 +57,19 @@ public class Start extends AbstractAppState {
 	public void initialize(AppStateManager stateManager, Application app) {
 		super.initialize(stateManager, app);
 		
-		bulletAppState = new BulletAppState();
-		app.getStateManager().attach(bulletAppState);
-		
-		StaticWorldHelper.addStaticWorld(App.rally.getRootNode(), getPhysicsSpace(), world, App.rally.sky.ifShadow);
+		App.rally.bullet.setEnabled(true);
+		App.rally.getStateManager().attach(world);
 		
 		cb = new CarBuilder();
 		cb.sound(false);
-		car = cb.addCar(getPhysicsSpace(), 0, carData, world.start, Matrix3f.IDENTITY, false);
+		App.rally.getStateManager().attach(cb);
 		
-		camera = new CarCamera("Cam Node - Start", App.rally.getCamera(), cb.get(0));
+		camera = new CarCamera("Cam - Start", App.rally.getCamera(), cb.get(0));
+		//camera = new BasicCamera("Cam -start", App.rally.getCamera(), new Vector3f(-70,50,0), new Vector3f(20,1,0)); 
 		camera.setLocalTranslation(start);
 		App.rally.getRootNode().attachChild(camera);
 		
-		Container myWindow = new Container();
+		myWindow = new Container();
 		App.rally.getGuiNode().attachChild(myWindow);
 		myWindow.setLocalTranslation(300, 300, 0);
 		
@@ -102,30 +99,42 @@ public class Start extends AbstractAppState {
             });
 	}
 	
-	private PhysicsSpace getPhysicsSpace() {
-		return bulletAppState.getPhysicsSpace();
-	}
-	
 	public void update (float tpf) {
+		if (!isEnabled() || !isInitialized())
+			return;
+		
 		super.update(tpf);
 		
-		Vector3f pos = car.getPhysicsLocation();
-		car.setPhysicsLocation(new Vector3f(0, pos.y, 0));
-		
-		if (this.isEnabled()) {
-			rotation += (FastMath.DEG_TO_RAD*tpf*speed) % FastMath.PI;
+		MyPhysicsVehicle car = cb.get(0);
+		if (car == null) {
+			cb.addCar(0, carData, world.getStartPos(), world.getStartRot(), true);
+		} else {
+			Vector3f pos = car.getPhysicsLocation();
+			car.setPhysicsLocation(new Vector3f(0, pos.y, 0));
 			
-			Quaternion q = new Quaternion();
-			q.fromAngleAxis(rotation, Vector3f.UNIT_Y);
-			camera.setLocalTranslation(q.mult(start).add(car.getPhysicsLocation()));
-			camera.lookAt(car.getPhysicsLocation(), Vector3f.UNIT_Y);
+			if (this.isEnabled()) {
+				rotation += (FastMath.DEG_TO_RAD*tpf*speed) % FastMath.PI;
+				
+				Quaternion q = new Quaternion();
+				q.fromAngleAxis(rotation, Vector3f.UNIT_Y);
+				camera.setLocalTranslation(q.mult(start).add(car.getPhysicsLocation()));
+				camera.lookAt(car.getPhysicsLocation(), Vector3f.UNIT_Y);
+			}
 		}
 	}
 	
 	public void cleanup() {
-		StaticWorldHelper.removeStaticWorld(App.rally.getRootNode(), getPhysicsSpace(), world);
-		cb.cleanup();
-		
 		App.rally.getRootNode().detachChild(camera);
+		camera = null;
+		
+		App.rally.getRootNode().detachChild(myWindow);
+		myWindow = null;
+		
+		cb.removePlayer(0);
+		App.rally.getStateManager().detach(cb);
+		cb = null;
+		
+		App.rally.getStateManager().detach(world);
+		world = null;
 	}
 }

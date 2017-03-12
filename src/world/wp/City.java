@@ -52,5 +52,9 @@ public enum City implements WP {
 		Builder() {
 			super(City.values());
 		}
+		
+		public DefaultBuilder copy() {
+			return new Builder();
+		}
 	}
 }

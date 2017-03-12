@@ -1,12 +1,10 @@
 package world;
 
-import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
-import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -23,7 +21,7 @@ public class FullCityWorld extends World {
 	private CityPiece[][] grid;
 	
 	public FullCityWorld() {
-		rootNode = new Node("full city world rootNode");
+		super("full city world rootNode");
 		rootNode.setShadowMode(ShadowMode.CastAndReceive);
 		
 		grid = new CityPiece[40][40];
@@ -34,15 +32,6 @@ public class FullCityWorld extends World {
 		return WorldType.FULLCITY;
 	}
 
-	@Override
-	public Node init(PhysicsSpace space, ViewPort view) {
-		isInit = true;
-		this.phys = space;
-		
-		//AssetManager am = App.rally.getAssetManager();
-		return rootNode;
-	}
-	
 	private void placeTiles(Vector3f pos) {
 		int x = Math.round(((pos.x+GRID_SIZE/2)/TILE_SIZE) + GRID_SIZE/2);
 		int y = Math.round(((pos.z+GRID_SIZE/2)/TILE_SIZE) + GRID_SIZE/2);
@@ -89,7 +78,7 @@ public class FullCityWorld extends World {
 		spat.addControl(new RigidBodyControl(coll, 0));
 		
 		rootNode.attachChild(spat);
-		phys.add(spat);
+		App.rally.getPhysicsSpace().add(spat);
 		
 		//If you remove this line: fps = fps/n for large n
 		GeometryBatchFactory.optimize(rootNode);
@@ -101,11 +90,11 @@ public class FullCityWorld extends World {
 	}
 
 	@Override
-	public Vector3f getWorldStart() { return new Vector3f(0,2,0); }
+	public Vector3f getStartPos() { return new Vector3f(0,2,0); }
 
 	@Override
-	public void update(float tpf, Vector3f playerPos, boolean force) {
-		placeTiles(playerPos);
+	public void update(float tpf) {
+		placeTiles(App.rally.getCamera().getLocation());
 	}
 
 	@Override
@@ -119,6 +108,7 @@ public class FullCityWorld extends World {
 
 	@Override
 	public void cleanup() {
+		super.cleanup();
 		try {
 			throw new Exception("Full city is not being deleted.");
 		} catch (Exception e) {

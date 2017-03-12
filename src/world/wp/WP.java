@@ -50,7 +50,13 @@ public interface WP {
 		
 		public World getBuilder() {
 			builder.reset(); //just incase its already been used, physics space is probably wrong for example
-			return builder;
+			try {
+				return builder.copy();
+			} catch (InstantiationException | IllegalAccessException e) {
+				e.printStackTrace();
+				System.exit(-1);
+			}
+			return null;
 		}
 	}
 	

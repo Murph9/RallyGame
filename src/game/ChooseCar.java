@@ -3,8 +3,6 @@ package game;
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
-import com.jme3.bullet.BulletAppState;
-import com.jme3.bullet.PhysicsSpace;
 import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
@@ -22,13 +20,13 @@ import car.MyPhysicsVehicle;
 import helper.H;
 import helper.H.Duo;
 import world.StaticWorld;
-import world.StaticWorldHelper;
+import world.StaticWorldBuilder;
+import world.World;
 
 public class ChooseCar extends AbstractAppState {
 
-	private static BulletAppState bulletAppState;
-
-	private StaticWorld world;
+	private World world;
+	private StaticWorld worldType;
 
 	private CarBuilder cb;
 	private Car car;
@@ -39,7 +37,7 @@ public class ChooseCar extends AbstractAppState {
 	private BasicCamera camera;
 
 	public ChooseCar() {
-		world = StaticWorld.garage2; //good default
+		worldType = StaticWorld.garage2; //good default
 		car = Car.values()[0];
 	}
 
@@ -48,19 +46,19 @@ public class ChooseCar extends AbstractAppState {
 	public void initialize(AppStateManager stateManager, Application app) {
 		super.initialize(stateManager, app);
 
-		bulletAppState = new BulletAppState();
-		app.getStateManager().attach(bulletAppState);
-
-		//create world
-		StaticWorldHelper.addStaticWorld(App.rally.getRootNode(), getPhysicsSpace(), world, App.rally.sky.ifShadow);
-
+		App.rally.bullet.setEnabled(true);
+		
 		//init player
-		Vector3f start = world.start;
+		Vector3f start = worldType.start;
 		Matrix3f dir = new Matrix3f();
 
+		world = new StaticWorldBuilder(worldType);
+		App.rally.getStateManager().attach(world);
+		
 		cb = new CarBuilder();
+		app.getStateManager().attach(cb);
 		cb.sound(false);
-		cb.addCar(getPhysicsSpace(), 0, car.get(), start, dir, true);
+		cb.addCar(0, car.get(), start, dir, true);
 
 		//make camera
 		camera = new BasicCamera("Camera", App.rally.getCamera(), new Vector3f(0,3,7), new Vector3f(0,1.2f, 0));
@@ -86,8 +84,8 @@ public class ChooseCar extends AbstractAppState {
                 public void execute( Button source ) {
                     car = c;
 
-                    cb.removePlayer(getPhysicsSpace(), 0);
-    				cb.addCar(getPhysicsSpace(), 0, car.get(), world.start, new Matrix3f(), true);
+                    cb.removePlayer(0);
+    				cb.addCar(0, car.get(), worldType.start, new Matrix3f(), true);
     				
     				String carinfotext = getCarInfoText(car);
     				label.setText(carinfotext);
@@ -135,18 +133,14 @@ public class ChooseCar extends AbstractAppState {
 		return out;
 	}
 
-	private PhysicsSpace getPhysicsSpace() {
-		return bulletAppState.getPhysicsSpace();
-	}
-
 
 	public void cleanup() {
 		//TODO i know theres got to be something else.
-		StaticWorldHelper.removeStaticWorld(App.rally.getRootNode(),getPhysicsSpace(), world);
-
-		App.rally.getStateManager().detach(bulletAppState);
+		App.rally.getStateManager().detach(cb);
+		cb = null;
 		
-		cb.cleanup();
+		App.rally.getStateManager().detach(world);
+		world = null;
 		
 		App.rally.getRootNode().detachChild(camera);
 	}

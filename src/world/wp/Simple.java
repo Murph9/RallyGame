@@ -62,5 +62,9 @@ public enum Simple implements WP {
 		Builder() {
 			super(Simple.values());
 		}
+
+		public DefaultBuilder copy() {
+			return new Builder();
+		}
 	}
 }

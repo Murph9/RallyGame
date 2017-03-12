@@ -5,8 +5,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import com.jme3.asset.AssetManager;
-import com.jme3.bullet.PhysicsSpace;
+import com.jme3.app.Application;
+import com.jme3.app.state.AppStateManager;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
@@ -17,7 +17,6 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -26,6 +25,7 @@ import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.shape.Box;
 
 import game.App;
+import helper.H;
 import world.World;
 import world.WorldType;
 import world.wp.WP.NodeType;
@@ -54,22 +54,24 @@ public abstract class DefaultBuilder extends World {
 		this(type, (long)(Math.random()*Long.MAX_VALUE));
 	}
 	DefaultBuilder(WP[] type, long seed) {
+		super("builder root node");
 		this.type = type;
-		this.rootNode = new Node("builder root node");
-		rootNode.setShadowMode(ShadowMode.CastAndReceive); //performance concern 1
+		this.rootNode.setShadowMode(ShadowMode.CastAndReceive); //performance concern 1
 		
 		this.rand = new Random(seed);
 	}
 	
 	@Override
-	public Node init(PhysicsSpace space, ViewPort view) {
-		this.isInit = true;
-		this.phys = space;
+	public void initialize(AppStateManager stateManager, Application app) {
+		if (isInitialized()) {
+			H.e("init again, too keen");
+			return;
+		}
+		super.initialize(stateManager, app);
 		
-		AssetManager am = App.rally.getAssetManager();
 		boolean mat = type[0].needsMaterial();
 		if (mat) {
-			this.mat = new Material(am, "Common/MatDefs/Misc/ShowNormals.j3md");		
+			this.mat = new Material(app.getAssetManager(), "Common/MatDefs/Misc/ShowNormals.j3md");		
 			this.mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		}
 		
@@ -78,7 +80,7 @@ public abstract class DefaultBuilder extends World {
 			WPObject wpo = new WPObject();
 			wpo.wp = type[i];
 			
-			Spatial piece = am.loadModel(type[i].getName());
+			Spatial piece = app.getAssetManager().loadModel(type[i].getName());
 			piece.setCullHint(CullHint.Never);
 			wpo.sp = ((Node)piece).getChild(0); //there is only one object in there (hopefully)
 			if (this.mat != null) {
@@ -93,7 +95,7 @@ public abstract class DefaultBuilder extends World {
 			this.wpos.add(wpo);
 		}
 		
-		Material matfloor = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+		Material matfloor = new Material(app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 		matfloor.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		matfloor.setColor("Color", ColorRGBA.Green);
 		
@@ -104,26 +106,26 @@ public abstract class DefaultBuilder extends World {
 		startGeometry.addControl(new RigidBodyControl(0));
 		
 		this.rootNode.attachChild(startGeometry);
-		this.phys.add(startGeometry);
-		
-		return rootNode;
+		App.rally.getPhysicsSpace().add(startGeometry);
 	}
 
 	@Override
-	public void update(float tpf, Vector3f playerPos, boolean force) {
-		count++;
-		if (!force && count % 10 != 0) return; //only on every 10th frame to save lag
+	public void update(float tpf) {
+		if (!isEnabled())
+			return;
 		
-		while (nextPos.subtract(playerPos).length() < distance) {
+		Vector3f pos = App.rally.getCamera().getLocation();
+		
+		while (nextPos.subtract(pos).length() < distance) {
 			selectNewPiece();
 		}
 		
 		List<Spatial> temp = new LinkedList<Spatial>(curPieces);
 		for (Spatial sp: temp) {
 			Vector3f endSpPos = sp.getWorldTranslation();
-			if (endSpPos.subtract(playerPos).length() > distance/2) {
+			if (endSpPos.subtract(pos).length() > distance/2) {
 				//2 because don't delete the ones we just placed
-				this.phys.remove(sp.getControl(0));
+				App.rally.getPhysicsSpace().remove(sp.getControl(0));
 				rootNode.detachChild(sp);
 				curPieces.remove(sp);
 			} else {
@@ -184,7 +186,7 @@ public abstract class DefaultBuilder extends World {
 		landscape.setKinematic(false);
 		s.addControl(landscape);
 
-		this.phys.add(landscape);
+		App.rally.getPhysicsSpace().add(landscape);
 		rootNode.attachChild(s);
 
 		curPieces.add(s);
@@ -205,7 +207,7 @@ public abstract class DefaultBuilder extends World {
 	public void reset() {
 		List<Spatial> ne = new LinkedList<Spatial>(curPieces);
 		for (Spatial s: ne) {
-			phys.remove(s.getControl(0));
+			App.rally.getPhysicsSpace().remove(s.getControl(0));
 			rootNode.detachChild(s);
 			curPieces.remove(s);
 		}
@@ -216,12 +218,12 @@ public abstract class DefaultBuilder extends World {
 	}
 
 	@Override
-	public Vector3f getWorldStart() {
+	public Vector3f getStartPos() {
 		return new Vector3f(0,1,0);
 	}
 	
 	@Override
-	public Matrix3f getWorldRot() {
+	public Matrix3f getStartRot() {
 		Matrix3f rot = new Matrix3f();
 		rot.fromAngleAxis(FastMath.DEG_TO_RAD*90, new Vector3f(0,1,0));
 		return rot;
@@ -247,12 +249,19 @@ public abstract class DefaultBuilder extends World {
 	}
 	
 	public void cleanup() {
-		isInit = false;
+		for (Spatial s: curPieces) {
+			App.rally.getPhysicsSpace().remove(s.getControl(0));
+			rootNode.detachChild(s);
+		}
+		
+		super.cleanup();
 	}
 	
 	public WorldType getType() {
 		return WorldType.DYNAMIC;
 	}
+	
+	public abstract World copy();
 	
 	protected class WPObject {
 		WP wp;

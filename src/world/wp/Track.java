@@ -57,5 +57,9 @@ public enum Track implements WP {
 		Builder() {
 			super(Track.values());
 		}
+
+		public DefaultBuilder copy() {
+			return new Builder();
+		}
 	}
 }

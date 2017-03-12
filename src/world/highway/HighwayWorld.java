@@ -1,11 +1,10 @@
 package world.highway;
 
+import com.jme3.app.Application;
+import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
-import com.jme3.bullet.PhysicsSpace;
 import com.jme3.material.Material;
 import com.jme3.math.Vector3f;
-import com.jme3.renderer.ViewPort;
-import com.jme3.scene.Node;
 import com.jme3.terrain.noise.ShaderUtils;
 import com.jme3.terrain.noise.basis.FilteredBasis;
 import com.jme3.terrain.noise.filter.*;
@@ -36,7 +35,7 @@ public class HighwayWorld extends World {
 	private int terrainSize;
 
 	public HighwayWorld() {
-		rootNode = new Node("curveWorldRoot");
+		super("curveWorldRoot");
 	}
 
 	@Override
@@ -45,15 +44,11 @@ public class HighwayWorld extends World {
 	}
 
 	@Override
-	public Node init(PhysicsSpace space, ViewPort view) {
-		isInit = true;
-		phys = space;
+	public void initialize(AppStateManager stateManager, Application app) {
+		super.initialize(stateManager, app);
 		terrainSize = 128 + 1;
 
-		AssetManager am = App.rally.getAssetManager();
-		createWorldWithNoise(am);
-
-		return rootNode;
+		createWorldWithNoise(app.getAssetManager());
 	}
 
 	private Material createTerrainMaterial(AssetManager am) {
@@ -99,7 +94,7 @@ public class HighwayWorld extends World {
 	private void createWorldWithNoise(AssetManager am) {
 		// TODO change settings
 		// TODO remember the ./world folder with the cached terrain pieces
-		NoiseBasedWorld newWorld = new NoiseBasedWorld(App.rally, phys, terrainSize, terrainSize);
+		NoiseBasedWorld newWorld = new NoiseBasedWorld(App.rally, App.rally.getPhysicsSpace(), terrainSize, terrainSize);
 
 		newWorld.setWorldHeight(192f);
 		newWorld.setViewDistance(2);
@@ -154,17 +149,18 @@ public class HighwayWorld extends World {
 
 	// interface nodes
 	@Override
-	public Vector3f getWorldStart() { return new Vector3f(0, 100, 0); }
+	public Vector3f getStartPos() { return new Vector3f(0, 100, 0); }
 	@Override
-	public void update(float tpf, Vector3f playerPos, boolean force) { }
+	public void update(float tpf) { }
 	@Override
 	public void reset() {  }
 
 	@Override
 	public void cleanup() {
-		isInit = false;
 		rootNode.detachAllChildren();
 		terrain.close();
 		App.rally.getStateManager().detach(terrain);
+		
+		super.cleanup();
 	}
 }

@@ -3,15 +3,14 @@ package world;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.jme3.app.Application;
+import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
-import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.material.Material;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
-import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
-import com.jme3.scene.Node;
 import com.jme3.terrain.geomipmap.TerrainLodControl;
 import com.jme3.terrain.geomipmap.TerrainQuad;
 import com.jme3.terrain.heightmap.AbstractHeightMap;
@@ -29,7 +28,7 @@ public class TerrainWorld extends World {
 	private TerrainQuad terrain;
 	
 	public TerrainWorld() {
-		rootNode = new Node("terrainRoot");	
+		super("terrainRoot");
 	}
 	
 	@Override
@@ -38,11 +37,10 @@ public class TerrainWorld extends World {
 	}
 
 	@Override
-	public Node init(PhysicsSpace space, ViewPort view) {
-		isInit = true;
-		phys = space;
+	public void initialize(AppStateManager stateManager, Application app) {
+		super.initialize(stateManager, app);
 		
-		AssetManager am = App.rally.getAssetManager();
+		AssetManager am = app.getAssetManager();
 		
 		// 1. Create terrain material and load four textures into it.
 	    Material mat_terrain = new Material(am, "Common/MatDefs/Terrain/Terrain.j3md");
@@ -93,26 +91,24 @@ public class TerrainWorld extends World {
 
 	    // 5. The LOD (level of detail) depends on were the camera is:
 	    List<Camera> cameras = new ArrayList<Camera>();
-	    cameras.add(view.getCamera());
+	    cameras.add(app.getCamera());
 	    TerrainLodControl control = new TerrainLodControl(terrain, cameras);
 	    terrain.addControl(control);
 	    
 	    RigidBodyControl rbc = new RigidBodyControl(0.0f);
 	    terrain.addControl(rbc);
-	    phys.add(rbc);
-	    
-		return rootNode;
+	    App.rally.getPhysicsSpace().add(rbc);
 	}
 
 
 	@Override
-	public Vector3f getWorldStart() {
+	public Vector3f getStartPos() {
 //		float height = heightMap.getTrueHeightAtPoint(0, 0);
 		return new Vector3f(0, -57.586773f, 0);
 	}
 
 	@Override
-	public void update(float tpf, Vector3f playerPos, boolean force) {
+	public void update(float tpf) {
 		
 	}
 

@@ -650,8 +650,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			w.radSec = 0; //stop rotation of the wheels
 		}
 		
-		setPhysicsLocation(App.rally.drive.world.getWorldStart());
-		setPhysicsRotation(App.rally.drive.world.getWorldRot());
+		setPhysicsLocation(App.rally.drive.world.getStartPos());
+		setPhysicsRotation(App.rally.drive.world.getStartRot());
 		setAngularVelocity(new Vector3f());
 		
 		App.rally.drive.reset();

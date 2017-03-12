@@ -30,8 +30,8 @@ public class CarCamera extends CameraNode implements RawInputListener {
 		
 		if (p != null) {
 			this.p = p;
-
-			Vector3f pPos = p.getPhysicsLocation();
+			Vector3f pPos = new Vector3f();
+			p.getInterpolatedPhysicsLocation(pPos);
 			setLocalTranslation(pPos.add(p.car.cam_offset)); //starting position of the camera
 			lookAt(pPos.add(p.car.cam_lookAt), new Vector3f(0,1,0)); //look at car
 		}
@@ -55,7 +55,8 @@ public class CarCamera extends CameraNode implements RawInputListener {
 		carForward = carForward.mult(-distance).add(0, p.car.cam_offset.y, 0);
 		
 		Vector3f camPos = prevPos;
-		Vector3f carPos = p.getPhysicsLocation();
+		Vector3f carPos = new Vector3f(); 
+		p.getInterpolatedPhysicsLocation(carPos);
 		
 		Vector3f diff = carPos.subtract(camPos);
 		if (diff.length() > distance) {
@@ -74,10 +75,9 @@ public class CarCamera extends CameraNode implements RawInputListener {
 			Quaternion q = new Quaternion();
 			q.fromAngleAxis(rotRad*ROT_SPEED, p.up);
 			setLocalTranslation(carPos.add(q.mult(carForward)));
-			
 		}
 
-		lookAt(p.getPhysicsLocation().add(p.car.cam_lookAt), new Vector3f(0,1,0));
+		lookAt(carPos.add(p.car.cam_lookAt), new Vector3f(0,1,0));
 	}
 
 	

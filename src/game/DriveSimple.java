@@ -4,13 +4,13 @@ package game;
 import world.World;
 import world.WorldType;
 
+import java.util.Collection;
+
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
-import com.jme3.bullet.BulletAppState;
-import com.jme3.bullet.PhysicsSpace;
+import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.input.Joystick;
-import com.jme3.math.*;
 import com.jme3.scene.*;
 
 import car.*;
@@ -19,11 +19,9 @@ import helper.H;
 //TODO there is another appstate to try here called (base|basic?)appstate
 public class DriveSimple extends AbstractAppState {
 	
-	private BulletAppState bulletAppState;
-	
+	public DriveMenu menu;
 	public World world;
-	private Node worldNode;
-	
+
 	//car stuff
 	public CarBuilder cb;
 	private CarData car;
@@ -34,21 +32,19 @@ public class DriveSimple extends AbstractAppState {
 	MiniMap minimap;
 	
 	//debug stuff
-	Node arrowNode;
 	public int frameCount = 0;
 	public boolean ifDebug = false;
 	
-    public DriveSimple (CarData car, World world) {
+    public DriveSimple(CarData car, World world) {
     	super();
     	this.car = car;
     	this.world = world;
-    	this.cb = new CarBuilder();
-    	App.rally.getStateManager().attach(cb);
+    	this.menu = new DriveMenu(this);
     	
     	WorldType type = world.getType();
     	if (type == WorldType.NONE)
     	{
-    		H.p("not sure what world type you want");
+    		H.e("not sure what world type you want");
     		System.exit(-1);
     	}
     }
@@ -56,74 +52,56 @@ public class DriveSimple extends AbstractAppState {
     @Override
     public void initialize(AppStateManager stateManager, Application app) {
     	super.initialize(stateManager, app);
+
+    	Collection<PhysicsRigidBody> list = App.rally.getPhysicsSpace().getRigidBodyList();
+    	if (list.size() > 0) {
+    		H.p("some one didn't clean up after themselves..." + list.size());
+    		for (PhysicsRigidBody r: list)
+    			App.rally.getPhysicsSpace().remove(r);
+    	}
     	
-    	bulletAppState = new BulletAppState();
-    	//bulletAppState.setDebugEnabled(true); //TODO 3.1 beta-1 still broken
-		app.getStateManager().attach(bulletAppState);
-		getPhysicsSpace().setMaxSubSteps(4);
+    	app.getStateManager().attach(world);
+    	
+		//buildCars
+		this.cb = new CarBuilder();
+		cb.addCar(0, car, world.getStartPos(), world.getStartRot(), true);
+		app.getStateManager().attach(cb);
+		app.getStateManager().attach(menu);
 		
-		createWorld();
-		
-		buildCars();
-		initCameras();
-		
-		//setup GUI
 		uiNode = new UINode(cb.get(0));
-		App.rally.getStateManager().attach(uiNode);
+		app.getStateManager().attach(uiNode);
 		
-		connectJoyStick();
-	}
-    
-	private void createWorld() {
-		worldNode = world.init(getPhysicsSpace(), App.rally.getViewPort()); 
-		App.rally.getRootNode().attachChild(worldNode);
-
-		arrowNode = new Node();
-		App.rally.getRootNode().attachChild(arrowNode);
-	}
-
-	private void initCameras() {
-	
+		//initCameras
 		camera = new CarCamera("Camera", App.rally.getCamera(), cb.get(0));
 		App.rally.getRootNode().attachChild(camera);
-		App.rally.getInputManager().addRawInputListener(camera);
+		app.getInputManager().addRawInputListener(camera);
 		
 		minimap = new MiniMap(cb.get(0));
-	}
-	
-	private void buildCars() {
-		Vector3f start = world.getWorldStart();
-		Matrix3f dir = world.getWorldRot();
-		cb.addCar(getPhysicsSpace(), 0, car, start, dir, true);
-	}
-	
-	private void connectJoyStick() {
+		
+		//connectJoySticks
 		Joystick[] joysticks = App.rally.getInputManager().getJoysticks();
 		if (joysticks == null) {
-			H.e("There are no joysticks :( .");
+			H.e("There are no joysticks :(");
 		}
+		
+		App.rally.bullet.setEnabled(true);
 	}
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// Not init below
 	@Override
 	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
-		bulletAppState.setEnabled(enabled); //we kinda don't want the physics running while paused
-		
+		world.setEnabled(enabled); //we kinda don't want the physics running while paused
+		App.rally.bullet.setEnabled(enabled);
 		//TODO particles and sound don't stop
 	}
 	
 	@Override
 	public void update(float tpf) {
-		if (!isEnabled()) return; //appstate stuff
+		if (!isEnabled()) return;
 		super.update(tpf);
 		
 		frameCount++;
 		
-		//update world
-		world.update(tpf, cb.get(0).getPhysicsLocation(), false);
-
 		//Hud stuff
 		minimap.update(tpf);
 		
@@ -131,35 +109,32 @@ public class DriveSimple extends AbstractAppState {
 		camera.myUpdate(tpf);
 	}
 	
+	public void next() {
+		App.rally.next(this);
+	}
 	
 	public void reset() {
 		world.reset();
-		arrowNode.detachAllChildren();
-	}
-
-	public PhysicsSpace getPhysicsSpace() {
-		return bulletAppState.getPhysicsSpace();
 	}
 	
 	public void cleanup() {
 		super.cleanup();
-		
 		H.p("cleaning drive class");
+		
 		App.rally.getStateManager().detach(cb);
 		cb = null;
+		
+		App.rally.getStateManager().detach(menu);
+		menu = null;
 		
 		App.rally.getStateManager().detach(uiNode);
 		uiNode = null;
 		
-		App.rally.getStateManager().detach(bulletAppState);
+		App.rally.getStateManager().detach(world);
+		world = null;
 		
-		Node rn = App.rally.getRootNode();
-		
-		rn.detachChild(worldNode);
-		world.cleanup();
-
-		rn.detachChild(arrowNode);
-		rn.detachChild(camera);
+		Node rootNode = App.rally.getRootNode();
+		rootNode.detachChild(camera);
 		App.rally.getInputManager().removeRawInputListener(camera);
 	}
 }

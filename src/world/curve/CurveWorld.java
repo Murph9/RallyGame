@@ -10,8 +10,9 @@ import java.util.PriorityQueue;
 
 import javax.imageio.ImageIO;
 
+import com.jme3.app.Application;
+import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
-import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
@@ -23,7 +24,6 @@ import com.jme3.math.Vector3f;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.renderer.Camera;
-import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -86,7 +86,7 @@ public class CurveWorld extends World {
 	private LRoadGenerator lrg;
 	
 	public CurveWorld() {
-		rootNode = new Node("curveWorldRoot");
+		super("curveWorldRoot");
 		road = new Roads();
 	}
 	
@@ -96,37 +96,32 @@ public class CurveWorld extends World {
 	}
 	
 	@Override
-	public Node init(PhysicsSpace space, ViewPort view) {
-		isInit = true;
-		phys = space;
-		
-		AssetManager am = App.rally.getAssetManager();
+	public void initialize(AppStateManager stateManager, Application app) {
+		super.initialize(stateManager, app);
 		
 //		/* TODO this all has all been removed until we sort out the l-system stuff
-		generateTerrain(am, view);
+		generateTerrain(app);
 		/*
 		boolean roadPlease = true; //SET the type here
 		if (roadPlease)
-			generateRoads(am, view);
+			generateRoads(app);
 		else
-			generateCity(am, view);
+			generateCity(app);
 		
 		fixTerrainHeights();
-		generateRandomTrees(am);
+		generateRandomTrees(app);
 		*/
 
-		generateLargeFlatBox(am, view);
+		generateLargeFlatBox(app);
 //		lrg = new LRoadGenerator(rootNode, 0.2f);
 //		lrg.init();
 		
 		saveTerrainToFile();
-		
-		return rootNode;
 	}
 	
-	private void generateLargeFlatBox(AssetManager am, ViewPort view) {
-		Material matfloor = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-//		Material matfloor = new Material(am, "assets/mat/SolidColor2.j3md");
+	private void generateLargeFlatBox(Application app) {
+		Material matfloor = new Material(app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+//		Material matfloor = new Material(app.getAssetManager(), "assets/mat/SolidColor2.j3md");
 		matfloor.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		matfloor.setColor("Color", ColorRGBA.Green);
 		
@@ -137,11 +132,13 @@ public class CurveWorld extends World {
 		startBox.addControl(new RigidBodyControl(0));
 		
 		this.rootNode.attachChild(startBox);
-		this.phys.add(startBox);
+		App.rally.getPhysicsSpace().add(startBox);
 	}
 
 	
-	private void generateTerrain(AssetManager am, ViewPort view) {
+	private void generateTerrain(Application app) {
+		AssetManager am = app.getAssetManager();
+		
 		//create the terrain (from terrain world)
 		Material terrainMaterial = new Material(am, "Common/MatDefs/Terrain/HeightBasedTerrain.j3md");
 		
@@ -197,19 +194,19 @@ public class CurveWorld extends World {
 	    
 	    rootNode.attachChild(terrain);
 	    List<Camera> cameras = new ArrayList<Camera>();
-	    cameras.add(view.getCamera());
+	    cameras.add(app.getViewPort().getCamera());
 	    
 	    TerrainLodControl control = new TerrainLodControl(terrain, cameras);
 	    terrain.addControl(control);
 	    c = new RigidBodyControl(0);
 
 	    terrain.addControl(c);
-	    phys.add(c);
+	    App.rally.getPhysicsSpace().add(c);
 	    //end terrain
 	}
 
 	@SuppressWarnings("unused")
-	private void generateRoads(AssetManager am, ViewPort view) {
+	private void generateRoads(Application app) {
 		float height = terrain.getHeight(new Vector2f(0,0.001f));
 		float height2 = terrain.getHeight(new Vector2f(0,75));
 		Vector3f[] points = new Vector3f[] {
@@ -220,7 +217,7 @@ public class CurveWorld extends World {
 			};
 		Curve curve = null;
 		curve = new BeizerCurve(points, Roads.CurveFunction());
-		road.placePiece(new CurveQueueObj(0, curve, null), rootNode, phys, true);
+		road.placePiece(new CurveQueueObj(0, curve, null), rootNode, App.rally.getPhysicsSpace(), true);
 		
 		for (int i = 0; i < 10; i++) {
 			points[1] = points[3].add(points[3].subtract(points[2]));
@@ -241,11 +238,11 @@ public class CurveWorld extends World {
 			points[2].y = y;
 
 			curve = new BeizerCurve(points, Roads.CurveFunction());
-			road.placePiece(new CurveQueueObj(0, curve, null), rootNode, phys, true);
+			road.placePiece(new CurveQueueObj(0, curve, null), rootNode, App.rally.getPhysicsSpace(), true);
 		}
 	}
 	
-	public void generateCity(AssetManager am, ViewPort view) {
+	public void generateCity(Application app) {
 		int size = 50;
 		
 		// l-system like generation attempt like http://www.tmwhere.com/city_generation.html
@@ -265,14 +262,14 @@ public class CurveWorld extends World {
 		}
 		
 		for (CurveQueueObj c: S) {
-			road.placePiece(c, rootNode, phys, false);
+			road.placePiece(c, rootNode, App.rally.getPhysicsSpace(), false);
 			H.p("Placing: " + c.rule);
 		}
 	}
 
 	@SuppressWarnings("unused")
-	private void generateRandomTrees(AssetManager am) {
-		Spatial spat = am.loadModel(CurveWorld.Tree_String);
+	private void generateRandomTrees(Application app) {
+		Spatial spat = app.getAssetManager().loadModel(CurveWorld.Tree_String);
 		if (spat instanceof Node) {
 			for (Spatial s: ((Node) spat).getChildren()) {
 				this.treeGeom = s;
@@ -298,7 +295,7 @@ public class CurveWorld extends World {
 			s.setLocalTranslation(newPos);
 			s.addControl(new RigidBodyControl(0));
 			rootNode.attachChild(s);
-			phys.add(s);
+			App.rally.getPhysicsSpace().add(s);
 		}
 		
 		//If you remove this line: fps = fps/n for large n
@@ -341,10 +338,10 @@ public class CurveWorld extends World {
         terrain.updateModelBound();
 
         //update physics
-        phys.remove(c);
+        App.rally.getPhysicsSpace().remove(c);
         c = new RigidBodyControl(0.0f);
 	    terrain.addControl(c);
-	    phys.add(c);
+	    App.rally.getPhysicsSpace().add(c);
 	}
 	
 	private void saveTerrainToFile() {
@@ -377,20 +374,22 @@ public class CurveWorld extends World {
 	}
 	
 	@Override
-	public Vector3f getWorldStart() {
+	public Vector3f getStartPos() {
 		if (terrain != null)
 			return new Vector3f(0,terrain.getHeight(new Vector2f(0, 3))+0.5f,3);
 		else 
 			return new Vector3f(0,0.5f,0);
 	}
 	@Override
-	public void update(float tpf, Vector3f playerPos, boolean force) {
-		if (lrg != null) lrg.update(tpf);
+	public void update(float tpf) {
+		if (!isEnabled())
+			return;
+		
+		if (lrg != null) 
+			lrg.update(tpf);
 	}
 	@Override
 	public void reset() { }
-	@Override
-	public void cleanup() { isInit = false; }
 
 	private float rayHeightAt(float x, float z, String target) {
 		CollisionResults results = new CollisionResults();
@@ -485,10 +484,10 @@ public class CurveWorld extends World {
         terrain.updateModelBound();
 
         //update physics
-        phys.remove(c);
+        getPhysicsSpace.remove(c);
         c = new RigidBodyControl(0.0f);
 	    terrain.addControl(c);
-	    phys.add(c);
+	    getPhysicsSpace.add(c);
 	}
 	
 	private boolean isInRadius(float x, float y, float radius) {

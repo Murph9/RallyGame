@@ -2,12 +2,13 @@ package car;
 
 import java.util.HashMap;
 
+import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
+import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.TextureKey;
 import com.jme3.audio.AudioData;
 import com.jme3.audio.AudioNode;
-import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.material.Material;
@@ -38,30 +39,17 @@ public class CarBuilder extends AbstractAppState {
 		
 		App.rally.getRootNode().attachChild(rootNode);
 	}
-
-	public void removePlayer(PhysicsSpace space, int id) {
-		if (!cars.containsKey(id)) {
-			try {
-				throw new Exception("A car doesn't have that Id");
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		rootNode.detachChildNamed(id+"");
-		MyVC e = cars.get(id);
-		
-		rootNode.detachChild(e.skidNode);
-		
-		e.cleanup();
-		space.remove(e);
-		cars.remove(id);
+	
+	public void initialize(AppStateManager stateManager, Application app) {
+		super.initialize(stateManager, app);
+		H.p("carbuilder init");
 	}
-
+	
 	public void sound(boolean sound) {
 		soundEnabled = sound;
 	}
 	
-	public MyVC addCar(PhysicsSpace space, int id, CarData car, Vector3f start, Matrix3f rot, boolean aPlayer) {
+	public MyVC addCar(int id, CarData car, Vector3f start, Matrix3f rot, boolean aPlayer) {
 		if (cars.containsKey(id)) {
 			try {
 				throw new Exception("A car already has that Id");
@@ -129,16 +117,37 @@ public class CarBuilder extends AbstractAppState {
 		
 		cars.put(id, player);
 
-		space.add(player);
+		App.rally.getPhysicsSpace().add(player);
 		return player;
 	}
 
+	public void removePlayer(int id) {
+		if (!cars.containsKey(id)) {
+			try {
+				throw new Exception("A car doesn't have that Id");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		rootNode.detachChildNamed(id+"");
+		MyVC car = cars.get(id);
+		
+		rootNode.detachChild(car.skidNode);
+		
+		App.rally.getPhysicsSpace().remove(car);
+		car.cleanup();
+		cars.remove(id);
+	}
+	
 	public void update(float tpf) {
+		if (!isEnabled())
+			return;
+		
 		if (cars.isEmpty())
 			return;
 
 		//TODO it can pause me itself thanks
-		if (App.rally.drive.isEnabled()) { //otherwise they update while paused..
+		if (App.rally.drive != null && App.rally.drive.isEnabled()) { //otherwise they update while paused..
 			for (Integer i : cars.keySet()) {
 				cars.get(i).myUpdate(tpf);
 			}
@@ -156,10 +165,10 @@ public class CarBuilder extends AbstractAppState {
 	public void cleanup() {
 		for (int key : cars.keySet()) {
 			MyVC car = cars.get(key);
-			
+			App.rally.getPhysicsSpace().remove(car);
 			car.cleanup();
 		}
-		
 		App.rally.getRootNode().detachChild(rootNode);
+		H.p("carbuilder cleanup");
 	}
 }

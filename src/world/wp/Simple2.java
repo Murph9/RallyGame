@@ -49,5 +49,9 @@ public enum Simple2 implements WP {
 		Builder() {
 			super(Simple2.values());
 		}
+
+		public DefaultBuilder copy() {
+			return new Builder();
+		}
 	}
 }

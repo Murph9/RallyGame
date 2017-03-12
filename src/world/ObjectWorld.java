@@ -3,14 +3,14 @@ package world;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.jme3.app.Application;
+import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
-import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
-import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -38,7 +38,7 @@ public class ObjectWorld extends World {
 	private boolean[][] grid;
 	
 	public ObjectWorld() {
-		rootNode = new Node("object world rootNode");
+		super("object world rootNode");
 		rootNode.setShadowMode(ShadowMode.CastAndReceive);
 		
 		addedObjects = new LinkedList<Spatial>();
@@ -51,11 +51,10 @@ public class ObjectWorld extends World {
 	}
 
 	@Override
-	public Node init(PhysicsSpace space, ViewPort view) {
-		isInit = true;
-		this.phys = space;
+	public void initialize(AppStateManager stateManager, Application app) {
+		super.initialize(stateManager, app);
 		
-		AssetManager am = App.rally.getAssetManager();
+		AssetManager am = app.getAssetManager();
 		
 		Material matfloor = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
 		matfloor.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
@@ -78,8 +77,6 @@ public class ObjectWorld extends World {
 		}
 		
 		placeTiles(new Vector3f(0,0,0));
-		
-		return rootNode;
 	}
 	
 	private void placeTiles(Vector3f pos) {
@@ -129,7 +126,7 @@ public class ObjectWorld extends World {
 		
 		addedObjects.add(f);
 		rootNode.attachChild(f);
-		phys.add(f);
+		App.rally.getPhysicsSpace().add(f);
 		
 		for (int i = 0; i < COUNT_A_TILE; i++) {
 			Spatial s = geomI.clone();
@@ -141,7 +138,7 @@ public class ObjectWorld extends World {
 			
 			addedObjects.add(s);
 			rootNode.attachChild(s);
-			phys.add(s);
+			App.rally.getPhysicsSpace().add(s);
 		}
 		
 		//If you remove this line: fps = fps/n for large n
@@ -149,20 +146,20 @@ public class ObjectWorld extends World {
 	}
 
 	@Override
-	public Vector3f getWorldStart() {
+	public Vector3f getStartPos() {
 		return new Vector3f(0,2,0);
 	}
 
 	@Override
-	public void update(float tpf, Vector3f playerPos, boolean force) {
-		placeTiles(playerPos);
+	public void update(float tpf) {
+		placeTiles(App.rally.getCamera().getLocation());
 	}
 
 	@Override
 	public void reset() {
 		rootNode.detachAllChildren();
 		for (Spatial g: addedObjects) {
-			phys.remove(g); //not really sure why removing the rootNode thing doesn't work from the loop
+			App.rally.getPhysicsSpace().remove(g); //not really sure why removing the rootNode thing doesn't work from the loop
 		}
 		addedObjects.clear();
 		
@@ -171,10 +168,5 @@ public class ObjectWorld extends World {
 				grid[i][j] = false;
 		
 		placeTiles(new Vector3f(0,0,0));
-	}
-
-	@Override
-	public void cleanup() {
-		isInit = false;
 	}
 }

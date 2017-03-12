@@ -52,5 +52,9 @@ public enum Underground implements WP {
 		Builder() {
 			super(Underground.values());
 		}
+
+		public DefaultBuilder copy() {
+			return new Builder();
+		}
 	}
 }

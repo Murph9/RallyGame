@@ -1,18 +1,12 @@
 package world.wp;
 
-import com.jme3.bullet.PhysicsSpace;
+import com.jme3.app.Application;
+import com.jme3.app.state.AppStateManager;
 import com.jme3.bullet.collision.shapes.PlaneCollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.FastMath;
-import com.jme3.math.Plane;
-import com.jme3.math.Quaternion;
-import com.jme3.math.Vector2f;
-import com.jme3.math.Vector3f;
-import com.jme3.renderer.ViewPort;
+import com.jme3.math.*;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
-import com.jme3.scene.Node;
 import com.jme3.scene.shape.Quad;
 import com.jme3.water.SimpleWaterProcessor;
 
@@ -59,14 +53,17 @@ public enum Floating implements WP {
 	}
 	
 	static class Builder extends DefaultBuilder {
-		SimpleWaterProcessor waterProcessor;
-		Geometry water;
+		private SimpleWaterProcessor waterProcessor;
+		private Geometry water;
 		
 		Builder() {
 			super(Floating.values());
 		}
 		
-		public Node init(PhysicsSpace space, ViewPort view) {
+		@Override
+		public void initialize(AppStateManager stateManager, Application app) {
+			super.initialize(stateManager, app);
+			
 			// we create a water processor
         	waterProcessor = new SimpleWaterProcessor(App.rally.getAssetManager());
         	// we set wave properties
@@ -93,7 +90,7 @@ public enum Floating implements WP {
         	water.setLocalTranslation(-2000, -4, 2000);
         	water.setShadowMode(ShadowMode.Receive);
         	water.setMaterial(waterProcessor.getMaterial());
-        	App.rally.getRootNode().attachChild(water);
+        	rootNode.attachChild(water);
         	
         	//add lastly a plane just under it so you don't fall forever
         	///* TODO
@@ -106,15 +103,18 @@ public enum Floating implements WP {
 //    		App.rally.drive.getPhysicsSpace().add(underp); //TODO add back in
 //	    		this.attachChild(p);
     		//*/
-    		
-    		return super.init(space, view);
 		}
 		
 		public void cleanup() {
-			super.cleanup();
-			
-			App.rally.getRootNode().detachChild(water);
+			rootNode.detachChild(water);
 			App.rally.getViewPort().removeProcessor(waterProcessor);
+			
+			super.cleanup();
+		}
+		
+
+		public DefaultBuilder copy() {
+			return new Builder();
 		}
 	}
 }

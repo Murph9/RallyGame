@@ -3,10 +3,7 @@ package game;
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
-import com.jme3.bullet.BulletAppState;
-import com.jme3.bullet.PhysicsSpace;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Node;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
@@ -20,26 +17,17 @@ import world.wp.WP.DynamicType;
 
 public class ChooseMap extends AbstractAppState {
 
-	private static BulletAppState bulletAppState;
-
-	private static boolean worldIsSet = false;
 	private static WorldType worldType = WorldType.NONE;
 	private static World world = null;
 	
 	private BasicCamera camera;
-
-	public ChooseMap() {
-		bulletAppState = new BulletAppState();
-		App.rally.getStateManager().attach(bulletAppState);
-	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public void initialize(AppStateManager stateManager, Application app) {
 		super.initialize(stateManager, app);
 
-		bulletAppState = new BulletAppState();
-		stateManager.attach(bulletAppState);
+		App.rally.bullet.setEnabled(true);
 		
 		camera = new BasicCamera("Camera", App.rally.getCamera(), new Vector3f(-70,50,0), new Vector3f(20,1,0));
 		App.rally.getRootNode().attachChild(camera);
@@ -84,8 +72,10 @@ public class ChooseMap extends AbstractAppState {
 		button.addClickCommands(new Command<Button>() {
             @Override
             public void execute( Button source ) {
-            	chooseMap();
+            	if (worldType == WorldType.NONE)
+            		return; //do not select it
             	App.rally.getGuiNode().detachChild(myWindow);
+            	chooseMap();
             }
         });
 	}
@@ -104,48 +94,36 @@ public class ChooseMap extends AbstractAppState {
 	public void update(float tpf) {
 		if (!isEnabled()) return;
 		super.update(tpf);
-
-		if (worldType != WorldType.NONE && !worldIsSet) { //keep checking if the ui changed something
-			//if the worldtype has been set, init the apprpriate world type
-			worldIsSet = true;
-			return;
-		}
-		
-		if (world != null) {
-			if (!world.isInit()) {
-				Node n = world.init(getPhysicsSpace(), App.rally.getViewPort());
-				App.rally.getRootNode().attachChild(n);
-			}
-			world.update(tpf, new Vector3f(0,0,0), false);
-		}
-	}
-
-	public PhysicsSpace getPhysicsSpace() {
-		return bulletAppState.getPhysicsSpace();
 	}
 
 	public void cleanup() {
-		App.rally.getStateManager().detach(bulletAppState);
 		App.rally.getRootNode().detachChild(camera);
-		App.rally.getRootNode().detachChild(world.getRootNode());
+		App.rally.getStateManager().detach(world);
 	}
 
 	////////////////////////
 	//UI stuff
 	public void chooseMap() {
-		if (world == null) { H.p("no return value for ChooseMap()"); }
+		if (world == null) { H.e("no return value for ChooseMap()"); }
 		App.rally.next(this);
 	}
 	public World getWorld() {
-		world.reset();
-		world.cleanup();
-		return world;
+		World newWorld = null;
+		try {
+			newWorld = world.copy();
+			App.rally.getStateManager().detach(world);
+		} catch (InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		world = null;
+		return newWorld;
 	}
 
 	public void setWorld(String typeStr, String subType) {
-		if (world != null && world.isInit()) {
-			App.rally.getRootNode().detachChild(world.getRootNode());
-			world.cleanup();
+		if (world != null && world.isInitialized()) {
+			App.rally.getStateManager().detach(world);
+			world = null;
 		}
 		worldType = WorldType.valueOf(WorldType.class, typeStr);
 		
@@ -178,5 +156,7 @@ public class ChooseMap extends AbstractAppState {
 				H.e("Non valid world type in ChooseMap.setWorld() method");
 				return;
 		}
+		
+		App.rally.getStateManager().attach(world);
 	}
 }

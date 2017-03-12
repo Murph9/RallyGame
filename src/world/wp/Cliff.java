@@ -42,5 +42,9 @@ public enum Cliff implements WP {
 		Builder() {
 			super(Cliff.values());
 		}
+		
+		public DefaultBuilder copy() {
+			return new Builder();
+		}
 	}
 }

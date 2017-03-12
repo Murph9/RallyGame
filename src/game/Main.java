@@ -7,6 +7,8 @@ import java.util.logging.Logger;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AppState;
 import com.jme3.app.state.AppStateManager;
+import com.jme3.bullet.BulletAppState;
+import com.jme3.bullet.PhysicsSpace;
 import com.jme3.font.BitmapFont;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
@@ -51,10 +53,10 @@ import world.wp.WP.DynamicType;
 //at night time or something because loading looks easier
 //stop the car sound on the menus [please]
 
-//Long TODO's: 
+//Long TODO's:
 //long running skidmark issue is in effect (but only for my computer)
 
-//Bugs TODO
+//Bugs TODO:
 //minimap is still a little weird, probably need to remove some of the water postprocessing stuff
 //tried that and got nowhere, they are connected for some reason [you do copy the first one] (thanks for that)
 
@@ -67,15 +69,17 @@ public class Main extends SimpleApplication {
 	public ChooseMap chooseMap;
 	
 	public DriveSimple drive;
-	public DriveMenu menu;
 	public SkyState sky;
+
+	public BulletAppState bullet; //one physics space
 	
 	private final CarData defaultCar = Car.Runner.get();
-	private final World defaultWorld = new HighwayWorld(); 
+	private final CarData defaultThem = Car.Runner.get();
+	private final World defaultWorld = new StaticWorldBuilder(StaticWorld.track2);
 			//Options:
-			//new HighwayWorld();
-			//new StaticWorldBuilder(StaticWorld.track2);
-			//DynamicType.Simple.getBuilder();
+			//	new HighwayWorld();
+			//	new StaticWorldBuilder(StaticWorld.track2);
+			//	DynamicType.Simple.getBuilder();
 	
 	private CarData car;
 	private World world;
@@ -97,19 +101,19 @@ public class Main extends SimpleApplication {
 		settings.setTitle(config.getTitle());
 		settings.setVSync(config.ifVsnyc());
 		
-
+//		settings.setFrameRate(config.getFrameRate());
 		app.setSettings(settings);
 		app.setTimer(new NanoTN(config.getFrameRate()));
 		app.setShowSettings(false);
 //		app.setDisplayStatView(false); //shows the triangle count and stuff
 		app.start();
 
-		
+		///////////////////////
 		//Just getting numbers for rotations
 		Quaternion q = new Quaternion();
 		q = q.fromAngleAxis(FastMath.DEG_TO_RAD*(-8), new Vector3f(0,0,1));
-		H.p(q);
-		 
+//		H.p(q);
+		
 		//note in the 0,0,0 -> a,b,c
 		//b = turning right and left
 		//a = barrel roll
@@ -148,6 +152,11 @@ public class Main extends SimpleApplication {
 		start = new Start();
 		getStateManager().attach(start);
 		
+		bullet = new BulletAppState();
+    	//bullet.setDebugEnabled(true); //TODO 3.1 beta-1 still broken
+		//getPhysicsSpace().setMaxSubSteps(4);
+		getStateManager().attach(bullet);
+		
 		inputManager.setCursorVisible(true);
 		flyCam.setEnabled(false);
 
@@ -160,11 +169,13 @@ public class Main extends SimpleApplication {
 		//use the default option and just init straight away
 		getStateManager().detach(start);
 		
-		if (car == null || world == null) {
+		if (car == null || world == null || defaultThem == null) {
 			System.err.println("Defaults not set.");
+			System.exit(1);
 		}
 		
 		startDrive(car, world);
+		//TODO how to start DriveAI?
 	}
 	
 	//HERE is the logic for the app progress.
@@ -173,10 +184,11 @@ public class Main extends SimpleApplication {
 		AppStateManager state = getStateManager();
 		
 		if (app instanceof Start) {
+//			App.rally.stop();
+//			return;
+			
 			state.detach(start);
-			
 			startChooseCar();
-			
 		} else if (app instanceof ChooseCar) {
 			state.detach(chooseCar);
 			startChooseMap();
@@ -186,13 +198,11 @@ public class Main extends SimpleApplication {
 			
 			startDrive(chooseCar.getCarData(), chooseMap.getWorld());
 			
-		} else if (app instanceof DriveMenu) {
-			state.detach(drive); //no need to call drive.cleanup because it can do that itself
+		} else if (app instanceof DriveSimple) {
+			state.detach(drive);
 			drive = null;
-			state.detach(menu);
-			menu.cleanup();
-			menu = null;
 			
+			//then start again
 			start = new Start();
 			state.attach(start);
 		} else {
@@ -211,11 +221,8 @@ public class Main extends SimpleApplication {
 	}
 	
 	private void startDrive(CarData car, World world) {
-		if (menu != null || drive != null) return; //not sure what this is actually hoping to stop
-		
-		menu = new DriveMenu();
-		getStateManager().attach(menu);
-		
+		if (drive != null) return; //not sure what this is actually hoping to stop
+				
 		drive = new DriveSimple(car, world);
 		getStateManager().attach(drive);
 	}
@@ -226,6 +233,9 @@ public class Main extends SimpleApplication {
 	}
 	public AppSettings getSettings() {
 		return settings;
+	}
+	public PhysicsSpace getPhysicsSpace() {
+		return bullet.getPhysicsSpace();
 	}
 
 	@Override
