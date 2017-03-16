@@ -24,8 +24,17 @@ public class H {
 	 * Easier way of typing System.out.println(); -> H.p();
 	 * @param o The thing you wanted printed
 	 */
+	public static void p() {
+		System.out.println();
+	}
 	public static void p(Object o) {
 		System.out.println(o);
+	}
+	public static void p(Object... os) {
+		for (Object o : os) {
+	        System.out.print(o.toString() + " ");
+	    }
+		System.out.println();
 	}
 	public static void p(Object[] ol, String sep) {
 		if (sep == null) sep = "\n";

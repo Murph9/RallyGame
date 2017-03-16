@@ -1,16 +1,16 @@
 package car;
 
-import com.jme3.math.Vector3f;
+//TODO use ridge racer cars
 
 public enum Car {
 	Normal(new NormalCar()),
 	WhiteSloth(new WhiteSloth()),
 	Rally(new RallyCar()),
-//	Track(new TrackCar()),
 	Rocket(new Rocket()),
 	Runner(new Runner()),
 	Hunter(new Hunter()),
 	Ricer(new Ricer()),
+	Muscle(new Muscle()),
 	;
 	
 	private CarData car;
@@ -24,6 +24,9 @@ public enum Car {
 	
 	private static class NormalCar extends CarData {
 		//for using the default settings.
+		NormalCar() {
+			rollFraction = 1.2f;
+		}
 	}
 	
 	
@@ -156,46 +159,6 @@ public enum Car {
 		}
 	}
 
-	//TODO use ridge racer cars here
-	@SuppressWarnings("unused")
-	private static class TrackCar extends CarData {
-		TrackCar() {
-			carModel = dir+"f1.blend";
-			wheelModel = dir+"f1_wheel.blend";
-			cam_offset = new Vector3f(0,2.5f,-6);
-
-			mass = 900;
-
-			areo_drag = 0.3f;
-
-			w_steerAngle = 0.25f;
-
-			sus_stiffness  = 200.0f;
-			sus_restLength = 0.05f;
-			sus_compValue  = 0.8f;
-			sus_dampValue  = 0.9f;
-
-			width = 1.5f;
-			height = 0.7f;
-			length = 5f;
-			rollFraction = 0.2f;
-
-			w_xOff = 0.62f;
-			w_yOff = 0.12f;
-			w_zOff = 1.63f;
-			setw_Pos();
-
-			//found via internet (f1 '09)
-			e_torque = new float[]{0, 300,500,500,550,608, 595,580,560,540,525, 500,440,410,360,350};
-			auto_gearDown = 9000;
-			auto_gearUp = 13500;
-			e_redline = 15000;
-
-			trans_finaldrive = 3.2f;
-			trans_gearRatios = new float[]{-5f,3.23f,2.19f,1.71f,1.39f,1.16f,0.93f};
-		}
-	}
-
 	private static class Rocket extends CarData {
 		Rocket() {
 			carModel = dir + "rocket1_1.blend";
@@ -311,5 +274,45 @@ public enum Car {
 			cam_offset.mult(2);
 		}
 
+	}
+	
+	private static class Muscle extends CarData {
+		Muscle() {
+			carModel = dir+"muscle.blend";
+			
+			w_flatdata = new MuscleWheelLatData();
+			w_flongdata = new MuscleWheelLongData();
+			
+			mass = 1520;
+			width = 1.758f;
+			height = 1.217f;
+			length = 4.75f;
+			//some of these numbers all round here are incorrect
+			e_redline = 6000;
+			e_torque = new float[] {0, 295, 510, 583, 624, 598, 520, 50};
+			
+			trans_effic = 0.8f;
+			trans_gearRatios = new float[]{-2.27f, 2.2f, 1.64f, 1.28f, 1f};
+			
+			rollFraction = 1f;
+			brakeMaxTorque = 3000;
+		}
+		
+		class MuscleWheelLatData extends WheelData {
+			MuscleWheelLatData() {
+				B = 10f;
+				C = 1.9f;
+				D = 0.9f;
+				E = 0.95f;
+			}
+		}
+		class MuscleWheelLongData extends WheelData {
+			MuscleWheelLongData() {
+				B = 12f;
+				C = 1.9f;
+				D = 0.9f;
+				E = 0.95f;
+			}
+		}
 	}
 }

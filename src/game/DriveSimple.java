@@ -24,11 +24,11 @@ public class DriveSimple extends AbstractAppState {
 
 	//car stuff
 	public CarBuilder cb;
-	private CarData car;
+	protected CarData car;
 	
 	//gui and camera stuff
 	CarCamera camera;
-	UINode uiNode;
+	CarUI uiNode;
 	MiniMap minimap;
 	
 	//debug stuff
@@ -68,7 +68,7 @@ public class DriveSimple extends AbstractAppState {
 		app.getStateManager().attach(cb);
 		app.getStateManager().attach(menu);
 		
-		uiNode = new UINode(cb.get(0));
+		uiNode = new CarUI(cb.get(0));
 		app.getStateManager().attach(uiNode);
 		
 		//initCameras

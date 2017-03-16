@@ -20,6 +20,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 import car.CarModelData.CarPart;
+import car.ai.CarAI;
 import game.App;
 import helper.H;
 
@@ -40,13 +41,13 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	private AudioNode engineSound;
 
 	//nice to use directions
-	Vector3f up = new Vector3f();
-	Vector3f right = new Vector3f();
-	Vector3f left = new Vector3f();
+	public Vector3f up = new Vector3f();
+	public Vector3f right = new Vector3f();
+	public Vector3f left = new Vector3f();
 
 	// Car controlling things
 	private MyKeyListener control;
-	private AI ai;
+	private CarAI ai;
 
 	//car data
 	public CarData car;
@@ -256,8 +257,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		carRootNode.attachChild(engineSound);
 	}
 
-	public void makeAI() {
-		this.ai = new AI(this);
+	public void makeAI(CarAI ai) {
+		this.ai = ai;
 	}
 
 	public void makeControl() {
@@ -572,10 +573,10 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		//wheel turning logic
 		steeringCurrent = 0;
 		if (steerLeft != 0) { //left
-			steeringCurrent += getMaxSteerAngle()*steerLeft;
+			steeringCurrent += getMaxSteerAngle(steerLeft);
 		}
 		if (steerRight != 0) { //right
-			steeringCurrent -= getMaxSteerAngle()*steerRight;
+			steeringCurrent -= getMaxSteerAngle(steerRight);
 		}
 		
 //		steeringCurrent = (float)VehiclePhysicsHelper.linearise(steeringCurrent, 0.5f); 
@@ -608,11 +609,11 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 	//TODO put some kind of brakes on when going slow
 	
-	private float getMaxSteerAngle() {
+	private float getMaxSteerAngle(float trySteerAngle) {
 //		/* comment here to toggle
 		float maxAngle = car.w_steerAngle/2;
 		float offset = 1;
-		return -maxAngle*FastMath.atan(0.12f*vel.length() - offset) + maxAngle*FastMath.HALF_PI + this.maxlat;
+		return Math.min(-maxAngle*FastMath.atan(0.12f*vel.length() - offset) + maxAngle*FastMath.HALF_PI + this.maxlat, Math.abs(trySteerAngle));
 //		*/
 		/* comment here to toggle
 		return car.w_steerAngle;
@@ -654,24 +655,13 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		setPhysicsRotation(App.rally.drive.world.getStartRot());
 		setAngularVelocity(new Vector3f());
 		
-		App.rally.drive.reset();
-/*
-		if (App.rally.drive.type == WorldType.DYNAMIC) {
-			setPhysicsLocation(App.rally.drive.worldB.getWorldStart());
-			Matrix3f p = new Matrix3f();
-			p.fromAngleAxis(FastMath.DEG_TO_RAD*90, new Vector3f(0,1,0));
-			setPhysicsRotation(p);
-
-			setAngularVelocity(new Vector3f());
-		} else {
-			setPhysicsLocation(App.rally.drive.world.start);
-		}
-*/	
 		skidNode.detachAllChildren();
 		skidList.clear();
 		for (MyWheelNode w: wheel) {
 			w.last = new Vector3f(0,0,0);
 		}
+		
+		App.rally.drive.reset();
 	}
 
 	private void flipMe() {

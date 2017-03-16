@@ -20,6 +20,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.texture.Texture;
 
+import car.ai.DriveAtAI;
 import game.App;
 import game.Main;
 import helper.H;
@@ -49,6 +50,7 @@ public class CarBuilder extends AbstractAppState {
 		soundEnabled = sound;
 	}
 	
+	//TODO this should be giving the ai
 	public MyVC addCar(int id, CarData car, Vector3f start, Matrix3f rot, boolean aPlayer) {
 		if (cars.containsKey(id)) {
 			try {
@@ -71,12 +73,14 @@ public class CarBuilder extends AbstractAppState {
 			//key.setAsCube(true); //TODO 3.1 not valid
 			final Texture tex = am.loadTexture(key);
 
-			for (Geometry g: H.getGeomList((Node)carmodel)) {
+			for (Geometry g: H.getGeomList((Node)carmodel)) {  
 				Material m = g.getMaterial();
-				m.setBoolean("UseMaterialColors", true);
-				if (aPlayer) //player gets reflections
-					m.setTexture("EnvMap", tex);
-				m.setVector3("FresnelParams", new Vector3f(0.05f, 0.18f, 0.11f));
+				if (!m.getMaterialDef().getName().equals("Unshaded")) { //this material type not correct for these settings
+					m.setBoolean("UseMaterialColors", true);
+					if (aPlayer) //player gets reflections
+						m.setTexture("EnvMap", tex);
+					m.setVector3("FresnelParams", new Vector3f(0.05f, 0.18f, 0.11f));
+				}
 				g.setMaterial(m);
 			}
 		}
@@ -108,7 +112,7 @@ public class CarBuilder extends AbstractAppState {
 		if (aPlayer) { //players get the keyboard
 			player.makeControl();
 		} else {
-			player.makeAI();
+			player.makeAI(new DriveAtAI(player, get(0)));
 		}
 		
 		if (aPlayer && soundEnabled) {

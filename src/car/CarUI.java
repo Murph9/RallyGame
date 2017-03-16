@@ -33,7 +33,7 @@ import game.App;
 import game.Main;
 import helper.H;
 
-public class UINode extends AbstractAppState {
+public class CarUI extends AbstractAppState {
 
 	//TODO scale it with monitor size (forza doesn't deal with this)
 	private MyPhysicsVehicle p;
@@ -110,7 +110,7 @@ public class UINode extends AbstractAppState {
 		}
 	};
 	
-	public UINode (MyPhysicsVehicle p) {
+	public CarUI (MyPhysicsVehicle p) {
 		Main r = App.rally;
 		this.p = p;
 		
@@ -572,7 +572,6 @@ public class UINode extends AbstractAppState {
 	}
 	
 	public void cleanup() {
-		rootNode.detachChild(telemetry);
 		InputManager i = App.rally.getInputManager();
 		i.deleteMapping("Telemetry");
 		i.removeListener(actionListener);

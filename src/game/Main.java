@@ -92,7 +92,7 @@ public class Main extends SimpleApplication {
 		if (config.ifFullscreen()) {
 			settings.setFullscreen(true);
 			//TODO untested
-			//will probably cause some resolution issues if it doesn't match nice
+			//will probably cause some resolution issues if it doesn't match up nice
 		} else {
 			settings.setResolution(config.getWidth(),config.getHeight());
 		}
@@ -165,17 +165,35 @@ public class Main extends SimpleApplication {
 		world = defaultWorld;
 	}
 	
-	public void startFast() {
-		//use the default option and just init straight away
-		getStateManager().detach(start);
+	public void startDemo(AppState state) {
+		getStateManager().detach(state);
+		
+		drive = new DriveDemo(defaultCar, DynamicType.Valley.getBuilder()); //make something else it can drive on
+		getStateManager().attach(drive);
+	}
+	
+	public void startAI(AppState state) {
+		getStateManager().detach(state);
 		
 		if (car == null || world == null || defaultThem == null) {
 			System.err.println("Defaults not set.");
 			System.exit(1);
 		}
+
+		drive = new DriveAI(defaultCar, defaultThem, defaultWorld);
+		getStateManager().attach(drive);
+	}
+	
+	public void startFast(AppState state) {
+		//use the default option and just init straight away
+		getStateManager().detach(state);
+		
+		if (car == null || world == null) {
+			System.err.println("Defaults not set.");
+			System.exit(1);
+		}
 		
 		startDrive(car, world);
-		//TODO how to start DriveAI?
 	}
 	
 	//HERE is the logic for the app progress.

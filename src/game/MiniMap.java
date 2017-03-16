@@ -7,10 +7,12 @@ import com.jme3.scene.Node;
 
 import car.MyPhysicsVehicle;
 
-public class MiniMap {
+public class MiniMap { //TODO appstate
 
 	//TODO (how do we keep this fixed?)
 	//	might have to map it onto a an actual object as a texture
+	
+	public Node rootNode;
 	
 	MyPhysicsVehicle target;
 	ViewPort viewport;
@@ -34,10 +36,10 @@ public class MiniMap {
 		
 		viewport.setClearFlags(true, true, true);
 		
-		Node a = new Node();
-		r.getRootNode().attachChild(a);
+		rootNode = new Node();
+		r.getRootNode().attachChild(rootNode);
 		
-		viewport.attachScene(a);//set what it can see here
+		viewport.attachScene(rootNode);//set what it can see here
 		viewport.clearProcessors();
 
 		viewport.attachScene(r.getRootNode());

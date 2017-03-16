@@ -21,6 +21,8 @@ import world.StaticWorldBuilder;
 
 public class Start extends AbstractAppState {
 
+	//TODO version number on screen somewhere
+	
 	private StaticWorldBuilder world;
 	
 	private StaticWorld worldType;
@@ -45,11 +47,19 @@ public class Start extends AbstractAppState {
 	}
 	
 	public void startFast() {
-		App.rally.startFast();
+		App.rally.startFast(this);
 	}
 	
 	public void startBasic() {
 		App.rally.next(this);
+	}
+	
+	public void startAI() {
+		App.rally.startAI(this);
+	}
+	
+	public void startDemo() {
+		App.rally.startDemo(this);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -87,6 +97,22 @@ public class Start extends AbstractAppState {
                 @Override
                 public void execute( Button source ) {
                     startBasic();
+                    App.rally.getGuiNode().detachChild(myWindow);
+                }
+            });
+        Button startAI = myWindow.addChild(new Button("StartAI"));
+        startAI.addClickCommands(new Command<Button>() {
+                @Override
+                public void execute( Button source ) {
+                    startAI();
+                    App.rally.getGuiNode().detachChild(myWindow);
+                }
+            });
+        Button startDemo = myWindow.addChild(new Button("Start Demo"));
+        startDemo.addClickCommands(new Command<Button>() {
+                @Override
+                public void execute( Button source ) {
+                    startDemo();
                     App.rally.getGuiNode().detachChild(myWindow);
                 }
             });
