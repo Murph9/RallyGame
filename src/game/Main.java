@@ -71,11 +71,11 @@ public class Main extends SimpleApplication {
 	public DriveSimple drive;
 	public SkyState sky;
 
-	public BulletAppState bullet; //one physics space
+	public BulletAppState bullet; //one physics space always
 	
 	private final CarData defaultCar = Car.Runner.get();
 	private final CarData defaultThem = Car.Runner.get();
-	private final World defaultWorld = new StaticWorldBuilder(StaticWorld.track2);
+	private final World defaultWorld = new HighwayWorld();
 			//Options:
 			//	new HighwayWorld();
 			//	new StaticWorldBuilder(StaticWorld.track2);

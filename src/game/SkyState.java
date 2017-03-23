@@ -14,9 +14,6 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
-import com.jme3.post.FilterPostProcessor;
-import com.jme3.post.filters.BloomFilter;
-import com.jme3.post.ssao.SSAOFilter;
 import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Geometry;
@@ -26,7 +23,6 @@ import com.jme3.scene.VertexBuffer;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.scene.control.BillboardControl;
 import com.jme3.scene.shape.Quad;
-import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.shadow.EdgeFilteringMode;
 import com.jme3.texture.Texture;
@@ -37,6 +33,10 @@ import helper.H;
 
 public class SkyState extends AbstractAppState {
 
+	//TODO change to skycontrol
+	//How to: https://github.com/stephengold/jme3-utilities
+	//library already downloaded
+	
 	private static final ColorRGBA DAY_TOP = new ColorRGBA(0,0,1,1);
 	private static final ColorRGBA DAY_SIDE = new ColorRGBA(0.3f,0.6f,1,1);
 	private static final ColorRGBA DAY_BOTTOM = new ColorRGBA(0.3f,0.6f,1,1);
@@ -66,11 +66,6 @@ public class SkyState extends AbstractAppState {
 	public final boolean ifShadow = true;
 	public final boolean ifFancyShadow = false;
 	private DirectionalLightShadowRenderer dlsr;
-	private DirectionalLightShadowFilter dlsf;
-
-	//glowing stuff
-	private final boolean ifGlow = false; //TODO does this even work?
-//	BloomFilter bloom;
 
 	
 	//TODO moon and moon light (basically more ambient light)
@@ -142,29 +137,6 @@ public class SkyState extends AbstractAppState {
 			dlsr.setShadowIntensity(0.6f);
 			dlsr.setEdgeFilteringMode(EdgeFilteringMode.Bilinear);
 			vp.addProcessor(dlsr);
-
-			dlsf = new DirectionalLightShadowFilter(am, 2048, 4);
-			dlsf.setLight(sunL);
-			dlsf.setLambda(0.55f);
-			dlsf.setShadowIntensity(0.6f);
-			dlsf.setEdgeFilteringMode(EdgeFilteringMode.Bilinear);
-			dlsf.setEnabled(false);
-
-			FilterPostProcessor fpp = new FilterPostProcessor(am);
-			fpp.addFilter(dlsf);
-			fpp.setNumSamples(1);
-
-			if (ifFancyShadow) {
-				SSAOFilter ssaoFilter = new SSAOFilter(12f, 20f, 0.33f, 0.61f);
-				fpp.addFilter(ssaoFilter);
-			}
-
-			if (ifGlow) {
-				BloomFilter bloom = new BloomFilter(BloomFilter.GlowMode.Objects);
-				fpp.addFilter(bloom);
-			}
-
-			vp.addProcessor(fpp);
 		}
 		
 		if (!ifCubeMap) {
@@ -369,7 +341,6 @@ public class SkyState extends AbstractAppState {
 		if ((sunPos.y-camPos.y) > 0) { //the sun is generally up more when its day time
 			if (isDay == false) { //changed
 				App.rally.getRootNode().removeLight(moonL);
-				dlsf.setLight(sunL);
 				dlsr.setLight(sunL);
 				App.rally.getRootNode().addLight(sunL);
 			}
@@ -377,7 +348,6 @@ public class SkyState extends AbstractAppState {
 		} else {
 			if (isDay == true) { //changed
 				App.rally.getRootNode().removeLight(sunL);
-				dlsf.setLight(moonL);
 				dlsr.setLight(moonL);
 				App.rally.getRootNode().addLight(moonL);
 			}
