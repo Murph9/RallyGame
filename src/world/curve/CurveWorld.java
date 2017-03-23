@@ -147,19 +147,19 @@ public class CurveWorld extends World {
         float rockScale = 64;
 		
         // GRASS texture
-        Texture grass = am.loadTexture("Textures/Terrain/splat/grass.jpg");
+        Texture grass = am.loadTexture("assets/terrain/grass.jpg");
         grass.setWrap(WrapMode.Repeat);
         terrainMaterial.setTexture("region1ColorMap", grass);
         terrainMaterial.setVector3("region1", new Vector3f(22, 82, grassScale)); //88,200
 
         // DIRT texture
-        Texture dirt = am.loadTexture("Textures/Terrain/splat/dirt.jpg");
+        Texture dirt = am.loadTexture("assets/terrain/dirt.jpg");
         dirt.setWrap(WrapMode.Repeat);
         terrainMaterial.setTexture("region2ColorMap", dirt);
         terrainMaterial.setVector3("region2", new Vector3f(0, 23, dirtScale));//0,90
 
         // ROCK texture
-        Texture rock = am.loadTexture("Textures/Terrain/Rock/Rock.PNG");
+        Texture rock = am.loadTexture("assets/terrain/Rock.PNG");
         rock.setWrap(WrapMode.Repeat);
         terrainMaterial.setTexture("region3ColorMap", rock);
         terrainMaterial.setVector3("region3", new Vector3f(80, 130, rockScale)); //198,260
@@ -167,7 +167,7 @@ public class CurveWorld extends World {
         terrainMaterial.setTexture("region4ColorMap", rock);
         terrainMaterial.setVector3("region4", new Vector3f(80, 130, rockScale));//198,260
 
-        Texture rock2 = am.loadTexture("Textures/Terrain/Rock2/rock.jpg");
+        Texture rock2 = am.loadTexture("assets/terrain/rock.jpg");
         rock2.setWrap(WrapMode.Repeat);
 
         terrainMaterial.setTexture("slopeColorMap", rock2);

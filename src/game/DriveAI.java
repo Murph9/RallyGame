@@ -7,7 +7,6 @@ import com.jme3.app.state.AppStateManager;
 
 import car.*;
 
-//TODO there is another appstate to try here called (base|basic?)appstate
 public class DriveAI extends DriveSimple {
 	
 	private CarData them;

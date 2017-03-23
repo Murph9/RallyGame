@@ -59,20 +59,19 @@ public class HighwayWorld extends World {
 		float rockScale = 16;
 
 		// GRASS texture
-		Texture grass = am.loadTexture("Textures/Terrain/splat/grass.jpg");
+		Texture grass = am.loadTexture("assets/terrain/grass.jpg");
 		grass.setWrap(WrapMode.Repeat);
 		terrainMaterial.setTexture("region1ColorMap", grass);
 		terrainMaterial.setVector3("region1", new Vector3f(58, 200, grassScale));
 
 		// DIRT texture
-		Texture dirt = am.loadTexture("Textures/Terrain/splat/dirt.jpg");
+		Texture dirt = am.loadTexture("assets/terrain/dirt.jpg");
 		dirt.setWrap(WrapMode.Repeat);
 		terrainMaterial.setTexture("region2ColorMap", dirt);
 		terrainMaterial.setVector3("region2", new Vector3f(0, 60, dirtScale));
 
-		// ROCK texture
-
-		Texture rock = am.loadTexture("Textures/Terrain/Rock/Rock.PNG");
+		// ROCK textures
+		Texture rock = am.loadTexture("assets/terrain/Rock.PNG");
 		rock.setWrap(WrapMode.Repeat);
 		terrainMaterial.setTexture("region3ColorMap", rock);
 		terrainMaterial.setVector3("region3", new Vector3f(198, 260, rockScale));
@@ -80,7 +79,7 @@ public class HighwayWorld extends World {
 		terrainMaterial.setTexture("region4ColorMap", rock);
 		terrainMaterial.setVector3("region4", new Vector3f(198, 260, rockScale));
 
-		Texture rock2 = am.loadTexture("Textures/Terrain/Rock2/rock.jpg");
+		Texture rock2 = am.loadTexture("assets/terrain/rock.jpg");
 		rock2.setWrap(WrapMode.Repeat);
 
 		terrainMaterial.setTexture("slopeColorMap", rock2);
@@ -160,6 +159,13 @@ public class HighwayWorld extends World {
 		rootNode.detachAllChildren();
 		terrain.close();
 		App.rally.getStateManager().detach(terrain);
+		/*
+		java.util.concurrent.RejectedExecutionException: Task java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask@33944466 rejected from java.util.concurrent.ScheduledThreadPoolExecutor@a2243b4[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 1021]
+			at java.util.concurrent.ThreadPoolExecutor$AbortPolicy.rejectedExecution(Unknown Source)
+			at java.util.concurrent.ThreadPoolExecutor.reject(Unknown Source)
+			at java.util.concurrent.ScheduledThreadPoolExecutor.delayedExecute(Unknown Source)
+			at java.util.concurrent.ScheduledThreadPoolExecutor.schedule(Unknown Source)
+		*/
 		
 		super.cleanup();
 	}

@@ -6,7 +6,6 @@ import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
-import com.jme3.asset.TextureKey;
 import com.jme3.audio.AudioData;
 import com.jme3.audio.AudioNode;
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
@@ -18,7 +17,6 @@ import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import com.jme3.texture.Texture;
 
 import car.ai.DriveAtAI;
 import game.App;
@@ -68,17 +66,18 @@ public class CarBuilder extends AbstractAppState {
 		} else {
 			carmodel = (Node) am.loadModel(car.carModel);
 
-			TextureKey key = new TextureKey("Textures/Sky/Bright/BrightSky.dds", true);
-			key.setGenerateMips(true);
+			//TODO requires another library to be included in the project
+//			TextureKey key = new TextureKey("Textures/Sky/Bright/BrightSky.dds", true);
+//			key.setGenerateMips(true);
 			//key.setAsCube(true); //TODO 3.1 not valid
-			final Texture tex = am.loadTexture(key);
+//			final Texture tex = am.loadTexture(key);
 
 			for (Geometry g: H.getGeomList((Node)carmodel)) {  
 				Material m = g.getMaterial();
 				if (!m.getMaterialDef().getName().equals("Unshaded")) { //this material type not correct for these settings
 					m.setBoolean("UseMaterialColors", true);
-					if (aPlayer) //player gets reflections
-						m.setTexture("EnvMap", tex);
+//					if (aPlayer) //player gets reflections
+//						m.setTexture("EnvMap", tex);
 					m.setVector3("FresnelParams", new Vector3f(0.05f, 0.18f, 0.11f));
 				}
 				g.setMaterial(m);

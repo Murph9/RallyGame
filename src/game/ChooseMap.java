@@ -136,9 +136,6 @@ public class ChooseMap extends AbstractAppState {
 				DynamicType dworld = DynamicType.valueOf(DynamicType.class, subType);
 				world = dworld.getBuilder();
 				break;
-			case TERRAIN:
-				world = new TerrainWorld();
-				break;
 			case OBJECT:
 				world = new ObjectWorld();
 				break;
