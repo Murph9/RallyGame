@@ -1,8 +1,5 @@
 package car;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.font.BitmapFont;
@@ -16,18 +13,14 @@ import com.jme3.material.RenderState.BlendMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
-import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
-import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial.CullHint;
-import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Line;
 import com.jme3.scene.shape.Quad;
 import com.jme3.system.AppSettings;
-import com.jme3.util.BufferUtils;
 
 import game.App;
 import game.Main;
@@ -45,21 +38,11 @@ public class CarUI extends AbstractAppState {
 	BitmapText score;
 	BitmapText angle;
 	
-	//rpm2
+	//rpm
 	Geometry rpmQuad;
 	Material rpmMat;
-	
-	//rpm
-	List<Geometry> rpmBar;
-	float rpmBarStep = 200;
-	private Material rpmBarOff; //default state
-	
-	private Material rpmBarOn; //less than rpm
-	private Material rpmBarOnAlt; //for the increment marking (and in rpm)
-	
-	private Material rpmBarRedLine; //marking the rpm
-	private Material rpmBarRedLineOn; //for past redline
-	
+
+	//other meters
 	Geometry nitro, nitroOff; //quads that display nitro
 	Geometry throttle, throttleOff; //quads that display throttle 
 	Geometry brake, brakeOff; //quads that display braking
@@ -281,58 +264,23 @@ public class CarUI extends AbstractAppState {
 		
 		centerx = App.rally.getSettings().getWidth()-127;
 		
-		rpmBarOn = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-		rpmBarOn.setColor("Color", ColorRGBA.White);
-		
-		rpmBarOnAlt = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-		rpmBarOnAlt.setColor("Color", ColorRGBA.LightGray);
-		
-		rpmBarOff = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-		rpmBarOff.setColor("Color", ColorRGBA.Gray);
-		
-		rpmBarRedLine = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-		rpmBarRedLine.setColor("Color", new ColorRGBA(ColorRGBA.Red).mult(0.7f));
-		
-		rpmBarRedLineOn = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-		rpmBarRedLineOn.setColor("Color", ColorRGBA.Red);
-		
-		this.rpmBar = new ArrayList<Geometry>();
-		
-		for (int i = 0; i < finalRPM+1; i += rpmBarStep) {
+		for (int i = 0; i < finalRPM+1; i += 1000) {
 			float angle = FastMath.interpolateLinear(i/(float)finalRPM, startAng, finalAng);
-			float angle2 = FastMath.interpolateLinear((i+rpmBarStep)/(float)finalRPM, startAng, finalAng);
 			
-			Mesh rpmM = new Mesh();
-			Vector3f [] vs = new Vector3f[4]; //order is inside vertex then outside
-			vs[0] = new Vector3f(FastMath.cos(angle)*radius*0.9f, FastMath.sin(angle)*radius*0.9f, -1);
-			vs[1] = new Vector3f(FastMath.cos(angle2)*radius*0.9f, FastMath.sin(angle2)*radius*0.9f, -1);
-			vs[2] = new Vector3f(FastMath.cos(angle)*radius, FastMath.sin(angle)*radius, 1);
-			vs[3] = new Vector3f(FastMath.cos(angle2)*radius, FastMath.sin(angle2)*radius, 1);
-			
-			Vector2f[] texCoord = new Vector2f[4];
-			texCoord[0] = new Vector2f(0,0);
-			texCoord[1] = new Vector2f(1,0);
-			texCoord[2] = new Vector2f(0,1);
-			texCoord[3] = new Vector2f(1,1);
-			int [] indexes = { 2,0,1, 1,3,2 };
-			
-			rpmM.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(vs));
-			rpmM.setBuffer(Type.TexCoord, 2, BufferUtils.createFloatBuffer(texCoord));
-			rpmM.setBuffer(Type.Index,    3, BufferUtils.createIntBuffer(indexes));
-			rpmM.updateBound();
-
-			//add physics space and mesh
-			Geometry rpmB = new Geometry("rpmBar"+i, rpmM);
-			rpmB.setLocalTranslation(centerx, centery, -1);//behind other things
-			speedoNode.attachChild(rpmB);
-			rpmBar.add(rpmB);
-			
-			if (i % 1000 == 0) {
-				Node g = addRPMNumber(angle, (int)i/1000, quad, centerx-10, centery-10);
-				speedoNode.attachChild(g);
-			} 
-			
-			rpmB.setMaterial(rpmBarOff); //no idea until the physics starts
+			if (i == redline) { //TODO
+				H.p(new Vector3f(FastMath.cos(angle)*radius, FastMath.sin(angle)*radius, 1));
+				Line l = new Line(new Vector3f(FastMath.cos(angle)*radius, FastMath.sin(angle)*radius, 1)
+						, new Vector3f(FastMath.cos(angle)*radius*0.9f, FastMath.sin(angle)*radius*0.9f, -1));
+				Geometry redLine = new Geometry("redline", l);
+				Material mat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+				mat.setColor("Color", new ColorRGBA(ColorRGBA.Red));
+				mat.getAdditionalRenderState().setLineWidth(4);
+				redLine.setMaterial(mat);
+	            redLine.setLocalTranslation(centerx, centery, -1);//behind other things
+				speedoNode.attachChild(redLine);
+			}
+			Node g = addRPMNumber(angle, (int)i/1000, quad, centerx-10, centery-10);
+			speedoNode.attachChild(g);
 		}
 		
 		
@@ -472,24 +420,6 @@ public class CarUI extends AbstractAppState {
 		setGearDigit(p.curGear);
 		
 		score.setText("??");
-		
-		//highlight the rpmBar the right amout
-		for (int i = 0; i < rpmBar.size(); i++) {
-			if (i*rpmBarStep >= redline) { //its a red one
-				if (p.curRPM < i*rpmBarStep + rpmBarStep/2)
-					rpmBar.get(i).setMaterial(rpmBarRedLine);
-				else
-					rpmBar.get(i).setMaterial(rpmBarRedLineOn);
-			} else {
-				if (p.curRPM < i*rpmBarStep + rpmBarStep/2)
-					rpmBar.get(i).setMaterial(rpmBarOff);
-				else
-					if (i*rpmBarStep % 500 == 0)
-						rpmBar.get(i).setMaterial(rpmBarOnAlt);
-					else 
-						rpmBar.get(i).setMaterial(rpmBarOn);
-			}
-		}
 		
 		//rpm bar 2
 		rpmMat.setFloat("Threshold", 1 - (p.curRPM/(float)Math.ceil(redline+1000))*(5/(float)8));

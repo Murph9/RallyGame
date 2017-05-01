@@ -4,71 +4,28 @@ import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
-import com.jme3.asset.TextureKey;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
-import com.jme3.material.Material;
-import com.jme3.material.RenderState.FaceCullMode;
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.FastMath;
-import com.jme3.math.Quaternion;
-import com.jme3.math.Vector2f;
-import com.jme3.math.Vector3f;
+import com.jme3.post.filters.BloomFilter;
 import com.jme3.renderer.ViewPort;
-import com.jme3.renderer.queue.RenderQueue.Bucket;
-import com.jme3.scene.Geometry;
-import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
-import com.jme3.scene.VertexBuffer;
-import com.jme3.scene.VertexBuffer.Type;
-import com.jme3.scene.control.BillboardControl;
-import com.jme3.scene.shape.Quad;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.shadow.EdgeFilteringMode;
-import com.jme3.texture.Texture;
-import com.jme3.util.BufferUtils;
-import com.jme3.util.SkyFactory;
 
-import helper.H;
+import jme3utilities.Misc;
+import jme3utilities.sky.SkyControl;
 
 public class SkyState extends AbstractAppState {
 
-	//TODO change to skycontrol
-	//How to: https://github.com/stephengold/jme3-utilities
-	//library already downloaded
-	
-	private static final ColorRGBA DAY_TOP = new ColorRGBA(0,0,1,1);
-	private static final ColorRGBA DAY_SIDE = new ColorRGBA(0.3f,0.6f,1,1);
-	private static final ColorRGBA DAY_BOTTOM = new ColorRGBA(0.3f,0.6f,1,1);
+	//Uses SkyControl from https://github.com/stephengold/jme3-utilities
 
-	private static final ColorRGBA NIGHT_TOP = new ColorRGBA(0,0,0.3f,1);
-	private static final ColorRGBA NIGHT_SIDE = new ColorRGBA(0.15f,0.3f,0.5f,1);
-	private static final ColorRGBA NIGHT_BOTTOM = new ColorRGBA(0.15f,0.3f,0.5f,1);
+	public static final boolean IF_SHADOW = true;
+	public static final boolean IF_BLOOM = true;
 	
-	private Geometry sun;
-	private Geometry moon;
-	private Node sunNode;
-	private float sunRot;
-	private float rotateSpeed = 0.01f; //0.01 seem ok for a game (maybe slower)
-	
-	public boolean isDay = true;
-	
-	//skymap
-	Geometry skymap;
-	int sideCount = 4;
-	boolean ifCubeMap = false;	
-	
-	private DirectionalLight sunL;
-	private DirectionalLight moonL;
-	private AmbientLight ambL;
-
-	//shadow stuff
-	public final boolean ifShadow = true;
-	public final boolean ifFancyShadow = false;
+	private DirectionalLight mainLight;
+	private AmbientLight ambLight;
 	private DirectionalLightShadowRenderer dlsr;
-
 	
-	//TODO moon and moon light (basically more ambient light)
 	public SkyState() { }
 
 	@Override
@@ -76,288 +33,47 @@ public class SkyState extends AbstractAppState {
 		Main r = App.rally;
 		AssetManager am = r.getAssetManager();
 		ViewPort vp = r.getViewPort();
-		Node skyRoot = r.getRootNode(); //can't have a sub root because the lights only effect things in their tree
-		r.getRootNode().attachChild(skyRoot);
-		
-		//lights
-		ambL = new AmbientLight(); //TODO some blender objects don't take too fondly to ambient light
-		ambL.setColor(new ColorRGBA(ColorRGBA.White).mult(0.2f).add(new ColorRGBA(ColorRGBA.Blue).mult(0.1f)));
-		skyRoot.addLight(ambL);
+		Node skyRoot = r.getRootNode(); //can't have a sub root because the lights only effect things in their sub-tree
 
-		sunL = new DirectionalLight();
-		sunL.setColor(new ColorRGBA(0.88f, 0.88f, 0.97f, 1f)); //maybe too bright?
-		
-		sunL.setDirection(new Vector3f(0f, 0.4f, 0f).normalizeLocal());
-		skyRoot.addLight(sunL);
+		mainLight = new DirectionalLight();
+        mainLight.setName("main"); //color, direction not set because skyfactory does itself
+        skyRoot.addLight(mainLight);
 
-		moonL = new DirectionalLight();
-		moonL.setColor(new ColorRGBA(0.4f, 0.4f, 0.4f, 1f));
-		moonL.setDirection(new Vector3f(0f, -1f, 0f).normalizeLocal());
-		skyRoot.addLight(moonL);
-		H.p("init sun");
+        ambLight = new AmbientLight();
+        ambLight.setName("ambient");
+        skyRoot.addLight(ambLight);
 		
-		//TODO moon object and light
-		//sun 'object'
-		sunRot = FastMath.QUARTER_PI; //start mid morning
-		sunNode = new Node("Sun rotate node");
+		SkyControl sky = new SkyControl(am, r.getCamera(), 0.7f, false, true);
+		skyRoot.addControl(sky);
+		sky.setCloudiness(0.4f);
+		sky.getSunAndStars().setHour(12f);
+		sky.getSunAndStars().setObserverLatitude(0f); //equator
+        sky.getUpdater().setAmbientLight(ambLight);
+        sky.getUpdater().setMainLight(mainLight);
 		
-		BillboardControl sunBC = new BillboardControl();
-		sun = new Geometry("sun", new Quad(10, 10)); 
-		Material mat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-		mat.setColor("Color", ColorRGBA.Yellow);
-		sun.setMaterial(mat);
-		sun.center();
-		sun.move(0, 0, 200);
-		sun.addControl(sunBC);
-
-		sunNode.attachChild(sun);
-		//end sun
-		//moon
-		BillboardControl moonBC = new BillboardControl();
-		moon = new Geometry("Moon", new Quad(10, 10));
-		mat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-		mat.setColor("Color", new ColorRGBA(ColorRGBA.White).mult(0.9f));
-		moon.setMaterial(mat);
-		moon.center();
-		moon.move(0, 0, -200);
-		moon.addControl(moonBC);
-		sunNode.attachChild(moon);
-		//end moon
-		
-		skyRoot.attachChild(sunNode);
-		
-		
-		vp.setBackgroundColor(ColorRGBA.Blue); //incase the skymap screws up
-
-		if (ifShadow) {
+        if (IF_SHADOW) {
 			//Shadows and lights
 			dlsr = new DirectionalLightShadowRenderer(am, 2048, 4);
-			dlsr.setLight(sunL);
+			dlsr.setLight(mainLight);
 			dlsr.setLambda(0.55f);
 			dlsr.setShadowIntensity(0.6f);
 			dlsr.setEdgeFilteringMode(EdgeFilteringMode.Bilinear);
 			vp.addProcessor(dlsr);
 		}
-		
-		if (!ifCubeMap) {
-			generateCubeMap(am, skyRoot);
-			
-		} else {
-			//sky cube map
-			boolean theirs = true; //TODO my try (note, the images need to rotate around one, so that the sky and floor match
-			if (theirs) {
-				Texture t = am.loadTexture("Textures/Sky/Bright/BrightSky.dds");
-				skyRoot.attachChild(SkyFactory.createSky(am, t, Vector3f.UNIT_XYZ, SkyFactory.EnvMapType.CubeMap));
-			} else {
-				TextureKey keye = new TextureKey("assets/east.png", true);
-				TextureKey keyw = new TextureKey("assets/west.png", true);
-				TextureKey keyn = new TextureKey("assets/north.png", true);
-				TextureKey keys = new TextureKey("assets/south.png", true);
-				TextureKey keyt = new TextureKey("assets/top.png", true);
-				TextureKey keyb = new TextureKey("assets/bottom.png", true);
-				skyRoot.attachChild(SkyFactory.createSky(am, am.loadTexture(keyw), am.loadTexture(keye), 
-						am.loadTexture(keyn), am.loadTexture(keys), am.loadTexture(keyt), am.loadTexture(keyb)));
-			}
-		}
-	}
-	
-	private void generateCubeMap(AssetManager am, Node skyRoot) {
-		//custom sky map
-		Mesh skyM = new Mesh();
-		
-		Vector3f [] vs = new Vector3f[2 * sideCount * 3]; //order is inside vertex then outside, 2 because top and bottom
-		Vector2f[] texCoord = new Vector2f[2 * sideCount * 3];
-		float[] colours = new float[2 * sideCount * 3 * 4];
-		int[] indexes = new int[2 * sideCount*3];
-		
-		//top half
-		for (int i = 0; i < sideCount*3;) {
-			float angle = FastMath.TWO_PI*i/((float)sideCount*3);
-			float incAngle = FastMath.TWO_PI*3/((float)sideCount*3);
-			
-			//center vertex
-			vs[i] = new Vector3f(0, 50, 0);
-			texCoord[i] = new Vector2f(0,0);
-			indexes[i] = i+2; //[=3rd vertex] im so sorry about the order
-
-			i++;
-			
-			//side 1
-			vs[i] = new Vector3f(FastMath.cos(angle)*50, 0, FastMath.sin(angle)*50);
-			texCoord[i] = new Vector2f(1,0);
-			indexes[i] = i-1; //[=1st vertex]
-			
-			i++;
-			
-			//side 2
-			vs[i] = new Vector3f(FastMath.cos(angle+incAngle)*50, 0, FastMath.sin(angle+incAngle)*50);
-			texCoord[i] = new Vector2f(0,1);
-			indexes[i] = i-1; //[=2nd vertex]
-			
-			i++;
-		}
-		
-		//bottom half
-		for (int i = sideCount*3; i < 2*sideCount*3;) {
-			float angle = FastMath.TWO_PI*i/((float)sideCount*3);
-			float incAngle = FastMath.TWO_PI*3/((float)sideCount*3);
-			
-			//center vertex
-			vs[i] = new Vector3f(0, -50, 0); 
-			texCoord[i] = new Vector2f(0,0);
-			indexes[i] = i+2; //[=3rd vertex] im so sorry about the order
-
-			colours[i*4 + 0] = 0f;
-			colours[i*4 + 1] = 0f;
-			colours[i*4 + 2] = 1f;
-			colours[i*4 + 3] = 1f;
-
-			i++;
-			
-			//side 1
-			vs[i] = new Vector3f(FastMath.cos(angle)*50, 0, FastMath.sin(angle)*50);
-			texCoord[i] = new Vector2f(1,0);
-			indexes[i] = i; //[=2nd vertex]
-			
-			colours[i*4 + 0] = 0.3f;
-			colours[i*4 + 1] = 0.6f;
-			colours[i*4 + 2] = 1.0f;
-			colours[i*4 + 3] = 1f;
-			
-			i++;
-			
-			//side 2
-			vs[i] = new Vector3f(FastMath.cos(angle+incAngle)*50, 0, FastMath.sin(angle+incAngle)*50);
-			texCoord[i] = new Vector2f(0,1);
-			indexes[i] = i-2; //[=1st vertex]
-			
-			colours[i*4 + 0] = 0.3f;
-			colours[i*4 + 1] = 0.6f;
-			colours[i*4 + 2] = 1.0f;
-			colours[i*4 + 3] = 1f;
-			
-			i++;
-		}
-		
-		skyM.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(vs));
-		skyM.setBuffer(Type.TexCoord, 2, BufferUtils.createFloatBuffer(texCoord));
-		skyM.setBuffer(Type.Index,    3, BufferUtils.createIntBuffer(indexes));
-		skyM.setBuffer(Type.Color, 4, colours);
-
-		skyM.updateBound();
-
-		Material skyMat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-		skyMat.setBoolean("VertexColor", true);
-		skyMat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
-		
-		skymap = new Geometry("sky", skyM);
-		skymap.setQueueBucket(Bucket.Sky);
-		skymap.setMaterial(skyMat);
-		skyRoot.attachChild(skymap);
-	}
-	
-	private void generateCubeMapColours() {
-		float[] colours = new float[2 * sideCount * 3 * 4];
-		
-		ColorRGBA top, side, bottom;
-		
-		if (isDay) {
-			top = DAY_TOP;
-			side = DAY_SIDE;
-			bottom = DAY_BOTTOM;
-		} else {
-			top = NIGHT_TOP;
-			side = NIGHT_SIDE;
-			bottom = NIGHT_BOTTOM;
-		}
-		
-		
-		int i = 0;
-		//top
-		while (i < sideCount*3) {
-			colours[i*4 + 0] = top.r;
-			colours[i*4 + 1] = top.g;
-			colours[i*4 + 2] = top.b;
-			colours[i*4 + 3] = top.a;
-
-			i++;
-			
-			colours[i*4 + 0] = side.r;
-			colours[i*4 + 1] = side.g;
-			colours[i*4 + 2] = side.b;
-			colours[i*4 + 3] = side.a;
-
-			i++;
-			
-			colours[i*4 + 0] = side.r;
-			colours[i*4 + 1] = side.g;
-			colours[i*4 + 2] = side.b;
-			colours[i*4 + 3] = side.a;
-
-			i++;
-		}
-		//bottom
-		while (i < 2*sideCount*3) {
-			colours[i*4 + 0] = bottom.r;
-			colours[i*4 + 1] = bottom.g;
-			colours[i*4 + 2] = bottom.b;
-			colours[i*4 + 3] = bottom.a;
-
-			i++;
-			
-			colours[i*4 + 0] = side.r;
-			colours[i*4 + 1] = side.g;
-			colours[i*4 + 2] = side.b;
-			colours[i*4 + 3] = side.a;
-
-			i++;
-			
-			colours[i*4 + 0] = side.r;
-			colours[i*4 + 1] = side.g;
-			colours[i*4 + 2] = side.b;
-			colours[i*4 + 3] = side.a;
-
-			i++;
-		}
-		
-		skymap.getMesh().getBuffer(VertexBuffer.Type.Color).updateData(BufferUtils.createFloatBuffer(colours));
+        
+        if (IF_BLOOM) {
+	        BloomFilter bloom = new BloomFilter(BloomFilter.GlowMode.Objects);
+	        bloom.setBlurScale(2.5f);
+	        bloom.setExposurePower(1f);
+	        Misc.getFpp(vp, am).addFilter(bloom);
+	        sky.getUpdater().addBloomFilter(bloom);
+        }
+        
+		sky.setEnabled(true);
 	}
 	
 	public void update(float tpf) {
 		super.update(tpf);
-		Vector3f camPos = App.rally.getCamera().getLocation();
-		sunNode.setLocalTranslation(camPos);
 		
-		sunRot += (tpf*rotateSpeed % FastMath.TWO_PI); //lock to one rotation
-		sunNode.setLocalRotation(new Quaternion().fromAngles(-sunRot, 0, 0));
-
-		Vector3f sunPos = sun.getWorldTranslation();
-		sunL.setDirection(camPos.subtract(sunPos).normalize());
-		moonL.setDirection(sunPos.subtract(camPos).normalize());
-		
-		float dayish = (sunPos.y-camPos.y)/(200*2) + 0.5f; //TODO use an actual field
-		updateDynSky(camPos, dayish);
-		
-		if ((sunPos.y-camPos.y) > 0) { //the sun is generally up more when its day time
-			if (isDay == false) { //changed
-				App.rally.getRootNode().removeLight(moonL);
-				dlsr.setLight(sunL);
-				App.rally.getRootNode().addLight(sunL);
-			}
-			isDay = true;
-		} else {
-			if (isDay == true) { //changed
-				App.rally.getRootNode().removeLight(sunL);
-				dlsr.setLight(moonL);
-				App.rally.getRootNode().addLight(moonL);
-			}
-			isDay = false;
-		}
-	}
-	
-	private void updateDynSky(Vector3f camPos, float dayTime) { //TODO find what dayTime should be
-		skymap.setLocalTranslation(camPos);
-		
-		generateCubeMapColours();
 	}
 }

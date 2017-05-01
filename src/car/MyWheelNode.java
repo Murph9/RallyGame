@@ -21,7 +21,9 @@ import com.jme3.texture.Texture;
 import com.jme3.util.BufferUtils;
 
 import game.App;
+import helper.H;
 
+@SuppressWarnings("unused")
 public class MyWheelNode extends Node {
 
 	public static final boolean ifSmoke = false; //TODO fix on pausing
@@ -29,16 +31,15 @@ public class MyWheelNode extends Node {
 	private static final Vector2f[] texCoord = new Vector2f[] { //texture of quad with order
 		new Vector2f(0, 0), new Vector2f(0, 1), new Vector2f(1, 0), new Vector2f(1, 1),
 	};
-	private static Texture skidTex = App.rally.getAssetManager().loadTexture("assets/stripes.png"); //texture for the tyre marks
+	private static Texture skidTex = App.rally.getAssetManager().loadTexture("assets/image/stripes.png"); //texture for the tyre marks
 	
 	Spatial spat; //the actual wheel model
-	Material mat;
 
 	MyPhysicsVehicle mvc;
 	int num;
 	
 	boolean contact;
-	Vector3f last;
+	private Vector3f last;
 	float radSec;
 
 	public float susForce;
@@ -75,7 +76,6 @@ public class MyWheelNode extends Node {
 		Quaternion q = new Quaternion();
 		q = q.fromAngleNormalAxis(-radSec*tpf*reverse, new Vector3f(1,0,0));
 		spat.setLocalRotation(spat.getLocalRotation().mult(q));
-		
 	}
 	
 	private ParticleEmitter initSmoke() {
@@ -103,56 +103,71 @@ public class MyWheelNode extends Node {
 	}
 
 	public Vector3f getContactPoint(float wheelRadius, float rollInfluence) {
+		// a faked collision location based on how much the car should roll
+		// see getWheel(<int>).getCollisionLocation() for the real one
 		return getLocalTranslation().add(0,-wheelRadius*rollInfluence,0);
 	}
 	
 	public void addSkidLine() {
-		if (contact) {
-			addSkidLine(last, mvc.getWheel(num).getCollisionLocation(), skid);
-			last = mvc.getWheel(num).getCollisionLocation();
-		} else {
+		if (!contact) {
 			last = new Vector3f(0,0,0);
-		}
-	}
-	
-	//TODO probably not working
-	private void addSkidLine(Vector3f a, Vector3f b, float grip) {
-		if (a.equals(new Vector3f(0,0,0)) || b.equals(new Vector3f(0,0,0))) {
+			return;
+		} //exit early
+
+		Vector3f cur = mvc.getWheel(num).getCollisionLocation();
+		if (last.equals(new Vector3f(0,0,0)) || cur.equals(new Vector3f(0,0,0))) {
+			last = cur;
 			return; //don't make a line because they aren't valid positions
 		}
-		a.y += 0.02f;
-		b.y += 0.02f; //z-buffering (i.e. to stop it "fighting" with the ground)
+		cur.y += 0.002f; //z-buffering (i.e. to stop it "fighting" with the ground)
+		
+		float clampSkid = FastMath.clamp(skid - 0.9f, 0, 1);
+		if (clampSkid < 0.01f) {
+			last = cur;
+			return; //don't make a line because they aren't valid positions
+		} //exit early if there is no mesh to create
 		
 		Mesh mesh = new Mesh(); //making a quad positions
 		Vector3f [] vertices = new Vector3f[4];
-		vertices[0] = a.add(mvc.right.mult(mvc.car.w_width));
-		vertices[1] = b.add(mvc.right.mult(mvc.car.w_width));
-		vertices[2] = a.add(mvc.left.mult(mvc.car.w_width));
-		vertices[3] = b.add(mvc.left.mult(mvc.car.w_width));
+		vertices[0] = last.add(mvc.right.mult(mvc.car.w_width));
+		vertices[1] = cur.add(mvc.right.mult(mvc.car.w_width));
+		vertices[2] = last.add(mvc.left.mult(mvc.car.w_width));
+		vertices[3] = cur.add(mvc.left.mult(mvc.car.w_width));
 		
 		mesh.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(vertices));
 		mesh.setBuffer(Type.TexCoord, 2, BufferUtils.createFloatBuffer(texCoord));
 		mesh.setBuffer(Type.Index,    3, BufferUtils.createIntBuffer(indexes));
 
 		mesh.updateBound();
-		
 		Geometry geo = new Geometry("MyMesh", mesh);
 		
-		Material mat = new Material(App.rally.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md"); //TODO make own material j3md for this
-		mat.setTexture("DiffuseMap", skidTex);
-		mat.setBoolean("UseMaterialColors", true);
-		
-		mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
+		Material mat = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
-		mat.setFloat("AlphaDiscardThreshold", 0.05f);
-		grip = FastMath.clamp(grip - 0.5f, 0, 1);
-		mat.setColor("Diffuse", new ColorRGBA(0,0,0,grip));
+		mat.setColor("Color", new ColorRGBA(0,0,0,clampSkid));
+
+		//TODO get the alpha one to work
+//		Material mat = new Material(App.rally.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md"); //TODO make own material j3md for this
+//		mat.setTexture("DiffuseMap", skidTex);
+//		mat.setBoolean("UseMaterialColors", true);
+		
+//		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
+//		mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
+//		mat.setFloat("AlphaDiscardThreshold", 0.05f);
+//		mat.setColor("Diffuse", new ColorRGBA(0,0,0,clampSkid));
 		
 		geo.setShadowMode(ShadowMode.Off);
 		geo.setQueueBucket(Bucket.Transparent);
+		
+		
 		geo.setMaterial(mat);
 
 		mvc.skidNode.attachChild(geo);
 		mvc.skidList.add(geo);
+		
+		last = cur;
+	}
+	
+	public void reset() {
+		last = new Vector3f(0,0,0);
 	}
 }
