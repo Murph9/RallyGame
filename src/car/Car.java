@@ -11,6 +11,7 @@ public enum Car {
 	Hunter(new Hunter()),
 	Ricer(new Ricer()),
 	Muscle(new Muscle()),
+	Wagon(new Wagon()),
 	;
 	
 	private CarData car;
@@ -311,6 +312,47 @@ public enum Car {
 				B = 12f;
 				C = 1.9f;
 				D = 0.9f;
+				E = 0.95f;
+			}
+		}
+	}
+	
+	private static class Wagon extends CarData {
+		Wagon() {
+			carModel = dir+"Wagon.blend";
+			wheelModel = dir+"Wagon_Wheel.blend";
+			
+			w_flatdata = new WagonWheelData();
+			w_flongdata = new WagonWheelData();
+			
+			mass = 500;
+			height = 1;
+			
+			driveFront = true;
+			
+			w_radius = 0.5f;
+			w_width = 0.1f;
+						
+			sus_stiffness = 100;
+			
+			rollFraction = 1;
+			
+			e_mass = 40;
+			e_torque = new float[] {200, 
+					200, 200, 200, 200, 200, 
+					200, 200, 200, 200, 200, 
+					200, 200, 200, 200, 200}; //electric
+			e_redline = 15000;
+			
+			trans_finaldrive = 1;
+			trans_gearRatios = new float[]{-8.27f, 8.27f};
+		}
+		
+		class WagonWheelData extends WheelData {
+			WagonWheelData() {
+				B = 10f;
+				C = 1.9f;
+				D = 0.62f;
 				E = 0.95f;
 			}
 		}

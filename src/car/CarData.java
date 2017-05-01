@@ -31,7 +31,7 @@ public abstract class CarData {
 	public float mass = 1200; //kg (total)
 	public float width = 1.4f; //x size meter, door handle to door handle
 	public float height = 1f; //y size meter, roof to ground
-	public float length = 3f; //z size meter, from front to back
+	public float length = 4f; //z size meter, from front to back
 	
 	//wheels axles directions
 	public float w_steerAngle = 0.5f; //radians
