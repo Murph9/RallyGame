@@ -27,6 +27,7 @@ public abstract class World extends AbstractAppState {
 		this.app = app;
 		
 		App.rally.getRootNode().attachChild(this.rootNode);
+		H.e("initialize() world with name: " + rootNode.getName());
 	}
 
 	//'Starts again'
@@ -45,13 +46,14 @@ public abstract class World extends AbstractAppState {
 		//remove everything you added, you are being removed now :(
 		if (this.rootNode == null)
 			H.e("I was probably cleaned up twice or never, please don't.");
-		
-		App.rally.getRootNode().detachChild(this.rootNode);
-		this.rootNode = null;
-		
+
 		this.initialized = false;
 		app = null;
 		
+		App.rally.getRootNode().detachChild(this.rootNode);
+		
+		H.e("cleanup() world with name: " + rootNode.getName());
+		this.rootNode = null;
 		super.cleanup();
 	}
 	

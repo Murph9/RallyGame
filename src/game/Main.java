@@ -73,16 +73,21 @@ public class Main extends SimpleApplication {
 
 	public BulletAppState bullet; //one physics space always
 	
-	private final CarData defaultCar = Car.Runner.get();
-	private final CarData defaultThem = Car.Runner.get();
-	private final World defaultWorld = new HighwayWorld();
-			//Options:
-			//	new HighwayWorld();
-			//	new StaticWorldBuilder(StaticWorld.track2);
-			//	DynamicType.Simple.getBuilder();
-	
+	private void loadDefaults() {
+		car = Car.Runner.get();
+		them = Car.Runner.get();
+		world = new HighwayWorld();
+		//Options:
+		//	new HighwayWorld();
+		//	new StaticWorldBuilder(StaticWorld.track2);
+		//	DynamicType.Simple.getBuilder();
+	}
+			
 	private CarData car;
+	private CarData them;
 	private World world;
+
+	public int frameCount = 0; //global frame timer
 	
 	public static void main(String[] args) {
 		Configuration config = Configuration.Read();
@@ -159,28 +164,25 @@ public class Main extends SimpleApplication {
 		
 		inputManager.setCursorVisible(true);
 		flyCam.setEnabled(false);
-
-		//set the default option
-		car = defaultCar;
-		world = defaultWorld;
 	}
 	
 	public void startDemo(AppState state) {
 		getStateManager().detach(state);
 		
-		drive = new DriveDemo(defaultCar, DynamicType.Valley.getBuilder()); //make something else it can drive on
+		drive = new DriveDemo(Car.Runner.get(), DynamicType.Valley.getBuilder()); //make something else it can drive on
 		getStateManager().attach(drive);
 	}
 	
 	public void startAI(AppState state) {
 		getStateManager().detach(state);
 		
-		if (car == null || world == null || defaultThem == null) {
+		loadDefaults();
+		if (car == null || world == null) {
 			System.err.println("Defaults not set.");
 			System.exit(1);
 		}
 
-		drive = new DriveAI(defaultCar, defaultThem, defaultWorld);
+		drive = new DriveAI(car, Car.Runner.get(), world);
 		getStateManager().attach(drive);
 	}
 	
@@ -188,8 +190,10 @@ public class Main extends SimpleApplication {
 		//use the default option and just init straight away
 		getStateManager().detach(state);
 		
+		loadDefaults(); //load default values
+		
 		if (car == null || world == null) {
-			System.err.println("Defaults not set.");
+			System.err.println("Main.startFast(): Defaults not set.");
 			System.exit(1);
 		}
 		
@@ -260,6 +264,8 @@ public class Main extends SimpleApplication {
 	public void simpleUpdate(float tpf) {
 		super.simpleUpdate(tpf);
 		stateManager.update(tpf);
+		
+		frameCount++; //global frame timer update
 	}
 
 	/////////////// menu

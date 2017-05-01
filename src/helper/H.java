@@ -73,6 +73,9 @@ public class H {
 	public static void e(Iterable<Object> ol, String sep) {
 		H.e(ol, sep);
 	}
+	public static void e(Exception e) {
+		e.printStackTrace(System.err);
+	}
 	
 	public static Vector3f clamp(Vector3f v, float value) {
 		float length = v.length();

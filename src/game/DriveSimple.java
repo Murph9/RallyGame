@@ -32,7 +32,6 @@ public class DriveSimple extends AbstractAppState {
 	MiniMap minimap;
 	
 	//debug stuff
-	public int frameCount = 0;
 	public boolean ifDebug = false;
 	
     public DriveSimple(CarData car, World world) {
@@ -99,8 +98,6 @@ public class DriveSimple extends AbstractAppState {
 	public void update(float tpf) {
 		if (!isEnabled()) return;
 		super.update(tpf);
-		
-		frameCount++;
 		
 		//Hud stuff
 		minimap.update(tpf);
