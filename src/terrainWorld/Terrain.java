@@ -17,7 +17,9 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor;
 
 //Copied from https://github.com/jayfella/TerrainWorld (and changed main world class to terrain, no file caching anymore)
 //Which has the https://en.wikipedia.org/wiki/WTFPL license
@@ -46,7 +48,7 @@ public abstract class Terrain extends AbstractAppState implements Closeable
     protected final Map<TerrainLocation, TerrainChunk> worldTiles = new HashMap<TerrainLocation, TerrainChunk>();
     protected final Map<TerrainLocation, TerrainChunk> worldTilesCache = new ConcurrentHashMap<TerrainLocation, TerrainChunk>();
 
-    ScheduledThreadPoolExecutor threadpool = new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors());
+    private ScheduledThreadPoolExecutor threadpool = new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors());
 
     public Terrain(SimpleApplication app, PhysicsSpace physicsSpace, int tileSize, int blockSize)
     {
@@ -58,6 +60,12 @@ public abstract class Terrain extends AbstractAppState implements Closeable
 
         this.bitshift = this.bitCalc(blockSize);
         this.positionAdjuster = (this.blockSize - 1) / 2;
+        
+        threadpool.setRejectedExecutionHandler(new RejectedExecutionHandler() {
+        	public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+        		// nothing, we want it to just ignore it all
+        	}
+        });
     }
 
     private int bitCalc(int blockSize)
