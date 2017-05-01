@@ -63,6 +63,7 @@ public class CarCamera extends CameraNode implements RawInputListener {
 			diff = diff.normalize().mult(distance);
 		}
 
+        //combine prev and vector 
 		prevPos = carPos.add(diff.add(0, p.car.cam_offset.y*2, 0));
 		setLocalTranslation(prevPos);
 

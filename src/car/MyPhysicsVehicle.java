@@ -551,7 +551,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		left = playerRot.mult(new Vector3f(1,0,0));
 		right = playerRot.mult(new Vector3f(-1,0,0));
 
-		for (MyWheelNode w: wheel) {
+		for (MyWheelNode w: wheel) { //TODO move to wheel update
 			WheelInfo wi = getWheel(w.num).getWheelInfo();
 			RaycastInfo ray = wi.raycastInfo;
 			w.contact = (ray.groundObject != null);
@@ -625,7 +625,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	private void addSkidLines() {
 		if (ai != null) return;
 
-		if (App.rally.drive.frameCount % 4 == 0) {
+		if (App.rally.frameCount % 4 == 0) {
 			for (MyWheelNode w: wheel) {
 				w.addSkidLine();
 			}
@@ -658,7 +658,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		skidNode.detachAllChildren();
 		skidList.clear();
 		for (MyWheelNode w: wheel) {
-			w.last = new Vector3f(0,0,0);
+			w.reset();
 		}
 		
 		App.rally.drive.reset();

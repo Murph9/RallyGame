@@ -1,0 +1,222 @@
+layout (quads,equal_spacing,cw) in;
+
+#import "Common/ShaderLib/Instancing.glsllib"
+#import "Common/ShaderLib/Skinning.glsllib"
+#import "Common/ShaderLib/Lighting.glsllib"
+
+#ifdef VERTEX_LIGHTING
+    #import "Common/ShaderLib/BlinnPhongLighting.glsllib"    
+#endif
+
+
+uniform vec4 m_Ambient;
+uniform vec4 m_Diffuse;
+uniform vec4 m_Specular;
+uniform float m_Shininess;
+
+uniform vec4 g_LightColor;
+uniform vec4 g_LightPosition;
+uniform vec4 g_AmbientLightColor;
+
+#ifdef HEIGHTMAP
+   uniform sampler2D m_NormalDisplacementMap;
+#endif
+
+
+uniform float m_DisplaceFactor;
+uniform int m_TessellationFactor;
+uniform int m_NumText;
+
+
+in vec3 WorldPos_ES_in[];
+in vec2 TexCoord_ES_in[];
+in vec3 Normal_ES_in[];
+in vec4 Tangent_ES_in[];
+
+out vec3 WorldPos_FS_in;
+out vec2 TexCoord_FS_in;
+out vec3 Normal_FS_in;
+out vec4 Tangent_FS_in;
+
+out vec3 AmbientSum;
+out vec4 DiffuseSum;
+out vec3 SpecularSum;
+
+out vec3 lightVec;
+
+vec2 texCoord;
+#ifdef SEPARATE_TEXCOORD
+  varying vec2 texCoord2;
+  attribute vec2 inTexCoord2;
+#endif
+
+#ifndef VERTEX_LIGHTING
+  //attribute vec4 inTangent;
+
+  #ifndef NORMALMAP
+    out vec3 vNormal;
+  #endif  
+  out vec3 vViewDir;
+  out vec4 vLightDir;
+#else
+  out vec2 vertexLightValues;
+  uniform vec4 g_LightDirection;
+#endif
+
+vec2 interpolate2D(vec2 v0, vec2 v1, vec2 v2, vec2 v3)
+{
+    //return v0 + vec2(gl_TessCoord.y) *  v1.y + vec2(gl_TessCoord.yx) * v2 +  vec2(gl_TessCoord.x) *v3.x;
+    return vec2(mix(mix(v0,v3,gl_TessCoord.x), mix(v1,v2,gl_TessCoord.x) , gl_TessCoord.y));
+}
+vec3 interpolate3D(vec3 v0, vec3 v1, vec3 v2, vec3 v3)
+{
+    //return  vec3(gl_TessCoord.x) * v0 +  vec3(gl_TessCoord.y) *v1 + vec3(gl_TessCoord.z) * v2 ;
+    return vec3(mix(mix(v0,v3,gl_TessCoord.x), mix(v1,v2,gl_TessCoord.x) , gl_TessCoord.y));
+} 
+
+vec4 interpolate4D(vec4 v0, vec4 v1, vec4 v2, vec4 v3)
+{  
+    //return  vec4(gl_TessCoord.x) *v0 +   vec4(gl_TessCoord.y) *v1 +  vec4(gl_TessCoord.z) *v2 ;
+    return vec4(mix(mix(v0,v3,gl_TessCoord.x), mix(v1,v2,gl_TessCoord.x) , gl_TessCoord.y));
+} 
+#ifdef USE_REFLECTION
+    uniform vec3 g_CameraPosition;
+    uniform vec3 m_FresnelParams;
+    varying vec4 refVec;
+
+    /**
+     * Input:
+     * attribute inPosition
+     * attribute inNormal
+     * uniform g_WorldMatrix
+     * uniform g_CameraPosition
+     *
+     * Output:
+     * varying refVec
+     */
+    void computeRef(in vec4 modelSpacePos){
+        // vec3 worldPos = (g_WorldMatrix * modelSpacePos).xyz;
+        vec3 worldPos = TransformWorld(modelSpacePos).xyz;
+
+        vec3 I = normalize( g_CameraPosition - worldPos  ).xyz;
+        // vec3 N = normalize( (g_WorldMatrix * vec4(inNormal, 0.0)).xyz );
+        vec3 N = normalize( TransformWorld(vec4(inNormal, 0.0)).xyz );
+
+        refVec.xyz = reflect(I, N);
+        refVec.w   = m_FresnelParams.x + m_FresnelParams.y * pow(1.0 + dot(I, N), m_FresnelParams.z);
+    }
+#endif
+
+void main(){
+    //TexCoord_FS_in = vec2(gl_TessCoord.y/m_NumText, gl_TessCoord.x);
+
+
+    TexCoord_FS_in =  interpolate2D(TexCoord_ES_in[0], TexCoord_ES_in[1], TexCoord_ES_in[2], TexCoord_ES_in[3]);
+  
+    Normal_FS_in = interpolate3D(Normal_ES_in[0], Normal_ES_in[1], Normal_ES_in[2], Normal_ES_in[3]);
+    Normal_FS_in = normalize(Normal_FS_in);
+    
+    Tangent_FS_in = interpolate4D(Tangent_ES_in[0], Tangent_ES_in[1], Tangent_ES_in[2], Tangent_ES_in[3]);
+    Tangent_FS_in = normalize(Tangent_FS_in);
+
+    //WorldPos_FS_in = interpolate3D(WorldPos_ES_in[0], WorldPos_ES_in[1], WorldPos_ES_in[2], WorldPos_ES_in[3]);
+
+
+    vec3 p0 = mix(gl_in[0].gl_Position.xyz, gl_in[3].gl_Position.xyz, gl_TessCoord.x);
+    // interpolate in horizontal direction between vert. 1 and 2
+    vec3 p1 = mix(gl_in[1].gl_Position.xyz, gl_in[2].gl_Position.xyz, gl_TessCoord.x);
+    
+    // interpolate in vert direction
+    vec3 tePosition = mix(p0, p1, gl_TessCoord.y);
+
+
+    float displace =  texture2D(m_NormalDisplacementMap, TexCoord_FS_in).x*m_DisplaceFactor;
+    tePosition.y += displace;
+
+    gl_Position = g_WorldViewProjectionMatrix * vec4(tePosition, 1);
+
+
+
+   vec4 modelSpacePos = vec4(gl_Position);
+   vec3 modelSpaceNorm = Normal_FS_in;
+
+   #ifndef VERTEX_LIGHTING
+        vec3 modelSpaceTan  = Tangent_FS_in.xyz;
+   #endif
+
+   texCoord = TexCoord_FS_in;
+   #ifdef SEPARATE_TEXCOORD
+      texCoord2 = TexCoord_FS_in;
+   #endif
+
+   vec3 wvPosition = TransformWorldView(modelSpacePos).xyz;// (g_WorldViewMatrix * modelSpacePos).xyz;
+   vec3 wvNormal  = normalize(TransformNormal(modelSpaceNorm));//normalize(g_NormalMatrix * modelSpaceNorm);
+   vec3 viewDir = normalize(-wvPosition);
+  
+   vec4 wvLightPos = (g_ViewMatrix * vec4(g_LightPosition.xyz,clamp(g_LightColor.w,0.0,1.0)));
+   wvLightPos.w = g_LightPosition.w;
+   vec4 lightColor = g_LightColor;
+
+   #if (defined(NORMALMAP) || defined(PARALLAXMAP)) && !defined(VERTEX_LIGHTING)
+     vec3 wvTangent = normalize(TransformNormal(modelSpaceTan));
+     vec3 wvBinormal = cross(wvNormal, wvTangent);
+     mat3 tbnMat = mat3(wvTangent, wvBinormal * Tangent_FS_in.w,wvNormal);
+   #endif
+ 
+   #if defined(NORMALMAP) && !defined(VERTEX_LIGHTING)
+     vViewDir  = -wvPosition * tbnMat;    
+     #if (defined(PARALLAXMAP) || (defined(NORMALMAP_PARALLAX) && defined(NORMALMAP))) 
+         vViewDirPrlx = vViewDir;
+     #endif
+     lightComputeDir(wvPosition, lightColor.w, wvLightPos, vLightDir, lightVec);
+     vLightDir.xyz = (vLightDir.xyz * tbnMat).xyz;
+   #elif !defined(VERTEX_LIGHTING)
+     vNormal = wvNormal;
+     vViewDir = viewDir;
+     #if defined(PARALLAXMAP)
+        vViewDirPrlx  =  -wvPosition * tbnMat;
+     #endif
+     lightComputeDir(wvPosition, lightColor.w, wvLightPos, vLightDir, lightVec);
+   #endif
+
+   #ifdef MATERIAL_COLORS
+      AmbientSum  = (m_Ambient  * g_AmbientLightColor).rgb;
+      DiffuseSum  =  m_Diffuse  * vec4(lightColor.rgb, 1.0);
+      SpecularSum = (m_Specular * lightColor).rgb;
+    #else
+      // Defaults: Ambient and diffuse are white, specular is black.
+      AmbientSum  = g_AmbientLightColor.rgb;
+      DiffuseSum  =  vec4(lightColor.rgb, 1.0);
+      SpecularSum = vec3(0.0);
+    #endif
+
+    #ifdef VERTEX_COLOR
+      AmbientSum *= inColor.rgb;
+      DiffuseSum *= inColor;
+    #endif
+
+    #ifdef VERTEX_LIGHTING
+        float spotFallOff = 1.0;
+        vec4 vLightDir;
+        lightComputeDir(wvPosition, lightColor.w, wvLightPos, vLightDir, lightVec);
+        #if __VERSION__ >= 110
+            // allow use of control flow
+        if(lightColor.w > 1.0){
+        #endif           
+           spotFallOff = computeSpotFalloff(g_LightDirection, lightVec);
+        #if __VERSION__ >= 110           
+        }
+        #endif
+        
+        vertexLightValues = computeLighting(wvNormal, viewDir, vLightDir.xyz, vLightDir.w * spotFallOff, m_Shininess);
+    #endif
+
+    #ifdef USE_REFLECTION 
+        computeRef(modelSpacePos);
+    #endif 
+/*
+    AmbientSum = g_AmbientLightColor.rgb;
+    DiffuseSum.rgb = g_LightColor.rgb;
+    SpecularSum = vec3(0,0,0
+*/
+}

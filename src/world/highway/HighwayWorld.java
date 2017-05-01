@@ -33,7 +33,7 @@ Make road our of random beizer curves
 public class HighwayWorld extends World {
 	private Terrain terrain;
 	private int terrainSize;
-
+	
 	public HighwayWorld() {
 		super("curveWorldRoot");
 	}
@@ -48,7 +48,9 @@ public class HighwayWorld extends World {
 		super.initialize(stateManager, app);
 		terrainSize = 128 + 1;
 
-		createWorldWithNoise(app.getAssetManager());
+		AssetManager am = app.getAssetManager();
+		
+		createWorldWithNoise(am);
 	}
 
 	private Material createTerrainMaterial(AssetManager am) {
@@ -158,7 +160,7 @@ public class HighwayWorld extends World {
 	public void cleanup() {
 		rootNode.detachAllChildren();
 		terrain.close();
-		App.rally.getStateManager().detach(terrain);
+		//App.rally.getStateManager().detach(terrain);
 		/*
 		java.util.concurrent.RejectedExecutionException: Task java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask@33944466 rejected from java.util.concurrent.ScheduledThreadPoolExecutor@a2243b4[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 1021]
 			at java.util.concurrent.ThreadPoolExecutor$AbortPolicy.rejectedExecution(Unknown Source)
