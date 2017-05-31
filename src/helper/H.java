@@ -7,6 +7,7 @@ import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
+import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
@@ -14,6 +15,7 @@ import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.debug.Arrow;
+import com.jme3.scene.shape.Box;
 
 import game.App;
 
@@ -32,14 +34,14 @@ public class H {
 	}
 	public static void p(Object... os) {
 		for (Object o : os) {
-	        System.out.print(o.toString() + " ");
+	        System.out.print(o + " ");
 	    }
 		System.out.println();
 	}
 	public static void p(Object[] ol, String sep) {
 		if (sep == null) sep = "\n";
 		for (Object o: ol)
-			System.out.print(o+sep);
+			System.out.print(o + sep);
 		System.out.println();
 	}
 	public static void p(Iterable<Object> ol, String sep) {
@@ -64,11 +66,17 @@ public class H {
 	public static void e(Object o) {
 		System.err.println(o);
 	}
+	public static void e(Object... os) {
+		for (Object o : os) {
+	        System.err.print(o + " ");
+	    }
+		System.err.println();
+	}
 	public static void e(Object[] ol, String sep) {
 		if (sep == null) sep = "\n";
 		for (Object o: ol)
 			System.err.print(o+sep);
-		System.out.println();
+		System.err.println();
 	}
 	public static void e(Iterable<Object> ol, String sep) {
 		H.e(ol, sep);
@@ -84,6 +92,33 @@ public class H {
 			newV.normalizeLocal().multLocal(value);
 		}
 		return newV;
+	}
+	public static float dotXZ(Vector3f a, Vector3f b) {
+		return a.x*b.x + a.z*b.z;
+	}
+	public static float distFromLineXZ(Vector3f start, Vector3f end, Vector3f point) {
+		float x0 = point.x;
+		float y0 = point.z;
+		float x1 = start.x;
+		float y1 = start.z;
+		float x2 = end.x;
+		float y2 = end.z;
+		return (Math.abs((y2-y1)*x0 - (x2-x1)*y0 + x2*y1 - y2*x1))/
+				FastMath.sqrt((y2-y1)*(y2-y1) + (x2-x1)*(x2-x1));
+	}
+	public static float[] boundingBoxXZ(Vector3f... p) {
+		float xmin = Float.MAX_VALUE;
+		float xmax = Float.MIN_VALUE;
+		float zmin = Float.MAX_VALUE;
+		float zmax = Float.MIN_VALUE;
+		for (Vector3f v: p) {
+			xmin = Math.min(xmin, v.x);
+			xmax = Math.max(xmax, v.x);
+			zmin = Math.min(zmin, v.z);
+			zmax = Math.max(zmax, v.z);
+		}
+		return new float[] { xmin, zmin, xmax, zmax };
+		//return new Vector3f[] { new Vector3f(xmin, 0, zmin), new Vector3f(xmin, 0, zmax),new Vector3f(xmax, 0, zmax),new Vector3f(xmax, 0, zmin)};
 	}
 	
 	public static float lerpArray(float i, float[] array) {
@@ -164,22 +199,60 @@ public class H {
 	}
 	
 	public static Geometry makeShapeArrow(AssetManager am, ColorRGBA color, Vector3f dir, Vector3f pos) {
+		if (!Vector3f.isValidVector(pos) || !Vector3f.isValidVector(dir)) {
+			H.e("not valid pos or dir", pos, dir);
+			return null;
+		}
 		Arrow arrow = new Arrow(dir);
-		Geometry arrowG = createShape(am, arrow, color, pos);
+		Geometry arrowG = createShape(am, arrow, color, pos, "an arrow");
 		arrowG.setShadowMode(ShadowMode.Off);
 		return arrowG;
 	}
+	public static Geometry makeShapeBox(AssetManager am, ColorRGBA color, Vector3f pos, float size) {
+		if (!Vector3f.isValidVector(pos)) {
+			H.e("not valid position");
+			return null;
+		}
+		
+		Box box = new Box(size, size, size);
+		Geometry boxG = createShape(am, box, color, pos, "a box");
+		boxG.setShadowMode(ShadowMode.Off);
+		return boxG;
+	}
 	
-	public static Geometry createShape(AssetManager am, Mesh shape, ColorRGBA color, Vector3f pos) {
+	public static Geometry createShape(AssetManager am, Mesh shape, ColorRGBA color, Vector3f pos, String name) {
 		Material mat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-		mat.getAdditionalRenderState().setWireframe(true);
 		mat.setColor("Color", color);
 		
-		Geometry g = new Geometry("coordinate axis", shape);
+		Geometry g = new Geometry(name, shape);
 		g.setMaterial(mat);
 		g.setLocalTranslation(pos);
 		return g;
 	}
+	
+	public static Vector3f[] rectFromLine(Vector3f start, Vector3f end, float thickness) {
+		//https://stackoverflow.com/a/1937202, with comment fix by Ryan Clarke
+		
+		Vector3f[] list = new Vector3f[4];
+		float dx = end.x - start.x; //delta x
+		float dy = end.z - start.z; //delta z
+		float linelength = FastMath.sqrt(dx * dx + dy * dy);
+		dx /= linelength;
+		dy /= linelength;
+		if (linelength == 0)
+			return null;
+		
+		//Ok, (dx, dy) is now a unit vector pointing in the direction of the line
+		//A perpendicular vector is given by (-dy, dx)
+		float px = 0.5f * thickness * (-dy); //perpendicular vector with lenght thickness * 0.5
+		float py = 0.5f * thickness * dx;
+		list[0] = new Vector3f(start.x + px, start.y, start.z + py);
+		list[1] = new Vector3f(end.x + px, end.y, end.z + py);
+		list[2] = new Vector3f(end.x - px, end.y,  end.z - py);
+		list[3] = new Vector3f(start.x - px, start.y,  start.z - py);
+		return list;
+	}
+	
 	
 	//http://nghiaho.com/?p=997
 	public static float nearlyAtan(float x) {
@@ -200,6 +273,10 @@ public class H {
 		if (y < 0) 
 			r = -r;
 		return 7;
+	}
+	
+	public static Vector2f v3tov2fXZ(Vector3f v) {
+		return new Vector2f(v.x, v.z);
 	}
 	
 	public static Vector3f screenTopLeft() {
