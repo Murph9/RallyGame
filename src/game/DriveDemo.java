@@ -8,6 +8,7 @@ import com.jme3.app.state.AppStateManager;
 
 import car.*;
 import car.ai.FollowWorldAI;
+import helper.H;
 
 //TODO there is another appstate to try here called (base|basic?)appstate
 public class DriveDemo extends DriveSimple {
@@ -16,6 +17,7 @@ public class DriveDemo extends DriveSimple {
     	super(car, world);
     	
     	if (!(world instanceof DefaultBuilder)) {
+    		H.e("DriveDemo has wrong world type.");
     		System.exit(-1);
     	}
     }

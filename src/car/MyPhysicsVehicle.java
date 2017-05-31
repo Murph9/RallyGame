@@ -38,7 +38,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	private float maxlong;
 
 	//sound stuff
-	private AudioNode engineSound;
+	public AudioNode engineSound;
 
 	//nice to use directions
 	public Vector3f up = new Vector3f();
@@ -56,7 +56,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 	//my wheel node
 	public MyWheelNode[] wheel = new MyWheelNode[4];
-	//TODO average the wheel forces from the last few frames, maybe?
 
 	//state stuff
 	public Vector3f vel;
@@ -88,7 +87,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	public float engineTorque;
 	public String totalTraction = "";
 	public float totalWheelRot;
-
+	public float dragForce;
+	
 	public float distance;
 
 	float redlineKillFor;
@@ -303,9 +303,10 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		float dragy = -(rr * velocity.y + car.areo_drag * velocity.y * FastMath.abs(velocity.y));
 		float dragz = -(rr * velocity.z + car.areo_drag * velocity.z * FastMath.abs(velocity.z));
 
-		float dragDown = -0.5f * car.areo_downforce * 1.225f * (velocity.z*velocity.z); //is the formula from wiki
+		float dragDown = -0.5f * car.areo_downforce * 1.225f * (velocity.z*velocity.z); //is the formula from wikipedia
 		
 		Vector3f totalNeutral = new Vector3f(dragx, dragy + dragDown, dragz).multLocal(tpf);
+		dragForce = totalNeutral.length();
 		applyCentralForce(w_angle.mult(totalNeutral));
 
 		//////////////////////////////////////////////////
@@ -610,14 +611,13 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	//TODO put some kind of brakes on when going slow
 	
 	private float getMaxSteerAngle(float trySteerAngle) {
-//		/* comment here to toggle
+		Vector3f local_vel = getPhysicsRotationMatrix().invert().mult(this.vel);
+		if (local_vel.z < 0) 
+			return car.w_steerAngle; //when going backwards you get no speed factor.
+		
 		float maxAngle = car.w_steerAngle/2;
 		float offset = 1;
 		return Math.min(-maxAngle*FastMath.atan(0.12f*vel.length() - offset) + maxAngle*FastMath.HALF_PI + this.maxlat, Math.abs(trySteerAngle));
-//		*/
-		/* comment here to toggle
-		return car.w_steerAngle;
-		//*/ 
 		//TODO needs some kind of turn back help now
 	}
 	
@@ -625,7 +625,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	private void addSkidLines() {
 		if (ai != null) return;
 
-		if (App.rally.frameCount % 4 == 0) {
+		if (App.rally.frameCount % 8 == 0) {
 			for (MyWheelNode w: wheel) {
 				w.addSkidLine();
 			}
@@ -651,9 +651,14 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			w.radSec = 0; //stop rotation of the wheels
 		}
 		
-		setPhysicsLocation(App.rally.drive.world.getStartPos());
-		setPhysicsRotation(App.rally.drive.world.getStartRot());
-		setAngularVelocity(new Vector3f());
+		Vector3f pos = App.rally.drive.world.getStartPos();
+		Matrix3f rot = App.rally.drive.world.getStartRot();
+
+		if (pos != null && rot != null) {
+			setPhysicsLocation(pos);
+			setPhysicsRotation(rot);
+			setAngularVelocity(new Vector3f());
+		} //noop if nulls
 		
 		skidNode.detachAllChildren();
 		skidList.clear();
@@ -697,7 +702,9 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		Vector3f pos = this.getPhysicsLocation();
 		return "x:"+H.roundDecimal(pos.x, 2) + ", y:"+H.roundDecimal(pos.y, 2)+", z:"+H.roundDecimal(pos.z, 2) +
 				"\nspeed:"+ H.roundDecimal(vel.length(), 2) + "m/s\nRPM:" + curRPM +
-				"\nengine:" + engineTorque + "\ntraction:" + totalTraction + "\nwheelRot:" + H.roundDecimal(totalWheelRot, 2) + "\nG Forces:"+gForce;
+				"\nengine:" + engineTorque + "\ndrag:" + dragForce + 
+				"Nm?\ntraction:" + totalTraction + 
+				"\nwheelRot:" + H.roundDecimal(totalWheelRot, 2) + "\nG Forces:"+gForce;
 	}
 }
 

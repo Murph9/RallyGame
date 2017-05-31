@@ -21,7 +21,6 @@ import com.jme3.texture.Texture;
 import com.jme3.util.BufferUtils;
 
 import game.App;
-import helper.H;
 
 @SuppressWarnings("unused")
 public class MyWheelNode extends Node {
@@ -119,9 +118,9 @@ public class MyWheelNode extends Node {
 			last = cur;
 			return; //don't make a line because they aren't valid positions
 		}
-		cur.y += 0.002f; //z-buffering (i.e. to stop it "fighting" with the ground)
+		cur.y += 0.02f; //z-buffering (i.e. to stop it "fighting" with the ground)
 		
-		float clampSkid = FastMath.clamp(skid - 0.9f, 0, 1);
+		float clampSkid = FastMath.clamp(skid - 0.85f, 0, 1);
 		if (clampSkid < 0.01f) {
 			last = cur;
 			return; //don't make a line because they aren't valid positions
@@ -141,26 +140,16 @@ public class MyWheelNode extends Node {
 		mesh.updateBound();
 		Geometry geo = new Geometry("MyMesh", mesh);
 		
+		//TODO better
 		Material mat = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		mat.setColor("Color", new ColorRGBA(0,0,0,clampSkid));
-
-		//TODO get the alpha one to work
-//		Material mat = new Material(App.rally.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md"); //TODO make own material j3md for this
-//		mat.setTexture("DiffuseMap", skidTex);
-//		mat.setBoolean("UseMaterialColors", true);
-		
-//		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
-//		mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
-//		mat.setFloat("AlphaDiscardThreshold", 0.05f);
-//		mat.setColor("Diffuse", new ColorRGBA(0,0,0,clampSkid));
-		
+		mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
 		geo.setShadowMode(ShadowMode.Off);
 		geo.setQueueBucket(Bucket.Transparent);
-		
-		
-		geo.setMaterial(mat);
 
+		geo.setMaterial(mat);
+		
 		mvc.skidNode.attachChild(geo);
 		mvc.skidList.add(geo);
 		
