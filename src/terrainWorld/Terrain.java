@@ -3,18 +3,29 @@ package terrainWorld;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.bullet.PhysicsSpace;
+import com.jme3.bullet.collision.shapes.HeightfieldCollisionShape;
+import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
+import com.jme3.scene.Node;
+import com.jme3.scene.control.Control;
 import com.jme3.terrain.geomipmap.TerrainLodControl;
 
+import game.App;
+import helper.H;
+import jme3tools.optimize.GeometryBatchFactory;
+
 import java.io.Closeable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -24,10 +35,14 @@ import java.util.concurrent.ThreadPoolExecutor;
 //Copied from https://github.com/jayfella/TerrainWorld (and changed main world class to terrain, no file caching anymore)
 //Which has the https://en.wikipedia.org/wiki/WTFPL license
 
+//TODO thinking of a second level cache
+//that 'like' the file system one but is still in memory, only save the heightmap as array or something
+
 public abstract class Terrain extends AbstractAppState implements Closeable
 {
     protected final SimpleApplication app;
     private final PhysicsSpace physicsSpace;
+    private final Node rootNode;
 
     protected final int blockSize;
     protected final int tileSize;
@@ -50,10 +65,11 @@ public abstract class Terrain extends AbstractAppState implements Closeable
 
     private ScheduledThreadPoolExecutor threadpool = new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors());
 
-    public Terrain(SimpleApplication app, PhysicsSpace physicsSpace, int tileSize, int blockSize)
+    public Terrain(SimpleApplication app, PhysicsSpace physicsSpace, int tileSize, int blockSize, Node rootNode)
     {
         this.app = app;
         this.physicsSpace = physicsSpace;
+        this.rootNode = rootNode;
 
         this.tileSize = tileSize;
         this.blockSize = blockSize;
@@ -94,6 +110,10 @@ public abstract class Terrain extends AbstractAppState implements Closeable
      */
     public void setCacheTime(long time) { this.cacheTime = time; }
 
+    
+    public int getBitShift() {
+    	return this.bitshift;
+    }
 
     /**
      * Set the view distance in tiles for each direction according
@@ -115,9 +135,7 @@ public abstract class Terrain extends AbstractAppState implements Closeable
     }
 
 
-    /**
-     * Set the view distance in tiles for all directions.
-     *
+    /**Set the view distance in tiles for all directions.
      * @param distance Tiles to load in all directions.
      */
     public final void setViewDistance(int distance)
@@ -127,9 +145,7 @@ public abstract class Terrain extends AbstractAppState implements Closeable
     }
 
 
-    /**
-     *
-     * @return notes whether or not this world has loaded all tiles required.
+    /**@return notes whether or not this world has loaded all tiles required.
      */
     public final boolean isLoaded()
     {
@@ -137,9 +153,7 @@ public abstract class Terrain extends AbstractAppState implements Closeable
     }
 
 
-    /**
-     *
-     * @return the amount of tiles that are currently loaded.
+    /**@return the amount of tiles that are currently loaded.
      */
     public final int getLoadedTileCount()
     {
@@ -161,18 +175,14 @@ public abstract class Terrain extends AbstractAppState implements Closeable
         return newTiles.size();
     }
 
-    /**
-     *
-     * @return the maximum height of this world.
+    /**@return the maximum height of this world.
      */
     public final float getWorldHeight()
     {
         return this.worldHeight;
     }
 
-    /**
-     * Set the maximum view height for this world.
-     *
+    /**Set the maximum view height for this world.
      * @param height The maximum height of this world.
      */
     public final void setWorldHeight(float height)
@@ -225,19 +235,19 @@ public abstract class Terrain extends AbstractAppState implements Closeable
                     return false;
 
                 physicsSpace.remove(chunk);
-                app.getRootNode().detachChild(chunk);
+                rootNode.detachChild(chunk);
 
                 // remove rigid objects...
                 if (chunk.getStaticRigidObjectsNode() != null)
                 {
                     physicsSpace.remove(chunk.getStaticRigidObjectsNode());
-                    app.getRootNode().detachChild(chunk.getStaticRigidObjectsNode());
+                    rootNode.detachChild(chunk.getStaticRigidObjectsNode());
                 }
 
                 // remove non-rigid objects
                 if (chunk.getStaticNonRigidObjectsNode() != null)
                 {
-                    app.getRootNode().detachChild(chunk.getStaticNonRigidObjectsNode());
+                	rootNode.detachChild(chunk.getStaticNonRigidObjectsNode());
                 }
 
                 iterator.remove();
@@ -276,20 +286,20 @@ public abstract class Terrain extends AbstractAppState implements Closeable
 
             pending.getChunk().setShadowMode(ShadowMode.Receive);
             worldTiles.put(pending.getLocation(), pending.getChunk());
-            app.getRootNode().attachChild(pending.getChunk());
+            rootNode.attachChild(pending.getChunk());
             physicsSpace.add(pending.getChunk());
 
             // add static rigid objects
             if (pending.getChunk().getStaticRigidObjectsNode() != null)
             {
-                app.getRootNode().attachChild(pending.getChunk().getStaticRigidObjectsNode());
+            	rootNode.attachChild(pending.getChunk().getStaticRigidObjectsNode());
                 physicsSpace.add(pending.getChunk().getStaticRigidObjectsNode());
             }
 
             // add static non-rigid objects
             if (pending.getChunk().getStaticNonRigidObjectsNode() != null)
             {
-                app.getRootNode().attachChild(pending.getChunk().getStaticNonRigidObjectsNode());
+            	rootNode.attachChild(pending.getChunk().getStaticNonRigidObjectsNode());
             }
 
             return true;
@@ -324,7 +334,7 @@ public abstract class Terrain extends AbstractAppState implements Closeable
 
                         chunk.setShadowMode(ShadowMode.Receive);
 
-                        app.getRootNode().attachChild(chunk);
+                        rootNode.attachChild(chunk);
                         physicsSpace.add(chunk);
                         worldTiles.put(location, chunk);
 
@@ -333,14 +343,14 @@ public abstract class Terrain extends AbstractAppState implements Closeable
                         // add static rigid objects
                         if (chunk.getStaticRigidObjectsNode() != null)
                         {
-                            app.getRootNode().attachChild(chunk.getStaticRigidObjectsNode());
+                        	rootNode.attachChild(chunk.getStaticRigidObjectsNode());
                             physicsSpace.add(chunk.getStaticRigidObjectsNode());
                         }
 
                         // add static non-rigid objects
                         if (chunk.getStaticNonRigidObjectsNode() != null)
                         {
-                            app.getRootNode().attachChild(chunk.getStaticNonRigidObjectsNode());
+                        	rootNode.attachChild(chunk.getStaticNonRigidObjectsNode());
                         }
 
 
@@ -351,28 +361,21 @@ public abstract class Terrain extends AbstractAppState implements Closeable
                         // its nowhere to be seen, generate it.
                         worldTilesQue.add(location);
 
-                        threadpool.submit(new Runnable()
+                        threadpool.submit(() ->
                         {
-                            @Override
-                            public void run()
+                            TerrainChunk newChunk = getTerrainChunk(location);
+                            PendingChunk pendingC = new PendingChunk(location, newChunk);
+
+                            tileLoadedThreaded(newChunk);
+
+                            newTiles.add(pendingC);
+
+                            // thread safety...
+                            app.enqueue(() -> 
                             {
-                                TerrainChunk newChunk = getTerrainChunk(location);
-                                PendingChunk pending = new PendingChunk(location, newChunk);
-
-                                tileLoadedThreaded(newChunk);
-
-                                newTiles.add(pending);
-
-                                // thread safety...
-                                app.enqueue(new Callable<Boolean>()
-                                {
-                                    public Boolean call()
-                                    {
-                                        worldTilesQue.remove(location);
-                                        return true;
-                                    }
-                                });
-                            }
+                                worldTilesQue.remove(location);
+                                return true;
+                            });
                         });
 
                         return true;
@@ -390,68 +393,56 @@ public abstract class Terrain extends AbstractAppState implements Closeable
         worldTilesCache.clear();
         cacheInterrupted = false;
 
-        Runnable cacheUpdater = new Runnable()
-        {
-            @Override
-            public void run()
+        Runnable cacheUpdater = () -> {
+            // top and bottom
+            for (int x = (topLx -1); x <= (botRx + 1); x++)
             {
-                // top and bottom
-                for (int x = (topLx -1); x <= (botRx + 1); x++)
+                if (cacheInterrupted) return;
+
+                // top
+                final TerrainLocation topLocation = new TerrainLocation(x, topLz - 1);
+                final TerrainChunk topChunk = getTerrainChunk(topLocation);
+                topChunk.setShadowMode(ShadowMode.Receive);
+                tileLoadedThreaded(topChunk);
+
+                // bottom
+                final TerrainLocation bottomLocation = new TerrainLocation(x, botRz + 1);
+                final TerrainChunk bottomChunk = getTerrainChunk(bottomLocation);
+                bottomChunk.setShadowMode(ShadowMode.Receive);
+                tileLoadedThreaded(bottomChunk);
+
+                app.enqueue(() -> {
+                    worldTilesCache.put(topLocation, topChunk);
+                    worldTilesCache.put(bottomLocation, bottomChunk);
+
+                    return true;
+                });
+            }
+
+            // sides
+            for (int z = topLz; z <= botRz; z++)
+            {
+                if (cacheInterrupted) return;
+
+                // left
+                final TerrainLocation leftLocation = new TerrainLocation(topLx - 1, z);
+                final TerrainChunk leftChunk = getTerrainChunk(leftLocation);
+                leftChunk.setShadowMode(ShadowMode.Receive);
+                tileLoadedThreaded(leftChunk);
+
+                // right
+                final TerrainLocation rightLocation = new TerrainLocation(botRx + 1, z);
+                final TerrainChunk rightChunk = getTerrainChunk(rightLocation);
+                rightChunk.setShadowMode(ShadowMode.Receive);
+                tileLoadedThreaded(leftChunk);
+
+                app.enqueue(() ->
                 {
-                    if (cacheInterrupted) return;
+                    worldTilesCache.put(leftLocation, leftChunk);
+                    worldTilesCache.put(rightLocation, rightChunk);
 
-                    // top
-                    final TerrainLocation topLocation = new TerrainLocation(x, topLz - 1);
-                    final TerrainChunk topChunk = getTerrainChunk(topLocation);
-                    topChunk.setShadowMode(ShadowMode.Receive);
-                    tileLoadedThreaded(topChunk);
-
-                    // bottom
-                    final TerrainLocation bottomLocation = new TerrainLocation(x, botRz + 1);
-                    final TerrainChunk bottomChunk = getTerrainChunk(bottomLocation);
-                    bottomChunk.setShadowMode(ShadowMode.Receive);
-                    tileLoadedThreaded(bottomChunk);
-
-                    app.enqueue(new Callable<Boolean>()
-                    {
-                        public Boolean call()
-                        {
-                            worldTilesCache.put(topLocation, topChunk);
-                            worldTilesCache.put(bottomLocation, bottomChunk);
-
-                            return true;
-                        }
-                    });
-                }
-
-                // sides
-                for (int z = topLz; z <= botRz; z++)
-                {
-                    if (cacheInterrupted) return;
-
-                    // left
-                    final TerrainLocation leftLocation = new TerrainLocation(topLx - 1, z);
-                    final TerrainChunk leftChunk = getTerrainChunk(leftLocation);
-                    leftChunk.setShadowMode(ShadowMode.Receive);
-                    tileLoadedThreaded(leftChunk);
-
-                    // right
-                    final TerrainLocation rightLocation = new TerrainLocation(botRx + 1, z);
-                    final TerrainChunk rightChunk = getTerrainChunk(rightLocation);
-                    rightChunk.setShadowMode(ShadowMode.Receive);
-                    tileLoadedThreaded(leftChunk);
-
-                    app.enqueue(new Callable<Boolean>()
-                    {
-                        public Boolean call()
-                        {
-                            worldTilesCache.put(leftLocation, leftChunk);
-                            worldTilesCache.put(rightLocation, rightChunk);
-
-                            return true;
-                        }
-                    });
-                }
+                    return true;
+                });
             }
         };
 
@@ -464,6 +455,11 @@ public abstract class Terrain extends AbstractAppState implements Closeable
             oldLocX = Integer.MAX_VALUE, oldLocZ = Integer.MAX_VALUE,
             topLx, topLz, botRx, botRz;
 
+    public int getTopLx() { return topLx; }
+    public int getTopLz() { return topLz; }
+    public int getBotRx() { return botRx; }
+    public int getBotRz() { return botRz; }
+    
     @Override
     public void update(float tpf)
     {
@@ -505,7 +501,6 @@ public abstract class Terrain extends AbstractAppState implements Closeable
     public abstract TerrainChunk getTerrainChunk(TerrainLocation location);
 
     /**
-     *
      * @param location The X and Z location in which you need the height
      * @return the height of the location. Returns 0f if the tile is not loaded.
      */
@@ -527,6 +522,103 @@ public abstract class Terrain extends AbstractAppState implements Closeable
         float height = tq.getHeightmapHeight(new Vector2f(tqPosX, tqPosZ));
 
         return height * this.worldHeight;
+    }
+    
+    /**
+     * Sets the height of the point
+     * Uses the y value for height 
+     * @param location
+     */
+    public void setHeight(Vector3f location) {
+    	List<Vector3f> list = new ArrayList<Vector3f>();
+    	list.add(location);
+    	setHeights(list);
+    }
+    /**
+     * Sets the height of the points
+     * Uses the y values for height 
+     * Updates the physics of it
+     * @param location
+     */
+    public void setHeights(List<Vector3f> location) {
+    	//run in a threadpool so its loaded after the trigger method (so the chunks exist for worldTiles.get())
+    	//all this thread safety...
+    	threadpool.submit(() -> {
+        	try {
+				Thread.sleep(1000); //TODO fix
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+        	
+            app.enqueue(() -> {
+            	rootNode.attachChild(boxNode);
+            	for (Vector3f v : location) {
+            		int xOff = (int) (FastMath.sign(v.x)*this.blockSize/2);
+            		int zOff = (int) (FastMath.sign(v.z)*this.blockSize/2);
+            		
+            		int x = (int)((v.x + xOff)/(this.blockSize - 1));
+            		int xMod = (int) ((v.x + xOff) % (this.blockSize - 1));
+            		int z = (int)((v.z + zOff)/(this.blockSize - 1));
+            		int zMod = (int) ((v.z + zOff) % (this.blockSize - 1));
+            		TerrainLocation tLoc = new TerrainLocation(x, z);
+            		TerrainChunk tq = this.worldTiles.get(tLoc);
+
+            		float height = v.y;
+            		if (tq != null) {
+            			
+            			setTheHeight(v, tq, height);
+
+            			//fixes the height between chunks
+            			if ((v.x != 0 && xMod == 0) || (v.z != 0 && zMod == 0)) {
+            				if ((v.x != 0 && xMod == 0))
+                				x--;
+	            			if (v.z != 0 && zMod == 0)
+	            				z--;
+	                		tLoc = new TerrainLocation(x, z);
+	                		tq = this.worldTiles.get(tLoc);
+	                		if (tq != null)
+	                			setTheHeight(v, tq, height);
+	                		else
+	                			H.e("!!!! Terrain: Second step not found.");
+            			}
+            		} else {
+		            	v.y = height;
+		            	H.p("No TerrainChunk for:", v, x, z, locX, locZ, "tiles #:", this.worldTiles.size());
+            		}
+            	}
+            	
+            	//update all the terrain things
+            	for (TerrainChunk tc: this.worldTiles.values()) {
+            		tc.updateModelBound();
+            		
+            		for (int i = 0; i < tc.getNumControls(); i++) {
+            			Control c = tc.getControl(i);
+            			if (c instanceof RigidBodyControl) {
+            				tc.removeControl(c);
+            				physicsSpace.remove(c);
+            			}
+            		}
+            		//add new rigid body
+            		Control c = new RigidBodyControl(new HeightfieldCollisionShape(tc.getHeightMap(), tc.getLocalScale()), 0);
+        			tc.addControl(c);
+        			physicsSpace.add(c);
+            	}
+            	
+            	if (App.rally.IF_DEBUG)
+            		GeometryBatchFactory.optimize(boxNode);
+            });
+        });
+    }
+    
+    private Node boxNode = new Node("box node");
+    private void setTheHeight(Vector3f v, TerrainChunk tc, float height) {
+    	Vector3f v2 = v.subtract(tc.getLocalTranslation().mult(1/tc.getWorldScale().x));
+    	tc.setHeight(H.v3tov2fXZ(v2), height/this.worldHeight);
+
+    	if (App.rally.IF_DEBUG) {
+    		H.p("Set height", v, tc);
+    		boxNode.attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Brown, v, 0.1f));
+    	}
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.jme3.bullet.collision.shapes.HeightfieldCollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.material.Material;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Node;
 import com.jme3.terrain.noise.basis.FilteredBasis;
 import java.nio.FloatBuffer;
 
@@ -15,8 +16,8 @@ public class NoiseBasedWorld extends Terrain
     private Material terrainMaterial;
     private FilteredBasis filteredBasis;
 
-    public NoiseBasedWorld(SimpleApplication app, PhysicsSpace physicsSpace, int tileSize, int blockSize) {
-        super(app, physicsSpace, tileSize, blockSize);
+    public NoiseBasedWorld(SimpleApplication app, PhysicsSpace physicsSpace, int tileSize, int blockSize, Node rootNode) {
+        super(app, physicsSpace, tileSize, blockSize, rootNode);
     }
 
     public final Material getMaterial() { return this.terrainMaterial; }
@@ -55,7 +56,7 @@ public class NoiseBasedWorld extends Terrain
         tq.setMaterial(terrainMaterial);
         return tq;
     }
-
+    
     private float[] getHeightmap(TerrainLocation tl) { 
     	return getHeightmap(tl.getX(), tl.getZ());
     }

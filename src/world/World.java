@@ -27,7 +27,7 @@ public abstract class World extends AbstractAppState {
 		this.app = app;
 		
 		App.rally.getRootNode().attachChild(this.rootNode);
-		H.e("initialize() world with name: " + rootNode.getName());
+		H.e("initialize() world: " + rootNode.getName());
 	}
 
 	//'Starts again'
@@ -52,7 +52,7 @@ public abstract class World extends AbstractAppState {
 		
 		App.rally.getRootNode().detachChild(this.rootNode);
 		
-		H.e("cleanup() world with name: " + rootNode.getName());
+		H.e("cleanup() world: " + rootNode.getName());
 		this.rootNode = null;
 		super.cleanup();
 	}

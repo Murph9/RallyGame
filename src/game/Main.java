@@ -4,7 +4,9 @@ package game;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.jme3.app.BasicProfilerState;
 import com.jme3.app.SimpleApplication;
+import com.jme3.app.StatsAppState;
 import com.jme3.app.state.AppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.bullet.BulletAppState;
@@ -73,21 +75,21 @@ public class Main extends SimpleApplication {
 
 	public BulletAppState bullet; //one physics space always
 	
+	private CarData car;
+	private CarData them;
+	private World world;
 	private void loadDefaults() {
 		car = Car.Runner.get();
 		them = Car.Runner.get();
 		world = new HighwayWorld();
-		//Options:
+		//alernatively:
 		//	new HighwayWorld();
 		//	new StaticWorldBuilder(StaticWorld.track2);
 		//	DynamicType.Simple.getBuilder();
 	}
-			
-	private CarData car;
-	private CarData them;
-	private World world;
 
 	public int frameCount = 0; //global frame timer
+	public final Boolean IF_DEBUG = false;
 	
 	public static void main(String[] args) {
 		Configuration config = Configuration.Read();
@@ -118,13 +120,12 @@ public class Main extends SimpleApplication {
 		Quaternion q = new Quaternion();
 		q = q.fromAngleAxis(FastMath.DEG_TO_RAD*(-8), new Vector3f(0,0,1));
 //		H.p(q);
-		
 		//note in the 0,0,0 -> a,b,c
 		//b = turning right and left
 		//a = barrel roll
 		//c = up and down a hill
 	}
-
+	
 	@Override
 	public void simpleInitApp() {
 		App.rally = this;
@@ -137,7 +138,7 @@ public class Main extends SimpleApplication {
 		}
 		if (ignoreOthers) {
 			Logger.getLogger("com.jme3.scene.plugins.").setLevel(Level.SEVERE);//remove warnings here
-			H.e("!!!! IGNORING (some) IMPORTANT WARNINGS !!!!!");	
+			H.e("!!!! IGNORING (some) IMPORTANT WARNINGS !!!!!");
 		}
 		inputManager.deleteMapping(SimpleApplication.INPUT_MAPPING_EXIT);
 		
@@ -164,6 +165,16 @@ public class Main extends SimpleApplication {
 		
 		inputManager.setCursorVisible(true);
 		flyCam.setEnabled(false);
+	}
+	
+	@Override
+	public void update() {
+		super.update();
+		
+		if (Vector3f.ZERO.length() != 0) {
+			H.e("Vector3f.ZERO is not zero!!!!, considered a fatal error.");
+			System.exit(342);
+		}
 	}
 	
 	public void startDemo(AppState state) {
