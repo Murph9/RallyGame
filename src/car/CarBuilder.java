@@ -152,10 +152,16 @@ public class CarBuilder extends AbstractAppState {
 		//TODO it can pause me itself thanks
 		if (App.rally.drive != null && App.rally.drive.isEnabled()) { //otherwise they update while paused..
 			for (Integer i : cars.keySet()) {
+				if (cars.get(i).engineSound != null)
+					cars.get(i).engineSound.play();
 				cars.get(i).myUpdate(tpf);
 			}
 		} else {
 			//something like disable sound
+			for (Integer i : cars.keySet()) {
+				if (cars.get(i).engineSound != null)
+					cars.get(i).engineSound.pause();
+			}
 		}
 	}
 
