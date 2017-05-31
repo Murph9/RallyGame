@@ -124,12 +124,13 @@ public enum Car {
 			carModel = dir+"car4raid_1.obj";
 			wheelModel = dir+"wheelraid1.obj";
 
-			mass = 1400;
+			mass = 1500;
 			areo_drag = 0.7f;
 			
 			w_width = 0.25f;
 			w_radius = 0.4f;
-
+			w_mass = 10;
+			
 			driveFront = true;
 			driveRear = true;
 
@@ -140,18 +141,18 @@ public enum Car {
 
 			sus_stiffness  = 35.0f;
 			sus_restLength = 0.15f;
-			sus_compValue  = 0.2f;
-			sus_dampValue  = 0.2f;
+			sus_compValue  = 0.4f;
+			sus_dampValue  = 0.5f;
 			rollFraction = 0.6f;
-			sus_maxForce = 25000;
+			sus_maxForce = 35000;
 
 			e_torque = new float[]{0,520,580,620,680,720,870,820,0};
-
+			e_mass = 40;
 			auto_gearDown = 3500;
 			auto_gearUp = 6800;
 			e_redline = 7200;
 
-			trans_effic = 0.75f;
+			trans_effic = 0.85f;
 			trans_finaldrive = 4f;
 			trans_gearRatios = new float[]{-3.5f,3.0f,2.3f,1.6f,1.2f,0.87f,0.7f};
 			
@@ -189,8 +190,6 @@ public enum Car {
 			auto_gearUp = 13500;
 			e_redline = 15000;
 			
-			e_mass = 30;
-
 			trans_finaldrive = 3.0f;
 			trans_gearRatios = new float[]{-5f,5,3.23f,2.19f,1.71f,1.39f,1.16f,0.93f};
 
@@ -217,7 +216,7 @@ public enum Car {
 			
 			e_torque = new float[] {0, 300, 450, 500, 530, 550, 500, 400};
 
-			e_mass = 10; //TODO underground 2 seems to have very low values like these
+			e_mass = 20; //TODO underground 2 seems to have very low values like these
 			w_mass = 20;
 			
 			auto_gearDown = 4000;

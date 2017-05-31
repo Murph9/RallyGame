@@ -91,7 +91,7 @@ public abstract class CarData {
 	public int e_redline = 6500;
 	
 	public float e_compression = 0.1f; //is going to be multiplied by the RPM
-	public float e_mass = 100; //kg	
+	public float e_mass = 30; //kg, this is the interia of the engine, 100 is high	
 	
 	public float trans_effic = 0.75f; //TODO apparently 0.7 is common (power is lost to rotating things)
 	public float trans_finaldrive = 3.0f; //helps set the total drive ratio
