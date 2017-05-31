@@ -35,7 +35,6 @@ public class CarUI extends AbstractAppState {
 	
 	//hud stuff
 	Geometry background;
-	BitmapText score;
 	BitmapText angle;
 	
 	//rpm
@@ -105,14 +104,7 @@ public class CarUI extends AbstractAppState {
 		rootNode = new Node("local root");
 		r.getGuiNode().attachChild(rootNode);
 		AssetManager am = r.getAssetManager();
-		
-		score = new BitmapText(guiFont, false);
-		score.setSize(guiFont.getCharSet().getRenderedSize());
-		score.setColor(ColorRGBA.White);
-		score.setText("");
-		score.setLocalTranslation(settings.getWidth()-200, settings.getHeight(), 0); // position
-		rootNode.attachChild(score);
-		
+
 		angle = new BitmapText(guiFont, false);		  
 		angle.setSize(guiFont.getCharSet().getRenderedSize());
 		angle.setColor(ColorRGBA.White);
@@ -268,7 +260,7 @@ public class CarUI extends AbstractAppState {
 			float angle = FastMath.interpolateLinear(i/(float)finalRPM, startAng, finalAng);
 			
 			if (i == redline) { //TODO
-				H.p(new Vector3f(FastMath.cos(angle)*radius, FastMath.sin(angle)*radius, 1));
+				//H.p(new Vector3f(FastMath.cos(angle)*radius, FastMath.sin(angle)*radius, 1));
 				Line l = new Line(new Vector3f(FastMath.cos(angle)*radius, FastMath.sin(angle)*radius, 1)
 						, new Vector3f(FastMath.cos(angle)*radius*0.9f, FastMath.sin(angle)*radius*0.9f, -1));
 				Geometry redLine = new Geometry("redline", l);
@@ -418,8 +410,6 @@ public class CarUI extends AbstractAppState {
 
 		setSpeedDigits(speedKMH);
 		setGearDigit(p.curGear);
-		
-		score.setText("??");
 		
 		//rpm bar 2
 		rpmMat.setFloat("Threshold", 1 - (p.curRPM/(float)Math.ceil(redline+1000))*(5/(float)8));
