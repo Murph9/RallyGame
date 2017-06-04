@@ -545,12 +545,12 @@ public abstract class Terrain extends AbstractAppState implements Closeable
     	//all this thread safety...
     	threadpool.submit(() -> {
         	try {
-				Thread.sleep(1000); //TODO fix
+				Thread.sleep(1000); //TODO fix this hack
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
         	
-            app.enqueue(() -> {
+            app.enqueue(() -> { //TODO don't put everything in the app, actually do things on the other thread
             	rootNode.attachChild(boxNode);
             	for (Vector3f v : location) {
             		int xOff = (int) (FastMath.sign(v.x)*this.blockSize/2);

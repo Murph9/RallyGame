@@ -252,7 +252,44 @@ public class H {
 		list[3] = new Vector3f(start.x - px, start.y,  start.z - py);
 		return list;
 	}
-	
+	/**
+	 * Vector3f the y is the height, and must be defined for a b c d.
+	 * p is the point, which we want the height for.
+	 * Assumptions:
+	 * - All abcd are coplanar
+	 * - p is inside abcd
+	 * @return the height of point p
+	 */
+	//Quad Height method:
+	//Line through AP, intercept with BC and CD, whichever is inside find point q.
+	//Interpolate height of q on BC or CD, then interpolate height of p using line Aq.
+	public static float heightInQuad(Vector3f p, Vector3f a, Vector3f b, Vector3f c, Vector3f d) {
+		Vector2f q = intersectionOf2LinesGiven2PointsEach(H.v3tov2fXZ(a), H.v3tov2fXZ(p), H.v3tov2fXZ(b), H.v3tov2fXZ(c));
+		float slopeBC = (b.y-c.y)/(H.v3tov2fXZ(b).subtract(H.v3tov2fXZ(c)).length()); //length is never negative
+		float distCToq = q.subtract(H.v3tov2fXZ(c)).length();
+		
+		Vector3f q3 = new Vector3f(q.x, c.y+slopeBC*distCToq, q.y);
+		float slopeAQ = (a.y-q3.y)/(q.subtract(H.v3tov2fXZ(a)).length());
+		float distAToq = H.v3tov2fXZ(p).subtract(H.v3tov2fXZ(a)).length();
+		
+		float pheight = a.y-slopeAQ*distAToq;
+		return pheight;
+	}
+
+	/**
+	 * https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection#Given_two_points_on_each_line
+	 * Gets the point where 2 lines interept, when the 2 lines are given as points. (p1 and p2) and (p3 and p4)
+	 * @return the point
+	 */
+	public static Vector2f intersectionOf2LinesGiven2PointsEach(Vector2f p1, Vector2f p2, Vector2f p3, Vector2f p4) {
+		
+		float px = ((p1.x*p2.y - p1.y*p2.x)*(p3.x-p4.x) - (p1.x-p2.x)*(p3.x*p4.y-p3.y*p4.x))
+				/((p1.x-p2.x)*(p3.y-p4.y) - (p1.y-p2.y)*(p3.x-p4.x));
+		float py = ((p1.x*p2.y - p1.y*p2.x)*(p3.y-p4.y) - (p1.y-p2.y)*(p3.x*p4.y-p3.y*p4.x))
+				/((p1.x-p2.x)*(p3.y-p4.y) - (p1.y-p2.y)*(p3.x-p4.x));
+		
+		return new Vector2f(px, py);
+	}
 	
 	//http://nghiaho.com/?p=997
 	public static float nearlyAtan(float x) {

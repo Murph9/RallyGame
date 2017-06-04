@@ -27,24 +27,23 @@ public class TerrainListener implements TileListener {
 	
 	/* TODO: a test for the terrain heights
 	private int alreadyDone;
-	public boolean tileLoaded_test(TerrainChunk chunk) {
+	public boolean tileLoaded(TerrainChunk chunk) {
 		if (App.rally.IF_DEBUG) {
 			Vector3f center = chunk.getLocalTranslation();
 			float size = chunk.getTerrainSize();
 			Vector3f positiveXZ = center.add(size/2,105,size/2);
-			Node rootNode = App.rally.getRootNode();
-			rootNode.attachChild(H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.Red, new Vector3f(0,0,-size), positiveXZ));
-			rootNode.attachChild(H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.Red, new Vector3f(-size,0,0), positiveXZ));
+			App.rally.getRootNode().attachChild(H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.Red, new Vector3f(0,0,-size), positiveXZ));
+			App.rally.getRootNode().attachChild(H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.Red, new Vector3f(-size,0,0), positiveXZ));
 		}
 		if (alreadyDone >= 1)
 			return true;
 		
-		world.generateRoad(new Vector3f(-200,105,0), new Vector3f(200,105,0));
+		world.generateRoad(new Vector3f(0,100,30), new Vector3f(0,95,20));
 		
 		alreadyDone++;
 		return true;
 	}
-	*/
+//	*/
 	
 	public boolean tileLoaded(TerrainChunk chunk) {
 		if (App.rally.IF_DEBUG)

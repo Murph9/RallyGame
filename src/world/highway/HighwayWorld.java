@@ -2,6 +2,8 @@ package world.highway;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AppStateManager;
@@ -231,8 +233,9 @@ public class HighwayWorld extends World {
 				float bcbmd = H.dotXZ(BC,BM);
 				
 				if (0 <= abamd && abamd <= H.dotXZ(AB,AB) && 0 <= bcbmd && bcbmd <= H.dotXZ(BC,BC)) {
-					float t = heightOfPointXZ(pos, start, end);
-					pos.y = (end.y - start.y)*t + start.y - 0.01f; //TODO this is not 'perfect', assumes its a line not a box
+					pos.y = H.heightInQuad(pos, rect[0], rect[1], rect[2], rect[3]);
+					
+					pos.y -= 0.01f;
 					heightList.add(pos);
 				}
 			}
@@ -241,7 +244,26 @@ public class HighwayWorld extends World {
 		terrain.setHeights(heightList);
 	}
 	
-	//TODO bilinear interoplation instead
+	
+	
+	@SuppressWarnings("unused")
+	private Vector2f getClosestPointOnLine(Vector2f a, Vector2f b, Vector2f p)
+    {
+        Vector2f ap = p.subtract(a);       //Vector from A to P   
+        Vector2f ab = b.subtract(a);       //Vector from A to B  
+
+        float magnitudeAB = ab.lengthSquared();     //Magnitude of AB vector (it's length squared)     
+        float ABAPproduct = ap.dot(ab);    //The DOT product of a_to_p and a_to_b     
+        float distance = ABAPproduct / magnitudeAB; //The normalized "distance" from a to your closest point  
+
+        if (distance < 0)     //Check if P projection is over vectorAB     
+            return null;
+        else if (distance > 1)
+            return null;
+        else
+            return a.add(ab.mult(distance));
+    }
+	@SuppressWarnings("unused")
 	//point assumed to be inside
 	private float heightOfPointXZ(Vector3f p, Vector3f a, Vector3f b) {
 		Vector3f AP = p.subtract(a);       //Vector from A to P   
@@ -269,7 +291,10 @@ public class HighwayWorld extends World {
 		return null; //else never again
 	}
 	@Override
-	public void update(float tpf) { }
+	public void update(float tpf) { 
+		//only way i have found to remove all the log messages it spews
+		Logger.getLogger(PerturbFilter.class.getCanonicalName()).setLevel(Level.SEVERE);
+	}
 	@Override
 	public void reset() { }
 
