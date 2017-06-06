@@ -283,12 +283,7 @@ public class HighwayWorld extends World {
 	// interface nodes
 	@Override
 	public Vector3f getStartPos() { 
-		Vector3f pos = new Vector3f(0, 103, 0);
-		if (terrain == null)
-			return pos;
-		if (!terrain.isLoaded())
-			return pos;
-		return null; //else never again
+		return new Vector3f(0, 103, 0);
 	}
 	@Override
 	public void update(float tpf) { 

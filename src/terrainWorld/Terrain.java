@@ -19,6 +19,7 @@ import helper.H;
 import jme3tools.optimize.GeometryBatchFactory;
 
 import java.io.Closeable;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -59,13 +60,14 @@ public abstract class Terrain extends AbstractAppState implements Closeable
     protected TileListener tileListener;
 
     private long cacheTime = 5000;
+    protected int fileSeed = 0;
 
     protected final Map<TerrainLocation, TerrainChunk> worldTiles = new HashMap<TerrainLocation, TerrainChunk>();
     protected final Map<TerrainLocation, TerrainChunk> worldTilesCache = new ConcurrentHashMap<TerrainLocation, TerrainChunk>();
 
     private ScheduledThreadPoolExecutor threadpool = new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors());
 
-    public Terrain(SimpleApplication app, PhysicsSpace physicsSpace, int tileSize, int blockSize, Node rootNode)
+    public Terrain(SimpleApplication app, PhysicsSpace physicsSpace, int tileSize, int blockSize, Node rootNode, int fileSeed)
     {
         this.app = app;
         this.physicsSpace = physicsSpace;
@@ -77,7 +79,14 @@ public abstract class Terrain extends AbstractAppState implements Closeable
         this.bitshift = this.bitCalc(blockSize);
         this.positionAdjuster = (this.blockSize - 1) / 2;
         
-        threadpool.setRejectedExecutionHandler(new RejectedExecutionHandler() {
+        this.fileSeed = fileSeed;
+        File dir = new File(System.getProperty("user.home") + "/.murph9/world_" + this.fileSeed + "/"); //fileSeed for different versions
+        if (!dir.exists())
+            dir.mkdirs();
+        
+        //TODO: something about removing old ones 
+        
+        this.threadpool.setRejectedExecutionHandler(new RejectedExecutionHandler() {
         	public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
         		// nothing, we want it to just ignore it all
         	}

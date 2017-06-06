@@ -8,7 +8,13 @@ import com.jme3.material.Material;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.terrain.noise.basis.FilteredBasis;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
 import java.nio.FloatBuffer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 //see base class for terrainWorld info
 public class NoiseBasedWorld extends Terrain
@@ -17,7 +23,8 @@ public class NoiseBasedWorld extends Terrain
     private FilteredBasis filteredBasis;
 
     public NoiseBasedWorld(SimpleApplication app, PhysicsSpace physicsSpace, int tileSize, int blockSize, Node rootNode) {
-        super(app, physicsSpace, tileSize, blockSize, rootNode);
+        super(app, physicsSpace, tileSize, blockSize, rootNode, 1);
+        //TODO to not keep using the same chunks try just change the '1'
     }
 
     public final Material getMaterial() { return this.terrainMaterial; }
@@ -40,9 +47,29 @@ public class NoiseBasedWorld extends Terrain
 
         String tqName = "TerrainChunk_" + location.getX() + "_" + location.getZ();
 
-        float[] heightmap = getHeightmap(location);
+        float[] heightmap = null; 
+        File savedFile = new File(System.getProperty("user.home") + "/.murph9/world_" + this.fileSeed + "/" + tqName + ".chunk");
 
-        tq = new TerrainChunk(tqName, this.tileSize, this.blockSize, heightmap);
+        if (savedFile.exists())
+        {
+            try
+            {
+                FileInputStream door = new FileInputStream(savedFile);
+                try (ObjectInputStream reader = new ObjectInputStream(door)) {
+                	heightmap = (float[])reader.readObject();
+                }
+            }
+            catch(Exception ex)
+            {
+                Logger.getLogger(NoiseBasedWorld.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        else
+        {
+            heightmap = getHeightmap(location);
+        }
+
+        tq = new TerrainChunk(tqName, this.tileSize, this.blockSize, heightmap, this.fileSeed);
         tq.setLocalScale(new Vector3f(1f, this.worldHeight, 1f));
 
         // set position
