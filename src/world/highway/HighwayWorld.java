@@ -51,7 +51,7 @@ Make road our of random beizer curves
 //https://hub.jmonkeyengine.org/t/vertexbuffer-for-specific-uv-behavior-shaders/38268/22
 
 public class HighwayWorld extends World {
-	private Terrain terrain;
+	public Terrain terrain;
 	private int blockSize; //(distance between points)/tileSize
 	private int tileSize; //the grid piece size
 	
@@ -137,7 +137,7 @@ public class HighwayWorld extends World {
 		App.rally.getStateManager().attach(this.terrain);
 		
 		//set after so the terrain exists first
-		newWorld.setTileListener(new TerrainListener(this));
+		newWorld.setTileListener(new TerrainListener(this, this.terrain));
 	}
 	private Material createTerrainMaterial(AssetManager am) {
 		Material terrainMaterial = new Material(am, "Common/MatDefs/Terrain/HeightBasedTerrain.j3md");
@@ -179,7 +179,7 @@ public class HighwayWorld extends World {
 	}
 	
 	protected void generateRoad(Vector3f start, Vector3f end) {
-		H.p("New arrow", start, "-->", end);
+		H.e("road: ", start, "-->", end);
 		float roadWidth = 6;
 		Vector3f[] rect = H.rectFromLine(start, end, roadWidth);
 		if (rect == null)

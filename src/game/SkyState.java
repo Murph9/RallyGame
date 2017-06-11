@@ -58,6 +58,7 @@ public class SkyState extends AbstractAppState {
 			dlsr.setLambda(0.55f);
 			dlsr.setShadowIntensity(0.6f);
 			dlsr.setEdgeFilteringMode(EdgeFilteringMode.Bilinear);
+			dlsr.setRenderBackFacesShadows(false);
 			vp.addProcessor(dlsr);
 		}
         

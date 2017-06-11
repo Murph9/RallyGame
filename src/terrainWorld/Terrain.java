@@ -142,6 +142,10 @@ public abstract class Terrain extends AbstractAppState implements Closeable
 
         totalVisibleChunks = (wViewDistance + eViewDistance + 1) * (nViewDistance + sViewDistance + 1);
     }
+    
+    public int getTotalVisibleChunks() {
+    	return this.totalVisibleChunks;
+    }
 
 
     /**Set the view distance in tiles for all directions.
@@ -168,7 +172,7 @@ public abstract class Terrain extends AbstractAppState implements Closeable
     {
         return this.worldTiles.size();
     }
-
+    
     public final int getCachedTilesCount()
     {
         return this.worldTilesCache.size();
@@ -464,11 +468,6 @@ public abstract class Terrain extends AbstractAppState implements Closeable
             oldLocX = Integer.MAX_VALUE, oldLocZ = Integer.MAX_VALUE,
             topLx, topLz, botRx, botRz;
 
-    public int getTopLx() { return topLx; }
-    public int getTopLz() { return topLz; }
-    public int getBotRx() { return botRx; }
-    public int getBotRz() { return botRz; }
-    
     @Override
     public void update(float tpf)
     {
@@ -533,6 +532,16 @@ public abstract class Terrain extends AbstractAppState implements Closeable
         return height * this.worldHeight;
     }
     
+    public TerrainChunk chunkFor(Vector2f v) {
+    	int xOff = (int) (FastMath.sign(v.x)*this.blockSize/2);
+		int zOff = (int) (FastMath.sign(v.y)*this.blockSize/2);
+		
+		int x = (int)((v.x + xOff)/(this.blockSize - 1));
+		int z = (int)((v.y + zOff)/(this.blockSize - 1));
+		TerrainLocation tLoc = new TerrainLocation(x, z);
+		return this.worldTiles.get(tLoc);
+    }
+    
     /**
      * Sets the height of the point
      * Uses the y value for height 
@@ -580,19 +589,19 @@ public abstract class Terrain extends AbstractAppState implements Closeable
             			//fixes the height between chunks
             			if ((v.x != 0 && xMod == 0) || (v.z != 0 && zMod == 0)) {
             				if ((v.x != 0 && xMod == 0))
-                				x--;
+                				x -= FastMath.sign(v.x);
 	            			if (v.z != 0 && zMod == 0)
-	            				z--;
+	            				z -= FastMath.sign(v.z);
 	                		tLoc = new TerrainLocation(x, z);
 	                		tq = this.worldTiles.get(tLoc);
 	                		if (tq != null)
 	                			setTheHeight(v, tq, height);
 	                		else
-	                			H.e("!!!! Terrain: Second step not found.");
+	                			H.e("!!!! Terrain: no joined chunk.", v, tLoc);
             			}
             		} else {
 		            	v.y = height;
-		            	H.p("No TerrainChunk for:", v, x, z, locX, locZ, "tiles #:", this.worldTiles.size());
+		            	H.e("!!!! No TerrainChunk for:", v, x, z, locX, locZ, "tiles #:", this.worldTiles.size());
             		}
             	}
             	
