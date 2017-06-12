@@ -1,7 +1,9 @@
 package world.highway;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,6 +14,7 @@ import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;
 import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
@@ -180,21 +183,20 @@ public class HighwayWorld extends World {
 	
 	protected void generateRoad(Vector3f start, Vector3f end) {
 		H.e("road: ", start, "-->", end);
-		float roadWidth = 6;
-		Vector3f[] rect = H.rectFromLine(start, end, roadWidth);
-		if (rect == null)
-			return;
 		
-		//draw it
-		rootNode.attachChild(H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.Cyan, end.add(0,0.01f,0).subtract(start), start.add(0,0.01f,0)));
+		//remember that the chunk hasn't been loaded into the world by here yet
+		if (terrain == null) {
+			H.e("STOP touching the terrain thing that you don't understand.");
+			return;//????, only happens when someone plays around with the terrain init order and breaks something
+		}
 		
-		Mesh mesh = new Mesh();		
-		mesh.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(new Vector3f[] {rect[0],rect[1],rect[3],rect[2]}));
-		mesh.setBuffer(Type.TexCoord, 2, BufferUtils.createFloatBuffer(texCoord));
-		mesh.setBuffer(Type.Index,    3, BufferUtils.createIntBuffer(indexes));
-		mesh.updateBound();
+		//TODO suggest this goes in the terrainlistener (maybe rename to roadbuilder)
+		Vector3f dir = end.subtract(start).normalizeLocal();
+		float length = end.subtract(start).length();
+		List<Vector3f> list = Arrays.asList(new Vector3f[] { start, start.add(dir.mult(length/3)), end.subtract(dir.mult(length/3)), end });
+		RoadMesh m = new RoadMesh(5, 2, list);
 		
-		Geometry geo = new Geometry("road", mesh);
+		Geometry geo = new Geometry("curvy", m);
 		Material mat = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		mat.setColor("Color", new ColorRGBA(0,0,0,0.5f));
@@ -203,47 +205,49 @@ public class HighwayWorld extends World {
 		geo.setQueueBucket(Bucket.Transparent);
 		geo.setMaterial(mat);
 		rootNode.attachChild(geo);
-		//end draw it
 		
-		//remember that the chunk hasn't been loaded into the world by here yet
-		if (terrain == null) {
-			H.e("STOP touching the terrain thing that you don't understand.");
-			return;//????, only happens when someone plays around with the terrain init order and breaks something
-		}
-		
-		//a1, b2, c3, d0 {index to char map} 
-		Vector3f AB = rect[2].subtract(rect[1]); //(2 - 1)
-		Vector3f BC = rect[3].subtract(rect[2]); //(3 - 2)
-		
+		List<Vector3f[]> quads = m.getQuads();
+		setHeightsFor(quads, (quad) -> {
+			return new Vector3f[] { quad[0], quad[1], quad[3], quad[2] };
+		});
+	}
+	
+	private void setHeightsFor(List<Vector3f[]> quads, Function<Vector3f[], Vector3f[]> ordered) {
 		List<Vector3f> heightList = new LinkedList<Vector3f>();
-		float[] box = H.boundingBoxXZ(rect);
-		box[0] -= 1; //extend the extends so they cover it completely
-		box[1] -= 1;
-		box[2] += 1;
-		box[3] += 1;
 		
-		for (int i = (int)box[0]; i < box[2]; i++) {
-			for (int j = (int)box[1]; j < box[3]; j++) {
-				Vector3f pos = new Vector3f(i, 0, j);
-
-				//http://stackoverflow.com/a/2763387 points in rectangle
-				Vector3f AM = pos.subtract(rect[1]); //(m - 1)
-				Vector3f BM = pos.subtract(rect[2]); //(m - 2)
-				float abamd = H.dotXZ(AB,AM);
-				float bcbmd = H.dotXZ(BC,BM);
-				
-				if (0 <= abamd && abamd <= H.dotXZ(AB,AB) && 0 <= bcbmd && bcbmd <= H.dotXZ(BC,BC)) {
-					pos.y = H.heightInQuad(pos, rect[0], rect[1], rect[2], rect[3]);
-					
-					pos.y -= 0.01f;
-					heightList.add(pos);
+		for (Vector3f[] rect: quads) {
+			if (App.rally.IF_DEBUG) {
+				App.rally.getRootNode().attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Green, rect[0].add(0,0.1f,0), 0.2f));
+				App.rally.getRootNode().attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.White, rect[1].add(0,0.1f,0), 0.2f));
+				App.rally.getRootNode().attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Blue, rect[2].add(0,-0.1f,0), 0.2f));
+				App.rally.getRootNode().attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Red, rect[3].add(0,-0.1f,0), 0.2f));
+			}
+			
+			rect = ordered.apply(rect);
+			
+			float[] box = H.boundingBoxXZ(rect);
+			box[0] -= 1; //extend the extends so they cover it completely
+			box[1] -= 1;
+			box[2] += 1;
+			box[3] += 1;
+			
+			for (int i = (int)box[0]; i < box[2]; i++) {
+				for (int j = (int)box[1]; j < box[3]; j++) {
+					Vector3f pos = new Vector3f(i, 0, j);
+					//use the jme3 library method for point in triangle
+					if (FastMath.pointInsideTriangle(H.v3tov2fXZ(rect[0]), H.v3tov2fXZ(rect[2]), H.v3tov2fXZ(rect[3]), H.v3tov2fXZ(pos)) != 0) {
+						pos.y = H.heightInTri(rect[0], rect[2], rect[3], pos) - 0.01f;
+						heightList.add(pos);
+					} else if (FastMath.pointInsideTriangle(H.v3tov2fXZ(rect[0]), H.v3tov2fXZ(rect[2]), H.v3tov2fXZ(rect[1]), H.v3tov2fXZ(pos)) != 0) {
+						pos.y = H.heightInTri(rect[0], rect[2], rect[1], pos) - 0.01f;
+						heightList.add(pos);
+					}
 				}
 			}
 		}
 		
 		terrain.setHeights(heightList);
 	}
-	
 	
 	
 	@SuppressWarnings("unused")
@@ -283,7 +287,7 @@ public class HighwayWorld extends World {
 	// interface nodes
 	@Override
 	public Vector3f getStartPos() { 
-		return new Vector3f(0, 103, 0);
+		return new Vector3f(10, 103, 0);
 	}
 	@Override
 	public void update(float tpf) { 

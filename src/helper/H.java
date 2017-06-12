@@ -275,6 +275,18 @@ public class H {
 		float pheight = a.y-slopeAQ*distAToq;
 		return pheight;
 	}
+	public static float heightInTri(Vector3f a, Vector3f b, Vector3f c, Vector3f p) {
+		Vector2f q = intersectionOf2LinesGiven2PointsEach(H.v3tov2fXZ(a), H.v3tov2fXZ(p), H.v3tov2fXZ(b), H.v3tov2fXZ(c));
+		float slopeBC = (b.y-c.y)/(H.v3tov2fXZ(b).subtract(H.v3tov2fXZ(c)).length()); //length is never negative
+		float distCToq = q.subtract(H.v3tov2fXZ(c)).length();
+		
+		Vector3f q3 = new Vector3f(q.x, c.y+slopeBC*distCToq, q.y);
+		float slopeAQ = (a.y-q3.y)/(q.subtract(H.v3tov2fXZ(a)).length());
+		float distAToq = H.v3tov2fXZ(p).subtract(H.v3tov2fXZ(a)).length();
+		
+		float pheight = a.y-slopeAQ*distAToq;
+		return pheight;
+	}
 
 	/**
 	 * https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection#Given_two_points_on_each_line
