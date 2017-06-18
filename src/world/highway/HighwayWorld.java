@@ -20,8 +20,6 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
-import com.jme3.scene.Mesh;
-import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.terrain.noise.ShaderUtils;
 import com.jme3.terrain.noise.basis.FilteredBasis;
 import com.jme3.terrain.noise.filter.*;
@@ -29,7 +27,6 @@ import com.jme3.terrain.noise.fractal.FractalSum;
 import com.jme3.terrain.noise.modulator.NoiseModulator;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture.WrapMode;
-import com.jme3.util.BufferUtils;
 
 import game.App;
 import helper.H;
@@ -44,12 +41,10 @@ Make road our of random beizer curves
 - these beizer curves to have road width (use the code from the 3d course)
   + WIDTH of basic road, similar to TDU: 
   		{45'(edge) 2.5(shoulder) | 4.5 (lane) || 4.5 | 2.5 45'}
-- eventually overlay it on terrain
- + flatten the terrain under the road so it 'fits'
-- add grass and trees all TDU like
+- add grass, trees and rocks all TDU like
 */
 
-//try and use:
+//uses:
 //https://github.com/JulienGreen/RoadTessalation
 //https://hub.jmonkeyengine.org/t/vertexbuffer-for-specific-uv-behavior-shaders/38268/22
 
@@ -57,11 +52,6 @@ public class HighwayWorld extends World {
 	public Terrain terrain;
 	private int blockSize; //(distance between points)/tileSize
 	private int tileSize; //the grid piece size
-	
-	private static final int[] indexes = { 2,0,1, 1,3,2 }; //tyre marks vertex order
-	private static final Vector2f[] texCoord = new Vector2f[] { //texture of quad with order
-		new Vector2f(0, 0), new Vector2f(0, 1), new Vector2f(1, 0), new Vector2f(1, 1),
-	};
 	
 	public HighwayWorld() {
 		super("highwayWorldRoot");
@@ -182,13 +172,16 @@ public class HighwayWorld extends World {
 	}
 	
 	protected void generateRoad(Vector3f start, Vector3f end) {
-		H.e("road: ", start, "-->", end);
-		
 		//remember that the chunk hasn't been loaded into the world by here yet
 		if (terrain == null) {
 			H.e("STOP touching the terrain thing that you don't understand.");
 			return;//????, only happens when someone plays around with the terrain init order and breaks something
 		}
+		
+		if (start == null || end == null || H.v3tov2fXZ(start).subtract(H.v3tov2fXZ(end)).length() == 0)
+			return; //no weird roads please
+		
+		H.e("road: ", start, "-->", end);
 		
 		//TODO suggest this goes in the terrainlistener (maybe rename to roadbuilder)
 		Vector3f dir = end.subtract(start).normalizeLocal();

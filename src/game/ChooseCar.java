@@ -57,7 +57,6 @@ public class ChooseCar extends AbstractAppState {
 		
 		cb = new CarBuilder();
 		app.getStateManager().attach(cb);
-		cb.sound(false);
 		cb.addCar(0, car.get(), start, dir, true);
 
 		//make camera
@@ -143,6 +142,7 @@ public class ChooseCar extends AbstractAppState {
 		world = null;
 		
 		App.rally.getRootNode().detachChild(camera);
+		camera = null;
 	}
 
 	/////////////////////////////

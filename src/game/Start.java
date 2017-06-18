@@ -71,7 +71,6 @@ public class Start extends AbstractAppState {
 		App.rally.getStateManager().attach(world);
 		
 		cb = new CarBuilder();
-		cb.sound(false);
 		App.rally.getStateManager().attach(cb);
 		
 		camera = new CarCamera("Cam - Start", App.rally.getCamera(), cb.get(0));

@@ -15,6 +15,7 @@ import com.jme3.font.BitmapFont;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.renderer.Camera;
 import com.jme3.system.AppSettings;
 import com.jme3.system.NanoTimer;
 import com.simsilica.lemur.GuiGlobals;
@@ -52,11 +53,7 @@ import world.wp.WP.DynamicType;
 
 //TODO
 //still need to get fog working..
-//at night time or something because loading looks easier
-//stop the car sound on the menus [please]
-
-//Long TODO's:
-//long running skidmark issue is in effect (but only for my computer)
+//night time or something because loading looks easier to do
 
 //Bugs TODO:
 //minimap is still a little weird, probably need to remove some of the water postprocessing stuff
@@ -274,8 +271,6 @@ public class Main extends SimpleApplication {
 	@Override
 	public void simpleUpdate(float tpf) {
 		super.simpleUpdate(tpf);
-		stateManager.update(tpf);
-		
 		frameCount++; //global frame timer update
 	}
 

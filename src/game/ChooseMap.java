@@ -98,7 +98,9 @@ public class ChooseMap extends AbstractAppState {
 
 	public void cleanup() {
 		App.rally.getRootNode().detachChild(camera);
+		camera = null;
 		App.rally.getStateManager().detach(world);
+		world = null;
 	}
 
 	////////////////////////

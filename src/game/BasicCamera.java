@@ -7,7 +7,7 @@ import com.jme3.scene.control.CameraControl.ControlDirection;
 
 public class BasicCamera extends CameraNode {
 
-	BasicCamera(String name, Camera c, Vector3f pos, Vector3f lookat) {
+	public BasicCamera(String name, Camera c, Vector3f pos, Vector3f lookat) {
 		super(name, c);
 		
 		setLocalTranslation(pos); //starting position of the camera

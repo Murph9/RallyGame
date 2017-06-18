@@ -44,8 +44,9 @@ public class CarBuilder extends AbstractAppState {
 		H.p("carbuilder init");
 	}
 	
-	public void sound(boolean sound) {
-		soundEnabled = sound;
+	public void setEnabled(boolean state) {
+		super.setEnabled(state);
+		soundEnabled = state;
 	}
 	
 	//TODO this should be giving the ai
@@ -148,19 +149,11 @@ public class CarBuilder extends AbstractAppState {
 		
 		if (cars.isEmpty())
 			return;
-
+		
 		//TODO it can pause me itself thanks
 		if (App.rally.drive != null && App.rally.drive.isEnabled()) { //otherwise they update while paused..
 			for (Integer i : cars.keySet()) {
-				if (cars.get(i).engineSound != null)
-					cars.get(i).engineSound.play();
 				cars.get(i).myUpdate(tpf);
-			}
-		} else {
-			//something like disable sound
-			for (Integer i : cars.keySet()) {
-				if (cars.get(i).engineSound != null)
-					cars.get(i).engineSound.pause();
 			}
 		}
 	}

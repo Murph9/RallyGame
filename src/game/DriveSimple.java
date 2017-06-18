@@ -11,7 +11,6 @@ import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.input.Joystick;
-import com.jme3.scene.*;
 
 import car.*;
 import helper.H;
@@ -91,7 +90,7 @@ public class DriveSimple extends AbstractAppState {
 		super.setEnabled(enabled);
 		world.setEnabled(enabled); //we kinda don't want the physics running while paused
 		App.rally.bullet.setEnabled(enabled);
-		//TODO particles and sound don't stop
+		this.cb.setEnabled(enabled);
 	}
 	
 	@Override
@@ -130,8 +129,8 @@ public class DriveSimple extends AbstractAppState {
 		App.rally.getStateManager().detach(world);
 		world = null;
 		
-		Node rootNode = App.rally.getRootNode();
-		rootNode.detachChild(camera);
+		App.rally.getRootNode().detachChild(camera);
 		App.rally.getInputManager().removeRawInputListener(camera);
+		camera = null;
 	}
 }

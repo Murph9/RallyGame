@@ -27,6 +27,12 @@ import helper.H;
 //extends:
 //https://github.com/jMonkeyEngine/jmonkeyengine/blob/master/jme3-jbullet/src/main/java/com/jme3/bullet/objects/PhysicsVehicle.java
 
+//resources:
+//http://web.archive.org/web/20050308061534/home.planet.nl/~monstrous/tutstab.html
+//http://phors.locost7.info/contents.htm
+//http://www.edy.es/dev/2011/12/facts-and-myths-on-the-pacejka-curves/
+//slow speed: http://au.mathworks.com/help/physmod/sdl/ref/tiremagicformula.html
+
 public class MyPhysicsVehicle extends PhysicsVehicle {
 
 	//skid stuff
@@ -72,10 +78,10 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	float steerRight;
 
 	float nitroTimeout;
-	boolean ifNitro = false;
+	boolean ifNitro;
 	float nitro;
 
-	boolean ifHandbrake = false;
+	boolean ifHandbrake;
 	
 	//TODO use
 	float clutch; //0 = can drive, 1 = can't drive
@@ -267,11 +273,9 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	}
 
 
-	//TODO find SAE950311
-	//Millikin & Millikin's Race Car Vehicle Dynamics
-	//https://www.sae.org/images/books/toc_pdfs/R146.pdf
-	////////////////////////////////////////////////////
-
+	/**Do fancy car physics
+	 * @param tpf time step
+	 */
 	private void specialPhysics(float tpf) {
 		//NOTE: that z is forward, x is side
 		// - the reference notes say that x is forward and y is sideways so just be careful
@@ -288,7 +292,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		gForce = w_angle.invert().mult(vel.subtract(w_velocity).mult(1/(tpf*getGravity().length()))); //mult by inverse time step and gravity
 		
 		//after prev step stuff is over set it to the current one
-		vel = w_velocity; 		
+		vel = w_velocity;
 		
 		float steeringCur = steeringCurrent;
 		if (velocity.z < 0) { //to flip the steering on moving in reverse
@@ -312,7 +316,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		//////////////////////////////////////////////////
 		//Wheel Forces
 		Vector3f[] wf = new Vector3f[] {
-				new Vector3f(), new Vector3f(), new Vector3f(), new Vector3f(),
+			new Vector3f(), new Vector3f(), new Vector3f(), new Vector3f(),
 		};
 
 		if (velocity.z == 0) { //to avoid all the divide by zeros
@@ -363,17 +367,14 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 		float maxSlowLat = Float.MAX_VALUE;
 		
-		//http://au.mathworks.com/help/physmod/sdl/ref/tiremagicformula.html
 		float slip_const = 1;
-		boolean slowSpeed = false;
-		float rearSteeringCur = 0;
 		float slowslipspeed = 9;
-		if (velocity.length() <= slowslipspeed) {
-			slowSpeed = true;
+		boolean isSlowSpeed = velocity.length() <= slowslipspeed;
+		float rearSteeringCur = 0;
+		
+		if (isSlowSpeed) {
 			slip_const = 2;
-			
 			//we want the force centre inline with the rear wheels at high speed and inline with the center at slow speeds
-//			steeringCur /= 2;
 			rearSteeringCur = -steeringCur;
 			
 			if (steeringCur != 0) {
@@ -384,9 +385,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			}
 		}
 
-		//http://web.archive.org/web/20050308061534/home.planet.nl/~monstrous/tutstab.html
-		//http://phors.locost7.info/contents.htm
-		//http://www.edy.es/dev/2011/12/facts-and-myths-on-the-pacejka-curves/
 
 		//for each wheel
 		for (int i = 0; i < 4; i++) {
@@ -428,14 +426,14 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			wf[i].x = -(anglefract/p)*VehicleGripHelper.tractionFormula(car.w_flatdata, p*maxlat) * susforce;
 			
 			//prevents the force from exceeding the centripetal force
-			if (slowSpeed) {
-				if (Math.abs(wf[i].x) > maxSlowLat) {
+			if (isSlowSpeed) {
+				if (Math.abs(wf[i].x) > maxSlowLat)
 					wf[i].x = FastMath.clamp(wf[i].x, -maxSlowLat, maxSlowLat);
-				}
-				if (accelCurrent == 0 && brakeCurrent == 0) {
-					float absT = FastMath.abs(torques[i]);
-					wf[i].z = FastMath.clamp(wf[i].z, -absT, absT);
-				}
+				
+//				if (accelCurrent == 0 && brakeCurrent == 0) {
+//					float absT = FastMath.abs(torques[i]);
+//					wf[i].z = FastMath.clamp(wf[i].z, -absT, absT);
+//				}
 			}
 				
 			wheel[i].skid = p;
@@ -449,9 +447,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			wheel[i].susForce = susforce;
 			wheel[i].gripDir = wf[i].mult(1/susforce);
 		}
-
-		//HARD TODO: better code from others 'transision' between basic and advanced friction models at slow speeds
-		//	i have no static model (yet)
 
 		//ui based values
 		totalTraction = "\nf: "+(wf[0].length() + wf[1].length())+", \nb:" + (wf[2].length() + wf[3].length());

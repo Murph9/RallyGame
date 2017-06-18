@@ -15,15 +15,14 @@ import com.jme3.scene.control.CameraControl.ControlDirection;
 
 public class CarCamera extends CameraNode implements RawInputListener {
 
-	//TODO:
-	//seems like nfs most wanted is (velocity + some gforce value) 
+	//TODO: seems like nfs most wanted is (velocity + some gforce value + fancy AAA stuff) 
 	
 	private MyPhysicsVehicle p;
 	private Vector3f prevPos;
 	
 	private float lastTimeout;
 	private float rotRad;
-	private static final float ROT_SPEED = 0.01f; 
+	private static final float ROT_SPEED = 0.01f;
 	
 	public CarCamera(String name, Camera c, MyPhysicsVehicle p) {
 		super(name, c);
@@ -48,25 +47,14 @@ public class CarCamera extends CameraNode implements RawInputListener {
 		if (prevPos == null) //its needed but not on the first loop apparently
 			prevPos = getLocalTranslation();
 		
-		float distance = p.car.cam_offset.length();
-		Vector3f carForward = new Vector3f();
-		p.getForwardVector(carForward);
-		carForward.normalizeLocal();
-		carForward = carForward.mult(-distance).add(0, p.car.cam_offset.y, 0);
-		
-		Vector3f camPos = prevPos;
-		Vector3f carPos = new Vector3f(); 
+		Vector3f nextPos = p.getPhysicsRotation().mult(p.car.cam_offset);
+		Vector3f carPos = new Vector3f();
 		p.getInterpolatedPhysicsLocation(carPos);
 		
-		Vector3f diff = carPos.subtract(camPos);
-		if (diff.length() > distance) {
-			diff = diff.normalize().mult(distance);
-		}
-
         //combine prev and vector 
-		prevPos = carPos.add(diff.add(0, p.car.cam_offset.y*2, 0));
+		prevPos = carPos.add(nextPos);
 		setLocalTranslation(prevPos);
-
+		
 		if (rotRad != 0) {
 			lastTimeout += tpf;
 			if (lastTimeout > 2) { //TODO static number
@@ -75,12 +63,15 @@ public class CarCamera extends CameraNode implements RawInputListener {
 			
 			Quaternion q = new Quaternion();
 			q.fromAngleAxis(rotRad*ROT_SPEED, p.up);
+			
+			Vector3f carForward = new Vector3f();
+			p.getForwardVector(carForward);
+			carForward.normalizeLocal();
 			setLocalTranslation(carPos.add(q.mult(carForward)));
 		}
 
 		lookAt(carPos.add(p.car.cam_lookAt), new Vector3f(0,1,0));
 	}
-
 	
 	
 	public void beginInput() {}
