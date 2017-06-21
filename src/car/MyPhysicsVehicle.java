@@ -380,7 +380,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			if (steeringCur != 0) {
 				float radius = car.w_zOff*2/FastMath.sin(steeringCur);
 				
-				float forceToKeepCircle = (car.mass*9.81f/4)*velocity.lengthSquared()/radius;
+				float forceToKeepCircle = (car.mass*getGravity().y/4)*velocity.lengthSquared()/radius;
 				maxSlowLat = FastMath.abs(forceToKeepCircle/4);
 			}
 		}
@@ -389,7 +389,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		//for each wheel
 		for (int i = 0; i < 4; i++) {
 			float susforce = (float)getWheel(i).getWheelInfo().wheelsSuspensionForce;
-			susforce = Math.min(susforce, car.mass*3); //[*3] HACK: to stop weird harsh physics on large normal suspension forces
+			susforce = Math.min(susforce, car.mass*4); //[*4] HACK: to stop weird harsh physics on large normal suspension forces
 
 			float slip_div = Math.abs(velocity.length());
 
@@ -430,10 +430,10 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 				if (Math.abs(wf[i].x) > maxSlowLat)
 					wf[i].x = FastMath.clamp(wf[i].x, -maxSlowLat, maxSlowLat);
 				
-//				if (accelCurrent == 0 && brakeCurrent == 0) {
-//					float absT = FastMath.abs(torques[i]);
-//					wf[i].z = FastMath.clamp(wf[i].z, -absT, absT);
-//				}
+				if (accelCurrent == 0 && brakeCurrent == 0) { //TODO was meant to fix really slow speed stuff
+					float absT = FastMath.abs(torques[i]);
+					wf[i].z = FastMath.clamp(wf[i].z, -absT, absT);
+				}
 			}
 				
 			wheel[i].skid = p;

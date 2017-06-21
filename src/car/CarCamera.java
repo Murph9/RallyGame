@@ -7,11 +7,17 @@ import com.jme3.input.event.KeyInputEvent;
 import com.jme3.input.event.MouseButtonEvent;
 import com.jme3.input.event.MouseMotionEvent;
 import com.jme3.input.event.TouchEvent;
+import com.jme3.math.ColorRGBA;
+import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.CameraNode;
 import com.jme3.scene.control.CameraControl.ControlDirection;
+import com.jme3.scene.plugins.blender.math.Matrix;
+
+import game.App;
+import helper.H;
 
 public class CarCamera extends CameraNode implements RawInputListener {
 
@@ -42,18 +48,34 @@ public class CarCamera extends CameraNode implements RawInputListener {
 		if (p == null) {
 			return;
 		}
+		//TODO use the direction of the wheels
+		//TODO also react to g force stuff
 		//TODO smooth the mouse stuff
 		
 		if (prevPos == null) //its needed but not on the first loop apparently
 			prevPos = getLocalTranslation();
 		
-		Vector3f nextPos = p.getPhysicsRotation().mult(p.car.cam_offset);
 		Vector3f carPos = new Vector3f();
 		p.getInterpolatedPhysicsLocation(carPos);
 		
-        //combine prev and vector 
-		prevPos = carPos.add(nextPos);
-		setLocalTranslation(prevPos);
+		Vector3f vec1 = p.getPhysicsRotation().mult(new Vector3f(0, 0, 1)).normalize();
+		Vector3f vec2 = p.vel.normalize();
+		
+		Vector3f vec = new Vector3f();
+		vec.interpolateLocal(vec1, vec2, 0.1f).normalize();
+		
+		vec.y = 1;
+		
+		Vector3f next = new Vector3f();
+		next.x = vec.x*p.car.cam_offset.z;
+		next.y = vec.y*p.car.cam_offset.y;
+		next.z = vec.z*p.car.cam_offset.z;
+		
+		next = carPos.add(next);
+		next.interpolateLocal(next, prevPos, 1f*tpf);//maybe
+		prevPos = next; 
+		
+		setLocalTranslation(prevPos); //already set for next frame
 		
 		if (rotRad != 0) {
 			lastTimeout += tpf;
