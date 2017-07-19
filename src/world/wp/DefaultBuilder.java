@@ -168,6 +168,9 @@ public abstract class DefaultBuilder extends World {
 		Spatial s = wpo.sp.clone();
 		CollisionShape coll = wpo.col;
 
+		//TODO attempt to use the wonderful getRotation().toAngles() and fromAngles() methods
+		//which should stop the slowly getting off track if you just create the quaternion everytime
+		
 		Quaternion inv = nextRot.mult(world.getNewAngle()).inverse();
 		Quaternion result = Quaternion.IDENTITY.mult(inv);
 		float angle = FastMath.acos(result.getW())*2; //believe me that this gets the angle between them

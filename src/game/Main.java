@@ -79,7 +79,7 @@ public class Main extends SimpleApplication {
 		car = Car.Runner.get();
 		them = Car.Runner.get();
 		world = new HighwayWorld();
-		//alernatively:
+		//world alernatives:
 		//	new HighwayWorld();
 		//	new StaticWorldBuilder(StaticWorld.track2);
 		//	DynamicType.Simple.getBuilder();
