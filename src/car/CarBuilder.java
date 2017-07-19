@@ -110,9 +110,9 @@ public class CarBuilder extends AbstractAppState {
 		player.setPhysicsRotation(rot);
 
 		if (aPlayer) { //players get the keyboard
-			player.makeControl();
+			player.attachKeyControl();
 		} else {
-			player.makeAI(new DriveAtAI(player, get(0)));
+			player.attachAI(new DriveAtAI(player, get(0)));
 		}
 		
 		if (aPlayer && soundEnabled) {

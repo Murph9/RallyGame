@@ -32,7 +32,7 @@ public class DriveDemo extends DriveSimple {
     	this.cb.addCar(0, car, world.getStartPos(), world.getStartRot(), true); //even though they aren't a player
 
     	MyPhysicsVehicle car = this.cb.get(0);
-    	car.makeAI(new FollowWorldAI(car, (DefaultBuilder)world));
+    	car.attachAI(new FollowWorldAI(car, (DefaultBuilder)world));
     	
     	uiNode.cleanup(); //TODO why?
     	app.getStateManager().detach(uiNode);

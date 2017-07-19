@@ -53,10 +53,14 @@ public class HighwayWorld extends World {
 	private int blockSize; //(distance between points)/tileSize
 	private int tileSize; //the grid piece size
 	
+	private List<RoadMesh> roads;
+	
 	public HighwayWorld() {
 		super("highwayWorldRoot");
 		//TODO this needs the road part, suggest something really simple to start with
 		//uses the TerrainListener class
+		
+		roads = new LinkedList<RoadMesh>();
 	}
 
 	@Override
@@ -78,10 +82,10 @@ public class HighwayWorld extends World {
 	
 	private void createWorldWithNoise(AssetManager am) {
 		// TODO change settings
-		// TODO remember the ./world folder with the cached terrain pieces, always cache to memory
+		// TODO remember the ./world folder with the cached terrain pieces
 		NoiseBasedWorld newWorld = new NoiseBasedWorld(App.rally, App.rally.getPhysicsSpace(), tileSize, blockSize, rootNode);
 
-		newWorld.setWorldHeight(192f);
+		newWorld.setWorldHeight(500); //TODO change to set the height range (needs to be scaled with the texture heights)
 		newWorld.setViewDistance(2);
 		newWorld.setCacheTime(5000);
 
@@ -110,7 +114,7 @@ public class HighwayWorld extends World {
 
 		OptimizedErode therm = new OptimizedErode();
 		therm.setRadius(5);
-		therm.setTalus(0.011f); //0.011
+		therm.setTalus(0.011f);
 
 		SmoothFilter smooth = new SmoothFilter();
 		smooth.setRadius(1);
@@ -120,7 +124,7 @@ public class HighwayWorld extends World {
 		iterate.addPreFilter(perturb);
 		iterate.addPostFilter(smooth);
 		iterate.setFilter(therm);
-		iterate.setIterations(1); //higher numbers make it really smooth
+		iterate.setIterations(3); //higher numbers make it really smooth
 
 		ground.addPreFilter(iterate);
 
@@ -143,22 +147,22 @@ public class HighwayWorld extends World {
 		Texture grass = am.loadTexture("assets/terrain/grass.jpg");
 		grass.setWrap(WrapMode.Repeat);
 		terrainMaterial.setTexture("region1ColorMap", grass);
-		terrainMaterial.setVector3("region1", new Vector3f(58, 200, grassScale));
+		terrainMaterial.setVector3("region1", new Vector3f(58*2, 200*2, grassScale));
 
 		// DIRT texture
 		Texture dirt = am.loadTexture("assets/terrain/dirt.jpg");
 		dirt.setWrap(WrapMode.Repeat);
 		terrainMaterial.setTexture("region2ColorMap", dirt);
-		terrainMaterial.setVector3("region2", new Vector3f(0, 60, dirtScale));
+		terrainMaterial.setVector3("region2", new Vector3f(0, 60*2, dirtScale));
 
 		// ROCK textures
 		Texture rock = am.loadTexture("assets/terrain/Rock.PNG");
 		rock.setWrap(WrapMode.Repeat);
 		terrainMaterial.setTexture("region3ColorMap", rock);
-		terrainMaterial.setVector3("region3", new Vector3f(198, 260, rockScale));
+		terrainMaterial.setVector3("region3", new Vector3f(198*2, 260*2, rockScale));
 
 		terrainMaterial.setTexture("region4ColorMap", rock);
-		terrainMaterial.setVector3("region4", new Vector3f(198, 260, rockScale));
+		terrainMaterial.setVector3("region4", new Vector3f(198*2, 260*2, rockScale));
 
 		Texture rock2 = am.loadTexture("assets/terrain/rock.jpg");
 		rock2.setWrap(WrapMode.Repeat);
@@ -188,6 +192,7 @@ public class HighwayWorld extends World {
 		float length = end.subtract(start).length();
 		List<Vector3f> list = Arrays.asList(new Vector3f[] { start, start.add(dir.mult(length/3)), end.subtract(dir.mult(length/3)), end });
 		RoadMesh m = new RoadMesh(5, 2, list);
+		roads.add(m);
 		
 		Geometry geo = new Geometry("curvy", m);
 		Material mat = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
@@ -205,20 +210,20 @@ public class HighwayWorld extends World {
 		});
 	}
 	
-	private void setHeightsFor(List<Vector3f[]> quads, Function<Vector3f[], Vector3f[]> ordered) {
+	private void setHeightsFor(List<Vector3f[]> quads, Function<Vector3f[], Vector3f[]> order) {
 		List<Vector3f> heightList = new LinkedList<Vector3f>();
 		
-		for (Vector3f[] rect: quads) {
+		for (Vector3f[] quad: quads) {
 			if (App.rally.IF_DEBUG) {
-				App.rally.getRootNode().attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Green, rect[0].add(0,0.1f,0), 0.2f));
-				App.rally.getRootNode().attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.White, rect[1].add(0,0.1f,0), 0.2f));
-				App.rally.getRootNode().attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Blue, rect[2].add(0,-0.1f,0), 0.2f));
-				App.rally.getRootNode().attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Red, rect[3].add(0,-0.1f,0), 0.2f));
+				App.rally.getRootNode().attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Green, quad[0].add(0,0.1f,0), 0.2f));
+				App.rally.getRootNode().attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.White, quad[1].add(0,0.1f,0), 0.2f));
+				App.rally.getRootNode().attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Blue, quad[2].add(0,-0.1f,0), 0.2f));
+				App.rally.getRootNode().attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Red, quad[3].add(0,-0.1f,0), 0.2f));
 			}
 			
-			rect = ordered.apply(rect);
+			quad = order.apply(quad);
 			
-			float[] box = H.boundingBoxXZ(rect);
+			float[] box = H.boundingBoxXZ(quad);
 			box[0] -= 1; //extend the extends so they cover it completely
 			box[1] -= 1;
 			box[2] += 1;
@@ -228,11 +233,11 @@ public class HighwayWorld extends World {
 				for (int j = (int)box[1]; j < box[3]; j++) {
 					Vector3f pos = new Vector3f(i, 0, j);
 					//use the jme3 library method for point in triangle
-					if (FastMath.pointInsideTriangle(H.v3tov2fXZ(rect[0]), H.v3tov2fXZ(rect[2]), H.v3tov2fXZ(rect[3]), H.v3tov2fXZ(pos)) != 0) {
-						pos.y = H.heightInTri(rect[0], rect[2], rect[3], pos) - 0.01f;
+					if (FastMath.pointInsideTriangle(H.v3tov2fXZ(quad[0]), H.v3tov2fXZ(quad[2]), H.v3tov2fXZ(quad[3]), H.v3tov2fXZ(pos)) != 0) {
+						pos.y = H.heightInTri(quad[0], quad[2], quad[3], pos) - 0.01f;
 						heightList.add(pos);
-					} else if (FastMath.pointInsideTriangle(H.v3tov2fXZ(rect[0]), H.v3tov2fXZ(rect[2]), H.v3tov2fXZ(rect[1]), H.v3tov2fXZ(pos)) != 0) {
-						pos.y = H.heightInTri(rect[0], rect[2], rect[1], pos) - 0.01f;
+					} else if (FastMath.pointInsideTriangle(H.v3tov2fXZ(quad[0]), H.v3tov2fXZ(quad[2]), H.v3tov2fXZ(quad[1]), H.v3tov2fXZ(pos)) != 0) {
+						pos.y = H.heightInTri(quad[0], quad[2], quad[1], pos) - 0.01f;
 						heightList.add(pos);
 					}
 				}
@@ -280,7 +285,7 @@ public class HighwayWorld extends World {
 	// interface nodes
 	@Override
 	public Vector3f getStartPos() { 
-		return new Vector3f(10, 103, 0);
+		return new Vector3f(10, 260, 0);
 	}
 	@Override
 	public void update(float tpf) { 

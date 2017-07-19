@@ -40,6 +40,9 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	protected LinkedList<Spatial> skidList = new LinkedList<Spatial>();
 	private static final int SKID_LENGTH = 100;
 	
+	//Wheel Forces
+	Vector3f[] wf; //4
+	Vector3f[] wf_last; //4
 	private float maxlat;
 	private float maxlong;
 
@@ -263,11 +266,11 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		carRootNode.attachChild(engineSound);
 	}
 
-	public void makeAI(CarAI ai) {
+	public void attachAI(CarAI ai) {
 		this.ai = ai;
 	}
 
-	public void makeControl() {
+	public void attachKeyControl() {
 		this.control = new MyKeyListener(this);
 		App.rally.getInputManager().addRawInputListener(this.control);
 	}
@@ -306,19 +309,19 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		float dragx = -(rr * velocity.x + car.areo_drag * velocity.x * FastMath.abs(velocity.x));
 		float dragy = -(rr * velocity.y + car.areo_drag * velocity.y * FastMath.abs(velocity.y));
 		float dragz = -(rr * velocity.z + car.areo_drag * velocity.z * FastMath.abs(velocity.z));
-
-		float dragDown = -0.5f * car.areo_downforce * 1.225f * (velocity.z*velocity.z); //is the formula from wikipedia
 		
-		Vector3f totalNeutral = new Vector3f(dragx, dragy + dragDown, dragz).multLocal(tpf);
+		float dragDown = -0.5f * car.areo_downforce * 1.225f * (velocity.z*velocity.z); //formula from wikipedia
+		
+		Vector3f totalNeutral = new Vector3f(dragx, dragy + dragDown, dragz).mult(tpf);
 		dragForce = totalNeutral.length();
 		applyCentralForce(w_angle.mult(totalNeutral));
 
 		//////////////////////////////////////////////////
 		//Wheel Forces
-		Vector3f[] wf = new Vector3f[] {
+		wf = new Vector3f[] {
 			new Vector3f(), new Vector3f(), new Vector3f(), new Vector3f(),
 		};
-
+		
 		if (velocity.z == 0) { //to avoid all the divide by zeros
 			velocity.z += 0.0001*FastMath.sign(FastMath.nextRandomFloat());
 		}
@@ -449,23 +452,27 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		}
 
 		//ui based values
-		totalTraction = "\nf: "+(wf[0].length() + wf[1].length())+", \nb:" + (wf[2].length() + wf[3].length());
+		this.totalTraction = "\nf: "+(wf[0].length() + wf[1].length())+", \nb:" + (wf[2].length() + wf[3].length());
 		this.totalWheelRot = 0;
 		for (MyWheelNode w: wheel) {
 			this.totalWheelRot += w.radSec;
 		}
 		this.totalWheelRot /= 4;
 
+		//make sure wf_last exists, by setting it be the same on the first frame
+		if (wf_last == null) wf_last = wf;
+		
 		//and finally apply forces
 		if (wheel[0].contact)
-			applyForce(w_angle.mult(wf[0]), w_angle.mult(wheel[0].getContactPoint(car.w_radius, car.rollFraction)));
+			applyForce(w_angle.mult((wf[0].add(wf_last[0])).mult(0.5f)), w_angle.mult(wheel[0].getContactPoint(car.w_radius, car.rollFraction)));
 		if (wheel[1].contact) 
-			applyForce(w_angle.mult(wf[1]), w_angle.mult(wheel[1].getContactPoint(car.w_radius, car.rollFraction)));
+			applyForce(w_angle.mult((wf[1].add(wf_last[1])).mult(0.5f)), w_angle.mult(wheel[1].getContactPoint(car.w_radius, car.rollFraction)));
 		if (wheel[2].contact) 
-			applyForce(w_angle.mult(wf[2]), w_angle.mult(wheel[2].getContactPoint(car.w_radius, car.rollFraction)));
+			applyForce(w_angle.mult((wf[2].add(wf_last[2])).mult(0.5f)), w_angle.mult(wheel[2].getContactPoint(car.w_radius, car.rollFraction)));
 		if (wheel[3].contact) 
-			applyForce(w_angle.mult(wf[3]), w_angle.mult(wheel[3].getContactPoint(car.w_radius, car.rollFraction)));
+			applyForce(w_angle.mult((wf[3].add(wf_last[3])).mult(0.5f)), w_angle.mult(wheel[3].getContactPoint(car.w_radius, car.rollFraction)));
 
+		wf_last = wf; //finally set it to the last value
 	}
 
 	private float getEngineWheelTorque(float tpf, float vz) {
@@ -558,14 +565,15 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 				w.update(tpf, -1);
 		}
 
-		//skid marks
-		addSkidLines();
 
 		//********************************************//
 		//Important call here
 		specialPhysics(tpf); //yay
 		//********************************************//
 
+		//skid marks
+		addSkidLines();
+		
 		//wheel turning logic
 		steeringCurrent = 0;
 		if (steerLeft != 0) { //left
@@ -574,10 +582,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		if (steerRight != 0) { //right
 			steeringCurrent -= getMaxSteerAngle(steerRight);
 		}
-		
-//		steeringCurrent = (float)VehiclePhysicsHelper.linearise(steeringCurrent, 0.5f); 
-		//TODO use function correctly
-		//TODO balance number
 		
 		//TODO make better [please its actually amazing to use]
 		float absdangle = Math.abs(driftangle);
@@ -613,7 +617,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		float maxAngle = car.w_steerAngle/2;
 		float offset = 1;
 		return Math.min(-maxAngle*FastMath.atan(0.12f*vel.length() - offset) + maxAngle*FastMath.HALF_PI + this.maxlat, Math.abs(trySteerAngle));
-		//TODO needs some kind of turn back help now
+		//TODO needs some kind of turn back help now, to come back from drifts
 	}
 	
 	///////////////////////////////////////////////////////////

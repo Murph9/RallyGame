@@ -7,16 +7,13 @@ import com.jme3.input.event.KeyInputEvent;
 import com.jme3.input.event.MouseButtonEvent;
 import com.jme3.input.event.MouseMotionEvent;
 import com.jme3.input.event.TouchEvent;
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
+import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.CameraNode;
 import com.jme3.scene.control.CameraControl.ControlDirection;
-import com.jme3.scene.plugins.blender.math.Matrix;
 
-import game.App;
 import helper.H;
 
 public class CarCamera extends CameraNode implements RawInputListener {
@@ -24,6 +21,7 @@ public class CarCamera extends CameraNode implements RawInputListener {
 	//TODO: seems like nfs most wanted is (velocity + some gforce value + fancy AAA stuff) 
 	
 	private MyPhysicsVehicle p;
+	private Vector3f prevVel; //for smoothing the velocity vector
 	private Vector3f prevPos;
 	
 	private float lastTimeout;
@@ -49,30 +47,33 @@ public class CarCamera extends CameraNode implements RawInputListener {
 			return;
 		}
 		//TODO use the direction of the wheels
-		//TODO also react to g force stuff
+		//TODO also react to g forces
 		//TODO smooth the mouse stuff
 		
-		if (prevPos == null) //its needed but not on the first loop apparently
+		if (prevPos == null) //doesn't exist on the first loop
 			prevPos = getLocalTranslation();
+		if (prevVel == null) prevVel = p.vel.normalize();
 		
 		Vector3f carPos = new Vector3f();
 		p.getInterpolatedPhysicsLocation(carPos);
 		
 		Vector3f vec1 = p.getPhysicsRotation().mult(new Vector3f(0, 0, 1)).normalize();
-		Vector3f vec2 = p.vel.normalize();
+		prevVel.interpolateLocal(p.vel.normalize(), 1f*tpf);
 		
 		Vector3f vec = new Vector3f();
-		vec.interpolateLocal(vec1, vec2, 0.1f).normalize();
+		vec.interpolateLocal(vec1, prevVel, 0.4f).normalize();
 		
 		vec.y = 1;
 		
 		Vector3f next = new Vector3f();
-		next.x = vec.x*p.car.cam_offset.z;
+		Vector2f vec_2 = H.v3tov2fXZ(vec).normalize();
+		
+		next.x = vec_2.x*p.car.cam_offset.z;
 		next.y = vec.y*p.car.cam_offset.y;
-		next.z = vec.z*p.car.cam_offset.z;
+		next.z = vec_2.y*p.car.cam_offset.z;
 		
 		next = carPos.add(next);
-		next.interpolateLocal(next, prevPos, 1f*tpf);//maybe
+		next.interpolateLocal(next, prevPos, 0.1f*tpf);//maybe
 		prevPos = next; 
 		
 		setLocalTranslation(prevPos); //already set for next frame
