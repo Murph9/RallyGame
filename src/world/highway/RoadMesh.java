@@ -106,8 +106,8 @@ public class RoadMesh extends Mesh {
                 float angle1 = anglex - FastMath.HALF_PI;
                 float angle2 = anglex + FastMath.HALF_PI;
 
-                computePosition.add( v1.add(new Vector3f(FastMath.cos(angle1) * width , 1, FastMath.sin(angle1) * width )));
-                computePosition.add( v1.add(new Vector3f(FastMath.cos(angle2) * width , 1, FastMath.sin(angle2) * width )));
+                computePosition.add( v1.add(new Vector3f(FastMath.cos(angle1) * width , 0, FastMath.sin(angle1) * width )));
+                computePosition.add( v1.add(new Vector3f(FastMath.cos(angle2) * width , 0, FastMath.sin(angle2) * width )));
             } 
             else {
                 Vector3f v1 = FastMath.interpolateBezier((i) / nbSection, cp.get(0), cp.get(1), cp.get(2), cp.get(3));
@@ -119,8 +119,8 @@ public class RoadMesh extends Mesh {
                 float angle1 = anglex - FastMath.HALF_PI;
                 float angle2 = anglex + FastMath.HALF_PI;
 
-                computePosition.add( v1.add(new Vector3f(FastMath.cos(angle1) * width , 1, FastMath.sin(angle1) * width )));
-                computePosition.add( v1.add(new Vector3f(FastMath.cos(angle2) * width , 1, FastMath.sin(angle2) * width )));
+                computePosition.add( v1.add(new Vector3f(FastMath.cos(angle1) * width , 0, FastMath.sin(angle1) * width )));
+                computePosition.add( v1.add(new Vector3f(FastMath.cos(angle2) * width , 0, FastMath.sin(angle2) * width )));
             }
         }
 
