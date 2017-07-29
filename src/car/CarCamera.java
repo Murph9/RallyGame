@@ -1,5 +1,7 @@
 package car;
 
+import com.jme3.collision.CollisionResult;
+import com.jme3.collision.CollisionResults;
 import com.jme3.input.RawInputListener;
 import com.jme3.input.event.JoyAxisEvent;
 import com.jme3.input.event.JoyButtonEvent;
@@ -7,13 +9,17 @@ import com.jme3.input.event.KeyInputEvent;
 import com.jme3.input.event.MouseButtonEvent;
 import com.jme3.input.event.MouseMotionEvent;
 import com.jme3.input.event.TouchEvent;
+import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
+import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.CameraNode;
+import com.jme3.scene.Geometry;
 import com.jme3.scene.control.CameraControl.ControlDirection;
 
+import game.App;
 import helper.H;
 
 public class CarCamera extends CameraNode implements RawInputListener {
@@ -27,6 +33,8 @@ public class CarCamera extends CameraNode implements RawInputListener {
 	private float lastTimeout;
 	private float rotRad;
 	private static final float ROT_SPEED = 0.01f;
+	
+	private Vector3f lastShake = new Vector3f();
 	
 	public CarCamera(String name, Camera c, MyPhysicsVehicle p) {
 		super(name, c);
@@ -42,6 +50,8 @@ public class CarCamera extends CameraNode implements RawInputListener {
 		setControlDir(ControlDirection.SpatialToCamera);
 	}
 
+	//TODO possbily use the render method to update the possition of this, which is probably why it needs the frame lock
+	
 	public void myUpdate(float tpf) {
 		if (p == null) {
 			return;
@@ -93,7 +103,31 @@ public class CarCamera extends CameraNode implements RawInputListener {
 			setLocalTranslation(carPos.add(q.mult(carForward)));
 		}
 
-		lookAt(carPos.add(p.car.cam_lookAt), new Vector3f(0,1,0));
+		//lastly do a ray cast to make sure that you can still see the car
+		CollisionResults results = new CollisionResults();
+		Vector3f dir = this.getLocalTranslation().subtract(carPos.add(p.car.cam_lookAt));
+		Ray ray = new Ray(carPos.add(p.car.cam_lookAt), dir);
+		App.rally.getRootNode().collideWith(ray, results);
+		CollisionResult cr = results.getClosestCollision();
+		if (cr != null && cr.getDistance() < dir.length()) {
+			Geometry g = cr.getGeometry();
+			if (!H.hasParentNode(g, p.carRootNode)) { //don't collide with the car
+				setLocalTranslation(cr.getContactPoint());
+			}
+		}
+		
+		//at high speeds shake the camera a little
+		float shakeFactor = p.vel.length() * p.vel.length() * 0.000002f; //TODO car constant
+		Vector3f lookAt = carPos.add(p.car.cam_lookAt);
+		lastShake.addLocal(new Vector3f(FastMath.nextRandomFloat(), FastMath.nextRandomFloat(), FastMath.nextRandomFloat()).normalize().mult(shakeFactor*FastMath.nextRandomInt(-1, 1)));
+		if (lastShake.length() > 0.01f)
+			lastShake.interpolateLocal(Vector3f.ZERO, 0.7f);
+		else
+			lastShake = new Vector3f();
+		
+		lookAt.addLocal(lastShake);
+		
+		lookAt(lookAt, new Vector3f(0,1,0));
 	}
 	
 	
