@@ -95,7 +95,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	//ui stuff
 	public float engineTorque;
 	public String totalTraction = "";
-	public float totalWheelRot;
 	public float dragForce;
 	
 	public float distance;
@@ -304,17 +303,20 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 		//////////////////////////////////////////////////
 		//'Wheel'less forces
-		//linear resistance and quadratic drag
-		float rr = car.resistance(9.81f);
-		float dragx = -(rr * velocity.x + car.areo_drag * velocity.x * FastMath.abs(velocity.x));
-		float dragy = -(rr * velocity.y + car.areo_drag * velocity.y * FastMath.abs(velocity.y));
-		float dragz = -(rr * velocity.z + car.areo_drag * velocity.z * FastMath.abs(velocity.z));
+		//linear resistance and quadratic drag (https://en.wikipedia.org/wiki/Automobile_drag_coefficient#Drag_area)
+		float rollingResistance = car.resistance(9.81f); //TODO was removed because i need the normal force to caculate correctly
 		
-		float dragDown = -0.5f * car.areo_downforce * 1.225f * (velocity.z*velocity.z); //formula from wikipedia
+		float dragx = -(1.225f * car.areo_drag * car.areo_crossSection * velocity.x * FastMath.abs(velocity.x));
+		float dragy = -(1.225f * car.areo_drag * car.areo_crossSection * velocity.y * FastMath.abs(velocity.y));
+		float dragz = -(1.225f * car.areo_drag * car.areo_crossSection * velocity.z * FastMath.abs(velocity.z));
+		//TODO change cross section for each xyz to make realistic drag feeling
 		
-		Vector3f totalNeutral = new Vector3f(dragx, dragy + dragDown, dragz).mult(tpf);
+		Vector3f totalNeutral = new Vector3f(dragx, dragy, dragz);
 		dragForce = totalNeutral.length();
-		applyCentralForce(w_angle.mult(totalNeutral));
+		
+		float dragDown = -0.5f * car.areo_downforce * 1.225f * (velocity.z*velocity.z); //formula for down force from wikipedia
+		dragDown = 0;
+		applyCentralForce(w_angle.mult(totalNeutral.add(0, dragDown, 0))); //apply downforce after
 
 		//////////////////////////////////////////////////
 		//Wheel Forces
@@ -328,10 +330,9 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		
 		////////////////////////
 		//longitudinal forces
-		engineTorque = getEngineWheelTorque(tpf, velocity.z);
+		engineTorque = getEngineWheelTorque(tpf, velocity.length() * Math.signum(velocity.z));
 		float[] torques = new float[] { 0, 0, 0, 0 };
 
-		engineTorque /= 2;
 		if (car.driveFront && car.driveRear)
 			engineTorque /= 2; //split up into 2 axles
 		
@@ -453,11 +454,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 		//ui based values
 		this.totalTraction = "\nf: "+(wf[0].length() + wf[1].length())+", \nb:" + (wf[2].length() + wf[3].length());
-		this.totalWheelRot = 0;
-		for (MyWheelNode w: wheel) {
-			this.totalWheelRot += w.radSec;
-		}
-		this.totalWheelRot /= 4;
 
 		//make sure wf_last exists, by setting it be the same on the first frame
 		if (wf_last == null) wf_last = wf;
@@ -702,8 +698,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		return "x:"+H.roundDecimal(pos.x, 2) + ", y:"+H.roundDecimal(pos.y, 2)+", z:"+H.roundDecimal(pos.z, 2) +
 				"\nspeed:"+ H.roundDecimal(vel.length(), 2) + "m/s\nRPM:" + curRPM +
 				"\nengine:" + engineTorque + "\ndrag:" + dragForce + 
-				"Nm?\ntraction:" + totalTraction + 
-				"\nwheelRot:" + H.roundDecimal(totalWheelRot, 2) + "\nG Forces:"+gForce;
+				"N\ntraction:" + totalTraction + "\nG Forces:"+gForce;
 	}
 }
 

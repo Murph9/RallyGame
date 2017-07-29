@@ -72,6 +72,7 @@ public class CarUI extends AbstractAppState {
 	private Geometry gripBox[];
 	private Geometry gripDir[];
 	private BitmapText gripValue[];
+	private BitmapText wheelRot[];
 	private Vector3f[] ps;
 	
 	//the g force meter circles
@@ -162,6 +163,8 @@ public class CarUI extends AbstractAppState {
 		this.gripBox = new Geometry[4];
 		this.gripDir = new Geometry[4];
 		this.gripValue = new BitmapText[4];
+		this.wheelRot = new BitmapText[4];
+		
 
 		Box b = new Box(20, 20, 1);
 		Line l = new Line(new Vector3f(0,0,10), new Vector3f(1,0,10));
@@ -183,6 +186,13 @@ public class CarUI extends AbstractAppState {
 			gripValue[i].setText("");
 			gripValue[i].setLocalTranslation(ps[i]);
 			n.attachChild(gripValue[i]);
+			
+			wheelRot[i] = new BitmapText(guiFont, false);
+			wheelRot[i].setSize(guiFont.getCharSet().getRenderedSize());
+			wheelRot[i].setColor(ColorRGBA.DarkGray);
+			wheelRot[i].setText("");
+			wheelRot[i].setLocalTranslation(ps[i].add(new Vector3f(0,20,0)));
+			n.attachChild(wheelRot[i]);
 		}
 		
 		//stats text 
@@ -430,6 +440,7 @@ public class CarUI extends AbstractAppState {
 			for (int i = 0 ; i < 4; i++) {
 				Material m = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 				gripValue[i].setText(String.format("%.2f", p.wheel[i].skid));
+				wheelRot[i].setText(String.format("%.2f", p.wheel[i].radSec));
 				m.setColor("Color", getGripBoxColour(p.wheel[i].skid));
 				gripBox[i].setMaterial(m);
 				
