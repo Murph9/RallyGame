@@ -28,7 +28,7 @@ public class ObjectWorld extends World {
 		TILE_SIZE = 40,
 		SPAWN_RANGE = 40;
 	
-	private static final String ITEM = "assets/objects/tree.blend";
+	private static final String ITEM = "assets/objects/tree_0.blend";
 	
 	private Geometry floor;
 	
