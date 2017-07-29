@@ -9,10 +9,11 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.terrain.noise.basis.FilteredBasis;
 
+import helper.H;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
-import java.nio.FloatBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,18 +21,19 @@ import java.util.logging.Logger;
 public class NoiseBasedWorld extends Terrain
 {
     private Material terrainMaterial;
-    private FilteredBasis filteredBasis;
+    private FilteredBasis[] filteredBasis;
 
     public NoiseBasedWorld(SimpleApplication app, PhysicsSpace physicsSpace, int tileSize, int blockSize, Node rootNode) {
         super(app, physicsSpace, tileSize, blockSize, rootNode, 1);
-        //TODO to not keep using the same chunks try just change the '1'
+        //TODO the 1 defines the save file name, useful for seeding
     }
 
     public final Material getMaterial() { return this.terrainMaterial; }
     public final void setMaterial(Material material) { this.terrainMaterial = material; }
 
-    public final FilteredBasis getFilteredBasis() { return this.filteredBasis; }
-    public final void setFilteredBasis(FilteredBasis basis) { this.filteredBasis = basis; }
+    public final FilteredBasis[] getFilteredBasis() { return this.filteredBasis; }
+    public final void setFilteredBasis(FilteredBasis basis) { setFilteredBasis( new FilteredBasis[]{ basis }); }
+    public final void setFilteredBasis(FilteredBasis[] basis) { this.filteredBasis = basis; }
 
     @Override
     public TerrainChunk getTerrainChunk(TerrainLocation location) {
@@ -50,7 +52,7 @@ public class NoiseBasedWorld extends Terrain
         float[] heightmap = null; 
         File savedFile = new File(System.getProperty("user.home") + "/.murph9/world_" + this.fileSeed + "/" + tqName + ".chunk");
 
-        if (savedFile.exists())
+        if (false && savedFile.exists()) //TODO don't ever go in here for now
         {
             try
             {
@@ -88,7 +90,19 @@ public class NoiseBasedWorld extends Terrain
     	return getHeightmap(tl.getX(), tl.getZ());
     }
     private float[] getHeightmap(int x, int z) {
-        FloatBuffer buffer = this.filteredBasis.getBuffer(x * (this.blockSize - 1), z * (this.blockSize - 1), 0, this.blockSize);
-        return buffer.array();
+    	if (this.filteredBasis == null || this.filteredBasis.length < 1) 
+    	{
+    		try {
+				throw new Exception("No filteredBasis");
+			} catch (Exception e) {
+				e.printStackTrace();
+				return null;
+			}
+    	}
+    	
+        float[] array = this.filteredBasis[0].getBuffer(x * (this.blockSize - 1), z * (this.blockSize - 1), 0, this.blockSize).array();
+        for (int i = 1; i < this.filteredBasis.length - 1; i++)
+        	H.addTogether(array, this.filteredBasis[i].getBuffer(x * (this.blockSize - 1), z * (this.blockSize - 1), 0, this.blockSize).array());
+        return array;
     }
 }

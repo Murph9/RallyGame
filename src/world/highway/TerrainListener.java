@@ -1,21 +1,42 @@
 package world.highway;
 
+import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
+import com.jme3.renderer.queue.RenderQueue.ShadowMode;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
+import com.jme3.scene.instancing.InstancedNode;
 
 import game.App;
 import helper.H;
+import jme3tools.optimize.GeometryBatchFactory;
 import terrainWorld.Terrain;
 import terrainWorld.TerrainChunk;
 import terrainWorld.TileListener;
 
 public class TerrainListener implements TileListener {
 
+	private static final String[] Tree_Strings = new String[] {
+				"assets/objects/tree_0.blend",
+				"assets/objects/tree_1.blend",
+				"assets/objects/tree_2.blend",
+				"assets/objects/tree_3.blend",
+				"assets/objects/tree_4.blend",
+				"assets/objects/tree_5.blend",
+				"assets/objects/tree_6.blend",
+			};
+	
+	private Spatial treeGeoms[] = new Spatial[Tree_Strings.length];
+	
 	private HighwayWorld world;
 	private Terrain terrain;
+	
+	private InstancedNode treeNode = new InstancedNode("tree node");
 	
 	private Vector3f lastPoint;
 	private Vector3f nextPoint;
@@ -25,12 +46,26 @@ public class TerrainListener implements TileListener {
 	private int totalLoaded;
 	private boolean terrainDoneLoading;
 	
-	public TerrainListener(HighwayWorld world, Terrain terrain) {
+	public TerrainListener(HighwayWorld world) {
 		this.world = world;
-		this.terrain = terrain;
+		this.terrain = world.terrain;
 		this.totalChunks = terrain.getTotalVisibleChunks();
 		
+		this.treeNode.setShadowMode(ShadowMode.CastAndReceive);
+		App.rally.getRootNode().attachChild(this.treeNode);
+		
 		H.p("Terrain started with direction: ", angle);
+		
+		for (int i = 0; i < Tree_Strings.length; i++) {
+			Spatial spat = App.rally.getAssetManager().loadModel(TerrainListener.Tree_Strings[i]);
+			if (spat instanceof Node) {
+				for (Spatial s: ((Node) spat).getChildren()) {
+					this.treeGeoms[i] = s;
+				}
+			} else {
+				this.treeGeoms[i] = (Geometry) spat;
+			}
+		}
 		
 		setNextPoint(); //init next point
 	}
@@ -79,6 +114,30 @@ public class TerrainListener implements TileListener {
 			
 			setNextPoint();
 		}
+		
+		//spawn trees on it then
+		/*// TODO please remove comment as we are testing trees
+		Vector3f pos = chunk.getLocalTranslation();
+		int count = 100;
+		for (int i = 0; i < count; i++) {
+			float x = (2*FastMath.rand.nextFloat() - 1)*world.getTileSize() + pos.x;
+			float z = (2*FastMath.rand.nextFloat() - 1)*world.getTileSize() + pos.z;
+			
+			float height = chunk.getHeight(new Vector2f(x,z));
+			if (Float.isNaN(height) || height == 0)
+				continue;
+			
+			Spatial s = treeGeoms[FastMath.nextRandomInt(0, treeGeoms.length-1)].clone();
+			
+			Vector3f newPos = new Vector3f(x, height, z);
+			s.setLocalTranslation(newPos);
+			s.addControl(new RigidBodyControl(0));
+			this.treeNode.attachChild(s);
+			App.rally.getPhysicsSpace().add(s);
+		}
+		
+		GeometryBatchFactory.optimize(this.treeNode);
+		*/
 		return true;
 	}
 	private void setNextPoint() {
@@ -95,7 +154,7 @@ public class TerrainListener implements TileListener {
 		angle += FastMath.DEG_TO_RAD*FastMath.nextRandomFloat()*3*(FastMath.nextRandomFloat() < 0.5f ? -1 : 1);
 		Quaternion rot = new Quaternion().fromAngleAxis(angle, Vector3f.UNIT_Y);
 		
-		Vector3f next = new Vector3f(FastMath.nextRandomFloat()*20 + 15, 0, 0);
+		Vector3f next = new Vector3f(FastMath.nextRandomFloat()*20 + 30, 0, 0);
 		Vector3f point = nextPoint.add(rot.mult(next));
 		
 		lastPoint = nextPoint;
@@ -112,4 +171,8 @@ public class TerrainListener implements TileListener {
 	public boolean tileUnloaded(TerrainChunk terrainChunk) { return true; }
 	@Override
 	public String imageHeightmapRequired(int x, int z) { return null; }
+	
+	public void cleanup() {
+		App.rally.getRootNode().detachChild(treeNode);
+	}
 }

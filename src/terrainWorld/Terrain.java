@@ -568,7 +568,7 @@ public abstract class Terrain extends AbstractAppState implements Closeable
 				e.printStackTrace();
 			}
         	
-            app.enqueue(() -> { //TODO don't put everything in the app, actually do things on the other thread
+            app.enqueue(() -> { //TODO don't put everything in the app, actually do things on the other thread (i.e. make as little as possible inside the enqueue code)
             	rootNode.attachChild(boxNode);
             	for (Vector3f v : location) {
             		int xOff = (int) (FastMath.sign(v.x)*this.blockSize/2);

@@ -52,14 +52,15 @@ public class HighwayWorld extends World {
 	public Terrain terrain;
 	private int blockSize; //(distance between points)/tileSize
 	private int tileSize; //the grid piece size
+	public int getTileSize() { return tileSize; }
 	
 	private List<RoadMesh> roads;
+	private TerrainListener tL;
 	
 	public HighwayWorld() {
 		super("highwayWorldRoot");
-		//TODO this needs the road part, suggest something really simple to start with
-		//uses the TerrainListener class
-		
+
+		//uses the TerrainListener class to get the road bits
 		roads = new LinkedList<RoadMesh>();
 	}
 
@@ -92,6 +93,7 @@ public class HighwayWorld extends World {
 		Material terrainMaterial = createTerrainMaterial(am);
 		newWorld.setMaterial(terrainMaterial);
 
+		/*
 		// create a noise generator
 		FractalSum base = new FractalSum();
 		base.setRoughness(0.7f);
@@ -106,7 +108,7 @@ public class HighwayWorld extends World {
 				return ShaderUtils.clamp(in[0] * 0.5f + 0.5f, 0, 1);
 			}
 		});
-
+		
 		FilteredBasis ground = new FilteredBasis(base);
 
 		PerturbFilter perturb = new PerturbFilter();
@@ -127,52 +129,87 @@ public class HighwayWorld extends World {
 		iterate.setIterations(3); //higher numbers make it really smooth
 
 		ground.addPreFilter(iterate);
+		*/
 
-		newWorld.setFilteredBasis(ground);
+		//larger height variance filter
+		FractalSum base2 = new FractalSum();
+		base2.setFrequency(0.003f); //mountians aren't small
+		base2.setAmplitude(1.5f); //they are big
+		base2.addModulator(new NoiseModulator() {
+			@Override
+			public float value(float... in) {
+				return ShaderUtils.clamp(in[0] * 0.5f + 0.5f, 0, 1);
+			}
+		});
+		FilteredBasis ground2 = new FilteredBasis(base2);
+		PerturbFilter perturb2 = new PerturbFilter();
+		perturb2.setMagnitude(0.119f);
+
+		OptimizedErode therm2 = new OptimizedErode();
+		therm2.setRadius(10);
+		therm2.setTalus(0.011f);
+
+		SmoothFilter smooth2 = new SmoothFilter();
+		smooth2.setRadius(1);
+		smooth2.setEffect(0.7f);
+
+		IterativeFilter iterate2 = new IterativeFilter();
+		iterate2.addPreFilter(perturb2);
+		iterate2.addPostFilter(smooth2);
+		iterate2.setFilter(therm2);
+		iterate2.setIterations(5); //higher numbers make it really smooth
+
+		ground2.addPreFilter(iterate2);
+		
+		newWorld.setFilteredBasis(new FilteredBasis[] { /*ground,*/ ground2 });
 
 		this.terrain = newWorld;
 		App.rally.getStateManager().attach(this.terrain);
 		
 		//set after so the terrain exists first
-		newWorld.setTileListener(new TerrainListener(this, this.terrain));
+		tL = new TerrainListener(this);
+		newWorld.setTileListener(tL);
 	}
 	private Material createTerrainMaterial(AssetManager am) {
-		Material terrainMaterial = new Material(am, "Common/MatDefs/Terrain/HeightBasedTerrain.j3md");
+        Material terrainMaterial = new Material(am, "Common/MatDefs/Terrain/HeightBasedTerrain.j3md");
 
 		float grassScale = 16;
 		float dirtScale = 16;
 		float rockScale = 16;
 
-		// GRASS texture
-		Texture grass = am.loadTexture("assets/terrain/grass.jpg");
-		grass.setWrap(WrapMode.Repeat);
-		terrainMaterial.setTexture("region1ColorMap", grass);
-		terrainMaterial.setVector3("region1", new Vector3f(58*2, 200*2, grassScale));
+		//TODO lighting
+		
+        // GRASS texture
+        Texture grass = am.loadTexture("assets/terrain/grass.jpg");
+        grass.setWrap(WrapMode.Repeat);
+        terrainMaterial.setTexture("region1ColorMap", grass);
+        terrainMaterial.setVector3("region1", new Vector3f(58*2, 200*2, grassScale));
 
-		// DIRT texture
-		Texture dirt = am.loadTexture("assets/terrain/dirt.jpg");
-		dirt.setWrap(WrapMode.Repeat);
-		terrainMaterial.setTexture("region2ColorMap", dirt);
-		terrainMaterial.setVector3("region2", new Vector3f(0, 60*2, dirtScale));
+        // DIRT texture
+        Texture dirt = am.loadTexture("assets/terrain/dirt.jpg");
+        dirt.setWrap(WrapMode.Repeat);
+        terrainMaterial.setTexture("region2ColorMap", dirt);
+        terrainMaterial.setVector3("region2", new Vector3f(0, 60*2, dirtScale));
 
-		// ROCK textures
-		Texture rock = am.loadTexture("assets/terrain/Rock.PNG");
-		rock.setWrap(WrapMode.Repeat);
-		terrainMaterial.setTexture("region3ColorMap", rock);
-		terrainMaterial.setVector3("region3", new Vector3f(198*2, 260*2, rockScale));
+        // ROCK textures
+        Texture rock = am.loadTexture("assets/terrain/Rock.PNG");
+        rock.setWrap(WrapMode.Repeat);
+        terrainMaterial.setTexture("region3ColorMap", rock);
+        terrainMaterial.setVector3("region3", new Vector3f(198*2, 260*2, rockScale));
 
-		terrainMaterial.setTexture("region4ColorMap", rock);
-		terrainMaterial.setVector3("region4", new Vector3f(198*2, 260*2, rockScale));
+        terrainMaterial.setTexture("region4ColorMap", rock);
+        terrainMaterial.setVector3("region4", new Vector3f(198*2, 260*2, rockScale));
 
-		Texture rock2 = am.loadTexture("assets/terrain/rock.jpg");
-		rock2.setWrap(WrapMode.Repeat);
+        Texture rock2 = am.loadTexture("assets/terrain/rock.jpg");
+        rock2.setWrap(WrapMode.Repeat);
 
-		terrainMaterial.setTexture("slopeColorMap", rock2);
-		terrainMaterial.setFloat("slopeTileFactor", 32);
+        terrainMaterial.setTexture("slopeColorMap", rock2);
+        terrainMaterial.setFloat("slopeTileFactor", 32);
 
-		terrainMaterial.setFloat("terrainSize", blockSize);
+        terrainMaterial.setFloat("terrainSize", blockSize);
 
-		return terrainMaterial;
+        return terrainMaterial;
+
 	}
 	
 	protected void generateRoad(Vector3f start, Vector3f end) {
@@ -182,16 +219,23 @@ public class HighwayWorld extends World {
 			return;//????, only happens when someone plays around with the terrain init order and breaks something
 		}
 		
-		if (start == null || end == null || H.v3tov2fXZ(start).subtract(H.v3tov2fXZ(end)).length() == 0)
+		if (start == null || end == null || H.v3tov2fXZ(start).subtract(H.v3tov2fXZ(end)).length() == 0) {
+			H.p("Weird road generated", start, end);
 			return; //no weird roads please
+		}
 		
 		H.e("road: ", start, "-->", end);
 		
+		
 		//TODO suggest this goes in the terrainlistener (maybe rename to roadbuilder)
-		Vector3f dir = end.subtract(start).normalizeLocal();
+		Vector3f dir = end.subtract(start).normalize();
 		float length = end.subtract(start).length();
-		List<Vector3f> list = Arrays.asList(new Vector3f[] { start, start.add(dir.mult(length/3)), end.subtract(dir.mult(length/3)), end });
+		List<Vector3f> list = Arrays.asList(new Vector3f[] { start, start.add(dir.mult(length/3)).add(H.randV3f()), end.subtract(dir.mult(length/3)).add(H.randV3f()), end });
 		RoadMesh m = new RoadMesh(5, 2, list);
+		
+		for (int i = 0; i < list.size(); i++)
+			App.rally.getRootNode().attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Green, list.get(i), 0.2f));
+		
 		roads.add(m);
 		
 		Geometry geo = new Geometry("curvy", m);
@@ -299,6 +343,7 @@ public class HighwayWorld extends World {
 	public void cleanup() {
 		this.rootNode.detachAllChildren();
 		this.terrain.close();
+		this.tL.cleanup();
 		App.rally.getStateManager().detach(this.terrain);
 		
 		super.cleanup();
