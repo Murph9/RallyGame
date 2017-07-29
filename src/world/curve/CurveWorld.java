@@ -77,7 +77,7 @@ public class CurveWorld extends World {
 	
 	private RigidBodyControl c;
 	
-	private static final String Tree_String = "assets/objects/tree.blend";
+	private static final String Tree_String = "assets/objects/tree_0.blend";
 	private Node treeNode;
 	private Spatial treeGeom;
 	
