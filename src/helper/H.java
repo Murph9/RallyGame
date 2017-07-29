@@ -303,6 +303,32 @@ public class H {
 		return new Vector2f(px, py);
 	}
 	
+	
+	//copies to first array
+	public static void addTogether(float[] a, float[] b) {
+		if (a.length != b.length) {
+			H.e("Arrays not the same length: " + a.length + " and " + b.length);
+			return;
+		}
+		for (int i = 1; i < a.length - 1; i++) {
+			a[i] += b[i];
+		}
+	}
+	//copies to new array
+	public static float[] addTogetherNew(float[] a, float[] b) {
+		if (a.length != b.length) {
+			H.e("Arrays not the same length: " + a.length + " and " + b.length);
+			return null;
+		}
+		float[] out = new float[a.length];
+		System.arraycopy(a, 0, out, 0, a.length);
+		for (int i = 1; i < a.length - 1; i++) {
+			out[i] += b[i];
+		}
+		return out;
+	}
+	
+	
 	//http://nghiaho.com/?p=997
 	public static float nearlyAtan(float x) {
 		float xabs = FastMath.abs(x);
@@ -326,6 +352,9 @@ public class H {
 	
 	public static Vector2f v3tov2fXZ(Vector3f v) {
 		return new Vector2f(v.x, v.z);
+	}
+	public static Vector3f randV3f() {
+		return new Vector3f(FastMath.nextRandomFloat()*2-1, FastMath.nextRandomFloat()*2-1, FastMath.nextRandomFloat()*2-1);
 	}
 	
 	public static Vector3f screenTopLeft() {
@@ -372,5 +401,16 @@ public class H {
 	    { 
 	    	return "(" + first + ", " + second + ")"; 
 	    }
+	}
+
+	public static Boolean hasParentNode(Spatial s, Node node) {
+		while (s != null) {
+			if (s == node) {
+				return true;
+			}
+			
+			s = s.getParent();
+		}
+		return false;
 	}
 }
