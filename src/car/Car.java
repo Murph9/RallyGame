@@ -215,7 +215,9 @@ public enum Car {
 			//TODO you can fix the oversteer at high speeds with a diff and different downforce scaling at higher speeds  
 			
 			e_torque = new float[] {0, 300, 450, 500, 530, 550, 500, 400};
-
+			trans_finaldrive = 3.5f;
+			trans_gearRatios = new float[]{-2.9f,3.6f,2.5f,1.8f,1.3f,1.0f,0.84f}; //reverse,gear1,gear2,g3,g4,g5,g6,...
+			
 			e_mass = 20; //TODO underground 2 seems to have very low values like these
 			w_mass = 20;
 			
@@ -232,7 +234,8 @@ public enum Car {
 
 			sus_maxForce = 40000;
 
-			areo_drag = 0.6f;
+			areo_drag = 0.33f;
+			areo_crossSection = 0.59f;
 			
 			brakeMaxTorque = 2500;
 		}

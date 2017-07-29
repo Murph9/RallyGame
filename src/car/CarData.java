@@ -74,8 +74,9 @@ public abstract class CarData {
 	
 	//drag constants
 	public float areo_drag = 1.0f; //squared component
-	public float areo_lineardrag = 0.02f;
+	public float areo_lineardrag = 0.01f;
 	public float areo_downforce = 0.0f; //no cars start with it
+	public float areo_crossSection = 0.47f; //m^2 front area
 
 	public float brakeMaxTorque = 4000;
 	public Vector3f JUMP_FORCE = new Vector3f(0, 5*mass, 0);
