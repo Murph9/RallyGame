@@ -1,5 +1,10 @@
 package world.highway;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
+
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
@@ -46,10 +51,13 @@ public class TerrainListener implements TileListener {
 	private int totalLoaded;
 	private boolean terrainDoneLoading;
 	
+	private Map<Vector3f, Node> treeNodes;
+	
 	public TerrainListener(HighwayWorld world) {
 		this.world = world;
 		this.terrain = world.terrain;
 		this.totalChunks = terrain.getTotalVisibleChunks();
+		this.treeNodes = new HashMap<Vector3f, Node>();
 		
 		this.treeNode.setShadowMode(ShadowMode.CastAndReceive);
 		App.rally.getRootNode().attachChild(this.treeNode);
@@ -102,6 +110,46 @@ public class TerrainListener implements TileListener {
 			terrainDoneLoading = true;
 			initRoads(chunk);
 		}
+		//spawn trees on it
+		Vector3f pos = chunk.getLocalTranslation();
+		if (this.treeNodes.containsKey(pos)) {
+			Node n = this.treeNodes.get(pos);
+			if (n == null) {
+				H.e("no trees with vector: ", chunk.getLocalTranslation(), " :(");
+				return true;
+			}
+			
+			for (Spatial c: n.getChildren()) {
+				App.rally.getPhysicsSpace().add(c);
+			}
+			this.treeNode.attachChild(this.treeNodes.get(pos));
+		} else {
+			//please not twice
+			Node node = new Node("treenode");
+			this.treeNode.attachChild(node);
+			this.treeNodes.put(pos, node);
+			
+			int count = 100;
+			float size = world.getTileSize()/2;
+			for (int i = 0; i < count; i++) {
+				float x = (2*FastMath.rand.nextFloat() - 1)*size + pos.x;
+				float z = (2*FastMath.rand.nextFloat() - 1)*size + pos.z;
+				
+				float height = chunk.getHeight(new Vector2f(x,z));
+				if (Float.isNaN(height) || height == 0)
+					continue;
+				
+				Spatial s = treeGeoms[FastMath.nextRandomInt(0, treeGeoms.length-1)].clone();
+				
+				Vector3f newPos = new Vector3f(x, height, z);
+				s.setLocalTranslation(newPos);
+				s.addControl(new RigidBodyControl(0));
+				node.attachChild(s);
+				App.rally.getPhysicsSpace().add(s);
+			}
+			GeometryBatchFactory.optimize(node);
+		}
+	
 		if (!terrainDoneLoading)
 			return true;
 		
@@ -115,29 +163,6 @@ public class TerrainListener implements TileListener {
 			setNextPoint();
 		}
 		
-		//spawn trees on it then
-		/*// TODO please remove comment as we are testing trees
-		Vector3f pos = chunk.getLocalTranslation();
-		int count = 100;
-		for (int i = 0; i < count; i++) {
-			float x = (2*FastMath.rand.nextFloat() - 1)*world.getTileSize() + pos.x;
-			float z = (2*FastMath.rand.nextFloat() - 1)*world.getTileSize() + pos.z;
-			
-			float height = chunk.getHeight(new Vector2f(x,z));
-			if (Float.isNaN(height) || height == 0)
-				continue;
-			
-			Spatial s = treeGeoms[FastMath.nextRandomInt(0, treeGeoms.length-1)].clone();
-			
-			Vector3f newPos = new Vector3f(x, height, z);
-			s.setLocalTranslation(newPos);
-			s.addControl(new RigidBodyControl(0));
-			this.treeNode.attachChild(s);
-			App.rally.getPhysicsSpace().add(s);
-		}
-		
-		GeometryBatchFactory.optimize(this.treeNode);
-		*/
 		return true;
 	}
 	private void setNextPoint() {
@@ -168,7 +193,18 @@ public class TerrainListener implements TileListener {
 		//TODO use this method to keep it on the other thread?
 	}
 	@Override
-	public boolean tileUnloaded(TerrainChunk terrainChunk) { return true; }
+	public boolean tileUnloaded(TerrainChunk terrainChunk) {
+		Node n = this.treeNodes.get(terrainChunk.getLocalTranslation());
+		if (n == null) {
+			H.e("no trees at: ", terrainChunk.getLocalTranslation(), " :(");
+			return true;
+		}
+		for (Spatial c: n.getChildren()) {
+			App.rally.getPhysicsSpace().remove(c);
+		}
+		this.treeNode.detachChild(n);
+		return true; 
+	}
 	@Override
 	public String imageHeightmapRequired(int x, int z) { return null; }
 	
