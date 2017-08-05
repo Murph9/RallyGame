@@ -464,7 +464,8 @@ public class CarUI extends AbstractAppState {
 			gs.z = 0; //screen has no depth 
 			g2.setLocalTranslation(gcenter.add(gs.mult(25))); //because screen pixels
 			
-			gText.setText("x: " + H.roundDecimal(gs.x, 2) +", y: " + H.roundDecimal(gs.y, 2));
+//			gText.setText("x: " + H.roundDecimal(gs.x, 2) +", y: " + H.roundDecimal(gs.y, 2));
+			gText.setText("x: " + gs.x +", y: " + gs.y);
 		}
 	}
 	

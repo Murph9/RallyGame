@@ -333,41 +333,25 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		engineTorque = getEngineWheelTorque(tpf, velocity.length() * Math.signum(velocity.z));
 		float[] torques = new float[] { 0, 0, 0, 0 };
 
+		//TODO suspect we should be dividing engine torque again (for realism)
 		if (car.driveFront && car.driveRear)
 			engineTorque /= 2; //split up into 2 axles
 		
-		//TODO differential
+		float diffConst = 0.1f; //TODO car property, small=slip large=locked
+//		float diffConst = 0.0001f; //minimum range of this value,(we want diff below to max at 5 using this factor)
+		
 		if (car.driveFront) {
-			torques[0] = engineTorque;
-			torques[1] = engineTorque;
-
-			//https://en.wikipedia.org/wiki/Limited-slip_differential#Basic_principle_of_operation
-			//TODO this all just feels wrong (you also lose a lot of power)
-			//calculate front diff
-			float diff = wheel[0].radSec - wheel[1].radSec; //positive when 0 is faster
-			if (diff > 0) { //check for total != 0 because divide by zero
-//				torques[0] = 0.5f*torques[0] - 0.5f*diff; //limited slip:
-//				torques[1] = 0.5f*torques[1] + 0.5f*diff; //make sure the difference not greater than w_difflock
-			} else {
-//				torques[0] = 0.5f*torques[0] + 0.5f*diff;
-//				torques[1] = 0.5f*torques[1] - 0.5f*diff;
-			}
+			//calc front diff
+			float diff = (wheel[0].radSec - wheel[1].radSec)*FastMath.sign((wheel[0].radSec + wheel[1].radSec)/2);
+			torques[0] = engineTorque*(1f - 2*FastMath.atan(diffConst*diff)/FastMath.PI);
+			torques[1] = engineTorque*(1f + 2*FastMath.atan(diffConst*diff)/FastMath.PI);
 		}
 		if (car.driveRear) {
-			torques[2] = engineTorque;
-			torques[3] = engineTorque;
-			
 			//calc rear diff
-			float diff = wheel[2].radSec - wheel[3].radSec; //positive when 0 is faster
-			if (diff > 0) { //check for total != 0 because divide by zero
-//				torques[2] = 0.5f*torques[2] - 0.5f*diff; //limited slip:
-//				torques[3] = 0.5f*torques[3] + 0.5f*diff; //make sure the difference not greater than w_difflock
-			} else {
-//				torques[2] = 0.5f*torques[2] + 0.5f*diff;
-//				torques[3] = 0.5f*torques[3] - 0.5f*diff;
-			}
+			float diff = (wheel[2].radSec - wheel[3].radSec)*FastMath.sign((wheel[2].radSec + wheel[3].radSec)/2);
+			torques[2] = engineTorque*(1f - 2*FastMath.atan(diffConst*diff)/FastMath.PI);
+			torques[3] = engineTorque*(1f + 2*FastMath.atan(diffConst*diff)/FastMath.PI);
 		}
-
 
 		float maxSlowLat = Float.MAX_VALUE;
 		
