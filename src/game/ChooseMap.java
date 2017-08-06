@@ -30,7 +30,7 @@ public class ChooseMap extends AbstractAppState {
 		App.rally.bullet.setEnabled(true);
 		
 		camera = new BasicCamera("Camera", App.rally.getCamera(), new Vector3f(-70,50,0), new Vector3f(20,1,0));
-		App.rally.getRootNode().attachChild(camera);
+		App.rally.getStateManager().attach(camera);
 		
 		//init gui
 		Container myWindow = new Container();
@@ -97,7 +97,7 @@ public class ChooseMap extends AbstractAppState {
 	}
 
 	public void cleanup() {
-		App.rally.getRootNode().detachChild(camera);
+		App.rally.getStateManager().detach(camera);
 		camera = null;
 		App.rally.getStateManager().detach(world);
 		world = null;

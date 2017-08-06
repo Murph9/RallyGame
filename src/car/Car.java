@@ -171,9 +171,13 @@ public enum Car {
 			driveFront = true;
 			driveRear = true;
 			
-			mass = 3000;
-			w_steerAngle = 0.5f;
+			mass = 1500;
 
+			w_steerAngle = 0.6f;
+			w_mass = 30;
+			w_flatdata = new RocketLatWheel();
+			w_flongdata = new RocketLongWheel();
+			
 			areo_drag = 0.1f;
 			areo_downforce = 200;
 			rollFraction = 0f;
@@ -182,19 +186,16 @@ public enum Car {
 			
 			brakeMaxTorque = 50000;
 
+			e_redline = 15000;
 			e_torque = new float[]{0,210,310,390,460,520,565,600,625,640,650,645,625,580,460,200};
 			for (int i = 0; i < e_torque.length; i++) {
 				e_torque[i] *= 2;
 			}
 			auto_gearDown = 9000;
 			auto_gearUp = 13500;
-			e_redline = 15000;
 			
 			trans_finaldrive = 3.0f;
 			trans_gearRatios = new float[]{-5f,5,3.23f,2.19f,1.71f,1.39f,1.16f,0.93f};
-
-			w_flatdata = new RocketLatWheel();
-			w_flongdata = new RocketLongWheel();
 			
 			nitro_force *= 10;
 		}

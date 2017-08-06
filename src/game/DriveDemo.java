@@ -39,10 +39,10 @@ public class DriveDemo extends DriveSimple {
     	uiNode = new CarUI(cb.get(0));
 		app.getStateManager().attach(uiNode);
 		
-		App.rally.getRootNode().detachChild(camera);
+		App.rally.getStateManager().detach(camera);
 		app.getInputManager().removeRawInputListener(camera);
 		camera = new CarCamera("Camera", App.rally.getCamera(), cb.get(0));
-		App.rally.getRootNode().attachChild(camera);
+		App.rally.getStateManager().attach(camera);
 		app.getInputManager().addRawInputListener(camera);
 		
 //		App.rally.getRootNode().detachChild(minimap.rootNode); //TODO causes crash

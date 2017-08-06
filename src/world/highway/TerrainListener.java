@@ -1,9 +1,7 @@
 package world.highway;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
 
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.math.ColorRGBA;

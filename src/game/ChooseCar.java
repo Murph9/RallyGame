@@ -61,7 +61,7 @@ public class ChooseCar extends AbstractAppState {
 
 		//make camera
 		camera = new BasicCamera("Camera", App.rally.getCamera(), new Vector3f(0,3,7), new Vector3f(0,1.2f, 0));
-		App.rally.getRootNode().attachChild(camera);
+		App.rally.getStateManager().attach(camera);
 		
 		//init gui
 		//info window first so the event listeners can delete it
@@ -141,7 +141,7 @@ public class ChooseCar extends AbstractAppState {
 		App.rally.getStateManager().detach(world);
 		world = null;
 		
-		App.rally.getRootNode().detachChild(camera);
+		App.rally.getStateManager().detach(camera);
 		camera = null;
 	}
 

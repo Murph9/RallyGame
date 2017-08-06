@@ -71,7 +71,7 @@ public class DriveSimple extends AbstractAppState {
 		
 		//initCameras
 		camera = new CarCamera("Camera", App.rally.getCamera(), cb.get(0));
-		App.rally.getRootNode().attachChild(camera);
+		App.rally.getStateManager().attach(camera);
 		app.getInputManager().addRawInputListener(camera);
 		
 		minimap = new MiniMap(cb.get(0));
@@ -88,8 +88,9 @@ public class DriveSimple extends AbstractAppState {
 	@Override
 	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
-		world.setEnabled(enabled); //we kinda don't want the physics running while paused
+		this.world.setEnabled(enabled); //we kinda don't want the physics running while paused
 		App.rally.bullet.setEnabled(enabled);
+		this.camera.setEnabled(enabled);
 		this.cb.setEnabled(enabled);
 	}
 	
@@ -101,8 +102,7 @@ public class DriveSimple extends AbstractAppState {
 		//Hud stuff
 		minimap.update(tpf);
 		
-		//camera
-		camera.myUpdate(tpf);
+//		camera.myUpdate(tpf);
 	}
 	
 	public void next() {
@@ -129,7 +129,8 @@ public class DriveSimple extends AbstractAppState {
 		App.rally.getStateManager().detach(world);
 		world = null;
 		
-		App.rally.getRootNode().detachChild(camera);
+		App.rally.getStateManager().detach(camera);
+		
 		App.rally.getInputManager().removeRawInputListener(camera);
 		camera = null;
 	}

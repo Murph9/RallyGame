@@ -105,22 +105,11 @@ public class Main extends SimpleApplication {
 		settings.setTitle(config.getTitle());
 		settings.setVSync(config.ifVsnyc());
 		
-//		settings.setFrameRate(config.getFrameRate());
+		settings.setFrameRate(config.getFrameRate());
 		app.setSettings(settings);
-		app.setTimer(new NanoTN(config.getFrameRate()));
 		app.setShowSettings(false);
 //		app.setDisplayStatView(false); //shows the triangle count and stuff
 		app.start();
-
-		///////////////////////
-		//Just getting numbers for rotations
-		Quaternion q = new Quaternion();
-		q = q.fromAngleAxis(FastMath.DEG_TO_RAD*(-8), new Vector3f(0,0,1));
-//		H.p(q);
-		//note in the 0,0,0 -> a,b,c
-		//b = turning right and left
-		//a = barrel roll
-		//c = up and down a hill
 	}
 	
 	@Override
@@ -279,23 +268,4 @@ public class Main extends SimpleApplication {
 		return timer;
 	}
 
-}
-
-class NanoTN extends NanoTimer {
-
-	private float frames;
-	NanoTN(float frames) {
-		super();
-		this.frames = frames;
-	}
-
-	public void setFrames(float frames) {
-		//for setting slow mo or something..
-	}
-
-	@Override
-	public float getTimePerFrame() {
-		//return tpf;
-		return 1f/frames; //frame time for 60fps
-	}
 }

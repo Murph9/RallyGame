@@ -13,7 +13,6 @@ import com.simsilica.lemur.Label;
 
 import car.Car;
 import car.CarBuilder;
-import car.CarCamera;
 import car.CarData;
 import car.MyPhysicsVehicle;
 import world.StaticWorld;
@@ -29,8 +28,7 @@ public class Start extends AbstractAppState {
 	private CarBuilder cb;
 	private static CarData carData;
 	
-	private CarCamera camera;
-	private final Vector3f start = new Vector3f(0,10,15);
+	private BasicCamera camera;
 	private final float speed = 4;
 	private float rotation;
 	
@@ -73,10 +71,9 @@ public class Start extends AbstractAppState {
 		cb = new CarBuilder();
 		App.rally.getStateManager().attach(cb);
 		
-		camera = new CarCamera("Cam - Start", App.rally.getCamera(), cb.get(0));
-		//camera = new BasicCamera("Cam -start", App.rally.getCamera(), new Vector3f(-70,50,0), new Vector3f(20,1,0)); 
-		camera.setLocalTranslation(start);
-		App.rally.getRootNode().attachChild(camera);
+		camera = new BasicCamera("Cam -start", App.rally.getCamera(), new Vector3f(-70,50,0), new Vector3f(20,1,0)); 
+		
+		App.rally.getStateManager().attach(camera);
 		
 		myWindow = new Container();
 		App.rally.getGuiNode().attachChild(myWindow);
@@ -142,14 +139,14 @@ public class Start extends AbstractAppState {
 				
 				Quaternion q = new Quaternion();
 				q.fromAngleAxis(rotation, Vector3f.UNIT_Y);
-				camera.setLocalTranslation(q.mult(start).add(car.getPhysicsLocation()));
-				camera.lookAt(car.getPhysicsLocation(), Vector3f.UNIT_Y);
+				//camera.setLocalTranslation(q.mult(start).add(car.getPhysicsLocation()));
+				//camera.lookAt(car.getPhysicsLocation(), Vector3f.UNIT_Y);
 			}
 		}
 	}
 	
 	public void cleanup() {
-		App.rally.getRootNode().detachChild(camera);
+		App.rally.getStateManager().detach(camera);
 		camera = null;
 		
 		App.rally.getRootNode().detachChild(myWindow);
