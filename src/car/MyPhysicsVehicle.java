@@ -304,7 +304,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		//////////////////////////////////////////////////
 		//'Wheel'less forces
 		//linear resistance and quadratic drag (https://en.wikipedia.org/wiki/Automobile_drag_coefficient#Drag_area)
-		float rollingResistance = car.resistance(9.81f); //TODO was removed because i need the normal force to caculate correctly
+		//float rollingResistance = car.resistance(9.81f); //TODO was removed because i need the normal force to caculate correctly
 		
 		float dragx = -(1.225f * car.areo_drag * car.areo_crossSection * velocity.x * FastMath.abs(velocity.x));
 		float dragy = -(1.225f * car.areo_drag * car.areo_crossSection * velocity.y * FastMath.abs(velocity.y));
@@ -314,8 +314,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		Vector3f totalNeutral = new Vector3f(dragx, dragy, dragz);
 		dragForce = totalNeutral.length();
 		
-		float dragDown = -0.5f * car.areo_downforce * 1.225f * (velocity.z*velocity.z); //formula for down force from wikipedia
-		dragDown = 0;
+		float dragDown = -0.5f * car.areo_downforce * 1.225f * (velocity.z*velocity.z); //formula for downforce from wikipedia
 		applyCentralForce(w_angle.mult(totalNeutral.add(0, dragDown, 0))); //apply downforce after
 
 		//////////////////////////////////////////////////
@@ -356,13 +355,13 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		float maxSlowLat = Float.MAX_VALUE;
 		
 		float slip_const = 1;
-		float slowslipspeed = 9;
+		float slowslipspeed = 10; //TODO some proportion of car.w_Off
 		boolean isSlowSpeed = velocity.length() <= slowslipspeed;
 		float rearSteeringCur = 0;
 		
 		if (isSlowSpeed) {
 			slip_const = 2;
-			//we want the force centre inline with the rear wheels at high speed and inline with the center at slow speeds
+			//we want the force centre inline with the center at slow speeds
 			rearSteeringCur = -steeringCur;
 			
 			if (steeringCur != 0) {
@@ -385,8 +384,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			float slipr = slip_const*(wheel[i].radSec*car.w_radius - velocity.z);
 			float slipratio = slipr/slip_div;
 
-			if (ifHandbrake && i > 1) //rearwheels, handbrake like this keeps engine speed and still slips 
-//				slipratio = (0*car.w_radius - velocity.z)/Math.abs(velocity.z);
+			if (ifHandbrake && i > 1) //rearwheels only 
 				wheel[i].radSec = 0;
 
 			float slipangle = 0;

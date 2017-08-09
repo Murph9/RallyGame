@@ -179,7 +179,7 @@ public enum Car {
 			w_flongdata = new RocketLongWheel();
 			
 			areo_drag = 0.1f;
-			areo_downforce = 200;
+			areo_downforce = 20;
 			rollFraction = 0f;
 
 			sus_maxForce = 100*mass;
