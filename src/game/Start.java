@@ -59,6 +59,9 @@ public class Start extends AbstractAppState {
 	public void startDemo() {
 		App.rally.startDemo(this);
 	}
+	public void startDev() {
+		App.rally.startDev(this);
+	}
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -109,6 +112,14 @@ public class Start extends AbstractAppState {
                 @Override
                 public void execute( Button source ) {
                     startDemo();
+                    App.rally.getGuiNode().detachChild(myWindow);
+                }
+            });
+        Button startDev = myWindow.addChild(new Button("Start Dev"));
+        startDev.addClickCommands(new Command<Button>() {
+                @Override
+                public void execute( Button source ) {
+                    startDev();
                     App.rally.getGuiNode().detachChild(myWindow);
                 }
             });

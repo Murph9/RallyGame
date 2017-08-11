@@ -166,7 +166,14 @@ public class Main extends SimpleApplication {
 	public void startDemo(AppState state) {
 		getStateManager().detach(state);
 		
-		drive = new DriveDemo(Car.Runner.get(), DynamicType.Valley.getBuilder()); //make something else it can drive on
+		drive = new DriveDemo(Car.Runner.get(), DynamicType.Valley.getBuilder()); //TODO make something else it can drive on
+		getStateManager().attach(drive);
+	}
+	
+	public void startDev(AppState state) {
+		getStateManager().detach(state);
+		
+		drive = new DriveDev(Car.Rocket.get(), new FlatWorld());
 		getStateManager().attach(drive);
 	}
 	

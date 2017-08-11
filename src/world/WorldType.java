@@ -11,6 +11,7 @@ public enum WorldType {
 	HIGHWAY,
 	
 	BASIC,
+	FLAT,
 	NONE,
 	;
 }
