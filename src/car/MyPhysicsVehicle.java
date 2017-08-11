@@ -412,16 +412,12 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			wf[i].x = -(anglefract/p)*VehicleGripHelper.tractionFormula(car.w_flatdata, p*maxlat) * susforce;
 			
 			//prevents the force from exceeding the centripetal force
-			if (isSlowSpeed) {
-				if (Math.abs(wf[i].x) > maxSlowLat)
-					wf[i].x = FastMath.clamp(wf[i].x, -maxSlowLat, maxSlowLat);
-				
-				if (accelCurrent == 0 && brakeCurrent == 0) { //TODO was meant to fix really slow speed stuff
-					float absT = FastMath.abs(torques[i]);
-					wf[i].z = FastMath.clamp(wf[i].z, -absT, absT);
-				}
+			if (isSlowSpeed && Math.abs(wf[i].x) > maxSlowLat) {
+				//[1-N/M] means the clamp is smaller for smaller speeds
+				float clampValue = Math.abs(maxSlowLat * (1-slowslipspeed/velocity.length()));
+				wf[i].x = FastMath.clamp(wf[i].x, -clampValue, clampValue);
 			}
-				
+			
 			wheel[i].skid = p;
 			//add the wheel force after merging the forces
 			float totalLongForce = torques[i] - wf[i].z - (brakeCurrent*car.brakeMaxTorque*Math.signum(wheel[i].radSec));
