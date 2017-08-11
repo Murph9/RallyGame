@@ -67,6 +67,9 @@ public class RoadMesh extends Mesh {
     public float getWidth() {
         return width;
     }
+    public List<Vector3f> getControlPoints() {
+    	return cp;
+    }
 
     public void updateGeometry(float width, float height, List<Vector3f> controlPoint) {
         updateGeometry(width, height, controlPoint, false, false);

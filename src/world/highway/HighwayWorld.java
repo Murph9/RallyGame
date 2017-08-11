@@ -1,6 +1,5 @@
 package world.highway;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
@@ -212,33 +211,29 @@ public class HighwayWorld extends World {
 
 	}
 	
-	protected void generateRoad(Vector3f start, Vector3f end) {
+	protected void generateRoad(RoadMesh road) {
 		//remember that the chunk hasn't been loaded into the world by here yet
 		if (terrain == null) {
 			H.e("STOP touching the terrain thing that you don't understand.");
 			return;//????, only happens when someone plays around with the terrain init order and breaks something
 		}
 		
-		if (start == null || end == null || H.v3tov2fXZ(start).subtract(H.v3tov2fXZ(end)).length() == 0) {
-			H.p("Weird road generated", start, end);
-			return; //no weird roads please
+		if (road == null) {
+			H.p("Road null");
+			return;
 		}
 		
-		H.e("road: ", start, "-->", end);
 		
+		List<Vector3f> list = road.getControlPoints(); //NO EDITing this object
+		H.e("road: ", list);
+
+		if (App.rally.IF_DEBUG)
+			for (int i = 0; i < list.size(); i++)
+				App.rally.getRootNode().attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Green, list.get(i), 0.2f));
 		
-		//TODO suggest this goes in the terrainlistener (maybe rename to roadbuilder)
-		Vector3f dir = end.subtract(start).normalize();
-		float length = end.subtract(start).length();
-		List<Vector3f> list = Arrays.asList(new Vector3f[] { start, start.add(dir.mult(length/3)).add(H.randV3f()), end.subtract(dir.mult(length/3)).add(H.randV3f()), end });
-		RoadMesh m = new RoadMesh(5, 2, list);
+		roads.add(road);
 		
-		for (int i = 0; i < list.size(); i++)
-			App.rally.getRootNode().attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Green, list.get(i), 0.2f));
-		
-		roads.add(m);
-		
-		Geometry geo = new Geometry("curvy", m);
+		Geometry geo = new Geometry("curvy", road);
 		Material mat = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		mat.setColor("Color", new ColorRGBA(0,0,0,0.5f));
@@ -248,7 +243,7 @@ public class HighwayWorld extends World {
 		geo.setMaterial(mat);
 		rootNode.attachChild(geo);
 		
-		List<Vector3f[]> quads = m.getQuads();
+		List<Vector3f[]> quads = road.getQuads();
 		setHeightsFor(quads, (quad) -> {
 			return new Vector3f[] { quad[0], quad[1], quad[3], quad[2] };
 		});

@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -562,49 +563,47 @@ public abstract class Terrain extends AbstractAppState implements Closeable
     	//run in a threadpool so its loaded after the trigger method (so the chunks exist for worldTiles.get())
     	//all this thread safety...
     	threadpool.submit(() -> {
-        	try {
-				Thread.sleep(1000); //TODO fix this hack
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+            
+        	List<HeightTemp> list = new LinkedList<HeightTemp>();
         	
-            app.enqueue(() -> { //TODO don't put everything in the app, actually do things on the other thread (i.e. make as little as possible inside the enqueue code)
-            	rootNode.attachChild(boxNode);
-            	for (Vector3f v : location) {
-            		int xOff = (int) (FastMath.sign(v.x)*this.blockSize/2);
-            		int zOff = (int) (FastMath.sign(v.z)*this.blockSize/2);
-            		
-            		int x = (int)((v.x + xOff)/(this.blockSize - 1));
-            		int xMod = (int) ((v.x + xOff) % (this.blockSize - 1));
-            		int z = (int)((v.z + zOff)/(this.blockSize - 1));
-            		int zMod = (int) ((v.z + zOff) % (this.blockSize - 1));
-            		TerrainLocation tLoc = new TerrainLocation(x, z);
-            		TerrainChunk tq = this.worldTiles.get(tLoc);
+        	for (Vector3f v : location) {
+        		int xOff = (int) (FastMath.sign(v.x)*this.blockSize/2);
+        		int zOff = (int) (FastMath.sign(v.z)*this.blockSize/2);
+        		
+        		int x = (int)((v.x + xOff)/(this.blockSize - 1));
+        		int xMod = (int) ((v.x + xOff) % (this.blockSize - 1));
+        		int z = (int)((v.z + zOff)/(this.blockSize - 1));
+        		int zMod = (int) ((v.z + zOff) % (this.blockSize - 1));
+        		TerrainLocation tLoc = new TerrainLocation(x, z);
+        		TerrainChunk tq = this.worldTiles.get(tLoc);
 
-            		float height = v.y;
-            		if (tq != null) {
-            			
-            			setTheHeight(v, tq, height);
+        		float height = v.y;
+        		if (tq != null) {
+        			
+        			list.add(new HeightTemp(v, tq, height));
 
-            			//fixes the height between chunks
-            			if ((v.x != 0 && xMod == 0) || (v.z != 0 && zMod == 0)) {
-            				if ((v.x != 0 && xMod == 0))
-                				x -= FastMath.sign(v.x);
-	            			if (v.z != 0 && zMod == 0)
-	            				z -= FastMath.sign(v.z);
-	                		tLoc = new TerrainLocation(x, z);
-	                		tq = this.worldTiles.get(tLoc);
-	                		if (tq != null)
-	                			setTheHeight(v, tq, height);
-	                		else
-	                			H.e("!!!! Terrain: no joined chunk.", v, tLoc);
-            			}
-            		} else {
-		            	v.y = height;
-		            	H.e("!!!! No TerrainChunk for:", v, x, z, locX, locZ, "tiles #:", this.worldTiles.size());
-            		}
-            	}
-            	
+        			//fixes the height between chunks
+        			if ((v.x != 0 && xMod == 0) || (v.z != 0 && zMod == 0)) {
+        				if ((v.x != 0 && xMod == 0))
+            				x -= FastMath.sign(v.x);
+            			if (v.z != 0 && zMod == 0)
+            				z -= FastMath.sign(v.z);
+                		tLoc = new TerrainLocation(x, z);
+                		tq = this.worldTiles.get(tLoc);
+                		if (tq != null)
+                			list.add(new HeightTemp(v, tq, height));
+                		else
+                			H.e("!!!! Terrain: no joined chunk.", v, tLoc); //TODO probably tried to set height before the other bit was added
+        			}
+        		} else {
+	            	v.y = height; //TODO probably tried to set height before the other bit was added
+	            	H.e("!!!! No TerrainChunk for:", v, x, z, locX, locZ, "tiles #:", this.worldTiles.size());
+        		}
+        	}
+        	app.enqueue(() -> {
+        		for (HeightTemp ht: list)
+        			setTheHeight(ht);
+        		
             	//update all the terrain things
             	for (TerrainChunk tc: this.worldTiles.values()) {
             		tc.updateModelBound();
@@ -622,20 +621,32 @@ public abstract class Terrain extends AbstractAppState implements Closeable
         			physicsSpace.add(c);
             	}
             	
+            	rootNode.attachChild(boxNode);
+            	
             	if (App.rally.IF_DEBUG)
             		GeometryBatchFactory.optimize(boxNode);
             });
         });
     }
-    
+    private class HeightTemp {
+    	Vector3f v;
+    	TerrainChunk tc;
+    	float height;
+    	
+    	public HeightTemp(Vector3f v, TerrainChunk tc, float height) {
+    		this.v = v;
+    		this.tc = tc;
+    		this.height = height;
+    	}
+    }
     private Node boxNode = new Node("box node");
-    private void setTheHeight(Vector3f v, TerrainChunk tc, float height) {
-    	Vector3f v2 = v.subtract(tc.getLocalTranslation().mult(1/tc.getWorldScale().x));
-    	tc.setHeight(H.v3tov2fXZ(v2), height/this.worldHeight);
+    private void setTheHeight(HeightTemp ht) {
+    	Vector3f v2 = ht.v.subtract(ht.tc.getLocalTranslation().mult(1/ht.tc.getWorldScale().x));
+    	ht.tc.setHeight(H.v3tov2fXZ(v2), ht.height/this.worldHeight);
 
     	if (App.rally.IF_DEBUG) {
-    		H.p("Set height", v, tc);
-    		boxNode.attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Brown, v, 0.1f));
+    		H.p("Set height", ht.v, ht.tc);
+    		boxNode.attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Brown, ht.v, 0.1f));
     	}
     }
 

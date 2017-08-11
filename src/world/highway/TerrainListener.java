@@ -1,6 +1,8 @@
 package world.highway;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.jme3.bullet.control.RigidBodyControl;
@@ -22,6 +24,7 @@ import terrainWorld.Terrain;
 import terrainWorld.TerrainChunk;
 import terrainWorld.TileListener;
 
+//TODO rename to road maker or something
 public class TerrainListener implements TileListener {
 
 	private static final String[] Tree_Strings = new String[] {
@@ -172,7 +175,11 @@ public class TerrainListener implements TileListener {
 		
 		lastPoint = lastPoint == null ? new Vector3f(Vector3f.ZERO) : lastPoint;
 
-		world.generateRoad(lastPoint, nextPoint);
+		Vector3f dir = nextPoint.subtract(lastPoint).normalize();
+		float length = nextPoint.subtract(lastPoint).length();
+		List<Vector3f> list = Arrays.asList(new Vector3f[] { lastPoint, lastPoint.add(dir.mult(length/3)).add(H.randV3f()), nextPoint.subtract(dir.mult(length/3)).add(H.randV3f()), nextPoint });
+		RoadMesh m = new RoadMesh(5, 2, list);
+		world.generateRoad(m);
 		
 		angle += FastMath.DEG_TO_RAD*FastMath.nextRandomFloat()*3*(FastMath.nextRandomFloat() < 0.5f ? -1 : 1);
 		Quaternion rot = new Quaternion().fromAngleAxis(angle, Vector3f.UNIT_Y);
@@ -183,6 +190,7 @@ public class TerrainListener implements TileListener {
 		lastPoint = nextPoint;
 		nextPoint = point;
 		nextPoint.y = 0;
+		H.p("next road point:", nextPoint);
 	}
 	
 	@Override
