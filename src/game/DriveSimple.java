@@ -101,8 +101,6 @@ public class DriveSimple extends AbstractAppState {
 		
 		//Hud stuff
 		minimap.update(tpf);
-		
-//		camera.myUpdate(tpf);
 	}
 	
 	public void next() {

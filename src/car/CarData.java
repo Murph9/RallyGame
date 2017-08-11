@@ -24,6 +24,7 @@ public abstract class CarData {
 	//camera options
 	public Vector3f cam_lookAt = new Vector3f(0,1.3f,0); //top of car usually
 	public Vector3f cam_offset = new Vector3f(0,2.1f,-6); //where the camera is
+	public float cam_shake = 0.000002f;
 	
 	public float rollFraction = 0.5f; //1 = full into roll, 0 = no roll
 	

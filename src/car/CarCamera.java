@@ -49,11 +49,8 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 			c.setLocation(pPos.add(p.car.cam_offset)); //starting position of the camera
 			c.lookAt(pPos.add(p.car.cam_lookAt), new Vector3f(0,1,0)); //look at car
 		}
-		
-		//c.setControlDir(ControlDirection.SpatialToCamera);
 	}
 
-	//TODO possbily use the render method to update the possition of this, which is probably why it needs the frame lock
 	@Override
 	public void update(float tpf) {
 		if (p == null) {
@@ -62,6 +59,10 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 		this.tpf = tpf;
 	}
 	private float tpf;
+	
+	public void setCar(MyPhysicsVehicle p) {
+		this.p = p;
+	}
 	
 	@Override
 	public void render(RenderManager rm) {
@@ -112,6 +113,7 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 		}
 
 		//lastly do a ray cast to make sure that you can still see the car
+		/*//TODO disabled until it actually avoids the car
 		CollisionResults results = new CollisionResults();
 		Vector3f dir = c.getLocation().subtract(carPos.add(p.car.cam_lookAt));
 		Ray ray = new Ray(carPos.add(p.car.cam_lookAt), dir);
@@ -123,9 +125,10 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 				c.setLocation(cr.getContactPoint());
 			}
 		}
+		*/
 		
 		//at high speeds shake the camera a little
-		float shakeFactor = p.vel.length() * p.vel.length() * 0.000002f; //TODO car constant
+		float shakeFactor = p.vel.length() * p.vel.length() * p.car.cam_shake;
 		Vector3f lookAt = carPos.add(p.car.cam_lookAt);
 		lastShake.addLocal(new Vector3f(FastMath.nextRandomFloat(), FastMath.nextRandomFloat(), FastMath.nextRandomFloat()).normalize().mult(shakeFactor*FastMath.nextRandomInt(-1, 1)));
 		if (lastShake.length() > 0.01f)
