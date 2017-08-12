@@ -6,7 +6,7 @@ public abstract class WheelData {
 	//if you ever need the values a# and b# in here again go there ^ for the proper values
 
 	//defaults from here: http://au.mathworks.com/help/physmod/sdl/ref/tireroadinteractionmagicformula.html
-	float B = 10, C = 1.9f, D = 2, E = 0.97f; //2 because its an arcade game
+	public float B = 10, C = 1.9f, D = 2, E = 0.97f; //2 because its an arcade game
 }
 
 class WheelDataLat extends WheelData {

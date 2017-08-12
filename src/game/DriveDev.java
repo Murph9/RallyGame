@@ -34,6 +34,7 @@ import car.*;
 import helper.H;
 
 //TODO appstate instead of drive
+//depends on removing may car related things, so changing will be hard 
 public class DriveDev extends DriveSimple implements RawInputListener {
 
 	private TextField tf;
@@ -147,6 +148,7 @@ public class DriveDev extends DriveSimple implements RawInputListener {
 				if (newWorld != null) {
 					App.rally.getStateManager().detach(world);
 					App.rally.getStateManager().attach(newWorld);
+					world = newWorld;
 					
 					this.cb.get(0).setPhysicsLocation(world.getStartPos());
 				}
@@ -156,24 +158,46 @@ public class DriveDev extends DriveSimple implements RawInputListener {
 			return;
 		}
 		
-		CarData c = this.cb.get(0).car;
+		if (in.length != 2) {
+			H.p("Not correct input: ", in);
+			return;
+		}
+		setField(this.cb.get(0).car, in[0], in[1]);
+	}
+	
+	private void setField(Object obj, String str, String value) {
+		if (str == null) {
+			H.p("Not correct input: ", str);
+			return;
+		}
 		try {
-			if (in.length != 2) {
-				H.p("Not correct input: ", in);
-				return;
-			}
+			String[] parts = str.split("\\."); //follow prop.field.mass
 			
-			Field f = c.getClass().getField(in[0]);
-			//TODO non float fields
-			
-			if (f.getType() == float.class) {
-				f.setFloat(c, Float.parseFloat(in[1]));
-				reloadCar();
-			} else {
-				H.e("CAN'T SET non-float fields");
+			for (String field: parts) {
+				Class<?> clazz = obj.getClass();
+				Field f = clazz.getField(field);
+				Boolean set = false;
+				if (f.getType() == float.class) {
+					f.setFloat(obj, Float.parseFloat(value));
+					set = true;
+				} else if (f.getType() == int.class) {
+					f.setInt(obj, Integer.parseInt(value));
+					set = true;
+				} else { //TODO check anything else
+					f.set(obj, value);
+					set = true;
+				}
+				
+				if (set) {
+					reloadCar();
+					break;
+				}
+				obj = f.get(obj);
 			}
+
 		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
 			e.printStackTrace();
+			H.p("Remember this can only set public fields");
 			return;
 		}
 	}
