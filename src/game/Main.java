@@ -210,11 +210,9 @@ public class Main extends SimpleApplication {
 		AppStateManager state = getStateManager();
 		
 		if (app instanceof Start) {
-//			App.rally.stop();
-//			return;
-			
 			state.detach(start);
 			startChooseCar();
+
 		} else if (app instanceof ChooseCar) {
 			state.detach(chooseCar);
 			startChooseMap();

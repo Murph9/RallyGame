@@ -78,7 +78,20 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 		
 		Vector3f carPos = p.carRootNode.getLocalTranslation();
 		
-		Vector3f vec1 = p.carRootNode.getLocalRotation().mult(new Vector3f(0, 0, 1)).normalize();
+		Quaternion pRot = p.carRootNode.getLocalRotation();
+		
+		if (!FastMath.approximateEquals(rotRad, 0)) {
+			lastTimeout += tpf;
+			if (lastTimeout > 2) { //TODO static number/setting
+				rotRad *= 0.6f; //reset to back of car slowly TODO static number/setting
+			}
+			
+			Quaternion q = new Quaternion();
+			q.fromAngleAxis(rotRad*ROT_SPEED, p.up);
+			pRot.multLocal(q);
+		}
+		
+		Vector3f vec1 = pRot.mult(new Vector3f(0, 0, 1)).normalize();
 		prevVel.interpolateLocal(p.vel.normalize(), 1f*tpf);
 		
 		Vector3f vec = new Vector3f();
@@ -98,19 +111,6 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 		prevPos = next; 
 		
 		c.setLocation(prevPos); //already set for next frame
-		
-		if (rotRad != 0) {
-			lastTimeout += tpf;
-			if (lastTimeout > 2) { //TODO static number
-				rotRad = 0; //reset to back of car
-			}
-			
-			Quaternion q = new Quaternion();
-			q.fromAngleAxis(rotRad*ROT_SPEED, p.up);
-			
-			Vector3f carForward = p.vel.normalize();
-			c.setLocation(carPos.add(q.mult(carForward)));
-		}
 
 		//lastly do a ray cast to make sure that you can still see the car
 		/*//TODO disabled until it actually avoids the car
