@@ -33,8 +33,7 @@ import com.simsilica.lemur.TextField;
 import car.*;
 import helper.H;
 
-//TODO appstate instead of drive
-//depends on removing may car related things, so changing will be hard 
+
 public class DriveDev extends DriveSimple implements RawInputListener {
 
 	private TextField tf;
@@ -65,8 +64,8 @@ public class DriveDev extends DriveSimple implements RawInputListener {
 		super.update(tpf);
 	}
 
-	//TODO interface output
-	//TODO tab complete
+	//TODO interface feedback
+	//TODO tab complete fields
 	private void parseInput(String input) {
 		input = input.replace("=", ""); //no equals
 		
@@ -89,7 +88,7 @@ public class DriveDev extends DriveSimple implements RawInputListener {
 				World newWorld = null;
 				switch (type) {
 					case OBJECT:
-						newWorld = new ObjectWorld(); //TODO move to WorldType enum
+						newWorld = new ObjectWorld(); //TODO move constructors to WorldType enum
 						break;
 						
 					case FULLCITY:
@@ -183,7 +182,7 @@ public class DriveDev extends DriveSimple implements RawInputListener {
 				} else if (f.getType() == int.class) {
 					f.setInt(obj, Integer.parseInt(value));
 					set = true;
-				} else { //TODO check anything else
+				} else { //TODO any other types?
 					f.set(obj, value);
 					set = true;
 				}

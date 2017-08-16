@@ -24,8 +24,6 @@ import helper.H;
 
 public class CarCamera extends AbstractAppState implements RawInputListener {
 
-	//TODO: seems like nfs most wanted is (velocity + some gforce value + fancy AAA stuff) 
-	
 	private Camera c;
 	private MyPhysicsVehicle p;
 	private Vector3f prevVel; //for smoothing the velocity vector
@@ -113,7 +111,7 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 		c.setLocation(prevPos); //already set for next frame
 
 		//lastly do a ray cast to make sure that you can still see the car
-		/*//TODO disabled until it actually avoids the car
+		/*//TODO disabled until it actually avoids the car model
 		CollisionResults results = new CollisionResults();
 		Vector3f dir = c.getLocation().subtract(carPos.add(p.car.cam_lookAt));
 		Ray ray = new Ray(carPos.add(p.car.cam_lookAt), dir);

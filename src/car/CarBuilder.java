@@ -28,12 +28,8 @@ public class CarBuilder extends AbstractAppState {
 	HashMap<Integer, MyVC> cars;
 	Node rootNode;
 
-	//settings
-	boolean soundEnabled;
-	
 	public CarBuilder() {
 		cars = new HashMap<>();
-		soundEnabled = true;
 		rootNode = new Node("Car Builder Root");
 		
 		App.rally.getRootNode().attachChild(rootNode);
@@ -46,7 +42,9 @@ public class CarBuilder extends AbstractAppState {
 	
 	public void setEnabled(boolean state) {
 		super.setEnabled(state);
-		soundEnabled = state;
+		for (Integer i : cars.keySet()) {
+			cars.get(i).enableSound(state);
+		}
 	}
 	
 	//TODO this should be giving the ai
@@ -67,25 +65,18 @@ public class CarBuilder extends AbstractAppState {
 		} else {
 			carmodel = (Node) am.loadModel(car.carModel);
 
-			//TODO requires another library to be included in the project
-//			TextureKey key = new TextureKey("Textures/Sky/Bright/BrightSky.dds", true);
-//			key.setGenerateMips(true);
-			//key.setAsCube(true); //TODO 3.1 not valid
-//			final Texture tex = am.loadTexture(key);
-
+			//TODO car reflection
 			for (Geometry g: H.getGeomList((Node)carmodel)) {  
 				Material m = g.getMaterial();
 				if (!m.getMaterialDef().getName().equals("Unshaded")) { //this material type not correct for these settings
 					m.setBoolean("UseMaterialColors", true);
-//					if (aPlayer) //player gets reflections
-//						m.setTexture("EnvMap", tex);
 					m.setVector3("FresnelParams", new Vector3f(0.05f, 0.18f, 0.11f));
 				}
 				g.setMaterial(m);
 			}
 		}
 
-		//its possible to shift the center of gravity offset (TODO add to CarData possibly)
+		//its possible to shift the center of gravity offset (TODO add to CarData)
 		//Convex collision shape or hull might be faster here)
 		CompoundCollisionShape compoundShape = new CompoundCollisionShape();
 		compoundShape.addChildShape(CollisionShapeFactory.createDynamicMeshShape(carmodel), new Vector3f(0,0,0));
@@ -115,7 +106,7 @@ public class CarBuilder extends AbstractAppState {
 			player.attachAI(new DriveAtAI(player, get(0)));
 		}
 		
-		if (aPlayer && soundEnabled) {
+		if (aPlayer) {
 			player.giveSound(new AudioNode(am, "assets/sound/engine.wav", AudioData.DataType.Buffer));
 		}
 		
@@ -147,11 +138,7 @@ public class CarBuilder extends AbstractAppState {
 		if (!isEnabled())
 			return;
 		
-		if (cars.isEmpty())
-			return;
-		
-		//TODO it can pause me itself thanks
-		if (App.rally.drive != null && App.rally.drive.isEnabled()) { //otherwise they update while paused..
+		if (!cars.isEmpty() && this.isEnabled()) {
 			for (Integer i : cars.keySet()) {
 				cars.get(i).myUpdate(tpf);
 			}

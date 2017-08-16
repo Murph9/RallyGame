@@ -63,7 +63,7 @@ public interface WP {
 	//shouldn't change per model in the set
 	float getScale();
 	boolean needsMaterial();
-	//boolean canMirror(); //TODO if you are ever thinking of trying to make the inverses: DO NOT - [5]hrs wasted so far
+	//boolean canMirror(); //This is commented out so if you are ever thinking of trying to make the inverses: DO NOT - [5]hrs wasted so far
 	
 	//change per model
 	String getName();

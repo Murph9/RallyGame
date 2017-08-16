@@ -134,7 +134,6 @@ public class ChooseCar extends AbstractAppState {
 
 
 	public void cleanup() {
-		//TODO i know theres got to be something else.
 		App.rally.getStateManager().detach(cb);
 		cb = null;
 		

@@ -43,7 +43,9 @@ public abstract class CarData {
 	public float w_width = 0.15f; //m
 	public float w_radius = 0.3f; //m
 	public float w_mass = 75; //kg
-	public float w_difflock = 0.5f; //percentage speed difference on one axle //TODO not working right
+	public float w_difflock = 0.1f;
+	//small=slip large=locked
+	//0.0001f < x < 5 i think is a good range
 	
 	//TODO make front and back independant (maybe even each wheel)
 	public Vector3f[] w_pos = new Vector3f[4];
@@ -66,11 +68,10 @@ public abstract class CarData {
 	
 	public float susCompression() { return sus_compValue * 2 * FastMath.sqrt(sus_stiffness); }
 	public float susDamping() { return sus_dampValue * 2 * FastMath.sqrt(sus_stiffness); }
-	public float sus_maxForce = 50*mass; //TODO '50' is a random number (v2 was 25)
+	public float sus_maxForce = 50*mass; //TODO '50' is a random number
 	public float sus_maxTravel = 50; //cms
 	
-	//jme3 grip constants
-	//my physics works with 0f, but feels 'tighter' with it: 1.0f because i don't really have slow physics yet
+	//jme3 grip constant is always off
 	public float wheelBasicSlip = 0;
 	
 	//drag constants
@@ -86,7 +87,8 @@ public abstract class CarData {
 	
 	//this one is from the notes, is a ~1999 corvette c6 
 	public float[] e_torque = new float[]{0,390,445,460,480,475,360,10}; //starts at 0 rpm, steps every 1000rpm (until done)
-		//TODO maybe 500 rpm splits (will get better peaks)
+	//found a porsche boxter engine curve:
+//	public float[] e_torque = new float[]{0,223,250,280,300,310,280,245,10};
 	
 	public int auto_gearDown = 2400; //rpm triggering a gear down
 	public int auto_gearUp = 5500; //rpm triggering a gear up
@@ -95,15 +97,14 @@ public abstract class CarData {
 	public float e_compression = 0.1f; //is going to be multiplied by the RPM
 	public float e_mass = 30; //kg, this is the interia of the engine, 100 is high	
 	
-	public float trans_effic = 0.75f; //TODO apparently 0.7 is common (power is lost to rotating things)
+	//TODO check hoursepowercurves are on crank to use this as anything other than 1
+	public float trans_effic = 0.75f; //apparently 0.7 is common (power is lost to rotating things)
 	public float trans_finaldrive = 3.0f; //helps set the total drive ratio
 	public float[] trans_gearRatios = new float[]{-2.9f,3.6f,2.5f,1.8f,1.3f,1.0f,0.74f}; //reverse,gear1,gear2,g3,g4,g5,g6,...
 	
-	//TODO i found a porsche boxter engine curve:
-//	public float[] torque = new float[]{0,223,250,280,300,310,280,245,10};
 
 	public boolean nitro_on = true;
-	public float nitro_force = 300; //TODO find a good number (this is torque as far as i can tell)
+	public float nitro_force = 300;
 	public float nitro_rate = 1;
 	public float nitro_max = 15;
 	

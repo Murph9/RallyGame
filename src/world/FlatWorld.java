@@ -53,7 +53,7 @@ public class FlatWorld extends World {
 
 	@Override
 	public void update(float tpf) {
-		//nothing
+		//TODO mod 1000 the car pos, so the grounds bumps don't occur
 		Vector3f pos = App.rally.getCamera().getLocation();
 		pos.y = 0;
 		startGeometry.setLocalTranslation(pos);

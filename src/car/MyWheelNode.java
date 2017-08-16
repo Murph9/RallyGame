@@ -25,7 +25,8 @@ import game.App;
 @SuppressWarnings("unused")
 public class MyWheelNode extends Node {
 
-	public static final boolean ifSmoke = false; //TODO fix on pausing
+	public static final boolean ifSmoke = false;
+	
 	private static final int[] indexes = { 2,0,1, 1,3,2 }; //tyre marks vertex order
 	private static final Vector2f[] texCoord = new Vector2f[] { //texture of quad with order
 		new Vector2f(0, 0), new Vector2f(0, 1), new Vector2f(1, 0), new Vector2f(1, 1),
@@ -140,7 +141,7 @@ public class MyWheelNode extends Node {
 		mesh.updateBound();
 		Geometry geo = new Geometry("MyMesh", mesh);
 		
-		//TODO better
+		//TODO better scaling on grip value
 		Material mat = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		mat.setColor("Color", new ColorRGBA(0,0,0,clampSkid));

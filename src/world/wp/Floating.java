@@ -71,8 +71,6 @@ public enum Floating implements WP {
         	waterProcessor.setWaterDepth(40);         // transparency of water
         	waterProcessor.setDistortionScale(0.5f);  // strength of waves (default = 0.2)
         	waterProcessor.setWaveSpeed(0.05f);       // speed of waves
-        	waterProcessor.setWaterColor(ColorRGBA.Green); //TODO actually make it green
-        	
         	waterProcessor.setReflectionScene(App.rally.getRootNode());
         	
         	// we set the water plane
@@ -91,18 +89,6 @@ public enum Floating implements WP {
         	water.setShadowMode(ShadowMode.Receive);
         	water.setMaterial(waterProcessor.getMaterial());
         	rootNode.attachChild(water);
-        	
-        	//add lastly a plane just under it so you don't fall forever
-        	///* TODO
-        	Plane under = new Plane(Vector3f.UNIT_Y, waterLocation.add(0,1.75f,0).dot(Vector3f.UNIT_Y));
-        	PlaneCollisionShape p = new PlaneCollisionShape(under);
-        	
-        	RigidBodyControl underp = new RigidBodyControl(p, 0);
-//	        	p.addControl(underp);
-    		underp.setKinematic(false);
-//    		App.rally.drive.getPhysicsSpace().add(underp); //TODO add back in
-//	    		this.attachChild(p);
-    		//*/
 		}
 		
 		public void cleanup() {

@@ -61,7 +61,6 @@ public class FullCityWorld extends World {
 	private void placeTile(int x, int y) {
 		if ((x < 0 || x >= GRID_SIZE) || (y < 0 || y >= GRID_SIZE)) {
 			//out of bounds
-			//TODO do something on the boundry (and make sure it happens only once)
 			return;
 		}
 		

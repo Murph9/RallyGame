@@ -156,7 +156,7 @@ public class LRoadGenerator {
 				return null;
 			}
 			
-			//TODO something about trying again
+			//try again?
 		}
 		
 		for (Vector3f b: buildings) {

@@ -48,15 +48,12 @@ public enum Valley implements WP {
 		return endNode;
 	}
 	
-	//TODO textures
-	
 	static class Builder extends DefaultBuilder {
 		Builder() {
 			super(Valley.values());
 		}
 		
 		protected void selectNewPiece() {
-			//TODO
 			List<WPObject> wpoList = new ArrayList<>();
 			for (WPObject w: wpos) {
 				if (nextNode == null || nextNode == w.wp.startNode()) {

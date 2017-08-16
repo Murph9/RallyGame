@@ -136,7 +136,7 @@ public class Main extends SimpleApplication {
 		GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
 		
 		InputMapper inputMapper = GuiGlobals.getInstance().getInputMapper();
-		inputMapper.release(); //TODO no keyboard inputs please (causes weird issues)
+		inputMapper.release(); //no keyboard inputs after init
 		
 		sky = new SkyState(); //lighting and shadow stuff is global
 		getStateManager().attach(sky);
@@ -145,7 +145,7 @@ public class Main extends SimpleApplication {
 		getStateManager().attach(start);
 		
 		bullet = new BulletAppState();
-    	//bullet.setDebugEnabled(true); //TODO 3.1 beta-1 still broken
+    	//bullet.setDebugEnabled(true); //broken in 3.1
 		//getPhysicsSpace().setMaxSubSteps(4);
 		getStateManager().attach(bullet);
 		
@@ -166,7 +166,7 @@ public class Main extends SimpleApplication {
 	public void startDemo(AppState state) {
 		getStateManager().detach(state);
 		
-		drive = new DriveDemo(Car.Runner.get(), DynamicType.Valley.getBuilder()); //TODO make something else it can drive on
+		drive = new DriveDemo(Car.Runner.get(), DynamicType.Valley.getBuilder()); //TODO allow other tracks
 		getStateManager().attach(drive);
 	}
 	

@@ -33,6 +33,8 @@ import helper.H;
 //http://www.edy.es/dev/2011/12/facts-and-myths-on-the-pacejka-curves/
 //slow speed: http://au.mathworks.com/help/physmod/sdl/ref/tiremagicformula.html
 
+//TODO could look into the brush tyre model
+
 public class MyPhysicsVehicle extends PhysicsVehicle {
 
 	//skid stuff
@@ -264,6 +266,15 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		engineSound.play();
 		carRootNode.attachChild(engineSound);
 	}
+	public void enableSound(boolean value) {
+		if (engineSound == null)
+			return;
+		
+		if (value)
+			engineSound.play();
+		else
+			engineSound.pause();
+	}
 
 	public void attachAI(CarAI ai) {
 		this.ai = ai;
@@ -332,30 +343,27 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		engineTorque = getEngineWheelTorque(tpf, velocity.length() * Math.signum(velocity.z));
 		float[] torques = new float[] { 0, 0, 0, 0 };
 
-		//TODO suspect we should be dividing engine torque again (for realism)
+		//TODO suspect we should be dividing engine torque again (for realism, but not fun)
 		if (car.driveFront && car.driveRear)
 			engineTorque /= 2; //split up into 2 axles
-		
-		float diffConst = 0.1f; //TODO car property, small=slip large=locked
-//		float diffConst = 0.0001f; //minimum range of this value,(we want diff below to max at 5 using this factor)
 		
 		if (car.driveFront) {
 			//calc front diff
 			float diff = (wheel[0].radSec - wheel[1].radSec)*FastMath.sign((wheel[0].radSec + wheel[1].radSec)/2);
-			torques[0] = engineTorque*(1f - 2*FastMath.atan(diffConst*diff)/FastMath.PI);
-			torques[1] = engineTorque*(1f + 2*FastMath.atan(diffConst*diff)/FastMath.PI);
+			torques[0] = engineTorque*(1f - 2*FastMath.atan(car.w_difflock*diff)/FastMath.PI);
+			torques[1] = engineTorque*(1f + 2*FastMath.atan(car.w_difflock*diff)/FastMath.PI);
 		}
 		if (car.driveRear) {
 			//calc rear diff
 			float diff = (wheel[2].radSec - wheel[3].radSec)*FastMath.sign((wheel[2].radSec + wheel[3].radSec)/2);
-			torques[2] = engineTorque*(1f - 2*FastMath.atan(diffConst*diff)/FastMath.PI);
-			torques[3] = engineTorque*(1f + 2*FastMath.atan(diffConst*diff)/FastMath.PI);
+			torques[2] = engineTorque*(1f - 2*FastMath.atan(car.w_difflock*diff)/FastMath.PI);
+			torques[3] = engineTorque*(1f + 2*FastMath.atan(car.w_difflock*diff)/FastMath.PI);
 		}
 
 		float maxSlowLat = Float.MAX_VALUE;
 		
 		float slip_const = 1;
-		float slowslipspeed = 10; //TODO some proportion of car.w_Off
+		float slowslipspeed = 10; //TODO some proportion of car.w_Off, so cars don't feel so weird
 		boolean isSlowSpeed = velocity.length() <= slowslipspeed;
 		float rearSteeringCur = 0;
 		
@@ -580,8 +588,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		}
 		
 	}
-
-	//TODO put some kind of brakes on when going slow
 	
 	private float getMaxSteerAngle(float trySteerAngle) {
 		Vector3f local_vel = getPhysicsRotationMatrix().invert().mult(this.vel);
@@ -619,7 +625,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		setLinearVelocity(new Vector3f());
 		setAngularVelocity(new Vector3f());
 
-		this.curRPM = 1000; //TODO create idle value in cardata
+		this.curRPM = 1000; //TODO CarData field
 		for (MyWheelNode w: this.wheel) {
 			w.radSec = 0; //stop rotation of the wheels
 		}
@@ -670,7 +676,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		}
 	}
 	
-	//TODO format in grid
 	public String statsString() {
 		Vector3f pos = this.getPhysicsLocation();
 		return "x:"+H.roundDecimal(pos.x, 2) + ", y:"+H.roundDecimal(pos.y, 2)+", z:"+H.roundDecimal(pos.z, 2) +
@@ -716,10 +721,7 @@ class VehicleGripHelper {
 	}
 	
 	//steering factor from: http://www.racer.nl/reference/carphys.htm#linearity
-	//TODO use
 	static double linearise(double input, double factor) {
 		return input*factor + (1 - factor) * Math.pow(input, 3);
 	}
-	
-	//TODO could look into the brush tyre model
 }

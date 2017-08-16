@@ -66,7 +66,7 @@ public enum Car {
 			e_redline = 6800;
 			
 			//TODO testing
-			e_compression = 0;
+			e_compression = 4;
 			e_mass = 20;
 			
 			trans_effic = 0.85f;
@@ -102,7 +102,7 @@ public enum Car {
 			//change wheel size
 			w_radius = 0.575f/2f;
 			sus_restLength = 0.2f;
-			rollFraction = 0.1f; //TODO not enough
+			rollFraction = 0.2f;
 			
 			auto_gearDown = 2000;
 			auto_gearUp = 5600; //guessed
@@ -208,19 +208,14 @@ public enum Car {
 		Runner() {
 			carModel = dir+"track1_2.blend";
 
-			
-//			w_zOff = 1.3f;
-//			w_yOff = 0.2f;
-//			setw_Pos();
-			
-			//TODO you can fix the oversteer at high speeds with a diff and different downforce scaling at higher speeds  
+			//TODO you can fix the oversteer at high speeds with a proper diff and different downforce scaling at higher speeds  
 			
 			e_torque = new float[] {0, 300, 450, 500, 530, 550, 500, 400};
 			trans_finaldrive = 3.5f;
 			trans_gearRatios = new float[]{-2.9f,3.6f,2.5f,1.8f,1.3f,1.0f,0.84f}; //reverse,gear1,gear2,g3,g4,g5,g6,...
 			
 			e_mass = 20; //TODO underground 2 seems to have very low values like these
-			w_mass = 20;
+			w_mass = 10;
 			
 			auto_gearDown = 4000;
 			auto_gearUp = 6500;

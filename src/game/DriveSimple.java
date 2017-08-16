@@ -15,7 +15,7 @@ import com.jme3.input.Joystick;
 import car.*;
 import helper.H;
 
-//TODO there is another appstate to try here called (base|basic?)appstate
+
 public class DriveSimple extends AbstractAppState {
 	
 	public DriveMenu menu;

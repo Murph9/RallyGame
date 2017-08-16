@@ -61,16 +61,12 @@ Later Things:
 //https://en.wikipedia.org/wiki/Diamond-square_algorithm
 //jme3test.terrain.TerrainTestAdvanced.java
 
-//TODO reaching the 'gap' in the terrain edge and (casting a shadow over it?) causes a crash
-
-//TODO cleanup properly, we keep hiting the memory limit
-
 //TODO thinking about creating an l-system road network
 //Main notes: http://www.tmwhere.com/city_generation.html
 //Other: https://www.reddit.com/r/gamedev/comments/19ic3j/procedural_content_generation_how_to_generate/
 
-
-//TODO other terrain generation method called PerlinNoise
+//Important:
+//TODO revert code back to l-system generation code, so this is actually a useful class  
 public class CurveWorld extends World {
 	private AbstractHeightMap map;
 	private TerrainQuad terrain;

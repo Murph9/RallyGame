@@ -60,7 +60,6 @@ public class ObjectWorld extends World {
 		matfloor.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		matfloor.setColor("Color", ColorRGBA.Green);
 		
-		//TODO change to a quad
 		Box floorBox = new Box(TILE_SIZE/2, 0.5f, TILE_SIZE/2);
 		
 		floor = new Geometry("floor", floorBox);
@@ -108,7 +107,6 @@ public class ObjectWorld extends World {
 	private void placeTile(int x, int y) {
 		if ((x < 0 || x >= GRID_SIZE) || (y < 0 || y >= GRID_SIZE)) {
 			//out of bounds
-			//TODO do something on the boundry (and make sure it happens only once)
 			return;
 		}
 		

@@ -269,7 +269,7 @@ public class CarUI extends AbstractAppState {
 		for (int i = 0; i < finalRPM+1; i += 1000) {
 			float angle = FastMath.interpolateLinear(i/(float)finalRPM, startAng, finalAng);
 			
-			if (i == redline) { //TODO
+			if (i == redline) { //TODO actually show red
 				//H.p(new Vector3f(FastMath.cos(angle)*radius, FastMath.sin(angle)*radius, 1));
 				Line l = new Line(new Vector3f(FastMath.cos(angle)*radius, FastMath.sin(angle)*radius, 1)
 						, new Vector3f(FastMath.cos(angle)*radius*0.9f, FastMath.sin(angle)*radius*0.9f, -1));
@@ -422,7 +422,7 @@ public class CarUI extends AbstractAppState {
 		setGearDigit(p.curGear);
 		
 		//rpm bar 2
-		rpmMat.setFloat("Threshold", 1 - (p.curRPM/(float)Math.ceil(redline+1000))*(5/(float)8));
+		rpmMat.setFloat("Threshold", Math.min(1, 1 - (p.curRPM/(float)Math.ceil(redline+1000))*(5/(float)8)));
 		
 		angle.setText(p.getAngle()+"'");
 		nitro.setLocalScale(1, p.nitro/p.car.nitro_max, 1);

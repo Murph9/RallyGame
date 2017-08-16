@@ -10,7 +10,6 @@ import car.*;
 import car.ai.FollowWorldAI;
 import helper.H;
 
-//TODO there is another appstate to try here called (base|basic?)appstate
 public class DriveDemo extends DriveSimple {
 
 	public DriveDemo (CarData car, World world) {
