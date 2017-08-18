@@ -41,7 +41,11 @@ Make road our of random beizer curves
   + WIDTH of basic road, similar to TDU: 
   		{45'(edge) 2.5(shoulder) | 4.5 (lane) || 4.5 | 2.5 45'}
 - add grass, trees and rocks all TDU like
-*/
+
+Later Things:
+- intesections
+- other kinds of road
+ */
 
 //uses:
 //https://github.com/JulienGreen/RoadTessalation

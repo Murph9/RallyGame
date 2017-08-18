@@ -1,10 +1,8 @@
-package world.curve;
+package helper;
 
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.terrain.heightmap.AbstractHeightMap;
-
-import helper.H;
 
 public class PerlinNoise extends AbstractHeightMap {
 

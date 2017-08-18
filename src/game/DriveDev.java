@@ -8,7 +8,7 @@ import world.StaticWorld;
 import world.StaticWorldBuilder;
 import world.World;
 import world.WorldType;
-import world.curve.CurveWorld;
+import world.curve.LSystemWorld;
 import world.highway.HighwayWorld;
 import world.wp.WP.DynamicType;
 
@@ -95,8 +95,8 @@ public class DriveDev extends DriveSimple implements RawInputListener {
 						newWorld = new FullCityWorld();
 						break;
 					
-					case CURVE:
-						newWorld = new CurveWorld();
+					case LSYSTEM:
+						newWorld = new LSystemWorld();
 						break;
 						
 					case HIGHWAY:

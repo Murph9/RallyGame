@@ -28,6 +28,7 @@ import game.*;
 import helper.H;
 import settings.Configuration;
 import world.*;
+import world.curve.LSystemWorld;
 import world.highway.HighwayWorld;
 import world.wp.WP.DynamicType;
 
@@ -78,7 +79,7 @@ public class Main extends SimpleApplication {
 	private void loadDefaults() {
 		car = Car.Runner.get();
 		them = Car.Runner.get();
-		world = new HighwayWorld();
+		world = new LSystemWorld();
 		//world alernatives:
 		//	new HighwayWorld();
 		//	new StaticWorldBuilder(StaticWorld.track2);

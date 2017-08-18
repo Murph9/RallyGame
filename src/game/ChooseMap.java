@@ -12,7 +12,7 @@ import com.simsilica.lemur.Label;
 import helper.H;
 import world.*;
 import world.highway.HighwayWorld;
-import world.curve.CurveWorld;
+import world.curve.LSystemWorld;
 import world.wp.WP.DynamicType;
 
 public class ChooseMap extends AbstractAppState {
@@ -144,8 +144,8 @@ public class ChooseMap extends AbstractAppState {
 			case FULLCITY:
 				world = new FullCityWorld();
 				break;
-			case CURVE:
-				world = new CurveWorld();
+			case LSYSTEM:
+				world = new LSystemWorld();
 				break;
 			case HIGHWAY:
 				world = new HighwayWorld();

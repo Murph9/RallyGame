@@ -7,7 +7,7 @@ public enum WorldType {
 	OBJECT,
 	FULLCITY,
 	
-	CURVE,
+	LSYSTEM,
 	HIGHWAY,
 	
 	BASIC,

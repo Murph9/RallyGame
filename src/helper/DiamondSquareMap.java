@@ -1,4 +1,4 @@
-package world.curve;
+package helper;
 
 import java.util.Random;
 
