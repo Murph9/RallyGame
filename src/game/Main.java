@@ -28,8 +28,8 @@ import game.*;
 import helper.H;
 import settings.Configuration;
 import world.*;
-import world.curve.LSystemWorld;
 import world.highway.HighwayWorld;
+import world.lsystem.LSystemWorld;
 import world.wp.WP.DynamicType;
 
 ////TODO Ideas for game modes:

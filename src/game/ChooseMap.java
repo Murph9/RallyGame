@@ -12,7 +12,7 @@ import com.simsilica.lemur.Label;
 import helper.H;
 import world.*;
 import world.highway.HighwayWorld;
-import world.curve.LSystemWorld;
+import world.lsystem.LSystemWorld;
 import world.wp.WP.DynamicType;
 
 public class ChooseMap extends AbstractAppState {

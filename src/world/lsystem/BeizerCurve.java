@@ -1,4 +1,4 @@
-package world.curve;
+package world.lsystem;
 
 import java.util.function.BiFunction;
 

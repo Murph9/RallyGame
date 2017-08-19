@@ -8,8 +8,8 @@ import world.StaticWorld;
 import world.StaticWorldBuilder;
 import world.World;
 import world.WorldType;
-import world.curve.LSystemWorld;
 import world.highway.HighwayWorld;
+import world.lsystem.LSystemWorld;
 import world.wp.WP.DynamicType;
 
 import java.lang.reflect.Field;
