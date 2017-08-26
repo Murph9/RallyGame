@@ -579,13 +579,11 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	}
 	
 	private float getMaxSteerAngle(float trySteerAngle, float sign) {
-		Boolean isWithDrift = (-sign * this.driftangle) > 0 && Math.abs(this.driftangle) > 5 * FastMath.DEG_TO_RAD; 
+		Vector3f local_vel = getPhysicsRotationMatrix().invert().mult(this.vel);
+		if (local_vel.z < 0 || ((-sign * this.driftangle) < 0 && Math.abs(this.driftangle) > 7 * FastMath.DEG_TO_RAD)) //TODO magic number 
+			return car.w_steerAngle; //when going backwards or needing to turn the other way, you get no speed factor
 		//eg: car is pointing more left than velocity, and is also turning left
 		//and drift angle needs to be large enough to matter
-
-		Vector3f local_vel = getPhysicsRotationMatrix().invert().mult(this.vel);
-		if (local_vel.z < 0 || !isWithDrift) 
-			return car.w_steerAngle; //when going backwards or needing to turn the other way, you get no speed factor
 		
 		float maxAngle = car.w_steerAngle/2;
 		//steering factor = atan(0.12 * vel - 1) + maxAngle*PI/2 + maxLat //TODO what is this 0.12f? and 1 shouldn't they be car settings?
