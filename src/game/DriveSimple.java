@@ -128,7 +128,6 @@ public class DriveSimple extends AbstractAppState {
 		world = null;
 		
 		App.rally.getStateManager().detach(camera);
-		
 		App.rally.getInputManager().removeRawInputListener(camera);
 		camera = null;
 	}

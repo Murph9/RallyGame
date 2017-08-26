@@ -117,7 +117,7 @@ public abstract class CarData {
 	////////////////////////////////////////////////////////
 	//usefulMethods
 	
-	public float e_inertia() { //car internal engine inertia
+	public float e_inertia() { //car internal engine + wheel inertia
 		float wheels = (w_mass*w_radius*w_radius/2);
 		if (driveFront && driveRear) {
 			return e_mass + wheels*4;

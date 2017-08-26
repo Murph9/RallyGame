@@ -1,6 +1,7 @@
 package car;
 
 import java.util.LinkedList;
+import java.util.Queue;
 
 import com.bulletphysics.dynamics.vehicle.DefaultVehicleRaycaster;
 import com.bulletphysics.dynamics.vehicle.WheelInfo;
@@ -39,7 +40,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 	//skid stuff
 	public Node skidNode;
-	protected LinkedList<Spatial> skidList = new LinkedList<Spatial>();
+	protected Queue<Spatial> skidList = new LinkedList<Spatial>();
 	private static final int SKID_LENGTH = 100;
 	
 	//Wheel Forces
@@ -381,12 +382,11 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		}
 
 
+		float slip_div = Math.abs(velocity.length());
+		
 		//for each wheel
 		for (int i = 0; i < 4; i++) {
-			float susforce = (float)getWheel(i).getWheelInfo().wheelsSuspensionForce;
-			susforce = Math.min(susforce, car.mass*4); //[*4] HACK: to stop weird harsh physics on large normal suspension forces
-
-			float slip_div = Math.abs(velocity.length());
+			wheel[i].susForce = Math.min(getWheel(i).getWheelInfo().wheelsSuspensionForce, car.mass*4); //[*4] HACK: to stop weird harsh physics on large normal suspension forces
 
 			// note that the bottom turn could be max of vel and radsec: http://www.menet.umn.edu/~gurkan/Tire%20Modeling%20%20Lecture.pdf 
 			float slipr = slip_const*(wheel[i].radSec*car.w_radius - velocity.z);
@@ -414,10 +414,10 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			float p = FastMath.sqrt(ratiofract*ratiofract + anglefract*anglefract);
 			
 			//calc the longitudinal force from the slip ratio
-			wf[i].z = (ratiofract/p)*VehicleGripHelper.tractionFormula(car.w_flongdata, p*maxlong) * susforce;
+			wf[i].z = (ratiofract/p)*VehicleGripHelper.tractionFormula(car.w_flongdata, p*maxlong) * wheel[i].susForce;
 			
 			//latitudinal force that is calculated off the slip angle
-			wf[i].x = -(anglefract/p)*VehicleGripHelper.tractionFormula(car.w_flatdata, p*maxlat) * susforce;
+			wf[i].x = -(anglefract/p)*VehicleGripHelper.tractionFormula(car.w_flatdata, p*maxlat) * wheel[i].susForce;
 			
 			//prevents the force from exceeding the centripetal force
 			if (isSlowSpeed && Math.abs(wf[i].x) > maxSlowLat) {
@@ -430,16 +430,15 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			//add the wheel force after merging the forces
 			float totalLongForce = torques[i] - wf[i].z - (brakeCurrent*car.brakeMaxTorque*Math.signum(wheel[i].radSec));
 			if (Math.signum(totalLongForce - (brakeCurrent*car.brakeMaxTorque*Math.signum(velocity.z))) != Math.signum(totalLongForce))
-				wheel[i].radSec = 0; //maxed out the forces with braking
+				wheel[i].radSec = 0; //maxed out the forces with braking, so no negative please
 			else
 				wheel[i].radSec += tpf*totalLongForce/(car.e_inertia());
-						
-			wheel[i].susForce = susforce;
-			wheel[i].gripDir = wf[i].mult(1/susforce);
+			
+			wheel[i].gripDir = wf[i].mult(1/car.mass/4);//.mult(1/wheel[i].susForce);
 		}
 
 		//ui based values
-		this.totalTraction = "\nf: "+(wf[0].length() + wf[1].length())+", \nb:" + (wf[2].length() + wf[3].length());
+		this.totalTraction = "\nf0: "+wf[0].length() +", f1: "+ wf[1].length()+", \nb2:" + wf[2].length() + ", b3:" + wf[3].length();
 
 		//make sure wf_last exists, by setting it be the same on the first frame
 		if (wf_last == null) wf_last = wf;
@@ -558,22 +557,12 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		
 		//wheel turning logic
 		steeringCurrent = 0;
-		if (steerLeft != 0) { //left
-			steeringCurrent += getMaxSteerAngle(steerLeft);
-		}
-		if (steerRight != 0) { //right
-			steeringCurrent -= getMaxSteerAngle(steerRight);
-		}
-		
-		//TODO make better [please its actually amazing to use]
-		float absdangle = Math.abs(driftangle);
-		if (absdangle > FastMath.DEG_TO_RAD*10 && absdangle > car.w_steerAngle) { 
-//			steeringCurrent = FastMath.sign(steeringCurrent)*absdangle;
-		}
-
+		if (steerLeft != 0) //left
+			steeringCurrent += getMaxSteerAngle(steerLeft, 1);
+		if (steerRight != 0) //right
+			steeringCurrent -= getMaxSteerAngle(steerRight, -1);
 		//TODO 0.3 - 0.4 seconds from lock to lock seems okay from what ive seen
-		
-		steeringCurrent = FastMath.clamp(steeringCurrent, -FastMath.PI*3f/8f, FastMath.PI*3f/8f);
+		steeringCurrent = FastMath.clamp(steeringCurrent, -car.w_steerAngle, car.w_steerAngle);
 		steer(steeringCurrent);
 
 		//update ai if any
@@ -589,15 +578,23 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		
 	}
 	
-	private float getMaxSteerAngle(float trySteerAngle) {
+	private float getMaxSteerAngle(float trySteerAngle, float sign) {
+		Boolean isWithDrift = (-sign * this.driftangle) > 0 && Math.abs(this.driftangle) > 5 * FastMath.DEG_TO_RAD; 
+		//eg: car is pointing more left than velocity, and is also turning left
+		//and drift angle needs to be large enough to matter
+
 		Vector3f local_vel = getPhysicsRotationMatrix().invert().mult(this.vel);
-		if (local_vel.z < 0) 
-			return car.w_steerAngle; //when going backwards you get no speed factor.
+		if (local_vel.z < 0 || !isWithDrift) 
+			return car.w_steerAngle; //when going backwards or needing to turn the other way, you get no speed factor
 		
 		float maxAngle = car.w_steerAngle/2;
-		float offset = 1;
-		return Math.min(-maxAngle*FastMath.atan(0.12f*vel.length() - offset) + maxAngle*FastMath.HALF_PI + this.maxlat, Math.abs(trySteerAngle));
-		//TODO needs some kind of turn back help now, to come back from drifts
+		//steering factor = atan(0.12 * vel - 1) + maxAngle*PI/2 + maxLat //TODO what is this 0.12f? and 1 shouldn't they be car settings?
+		float value = Math.min(-maxAngle*FastMath.atan(0.12f*vel.length() - 1) + maxAngle*FastMath.HALF_PI + this.maxlat, Math.abs(trySteerAngle));
+		
+		//TODO turn back value should be vel dir + maxlat instead of just full lock 
+		
+		//remember that this value is clamped after this method is called
+		return value;
 	}
 	
 	///////////////////////////////////////////////////////////
@@ -610,10 +607,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			}
 
 			int extra = skidList.size() - SKID_LENGTH; //so i can remove more than one (like all 4 that frame)
-			for (int i = 0; i < extra; i++) {
-				skidNode.detachChild(skidList.getFirst());
-				skidList.removeFirst();
-			}
+			for (int i = 0; i < extra; i++)
+				skidNode.detachChild(skidList.poll());
 		}
 	}
 
