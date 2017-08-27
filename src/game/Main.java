@@ -152,6 +152,9 @@ public class Main extends SimpleApplication {
 		
 		inputManager.setCursorVisible(true);
 		flyCam.setEnabled(false);
+		
+		//profiling in jme 3.2
+		//getStateManager().atttach(new DetailedProfilerState());
 	}
 	
 	@Override

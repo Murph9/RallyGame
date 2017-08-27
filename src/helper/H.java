@@ -1,7 +1,10 @@
 package helper;
 
+import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
@@ -412,5 +415,17 @@ public class H {
 			s = s.getParent();
 		}
 		return false;
+	}
+	
+	public static Map<String, Object> toMap(Object obj) {
+        Field[] fields = obj.getClass().getFields();
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+        	for (Field f : fields)
+        		map.put(f.getName(), f.get(obj));
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
+        return map;
 	}
 }
