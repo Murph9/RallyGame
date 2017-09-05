@@ -5,11 +5,13 @@ import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
 
 import car.MyPhysicsVehicle;
+import helper.H;
 import world.wp.DefaultBuilder;
 
 public class FollowWorldAI extends CarAI {
 
 	private DefaultBuilder world;
+	private float lastTurn;
 	
 	public FollowWorldAI (MyPhysicsVehicle car, DefaultBuilder world) {
 		super(car);
@@ -33,15 +35,19 @@ public class FollowWorldAI extends CarAI {
 		float angF = myforward.normalize().angleBetween((atPos.subtract(pos)).normalize());
 		float ang = car.left.normalize().angleBetween((atPos.subtract(pos)).normalize());
 		
-		float turndeg = (angF > FastMath.QUARTER_PI) ? 1 : angF/FastMath.QUARTER_PI;
+		//get attempted turn angle as pos or negative
+		float nowTurn = angF*Math.signum(FastMath.HALF_PI-ang); //TODO wobble
 
+		H.p(nowTurn, angF, ang, lastTurn);
+		lastTurn = FastMath.interpolateLinear(tpf*10, lastTurn, nowTurn);
+		
 		//turn towards 
-		if (ang > FastMath.HALF_PI) {
+		if (lastTurn < 0) {
 			onEvent("Left", false, 0);
-			onEvent("Right", true, turndeg*reverse);
+			onEvent("Right", true, Math.abs(lastTurn)*reverse);
 		} else {
 			onEvent("Right", false, 0);
-			onEvent("Left", true, turndeg*reverse);
+			onEvent("Left", true, Math.abs(lastTurn)*reverse);
 		}
 		//slow down to turn
 		if (FastMath.abs(angF) < FastMath.QUARTER_PI) {
