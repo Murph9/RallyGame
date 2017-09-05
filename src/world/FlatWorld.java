@@ -62,6 +62,6 @@ public class FlatWorld extends World {
 	
 	public void cleanup() {
 		this.rootNode.detachChild(startGeometry);
-		App.rally.getPhysicsSpace().add(startGeometry);
+		App.rally.getPhysicsSpace().remove(startGeometry);
 	}
 }

@@ -1,12 +1,17 @@
 package car;
 
-public abstract class WheelData {
+import java.io.Serializable;
 
+public abstract class WheelData implements Serializable {
 	//http://www.edy.es/dev/docs/pacejka-94-parameters-explained-a-comprehensive-guide/
 	//if you ever need the values a# and b# in here again go there ^ for the proper values
-
 	//defaults from here: http://au.mathworks.com/help/physmod/sdl/ref/tireroadinteractionmagicformula.html
 	public float B = 10, C = 1.9f, D = 2, E = 0.97f; //2 because its an arcade game
+	
+	@Override
+	public String toString() {
+		return "B:"+B+",C:"+C+",D:"+D+",E:"+E;
+	}
 }
 
 class WheelDataLat extends WheelData {
@@ -40,7 +45,7 @@ class RocketLatWheel extends WheelDataLat {
 		B = 10f;
 		C = 2f;
 		D = 1.3f;
-		E = 1f;
+		E = 0.99f;
 	}
 }
 class RocketLongWheel extends WheelDataLong {
@@ -48,6 +53,6 @@ class RocketLongWheel extends WheelDataLong {
 		B = 10f;
 		C = 2f;
 		D = 1.3f;
-		E = 1f;
+		E = 0.99f;
 	}
 }

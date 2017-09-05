@@ -167,4 +167,13 @@ public class ObjectWorld extends World {
 		
 		placeTiles(new Vector3f(0,0,0));
 	}
+	
+	@Override
+	public void cleanup() {
+		super.cleanup();
+		
+		for (Spatial g: addedObjects) {
+			App.rally.getPhysicsSpace().remove(g); //not really sure why removing the rootNode thing doesn't work from the loop
+		}
+	}
 }

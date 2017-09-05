@@ -12,6 +12,7 @@ import com.jme3.input.event.MouseButtonEvent;
 import com.jme3.input.event.MouseMotionEvent;
 import com.jme3.input.event.TouchEvent;
 
+//TODO move to global scope so other things can listen, and it doesn't depend on the car
 public class MyKeyListener implements RawInputListener {
 
 	MyPhysicsVehicle a;

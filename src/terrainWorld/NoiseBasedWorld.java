@@ -52,7 +52,7 @@ public class NoiseBasedWorld extends Terrain
         float[] heightmap = null; 
         File savedFile = new File(System.getProperty("user.home") + "/.murph9/world_" + this.fileSeed + "/" + tqName + ".chunk");
 
-        if (false && savedFile.exists()) //TODO don't ever go in here for now
+        if (savedFile.exists())
         {
             try
             {
