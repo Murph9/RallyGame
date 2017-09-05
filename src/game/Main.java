@@ -19,6 +19,7 @@ import com.jme3.renderer.Camera;
 import com.jme3.system.AppSettings;
 import com.jme3.system.NanoTimer;
 import com.simsilica.lemur.GuiGlobals;
+import com.simsilica.lemur.event.MouseAppState;
 import com.simsilica.lemur.input.InputMapper;
 import com.simsilica.lemur.style.BaseStyles;
 
@@ -135,6 +136,9 @@ public class Main extends SimpleApplication {
 		BaseStyles.loadGlassStyle();
 		//Set 'glass' as the default style when not specified
 		GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
+		//Init the lemur mouse listener
+		getStateManager().attach(new MouseAppState(this));
+		
 		
 		InputMapper inputMapper = GuiGlobals.getInstance().getInputMapper();
 		inputMapper.release(); //no keyboard inputs after init

@@ -28,7 +28,7 @@ public class DriveSimple extends AbstractAppState {
 	//gui and camera stuff
 	CarCamera camera;
 	CarUI uiNode;
-	MiniMap minimap;
+//	MiniMap minimap;
 	
 	//debug stuff
 	public boolean ifDebug = false;
@@ -74,7 +74,7 @@ public class DriveSimple extends AbstractAppState {
 		App.rally.getStateManager().attach(camera);
 		app.getInputManager().addRawInputListener(camera);
 		
-		minimap = new MiniMap(cb.get(0));
+//		minimap = new MiniMap(cb.get(0));
 		
 		//connectJoySticks
 		Joystick[] joysticks = App.rally.getInputManager().getJoysticks();
@@ -100,7 +100,7 @@ public class DriveSimple extends AbstractAppState {
 		super.update(tpf);
 		
 		//Hud stuff
-		minimap.update(tpf);
+//		minimap.update(tpf);
 	}
 	
 	public void next() {

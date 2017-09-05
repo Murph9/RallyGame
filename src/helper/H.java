@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
@@ -86,6 +87,14 @@ public class H {
 	}
 	public static void e(Exception e) {
 		e.printStackTrace(System.err);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T> Boolean allTrue(Function<T, Boolean> f, T... ts) {
+		for (T t: ts)
+			if (!f.apply(t))
+				return false;
+		return true;
 	}
 	
 	public static Vector3f clamp(Vector3f v, float value) {
@@ -362,6 +371,12 @@ public class H {
 	
 	public static Vector3f screenTopLeft() {
 		return new Vector3f(0, App.rally.getSettings().getHeight(), 0);
+	}
+	public static Vector3f screenTopRight() {
+		return new Vector3f(App.rally.getSettings().getWidth(), App.rally.getSettings().getHeight(), 0);
+	}
+	public static Vector3f screenBottomRight() {
+		return new Vector3f(App.rally.getSettings().getWidth(), App.rally.getSettings().getHeight(), 0);
 	}
 	public static Vector3f screenMiddle() {
 		return new Vector3f(App.rally.getSettings().getWidth()/2, App.rally.getSettings().getHeight()/2, 0);
