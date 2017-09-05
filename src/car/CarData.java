@@ -1,5 +1,12 @@
 package car;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+
 import com.bulletphysics.dynamics.vehicle.VehicleTuning;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
@@ -7,8 +14,7 @@ import com.jme3.math.Vector3f;
 import helper.H;
 import helper.H.Duo;
 
-public abstract class CarData {
-	
+public abstract class CarData implements Serializable {
 	public static final String dir = "assets/models/";
 
 	//List of not primitives:
@@ -135,7 +141,7 @@ public abstract class CarData {
 	public float lerpTorque(int rpm) {
 		float RPM = (float)rpm / 1000;
 		return H.lerpArray(RPM, this.e_torque);
-	} 
+	}
 
 	//get the max power and rpm
 	public Duo<Float, Float> getMaxPower() {
@@ -147,6 +153,22 @@ public abstract class CarData {
 			if (prevmax != max) maxrpm = i;
 		} //http://www.autospeed.com/cms/article.html?&title=Power-versus-Torque-Part-1&A=108647
 		return new Duo<Float, Float>(max, maxrpm*1000);
+	}
+	
+	
+	public CarData cloneWithSerialization() {
+		try {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(baos);
+			oos.writeObject(this);
+	
+			ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+			ObjectInputStream ois = new ObjectInputStream(bais);
+			return (CarData) ois.readObject();
+		} catch (IOException | ClassNotFoundException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 }
 

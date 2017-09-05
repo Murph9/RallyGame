@@ -56,9 +56,13 @@ public class CarBuilder extends AbstractAppState {
 				e.printStackTrace();
 			}
 		}
+		
+		//clone CarData so if its edited, only this one changes not the global one
+		car = car.cloneWithSerialization();
+		
 		Main r = App.rally;
 		AssetManager am = r.getAssetManager();
-
+		
 		Spatial carmodel = am.loadModel(car.carModel);
 		if (carmodel instanceof Geometry) {
 

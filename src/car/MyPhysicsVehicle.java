@@ -72,9 +72,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	//state stuff
 	public Vector3f vel;
 	public Vector3f gForce;
-	
-	public int curGear = 1;
-	public int curRPM = 1000;
 
 	public float accelCurrent;
 	public float steeringCurrent;
@@ -88,7 +85,9 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	float nitro;
 
 	boolean ifHandbrake;
-	
+
+	public int curGear = 1;
+	public int curRPM = 1000;
 	//TODO use
 	float clutch; //0 = can drive, 1 = can't drive
 	int gearChangeTo;
@@ -360,6 +359,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			torques[2] = engineTorque*(1f - 2*FastMath.atan(car.w_difflock*diff)/FastMath.PI);
 			torques[3] = engineTorque*(1f + 2*FastMath.atan(car.w_difflock*diff)/FastMath.PI);
 		}
+		//TODO center diff, as all wheel drive cars kind of ignore certain wheels
 
 		float maxSlowLat = Float.MAX_VALUE;
 		
@@ -429,6 +429,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			wheel[i].skid = p;
 			//add the wheel force after merging the forces
 			float totalLongForce = torques[i] - wf[i].z - (brakeCurrent*car.brakeMaxTorque*Math.signum(wheel[i].radSec));
+			//H.p(totalLongForce, torques[i], wf[i].z, (brakeCurrent*car.brakeMaxTorque));
 			if (Math.signum(totalLongForce - (brakeCurrent*car.brakeMaxTorque*Math.signum(velocity.z))) != Math.signum(totalLongForce))
 				wheel[i].radSec = 0; //maxed out the forces with braking, so no negative please
 			else
@@ -461,15 +462,16 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		float diffRatio = car.trans_finaldrive/2; //the 2 makes it fit the real world for some reason?
 		
 		float wheelrot = 0;
-		if (clutch == 0) { //TODO let the engine rev
-			if (car.driveFront)
-				wheelrot = (wheel[0].radSec + wheel[1].radSec)/2; //get the drive wheels rotation speed
-			if (car.driveRear) 
-				wheelrot = (wheel[2].radSec + wheel[3].radSec)/2; //get the average to pretend there is a diff
-			
-			curRPM = (int)(wheelrot*curGearRatio*diffRatio*60*car.w_radius); //rad/(m*sec) to rad/min and the drive ratios to engine
-			//wheel rad/s, gearratio, diffratio, conversion from rad/sec to rad/min
-		} //don't set the rpm if the clutch is in
+		//get the drive wheels rotation speed
+		if (car.driveFront && car.driveRear)
+			wheelrot = (wheel[0].radSec + wheel[1].radSec + wheel[2].radSec + wheel[3].radSec)/4;
+		else if (car.driveFront)
+			wheelrot = (wheel[0].radSec + wheel[1].radSec)/2;
+		else if (car.driveRear) 
+			wheelrot = (wheel[2].radSec + wheel[3].radSec)/2;
+		
+		curRPM = (int)(wheelrot*curGearRatio*diffRatio*60*car.w_radius); //rad/(m*sec) to rad/min and the drive ratios to engine
+		//wheel rad/s, gearratio, diffratio, conversion from rad/sec to rad/min
 
 		int idleRPM = 1000;
 		curRPM = Math.max(curRPM, idleRPM); //no stall please, its bad enough that we don't have to torque here
@@ -510,16 +512,25 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 	private void autoTransmission(int rpm, float vz) {
 		if (curGear == 0) return; //no changing out of reverse on me please..
-
+		if (H.allTrue((w) -> { return !w.contact; }, wheel))
+			return; //if no contact, no changing of gear
+		
 		float driveSpeed = (car.trans_gearRatios[curGear]*car.trans_finaldrive/2*60);
-		float gearUpSpeed = car.auto_gearUp/driveSpeed;
+		float gearUpSpeed = car.auto_gearUp/driveSpeed; //TODO pre compute, as it doesn't change
 		float gearDownSpeed = car.auto_gearDown/driveSpeed;
 		//TODO: error checking that there isn't over lap  [2-----[3--2]----3] not [2------2]--[3-----3]
 
+		//TODO check that these values are actually working
+		
 		if (vz > gearUpSpeed && curGear < car.trans_gearRatios.length-1) { //TODO should also work off speed so you can redline (both up and down)
 			curGear++;
+			//TODO:
+			/*clutch = 1;
+			gearChangeTo = curGear + 1;*/
 		} else if (vz < gearDownSpeed && curGear > 1) {
 			curGear--;
+			/*clutch = 1;
+			gearChangeTo = curGear - 1;*/
 		}
 	}
 
@@ -581,7 +592,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	private float getMaxSteerAngle(float trySteerAngle, float sign) {
 		Vector3f local_vel = getPhysicsRotationMatrix().invert().mult(this.vel);
 		if (local_vel.z < 0 || ((-sign * this.driftangle) < 0 && Math.abs(this.driftangle) > 7 * FastMath.DEG_TO_RAD)) //TODO magic number 
-			return car.w_steerAngle; //when going backwards or needing to turn the other way, you get no speed factor
+			return trySteerAngle; //when going backwards, slow or needing to turning against drift, you get no speed factor
 		//eg: car is pointing more left than velocity, and is also turning left
 		//and drift angle needs to be large enough to matter
 		
@@ -589,7 +600,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		//steering factor = atan(0.12 * vel - 1) + maxAngle*PI/2 + maxLat //TODO what is this 0.12f? and 1 shouldn't they be car settings?
 		float value = Math.min(-maxAngle*FastMath.atan(0.12f*vel.length() - 1) + maxAngle*FastMath.HALF_PI + this.maxlat, Math.abs(trySteerAngle));
 		
-		//TODO turn back value should be vel dir + maxlat instead of just full lock 
+		//TODO turn back value should be vel dir + maxlat instead of just full lock
 		
 		//remember that this value is clamped after this method is called
 		return value;
