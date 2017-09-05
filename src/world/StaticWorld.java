@@ -18,6 +18,7 @@ public enum StaticWorld {
 	//other peoples:
 	track2("track2.blend", 1, new Vector3f(0,0,0), false),
 	carpark("carpark.blend", 1, new Vector3f(0,0,0), false),
+	unbenannt("unbenannt_track.blend", 1, new Vector3f(0,0,0), true), //TODO needs fixing
 	
 	//debug ones: (not working now)
 //	paris1("paris1.blend", 1, new Vector3f(40,75,0), true), //be careful with this one, large

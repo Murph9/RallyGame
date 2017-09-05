@@ -191,7 +191,7 @@ public enum Car {
 			for (int i = 0; i < e_torque.length; i++) {
 				e_torque[i] *= 2;
 			}
-			auto_gearDown = 9000;
+			auto_gearDown = 7000;
 			auto_gearUp = 13500;
 			
 			trans_finaldrive = 3.0f;
