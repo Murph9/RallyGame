@@ -150,9 +150,12 @@ public class ChooseMap extends AbstractAppState {
 			case HIGHWAY:
 				world = new HighwayWorld();
 				break;
+			case FLAT:
+				world = new FlatWorld();
+				break;
 				
 			default:
-				H.e("Non valid world type in ChooseMap.setWorld() method");
+				H.p("Non valid world type in ChooseMap.setWorld() method");
 				return;
 		}
 		
