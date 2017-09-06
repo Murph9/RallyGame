@@ -14,8 +14,8 @@ import helper.H;
 
 public class DriveDev extends DriveSimple {
 
-	private CarEditor inputContainer;
-	private WorldEditor worldContainer;
+	private CarEditor carEditor;
+	private WorldEditor worldEditor;
 	private CarWheelGraph wheelGraphs;
 	
 	public DriveDev (CarData car, World world) {
@@ -27,13 +27,13 @@ public class DriveDev extends DriveSimple {
     	super.initialize(stateManager, app);
     	
     	//init input gui
-		inputContainer = new CarEditor(this.cb.get(0), () -> { reloadCar(); });
-		inputContainer.setLocalTranslation(H.screenTopLeft().add(0, -20, 0));
-		App.rally.getGuiNode().attachChild(inputContainer);
+		carEditor = new CarEditor(this.cb.get(0), () -> { reloadCar(); });
+		carEditor.setLocalTranslation(H.screenTopLeft().add(0, -20, 0));
+		App.rally.getGuiNode().attachChild(carEditor);
 		
-		worldContainer = new WorldEditor((a) -> { reloadWorld(a); });
-		worldContainer.setLocalTranslation(H.screenTopRight().add(-worldContainer.width, 0, 0));
-		App.rally.getGuiNode().attachChild(worldContainer);
+		worldEditor = new WorldEditor((a) -> { reloadWorld(a); });
+		worldEditor.setLocalTranslation(H.screenTopRight().add(-worldEditor.width, 0, 0));
+		App.rally.getGuiNode().attachChild(worldEditor);
 		
 		Vector3f size = new Vector3f(400,400,0);
 		wheelGraphs = new CarWheelGraph(this.cb.get(0), size);
@@ -77,10 +77,10 @@ public class DriveDev extends DriveSimple {
 		this.cb.get(0).setLinearVelocity(vel);
 		this.cb.get(0).setPhysicsRotation(q);
 		
-		App.rally.getGuiNode().detachChild(inputContainer);
-		inputContainer = new CarEditor(this.cb.get(0), () -> { reloadCar(); });
-		inputContainer.setLocalTranslation(H.screenTopLeft().add(0, -50, 0));
-		App.rally.getGuiNode().attachChild(inputContainer);
+		App.rally.getGuiNode().detachChild(carEditor);
+		carEditor = new CarEditor(this.cb.get(0), () -> { reloadCar(); });
+		carEditor.setLocalTranslation(H.screenTopLeft().add(0, -50, 0));
+		App.rally.getGuiNode().attachChild(carEditor);
 		
 		wheelGraphs.updateMyPhysicsVehicle(this.cb.get(0));
 	}
@@ -100,7 +100,8 @@ public class DriveDev extends DriveSimple {
 	@Override
 	public void cleanup() {
 		super.cleanup();
-		App.rally.getGuiNode().detachChild(inputContainer);
+		App.rally.getGuiNode().detachChild(carEditor);
+		App.rally.getGuiNode().detachChild(worldEditor);
 		App.rally.getGuiNode().detachChild(wheelGraphs);
 	}
 }

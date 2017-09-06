@@ -343,28 +343,34 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		engineTorque = getEngineWheelTorque(tpf, velocity.length() * Math.signum(velocity.z));
 		float[] torques = new float[] { 0, 0, 0, 0 };
 
-		//TODO suspect we should be dividing engine torque again (for realism, but not fun)
-		if (car.driveFront && car.driveRear)
-			engineTorque /= 2; //split up into 2 axles
-		
+		//split once for each 2 wheels
+		float frontTorque = engineTorque/2;
+		float rearTorque = engineTorque/2;
+		if (car.driveFront && car.driveRear) {
+			float frontRadSec = (wheel[0].radSec + wheel[1].radSec)/2;
+			float rearRadSec = (wheel[2].radSec + wheel[3].radSec)/2;
+			//calc center diff
+			float diff = (frontRadSec - rearRadSec)*FastMath.sign((frontRadSec + rearRadSec)/2);
+			frontTorque = (engineTorque/2)*(1f - 2*FastMath.atan(car.w_difflock*diff)/FastMath.PI); //TODO constant for center diff
+			rearTorque = (engineTorque/2)*(1f + 2*FastMath.atan(car.w_difflock*diff)/FastMath.PI);
+		}
 		if (car.driveFront) {
 			//calc front diff
 			float diff = (wheel[0].radSec - wheel[1].radSec)*FastMath.sign((wheel[0].radSec + wheel[1].radSec)/2);
-			torques[0] = engineTorque*(1f - 2*FastMath.atan(car.w_difflock*diff)/FastMath.PI);
-			torques[1] = engineTorque*(1f + 2*FastMath.atan(car.w_difflock*diff)/FastMath.PI);
+			torques[0] = frontTorque*(1f - 2*FastMath.atan(car.w_difflock*diff)/FastMath.PI);
+			torques[1] = frontTorque*(1f + 2*FastMath.atan(car.w_difflock*diff)/FastMath.PI);
 		}
 		if (car.driveRear) {
 			//calc rear diff
 			float diff = (wheel[2].radSec - wheel[3].radSec)*FastMath.sign((wheel[2].radSec + wheel[3].radSec)/2);
-			torques[2] = engineTorque*(1f - 2*FastMath.atan(car.w_difflock*diff)/FastMath.PI);
-			torques[3] = engineTorque*(1f + 2*FastMath.atan(car.w_difflock*diff)/FastMath.PI);
+			torques[2] = rearTorque*(1f - 2*FastMath.atan(car.w_difflock*diff)/FastMath.PI);
+			torques[3] = rearTorque*(1f + 2*FastMath.atan(car.w_difflock*diff)/FastMath.PI);
 		}
-		//TODO center diff, as all wheel drive cars kind of ignore certain wheels
 
 		float maxSlowLat = Float.MAX_VALUE;
 		
 		float slip_const = 1;
-		float slowslipspeed = 10; //TODO some proportion of car.w_Off, so cars don't feel so weird
+		float slowslipspeed = 10; //TODO some proportion of car.w_Off, so cars don't feel so weird at slow speeds
 		boolean isSlowSpeed = velocity.length() <= slowslipspeed;
 		float rearSteeringCur = 0;
 		
@@ -425,19 +431,25 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 				float clampValue = Math.abs(maxSlowLat * (1-slowslipspeed/velocity.length()));
 				wf[i].x = FastMath.clamp(wf[i].x, -clampValue, clampValue);
 			}
+			//prevent the x forces from being larger than the force that would stop us from changing our x velocity sign
+			if (isSlowSpeed) {
+				if (Math.signum(wf[i].x) != Math.signum(wf[i].x - velocity.x*(car.mass/4)/tpf)) { 
+					wf[i].x = FastMath.clamp(wf[i].x, -1*Math.abs(velocity.x*(car.mass/4)/tpf), Math.abs(velocity.x*(car.mass/4)/tpf));
+				}
+			}
 			
 			wheel[i].skid = p;
 			//add the wheel force after merging the forces
 			float totalLongForce = torques[i] - wf[i].z - (brakeCurrent*car.brakeMaxTorque*Math.signum(wheel[i].radSec));
-			//H.p(totalLongForce, torques[i], wf[i].z, (brakeCurrent*car.brakeMaxTorque));
-			if (Math.signum(totalLongForce - (brakeCurrent*car.brakeMaxTorque*Math.signum(velocity.z))) != Math.signum(totalLongForce))
-				wheel[i].radSec = 0; //maxed out the forces with braking, so no negative please
+			float nextRadSec = wheel[i].radSec + tpf*totalLongForce/(car.e_inertia());
+			if (brakeCurrent != 0 && Math.signum(wheel[i].radSec) != Math.signum(nextRadSec))
+				wheel[i].radSec = 0; //maxed out the forces with braking, so prevent wheels from moving
 			else
 				wheel[i].radSec += tpf*totalLongForce/(car.e_inertia());
 			
-			wheel[i].gripDir = wf[i].mult(1/car.mass/4);//.mult(1/wheel[i].susForce);
+			wheel[i].gripDir = wf[i].mult(1/wheel[i].susForce);
 		}
-
+		
 		//ui based values
 		this.totalTraction = "\nf0: "+wf[0].length() +", f1: "+ wf[1].length()+", \nb2:" + wf[2].length() + ", b3:" + wf[3].length();
 

@@ -28,8 +28,6 @@ import com.simsilica.lemur.event.MouseEventControl;
 import game.App;
 import helper.H;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-import world.World;
-import world.WorldType;
 
 //TODO cleanup
 public class CarEditor extends Container {
@@ -277,16 +275,5 @@ public class CarEditor extends Container {
 			this.o = o;
 			this.inputs = inputs;
 		}
-	}
-	
-	@SuppressWarnings("unchecked")
-	private void addButton(Container myWindow, CarData car, String s, int j, int i) {
-		Button button = myWindow.addChild(new Button(s), j, i);
-		button.addClickCommands(new Command<Button>() {
-            @Override
-            public void execute( Button source ) {
-            	
-            }
-        });
 	}
 }
