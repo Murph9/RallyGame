@@ -181,7 +181,7 @@ public class Main extends SimpleApplication {
 	public void startDev(AppState state) {
 		getStateManager().detach(state);
 		
-		drive = new DriveDev(Car.Rocket.get(), new FlatWorld());
+		drive = new DriveDev(Car.Runner.get(), new FlatWorld());
 		getStateManager().attach(drive);
 	}
 	

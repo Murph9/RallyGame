@@ -388,6 +388,9 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		}
 
 
+		//make sure wf_last exists, by setting it be the same on the first frame
+		if (wf_last == null) wf_last = wf;
+		
 		float slip_div = Math.abs(velocity.length());
 		
 		//for each wheel
@@ -411,9 +414,9 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			}
 			slipangle *= slip_const;
 			
-			if (i == 2) //a rear wheel
+			if (i == 2) //any rear wheel (as they don't turn)
 				driftangle = slipangle;
-
+			
 			//start work on merging the forces into a traction circle
 			float ratiofract = slipratio/maxlong;
 			float anglefract = slipangle/maxlat;
@@ -421,9 +424,14 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			
 			//calc the longitudinal force from the slip ratio
 			wf[i].z = (ratiofract/p)*VehicleGripHelper.tractionFormula(car.w_flongdata, p*maxlong) * wheel[i].susForce;
+			//then average it with the last one
+			wf[i].z = (wf_last[i].z + wf[i].z)/2;
 			
 			//latitudinal force that is calculated off the slip angle
 			wf[i].x = -(anglefract/p)*VehicleGripHelper.tractionFormula(car.w_flatdata, p*maxlat) * wheel[i].susForce;
+			//then average it with the last one
+			wf[i].x = (wf_last[i].x + wf[i].x)/2;			
+
 			
 			//prevents the force from exceeding the centripetal force
 			if (isSlowSpeed && Math.abs(wf[i].x) > maxSlowLat) {
@@ -432,10 +440,9 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 				wf[i].x = FastMath.clamp(wf[i].x, -clampValue, clampValue);
 			}
 			//prevent the x forces from being larger than the force that would stop us from changing our x velocity sign
-			if (isSlowSpeed) {
-				if (Math.signum(wf[i].x) != Math.signum(wf[i].x - velocity.x*(car.mass/4)/tpf)) { 
-					wf[i].x = FastMath.clamp(wf[i].x, -1*Math.abs(velocity.x*(car.mass/4)/tpf), Math.abs(velocity.x*(car.mass/4)/tpf));
-				}
+			if (isSlowSpeed) { //does cause us to not be able to turn for like ~0.2sec sometimes
+				float limit = Math.max(Math.abs(velocity.x)*(car.mass/4)/tpf, 1000);
+				wf[i].x = FastMath.clamp(wf[i].x, -limit, limit);
 			}
 			
 			wheel[i].skid = p;
@@ -449,23 +456,20 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			
 			wheel[i].gripDir = wf[i].mult(1/wheel[i].susForce);
 		}
-		
+
 		//ui based values
 		this.totalTraction = "\nf0: "+wf[0].length() +", f1: "+ wf[1].length()+", \nb2:" + wf[2].length() + ", b3:" + wf[3].length();
-
-		//make sure wf_last exists, by setting it be the same on the first frame
-		if (wf_last == null) wf_last = wf;
 		
 		//and finally apply forces
 		if (wheel[0].contact)
-			applyForce(w_angle.mult((wf[0].add(wf_last[0])).mult(0.5f)), w_angle.mult(wheel[0].getContactPoint(car.w_radius, car.rollFraction)));
+			applyForce(w_angle.mult(wf[0]), w_angle.mult(wheel[0].getContactPoint(car.w_radius, car.rollFraction)));
 		if (wheel[1].contact) 
-			applyForce(w_angle.mult((wf[1].add(wf_last[1])).mult(0.5f)), w_angle.mult(wheel[1].getContactPoint(car.w_radius, car.rollFraction)));
+			applyForce(w_angle.mult(wf[1]), w_angle.mult(wheel[1].getContactPoint(car.w_radius, car.rollFraction)));
 		if (wheel[2].contact) 
-			applyForce(w_angle.mult((wf[2].add(wf_last[2])).mult(0.5f)), w_angle.mult(wheel[2].getContactPoint(car.w_radius, car.rollFraction)));
+			applyForce(w_angle.mult(wf[2]), w_angle.mult(wheel[2].getContactPoint(car.w_radius, car.rollFraction)));
 		if (wheel[3].contact) 
-			applyForce(w_angle.mult((wf[3].add(wf_last[3])).mult(0.5f)), w_angle.mult(wheel[3].getContactPoint(car.w_radius, car.rollFraction)));
-
+			applyForce(w_angle.mult(wf[3]), w_angle.mult(wheel[3].getContactPoint(car.w_radius, car.rollFraction)));
+		
 		wf_last = wf; //finally set it to the last value
 	}
 
@@ -486,7 +490,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		//wheel rad/s, gearratio, diffratio, conversion from rad/sec to rad/min
 
 		int idleRPM = 1000;
-		curRPM = Math.max(curRPM, idleRPM); //no stall please, its bad enough that we don't have to torque here
+		curRPM = Math.max(curRPM, idleRPM); //no stall please, its bad enough that we don't have torque here
 
 		autoTransmission(curRPM, vz);
 
