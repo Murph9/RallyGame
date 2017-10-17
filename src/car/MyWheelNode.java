@@ -1,5 +1,7 @@
 package car;
 
+import com.jme3.effect.ParticleEmitter;
+import com.jme3.effect.ParticleMesh;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;
 import com.jme3.material.RenderState.FaceCullMode;
@@ -18,19 +20,20 @@ import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.util.BufferUtils;
 
 import game.App;
-import helper.H;
 
 //TODO smoke from tyres
 
 public class MyWheelNode extends Node {
 
 	private static final int QUAD_COUNT = 200;
+	private static boolean SMOKE_ON = false;
 	
 	private static final int VERTEX_BUFFER_SIZE = 4*QUAD_COUNT; //Vector3f.size * triangle size * 2 (2 tri per quad) * count
 	private static final int[] indexes = { 2,0,1, 1,3,2 }; //tyre marks vertex order
 	private static final Vector2f[] texCoord = new Vector2f[] { //texture of quad with order
 		new Vector2f(0, 0), new Vector2f(0, 1), new Vector2f(1, 0), new Vector2f(1, 1),
 	};
+	
 	private Geometry SkidLine;
 	private Vector3f[] vertices;
 	private int verticesPos;
@@ -51,6 +54,8 @@ public class MyWheelNode extends Node {
 	public float susForce;
 	public Vector3f gripDir;
 	public float skid;
+	
+    private ParticleEmitter smokeEmit;
 	
 	public MyWheelNode(String name, MyPhysicsVehicle mvc, int num) {
 		super(name);
@@ -85,7 +90,16 @@ public class MyWheelNode extends Node {
 		
 		mesh.setBuffer(Type.Index, 3, BufferUtils.createIntBuffer(i_s)); 
 		
-		Vector2f[] coord = new Vector2f[4*QUAD_COUNT]; //TODO
+		Vector2f[] coord = new Vector2f[4*QUAD_COUNT];
+		j = 0;
+		for (int i = 0; i < coord.length; i += 4) {
+			coord[i+0] = texCoord[0].add(new Vector2f(0, j));
+			coord[i+1] = texCoord[0].add(new Vector2f(0, j));
+			coord[i+2] = texCoord[0].add(new Vector2f(0, j));
+			coord[i+3] = texCoord[0].add(new Vector2f(0, j));
+			j++;
+		}
+		
 		mesh.setBuffer(Type.TexCoord, 2, BufferUtils.createFloatBuffer(coord)); 
 		
 		mesh.setBuffer(Type.Color, 4, BufferUtils.createFloatBuffer(ColorRGBA.BlackNoAlpha, ColorRGBA.BlackNoAlpha, ColorRGBA.BlackNoAlpha, ColorRGBA.BlackNoAlpha));
@@ -102,7 +116,33 @@ public class MyWheelNode extends Node {
 		this.SkidLine.setQueueBucket(Bucket.Transparent);
 		
 		App.rally.getRootNode().attachChild(this.SkidLine);
+		
+		//smoke
+		this.smokeEmit = initSmoke();
+		this.smokeEmit.setEnabled(true);
+        attachChild(this.smokeEmit);
 	}
+	
+    private ParticleEmitter initSmoke() {
+        ParticleEmitter smoke = new ParticleEmitter("Emitter", ParticleMesh.Type.Triangle, 40);
+        smoke.setParticlesPerSec(0); //start with none
+        smoke.setNumParticles(100);
+        smoke.setInWorldSpace(true);
+        smoke.setRotateSpeed(FastMath.QUARTER_PI);
+        
+        smoke.setImagesX(15); //the smoke image is 15x * 1y (y is already the default of 1)
+        smoke.setEndColor(new ColorRGBA(0.7f, 0.7f, 0.7f, 0.2f));
+        smoke.setStartColor(new ColorRGBA(0.7f, 0.7f, 0.7f, 0.4f));
+
+        smoke.setStartSize(0.4f);
+        smoke.setEndSize(4f);
+        
+        Material emit = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Particle.j3md");
+        emit.setTexture("Texture", App.rally.getAssetManager().loadTexture("assets/image/Smoke.png"));
+        smoke.setMaterial(emit);
+        return smoke;
+    }
+	
 	
 	public void update(float tpf, int reverse) {
 		reverse = FastMath.sign(reverse);
@@ -114,8 +154,13 @@ public class MyWheelNode extends Node {
 		if (App.rally.frameCount % 3 == 0) {
 			addSkidLine();
 			//TODO set the current quads next pos to be where the wheels are
-			//this is to prevent the weird flickering
+			//  to prevent the weird flickering
 		}
+		
+		if (skid < 2.3 || !this.contact || this.mvc.vel.length() < 3)
+			this.smokeEmit.setParticlesPerSec(0);
+		else if (this.smokeEmit.getParticlesPerSec() != 30 && MyWheelNode.SMOKE_ON)
+			this.smokeEmit.setParticlesPerSec(30);
 	}
 	
 	public Vector3f getContactPoint(float wheelRadius, float rollInfluence) {
