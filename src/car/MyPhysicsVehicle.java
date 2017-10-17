@@ -38,11 +38,6 @@ import helper.H;
 
 public class MyPhysicsVehicle extends PhysicsVehicle {
 
-	//skid stuff
-	public Node skidNode;
-	protected Queue<Spatial> skidList = new LinkedList<Spatial>();
-	private static final int SKID_LENGTH = 100;
-	
 	//Wheel Forces
 	Vector3f[] wf; //4
 	Vector3f[] wf_last; //4
@@ -112,7 +107,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		
 		//init the car model
 		this.model = new CarModelData(cartype.carModel, cartype.wheelModel);
-		this.skidNode = new Node(); //attached in car builder
 		
 		AssetManager am = App.rally.getAssetManager();
 
@@ -421,7 +415,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			float ratiofract = slipratio/maxlong;
 			float anglefract = slipangle/maxlat;
 			float p = FastMath.sqrt(ratiofract*ratiofract + anglefract*anglefract);
-			
+						
 			//calc the longitudinal force from the slip ratio
 			wf[i].z = (ratiofract/p)*VehicleGripHelper.tractionFormula(car.w_flongdata, p*maxlong) * wheel[i].susForce;
 			//then average it with the last one
@@ -430,7 +424,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			//latitudinal force that is calculated off the slip angle
 			wf[i].x = -(anglefract/p)*VehicleGripHelper.tractionFormula(car.w_flatdata, p*maxlat) * wheel[i].susForce;
 			//then average it with the last one
-			wf[i].x = (wf_last[i].x + wf[i].x)/2;			
+			wf[i].x = (wf_last[i].x + wf[i].x)/2;
 
 			
 			//prevents the force from exceeding the centripetal force
@@ -454,7 +448,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			else
 				wheel[i].radSec += tpf*totalLongForce/(car.e_inertia());
 			
-			wheel[i].gripDir = wf[i].mult(1/wheel[i].susForce);
+			wheel[i].gripDir = wf[i].mult(1/(car.mass*4)); //normalise grip bar
 		}
 
 		//ui based values
@@ -578,9 +572,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		//Important call here
 		specialPhysics(tpf); //yay
 		//********************************************//
-
-		//skid marks
-		addSkidLines();
 		
 		//wheel turning logic
 		steeringCurrent = 0;
@@ -623,21 +614,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	}
 	
 	///////////////////////////////////////////////////////////
-	private void addSkidLines() {
-		if (ai != null) return;
-
-		if (App.rally.frameCount % 8 == 0) {
-			for (MyWheelNode w: wheel) {
-				w.addSkidLine();
-			}
-
-			int extra = skidList.size() - SKID_LENGTH; //so i can remove more than one (like all 4 that frame)
-			for (int i = 0; i < extra; i++)
-				skidNode.detachChild(skidList.poll());
-		}
-	}
-
-
 	private void reset() {
 		if (App.rally.drive == null) return;
 
@@ -659,8 +635,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			setAngularVelocity(new Vector3f());
 		} //noop if nulls
 		
-		skidNode.detachAllChildren();
-		skidList.clear();
 		for (MyWheelNode w: wheel) {
 			w.reset();
 		}
@@ -693,6 +667,10 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			carRootNode.detachChild(this.engineSound);
 			App.rally.getAudioRenderer().stopSource(engineSound);
 			engineSound = null;
+		}
+		
+		for (MyWheelNode w: this.wheel) {
+			w.cleanup();
 		}
 	}
 	

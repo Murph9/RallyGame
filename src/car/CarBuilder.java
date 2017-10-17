@@ -100,7 +100,6 @@ public class CarBuilder extends AbstractAppState {
 		}
 
 		rootNode.attachChild(carNode);
-		rootNode.attachChild(player.skidNode);
 		player.setPhysicsLocation(start);
 		player.setPhysicsRotation(rot);
 
@@ -130,8 +129,6 @@ public class CarBuilder extends AbstractAppState {
 		}
 		rootNode.detachChildNamed(id+"");
 		MyVC car = cars.get(id);
-		
-		rootNode.detachChild(car.skidNode);
 		
 		App.rally.getPhysicsSpace().remove(car);
 		car.cleanup();

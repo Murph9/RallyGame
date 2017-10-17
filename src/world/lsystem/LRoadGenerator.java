@@ -1,9 +1,13 @@
 package world.lsystem;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 
+import com.jme3.bullet.collision.shapes.CollisionShape;
+import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
@@ -17,14 +21,14 @@ import com.jme3.scene.shape.Line;
 import game.App;
 import helper.H;
 import jme3tools.optimize.GeometryBatchFactory;
+import world.highway.RoadMesh;
 
 public class LRoadGenerator {
 
 	private static Quaternion ROT90 = new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y);
 	
-	//is going to draw a simple version with just lines in the sky
 	Node rootNode;
-	private final boolean DEBUG = true;
+	private final boolean DEBUG = false;
 	float height;
 	
 	private PriorityQueue<QueueObj> Q;
@@ -64,8 +68,11 @@ public class LRoadGenerator {
 		box2.setMaterial(mat);
 		
 		//initial state of the system is 2 lines pointing in different directions from each other <--+-->
-		QueueObj o = new QueueObj(0, LineType.BIG, new Vector3f(0,0,0), new Vector3f(0,0,5), "startA");
-		QueueObj o2 = new QueueObj(0, LineType.BIG, new Vector3f(0,0,0), new Vector3f(0,0,-5), "startB");
+		QueueObj o = new QueueObj(0, LineType.BIG, new Vector3f(0,0,0), new Vector3f(0,0,40), "startA"); //TODO this length defines road length throughout
+		QueueObj o2 = new QueueObj(0, LineType.BIG, new Vector3f(0,0,0), new Vector3f(0,0,-40), "startB");
+		
+		//draw the starting point..
+		drawMeAVerySmallBox(new Vector3f(0,0.25f,0), ColorRGBA.White);
 		
 		Q.add(o);
 		Q.add(o2);
@@ -81,7 +88,7 @@ public class LRoadGenerator {
 			ConstraintReason reason = localConstraints(q);
 			if (reason != ConstraintReason.Overlap) {
 				S.add(q);
-				draw(q);
+				place(q);
 				
 				if (DEBUG)
 					H.p("|Placing a line with rule: " + q.rule);
@@ -114,7 +121,7 @@ public class LRoadGenerator {
 				}
 			}
 			
-			GeometryBatchFactory.optimize(rootNode);
+//			GeometryBatchFactory.optimize(rootNode);
 		}
 	}
 	
@@ -125,15 +132,17 @@ public class LRoadGenerator {
 		;
 	}
 	private ConstraintReason localConstraints(QueueObj q) {
+		float length = q.start.subtract(q.end).length();
 		//yay O(2*n)
 		for (QueueObj o: S) {
 			//check if the point is close to another
-			if (IsNear(q.end, o.end, 2f)) {
+			if (IsNear(q.end, o.end, length/2)) {
 				q.end = o.end;
 				return ConstraintReason.NearPoint;
 			}
 			
 			//if it overlaps another line, don't bother
+			//TODO join
 			boolean a = isIntersecting(q.start, q.end, o.start, o.end);
 			if (a) return ConstraintReason.Overlap;
 		}
@@ -242,18 +251,41 @@ public class LRoadGenerator {
 		return list.toArray(new QueueObj[]{});
 	}
 
-	private void draw(QueueObj obj) {
-		Line line = new Line(obj.start, obj.end);
-		Geometry geometry = new Geometry("line", line);
+	private void place(QueueObj obj) {
+		Vector3f dir = obj.end.subtract(obj.start);
+		List<Vector3f> list = Arrays.asList(new Vector3f[] { 
+				obj.start, obj.start.add(dir.mult(0.4f)), 
+				obj.start.add(dir.mult(0.6f)), obj.end });
+		RoadMesh m = new RoadMesh(dir.length()/12, 2, list);
+		
+		Geometry geometry = new Geometry("line", m);
 		Material mat = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 		mat.setColor("Color", obj.type.colour);
-		mat.getAdditionalRenderState().setLineWidth(obj.type.lineWidth);
 		geometry.setMaterial(mat);
 		rootNode.attachChild(geometry);
+		
+		CollisionShape col = CollisionShapeFactory.createMeshShape(geometry);
+		RigidBodyControl landscape = new RigidBodyControl(col, 0);
+		App.rally.getPhysicsSpace().add(landscape);
+		
+		/*
+        Line line = new Line(obj.start, obj.end);
+        geometry = new Geometry("line", line);
+        mat = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+        mat.setColor("Color", ColorRGBA.Gray);
+        mat.getAdditionalRenderState().setLineWidth(obj.type.lineWidth);
+        geometry.setMaterial(mat);
+        rootNode.attachChild(geometry);
+		*/
 		
 		if (DEBUG) {
 //			H.p("|Drawing line, " + obj.start + " " + obj.end + ", colour:" + obj.type.colour);
 			drawMeAVerySmallBox(obj.end, ColorRGBA.White);
+			
+			drawMeAVerySmallBox(list.get(0), ColorRGBA.Red);
+			drawMeAVerySmallBox(list.get(1), ColorRGBA.Brown);
+			drawMeAVerySmallBox(list.get(2), ColorRGBA.Gray);
+			drawMeAVerySmallBox(list.get(3), ColorRGBA.Blue);
 		}
 	}
 	

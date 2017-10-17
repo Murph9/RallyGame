@@ -2,7 +2,6 @@ package world.highway;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.jme3.bullet.control.RigidBodyControl;
@@ -16,15 +15,19 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.instancing.InstancedNode;
+import com.jme3.terrain.noise.basis.FilteredBasis;
 
 import game.App;
 import helper.H;
 import jme3tools.optimize.GeometryBatchFactory;
+import terrainWorld.NoiseBasedWorld;
 import terrainWorld.Terrain;
 import terrainWorld.TerrainChunk;
 import terrainWorld.TileListener;
 
 //TODO rename to road maker or something
+//TODO should fetch the heights based on the noise generator, instead of the terrain
+//	should help generation code, and also allow preperation for more world at once
 public class TerrainListener implements TileListener {
 
 	private static final String[] Tree_Strings = new String[] {
@@ -37,16 +40,31 @@ public class TerrainListener implements TileListener {
 				"assets/objects/tree_6.blend",
 			};
 	
+	private enum CurveTypes {
+		//defined as going straight is +z(y) only
+		Straight(new Vector2f[] { new Vector2f(0,0), new Vector2f(0,40), new Vector2f(0,40), new Vector2f(0,80) }),
+		
+//		Right(new Vector2f[] { new Vector2f(0,0), new Vector2f(0,40), new Vector2f(-40,80), new Vector2f(-80,80) }),
+//		Left(new Vector2f[] { new Vector2f(0,0), new Vector2f(0,40), new Vector2f(40,80), new Vector2f(80,80) }),
+		;
+		//TODO make more on: https://www.desmos.com/calculator/cahqdxeshd
+		//note that a line from 0,0 to 20,30 on that should be 0,0 to -20,30
+		
+		public final Vector2f[] points; 
+		CurveTypes(Vector2f[] ps) {
+			this.points = ps;
+		}
+	}
+	
 	private Spatial treeGeoms[] = new Spatial[Tree_Strings.length];
 	
 	private HighwayWorld world;
-	private Terrain terrain;
+	private NoiseBasedWorld terrain;
 	
 	private InstancedNode treeNode = new InstancedNode("tree node");
 	
-	private Vector3f lastPoint;
-	private Vector3f nextPoint;
-	private float angle = FastMath.nextRandomFloat()*FastMath.TWO_PI;
+	//you can calculate the last pos and the last rot based on these points
+	private Vector3f[] lastPoints = new Vector3f[] { new Vector3f(0,0,0), new Vector3f(0,0,0), new Vector3f(0,0,0), new Vector3f(0,0,1) };
 	
 	private int totalChunks;
 	private int totalLoaded;
@@ -63,7 +81,7 @@ public class TerrainListener implements TileListener {
 		this.treeNode.setShadowMode(ShadowMode.CastAndReceive);
 		App.rally.getRootNode().attachChild(this.treeNode);
 		
-		H.p("Terrain started with direction: ", angle);
+		//TODO random start angle H.p("Terrain started with direction: ", angle);
 		
 		for (int i = 0; i < Tree_Strings.length; i++) {
 			Spatial spat = App.rally.getAssetManager().loadModel(TerrainListener.Tree_Strings[i]);
@@ -76,13 +94,27 @@ public class TerrainListener implements TileListener {
 			}
 		}
 		
-		setNextPoint(); //init next point
+		generateRoadBit(); //init first road
+	}
+	
+	private float getHeightFromBasis(Vector3f pos) {
+		return getHeightFromBasis(H.v3tov2fXZ(pos));
+	}
+	private float getHeightFromBasis(Vector2f pos) {
+		//TODO the purterb filters and iterative filters don't work unless i fetch the full chunk buffer 
+		//causing the worst perf issue ive seen that wasn't deliberate :(
+		
+		FilteredBasis fb = terrain.getFilteredBasis()[0];
+		float[] heights = fb.getBuffer(pos.x, pos.y, 0, this.terrain.blockSize).array();
+		
+		H.p(heights[(heights.length/2)+1] * terrain.getWorldHeight());
+		return heights[(heights.length/2)+1] * terrain.getWorldHeight();
 	}
 	
 	private void initRoads(TerrainChunk chunk) {
 		while (true) {
 			float height = 0;
-			Vector2f pos = H.v3tov2fXZ(nextPoint);
+			Vector2f pos = H.v3tov2fXZ(lastPoints[3]);
 			TerrainChunk tc = terrain.chunkFor(pos);
 			if (tc != null)
 				height = tc.getHeight(pos);
@@ -93,9 +125,8 @@ public class TerrainListener implements TileListener {
 					break;
 				}
 			}
-	
-			nextPoint.y = height;
-			setNextPoint();
+
+			generateRoadBit();
 		}
 	}
 	
@@ -155,42 +186,46 @@ public class TerrainListener implements TileListener {
 			return true;
 		
 		while (true) {
-			float height = chunk.getHeight(H.v3tov2fXZ(nextPoint));
+			float height = chunk.getHeight(H.v3tov2fXZ(lastPoints[3]));
 			if (Float.isNaN(height) || height == 0) {
 				break; //no more space to load road on
 			}
-			nextPoint.y = height;
-			
-			setNextPoint();
+			H.p("height before:", height);
+			generateRoadBit();
 		}
 		
 		return true;
 	}
-	private void setNextPoint() {
-		if (lastPoint == null) {
-			lastPoint = new Vector3f();
-			nextPoint = new Vector3f();
-			return;
+	private void generateRoadBit() {
+		//TODO should probably be getting in the height of point 3, so it can use it
+		
+		//pick from the list of biezer curves
+		Vector2f[] points = H.randFromArray(CurveTypes.values()).points;
+
+		//transform points based of the last points
+		Vector3f[] newPoints = new Vector3f[] {
+				H.v2tov3fXZ(points[0]),
+				H.v2tov3fXZ(points[1]),
+				H.v2tov3fXZ(points[2]),
+				H.v2tov3fXZ(points[3]),
+			};
+		
+		float oldAngle = FastMath.atan2(lastPoints[3].z - lastPoints[2].z, lastPoints[3].x - lastPoints[2].x) - FastMath.HALF_PI;
+		Quaternion q = new Quaternion().fromAngleAxis(-oldAngle, Vector3f.UNIT_Y); 
+		for (int i = 0; i < newPoints.length; i++) {
+			newPoints[i] = q.mult(newPoints[i]).add(lastPoints[3]);
+			newPoints[i].y = getHeightFromBasis(newPoints[i]); 
 		}
 		
-		lastPoint = lastPoint == null ? new Vector3f(Vector3f.ZERO) : lastPoint;
-
-		Vector3f dir = nextPoint.subtract(lastPoint).normalize();
-		float length = nextPoint.subtract(lastPoint).length();
-		List<Vector3f> list = Arrays.asList(new Vector3f[] { lastPoint, lastPoint.add(dir.mult(length/3)).add(H.randV3f()), nextPoint.subtract(dir.mult(length/3)).add(H.randV3f()), nextPoint });
-		RoadMesh m = new RoadMesh(5, 2, list);
+		RoadMesh m = new RoadMesh(5, 2, Arrays.asList(newPoints));
 		world.generateRoad(m);
 		
-		angle += FastMath.DEG_TO_RAD*FastMath.nextRandomFloat()*3*(FastMath.nextRandomFloat() < 0.5f ? -1 : 1);
-		Quaternion rot = new Quaternion().fromAngleAxis(angle, Vector3f.UNIT_Y);
+		App.rally.getRootNode().attachChild(H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.White, q.mult(new Vector3f(10,0,0)), lastPoints[3]));
+		App.rally.getRootNode().attachChild(H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.Red, newPoints[3].subtract(newPoints[0]), newPoints[0]));
 		
-		Vector3f next = new Vector3f(FastMath.nextRandomFloat()*20 + 30, 0, 0);
-		Vector3f point = nextPoint.add(rot.mult(next));
+		lastPoints = newPoints;
 		
-		lastPoint = nextPoint;
-		nextPoint = point;
-		nextPoint.y = 0;
-		H.p("next road point:", nextPoint);
+		H.p("next road point:", lastPoints[3]);
 	}
 	
 	@Override

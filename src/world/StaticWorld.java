@@ -1,24 +1,32 @@
 package world;
 
+import com.jme3.math.FastMath;
+import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
+
+import helper.H;
 
 //Simple class that makes changing static world quite easy
 public enum StaticWorld {
 	//special
-	garage("garage.blend", 1, new Vector3f(0,1,0), false),
-	garage2("garage_2.blend", 1, new Vector3f(0,1,0), false),
+	garage("garage.blend", 1, new Vector3f(0,1,0), null, false),
+	garage2("garage_2.blend", 1, new Vector3f(0,1,0), null, false),
 
 	//normal
-	duct("duct.blend", 50, new Vector3f(0,-6,0), true),
-	duct2("duct.blend", 5, new Vector3f(0,0,0), true),
-	raleigh("raleigh.blend", 8, new Vector3f(34.441566f, 20.72906f, 27.334211f), true),
+	duct("duct.blend", 50, new Vector3f(0,-6,0), null, true),
+	duct2("duct.blend", 5, new Vector3f(0,0,0), null, true),
+	raleigh("raleigh.blend", 8, new Vector3f(34.441566f, 20.72906f, 27.334211f), null, true),
 
-	dragstrip("dragstrip.blend", 10, new Vector3f(0,0,0), false),
+	dragstrip("dragstrip.blend", 10, new Vector3f(0,0,0), null, false),
 	
 	//other peoples:
-	track2("track2.blend", 1, new Vector3f(0,0,0), false),
-	carpark("carpark.blend", 1, new Vector3f(0,0,0), false),
-	unbenannt("unbenannt_track.blend", 1, new Vector3f(0,0,0), true), //TODO needs fixing
+	track2("track2.blend", 1, new Vector3f(0,0,0), H.FromAngleAxis(FastMath.PI, Vector3f.UNIT_Y), false),
+	carpark("carpark.blend", 1, new Vector3f(0,0,0), null, false),
+	unbenannt("unbenannt_track.blend", 1, new Vector3f(0,0,0), null, true), //TODO needs fixing
+	
+	block_fort("block_fort.blend", 10, new Vector3f(-20,0,-12), null, false),
+	rainbow_road("rainbow_road.blend", 1, new Vector3f(0,0,0), null, true),
+	wuhu_island("wuhu_island.blend", 2, new Vector3f(0,0,0), H.FromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y), true),
 	
 	//debug ones: (not working now)
 //	paris1("paris1.blend", 1, new Vector3f(40,75,0), true), //be careful with this one, large
@@ -34,12 +42,16 @@ public enum StaticWorld {
 	public String name;
 	public float scale;
 	public Vector3f start;
+	public Matrix3f rot;
 	public boolean ifNeedsTexture;
-	
-	StaticWorld (String a, float size, Vector3f pos, boolean texture) {
-		this.name = dir+a;
+
+	StaticWorld(String a, float size, Vector3f pos, Matrix3f rot, boolean texture) {
+		this.name = dir + a;
 		this.scale = size;
 		this.start = pos;
+		this.rot = rot;
+		if (this.rot == null)
+			this.rot = new Matrix3f(Matrix3f.IDENTITY);
 		this.ifNeedsTexture = texture;
 	}
 }

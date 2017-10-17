@@ -51,8 +51,12 @@ Later Things:
 //https://github.com/JulienGreen/RoadTessalation
 //https://hub.jmonkeyengine.org/t/vertexbuffer-for-specific-uv-behavior-shaders/38268/22
 
+
+//Large TODO:
+//Set the height in the filteredBasis
+
 public class HighwayWorld extends World {
-	public Terrain terrain;
+	public NoiseBasedWorld terrain;
 	private int blockSize; //(distance between points)/tileSize
 	private int tileSize; //the grid piece size
 	public int getTileSize() { return tileSize; }
@@ -165,6 +169,8 @@ public class HighwayWorld extends World {
 		ground2.addPreFilter(iterate2);
 		
 		newWorld.setFilteredBasis(new FilteredBasis[] { /*ground,*/ ground2 });
+		//TODO for height generation, suggest creating my own FilteredBasis
+		//which can have points individually set so that i don't have to look at the terrain heights
 
 		this.terrain = newWorld;
 		App.rally.getStateManager().attach(this.terrain);
@@ -237,7 +243,7 @@ public class HighwayWorld extends World {
 		
 		roads.add(road);
 		
-		Geometry geo = new Geometry("curvy", road);
+		Geometry geo = new Geometry("highway", road);
 		Material mat = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		mat.setColor("Color", new ColorRGBA(0,0,0,0.5f));
