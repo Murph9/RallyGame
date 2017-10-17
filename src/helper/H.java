@@ -11,6 +11,7 @@ import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
+import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
@@ -365,8 +366,22 @@ public class H {
 	public static Vector2f v3tov2fXZ(Vector3f v) {
 		return new Vector2f(v.x, v.z);
 	}
+	public static Vector3f v2tov3fXZ(Vector2f v) {
+		return new Vector3f(v.x, 0, v.y);
+	}
+	
+	public static Matrix3f FromAngleAxis(float angle, Vector3f axis) {
+		Matrix3f m = new Matrix3f();
+		m.fromAngleAxis(angle, axis);
+		return m;
+	}
+	
+	
 	public static Vector3f randV3f() {
 		return new Vector3f(FastMath.nextRandomFloat()*2-1, FastMath.nextRandomFloat()*2-1, FastMath.nextRandomFloat()*2-1);
+	}
+	public static <T> T randFromArray(T[] array) {
+		return array[FastMath.nextRandomInt(0, array.length-1)];
 	}
 	
 	public static Vector3f screenTopLeft() {

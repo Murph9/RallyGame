@@ -15,7 +15,7 @@ public class DriveAI extends DriveSimple {
 	public DriveAI (CarData car, CarData them, World world) {
     	super(car, world);
     	this.them = them;
-    	this.themCount = 1;
+    	this.themCount = 3;
     }
 	
 	@Override

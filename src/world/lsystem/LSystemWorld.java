@@ -23,7 +23,7 @@ public class LSystemWorld extends World {
 	private LRoadGenerator lrg;
 	
 	public LSystemWorld() {
-		super("curveWorldRoot");
+		super(LSystemWorld.class.getSimpleName());
 	}
 	
 	@Override
@@ -46,10 +46,10 @@ public class LSystemWorld extends World {
 		matfloor.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		matfloor.setColor("Color", ColorRGBA.Green);
 		
-		Box start = new Box(100, 0.25f, 100);
+		Box start = new Box(10, 0.25f, 10);
 		Geometry startBox = new Geometry("Starting Box", start);
 		startBox.setMaterial(matfloor);
-		startBox.setLocalTranslation(0, -0.1f, 0);
+		startBox.setLocalTranslation(0, -0.25f, 0);
 		startBox.addControl(new RigidBodyControl(0));
 		
 		this.rootNode.attachChild(startBox);

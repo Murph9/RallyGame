@@ -80,7 +80,7 @@ public class Main extends SimpleApplication {
 	private void loadDefaults() {
 		car = Car.Runner.get();
 		them = Car.Runner.get();
-		world = new LSystemWorld();
+		world = new HighwayWorld();
 		//world alernatives:
 		//	new HighwayWorld();
 		//	new StaticWorldBuilder(StaticWorld.track2);
@@ -181,7 +181,7 @@ public class Main extends SimpleApplication {
 	public void startDev(AppState state) {
 		getStateManager().detach(state);
 		
-		drive = new DriveDev(Car.Runner.get(), new FlatWorld());
+		drive = new DriveDev(Car.Runner.get(), new StaticWorldBuilder(StaticWorld.track2));
 		getStateManager().attach(drive);
 	}
 	

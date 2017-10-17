@@ -46,7 +46,7 @@ public class SkyState extends AbstractAppState {
 		SkyControl sky = new SkyControl(am, r.getCamera(), 0.7f, false, true);
 		skyRoot.addControl(sky);
 		sky.setCloudiness(0.2f);
-		sky.getSunAndStars().setHour(12f);
+		sky.getSunAndStars().setHour(9f);
 		sky.getSunAndStars().setObserverLatitude(0f); //equator
         sky.getUpdater().setAmbientLight(ambLight);
         sky.getUpdater().setMainLight(mainLight);

@@ -18,7 +18,7 @@ public class DriveDev extends DriveSimple {
 	private WorldEditor worldEditor;
 	private CarWheelGraph wheelGraphs;
 	
-	public DriveDev (CarData car, World world) {
+	public DriveDev(CarData car, World world) {
     	super(car, world);
     }
 	

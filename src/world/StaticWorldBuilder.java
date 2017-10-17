@@ -12,6 +12,7 @@ import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.FaceCullMode;
+import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
@@ -49,6 +50,10 @@ public class StaticWorldBuilder extends World {
 	@Override
 	public Vector3f getStartPos() {
 		return world.start;
+	}
+	@Override
+	public Matrix3f getStartRot() {
+		return world.rot;
 	}
 
 	@Override

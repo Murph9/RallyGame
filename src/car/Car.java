@@ -1,5 +1,7 @@
 package car;
 
+import com.jme3.math.Vector3f;
+
 //TODO use ridge racer cars
 
 public enum Car {
@@ -233,7 +235,7 @@ public enum Car {
 			areo_drag = 0.33f;
 			areo_crossSection = 0.59f;
 			
-			brakeMaxTorque = 2500;
+			brakeMaxTorque = 5000;
 		}
 	}
 
@@ -255,7 +257,7 @@ public enum Car {
 			w_radius = 0.4f;
 
 			rollFraction = 0.1f;
-			sus_maxForce = 55000;
+			sus_maxForce = 85000;
 
 			driveFront = true;
 			driveRear = true;
@@ -270,7 +272,7 @@ public enum Car {
 			trans_finaldrive = 3f;
 			trans_gearRatios = new float[]{-3.5f,3.66f,2.5f,1.9f,1.4f,1.02f,0.7f};
 			
-			cam_offset.mult(2);
+			cam_offset = new Vector3f(0,3.1f,-9);
 		}
 
 	}
@@ -286,7 +288,7 @@ public enum Car {
 			width = 1.758f;
 			height = 1.217f;
 			length = 4.75f;
-			//some of these numbers all round here are incorrect
+			//some of these numbers all around here are incorrect
 			e_redline = 6000;
 			e_torque = new float[] {0, 295, 510, 583, 624, 598, 520, 50};
 			

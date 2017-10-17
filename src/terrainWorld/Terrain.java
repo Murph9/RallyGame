@@ -46,7 +46,7 @@ public abstract class Terrain extends AbstractAppState implements Closeable
     private final PhysicsSpace physicsSpace;
     private final Node rootNode;
 
-    protected final int blockSize;
+    public final int blockSize;
     protected final int tileSize;
     protected final int bitshift;
     private final int positionAdjuster;
@@ -564,6 +564,12 @@ public abstract class Terrain extends AbstractAppState implements Closeable
     	//all this thread safety...
     	threadpool.submit(() -> {
             
+    		try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+    		
         	List<HeightTemp> list = new LinkedList<HeightTemp>();
         	
         	for (Vector3f v : location) {
@@ -597,7 +603,7 @@ public abstract class Terrain extends AbstractAppState implements Closeable
         			}
         		} else {
 	            	v.y = height; //TODO probably tried to set height before the other bit was added
-	            	H.e("!!!! No TerrainChunk for:", v, x, z, locX, locZ, "tiles #:", this.worldTiles.size());
+	            	//TODO: H.e("!!!!! No TerrainChunk for:", v, x, z, locX, locZ, "tiles #:", this.worldTiles.size());
         		}
         	}
         	app.enqueue(() -> {
