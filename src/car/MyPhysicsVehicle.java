@@ -1,8 +1,5 @@
 package car;
 
-import java.util.LinkedList;
-import java.util.Queue;
-
 import com.bulletphysics.dynamics.vehicle.DefaultVehicleRaycaster;
 import com.bulletphysics.dynamics.vehicle.WheelInfo;
 import com.bulletphysics.dynamics.vehicle.WheelInfo.RaycastInfo;
@@ -18,7 +15,6 @@ import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
 
 import car.CarModelData.CarPart;
 import car.ai.CarAI;
@@ -440,8 +436,12 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			}
 			
 			wheel[i].skid = p;
+			float brakeCurrent2 = brakeCurrent;
+			if (wheel[i].skid > 1 && vel.length() > 2 && brakeCurrent == 1)
+				brakeCurrent2 = 0; //abs (which works way too well i think)
+			
 			//add the wheel force after merging the forces
-			float totalLongForce = torques[i] - wf[i].z - (brakeCurrent*car.brakeMaxTorque*Math.signum(wheel[i].radSec));
+			float totalLongForce = torques[i] - wf[i].z - (brakeCurrent2*car.brakeMaxTorque*Math.signum(wheel[i].radSec));
 			float nextRadSec = wheel[i].radSec + tpf*totalLongForce/(car.e_inertia());
 			if (brakeCurrent != 0 && Math.signum(wheel[i].radSec) != Math.signum(nextRadSec))
 				wheel[i].radSec = 0; //maxed out the forces with braking, so prevent wheels from moving
