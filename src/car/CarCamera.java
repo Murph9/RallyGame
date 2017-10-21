@@ -111,7 +111,7 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 		c.setLocation(prevPos); //already set for next frame
 
 		//lastly do a ray cast to make sure that you can still see the car
-		/*//TODO disabled until it actually avoids the car model
+		//TODO actually avoid the car model, and maybe not so touchy...
 		CollisionResults results = new CollisionResults();
 		Vector3f dir = c.getLocation().subtract(carPos.add(p.car.cam_lookAt));
 		Ray ray = new Ray(carPos.add(p.car.cam_lookAt), dir);
@@ -119,11 +119,11 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 		CollisionResult cr = results.getClosestCollision();
 		if (cr != null && cr.getDistance() < dir.length()) {
 			Geometry g = cr.getGeometry();
-			if (!H.hasParentNode(g, p.carRootNode)) { //don't collide with the car
+			if (!H.hasParentNode(g, p.carRootNode)) { //don't collide with the car TODO doesn't work
 				c.setLocation(cr.getContactPoint());
+				H.p("Camera contact on: ", g.getName());
 			}
 		}
-		//*/
 		
 		//at high speeds shake the camera a little
 		float shakeFactor = p.vel.length() * p.vel.length() * p.car.cam_shake;

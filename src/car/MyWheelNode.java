@@ -131,8 +131,8 @@ public class MyWheelNode extends Node {
         smoke.setRotateSpeed(FastMath.QUARTER_PI);
         
         smoke.setImagesX(15); //the smoke image is 15x * 1y (y is already the default of 1)
-        smoke.setEndColor(new ColorRGBA(0.7f, 0.7f, 0.7f, 0.2f));
-        smoke.setStartColor(new ColorRGBA(0.7f, 0.7f, 0.7f, 0.4f));
+        smoke.setEndColor(new ColorRGBA(0.7f, 0.7f, 0.7f, 0.6f));
+        smoke.setStartColor(new ColorRGBA(0.7f, 0.7f, 0.7f, 0.3f));
 
         smoke.setStartSize(0.4f);
         smoke.setEndSize(4f);
@@ -229,6 +229,10 @@ public class MyWheelNode extends Node {
 		//TODO reset skid buffers?
 	}
 
+	public void setEnabled(boolean enabled) {
+		//TODO disable smoke
+	}
+	
 	public void cleanup() {
 		App.rally.getRootNode().detachChild(this.SkidLine);
 	}

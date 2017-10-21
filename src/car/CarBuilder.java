@@ -44,6 +44,10 @@ public class CarBuilder extends AbstractAppState {
 		super.setEnabled(state);
 		for (Integer i : cars.keySet()) {
 			cars.get(i).enableSound(state);
+			
+			for (MyWheelNode w: cars.get(i).wheel) {
+				w.setEnabled(state);
+			}
 		}
 	}
 	
