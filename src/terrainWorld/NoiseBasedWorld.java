@@ -86,7 +86,7 @@ public class NoiseBasedWorld extends Terrain
         return tq;
     }
     
-    private float[] getHeightmap(TerrainLocation tl) { 
+    private float[] getHeightmap(TerrainLocation tl) {
     	return getHeightmap(tl.getX(), tl.getZ());
     }
     private float[] getHeightmap(int x, int z) {

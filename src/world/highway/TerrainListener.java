@@ -21,7 +21,6 @@ import game.App;
 import helper.H;
 import jme3tools.optimize.GeometryBatchFactory;
 import terrainWorld.NoiseBasedWorld;
-import terrainWorld.Terrain;
 import terrainWorld.TerrainChunk;
 import terrainWorld.TileListener;
 
@@ -102,12 +101,12 @@ public class TerrainListener implements TileListener {
 	}
 	private float getHeightFromBasis(Vector2f pos) {
 		//TODO the purterb filters and iterative filters don't work unless i fetch the full chunk buffer 
-		//causing the worst perf issue ive seen that wasn't deliberate :(
+		//causing the worst perf issue ive had that wasn't deliberate :(
 		
 		FilteredBasis fb = terrain.getFilteredBasis()[0];
 		float[] heights = fb.getBuffer(pos.x, pos.y, 0, this.terrain.blockSize).array();
 		
-		H.p(heights[(heights.length/2)+1] * terrain.getWorldHeight());
+		H.p(heights.length, heights[(heights.length/2)+1] * terrain.getWorldHeight(), this.lastPoints[3]);
 		return heights[(heights.length/2)+1] * terrain.getWorldHeight();
 	}
 	
@@ -196,9 +195,8 @@ public class TerrainListener implements TileListener {
 		
 		return true;
 	}
+	
 	private void generateRoadBit() {
-		//TODO should probably be getting in the height of point 3, so it can use it
-		
 		//pick from the list of biezer curves
 		Vector2f[] points = H.randFromArray(CurveTypes.values()).points;
 
@@ -214,7 +212,7 @@ public class TerrainListener implements TileListener {
 		Quaternion q = new Quaternion().fromAngleAxis(-oldAngle, Vector3f.UNIT_Y); 
 		for (int i = 0; i < newPoints.length; i++) {
 			newPoints[i] = q.mult(newPoints[i]).add(lastPoints[3]);
-			newPoints[i].y = getHeightFromBasis(newPoints[i]); 
+			newPoints[i].y = getHeightFromBasis(newPoints[i]);
 		}
 		
 		RoadMesh m = new RoadMesh(5, 2, Arrays.asList(newPoints));

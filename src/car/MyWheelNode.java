@@ -26,7 +26,7 @@ import game.App;
 public class MyWheelNode extends Node {
 
 	private static final int QUAD_COUNT = 200;
-	private static boolean SMOKE_ON = false;
+	private static boolean SMOKE_ON = true;
 	
 	private static final int VERTEX_BUFFER_SIZE = 4*QUAD_COUNT; //Vector3f.size * triangle size * 2 (2 tri per quad) * count
 	private static final int[] indexes = { 2,0,1, 1,3,2 }; //tyre marks vertex order

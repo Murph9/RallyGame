@@ -30,7 +30,6 @@ import com.jme3.texture.Texture.WrapMode;
 import game.App;
 import helper.H;
 import terrainWorld.NoiseBasedWorld;
-import terrainWorld.Terrain;
 import world.World;
 import world.WorldType;
 
