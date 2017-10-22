@@ -130,7 +130,7 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 		Vector3f lookAt = carPos.add(p.car.cam_lookAt);
 		lastShake.addLocal(new Vector3f(FastMath.nextRandomFloat(), FastMath.nextRandomFloat(), FastMath.nextRandomFloat()).normalize().mult(shakeFactor*FastMath.nextRandomInt(-1, 1)));
 		if (lastShake.length() > 0.01f)
-			lastShake.interpolateLocal(Vector3f.ZERO, 0.7f);
+			lastShake.interpolateLocal(Vector3f.ZERO, 0.7f); //TODO shake slower
 		else
 			lastShake = new Vector3f();
 		

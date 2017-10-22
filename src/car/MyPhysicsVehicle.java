@@ -1,5 +1,8 @@
 package car;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import com.bulletphysics.dynamics.vehicle.DefaultVehicleRaycaster;
 import com.bulletphysics.dynamics.vehicle.WheelInfo;
 import com.bulletphysics.dynamics.vehicle.WheelInfo.RaycastInfo;
@@ -10,6 +13,7 @@ import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.objects.PhysicsVehicle;
 import com.jme3.bullet.objects.VehicleWheel;
 import com.jme3.bullet.util.Converter;
+import com.jme3.input.RawInputListener;
 import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
@@ -49,7 +53,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	public Vector3f left = new Vector3f();
 
 	// Car controlling things
-	private MyKeyListener control;
+	private List<RawInputListener> controls;
 	private CarAI ai;
 
 	//car data
@@ -169,63 +173,68 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	}
 
 	public void onAction(String binding, boolean value, float tpf) {
+		if (binding == null) {
+			H.p("No binding given?");
+			return;
+		}
+		
 		//value == 'if pressed (down) - we get one back when its unpressed (up)'
 		//tpf is being used as the value for joysticks. deal with it
-		switch(binding) {
-		case "Left": 
-			steerLeft = tpf;
-			break;
-
-		case "Right":
-			steerRight = tpf;
-			break;
-
-		case "Accel":
-			accelCurrent = tpf;
-			break;
-
-		case "Brake":
-			brakeCurrent = tpf;
-			break;
-
-		case "Nitro":
-			if (car.nitro_on) {
-				ifNitro = value;
-				if (!ifNitro)
-					this.nitroTimeout = 2;
-			}
-			break;
-
-		case "Jump":
-			if (value) {
-				applyImpulse(car.JUMP_FORCE, new Vector3f(0,0,0)); //push up
-				Vector3f old = getPhysicsLocation();
-				old.y += 2; //and move up
-				setPhysicsLocation(old);
-			}
-			break;
-
-		case "Handbrake":
-			ifHandbrake = value;
-			break;
-
-		case "Flip":
-			if (value) this.flipMe();
-			break;
-
-		case "Reset":
-			if (value) this.reset();
-			break;
-
-		case "Reverse":
-			if (value) curGear = 0;
-			else curGear = 1;
-			break;
-
-		default:
-			//nothing
-			System.err.println("unknown key: "+binding);
-			break;
+		switch (binding) {
+			case "Left": 
+				steerLeft = tpf;
+				break;
+	
+			case "Right":
+				steerRight = tpf;
+				break;
+	
+			case "Accel":
+				accelCurrent = tpf;
+				break;
+	
+			case "Brake":
+				brakeCurrent = tpf;
+				break;
+	
+			case "Nitro":
+				if (car.nitro_on) {
+					ifNitro = value;
+					if (!ifNitro)
+						this.nitroTimeout = 2;
+				}
+				break;
+	
+			case "Jump":
+				if (value) {
+					applyImpulse(car.JUMP_FORCE, new Vector3f(0,0,0)); //push up
+					Vector3f old = getPhysicsLocation();
+					old.y += 2; //and move up
+					setPhysicsLocation(old);
+				}
+				break;
+	
+			case "Handbrake":
+				ifHandbrake = value;
+				break;
+	
+			case "Flip":
+				if (value) this.flipMe();
+				break;
+	
+			case "Reset":
+				if (value) this.reset();
+				break;
+	
+			case "Reverse":
+				if (value) curGear = 0;
+				else curGear = 1;
+				break;
+	
+			default:
+				//nothing
+				System.err.println("unknown binding: "+binding);
+				break;
 		}
 	}
 	//end controls
@@ -270,9 +279,13 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		this.ai = ai;
 	}
 
-	public void attachKeyControl() {
-		this.control = new MyKeyListener(this);
-		App.rally.getInputManager().addRawInputListener(this.control);
+	public void attachControls() {
+		this.controls = new LinkedList<RawInputListener>();
+		this.controls.add(new MyKeyListener(this));
+		this.controls.add(new JoystickEventListner(this));
+		
+		App.rally.getInputManager().addRawInputListener(this.controls.get(0));
+		App.rally.getInputManager().addRawInputListener(this.controls.get(1));
 	}
 
 
@@ -658,9 +671,10 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 
 	public void cleanup() {
 		this.ai = null;
-		if (this.control != null) {
-			App.rally.getInputManager().removeRawInputListener(this.control);
-			this.control = null;
+		if (this.controls != null && !this.controls.isEmpty()) {
+			for (RawInputListener ril: this.controls)
+			App.rally.getInputManager().removeRawInputListener(ril);
+			this.controls.clear();
 		}
 
 		if (this.engineSound != null) {

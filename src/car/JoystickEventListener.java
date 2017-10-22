@@ -6,7 +6,6 @@ import java.util.Map;
 import com.jme3.input.JoystickAxis;
 import com.jme3.input.JoystickButton;
 import com.jme3.input.RawInputListener;
-import com.jme3.input.controls.ActionListener;
 import com.jme3.input.event.JoyAxisEvent;
 import com.jme3.input.event.JoyButtonEvent;
 import com.jme3.input.event.KeyInputEvent;
@@ -16,19 +15,15 @@ import com.jme3.input.event.TouchEvent;
 
 class JoystickEventListner implements RawInputListener {
 
-	//TODO:
-	//currently this assumes every controller controlls the same car
-	//would need to abstract it out using the old Controller class (which is still in version control)
+	//TODO its very hardcoded
 	
-	//it also is currently hardcoded..
+	private Map<String, String> intToButton = new HashMap<String, String>();
+	private Map<String, String> buttonToAction = new HashMap<String, String>();
 	
-	Map<String, String> intToButton = new HashMap<String, String>(); //internal int to human readable string
-	Map<String, String> buttonToMapping = new HashMap<String, String>(); //to game mapping
+	private MyPhysicsVehicle a;
+	private double stickdeadzone = 0.2f;
 	
-	ActionListener a;
-	double stickdeadzone = 0.25f; //TODO maybe still causing issues?
-	
-	JoystickEventListner (ActionListener a) {
+	JoystickEventListner (MyPhysicsVehicle a) {
 		this.a = a;
 		
 		intToButton.put(JoystickButton.BUTTON_0, "A"); //A
@@ -44,21 +39,32 @@ class JoystickEventListner implements RawInputListener {
 		
 		intToButton.put(JoystickButton.BUTTON_8, "LeftStick"); //LeftStick
 		intToButton.put(JoystickButton.BUTTON_9, "RightStick"); //RightStick
+		
+		
+		buttonToAction.put("A", "Handbrake");
+		buttonToAction.put("B", "Nitro");
+		
+		buttonToAction.put("Start", "Reset");
+		buttonToAction.put("X", "Flip");
+		buttonToAction.put("Y", "Jump");
+		
+		buttonToAction.put("RightStick", "Reverse");
 	}
 
 	@Override
 	public void onJoyAxisEvent(JoyAxisEvent arg0) {
 		JoystickAxis axis = arg0.getAxis();
 		float value = arg0.getValue();
+		float valueAbs = Math.abs(value);
 		
 		//TODO fix
 		if (axis == axis.getJoystick().getXAxis()) { // left/right normal stick
 			if (value > 0) {
 				a.onAction("Left", false, 0);
-				a.onAction("Right", true, Math.abs(value) < stickdeadzone ? 0 : value); //less than deadzone = 0
+				a.onAction("Right", true, valueAbs < stickdeadzone ? 0 : valueAbs); //less than deadzone = 0
 			} else {
-				a.onAction("Left", false, 0);
-				a.onAction("Right", true, Math.abs(value) < stickdeadzone ? 0 : value);
+				a.onAction("Right", false, 0);
+				a.onAction("Left", true, valueAbs < stickdeadzone ? 0 : valueAbs);
 			}
 		} else if (axis == axis.getJoystick().getYAxis()) { //up/down normal stick
 			//not mapped yet			
@@ -66,10 +72,10 @@ class JoystickEventListner implements RawInputListener {
 		} else if (axis == axis.getJoystick().getAxis(JoystickAxis.Z_AXIS)) { //triggers?
 			if (value > 0) { //brake
 				a.onAction("Accel", false, 0);
-				a.onAction("Brake", true, Math.abs(value) < stickdeadzone ? 0 : value); //less than deadzone = 0
+				a.onAction("Brake", true, valueAbs < stickdeadzone ? 0 : valueAbs); //less than deadzone = 0
 			} else {
 				a.onAction("Brake", false, 0);
-				a.onAction("Accel", true, Math.abs(value) < stickdeadzone ? 0 : -value);
+				a.onAction("Accel", true, valueAbs < stickdeadzone ? 0 : valueAbs);
 			}
 			
 		} else if (axis == axis.getJoystick().getAxis(JoystickAxis.Z_ROTATION)) {
@@ -93,7 +99,8 @@ class JoystickEventListner implements RawInputListener {
 
 	@Override
 	public void onJoyButtonEvent(JoyButtonEvent arg0) {
-		a.onAction(Integer.toString(arg0.getButtonIndex()), arg0.isPressed(), arg0.isPressed() ? 1 : 0);
+		String button = this.intToButton.get(Integer.toString(arg0.getButtonIndex())); 
+		a.onAction(this.buttonToAction.get(button), arg0.isPressed(), arg0.isPressed() ? 1 : 0);
 		
 		arg0.isConsumed();
 	}

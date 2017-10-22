@@ -92,8 +92,6 @@ public class CarBuilder extends AbstractAppState {
 		Node carNode = new Node(id+"");
 		MyVC player = new MyVC(compoundShape, car, carNode);
 		
-		//TODO player.addRawInputListener(new JoystickEventListner(this));
-		
 		carNode.addControl(player);
 		carNode.attachChild(carmodel);
 
@@ -108,7 +106,7 @@ public class CarBuilder extends AbstractAppState {
 		player.setPhysicsRotation(rot);
 
 		if (aPlayer) { //players get the keyboard
-			player.attachKeyControl();
+			player.attachControls();
 		} else {
 			player.attachAI(new DriveAtAI(player, get(0)));
 		}

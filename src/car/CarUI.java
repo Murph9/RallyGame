@@ -426,8 +426,8 @@ public class CarUI extends AbstractAppState {
 		
 		angle.setText(p.getAngle()+"'");
 		nitro.setLocalScale(1, p.nitro/p.car.nitro_max, 1);
-		throttle.setLocalScale(p.accelCurrent, 1, 1);
-		brake.setLocalScale(p.brakeCurrent, 1, 1);
+		throttle.setLocalScale(1, p.accelCurrent, 1);
+		brake.setLocalScale(1, p.brakeCurrent, 1);
 		steer.setLocalTranslation(centerx - 35 + (p.steeringCurrent*-1 + 0.5f)*60 - 6/2, centery + 40, 0); //steering is a translated square
 	
 		

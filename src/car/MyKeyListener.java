@@ -34,6 +34,8 @@ public class MyKeyListener implements RawInputListener {
 		layout.put(KeyInput.KEY_S, "Brake");
 		
 		layout.put(KeyInput.KEY_LSHIFT, "Reverse");
+		layout.put(KeyInput.KEY_RSHIFT, "Reverse");
+		
 		layout.put(KeyInput.KEY_SPACE, "Handbrake");
 
 		layout.put(KeyInput.KEY_LCONTROL, "Nitro");
