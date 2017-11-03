@@ -4,7 +4,7 @@ Requires:
 Java 8
 
 A simple 3D rally like game in Java.
-Can be played on my webpage at <a href="murph9.com">murph9.com</a> under my games
+Can be played on my webpage at <a href="murph9.com">https://www.murph9.com</a> under my games
 
 Currently still very much in testing, you can drive around in many different car types. From normal cars, a 4x4, a track car, an impossible hyper-super-car and the infamous White Beast.
 
