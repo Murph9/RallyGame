@@ -57,10 +57,6 @@ import world.wp.WP.DynamicType;
 //still need to get fog working..
 //night time or something because loading looks easier to do
 
-//Bugs TODO:
-//minimap is still a little weird, probably need to remove some of the water postprocessing stuff
-//tried that and got nowhere, they are connected for some reason [you do copy the first one] (thanks for that)
-
 
 @SuppressWarnings("unused")
 public class Main extends SimpleApplication {

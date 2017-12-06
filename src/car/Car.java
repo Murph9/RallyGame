@@ -14,6 +14,8 @@ public enum Car {
 	Ricer(new Ricer()),
 	Muscle(new Muscle()),
 	Wagon(new Wagon()),
+	Miata(new Miata()),
+	Gt(new Gt()),
 	;
 	
 	private CarData car;
@@ -32,6 +34,26 @@ public enum Car {
 		}
 	}
 	
+	private static class Miata extends CarData {
+		Miata() {
+			carModel = dir+"miata.blend";
+			
+			mass = 1000;
+			
+			e_torque = new float[] {0, 300, 450, 500, 530, 550, 500, 400};
+			trans_finaldrive = 3.5f;
+			trans_gearRatios = new float[]{-2.9f,3.6f,2.5f,1.8f,1.3f,1.0f,0.84f}; //reverse,gear1,gear2,g3,g4,g5,g6,...
+			
+			e_mass = 20; //TODO underground 2 seems to have very low values like these
+			w_mass = 10;
+			
+			auto_gearDown = 4000;
+			auto_gearUp = 6500;
+			e_redline = 7000;
+			
+			sus_maxForce = 40000;
+		}
+	}
 	
 	//TODO it rolls realy easy compared to the runner car
 	//TODO tune in general
@@ -203,9 +225,6 @@ public enum Car {
 		}
 	}
 
-	///////////////////////////////////////
-	//for the runing mode
-
 	private static class Runner extends CarData {
 		Runner() {
 			carModel = dir+"track1_2.blend";
@@ -236,6 +255,48 @@ public enum Car {
 			areo_crossSection = 0.59f;
 			
 			brakeMaxTorque = 5000;
+		}
+	}
+	
+	private static class Gt extends CarData {
+		Gt() {
+			//http://www.automobile-catalog.com/auta_details1.php
+			//Ford Gt (2005)
+			
+			//TODO might highlight unusual physics?
+			
+			carModel = dir+"gt.blend";
+			wheelModel = dir+"gt_wheel.blend";
+			
+			mass = 1520;
+			width = 1.953f;
+			height = 1.125f;
+			length = 4.643f;
+			
+			w_radius = 0.735f/2f;
+			w_mass = 10;
+			
+			sus_maxForce = mass*55;
+			
+			driveFront = false;
+			driveRear = true;
+			
+			//http://www.automobile-catalog.com/curve/2005/894440/ford_gt.html
+			e_torque = new float[]{0, 322.9f, 565f, 645.7f, 677.4f, 662.4f, 627.3f, 503.4f, 0};
+			e_redline = 6800;
+			e_mass = 20;
+			
+			auto_gearUp = 6700;
+			
+			rollFraction = -0.8f; //???
+			brakeMaxTorque = 8000;
+			
+			trans_effic = 1f; //TODO
+			trans_finaldrive = 3.36f;
+			trans_gearRatios = new float[]{-3.135f, 2.611f, 1.708f, 1.233f, 0.943f, 0.767f, 0.625f};
+			
+			areo_drag = 0.31f;
+			cam_offset = new Vector3f(0,3.1f,-9);
 		}
 	}
 

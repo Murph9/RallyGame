@@ -61,7 +61,8 @@ public class HighwayWorld extends World {
 	public int getTileSize() { return tileSize; }
 	
 	private List<RoadMesh> roads;
-	private TerrainListener tL;
+	private RoadMaker rM;
+	private TreeMaker tM;
 	
 	public HighwayWorld() {
 		super("highwayWorldRoot");
@@ -99,29 +100,22 @@ public class HighwayWorld extends World {
 		Material terrainMaterial = createTerrainMaterial(am);
 		newWorld.setMaterial(terrainMaterial);
 
-		/*
-		// create a noise generator
+		//larger height variance filter
 		FractalSum base = new FractalSum();
-		base.setRoughness(0.7f);
-		base.setFrequency(1.0f);
-		base.setAmplitude(0.5f);
-		base.setLacunarity(3.12f);
-		base.setOctaves(8);
-		base.setScale(0.02125f);
+		base.setFrequency(0.003f); //mountians aren't small
+		base.setAmplitude(1.5f); //they are big
 		base.addModulator(new NoiseModulator() {
 			@Override
 			public float value(float... in) {
 				return ShaderUtils.clamp(in[0] * 0.5f + 0.5f, 0, 1);
 			}
 		});
-		
 		FilteredBasis ground = new FilteredBasis(base);
-
 		PerturbFilter perturb = new PerturbFilter();
 		perturb.setMagnitude(0.119f);
 
 		OptimizedErode therm = new OptimizedErode();
-		therm.setRadius(5);
+		therm.setRadius(10);
 		therm.setTalus(0.011f);
 
 		SmoothFilter smooth = new SmoothFilter();
@@ -132,42 +126,11 @@ public class HighwayWorld extends World {
 		iterate.addPreFilter(perturb);
 		iterate.addPostFilter(smooth);
 		iterate.setFilter(therm);
-		iterate.setIterations(3); //higher numbers make it really smooth
+		iterate.setIterations(5); //higher numbers make it really smooth
 
 		ground.addPreFilter(iterate);
-		*/
-
-		//larger height variance filter
-		FractalSum base2 = new FractalSum();
-		base2.setFrequency(0.003f); //mountians aren't small
-		base2.setAmplitude(1.5f); //they are big
-		base2.addModulator(new NoiseModulator() {
-			@Override
-			public float value(float... in) {
-				return ShaderUtils.clamp(in[0] * 0.5f + 0.5f, 0, 1);
-			}
-		});
-		FilteredBasis ground2 = new FilteredBasis(base2);
-		PerturbFilter perturb2 = new PerturbFilter();
-		perturb2.setMagnitude(0.119f);
-
-		OptimizedErode therm2 = new OptimizedErode();
-		therm2.setRadius(10);
-		therm2.setTalus(0.011f);
-
-		SmoothFilter smooth2 = new SmoothFilter();
-		smooth2.setRadius(1);
-		smooth2.setEffect(0.7f);
-
-		IterativeFilter iterate2 = new IterativeFilter();
-		iterate2.addPreFilter(perturb2);
-		iterate2.addPostFilter(smooth2);
-		iterate2.setFilter(therm2);
-		iterate2.setIterations(5); //higher numbers make it really smooth
-
-		ground2.addPreFilter(iterate2);
 		
-		newWorld.setFilteredBasis(new FilteredBasis[] { /*ground,*/ ground2 });
+		newWorld.setFilteredBasis(ground);
 		//TODO for height generation, suggest creating my own FilteredBasis
 		//which can have points individually set so that i don't have to look at the terrain heights
 
@@ -175,8 +138,11 @@ public class HighwayWorld extends World {
 		App.rally.getStateManager().attach(this.terrain);
 		
 		//set after so the terrain exists first
-		tL = new TerrainListener(this);
-		newWorld.setTileListener(tL);
+		rM = new RoadMaker(this);
+		newWorld.addTileListener(rM);
+		
+		tM = new TreeMaker(this);
+		newWorld.addTileListener(tM);
 	}
 	private Material createTerrainMaterial(AssetManager am) {
         Material terrainMaterial = new Material(am, "Common/MatDefs/Terrain/HeightBasedTerrain.j3md");
@@ -233,7 +199,7 @@ public class HighwayWorld extends World {
 		}
 		
 		
-		List<Vector3f> list = road.getControlPoints(); //NO EDITing this object
+		List<Vector3f> list = road.getControlPoints(); //No editing this object
 		H.e("road: ", list);
 
 		if (App.rally.IF_DEBUG)
@@ -347,7 +313,7 @@ public class HighwayWorld extends World {
 	public void cleanup() {
 		this.rootNode.detachAllChildren();
 		this.terrain.close();
-		this.tL.cleanup();
+		this.tM.cleanup();
 		App.rally.getStateManager().detach(this.terrain);
 		
 		super.cleanup();

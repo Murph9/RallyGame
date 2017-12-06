@@ -58,7 +58,7 @@ public abstract class Terrain extends AbstractAppState implements Closeable
     private boolean isLoaded;
     private int totalVisibleChunks = 25;
 
-    protected TileListener tileListener;
+    protected List<TileListener> tileListeners;
 
     private long cacheTime = 5000;
     protected int fileSeed = 0;
@@ -79,6 +79,8 @@ public abstract class Terrain extends AbstractAppState implements Closeable
 
         this.bitshift = this.bitCalc(blockSize);
         this.positionAdjuster = (this.blockSize - 1) / 2;
+        
+        this.tileListeners = new LinkedList<TileListener>();
         
         this.fileSeed = fileSeed;
         File dir = new File(System.getProperty("user.home") + "/.murph9/world_" + this.fileSeed + "/"); //fileSeed for different versions
@@ -204,30 +206,37 @@ public abstract class Terrain extends AbstractAppState implements Closeable
         this.worldHeight = height;
     }
 
-    public void setTileListener(TileListener listener)
+    public void addTileListener(TileListener listener)
     {
-        this.tileListener = listener;
+        this.tileListeners.add(listener);
     }
 
     private boolean tileLoaded(TerrainChunk terrainChunk)
     {
-        if (this.tileListener != null)
-            return this.tileListener.tileLoaded(terrainChunk);
+        if (this.tileListeners.size() > 0) {
+        	boolean result = true;
+        	for (TileListener tl: this.tileListeners)
+        		result = result && tl.tileLoaded(terrainChunk);
+        	return result;
+        }
 
         return true;
     }
     public boolean tileUnloaded(TerrainChunk terrainChunk)
     {
-        if (this.tileListener != null)
-            return this.tileListener.tileUnloaded(terrainChunk);
-
+    	if (this.tileListeners.size() > 0) {
+        	boolean result = true;
+        	for (TileListener tl: this.tileListeners)
+        		result = result && tl.tileUnloaded(terrainChunk);
+        	return result;
+        }
         return true;
     }
 
     public void tileLoadedThreaded(TerrainChunk terrainChunk)
     {
-        if (this.tileListener != null)
-            this.tileListener.tileLoadedThreaded(terrainChunk);
+    	for (TileListener tl: this.tileListeners)
+    		tl.tileLoadedThreaded(terrainChunk);
     }
 
     private boolean checkForOldChunks()

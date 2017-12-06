@@ -5,35 +5,40 @@ import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.HeightfieldCollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.material.Material;
+import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.terrain.noise.basis.FilteredBasis;
 
-import helper.H;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 //see base class for terrainWorld info
+
+//modified to cache the filtered basis calls
 public class NoiseBasedWorld extends Terrain
 {
     private Material terrainMaterial;
-    private FilteredBasis[] filteredBasis;
+    private FilteredBasis filteredBasis;
+    
+	private HashMap<Vector2f, float[]> cache;
 
     public NoiseBasedWorld(SimpleApplication app, PhysicsSpace physicsSpace, int tileSize, int blockSize, Node rootNode) {
         super(app, physicsSpace, tileSize, blockSize, rootNode, 1);
         //TODO the 1 defines the save file name, useful for seeding
+        
+        cache = new HashMap<Vector2f, float[]>();
     }
 
     public final Material getMaterial() { return this.terrainMaterial; }
     public final void setMaterial(Material material) { this.terrainMaterial = material; }
 
-    public final FilteredBasis[] getFilteredBasis() { return this.filteredBasis; }
-    public final void setFilteredBasis(FilteredBasis basis) { setFilteredBasis( new FilteredBasis[]{ basis }); }
-    public final void setFilteredBasis(FilteredBasis[] basis) { this.filteredBasis = basis; }
+    public final FilteredBasis getFilteredBasis() { return this.filteredBasis; }
+    public final void setFilteredBasis(FilteredBasis basis) { this.filteredBasis = basis; }
 
     @Override
     public TerrainChunk getTerrainChunk(TerrainLocation location) {
@@ -89,8 +94,8 @@ public class NoiseBasedWorld extends Terrain
     private float[] getHeightmap(TerrainLocation tl) {
     	return getHeightmap(tl.getX(), tl.getZ());
     }
-    private float[] getHeightmap(int x, int z) {
-    	if (this.filteredBasis == null || this.filteredBasis.length < 1) 
+    public float[] getHeightmap(int x, int z) {
+    	if (this.filteredBasis == null) 
     	{
     		try {
 				throw new Exception("No filteredBasis");
@@ -100,9 +105,13 @@ public class NoiseBasedWorld extends Terrain
 			}
     	}
     	
-        float[] array = this.filteredBasis[0].getBuffer(x * (this.blockSize - 1), z * (this.blockSize - 1), 0, this.blockSize).array();
-        for (int i = 1; i < this.filteredBasis.length - 1; i++)
-        	H.addTogether(array, this.filteredBasis[i].getBuffer(x * (this.blockSize - 1), z * (this.blockSize - 1), 0, this.blockSize).array());
+        Vector2f pos = new Vector2f(x, z);
+    	if (cache.containsKey(pos))
+    		return cache.get(pos);
+    	
+        float[] array = this.filteredBasis.getBuffer(x * (this.blockSize - 1), z * (this.blockSize - 1), 0, this.blockSize).array();
+        cache.put(pos, array);
+
         return array;
     }
 }

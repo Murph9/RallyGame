@@ -92,17 +92,16 @@ public class CarModelData {
 	}
 	
 	enum CarPart {
-		Chassis("chassis"),
-		Exhaust("exhaust"),
-		Wheel_FL("wheel_fl"),
-		Wheel_FR("wheel_fr"),
-		Wheel_RL("wheel_rl"),
-		Wheel_RR("wheel_rr"),
+		Chassis("chassis"), //main model
+		Exhaust1("exhaust1"),//only one side
+		Exhaust2("exhaust2"),//only one side
+		Wheel_FL("wheel_fl"), //front left
+		Wheel_FR("wheel_fr"), //front right 
+		Wheel_RL("wheel_rl"), //rear left
+		Wheel_RR("wheel_rr"), //rear right
 		
-		Headlight_L("headlight_l"),
-		Headlight_R("headlight_r"),
-		Taillight_L("taillight_l"),
-		Taillight_R("taillight_r"),
+		Headlight_L("headlight"), //only one side
+		Taillight_L("taillight_l"), //only one side
 		//TODO more
 		;
 		
