@@ -90,6 +90,21 @@ public class H {
 		e.printStackTrace(System.err);
 	}
 	
+	public static String str(Object[] ol, String sep) {
+		if (ol == null) return null;
+		String str = "";
+		for (Object o: ol)
+			str += sep + o;
+		return str;
+	}
+	public static String str(Iterable<Object> ol, String sep) {
+		if (ol == null) return null;
+		String str = "";
+		for (Object o: ol)
+			str += sep + o.toString();
+		return str;
+	}
+	
 	@SuppressWarnings("unchecked")
 	public static <T> Boolean allTrue(Function<T, Boolean> f, T... ts) {
 		for (T t: ts)
@@ -339,6 +354,19 @@ public class H {
 			out[i] += b[i];
 		}
 		return out;
+	}
+	
+	public static Vector3f closestTo(Vector3f pos, Vector3f[] list) {
+		Vector3f cur = null;
+		float curDist = Float.MAX_VALUE;
+		for (int i = 0; i < list.length; i++) {
+			float dist = pos.distance(list[i]);
+			if (dist < curDist) {
+				cur = list[i];
+				curDist = dist;
+			}
+		}
+		return cur;
 	}
 	
 	

@@ -5,25 +5,26 @@ import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
 
 import car.MyPhysicsVehicle;
+import game.DriveRace;
 import helper.H;
-import world.wp.DefaultBuilder;
 
-public class FollowWorldAI extends CarAI {
+public class RaceAI extends CarAI {
 
-	private DefaultBuilder world;
-	private float lastTurn;
+	private DriveRace race;
 	
-	public FollowWorldAI (MyPhysicsVehicle car, DefaultBuilder world) {
+	public RaceAI(MyPhysicsVehicle car, MyPhysicsVehicle notused, DriveRace race) {
 		super(car);
-		
-		this.world = world;
+		this.race = race;
 	}
 
+	@Override
 	public void update(float tpf) {
 		Vector3f pos = car.getPhysicsLocation();
-		Vector3f atPos = world.getNextPieceClosestTo(pos);
-		if (atPos == null)
-			return; //don't know
+		Vector3f atPos = race.getNextCheckpoint(this, pos);
+		if (atPos == null) {
+			H.e("at pos was null though?");
+			return; //don't know what to do
+		}
 		
 		Matrix3f w_angle = car.getPhysicsRotationMatrix();
 		Vector3f velocity = w_angle.invert().mult(car.vel);
@@ -36,18 +37,15 @@ public class FollowWorldAI extends CarAI {
 		float ang = car.left.normalize().angleBetween((atPos.subtract(pos)).normalize());
 		
 		//get attempted turn angle as pos or negative
-		float nowTurn = angF*Math.signum(FastMath.HALF_PI-ang); //TODO wobble
-
-		H.p(nowTurn, angF, ang, lastTurn);
-		lastTurn = FastMath.interpolateLinear(tpf*10, lastTurn, nowTurn);
+		float nowTurn = angF*Math.signum(FastMath.HALF_PI-ang);
 		
 		//turn towards 
-		if (lastTurn < 0) {
+		if (nowTurn < 0) {
 			onEvent("Left", false, 0);
-			onEvent("Right", true, Math.abs(lastTurn)*reverse);
+			onEvent("Right", true, Math.abs(nowTurn)*reverse);
 		} else {
 			onEvent("Right", false, 0);
-			onEvent("Left", true, Math.abs(lastTurn)*reverse);
+			onEvent("Left", true, Math.abs(nowTurn)*reverse);
 		}
 		//slow down to turn
 		if (FastMath.abs(angF) < FastMath.QUARTER_PI) {
@@ -67,7 +65,11 @@ public class FollowWorldAI extends CarAI {
 				onEvent("Flip", true, 1);
 			}
 		}
+		if (car.getLinearVelocity().length() > 20) {
+			onEvent("Accel", false, 0); //don't go too fast
+			onEvent("Brake", false, 0);
+		}
 		
-		//TODO some kind of ray cast so they can drive around things properly
+		//TODO some kind of ray cast so they can drive around things at all
 	}
 }

@@ -77,8 +77,4 @@ public class DriveAtAI extends CarAI {
 			H.p("respawned at " + driveAtThis.getPhysicsLocation());
 		}
 	}
-
-	private void onEvent(String act, boolean ifdown, float amnt) {
-		car.onAction(act, ifdown, amnt);
-	}
 }

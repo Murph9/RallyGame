@@ -12,7 +12,7 @@ import car.*;
 import helper.H;
 
 
-public class DriveDev extends DriveSimple {
+public class DriveDev extends DriveBase {
 
 	private CarEditor carEditor;
 	private WorldEditor worldEditor;
@@ -59,7 +59,7 @@ public class DriveDev extends DriveSimple {
 		CarData c = car.car;
 		
 		this.cb.removePlayer(0);
-		this.cb.addCar(0, c, world.getStartPos(), world.getStartRot(), true);
+		this.cb.addCar(0, c, world.getStartPos(), world.getStartRot(), true, null);
 		App.rally.getStateManager().attach(cb);
 
 		App.rally.getStateManager().detach(uiNode);

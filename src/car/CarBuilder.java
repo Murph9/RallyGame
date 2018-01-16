@@ -1,6 +1,8 @@
 package car;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.function.BiFunction;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
@@ -18,6 +20,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
+import car.ai.CarAI;
 import car.ai.DriveAtAI;
 import game.App;
 import game.Main;
@@ -52,7 +55,7 @@ public class CarBuilder extends AbstractAppState {
 	}
 	
 	//TODO this should be giving the ai
-	public MyVC addCar(int id, CarData car, Vector3f start, Matrix3f rot, boolean aPlayer) {
+	public MyVC addCar(int id, CarData car, Vector3f start, Matrix3f rot, boolean aPlayer, BiFunction<MyPhysicsVehicle, MyPhysicsVehicle, CarAI> ai) {
 		if (cars.containsKey(id)) {
 			try {
 				throw new Exception("A car already has that Id");
@@ -108,7 +111,12 @@ public class CarBuilder extends AbstractAppState {
 		if (aPlayer) { //players get the keyboard
 			player.attachControls();
 		} else {
-			player.attachAI(new DriveAtAI(player, get(0)));
+			CarAI _ai;
+			if (ai != null)
+				_ai = ai.apply(player, get(0));
+			else
+				_ai = new DriveAtAI(player, get(0));
+			player.attachAI(_ai);
 		}
 		
 		if (aPlayer) {
@@ -152,6 +160,9 @@ public class CarBuilder extends AbstractAppState {
 		if (cars.containsKey(a))
 			return cars.get(a);
 		return null;
+	}
+	public Collection<? extends MyPhysicsVehicle> getAll() {
+		return cars.values();
 	}
 
 	public void cleanup() {

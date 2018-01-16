@@ -65,7 +65,7 @@ public class Main extends SimpleApplication {
 	public ChooseCar chooseCar;
 	public ChooseMap chooseMap;
 	
-	public DriveSimple drive;
+	public DriveBase drive;
 	public SkyState sky;
 
 	public BulletAppState bullet; //one physics space always
@@ -193,6 +193,10 @@ public class Main extends SimpleApplication {
 		drive = new DriveAI(car, Car.Runner.get(), world);
 		getStateManager().attach(drive);
 	}
+	public void startRace(AppState state) {
+		getStateManager().detach(state); 
+		getStateManager().attach(new DriveRace()); //TODO bit of a hack
+	}
 	
 	public void startFast(AppState state) {
 		//use the default option and just init straight away
@@ -226,7 +230,7 @@ public class Main extends SimpleApplication {
 			
 			startDrive(chooseCar.getCarData(), chooseMap.getWorld());
 			
-		} else if (app instanceof DriveSimple) {
+		} else if (app instanceof DriveBase) {
 			state.detach(drive);
 			drive = null;
 			
@@ -235,6 +239,11 @@ public class Main extends SimpleApplication {
 			state.attach(start);
 		} else {
 			H.p("Unexpected state called me '" + app + "' - rally.next()");
+			//but just start again anyway
+			state.detach(app);
+			drive = null;
+			start = new Start();
+			state.attach(start);
 		}
 	}
 	
@@ -251,7 +260,7 @@ public class Main extends SimpleApplication {
 	private void startDrive(CarData car, World world) {
 		if (drive != null) return; //not sure what this is actually hoping to stop
 				
-		drive = new DriveSimple(car, world);
+		drive = new DriveBase(car, world);
 		getStateManager().attach(drive);
 	}
 

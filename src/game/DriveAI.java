@@ -7,7 +7,7 @@ import com.jme3.app.state.AppStateManager;
 
 import car.*;
 
-public class DriveAI extends DriveSimple {
+public class DriveAI extends DriveBase {
 	
 	private CarData them;
 	private int themCount;
@@ -23,7 +23,7 @@ public class DriveAI extends DriveSimple {
     	super.initialize(stateManager, app);
     	
     	for (int i = 0; i < this.themCount; i++)
-    		this.cb.addCar(i + 1, them, world.getStartPos(), world.getStartRot(), false);
+    		this.cb.addCar(i + 1, them, world.getStartPos(), world.getStartRot(), false, null);
 	}
 	
 	public void update(float tpf) {

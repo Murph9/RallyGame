@@ -62,6 +62,9 @@ public class Start extends AbstractAppState {
 	public void startDev() {
 		App.rally.startDev(this);
 	}
+	public void startRace() {
+		App.rally.startRace(this);
+	}
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -123,6 +126,14 @@ public class Start extends AbstractAppState {
                     App.rally.getGuiNode().detachChild(myWindow);
                 }
             });
+        Button startRace = myWindow.addChild(new Button("Start Race"));
+        startRace.addClickCommands(new Command<Button>() {
+                @Override
+                public void execute( Button source ) {
+                    startRace();
+                    App.rally.getGuiNode().detachChild(myWindow);
+                }
+            });
         Button exit = myWindow.addChild(new Button("Exit"));
         exit.addClickCommands(new Command<Button>() {
                 @Override
@@ -140,7 +151,7 @@ public class Start extends AbstractAppState {
 		
 		MyPhysicsVehicle car = cb.get(0);
 		if (car == null) {
-			cb.addCar(0, carData, world.getStartPos(), world.getStartRot(), true);
+			cb.addCar(0, carData, world.getStartPos(), world.getStartRot(), true, null);
 		} else {
 			Vector3f pos = car.getPhysicsLocation();
 			car.setPhysicsLocation(new Vector3f(0, pos.y, 0));

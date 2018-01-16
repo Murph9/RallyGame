@@ -57,7 +57,7 @@ public class ChooseCar extends AbstractAppState {
 		
 		cb = new CarBuilder();
 		app.getStateManager().attach(cb);
-		cb.addCar(0, car.get(), start, dir, true);
+		cb.addCar(0, car.get(), start, dir, true, null);
 
 		//make camera
 		camera = new BasicCamera("Camera", App.rally.getCamera(), new Vector3f(0,3,7), new Vector3f(0,1.2f, 0));
@@ -84,7 +84,7 @@ public class ChooseCar extends AbstractAppState {
                     car = c;
 
                     cb.removePlayer(0);
-    				cb.addCar(0, car.get(), worldType.start, new Matrix3f(), true);
+    				cb.addCar(0, car.get(), worldType.start, new Matrix3f(), true, null);
     				
     				String carinfotext = getCarInfoText(car);
     				label.setText(carinfotext);

@@ -16,7 +16,7 @@ import car.*;
 import helper.H;
 
 
-public class DriveSimple extends AbstractAppState {
+public class DriveBase extends AbstractAppState {
 	
 	public DriveMenu menu;
 	public World world;
@@ -33,7 +33,7 @@ public class DriveSimple extends AbstractAppState {
 	//debug stuff
 	public boolean ifDebug = false;
 	
-    public DriveSimple(CarData car, World world) {
+    public DriveBase(CarData car, World world) {
     	super();
     	this.car = car;
     	this.world = world;
@@ -62,7 +62,7 @@ public class DriveSimple extends AbstractAppState {
     	
 		//buildCars
 		this.cb = new CarBuilder();
-		cb.addCar(0, car, world.getStartPos(), world.getStartRot(), true);
+		cb.addCar(0, car, world.getStartPos(), world.getStartRot(), true, null);
 		app.getStateManager().attach(cb);
 		app.getStateManager().attach(menu);
 		

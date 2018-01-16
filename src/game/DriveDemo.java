@@ -10,7 +10,7 @@ import car.*;
 import car.ai.FollowWorldAI;
 import helper.H;
 
-public class DriveDemo extends DriveSimple {
+public class DriveDemo extends DriveBase {
 
 	public DriveDemo (CarData car, World world) {
     	super(car, world);
@@ -28,7 +28,7 @@ public class DriveDemo extends DriveSimple {
     	//remove all stuff we want and player from everything
     	
     	this.cb.removePlayer(0);
-    	this.cb.addCar(0, car, world.getStartPos(), world.getStartRot(), true); //even though they aren't a player
+    	this.cb.addCar(0, car, world.getStartPos(), world.getStartRot(), true, null); //even though they aren't a player
 
     	MyPhysicsVehicle car = this.cb.get(0);
     	car.attachAI(new FollowWorldAI(car, (DefaultBuilder)world));

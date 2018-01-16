@@ -13,5 +13,7 @@ public enum WorldType {
 	BASIC,
 	FLAT,
 	NONE,
+	
+	TEST,
 	;
 }

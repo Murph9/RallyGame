@@ -278,6 +278,9 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	public void attachAI(CarAI ai) {
 		this.ai = ai;
 	}
+	public CarAI getAI() {
+		return this.ai;
+	}
 
 	public void attachControls() {
 		this.controls = new LinkedList<RawInputListener>();
@@ -617,8 +620,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		//and drift angle needs to be large enough to matter
 		
 		float maxAngle = car.w_steerAngle/2;
-		//steering factor = atan(0.12 * vel - 1) + maxAngle*PI/2 + maxLat //TODO what is this 0.12f? and 1 shouldn't they be car settings?
-		float value = Math.min(-maxAngle*FastMath.atan(0.12f*vel.length() - 1) + maxAngle*FastMath.HALF_PI + this.maxlat, Math.abs(trySteerAngle));
+		//steering factor = atan(0.08 * vel - 1) + maxAngle*PI/2 + maxLat //TODO what is this 0.08f and 1 shouldn't they be car settings?
+		float value = Math.min(-maxAngle*FastMath.atan(0.08f*vel.length() - 1) + maxAngle*FastMath.HALF_PI + this.maxlat, Math.abs(trySteerAngle));
 		
 		//TODO turn back value should be vel dir + maxlat instead of just full lock
 		

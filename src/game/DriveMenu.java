@@ -22,9 +22,9 @@ public class DriveMenu extends AbstractAppState {
 	Container infoHint;
 	Container info;
 	
-	DriveSimple drive;
+	DriveBase drive;
 	
-	public DriveMenu(DriveSimple drive) {
+	public DriveMenu(DriveBase drive) {
 		super();
 		this.drive = drive;
 	}
@@ -106,7 +106,10 @@ public class DriveMenu extends AbstractAppState {
 	
 	
 	public void mainMenu() {
-		drive.next();
+		if (drive != null)
+			drive.next();
+		else //TODO fix
+			App.rally.next(null);
 	}
 
 	public void update(float tpf) {
