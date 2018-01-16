@@ -1,4 +1,4 @@
-package game;
+package drive;
 
 import world.World;
 import world.wp.DefaultBuilder;
@@ -8,6 +8,7 @@ import com.jme3.app.state.AppStateManager;
 
 import car.*;
 import car.ai.FollowWorldAI;
+import game.App;
 import helper.H;
 
 public class DriveDemo extends DriveBase {

@@ -1,4 +1,4 @@
-package game;
+package drive;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +34,8 @@ import car.CarUI;
 import car.MyPhysicsVehicle;
 import car.ai.CarAI;
 import car.ai.RaceAI;
+import game.App;
+import game.RaceMenu;
 import helper.H;
 
 public class DriveRace extends AbstractAppState {

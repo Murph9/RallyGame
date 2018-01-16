@@ -6,6 +6,8 @@ import com.jme3.math.Vector3f;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
+import drive.DriveBase;
+import drive.DriveMenu;
 import helper.H;
 
 public class RaceMenu extends DriveMenu {

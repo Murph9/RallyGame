@@ -5,7 +5,7 @@ import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
 
 import car.MyPhysicsVehicle;
-import game.DriveRace;
+import drive.DriveRace;
 import helper.H;
 
 public class RaceAI extends CarAI {

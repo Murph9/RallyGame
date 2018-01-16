@@ -25,6 +25,11 @@ import com.simsilica.lemur.style.BaseStyles;
 
 import car.Car;
 import car.CarData;
+import drive.DriveAI;
+import drive.DriveBase;
+import drive.DriveDemo;
+import drive.DriveDev;
+import drive.DriveRace;
 import game.*;
 import helper.H;
 import settings.Configuration;
