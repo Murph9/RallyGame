@@ -29,7 +29,6 @@ public class DriveBase extends AbstractAppState {
 	//gui and camera stuff
 	CarCamera camera;
 	CarUI uiNode;
-//	MiniMap minimap;
 	
 	//debug stuff
 	public boolean ifDebug = false;
@@ -61,7 +60,7 @@ public class DriveBase extends AbstractAppState {
     	
     	app.getStateManager().attach(world);
     	
-		//buildCars
+		//build player
 		this.cb = new CarBuilder();
 		cb.addCar(0, car, world.getStartPos(), world.getStartRot(), true, null);
 		app.getStateManager().attach(cb);
@@ -74,9 +73,7 @@ public class DriveBase extends AbstractAppState {
 		camera = new CarCamera("Camera", App.rally.getCamera(), cb.get(0));
 		App.rally.getStateManager().attach(camera);
 		app.getInputManager().addRawInputListener(camera);
-		
-//		minimap = new MiniMap(cb.get(0));
-		
+				
 		//connectJoySticks
 		Joystick[] joysticks = App.rally.getInputManager().getJoysticks();
 		if (joysticks == null) {
@@ -99,9 +96,6 @@ public class DriveBase extends AbstractAppState {
 	public void update(float tpf) {
 		if (!isEnabled()) return;
 		super.update(tpf);
-		
-		//Hud stuff
-//		minimap.update(tpf);
 	}
 	
 	public void next() {

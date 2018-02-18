@@ -21,7 +21,6 @@ import com.jme3.util.BufferUtils;
 
 import game.App;
 
-//TODO smoke from tyres
 
 public class MyWheelNode extends Node {
 
@@ -126,16 +125,16 @@ public class MyWheelNode extends Node {
     private ParticleEmitter initSmoke() {
         ParticleEmitter smoke = new ParticleEmitter("Emitter", ParticleMesh.Type.Triangle, 40);
         smoke.setParticlesPerSec(0); //start with none
-        smoke.setNumParticles(100);
+        smoke.setNumParticles(30);
         smoke.setInWorldSpace(true);
         smoke.setRotateSpeed(FastMath.QUARTER_PI);
         
         smoke.setImagesX(15); //the smoke image is 15x * 1y (y is already the default of 1)
-        smoke.setEndColor(new ColorRGBA(0.7f, 0.7f, 0.7f, 0.6f));
-        smoke.setStartColor(new ColorRGBA(0.7f, 0.7f, 0.7f, 0.3f));
+        smoke.setEndColor(new ColorRGBA(0.7f, 0.7f, 0.7f, 0.2f));
+        smoke.setStartColor(new ColorRGBA(0.7f, 0.7f, 0.7f, 0.5f));
 
         smoke.setStartSize(0.4f);
-        smoke.setEndSize(4f);
+        smoke.setEndSize(3f);
         
         Material emit = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Particle.j3md");
         emit.setTexture("Texture", App.rally.getAssetManager().loadTexture("assets/image/Smoke.png"));
@@ -157,7 +156,7 @@ public class MyWheelNode extends Node {
 			//  to prevent the weird flickering
 		}
 		
-		if (skid < 2.3 || !this.contact || this.mvc.vel.length() < 3)
+		if (skid < 3.5 || !this.contact || this.mvc.vel.length() < 3)
 			this.smokeEmit.setParticlesPerSec(0);
 		else if (this.smokeEmit.getParticlesPerSec() != 30 && MyWheelNode.SMOKE_ON)
 			this.smokeEmit.setParticlesPerSec(30);

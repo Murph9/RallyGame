@@ -19,9 +19,13 @@ import helper.H;
 public class DriveMenu extends AbstractAppState {
 
 	//GUI objects
-	Container pauseMenu;
-	Container infoHint;
-	Container info;
+	private Container pauseMenu;
+	private Container infoHint;
+	private Container info;
+	
+	//random Label to print to the screen to show the user, assumed settable by 'Drive*'
+	public Label randomthing;
+	private Container random;
 	
 	DriveBase drive;
 	
@@ -82,6 +86,12 @@ public class DriveMenu extends AbstractAppState {
 		info = new Container();
 		info.attachChild(new Label("Controls: move: wasd and arrows , flip: f, handbrake: space, reverse: leftshift, camera: e,z, tab: this, pause: esc, reset: enter, jump: q, nitro: leftcontrol, telemetry: home"));
 		info.setLocalTranslation(H.screenTopLeft());
+		
+		random = new Container();
+		randomthing = new Label("");
+		random.attachChild(randomthing);
+		random.setLocalTranslation(H.screenTopRight().add(-100, 0, 0));
+		App.rally.getGuiNode().attachChild(random);
 	}
 
 	public void togglePause() {

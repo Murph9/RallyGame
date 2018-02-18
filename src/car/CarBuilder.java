@@ -144,6 +144,24 @@ public class CarBuilder extends AbstractAppState {
 		car.cleanup();
 		cars.remove(id);
 	}
+	public void removePlayer(MyPhysicsVehicle mpv) {
+		for (int key: cars.keySet()) {
+			MyPhysicsVehicle car = cars.get(key);
+			if (car == mpv) {
+				rootNode.detachChildNamed(key+"");
+				App.rally.getPhysicsSpace().remove(car);
+				car.cleanup();
+				cars.remove(key);
+				return;
+			}
+		}
+		
+		try {
+			throw new Exception("That car is not in my records");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 	
 	public void update(float tpf) {
 		if (!isEnabled())
@@ -163,6 +181,9 @@ public class CarBuilder extends AbstractAppState {
 	}
 	public Collection<? extends MyPhysicsVehicle> getAll() {
 		return cars.values();
+	}
+	public int getCount() {
+		return cars.size();
 	}
 
 	public void cleanup() {

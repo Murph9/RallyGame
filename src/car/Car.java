@@ -37,6 +37,7 @@ public enum Car {
 	private static class Miata extends CarData {
 		Miata() {
 			carModel = dir+"miata.blend";
+			wheelModel = dir+"miata_wheel.blend";
 			
 			mass = 1000;
 			

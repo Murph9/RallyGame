@@ -41,8 +41,7 @@ import helper.H;
 public class DriveRace extends AbstractAppState {
 
 	//TODO:
-	//- some way of indicating where the next checkpoint is (and some way of showing the AIs as well)
-	//- better AI
+	//- better AI, otherwise this actually sucks
 	
 	public RaceMenu menu;
 	
@@ -107,7 +106,7 @@ public class DriveRace extends AbstractAppState {
 		q.lookAt(checkpoints[0].subtract(checkpoints[checkpoints.length - 1]), Vector3f.UNIT_Y); 
 		worldRot = q.toRotationMatrix();
 		
-    	//TODO put this in the 3d model
+    	//TODO put this in the 3d world model
 		this.worldStarts = new Vector3f[themCount+1];
 		for (int i = 0; i < worldStarts.length; i++) {
 			this.worldStarts[i] = worldStart.add(worldRot.mult(new Vector3f(3,0,0).mult(i % 2 == 0 ? (i+1)/2 : -((i+1)/2))));

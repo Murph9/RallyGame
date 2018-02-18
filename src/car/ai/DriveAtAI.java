@@ -5,19 +5,53 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 
 import car.MyPhysicsVehicle;
+import game.App;
 import helper.H;
+import world.WorldType;
 
 public class DriveAtAI extends CarAI {
 
 	private PhysicsRigidBody driveAtThis;
 	
+	private float reversingTimer;
+	private boolean reversing;
+	
 	public DriveAtAI (MyPhysicsVehicle car, PhysicsRigidBody node) {
 		super(car);
 		
 		this.driveAtThis = node;
+		this.reversingTimer = 0;
+		this.reversing = false;
 	}
 
 	public void update(float tpf) {
+		float velocity = car.getLinearVelocity().length();
+		
+		//try and fix a stuck situation TODO test this works
+		if (!reversing) {
+			if (velocity < 0.5f) {
+				reversingTimer += tpf;
+				if (reversingTimer > 5) {
+					reversing = true;
+					reversingTimer = 1;
+				}
+			} else {
+				reversingTimer = 0;
+			}
+	
+			if (velocity < 1 && car.up.y < 0) { //if very still and not the right way up then flip over
+				onEvent("Flip", true, 1);
+			}
+		} else {
+			//currently reversing
+			onEvent("Reverse", true, 1);
+			H.e("reversing");
+			reversingTimer -= tpf;
+			if (reversingTimer < 0)
+				reversing = false;
+			return;
+		}
+		
 		Vector3f pos = car.getPhysicsLocation();
 		Vector3f atPos = driveAtThis.getPhysicsLocation();
 
@@ -56,20 +90,16 @@ public class DriveAtAI extends CarAI {
 		}
 		
 		//if going to slow speed up
-		if (car.getLinearVelocity().length() < 10) {
+		if (velocity < 10) {
 			onEvent("Accel", true, 1);
 			onEvent("Brake", false, 0);
-			
-			if (car.getLinearVelocity().length() < 1 && car.up.y < 0) { //very still
-				onEvent("Flip", true, 1);
-			}
 		}
 		
 		//TODO some kind of ray cast so they can drive around things properly
 		
-		//hack so they don't lose too bad
-		
-		if (atPos.y - pos.y > 50 || atPos.subtract(pos).length() > 500) {
+		//hack so they don't lose too bad on dynamic tracks
+		if (App.rally.drive.world.getType() == WorldType.DYNAMIC
+				&& atPos.y - pos.y > 50 || atPos.subtract(pos).length() > 500) {
 			car.setPhysicsLocation(atPos.add(4, 1, 0)); //spawn 3 up and left of me
 			car.setLinearVelocity(driveAtThis.getLinearVelocity()); //and give them my speed
 			car.setPhysicsRotation(driveAtThis.getPhysicsRotation()); //and rotation
