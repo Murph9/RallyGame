@@ -65,6 +65,9 @@ public class Start extends AbstractAppState {
 	public void startRace() {
 		App.rally.startRace(this);
 	}
+	public void startCrash() {
+		App.rally.startCrash(this);
+	}
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -118,11 +121,11 @@ public class Start extends AbstractAppState {
                     App.rally.getGuiNode().detachChild(myWindow);
                 }
             });
-        Button startDev = myWindow.addChild(new Button("Start Dev"));
-        startDev.addClickCommands(new Command<Button>() {
+        Button startCrash = myWindow.addChild(new Button("Start Crash"));
+        startCrash.addClickCommands(new Command<Button>() {
                 @Override
                 public void execute( Button source ) {
-                    startDev();
+                    startCrash();
                     App.rally.getGuiNode().detachChild(myWindow);
                 }
             });
@@ -131,6 +134,14 @@ public class Start extends AbstractAppState {
                 @Override
                 public void execute( Button source ) {
                     startRace();
+                    App.rally.getGuiNode().detachChild(myWindow);
+                }
+            });
+        Button startDev = myWindow.addChild(new Button("Start Dev"));
+        startDev.addClickCommands(new Command<Button>() {
+                @Override
+                public void execute( Button source ) {
+                    startDev();
                     App.rally.getGuiNode().detachChild(myWindow);
                 }
             });

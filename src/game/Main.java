@@ -25,11 +25,7 @@ import com.simsilica.lemur.style.BaseStyles;
 
 import car.Car;
 import car.CarData;
-import drive.DriveAI;
-import drive.DriveBase;
-import drive.DriveDemo;
-import drive.DriveDev;
-import drive.DriveRace;
+import drive.*;
 import game.*;
 import helper.H;
 import settings.Configuration;
@@ -185,6 +181,14 @@ public class Main extends SimpleApplication {
 		drive = new DriveDev(Car.Runner.get(), new StaticWorldBuilder(StaticWorld.track2));
 		getStateManager().attach(drive);
 	}
+	
+	public void startCrash(AppState state) {
+		getStateManager().detach(state);
+		
+		drive = new DriveCrash(new StaticWorldBuilder(StaticWorld.duct2));
+		getStateManager().attach(drive);
+	}
+	
 	
 	public void startAI(AppState state) {
 		getStateManager().detach(state);

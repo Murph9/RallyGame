@@ -40,7 +40,8 @@ public class NoiseBasedWorld extends Terrain
     public final FilteredBasis getFilteredBasis() { return this.filteredBasis; }
     public final void setFilteredBasis(FilteredBasis basis) { this.filteredBasis = basis; }
 
-    @Override
+    @SuppressWarnings("unused")
+	@Override
     public TerrainChunk getTerrainChunk(TerrainLocation location) {
         TerrainChunk tq = this.worldTiles.get(location);
 
