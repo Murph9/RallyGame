@@ -304,7 +304,6 @@ public abstract class Terrain extends AbstractAppState implements Closeable
                 return false;
 
             TerrainLodControl lodControl = new TerrainLodControl(pending.getChunk(), app.getCamera());
-            lodControl.setExecutor(threadpool);
             pending.getChunk().addControl(lodControl);
 
             pending.getChunk().setShadowMode(ShadowMode.Receive);
@@ -352,7 +351,6 @@ public abstract class Terrain extends AbstractAppState implements Closeable
                             return false;
 
                         TerrainLodControl lodControl = new TerrainLodControl(chunk, app.getCamera());
-                        lodControl.setExecutor(threadpool);
                         chunk.addControl(lodControl);
 
                         chunk.setShadowMode(ShadowMode.Receive);
