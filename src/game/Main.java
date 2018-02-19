@@ -148,8 +148,8 @@ public class Main extends SimpleApplication {
 		
 		bullet = new BulletAppState();
     	//bullet.setDebugEnabled(true); //broken in 3.1
-		//getPhysicsSpace().setMaxSubSteps(4);
 		getStateManager().attach(bullet);
+		bullet.getPhysicsSpace().setAccuracy(1f/120f); //double rate physics
 		
 		inputManager.setCursorVisible(true);
 		flyCam.setEnabled(false);

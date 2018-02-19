@@ -8,6 +8,7 @@ import com.bulletphysics.dynamics.vehicle.WheelInfo;
 import com.jme3.asset.AssetManager;
 import com.jme3.audio.AudioNode;
 import com.jme3.bullet.PhysicsSpace;
+import com.jme3.bullet.PhysicsTickListener;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.objects.PhysicsVehicle;
 import com.jme3.bullet.objects.VehicleWheel;
@@ -33,9 +34,7 @@ import helper.H;
 //http://www.edy.es/dev/2011/12/facts-and-myths-on-the-pacejka-curves/
 //slow speed: http://au.mathworks.com/help/physmod/sdl/ref/tiremagicformula.html
 
-//TODO could look into the brush tyre model
-
-public class MyPhysicsVehicle extends PhysicsVehicle {
+public class MyPhysicsVehicle extends PhysicsVehicle implements PhysicsTickListener {
 
 	//Wheel Forces
 	Vector3f[] wf; //4
@@ -291,9 +290,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	}
 
 
-	/**Do fancy car physics
-	 * @param tpf time step
-	 */
+	/**Do fancy car physics*/
 	private void specialPhysics(float tpf) {
 		//NOTE: that z is forward, x is side
 		// - the reference notes say that x is forward and y is sideways so just be careful
@@ -316,11 +313,11 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		if (velocity.z < 0) { //to flip the steering on moving in reverse
 			steeringCur *= -1;
 		}
-
+		
 		//////////////////////////////////////////////////
 		//'Wheel'less forces
 		//linear resistance and quadratic drag (https://en.wikipedia.org/wiki/Automobile_drag_coefficient#Drag_area)
-		//float rollingResistance = car.resistance(9.81f); //TODO was removed because i need the normal force to caculate correctly
+		//float rollingResistance = car.resistance(9.81f); //TODO was removed because i need the suspension normal force to caculate correctly
 		
 		float dragx = -(1.225f * car.areo_drag * car.areo_crossSection * velocity.x * FastMath.abs(velocity.x));
 		float dragy = -(1.225f * car.areo_drag * car.areo_crossSection * velocity.y * FastMath.abs(velocity.y));
@@ -402,15 +399,14 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		for (int i = 0; i < 4; i++) {
 			WheelInfo wi = getWheel(wheel[i].num).getWheelInfo();
 			wheel[i].contact = (wi.raycastInfo.groundObject != null);
-			wheel[i].update(tpf, wheel[i].num % 2 == 1? 1 : -1);
-			
-			wheel[i].susForce = Math.min(getWheel(i).getWheelInfo().wheelsSuspensionForce, car.mass*4); //[*4] HACK: to stop weird harsh physics on large normal suspension forces
+			wheel[i].physicsUpdate(tpf);
+			wheel[i].susForce = Math.min(getWheel(i).getWheelInfo().wheelsSuspensionForce, car.mass*4); //[*4] HACK: to stop weird harsh physics on large suspension forces as the normal force
 
 			// note that the bottom turn could be max of vel and radsec: http://www.menet.umn.edu/~gurkan/Tire%20Modeling%20%20Lecture.pdf 
 			float slipr = slip_const*(wheel[i].radSec*car.w_radius - velocity.z);
 			float slipratio = slipr/slip_div;
 
-			if (ifHandbrake && i > 1) //rearwheels only 
+			if (ifHandbrake && i > 1) //rearwheels only
 				wheel[i].radSec = 0;
 
 			float slipangle = 0;
@@ -441,7 +437,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 			//then average it with the last one
 			wf[i].x = (wf_last[i].x + wf[i].x)/2;
 
-			
 			//prevents the force from exceeding the centripetal force
 			if (isSlowSpeed && Math.abs(wf[i].x) > maxSlowLat) {
 				//[1-N/M] means the clamp is smaller for smaller speeds
@@ -563,46 +558,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		}
 	}
 
-
-	//////////////////////////////////////////////////////////////
-	public void myUpdate(float tpf) {
-		distance += getLinearVelocity().length()*tpf;
-
-		Matrix3f playerRot = new Matrix3f();
-		getPhysicsRotationMatrix(playerRot);
-
-		up = playerRot.mult(new Vector3f(0,1,0));
-		left = playerRot.mult(new Vector3f(1,0,0));
-		right = playerRot.mult(new Vector3f(-1,0,0));
-
-		//********************************************//
-		//Important call here
-		specialPhysics(tpf); //yay
-		//********************************************//
-		
-		//wheel turning logic
-		steeringCurrent = 0;
-		if (steerLeft != 0) //left
-			steeringCurrent += getMaxSteerAngle(steerLeft, 1);
-		if (steerRight != 0) //right
-			steeringCurrent -= getMaxSteerAngle(steerRight, -1);
-		//TODO 0.3 - 0.4 seconds from lock to lock seems okay from what ive seen
-		steeringCurrent = FastMath.clamp(steeringCurrent, -car.w_steerAngle, car.w_steerAngle);
-		steer(steeringCurrent);
-
-		//update ai if any
-		if (ai != null) {
-			ai.update(tpf);
-		}
-
-		if (engineSound != null) {
-			//if sound exists
-			float pitch = FastMath.clamp(0.5f+1.5f*((float)curRPM/(float)car.e_redline), 0.5f, 2);
-			engineSound.setPitch(pitch);
-		}
-		
-	}
-	
 	private float getMaxSteerAngle(float trySteerAngle, float sign) {
 		Vector3f local_vel = getPhysicsRotationMatrix().invert().mult(this.vel);
 		if (local_vel.z < 0 || ((-sign * this.driftangle) < 0 && Math.abs(this.driftangle) > car.minDriftAngle * FastMath.DEG_TO_RAD)) 
@@ -688,6 +643,51 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 				"\nspeed:"+ H.roundDecimal(vel.length(), 2) + "m/s\nRPM:" + curRPM +
 				"\nengine:" + engineTorque + "\ndrag:" + dragForce + 
 				"N\ntraction:" + totalTraction + "\nG Forces:"+gForce;
+	}
+
+	@Override
+	public void prePhysicsTick(PhysicsSpace space, float tpf) {
+		//the important one
+		
+		distance += getLinearVelocity().length()*tpf;
+
+		Matrix3f playerRot = new Matrix3f();
+		getPhysicsRotationMatrix(playerRot);
+
+		up = playerRot.mult(new Vector3f(0,1,0));
+		left = playerRot.mult(new Vector3f(1,0,0));
+		right = playerRot.mult(new Vector3f(-1,0,0));
+
+		//********************************************//
+		//Important call here
+		specialPhysics(tpf); //yay
+		//********************************************//
+		
+		//wheel turning logic
+		steeringCurrent = 0;
+		if (steerLeft != 0) //left
+			steeringCurrent += getMaxSteerAngle(steerLeft, 1);
+		if (steerRight != 0) //right
+			steeringCurrent -= getMaxSteerAngle(steerRight, -1);
+		//TODO 0.3 - 0.4 seconds from lock to lock seems okay from what ive seen
+		steeringCurrent = FastMath.clamp(steeringCurrent, -car.w_steerAngle, car.w_steerAngle);
+		steer(steeringCurrent);
+
+		//update ai if any
+		if (ai != null) {
+			ai.update(tpf);
+		}
+
+		if (engineSound != null) {
+			//if sound exists
+			float pitch = FastMath.clamp(0.5f+1.5f*((float)curRPM/(float)car.e_redline), 0.5f, 2);
+			engineSound.setPitch(pitch);
+		}
+	}
+
+	@Override
+	public void physicsTick(PhysicsSpace arg0, float arg1) {
+		//happens after the tick
 	}
 }
 

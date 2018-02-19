@@ -143,23 +143,27 @@ public class MyWheelNode extends Node {
     }
 	
 	
-	public void update(float tpf, int reverse) {
-		reverse = FastMath.sign(reverse);
+	public void physicsUpdate(float tpf) {
+		App.rally.enqueue(() -> {
+			Quaternion q = new Quaternion();
+			q = q.fromAngleNormalAxis(-radSec*tpf*FastMath.sign(num % 2 == 1? 1 : -1), new Vector3f(1,0,0));
+			spat.setLocalRotation(spat.getLocalRotation().mult(q));
+		});
+	}
+	
 
-		Quaternion q = new Quaternion();
-		q = q.fromAngleNormalAxis(-radSec*tpf*reverse, new Vector3f(1,0,0));
-		spat.setLocalRotation(spat.getLocalRotation().mult(q));
-		
-		if (App.rally.frameCount % 3 == 0) {
-			addSkidLine();
-			//TODO set the current quads next pos to be where the wheels are
-			//  to prevent the weird flickering
-		}
-		
+	public void update(float tpf) {
 		if (skid < 3.5 || !this.contact || this.mvc.vel.length() < 3)
 			this.smokeEmit.setParticlesPerSec(0);
 		else if (this.smokeEmit.getParticlesPerSec() != 30 && MyWheelNode.SMOKE_ON)
 			this.smokeEmit.setParticlesPerSec(30);
+		
+		if (App.rally.frameCount % 3 == 0) {
+			addSkidLine();
+			
+			//TODO set the current quads next pos to be where the wheels are
+			//  to prevent the weird flickering
+		}
 	}
 	
 	public Vector3f getContactPoint(float wheelRadius, float rollInfluence) {

@@ -125,6 +125,7 @@ public class CarBuilder extends AbstractAppState {
 		
 		cars.put(id, player);
 
+		App.rally.getPhysicsSpace().addTickListener(player);
 		App.rally.getPhysicsSpace().add(player);
 		return player;
 	}
@@ -140,6 +141,7 @@ public class CarBuilder extends AbstractAppState {
 		rootNode.detachChildNamed(id+"");
 		MyVC car = cars.get(id);
 		
+		App.rally.getPhysicsSpace().removeTickListener(car);
 		App.rally.getPhysicsSpace().remove(car);
 		car.cleanup();
 		cars.remove(id);
@@ -167,9 +169,12 @@ public class CarBuilder extends AbstractAppState {
 		if (!isEnabled())
 			return;
 		
-		if (!cars.isEmpty() && this.isEnabled()) {
+		if (!cars.isEmpty()) {
 			for (Integer i : cars.keySet()) {
-				cars.get(i).myUpdate(tpf);
+				cars.get(i).setEnabled(isEnabled());
+				
+				for (MyWheelNode w: cars.get(i).wheel)
+					w.update(tpf); //TODO this kind of reach through feels like a hack
 			}
 		}
 	}
