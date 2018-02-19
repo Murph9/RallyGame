@@ -115,6 +115,10 @@ public abstract class CarData implements Serializable {
 	public float nitro_max = 15;
 	
 	
+	//no idea category
+	public float minDriftAngle = 7;
+	
+	
 	//Constructor (when we don't have model data)
 	protected CarData() {
 		setw_Pos();

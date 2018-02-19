@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.bulletphysics.dynamics.vehicle.DefaultVehicleRaycaster;
 import com.bulletphysics.dynamics.vehicle.WheelInfo;
-import com.bulletphysics.dynamics.vehicle.WheelInfo.RaycastInfo;
 import com.jme3.asset.AssetManager;
 import com.jme3.audio.AudioNode;
 import com.jme3.bullet.PhysicsSpace;
@@ -401,6 +400,10 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		
 		//for each wheel
 		for (int i = 0; i < 4; i++) {
+			WheelInfo wi = getWheel(wheel[i].num).getWheelInfo();
+			wheel[i].contact = (wi.raycastInfo.groundObject != null);
+			wheel[i].update(tpf, wheel[i].num % 2 == 1? 1 : -1);
+			
 			wheel[i].susForce = Math.min(getWheel(i).getWheelInfo().wheelsSuspensionForce, car.mass*4); //[*4] HACK: to stop weird harsh physics on large normal suspension forces
 
 			// note that the bottom turn could be max of vel and radsec: http://www.menet.umn.edu/~gurkan/Tire%20Modeling%20%20Lecture.pdf 
@@ -572,18 +575,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 		left = playerRot.mult(new Vector3f(1,0,0));
 		right = playerRot.mult(new Vector3f(-1,0,0));
 
-		for (MyWheelNode w: wheel) { //TODO move to wheel update
-			WheelInfo wi = getWheel(w.num).getWheelInfo();
-			RaycastInfo ray = wi.raycastInfo;
-			w.contact = (ray.groundObject != null);
-
-			if (w.num % 2 == 1) 
-				w.update(tpf, 1);
-			else 
-				w.update(tpf, -1);
-		}
-
-
 		//********************************************//
 		//Important call here
 		specialPhysics(tpf); //yay
@@ -614,7 +605,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle {
 	
 	private float getMaxSteerAngle(float trySteerAngle, float sign) {
 		Vector3f local_vel = getPhysicsRotationMatrix().invert().mult(this.vel);
-		if (local_vel.z < 0 || ((-sign * this.driftangle) < 0 && Math.abs(this.driftangle) > 7 * FastMath.DEG_TO_RAD)) //TODO magic number 
+		if (local_vel.z < 0 || ((-sign * this.driftangle) < 0 && Math.abs(this.driftangle) > car.minDriftAngle * FastMath.DEG_TO_RAD)) 
 			return trySteerAngle; //when going backwards, slow or needing to turning against drift, you get no speed factor
 		//eg: car is pointing more left than velocity, and is also turning left
 		//and drift angle needs to be large enough to matter
