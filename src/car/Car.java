@@ -73,14 +73,14 @@ public enum Car {
 			height = 1.295f;
 			length = 4.52f;
 			
-			rollFraction = 0.1f;
+			rollFraction = 1f;
 			
 			w_zOff = 1.32f;
 			w_yOff = -0.15f;
 			setw_Pos();
 			
 			//https://en.wikipedia.org/wiki/Automobile_drag_coefficient
-			areo_drag = 0.33f;
+			areo_drag = 0.33f; //do not touch this, it actually balances with the torque curve now
 
 			driveFront = false;
 			driveRear = true;
@@ -91,10 +91,9 @@ public enum Car {
 			auto_gearDown = 3500;
 			auto_gearUp = 6500;
 			e_redline = 6800;
-			
-			//TODO testing
-			e_compression = 4;
-			e_mass = 20;
+		
+			e_compression = 2;
+			e_mass = 5; //fast reving
 			
 			trans_effic = 0.85f;
 			trans_finaldrive = 3.69f;//final drive maybe?
@@ -105,7 +104,7 @@ public enum Car {
 			sus_dampValue = 0.6f;
 			sus_restLength = 0.2f;
 
-			sus_maxForce = mass*4*9.81f;
+			sus_maxForce = 8000;
 		}
 	}
 
