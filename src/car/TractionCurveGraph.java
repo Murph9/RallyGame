@@ -24,7 +24,6 @@ public class TractionCurveGraph extends Container {
 		this.latData = p.car.w_flatdata;
 		this.longData = p.car.w_flongdata;
 		drawGraphs();
-		H.p(this.latData);
 	}
 
 	private void drawGraphs() {

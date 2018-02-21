@@ -17,6 +17,7 @@ import car.Car;
 import car.CarBuilder;
 import car.CarData;
 import car.MyPhysicsVehicle;
+import car.PowerCurveGraph;
 import helper.H;
 import helper.H.Duo;
 import world.StaticWorld;
@@ -35,9 +36,11 @@ public class ChooseCar extends AbstractAppState {
 	private float rotation; 
 	
 	private BasicCamera camera;
+	
+	private PowerCurveGraph graph;
 
 	public ChooseCar() {
-		worldType = StaticWorld.garage2; //good default
+		worldType = StaticWorld.garage2;
 		car = Car.values()[0];
 	}
 
@@ -58,6 +61,7 @@ public class ChooseCar extends AbstractAppState {
 		cb = new CarBuilder();
 		app.getStateManager().attach(cb);
 		cb.addCar(0, car.get(), start, dir, true, null);
+		//TODO remove smoke
 
 		//make camera
 		camera = new BasicCamera("Camera", App.rally.getCamera(), new Vector3f(0,3,7), new Vector3f(0,1.2f, 0));
@@ -88,6 +92,8 @@ public class ChooseCar extends AbstractAppState {
     				
     				String carinfotext = getCarInfoText(car);
     				label.setText(carinfotext);
+    				
+    				graph.updateMyPhysicsVehicle(cb.get(0));
                 }
             });
         	i++;
@@ -102,6 +108,11 @@ public class ChooseCar extends AbstractAppState {
             	App.rally.getGuiNode().detachChild(infoWindow);
             }
         });
+        
+        Vector3f size = new Vector3f(400,400,0);
+		graph = new PowerCurveGraph(this.cb.get(0), size);
+		graph.setLocalTranslation(H.screenBottomRight().subtract(size.add(5,-25,0)));
+		App.rally.getGuiNode().attachChild(graph);
 	}
 
 
@@ -113,11 +124,11 @@ public class ChooseCar extends AbstractAppState {
 		Vector3f pos = car.getPhysicsLocation();
 		car.setPhysicsLocation(new Vector3f(0, pos.y, 0));
 		
-		rotation += FastMath.DEG_TO_RAD*tpf;
-		
-		Quaternion q = new Quaternion();
-		q.fromAngleAxis(rotation, Vector3f.UNIT_Y);
-		car.setPhysicsRotation(q);
+		//code to rotate slowly
+//		rotation += FastMath.DEG_TO_RAD*tpf;
+//		Quaternion q = new Quaternion();
+//		q.fromAngleAxis(rotation, Vector3f.UNIT_Y);
+//		car.setPhysicsRotation(q);
 	}
 
 	private String getCarInfoText(Car car) {
@@ -142,6 +153,9 @@ public class ChooseCar extends AbstractAppState {
 		
 		App.rally.getStateManager().detach(camera);
 		camera = null;
+		
+		App.rally.getGuiNode().detachChild(graph);
+		graph = null;
 	}
 
 	/////////////////////////////

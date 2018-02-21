@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import com.jme3.asset.AssetManager;
@@ -21,6 +22,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.shape.Box;
+import com.jme3.scene.shape.Line;
 
 import game.App;
 
@@ -246,6 +248,16 @@ public class H {
 		Geometry boxG = createShape(am, box, color, pos, "a box");
 		boxG.setShadowMode(ShadowMode.Off);
 		return boxG;
+	}
+	public static Geometry makeShapeLine(AssetManager am, ColorRGBA color, Vector3f start, Vector3f end) {
+		if (!Vector3f.isValidVector(start) || !Vector3f.isValidVector(end)) {
+			H.e("not valid start or end", start, end);
+			return null;
+		}
+		Line l = new Line(start, end);
+		Geometry lineG = createShape(am, l, color, Vector3f.ZERO, "a line");
+		lineG.setShadowMode(ShadowMode.Off);
+		return lineG;
 	}
 	
 	public static Geometry createShape(AssetManager am, Mesh shape, ColorRGBA color, Vector3f pos, String name) {
@@ -485,5 +497,17 @@ public class H {
 			e.printStackTrace();
 		}
         return map;
+	}
+	public static float maxInArray(float[] array) {
+		float result = Float.MIN_VALUE;
+		for (float value: array)
+			result = Math.max(result, value);
+		return result;
+	}
+	public static float maxInArray(float[] array, BiFunction<Float, Integer, Float> func) {
+		float result = Float.MIN_VALUE;
+		for (int i = 0; i < array.length; i++)
+			result = Math.max(result, func.apply(array[i], i));
+		return result;
 	}
 }

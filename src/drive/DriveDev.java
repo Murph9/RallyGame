@@ -38,7 +38,7 @@ public class DriveDev extends DriveBase {
 		
 		Vector3f size = new Vector3f(400,400,0);
 		wheelGraphs = new TractionCurveGraph(this.cb.get(0), size);
-		wheelGraphs.setLocalTranslation(H.screenBottomRight().subtract(size));
+		wheelGraphs.setLocalTranslation(H.screenBottomRight().subtract(size.add(-5,-25,0)));
 		App.rally.getGuiNode().attachChild(wheelGraphs);
 	}
 	
