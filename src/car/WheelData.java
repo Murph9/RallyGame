@@ -6,7 +6,7 @@ public abstract class WheelData implements Serializable {
 	//http://www.edy.es/dev/docs/pacejka-94-parameters-explained-a-comprehensive-guide/
 	//if you ever need the values a# and b# in here again go there ^ for the proper values
 	//defaults from here: http://au.mathworks.com/help/physmod/sdl/ref/tireroadinteractionmagicformula.html
-	public float B = 10, C = 1.9f, D = 2, E = 0.97f; //2 because its an arcade game
+	public float B = 10, C = 1.9f, D = 1, E = 0.97f; //2 because its an arcade game
 	
 	@Override
 	public String toString() {
@@ -17,7 +17,7 @@ public abstract class WheelData implements Serializable {
 class WheelDataLat extends WheelData {
 	WheelDataLat() {
 		B = 12f; // i made this all up
-		D = 2.1f;
+		D = 1.1f;
 		E = 1;
 	}
 }

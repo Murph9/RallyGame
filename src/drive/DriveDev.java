@@ -17,7 +17,7 @@ public class DriveDev extends DriveBase {
 
 	private CarEditor carEditor;
 	private WorldEditor worldEditor;
-	private CarWheelGraph wheelGraphs;
+	private TractionCurveGraph wheelGraphs;
 	
 	public DriveDev(CarData car, World world) {
     	super(car, world);
@@ -37,7 +37,7 @@ public class DriveDev extends DriveBase {
 		App.rally.getGuiNode().attachChild(worldEditor);
 		
 		Vector3f size = new Vector3f(400,400,0);
-		wheelGraphs = new CarWheelGraph(this.cb.get(0), size);
+		wheelGraphs = new TractionCurveGraph(this.cb.get(0), size);
 		wheelGraphs.setLocalTranslation(H.screenBottomRight().subtract(size));
 		App.rally.getGuiNode().attachChild(wheelGraphs);
 	}

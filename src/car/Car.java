@@ -41,12 +41,14 @@ public enum Car {
 			
 			mass = 1000;
 			
-			e_torque = new float[] {0, 300, 450, 500, 530, 550, 500, 400};
+			e_torque = new float[] {0, 300, 450, 500, 530, 550, 500, 400}; //TODO its slower than this
 			trans_finaldrive = 3.5f;
 			trans_gearRatios = new float[]{-2.9f,3.6f,2.5f,1.8f,1.3f,1.0f,0.84f}; //reverse,gear1,gear2,g3,g4,g5,g6,...
 			
 			e_mass = 20; //TODO underground 2 seems to have very low values like these
 			w_mass = 10;
+			
+			rollFraction = 1;
 			
 			auto_gearDown = 4000;
 			auto_gearUp = 6500;
@@ -132,6 +134,10 @@ public enum Car {
 			auto_gearDown = 2000;
 			auto_gearUp = 5600; //guessed
 			e_redline = 6200; //guessed
+			
+			//smaller engine
+			e_compression *= 0.2f;
+			e_mass = 2;
 			
 			e_torque = new float[] {0, 50, 85, 102, 110, 107, 95, 40};
 			

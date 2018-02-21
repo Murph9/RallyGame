@@ -8,18 +8,17 @@ import com.simsilica.lemur.Container;
 import game.App;
 import helper.H;
 
-public class CarWheelGraph extends Container {
+public class TractionCurveGraph extends Container {
 
 	private WheelData latData;
 	private WheelData longData;
 	
-	public CarWheelGraph(MyPhysicsVehicle p, Vector3f size) {
+	public TractionCurveGraph(MyPhysicsVehicle p, Vector3f size) {
 		super();
 		
 		this.setPreferredSize(size);
 		updateMyPhysicsVehicle(p);
 	}
-	
 	
 	public void updateMyPhysicsVehicle(MyPhysicsVehicle p) {
 		this.latData = p.car.w_flatdata;
