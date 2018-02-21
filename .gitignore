@@ -41,3 +41,6 @@ local.properties
 
 # STS (Spring Tool Suite)
 .springBeans
+
+# blender save files
+*.blend1
