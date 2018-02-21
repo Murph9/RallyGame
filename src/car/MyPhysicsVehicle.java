@@ -343,6 +343,7 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements PhysicsTickListe
 		////////////////////////
 		//longitudinal forces
 		engineTorque = getEngineWheelTorque(tpf, velocity.length() * Math.signum(velocity.z));
+		
 		float[] torques = new float[] { 0, 0, 0, 0 };
 
 		//split once for each 2 wheels
@@ -496,8 +497,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements PhysicsTickListe
 		
 		curRPM = (int)(wheelrot*curGearRatio*diffRatio*60*car.w_radius); //rad/(m*sec) to rad/min and the drive ratios to engine
 		//wheel rad/s, gearratio, diffratio, conversion from rad/sec to rad/min
-
-		int idleRPM = 1000;
+		
+		int idleRPM = 1000; //TODO car constant
 		curRPM = Math.max(curRPM, idleRPM); //no stall please, its bad enough that we don't have torque here
 
 		autoTransmission(curRPM, vz);
@@ -520,18 +521,21 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements PhysicsTickListe
 			}
 		}
 
-		float engineTorque = (car.lerpTorque(curRPM) + nitroForce)*accelCurrent;
+		//TODO fake some kind of clutch at slow speeds in first (to prevent very low torques at 1000 rpm)
+		
+		float eTorque = (car.lerpTorque(curRPM) + nitroForce)*accelCurrent;
 		float engineDrag = 0;
 		if (accelCurrent < 0.05f || curRPM > car.e_redline) //so compression only happens on no accel
-			engineDrag = (curRPM-idleRPM)*car.e_compression;
+			engineDrag = (curRPM-idleRPM)*car.e_compression * (curGear>0?1:-1); //reverse goes the other way
 		
+		float engineOutTorque = 0;
 		if (Math.abs(curRPM) > car.e_redline)
-			return -engineDrag; //kill engine if greater than redline, and only apply compression
-		
-		float engineOutTorque = engineTorque*curGearRatio*diffRatio*car.trans_effic - engineDrag;
+			engineOutTorque = -engineDrag; //kill engine if greater than redline, and only apply compression
+		else //normal path
+			engineOutTorque = eTorque*curGearRatio*diffRatio*car.trans_effic - engineDrag;
 
-		float totalTorque = engineOutTorque/car.w_radius;
-		return totalTorque;
+		H.p(curRPM, engineOutTorque, engineDrag, accelCurrent);
+		return engineOutTorque/car.w_radius;
 	}
 
 	private void autoTransmission(int rpm, float vz) {

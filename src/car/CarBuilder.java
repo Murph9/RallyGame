@@ -151,6 +151,7 @@ public class CarBuilder extends AbstractAppState {
 			MyPhysicsVehicle car = cars.get(key);
 			if (car == mpv) {
 				rootNode.detachChildNamed(key+"");
+				App.rally.getPhysicsSpace().removeTickListener(car);
 				App.rally.getPhysicsSpace().remove(car);
 				car.cleanup();
 				cars.remove(key);
@@ -194,6 +195,7 @@ public class CarBuilder extends AbstractAppState {
 	public void cleanup() {
 		for (int key : cars.keySet()) {
 			MyVC car = cars.get(key);
+			App.rally.getPhysicsSpace().removeTickListener(car);
 			App.rally.getPhysicsSpace().remove(car);
 			car.cleanup();
 		}

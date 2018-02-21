@@ -90,9 +90,7 @@ public enum Car {
 
 			auto_gearDown = 3500;
 			auto_gearUp = 6500;
-			e_redline = 6800;
-		
-			e_compression = 2;
+			e_redline = 6700;
 			e_mass = 5; //fast reving
 			
 			trans_effic = 0.85f;
@@ -104,7 +102,7 @@ public enum Car {
 			sus_dampValue = 0.6f;
 			sus_restLength = 0.2f;
 
-			sus_maxForce = 8000;
+			sus_maxForce = mass*9.81f*4f;
 		}
 	}
 
