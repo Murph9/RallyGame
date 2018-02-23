@@ -97,7 +97,7 @@ public enum Car {
 			trans_finaldrive = 3.69f;//final drive maybe?
 			trans_gearRatios = new float[] { -3.38f, 3.32f, 1.9f, 1.31f, 1f, 0.84f};
 			
-			sus_stiffness = 40.0f; //20 is fairly stiff
+			sus_stiffness = 20.0f; //20 is fairly stiff
 			sus_compValue = 0.5f; //(should be lower than damp)
 			sus_dampValue = 0.6f;
 			sus_restLength = 0.2f;
@@ -202,15 +202,18 @@ public enum Car {
 			mass = 1500;
 
 			w_steerAngle = 0.6f;
-			w_mass = 30;
+			w_mass = 10;
 			w_flatdata = new RocketLatWheel();
 			w_flongdata = new RocketLongWheel();
 			
-			areo_drag = 0.1f;
+			areo_drag = 0.15f; //0.3f is basically a car's min
 			areo_downforce = 2;
-			rollFraction = 0f;
+			rollFraction = 0.1f;
+			cam_shake *= 0.1f;
 
-			sus_maxForce = 100*mass;
+			sus_stiffness = 100f;
+			sus_restLength = 0.0f;
+			sus_maxForce = 200*mass*9.81f;
 			
 			brakeMaxTorque = 50000;
 
@@ -223,7 +226,7 @@ public enum Car {
 			auto_gearUp = 13500;
 			
 			trans_finaldrive = 3.0f;
-			trans_gearRatios = new float[]{-5f,5,3.23f,2.19f,1.71f,1.39f,1.16f,0.93f};
+			trans_gearRatios = new float[]{-5f,5,3.23f,2.19f,1.71f,1.39f,1.16f,0.93f,0.81f,0.74f}; //please no more than 9 gears
 			
 			nitro_force *= 10;
 		}

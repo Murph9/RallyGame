@@ -534,7 +534,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements PhysicsTickListe
 		else //normal path
 			engineOutTorque = eTorque*curGearRatio*diffRatio*car.trans_effic - engineDrag;
 
-		H.p(curRPM, engineOutTorque, engineDrag, accelCurrent);
 		return engineOutTorque/car.w_radius;
 	}
 

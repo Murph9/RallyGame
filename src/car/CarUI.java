@@ -253,7 +253,7 @@ public class CarUI extends AbstractAppState {
 		background.setCullHint(CullHint.Never);
 		rpmMat = new Material(am, "assets/mat/Radial.j3md");
 		rpmMat.setTransparent(true);
-		rpmMat.setTexture("ThresholdMap", am.loadTexture("assets/image/radialgradient.png"));
+		rpmMat.setTexture("ThresholdMap", am.loadTexture("assets/image/radialgradient_large.png"));
 		rpmMat.setFloat("Threshold", FastMath.nextRandomFloat());
 		rpmMat.setColor("Color", ColorRGBA.White);
 		rpmMat.getAdditionalRenderState().setBlendMode(BlendMode.AlphaAdditive);
