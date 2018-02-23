@@ -4,19 +4,19 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
 public enum City implements WP {
-	CROSS("cross.blend", new Vector3f(2,0,0), WP.STRIAGHT),
-	STRAIGHT("straight.blend", new Vector3f(3,0,0), WP.STRIAGHT),
+	CROSS("cross.blend", new Vector3f(2,0,0), WP.STRAIGHT),
+	STRAIGHT("straight.blend", new Vector3f(3,0,0), WP.STRAIGHT),
 	
 	LEFT("left.blend", new Vector3f(1,0,-1), WP.LEFT_90),
 	LEFT_LONG("left_long.blend", new Vector3f(2,0,-2), WP.LEFT_90),
-	LEFT_CHICANE("left_chicane.blend", new Vector3f(2,0,-1), WP.STRIAGHT),
+	LEFT_CHICANE("left_chicane.blend", new Vector3f(2,0,-1), WP.STRAIGHT),
 	
 	RIGHT("right.blend", new Vector3f(1,0,1), WP.RIGHT_90),
 	RIGHT_LONG("right_long.blend", new Vector3f(2,0,2), WP.RIGHT_90),
-	RIGHT_CHICANE("right_chicane.blend", new Vector3f(2,0,1), WP.STRIAGHT),
+	RIGHT_CHICANE("right_chicane.blend", new Vector3f(2,0,1), WP.STRAIGHT),
 	
-	HILL_UP("hill_up.blend", new Vector3f(4,0.5f,0), WP.STRIAGHT),
-	HILL_DOWN("hill_down.blend", new Vector3f(4,-0.5f,0), WP.STRIAGHT),
+	HILL_UP("hill_up.blend", new Vector3f(4,0.5f,0), WP.STRAIGHT),
+	HILL_DOWN("hill_down.blend", new Vector3f(4,-0.5f,0), WP.STRAIGHT),
 	;
 	
 	private static String dir = "assets/wb/city/";

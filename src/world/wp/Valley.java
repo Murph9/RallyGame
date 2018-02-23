@@ -8,7 +8,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
 public enum Valley implements WP {
-	STRAIGHT("straight.blend", new Vector3f(25,0,0), WP.STRIAGHT),
+	STRAIGHT("straight.blend", new Vector3f(25,0,0), WP.STRAIGHT),
 	STRAIGHT_DOWN("straight_down.blend", new Vector3f(20,-1.33697f, 0), WP.DOWN_8),
 	STRAIGHT_UP("straight_up.blend", new Vector3f(20,1.33697f, 0), WP.UP_8),
 	

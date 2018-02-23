@@ -4,10 +4,10 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
 public enum Cliff implements WP {
-	STRAIGHT("straight.blend", new Vector3f(20,0,0), WP.STRIAGHT, NodeType.A, NodeType.A),
+	STRAIGHT("straight.blend", new Vector3f(20,0,0), WP.STRAIGHT, NodeType.A, NodeType.A),
 	RIGHT("right.blend", new Vector3f(35.35f,0,14.6f), WP.RIGHT_45, NodeType.A, NodeType.A),
 	LEFT("left.blend", new Vector3f(35.35f,0,-14.6f), WP.LEFT_45, NodeType.A, NodeType.A),
-	DOWN("down.blend", new Vector3f(25,-1.4f,0), WP.STRIAGHT, NodeType.A, NodeType.A),
+	DOWN("down.blend", new Vector3f(25,-1.4f,0), WP.STRAIGHT, NodeType.A, NodeType.A),
 	
 	SHARTRIGHTDOWN("sharpright.blend", new Vector3f(9.537f,-13.124f,48.31f), WP.RIGHT_135, NodeType.A, NodeType.A),
 	SHARTLEFTDOWN("sharpleft.blend", new Vector3f(35,-4.5671f,-30), WP.LEFT_90, NodeType.A, NodeType.A),

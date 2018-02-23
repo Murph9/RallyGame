@@ -15,7 +15,7 @@ public interface WP {
 	}
 	
 	static final Quaternion
-		STRIAGHT = new Quaternion(0, 0, 0, 1),
+		STRAIGHT = new Quaternion(0, 0, 0, 1),
 		BACK = new Quaternion(0, 1, 0, 0),
 		
 		LEFT_15 = new Quaternion(0.0f, 0.13052f, 0.0f, 0.99144f),
@@ -41,6 +41,7 @@ public interface WP {
 		Track(new Track.Builder()),
 		Underground(new Underground.Builder()),
 		Valley(new Valley.Builder()),
+		Rocks(new Rocks.Builder()),
 		;
 		
 		private World builder;
