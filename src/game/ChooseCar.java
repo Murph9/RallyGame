@@ -125,9 +125,11 @@ public class ChooseCar extends AbstractAppState {
 		car.setPhysicsLocation(new Vector3f(0, pos.y, 0));
 		
 		//code to rotate slowly
-//		rotation += FastMath.DEG_TO_RAD*tpf;
-//		Quaternion q = new Quaternion();
-//		q.fromAngleAxis(rotation, Vector3f.UNIT_Y);
+		rotation += FastMath.DEG_TO_RAD*tpf;
+		Quaternion q = new Quaternion();
+		q.fromAngleAxis(rotation, Vector3f.UNIT_Y);
+
+//TODO removed so you can drive yourself		
 //		car.setPhysicsRotation(q);
 	}
 

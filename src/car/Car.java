@@ -110,7 +110,7 @@ public enum Car {
 	private static class WhiteSloth extends CarData {
 		//http://www.automobile-catalog.com/auta_details1.php
 		WhiteSloth() {
-			carModel = dir+"Mazda_121_Metro_2.blend";
+			carModel = dir+"Mazda_121_Metro.blend";
 			wheelModel = dir+"Mazda_121_Metro_wheel.blend";
 			
 			driveFront = true;

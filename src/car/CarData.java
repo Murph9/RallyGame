@@ -32,7 +32,7 @@ public abstract class CarData implements Serializable {
 	public Vector3f cam_offset = new Vector3f(0,2.1f,-6); //where the camera is
 	public float cam_shake = 0.000002f;
 	
-	public float rollFraction = 0.5f; //1 = full into roll, 0 = no roll
+	public float rollFraction = 1f; //1 = full into roll, 0 = no roll
 	
 	//physical things
 	public float mass = 1200; //kg (total)
