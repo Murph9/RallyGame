@@ -1,19 +1,13 @@
 package car;
 
-import com.bulletphysics.dynamics.RigidBody;
-import com.bulletphysics.dynamics.vehicle.RaycastVehicle;
-import com.bulletphysics.dynamics.vehicle.VehicleRaycaster;
-import com.bulletphysics.dynamics.vehicle.WheelInfo;
-import com.bulletphysics.linearmath.Transform;
-
-import javax.vecmath.Vector3f;
+//import javax.vecmath.Vector3f;
 
 //copied from:
 //https://github.com/bubblecloud/jbullet/blob/master/src/main/java/com/bulletphysics/dynamics/vehicle/RaycastVehicle.java
 
 //For re-writing the physics engine.
 
-public class FancyRcV extends RaycastVehicle {
+public class FancyRcV {/*extends RaycastVehicle {
 
 	Vector3f fwd = new Vector3f();
 	private int indexRightAxis = 0;
@@ -157,4 +151,4 @@ public class FancyRcV extends RaycastVehicle {
 	public void updateFriction(float timeStep) {
 		//empty
 	}
-}
+*/}

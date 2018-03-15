@@ -90,7 +90,7 @@ public class CarBuilder extends AbstractAppState {
 		//its possible to shift the center of gravity offset (TODO add to CarData)
 		//Convex collision shape or hull might be faster here)
 		CompoundCollisionShape compoundShape = new CompoundCollisionShape();
-		compoundShape.addChildShape(CollisionShapeFactory.createDynamicMeshShape(carmodel), new Vector3f(0,0,0));
+//		compoundShape.addChildShape(CollisionShapeFactory.createDynamicMeshShape(carmodel), new Vector3f(0,0,0));
 		
 		Node carNode = new Node(id+"");
 		MyVC player = new MyVC(compoundShape, car, carNode);

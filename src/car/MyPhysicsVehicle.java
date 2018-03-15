@@ -3,16 +3,12 @@ package car;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.bulletphysics.dynamics.vehicle.DefaultVehicleRaycaster;
-import com.bulletphysics.dynamics.vehicle.WheelInfo;
 import com.jme3.asset.AssetManager;
 import com.jme3.audio.AudioNode;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.PhysicsTickListener;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.objects.PhysicsVehicle;
-import com.jme3.bullet.objects.VehicleWheel;
-import com.jme3.bullet.util.Converter;
 import com.jme3.input.RawInputListener;
 import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
@@ -237,24 +233,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements PhysicsTickListe
 	}
 	//end controls
 
-
-	/**Used internally (in jme), creates the actual vehicle constraint when vehicle is added to phyicsspace
-	 */
-	@Override
-	public void createVehicle(PhysicsSpace space) {
-		physicsSpace = space;
-		if (space == null) {
-			return;
-		}
-		rayCaster = new DefaultVehicleRaycaster(space.getDynamicsWorld());
-		vehicle = new FancyRcV(car, rBody, rayCaster); //<-- i added it here for the change of constructor
-		vehicle.setCoordinateSystem(0, 1, 2);
-		for (VehicleWheel wheel : wheels) {
-			wheel.setWheelInfo(vehicle.addWheel(Converter.convert(wheel.getLocation()), Converter.convert(wheel.getDirection()), Converter.convert(wheel.getAxle()),
-					wheel.getRestLength(), wheel.getRadius(), tuning, wheel.isFrontWheel()));
-		}
-	}
-
 	public void giveSound(AudioNode audio) {
 		if (engineSound != null) carRootNode.detachChild(engineSound); //incase we have 2 sounds running
 
@@ -398,10 +376,12 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements PhysicsTickListe
 		
 		//for each wheel
 		for (int i = 0; i < 4; i++) {
-			WheelInfo wi = getWheel(wheel[i].num).getWheelInfo();
-			wheel[i].contact = (wi.raycastInfo.groundObject != null);
+			//TODO hack for jme3.2
+			//WheelInfo wi = getWheel(wheel[i].num).getWheelInfo();
+			//wheel[i].contact = (wi.raycastInfo.groundObject != null);
+			wheel[i].contact = true;
 			wheel[i].physicsUpdate(tpf);
-			wheel[i].susForce = Math.min(getWheel(i).getWheelInfo().wheelsSuspensionForce, car.mass*4); //[*4] HACK: to stop weird harsh physics on large suspension forces as the normal force
+			wheel[i].susForce = 9.81f*car.mass/4;//Math.min(getWheel(i).getWheelInfo().wheelsSuspensionForce, car.mass*4); //[*4] HACK: to stop weird harsh physics on large suspension forces as the normal force
 
 			// note that the bottom turn could be max of vel and radsec: http://www.menet.umn.edu/~gurkan/Tire%20Modeling%20%20Lecture.pdf 
 			float slipr = slip_const*(wheel[i].radSec*car.w_radius - velocity.z);
@@ -616,11 +596,6 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements PhysicsTickListe
 		setPhysicsLocation(getPhysicsLocation().add(new Vector3f(0,1,0)));
 	}
 
-	@Override
-	public float getCurrentVehicleSpeedKmHour() {
-		return vehicle.getCurrentSpeedKmHour();
-	}
-
 	public void cleanup() {
 		this.ai = null;
 		if (this.controls != null && !this.controls.isEmpty()) {
@@ -692,6 +667,8 @@ public class MyPhysicsVehicle extends PhysicsVehicle implements PhysicsTickListe
 	public void physicsTick(PhysicsSpace arg0, float arg1) {
 		//happens after the tick
 	}
+	
+	private native void finalizeNative(long rayCaster, long vehicle);
 }
 
 class VehicleGripHelper {

@@ -43,7 +43,7 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 		if (p != null) {
 			this.p = p;
 			Vector3f pPos = new Vector3f();
-			p.getInterpolatedPhysicsLocation(pPos);
+			p.getPhysicsLocation(pPos);
 			c.setLocation(pPos.add(p.car.cam_offset)); //starting position of the camera
 			c.lookAt(pPos.add(p.car.cam_lookAt), new Vector3f(0,1,0)); //look at car
 		}

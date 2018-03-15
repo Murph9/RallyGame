@@ -66,7 +66,7 @@ public class SkyState extends AbstractAppState {
 	        BloomFilter bloom = new BloomFilter(BloomFilter.GlowMode.Objects);
 	        bloom.setBlurScale(2.5f);
 	        bloom.setExposurePower(1f);
-	        Misc.getFpp(vp, am).addFilter(bloom);
+	        Misc.getFpp(vp, am, 0).addFilter(bloom);
 	        sky.getUpdater().addBloomFilter(bloom);
         }
         

@@ -7,7 +7,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-import com.bulletphysics.dynamics.vehicle.VehicleTuning;
+import com.jme3.bullet.objects.infos.VehicleTuning;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 
