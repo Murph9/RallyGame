@@ -107,6 +107,14 @@ public class H {
 		return str;
 	}
 	
+	public static String join(Object... os) {
+		String s = "";
+		for (Object o: os) {
+			s += o + " ";
+		}
+		return s;
+	}
+	
 	@SuppressWarnings("unchecked")
 	public static <T> Boolean allTrue(Function<T, Boolean> f, T... ts) {
 		for (T t: ts)
