@@ -4,7 +4,7 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
 
-import car.MyPhysicsVehicle;
+import car.ray.RayCarControl;
 import drive.DriveRace;
 import helper.H;
 
@@ -12,7 +12,7 @@ public class RaceAI extends CarAI {
 
 	private DriveRace race;
 	
-	public RaceAI(MyPhysicsVehicle car, MyPhysicsVehicle notused, DriveRace race) {
+	public RaceAI(RayCarControl car, RayCarControl notused, DriveRace race) {
 		super(car);
 		this.race = race;
 	}
@@ -30,8 +30,7 @@ public class RaceAI extends CarAI {
 		Vector3f velocity = w_angle.invert().mult(car.vel);
 		int reverse = (velocity.z < 0 ? -1 : 1);
 		
-		Vector3f myforward = new Vector3f();
-		car.getForwardVector(myforward);
+		Vector3f myforward = car.forward;
 		
 		float angF = myforward.normalize().angleBetween((atPos.subtract(pos)).normalize());
 		float ang = car.left.normalize().angleBetween((atPos.subtract(pos)).normalize());

@@ -1,4 +1,4 @@
-package car;
+package car.ray;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,15 +12,13 @@ import com.jme3.input.event.MouseButtonEvent;
 import com.jme3.input.event.MouseMotionEvent;
 import com.jme3.input.event.TouchEvent;
 
-import car.ray.RayCarControl;
-
-//TODO move to global scope so other things can listen, and it doesn't depend on the car
-public class MyKeyListener implements RawInputListener {
+//TODO move to global scope so other things can use this to listen
+public class RayCarKeyListener implements RawInputListener {
 
 	RayCarControl a;
 	Map<Integer, String> layout = new HashMap<Integer, String>();
 	
-	public MyKeyListener(RayCarControl a) {
+	public RayCarKeyListener(RayCarControl a) {
 		this.a = a;
 		
 		layout.put(KeyInput.KEY_LEFT, "Left");
@@ -47,6 +45,8 @@ public class MyKeyListener implements RawInputListener {
 		layout.put(KeyInput.KEY_RETURN, "Reset");
 		
 		layout.put(KeyInput.KEY_Q, "Jump");
+		
+		layout.put(KeyInput.KEY_1, "Rotate180");
 	}
 	
 	public void beginInput() {}

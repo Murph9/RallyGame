@@ -5,24 +5,28 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.simsilica.lemur.Container;
 
+import car.ray.RayCarControl;
+import car.ray.WheelDataConst.WheelDataTractionConst;
 import game.App;
 import helper.H;
 
+import car.ray.RayCar.GripHelper;
+
 public class TractionCurveGraph extends Container {
 
-	private WheelData latData;
-	private WheelData longData;
+	private WheelDataTractionConst latData;
+	private WheelDataTractionConst longData;
 	
-	public TractionCurveGraph(MyPhysicsVehicle p, Vector3f size) {
+	public TractionCurveGraph(RayCarControl p, Vector3f size) {
 		super();
 		
 		this.setPreferredSize(size);
 		updateMyPhysicsVehicle(p);
 	}
 	
-	public void updateMyPhysicsVehicle(MyPhysicsVehicle p) {
-		this.latData = p.car.w_flatdata;
-		this.longData = p.car.w_flongdata;
+	public void updateMyPhysicsVehicle(RayCarControl p) {
+		this.latData = p.getCarData().wheelData[0].pjk_lat;
+		this.longData = p.getCarData().wheelData[0].pjk_long;
 		drawGraphs();
 	}
 
@@ -30,25 +34,25 @@ public class TractionCurveGraph extends Container {
 		this.detachAllChildren();
 		
 		Vector3f size = getPreferredSize();
-		float max = VehicleGripHelper.tractionFormula(latData, VehicleGripHelper.calcSlipMax(latData, 0.0005f));
+		float max = GripHelper.tractionFormula(latData, GripHelper.calcSlipMax(latData, 0.0005f));
 		Float[] points = simulateGraphPoints(latData);
 		for (int i = 0; i < points.length; i++) {
 			Vector3f pos = new Vector3f(i*(size.x/points.length), -(size.y/2)+(size.y/2)*(points[i]/max), 0);
 			this.attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Blue, pos, 1));
 		}
 		
-		max = VehicleGripHelper.tractionFormula(longData, VehicleGripHelper.calcSlipMax(longData, 0.0005f));
+		max = GripHelper.tractionFormula(longData, GripHelper.calcSlipMax(longData, 0.0005f));
 		points = simulateGraphPoints(longData);
 		for (int i = 0; i < points.length; i++) {
 			Vector3f pos = new Vector3f(i*(size.x/points.length), -(size.y)+(size.y/2)*(points[i]/max), 0);
 			this.attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Red, pos, 1));
 		}
 	}
-	private Float[] simulateGraphPoints(WheelData d) {
+	private Float[] simulateGraphPoints(WheelDataTractionConst d) {
 		Vector3f size = getPreferredSize();
 		Float[] list = new Float[(int)size.x/2];
 		for (int i = 0; i < list.length; i++)
-			list[i] = VehicleGripHelper.tractionFormula(d, (float)i*FastMath.PI/size.x);
+			list[i] = GripHelper.tractionFormula(d, (float)i*FastMath.PI/size.x);
 		return list;
 	}
 	

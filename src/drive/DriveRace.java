@@ -29,11 +29,11 @@ import com.jme3.scene.Spatial;
 import car.Car;
 import car.CarBuilder;
 import car.CarCamera;
-import car.CarData;
 import car.CarUI;
-import car.MyPhysicsVehicle;
 import car.ai.CarAI;
 import car.ai.RaceAI;
+import car.ray.CarDataConst;
+import car.ray.RayCarControl;
 import game.App;
 import game.RaceMenu;
 import helper.H;
@@ -54,7 +54,7 @@ public class DriveRace extends AbstractAppState {
 	
 	//car stuff
 	public CarBuilder cb;
-	protected CarData car;
+	protected CarDataConst car;
 
 	//gui and camera stuff
 	private CarCamera camera;
@@ -62,11 +62,11 @@ public class DriveRace extends AbstractAppState {
 	
 	//ai things
 	private int themCount = 4;
-	private CarData themType = Car.Runner.get();
+	private CarDataConst themType = Car.Runner.get();
 	
 	//race start things
 	private Vector3f[] worldStarts;
-	private MyPhysicsVehicle[] cars; 
+	private RayCarControl[] cars; 
 	private Integer[] carCheckpointNext;
 	
 	private Vector3f[] checkpoints;
@@ -132,7 +132,7 @@ public class DriveRace extends AbstractAppState {
 		App.rally.bullet.setEnabled(true);
 		
 		Object[] a = cb.getAll().toArray();
-		cars = Arrays.copyOf(a, a.length, MyPhysicsVehicle[].class);
+		cars = Arrays.copyOf(a, a.length, RayCarControl[].class);
 		carCheckpointNext = new Integer[cars.length];
 		Arrays.fill(carCheckpointNext, 0);
 		

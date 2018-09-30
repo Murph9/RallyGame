@@ -14,6 +14,7 @@ import helper.H;
 
 public class CarModelData {
 	
+	//TODO new raycar stuff
 	boolean simple = false;
 
 	String carModel;

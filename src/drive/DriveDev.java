@@ -9,6 +9,8 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
 import car.*;
+import car.ray.CarDataConst;
+import car.ray.RayCarControl;
 import game.App;
 import helper.H;
 
@@ -19,7 +21,7 @@ public class DriveDev extends DriveBase {
 	private WorldEditor worldEditor;
 	private TractionCurveGraph wheelGraphs;
 	
-	public DriveDev(CarData car, World world) {
+	public DriveDev(CarDataConst car, World world) {
     	super(car, world);
     }
 	
@@ -51,13 +53,13 @@ public class DriveDev extends DriveBase {
 	public void reloadCar() {
 		//TODO minimap can't be reset
 		
-		MyPhysicsVehicle car = this.cb.get(0);
+		RayCarControl car = this.cb.get(0);
 		
 		Vector3f pos = car.getPhysicsLocation();
 		Vector3f vel = car.getLinearVelocity();
 		Quaternion q = car.getPhysicsRotation();
 		
-		CarData c = car.car;
+		CarDataConst c = car.getCarData();
 		
 		this.cb.removePlayer(0);
 		this.cb.addCar(0, c, world.getStartPos(), world.getStartRot(), true, null);

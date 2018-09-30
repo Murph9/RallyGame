@@ -1,40 +1,45 @@
 package car;
 
-import com.jme3.math.Vector3f;
+import car.ray.CarDataConst;
 
 //TODO use ridge racer cars
 
+//TODO rewrite this whole file to make a little bit more sense
+//like using the enum to actually generate the data, instead of using extended classes
+
 public enum Car {
 	Normal(new NormalCar()),
-	WhiteSloth(new WhiteSloth()),
-	Rally(new RallyCar()),
-	Rocket(new Rocket()),
 	Runner(new Runner()),
+	Rally(new RallyCar()),
+	/*WhiteSloth(new WhiteSloth()),
+	
+	Rocket(new Rocket()),
+	
 	Hunter(new Hunter()),
 	Ricer(new Ricer()),
 	Muscle(new Muscle()),
 	Wagon(new Wagon()),
 	Miata(new Miata()),
-	Gt(new Gt()),
+	Gt(new Gt()),*/
 	;
 	
-	private CarData car;
-	Car(CarData car) {
+	private CarDataConst car;
+	Car(CarDataConst car) {
 		this.car = car;
 	}
 	
-	public CarData get() {
+	public CarDataConst get() {
 		return car;
 	}
 	
-	private static class NormalCar extends CarData {
+	private static class NormalCar extends CarDataConst {
 		//for using the default settings.
 		NormalCar() {
 			rollFraction = 1.2f;
 		}
 	}
-	
-	private static class Miata extends CarData {
+	/*
+	private static class Miata extends CarDataConst {
 		Miata() {
 			carModel = dir+"miata.blend";
 			wheelModel = dir+"miata_wheel.blend";
@@ -60,7 +65,7 @@ public enum Car {
 	
 	//TODO it rolls realy easy compared to the runner car
 	//TODO tune in general
-	private static class Ricer extends CarData {
+	private static class Ricer extends CarDataConst {
 		//for using the default settings.
 		//probably shouldn't have a custom constructor
 		Ricer() {
@@ -107,7 +112,7 @@ public enum Car {
 	}
 
 	
-	private static class WhiteSloth extends CarData {
+	private static class WhiteSloth extends CarDataConst {
 		//http://www.automobile-catalog.com/auta_details1.php
 		WhiteSloth() {
 			carModel = dir+"Mazda_121_Metro.blend";
@@ -146,9 +151,9 @@ public enum Car {
 			nitro_force *= 10;
 		}
 	}
-
-	private static class RallyCar extends CarData {
-		RallyCar() {
+*/
+	private static class RallyCar extends CarDataConst {
+		/*RallyCar() {
 			carModel = dir+"car4raid_1.obj";
 			wheelModel = dir+"wheelraid1.obj";
 
@@ -186,10 +191,10 @@ public enum Car {
 			
 			w_flatdata = new RallyLatWheel();
 			w_flongdata = new RallyLongWheel();
-		}
+		}*/
 	}
-
-	private static class Rocket extends CarData {
+/*
+	private static class Rocket extends CarDataConst {
 		Rocket() {
 			carModel = dir + "rocket1_1.blend";
 			w_zOff = 1.2f;
@@ -231,9 +236,9 @@ public enum Car {
 			nitro_force *= 10;
 		}
 	}
-
-	private static class Runner extends CarData {
-		Runner() {
+*/
+	private static class Runner extends CarDataConst {
+		/*Runner() {
 			carModel = dir+"track1_2.blend";
 
 			//TODO you can fix the oversteer at high speeds with a proper diff and different downforce scaling at higher speeds  
@@ -262,10 +267,10 @@ public enum Car {
 			areo_crossSection = 0.59f;
 			
 			brakeMaxTorque = 5000;
-		}
+		}*/
 	}
-	
-	private static class Gt extends CarData {
+/*	
+	private static class Gt extends CarDataConst {
 		Gt() {
 			//http://www.automobile-catalog.com/auta_details1.php
 			//Ford Gt (2005)
@@ -307,7 +312,7 @@ public enum Car {
 		}
 	}
 
-	private static class Hunter extends CarData {
+	private static class Hunter extends CarDataConst {
 		Hunter() {
 			carModel = dir+"sa_hummer.blend";
 			wheelModel = dir+"sa_hummer_wheel.blend";
@@ -345,7 +350,7 @@ public enum Car {
 
 	}
 	
-	private static class Muscle extends CarData {
+	private static class Muscle extends CarDataConst {
 		Muscle() {
 			carModel = dir+"muscle.blend";
 			
@@ -385,7 +390,7 @@ public enum Car {
 		}
 	}
 	
-	private static class Wagon extends CarData {
+	private static class Wagon extends CarDataConst {
 		Wagon() {
 			carModel = dir+"Wagon.blend";
 			wheelModel = dir+"Wagon_Wheel.blend";
@@ -424,5 +429,5 @@ public enum Car {
 				E = 0.95f;
 			}
 		}
-	}
+	}*/
 }

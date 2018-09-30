@@ -22,6 +22,9 @@ import com.jme3.scene.shape.Line;
 import com.jme3.scene.shape.Quad;
 import com.jme3.system.AppSettings;
 
+import car.ray.RayCarControl;
+import car.ray.RayCarPowered.PoweredState;
+import car.ray.RayWheel;
 import game.App;
 import game.Main;
 import helper.H;
@@ -29,7 +32,7 @@ import helper.H;
 public class CarUI extends AbstractAppState {
 
 	//TODO scale it with monitor size (forza doesn't deal with this)
-	private MyPhysicsVehicle p;
+	private RayCarControl p;
 	
 	private Node rootNode;
 	
@@ -93,11 +96,11 @@ public class CarUI extends AbstractAppState {
 		}
 	};
 	
-	public CarUI (MyPhysicsVehicle p) {
+	public CarUI (RayCarControl p) {
 		Main r = App.rally;
 		this.p = p;
 		
-		this.redline = p.car.e_redline;
+		this.redline = p.getCarData().e_redline;
 		this.finalRPM = (int)FastMath.ceil(this.redline) + 1000;
 
 		BitmapFont guiFont = r.getFont();
@@ -416,19 +419,21 @@ public class CarUI extends AbstractAppState {
 	
 	//main update method
 	public void update(float tpf) {
+		PoweredState powerState = p.getPoweredState();
+		
 		int speedKMH = (int)Math.abs(p.getCurrentVehicleSpeedKmHour());
 
 		setSpeedDigits(speedKMH);
-		setGearDigit(p.curGear);
+		setGearDigit(powerState.curGear);
 		
 		//rpm bar 2
-		rpmMat.setFloat("Threshold", Math.min(1, 1 - (p.curRPM/(float)Math.ceil(redline+1000))*(5/(float)8)));
+		rpmMat.setFloat("Threshold", Math.min(1, 1 - (powerState.curRPM/(float)Math.ceil(redline+1000))*(5/(float)8)));
 		
-		angle.setText(p.getAngle()+"'");
-		nitro.setLocalScale(1, p.nitro/p.car.nitro_max, 1);
-		throttle.setLocalScale(1, p.accelCurrent, 1);
-		brake.setLocalScale(1, p.brakeCurrent, 1);
-		steer.setLocalTranslation(centerx - 35 + (p.steeringCurrent*-1 + 0.5f)*60 - 6/2, centery + 40, 0); //steering is a translated square
+//		angle.setText(powerState.getAngle()+"'"); //TODO
+		nitro.setLocalScale(1, powerState.nitro/p.getCarData().nitro_max, 1);
+		throttle.setLocalScale(1, powerState.accelCurrent, 1);
+		brake.setLocalScale(1, powerState.brakeCurrent, 1);
+		steer.setLocalTranslation(centerx - 35 + (powerState.steeringCurrent*-1 + 0.5f)*60 - 6/2, centery + 40, 0); //steering is a translated square
 	
 		
 		// http://forum.projectcarsgame.com/showthread.php?23037-Telemetry-detail&p=892187&viewfull=1#post892187
@@ -438,15 +443,17 @@ public class CarUI extends AbstractAppState {
 			
 			//grips
 			for (int i = 0 ; i < 4; i++) {
+				RayWheel wheel = p.getWheel(i).getRayWheel();
+				
 				Material m = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-				gripValue[i].setText(String.format("%.2f", p.wheel[i].skid));
-				wheelRot[i].setText(String.format("%.2f", p.wheel[i].radSec));
-				m.setColor("Color", getGripBoxColour(p.wheel[i].skid));
+				gripValue[i].setText(String.format("%.2f", wheel.skidFraction));
+				wheelRot[i].setText(String.format("%.2f", wheel.radSec));
+				m.setColor("Color", getGripBoxColour(wheel.skidFraction));
 				gripBox[i].setMaterial(m);
 				
-				Vector3f dir = p.wheel[i].gripDir;
+				Vector3f dir = null;//wheel.gripDir; //TODO?
 				if (dir != null) {
-					gripBox[i].setLocalScale(p.wheel[i].susForce/(p.car.mass*2));
+					gripBox[i].setLocalScale(wheel.susForce/(p.getCarData().mass*2));
 					
 					gripDir[i].setLocalScale(dir.length()*75);
 					
@@ -459,7 +466,7 @@ public class CarUI extends AbstractAppState {
 			
 			//gees (g forces)
 			//needs to be translated from local into screen axis
-			Vector3f gs = p.gForce;
+			Vector3f gs = new Vector3f();//TODO p.gForce;
 			gs.y = gs.z; //z is front back
 			gs.z = 0; //screen has no depth 
 			g2.setLocalTranslation(gcenter.add(gs.mult(25))); //because screen pixels

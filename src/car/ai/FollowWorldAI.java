@@ -4,7 +4,7 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
 
-import car.MyPhysicsVehicle;
+import car.ray.RayCarControl;
 import helper.H;
 import world.wp.DefaultBuilder;
 
@@ -13,7 +13,7 @@ public class FollowWorldAI extends CarAI {
 	private DefaultBuilder world;
 	private float lastTurn;
 	
-	public FollowWorldAI (MyPhysicsVehicle car, DefaultBuilder world) {
+	public FollowWorldAI (RayCarControl car, DefaultBuilder world) {
 		super(car);
 		
 		this.world = world;
@@ -29,8 +29,7 @@ public class FollowWorldAI extends CarAI {
 		Vector3f velocity = w_angle.invert().mult(car.vel);
 		int reverse = (velocity.z < 0 ? -1 : 1);
 		
-		Vector3f myforward = new Vector3f();
-		car.getForwardVector(myforward);
+		Vector3f myforward = car.forward;
 		
 		float angF = myforward.normalize().angleBetween((atPos.subtract(pos)).normalize());
 		float ang = car.left.normalize().angleBetween((atPos.subtract(pos)).normalize());

@@ -13,6 +13,7 @@ import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.input.Joystick;
 
 import car.*;
+import car.ray.CarDataConst;
 import game.App;
 import helper.H;
 
@@ -24,7 +25,7 @@ public class DriveBase extends AbstractAppState {
 
 	//car stuff
 	public CarBuilder cb;
-	protected CarData car;
+	protected CarDataConst car;
 	
 	//gui and camera stuff
 	CarCamera camera;
@@ -33,7 +34,7 @@ public class DriveBase extends AbstractAppState {
 	//debug stuff
 	public boolean ifDebug = false;
 	
-    public DriveBase(CarData car, World world) {
+    public DriveBase(CarDataConst car, World world) {
     	super();
     	this.car = car;
     	this.world = world;

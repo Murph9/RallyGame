@@ -1,12 +1,12 @@
 package car.ai;
 
-import car.MyPhysicsVehicle;
+import car.ray.RayCarControl;
 
 public abstract class CarAI {
 	
-	protected MyPhysicsVehicle car;
+	protected RayCarControl car;
 
-	public CarAI(MyPhysicsVehicle car) {
+	public CarAI(RayCarControl car) {
 		this.car = car;
 	}
 	

@@ -25,15 +25,18 @@ import com.simsilica.lemur.component.InsetsComponent;
 import com.simsilica.lemur.event.DefaultMouseListener;
 import com.simsilica.lemur.event.MouseEventControl;
 
+import car.ray.CarDataConst;
+import car.ray.RayCarControl;
 import game.App;
 import helper.H;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 //TODO cleanup
+//TODO rewrite to work with RayCarControl
 public class CarEditor extends Container {
 
-	private MyPhysicsVehicle p;
-	private CarData nextCarData;
+	private RayCarControl p;
+	private CarDataConst nextCarData;
 	private HashMap<String, FieldEntry> fields;
 	private Runnable a;
 	
@@ -45,14 +48,14 @@ public class CarEditor extends Container {
 		}
 	};
 	
-	public CarEditor(MyPhysicsVehicle p, Runnable a) {
+	public CarEditor(RayCarControl p, Runnable a) {
 		super("CarEditor");
 		
 		this.p = p;
 		this.a = a;
 		this.fields = new HashMap<String, FieldEntry>();
 		try {
-			attachTree(this.p.car, this, "Car Data");
+			attachTree(this.p.getCarData(), this, "Car Data");
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
@@ -103,7 +106,7 @@ public class CarEditor extends Container {
 				carButton.addClickCommands(new Command<Button>() {
 		            @Override
 		            public void execute( Button source ) {
-		            	nextCarData = car.get();
+//		            	nextCarData = car.get();//TODO
 		            }
 		        });
 			}
@@ -112,7 +115,7 @@ public class CarEditor extends Container {
 	            @Override
 	            public void execute( Button source ) {
 	            	if (nextCarData != null) {
-	            		p.car = nextCarData;
+//	            		p.car = nextCarData; //TODO
 	            		a.run();
 	            	}
 	            }
@@ -253,7 +256,7 @@ public class CarEditor extends Container {
 	
 
 	public String carDataToString() {
-		List<Entry<String, Object>> list = new ArrayList<Entry<String, Object>>(H.toMap(p.car).entrySet());
+		List<Entry<String, Object>> list = new ArrayList<Entry<String, Object>>(H.toMap(p.getCarData()).entrySet());
 
 		list.sort((a,b) -> a.getKey().compareTo(b.getKey()));
 		

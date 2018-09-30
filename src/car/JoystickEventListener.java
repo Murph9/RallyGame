@@ -13,6 +13,8 @@ import com.jme3.input.event.MouseButtonEvent;
 import com.jme3.input.event.MouseMotionEvent;
 import com.jme3.input.event.TouchEvent;
 
+import car.ray.RayCarControl;
+
 class JoystickEventListner implements RawInputListener {
 
 	//TODO its very hardcoded
@@ -20,10 +22,10 @@ class JoystickEventListner implements RawInputListener {
 	private Map<String, String> intToButton = new HashMap<String, String>();
 	private Map<String, String> buttonToAction = new HashMap<String, String>();
 	
-	private MyPhysicsVehicle a;
+	private RayCarControl a;
 	private double stickdeadzone = 0.2f;
 	
-	JoystickEventListner (MyPhysicsVehicle a) {
+	JoystickEventListner (RayCarControl a) {
 		this.a = a;
 		
 		intToButton.put(JoystickButton.BUTTON_0, "A"); //A

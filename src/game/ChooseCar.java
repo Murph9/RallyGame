@@ -15,9 +15,9 @@ import com.simsilica.lemur.Label;
 
 import car.Car;
 import car.CarBuilder;
-import car.CarData;
-import car.MyPhysicsVehicle;
 import car.PowerCurveGraph;
+import car.ray.CarDataConst;
+import car.ray.RayCarControl;
 import helper.H;
 import helper.H.Duo;
 import world.StaticWorld;
@@ -120,7 +120,7 @@ public class ChooseCar extends AbstractAppState {
 		if (!isEnabled()) return; //appstate stuff
 		super.update(tpf);
 
-		MyPhysicsVehicle car = cb.get(0);
+		RayCarControl car = cb.get(0);
 		Vector3f pos = car.getPhysicsLocation();
 		car.setPhysicsLocation(new Vector3f(0, pos.y, 0));
 		
@@ -134,12 +134,12 @@ public class ChooseCar extends AbstractAppState {
 	}
 
 	private String getCarInfoText(Car car) {
-		CarData cd = car.get();
+		CarDataConst cd = car.get();
 		String out = "Name: "+ car.name() + "\n";
 		Duo<Float, Float> data = cd.getMaxPower();
 		out += "Max Power: " + data.first + "kW? @ " + data.second + " rpm \n";
 		out += "Weight: "+ cd.mass + "kg\n";
-		out += "Drag(linear): " + cd.areo_drag + "(" + cd.resistance(9.81f) + ")\n";
+		out += "Drag(linear): " + cd.areo_drag + "(" + cd.rollingResistance(9.81f, 0) + ")\n"; //TODO hardcoded 0
 		out += "Redline: "+ cd.e_redline +"\n";
 		
 		return out;
@@ -166,7 +166,7 @@ public class ChooseCar extends AbstractAppState {
 		if (car == null) { H.p("no return value for ChooseCar()"); };
 		App.rally.next(this);
 	}
-	public CarData getCarData() {
+	public CarDataConst getCarData() {
 		return car.get();
 	}
 }

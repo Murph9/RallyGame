@@ -4,7 +4,7 @@ import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 
-import car.MyPhysicsVehicle;
+import car.ray.RayCarControl;
 import game.App;
 import helper.H;
 import world.WorldType;
@@ -16,7 +16,7 @@ public class DriveAtAI extends CarAI {
 	private float reversingTimer;
 	private boolean reversing;
 	
-	public DriveAtAI (MyPhysicsVehicle car, PhysicsRigidBody node) {
+	public DriveAtAI (RayCarControl car, PhysicsRigidBody node) {
 		super(car);
 		
 		this.driveAtThis = node;
@@ -55,8 +55,7 @@ public class DriveAtAI extends CarAI {
 		Vector3f pos = car.getPhysicsLocation();
 		Vector3f atPos = driveAtThis.getPhysicsLocation();
 
-		Vector3f myforward = new Vector3f();
-		car.getForwardVector(myforward);
+		Vector3f myforward = car.forward;
 		
 		float angF = myforward.normalize().angleBetween((atPos.subtract(pos)).normalize());
 		float ang = car.left.normalize().angleBetween((atPos.subtract(pos)).normalize());

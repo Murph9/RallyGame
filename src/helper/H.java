@@ -188,6 +188,7 @@ public class H {
 	}
 	
 	public static int clamp(int input, int low, int high) {
+		//TODO change to Math.min/Math.max calls
 		if (input < low) input = low;
 		if (input > high) input = high;
 		return input;

@@ -5,6 +5,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jme3.app.BasicProfilerState;
+import com.jme3.app.DetailedProfilerState;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.StatsAppState;
 import com.jme3.app.state.AppState;
@@ -24,7 +25,7 @@ import com.simsilica.lemur.input.InputMapper;
 import com.simsilica.lemur.style.BaseStyles;
 
 import car.Car;
-import car.CarData;
+import car.ray.CarDataConst;
 import drive.*;
 import game.*;
 import helper.H;
@@ -71,13 +72,13 @@ public class Main extends SimpleApplication {
 
 	public BulletAppState bullet; //one physics space always
 	
-	private CarData car;
-	private CarData them;
+	private CarDataConst car;
+	private CarDataConst them;
 	private World world;
 	private void loadDefaults() {
 		car = Car.Runner.get();
 		them = Car.Runner.get();
-		world = new HighwayWorld();
+		world = new StaticWorldBuilder(StaticWorld.track2);
 		//world alernatives:
 		//	new HighwayWorld();
 		//	new StaticWorldBuilder(StaticWorld.track2);
@@ -147,15 +148,19 @@ public class Main extends SimpleApplication {
 		getStateManager().attach(start);
 		
 		bullet = new BulletAppState();
-    	//bullet.setDebugEnabled(true); //broken in 3.1
+    	bullet.setDebugEnabled(true);
 		getStateManager().attach(bullet);
-		bullet.getPhysicsSpace().setAccuracy(1f/120f); //double rate physics
+		bullet.getPhysicsSpace().setAccuracy(1f/60f); //double rate physics
+		bullet.getPhysicsSpace().setGravity(new Vector3f(0, -9.81f, 0)); //yay its down
 		
 		inputManager.setCursorVisible(true);
 		flyCam.setEnabled(false);
 		
 		//profiling in jme 3.2
-		//getStateManager().atttach(new DetailedProfilerState());
+		DetailedProfilerState profiler = new DetailedProfilerState(); 
+		//TODO add physics engine stuff to this
+//		getStateManager().attach(profiler);
+		
 	}
 	
 	@Override
@@ -266,7 +271,7 @@ public class Main extends SimpleApplication {
 		getStateManager().attach(chooseMap);
 	}
 	
-	private void startDrive(CarData car, World world) {
+	private void startDrive(CarDataConst car, World world) {
 		if (drive != null) return; //not sure what this is actually hoping to stop
 				
 		drive = new DriveBase(car, world);

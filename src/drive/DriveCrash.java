@@ -10,6 +10,8 @@ import com.jme3.app.state.AppStateManager;
 import com.jme3.math.Vector3f;
 
 import car.*;
+import car.ray.CarDataConst;
+import car.ray.RayCarControl;
 import game.App;
 import helper.H;
 
@@ -19,7 +21,7 @@ public class DriveCrash extends DriveBase {
 			new Vector3f(0,0,0)
 	};
 
-	private CarData them;
+	private CarDataConst them;
 	private int maxCount;
 	private int nextId;
 	
@@ -49,13 +51,13 @@ public class DriveCrash extends DriveBase {
 		
 		//check if any are upside down, if so kill them
 		//TODO check if collisions are from the player
-		List<MyPhysicsVehicle> toKill = new ArrayList<MyPhysicsVehicle>();
-		for (MyPhysicsVehicle c: this.cb.getAll()) {
+		List<RayCarControl> toKill = new ArrayList<RayCarControl>();
+		for (RayCarControl c: this.cb.getAll()) {
 			if (c.up.y < 0 && c != this.cb.get(0)) {
 				toKill.add(c); //TODO
 			}
 		}
-		for (MyPhysicsVehicle c: toKill) {
+		for (RayCarControl c: toKill) {
 			//killed
 			totalKilled++;
 			cb.removePlayer(c);

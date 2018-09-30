@@ -5,7 +5,7 @@ import com.jme3.renderer.Camera;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Node;
 
-import car.MyPhysicsVehicle;
+import car.ray.RayCarControl;
 
 public class MiniMap { //TODO appstate
 
@@ -14,13 +14,13 @@ public class MiniMap { //TODO appstate
 	
 	public Node rootNode;
 	
-	MyPhysicsVehicle target;
+	RayCarControl target;
 	ViewPort viewport;
 	Camera cam;
 	
 	final float height = 100;
 	
-	MiniMap(MyPhysicsVehicle target) {
+	MiniMap(RayCarControl target) {
 		this.target = target;
 		Main r = App.rally;
 		
@@ -48,8 +48,7 @@ public class MiniMap { //TODO appstate
 	
 	public void update(float tpf) {
 		Vector3f pos = target.getPhysicsLocation();
-		Vector3f f = new Vector3f();
-		cam.lookAt(pos, target.getForwardVector(f));
+		cam.lookAt(pos, target.forward);
 		
 		pos.addLocal(0,height,0);
 		cam.setLocation(pos);

@@ -19,13 +19,14 @@ import com.jme3.renderer.Camera;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
 
+import car.ray.RayCarControl;
 import game.App;
 import helper.H;
 
 public class CarCamera extends AbstractAppState implements RawInputListener {
 
 	private Camera c;
-	private MyPhysicsVehicle p;
+	private RayCarControl p;
 	private Vector3f prevVel; //for smoothing the velocity vector
 	private Vector3f prevPos;
 	
@@ -35,17 +36,16 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 	
 	private Vector3f lastShake = new Vector3f();
 	
-	public CarCamera(String name, Camera c, MyPhysicsVehicle p) {
+	public CarCamera(String name, Camera c, RayCarControl p) {
 		super();
 		
 		this.c = c;
 		
 		if (p != null) {
 			this.p = p;
-			Vector3f pPos = new Vector3f();
-			p.getPhysicsLocation(pPos);
-			c.setLocation(pPos.add(p.car.cam_offset)); //starting position of the camera
-			c.lookAt(pPos.add(p.car.cam_lookAt), new Vector3f(0,1,0)); //look at car
+			Vector3f pPos = p.getPhysicsLocation();
+			c.setLocation(pPos.add(p.getCarData().cam_offset)); //starting position of the camera
+			c.lookAt(pPos.add(p.getCarData().cam_lookAt), new Vector3f(0,1,0)); //look at car
 		}
 	}
 
@@ -58,7 +58,7 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 	}
 	private float tpf;
 	
-	public void setCar(MyPhysicsVehicle p) {
+	public void setCar(RayCarControl p) {
 		this.p = p;
 	}
 	
@@ -74,9 +74,9 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 			prevPos = c.getLocation();
 		if (prevVel == null) prevVel = p.vel.normalize();
 		
-		Vector3f carPos = p.carRootNode.getLocalTranslation();
+		Vector3f carPos = p.getRootNode().getLocalTranslation();
 		
-		Quaternion pRot = p.carRootNode.getLocalRotation();
+		Quaternion pRot = p.getRootNode().getLocalRotation();
 		
 		if (!FastMath.approximateEquals(rotRad, 0)) {
 			lastTimeout += tpf;
@@ -100,9 +100,9 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 		Vector3f next = new Vector3f();
 		Vector2f vec_2 = H.v3tov2fXZ(vec).normalize();
 		
-		next.x = vec_2.x*p.car.cam_offset.z;
-		next.y = vec.y*p.car.cam_offset.y;
-		next.z = vec_2.y*p.car.cam_offset.z;
+		next.x = vec_2.x*p.getCarData().cam_offset.z;
+		next.y = vec.y*p.getCarData().cam_offset.y;
+		next.z = vec_2.y*p.getCarData().cam_offset.z;
 		
 		next = carPos.add(next);
 		next.interpolateLocal(next, prevPos, 0.1f*tpf);//maybe
@@ -113,21 +113,21 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 		//lastly do a ray cast to make sure that you can still see the car
 		//TODO actually avoid the car model, and maybe not so touchy...
 		CollisionResults results = new CollisionResults();
-		Vector3f dir = c.getLocation().subtract(carPos.add(p.car.cam_lookAt));
-		Ray ray = new Ray(carPos.add(p.car.cam_lookAt), dir);
+		Vector3f dir = c.getLocation().subtract(carPos.add(p.getCarData().cam_lookAt));
+		Ray ray = new Ray(carPos.add(p.getCarData().cam_lookAt), dir);
 		App.rally.getRootNode().collideWith(ray, results);
 		CollisionResult cr = results.getClosestCollision();
 		if (cr != null && cr.getDistance() < dir.length()) {
 			Geometry g = cr.getGeometry();
-			if (!H.hasParentNode(g, p.carRootNode)) { //don't collide with the car TODO doesn't work
+			if (!H.hasParentNode(g, p.getRootNode())) { //don't collide with the car TODO doesn't work
 				c.setLocation(cr.getContactPoint());
 				H.p("Camera contact on: ", g.getName());
 			}
 		}
 		
 		//at high speeds shake the camera a little
-		float shakeFactor = p.vel.length() * p.vel.length() * p.car.cam_shake;
-		Vector3f lookAt = carPos.add(p.car.cam_lookAt);
+		float shakeFactor = p.vel.length() * p.vel.length() * p.getCarData().cam_shake;
+		Vector3f lookAt = carPos.add(p.getCarData().cam_lookAt);
 		lastShake.addLocal(new Vector3f(FastMath.nextRandomFloat(), FastMath.nextRandomFloat(), FastMath.nextRandomFloat()).normalize().mult(shakeFactor*FastMath.nextRandomInt(-1, 1)));
 		if (lastShake.length() > 0.01f)
 			lastShake.interpolateLocal(Vector3f.ZERO, 0.7f); //TODO shake slower

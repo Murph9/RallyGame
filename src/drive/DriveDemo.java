@@ -8,12 +8,14 @@ import com.jme3.app.state.AppStateManager;
 
 import car.*;
 import car.ai.FollowWorldAI;
+import car.ray.CarDataConst;
+import car.ray.RayCarControl;
 import game.App;
 import helper.H;
 
 public class DriveDemo extends DriveBase {
 
-	public DriveDemo (CarData car, World world) {
+	public DriveDemo (CarDataConst car, World world) {
     	super(car, world);
     	
     	if (!(world instanceof DefaultBuilder)) {
@@ -31,7 +33,7 @@ public class DriveDemo extends DriveBase {
     	this.cb.removePlayer(0);
     	this.cb.addCar(0, car, world.getStartPos(), world.getStartRot(), true, null); //even though they aren't a player
 
-    	MyPhysicsVehicle car = this.cb.get(0);
+    	RayCarControl car = this.cb.get(0);
     	car.attachAI(new FollowWorldAI(car, (DefaultBuilder)world));
     	
     	uiNode.cleanup(); //TODO why?

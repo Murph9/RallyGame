@@ -10,7 +10,7 @@ import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
 import com.jme3.audio.AudioData;
 import com.jme3.audio.AudioNode;
-import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
+import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.material.Material;
 import com.jme3.math.Matrix3f;
@@ -22,13 +22,15 @@ import com.jme3.scene.Spatial;
 
 import car.ai.CarAI;
 import car.ai.DriveAtAI;
+import car.ray.CarDataConst;
+import car.ray.RayCarControl;
 import game.App;
 import game.Main;
 import helper.H;
 
 public class CarBuilder extends AbstractAppState {
 
-	HashMap<Integer, MyVC> cars;
+	HashMap<Integer, RayCarControl> cars;
 	Node rootNode;
 
 	public CarBuilder() {
@@ -46,38 +48,41 @@ public class CarBuilder extends AbstractAppState {
 	public void setEnabled(boolean state) {
 		super.setEnabled(state);
 		for (Integer i : cars.keySet()) {
-			cars.get(i).enableSound(state);
+			//cars.get(i).enableSound(state); //TODO
 			
-			for (MyWheelNode w: cars.get(i).wheel) {
-				w.setEnabled(state);
+			/* TODO this should be defined by the car, right?
+			for (int j = 0; j < 4; j++) {
+				cars.get(i).getWheel(j).setEnabled(state);
 			}
+			*/
 		}
 	}
 	
 	//TODO this should be giving the ai
-	public MyVC addCar(int id, CarData car, Vector3f start, Matrix3f rot, boolean aPlayer, BiFunction<MyPhysicsVehicle, MyPhysicsVehicle, CarAI> ai) {
+	public RayCarControl addCar(int id, CarDataConst carData, Vector3f start, Matrix3f rot, boolean aPlayer, BiFunction<RayCarControl, RayCarControl, CarAI> ai) {
 		if (cars.containsKey(id)) {
 			try {
-				throw new Exception("A car already has that Id");
+				throw new Exception("A car already has that id: " + id);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 		
 		//clone CarData so if its edited, only this one changes not the global one
-		car = car.cloneWithSerialization();
+		carData = carData.cloneWithSerialization(); //TODO should be removable at some point
 		
 		Main r = App.rally;
 		AssetManager am = r.getAssetManager();
 		
-		Spatial carmodel = am.loadModel(car.carModel);
-		if (carmodel instanceof Geometry) {
+		Spatial carModel = am.loadModel(carData.carModel);
+		if (carModel instanceof Geometry) {
 
 		} else {
-			carmodel = (Node) am.loadModel(car.carModel);
+			carModel = (Node) am.loadModel(carData.carModel);
 
-			//TODO car reflection
-			for (Geometry g: H.getGeomList((Node)carmodel)) {  
+			//TODO car reflections in material def
+			
+			for (Geometry g: H.getGeomList((Node)carModel)) {  
 				Material m = g.getMaterial();
 				if (!m.getMaterialDef().getName().equals("Unshaded")) { //this material type not correct for these settings
 					m.setBoolean("UseMaterialColors", true);
@@ -86,17 +91,13 @@ public class CarBuilder extends AbstractAppState {
 				g.setMaterial(m);
 			}
 		}
-
-		//its possible to shift the center of gravity offset (TODO add to CarData)
-		//Convex collision shape or hull might be faster here)
-		CompoundCollisionShape compoundShape = new CompoundCollisionShape();
-//		compoundShape.addChildShape(CollisionShapeFactory.createDynamicMeshShape(carmodel), new Vector3f(0,0,0));
 		
 		Node carNode = new Node(id+"");
-		MyVC player = new MyVC(compoundShape, car, carNode);
 		
-		carNode.addControl(player);
-		carNode.attachChild(carmodel);
+		//update the collision shape, NOTE: a convex collision shape or hull might be faster here
+		CollisionShape colShape = CollisionShapeFactory.createDynamicMeshShape(carModel);
+		RayCarControl player = new RayCarControl(App.rally.getPhysicsSpace(), colShape, carData, carNode);
+		carNode.attachChild(carModel);
 
 		if (aPlayer) { //player gets a shadow
 			carNode.setShadowMode(ShadowMode.CastAndReceive);
@@ -109,50 +110,42 @@ public class CarBuilder extends AbstractAppState {
 		player.setPhysicsRotation(rot);
 
 		if (aPlayer) { //players get the keyboard
-			player.attachControls();
+//			player.attachControls(); //TODO support in raycar
 		} else {
 			CarAI _ai;
 			if (ai != null)
 				_ai = ai.apply(player, get(0));
 			else
-				_ai = new DriveAtAI(player, get(0));
+				_ai = new DriveAtAI(player, get(0).getPhysicsObject());
 			player.attachAI(_ai);
 		}
 		
-		if (aPlayer) {
-			player.giveSound(new AudioNode(am, "assets/sound/engine.wav", AudioData.DataType.Buffer));
+		if (aPlayer) { //TODO support in raycar
+//			player.giveSound(new AudioNode(am, "assets/sound/engine.wav", AudioData.DataType.Buffer));
 		}
 		
 		cars.put(id, player);
-
-		App.rally.getPhysicsSpace().addTickListener(player);
-		App.rally.getPhysicsSpace().add(player);
 		return player;
 	}
 
 	public void removePlayer(int id) {
 		if (!cars.containsKey(id)) {
 			try {
-				throw new Exception("A car doesn't have that Id");
+				throw new Exception("A car doesn't have that id: " + id);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 		rootNode.detachChildNamed(id+"");
-		MyVC car = cars.get(id);
-		
-		App.rally.getPhysicsSpace().removeTickListener(car);
-		App.rally.getPhysicsSpace().remove(car);
+		RayCarControl car = cars.get(id);
 		car.cleanup();
 		cars.remove(id);
 	}
-	public void removePlayer(MyPhysicsVehicle mpv) {
+	public void removePlayer(RayCarControl mpv) {
 		for (int key: cars.keySet()) {
-			MyPhysicsVehicle car = cars.get(key);
+			RayCarControl car = cars.get(key);
 			if (car == mpv) {
 				rootNode.detachChildNamed(key+"");
-				App.rally.getPhysicsSpace().removeTickListener(car);
-				App.rally.getPhysicsSpace().remove(car);
 				car.cleanup();
 				cars.remove(key);
 				return;
@@ -160,7 +153,7 @@ public class CarBuilder extends AbstractAppState {
 		}
 		
 		try {
-			throw new Exception("That car is not in my records");
+			throw new Exception("That car is not in my records, shrug.");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -170,22 +163,18 @@ public class CarBuilder extends AbstractAppState {
 		if (!isEnabled())
 			return;
 		
-		if (!cars.isEmpty()) {
-			for (Integer i : cars.keySet()) {
-				cars.get(i).setEnabled(isEnabled());
-				
-				for (MyWheelNode w: cars.get(i).wheel)
-					w.update(tpf); //TODO this kind of reach through feels like a hack
-			}
+		for (RayCarControl rcc: cars.values()) {
+			if (rcc.isEnabled())
+				rcc.update(tpf);
 		}
 	}
 
-	public MyPhysicsVehicle get(int a) {
+	public RayCarControl get(int a) {
 		if (cars.containsKey(a))
 			return cars.get(a);
 		return null;
 	}
-	public Collection<? extends MyPhysicsVehicle> getAll() {
+	public Collection<? extends RayCarControl> getAll() {
 		return cars.values();
 	}
 	public int getCount() {
@@ -194,9 +183,7 @@ public class CarBuilder extends AbstractAppState {
 
 	public void cleanup() {
 		for (int key : cars.keySet()) {
-			MyVC car = cars.get(key);
-			App.rally.getPhysicsSpace().removeTickListener(car);
-			App.rally.getPhysicsSpace().remove(car);
+			RayCarControl car = cars.get(key);
 			car.cleanup();
 		}
 		App.rally.getRootNode().detachChild(rootNode);

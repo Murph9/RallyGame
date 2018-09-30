@@ -11,24 +11,26 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.simsilica.lemur.Container;
 
+import car.ray.CarDataConst;
+import car.ray.RayCarControl;
 import game.App;
 import helper.H;
 
 public class PowerCurveGraph extends Container {
 
-	private CarData car;
+	private CarDataConst car;
 	private List<Geometry> things;
 	private List<Node> things2;
 	
-	public PowerCurveGraph(MyPhysicsVehicle p, Vector3f size) {
+	public PowerCurveGraph(RayCarControl p, Vector3f size) {
 		super();
 		
 		this.setPreferredSize(size);
 		updateMyPhysicsVehicle(p);
 	}
 	
-	public void updateMyPhysicsVehicle(MyPhysicsVehicle p) {
-		this.car = p.car;
+	public void updateMyPhysicsVehicle(RayCarControl p) {
+		this.car = p.getCarData();
 		drawGraphs();
 	}
 	
