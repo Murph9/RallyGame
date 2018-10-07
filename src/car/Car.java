@@ -153,31 +153,25 @@ public enum Car {
 	}
 */
 	private static class RallyCar extends CarDataConst {
-		/*RallyCar() {
+		RallyCar() {
 			carModel = dir+"car4raid_1.obj";
 			wheelModel = dir+"wheelraid1.obj";
 
 			mass = 1500;
 			areo_drag = 0.7f;
 			
-			w_width = 0.25f;
-			w_radius = 0.4f;
-			w_mass = 10;
-			
 			driveFront = true;
 			driveRear = true;
-
+/*
 			w_xOff = 0.7f;
 			w_yOff = 0.2f;
 			w_zOff = 1.1f;
 			setw_Pos();
 
 			sus_stiffness  = 35.0f;
-			sus_restLength = 0.15f;
-			sus_compValue  = 0.4f;
-			sus_dampValue  = 0.5f;
+			sus_comp = 0.4f;
+			sus_relax = 0.5f;
 			rollFraction = 0.6f;
-			sus_maxForce = 35000;
 
 			e_torque = new float[]{0,520,580,620,680,720,870,820,0};
 			e_mass = 40;
@@ -191,7 +185,23 @@ public enum Car {
 			
 			w_flatdata = new RallyLatWheel();
 			w_flongdata = new RallyLongWheel();
-		}*/
+			
+			w_width = 0.25f;
+			w_radius = 0.4f;
+			w_mass = 10;*/
+		}
+		
+		@Override
+		public void refresh() {
+			super.refresh();
+			
+			sus_max_force = 35000;
+		}
+		
+		@Override
+		protected void refreshWheels() {
+			
+		}
 	}
 /*
 	private static class Rocket extends CarDataConst {
@@ -247,7 +257,7 @@ public enum Car {
 			trans_finaldrive = 3.5f;
 			trans_gearRatios = new float[]{-2.9f,3.6f,2.5f,1.8f,1.3f,1.0f,0.84f}; //reverse,gear1,gear2,g3,g4,g5,g6,...
 			
-			e_mass = 20; //TODO underground 2 seems to have very low values like these
+			e_mass = 20;
 			w_mass = 10;
 			
 			auto_gearDown = 4000;

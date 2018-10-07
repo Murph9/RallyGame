@@ -429,12 +429,11 @@ public class CarUI extends AbstractAppState {
 		//rpm bar 2
 		rpmMat.setFloat("Threshold", Math.min(1, 1 - (powerState.curRPM/(float)Math.ceil(redline+1000))*(5/(float)8)));
 		
-//		angle.setText(powerState.getAngle()+"'"); //TODO
+		angle.setText(powerState.driftAngle+"'");
 		nitro.setLocalScale(1, powerState.nitro/p.getCarData().nitro_max, 1);
 		throttle.setLocalScale(1, powerState.accelCurrent, 1);
 		brake.setLocalScale(1, powerState.brakeCurrent, 1);
 		steer.setLocalTranslation(centerx - 35 + (powerState.steeringCurrent*-1 + 0.5f)*60 - 6/2, centery + 40, 0); //steering is a translated square
-	
 		
 		// http://forum.projectcarsgame.com/showthread.php?23037-Telemetry-detail&p=892187&viewfull=1#post892187
 		if (showTelemetry) {
@@ -451,7 +450,7 @@ public class CarUI extends AbstractAppState {
 				m.setColor("Color", getGripBoxColour(wheel.skidFraction));
 				gripBox[i].setMaterial(m);
 				
-				Vector3f dir = null;//wheel.gripDir; //TODO?
+				Vector3f dir = wheel.gripDir;
 				if (dir != null) {
 					gripBox[i].setLocalScale(wheel.susForce/(p.getCarData().mass*2));
 					
@@ -464,11 +463,11 @@ public class CarUI extends AbstractAppState {
 				}
 			}
 			
-			//gees (g forces)
+			//g forces
 			//needs to be translated from local into screen axis
 			Vector3f gs = new Vector3f();//TODO p.gForce;
 			gs.y = gs.z; //z is front back
-			gs.z = 0; //screen has no depth 
+			gs.z = 0; //screen has no depth
 			g2.setLocalTranslation(gcenter.add(gs.mult(25))); //because screen pixels
 			
 //			gText.setText("x: " + H.roundDecimal(gs.x, 2) +", y: " + H.roundDecimal(gs.y, 2));

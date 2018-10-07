@@ -148,9 +148,9 @@ public class Main extends SimpleApplication {
 		getStateManager().attach(start);
 		
 		bullet = new BulletAppState();
-    	bullet.setDebugEnabled(true);
+//    	bullet.setDebugEnabled(true);
 		getStateManager().attach(bullet);
-		bullet.getPhysicsSpace().setAccuracy(1f/60f); //double rate physics
+		bullet.getPhysicsSpace().setAccuracy(1f/180f); //physics rate
 		bullet.getPhysicsSpace().setGravity(new Vector3f(0, -9.81f, 0)); //yay its down
 		
 		inputManager.setCursorVisible(true);

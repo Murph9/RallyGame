@@ -15,7 +15,7 @@ import com.jme3.input.event.TouchEvent;
 
 import car.ray.RayCarControl;
 
-class JoystickEventListner implements RawInputListener {
+public class JoystickEventListener implements RawInputListener {
 
 	//TODO its very hardcoded
 	
@@ -25,7 +25,7 @@ class JoystickEventListner implements RawInputListener {
 	private RayCarControl a;
 	private double stickdeadzone = 0.2f;
 	
-	JoystickEventListner (RayCarControl a) {
+	public JoystickEventListener (RayCarControl a) {
 		this.a = a;
 		
 		intToButton.put(JoystickButton.BUTTON_0, "A"); //A

@@ -14,6 +14,7 @@ public class RayCarPowered extends RayCar {
 	protected float accelCurrent;
 	protected float steeringCurrent;
 	protected float brakeCurrent;
+	protected boolean handbrakeCurrent;
 	
 	protected float steerLeft;
 	protected float steerRight;
@@ -21,9 +22,6 @@ public class RayCarPowered extends RayCar {
 	protected float nitroTimeout;
 	protected boolean ifNitro;
 	protected float nitro;
-	 
-	//TODO should this be lower classed?
-	protected boolean ifHandbrake;
 	
 	protected int curGear = 1;
 	protected int curRPM = 1000;
@@ -97,17 +95,15 @@ public class RayCarPowered extends RayCar {
 		curRPM = (int)(wheelrot*curGearRatio*diffRatio*60*carData.wheelData[0].radius); //rad/(m*sec) to rad/min and the drive ratios to engine
 		//wheel rad/s, gearratio, diffratio, conversion from rad/sec to rad/min
 		
-		int idleRPM = 1000; //TODO car constant
-		curRPM = Math.max(curRPM, idleRPM); //no stall please, its bad enough that we don't have torque here
+		curRPM = Math.max(curRPM, carData.e_idle); //no stall please, its bad enough that we don't have torque here
 
 		autoTransmission(curRPM, vz);
 
 		float nitroForce = 0;
-		/* TODO
-		if (carData.nitro_on) {
+		if (carData.nitro_on) { //TODO this is not bug free [surprising with its length huh?]
 			if (ifNitro && this.nitro > 0) {
 				nitroForce = carData.nitro_force;
-				this.nitro -= 2*tpf*car.nitro_rate;
+				this.nitro -= 2*tpf*carData.nitro_rate;
 				if (this.nitro < 0)
 					this.nitro = 0; //no more nitro :(
 			} else if (this.nitroTimeout > 0) { //start the timeout to start growing again
@@ -115,18 +111,18 @@ public class RayCarPowered extends RayCar {
 				if (this.nitroTimeout < 0)
 					this.nitroTimeout = 0;
 			} else {
-				this.nitro += car.nitro_rate*tpf;
-				if (this.nitro > car.nitro_max)
-					this.nitro = this.car.nitro_max;
+				this.nitro += carData.nitro_rate*tpf;
+				if (this.nitro > carData.nitro_max)
+					this.nitro = this.carData.nitro_max;
 			}
 		}
-*/
+
 		//TODO fake some kind of clutch at slow speeds in first (to prevent very low torques at 1000 rpm)
 		
 		float eTorque = (carData.lerpTorque(curRPM) + nitroForce)*accelCurrent;
 		float engineDrag = 0;
 		if (accelCurrent < 0.05f || curRPM > carData.e_redline) //so compression only happens on no accel
-			engineDrag = (curRPM-idleRPM)*carData.e_compression * (curGear>0?1:-1); //reverse goes the other way
+			engineDrag = (curRPM-carData.e_idle)*carData.e_compression * (curGear>0?1:-1); //reverse goes the other way
 		
 		float engineOutTorque = 0;
 		if (Math.abs(curRPM) > carData.e_redline)
@@ -134,7 +130,7 @@ public class RayCarPowered extends RayCar {
 		else //normal path
 			engineOutTorque = eTorque*curGearRatio*diffRatio*carData.trans_effic - engineDrag;
 
-		return engineOutTorque/carData.wheelData[0].radius; //TODO pick a better wheel by drive wheel
+		return engineOutTorque/carData.wheelData[0].radius; //TODO pick a better wheel for drive wheel size
 	}
 	
 	private void autoTransmission(int rpm, float vz) {
@@ -170,10 +166,12 @@ public class RayCarPowered extends RayCar {
 		//TODO please explain the rationale behind this class
 		public final float accelCurrent;
 		public final float brakeCurrent;
+		public final boolean ifHandbrake;
 		public final int curGear;
 		public final float nitro;
 		public final float steeringCurrent;
 		public final int curRPM;
+		public final float driftAngle;
 		public PoweredState(RayCarPowered rayCarPowered) {
 			accelCurrent = rayCarPowered.accelCurrent;
 			brakeCurrent = rayCarPowered.brakeCurrent;
@@ -181,6 +179,8 @@ public class RayCarPowered extends RayCar {
 			nitro = rayCarPowered.nitro;
 			steeringCurrent = rayCarPowered.steeringCurrent;
 			curRPM = rayCarPowered.curRPM;
+			ifHandbrake = rayCarPowered.handbrakeCurrent;
+			driftAngle = rayCarPowered.driftAngle;
 		}
 	}
 }

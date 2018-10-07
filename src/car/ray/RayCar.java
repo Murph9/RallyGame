@@ -11,7 +11,6 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
 
-import car.ray.WheelDataConst.WheelDataTractionConst;
 import game.App;
 import helper.H;
 import helper.HelperObj;
@@ -26,6 +25,8 @@ import helper.HelperObj;
 //handles suspension/traction/drag
 public class RayCar implements PhysicsTickListener {
 
+	private static final boolean DEBUG = false;
+	
 	//handy ids to help with removing magic numbers
 	protected static int WHEEL_FL = 0, WHEEL_FR = 1, WHEEL_RL = 2, WHEEL_RR = 3;
 	
@@ -42,6 +43,8 @@ public class RayCar implements PhysicsTickListener {
 	private boolean handbrakeCur;
 	protected final float[] wheelTorque;
 	
+	protected float driftAngle;
+	
 	public RayCar(CollisionShape shape, CarDataConst carData) {
 		this.carData = carData;
 		this.carData.refresh();
@@ -55,25 +58,6 @@ public class RayCar implements PhysicsTickListener {
 		this.wheelTorque = new float[4];
 
 		rbc = new RigidBodyControl(shape, carData.mass);
-        
-        doForEachWheel((w_id) -> {
-	        try {
-				//generate the slip* max force from the car wheel data
-				double error = 0.0005f; //our fixed error, we don't really care how close it is past 3 or 4 decimals
-				
-				this.wheels[w_id].maxLat = GripHelper.calcSlipMax(carData.wheelData[w_id].pjk_lat, error);
-				if (Float.isNaN(this.wheels[w_id].maxLat))
-					throw new Exception("maxlat was: '" + this.wheels[w_id].maxLat +"'.");
-				this.wheels[w_id].maxLong = GripHelper.calcSlipMax(carData.wheelData[w_id].pjk_long, error);
-				if (Float.isNaN(this.wheels[w_id].maxLong)) 
-					throw new Exception("maxlong was: '" + this.wheels[w_id].maxLong +"'.");
-				
-			} catch (Exception e) {
-				e.printStackTrace();
-				H.p("error in calculating max(lat|long) values of: " + carData.getClass());
-				System.exit(1);
-			}
-        });
 	}
 
 	@Override
@@ -97,20 +81,21 @@ public class RayCar implements PhysicsTickListener {
 			Vector3f localPos = carData.wheelOffset[w_id];
 			
 			Vector3f pos = vecLocalToWorld(localPos);
-			//TODO use the start position offset
+			//TODO use the start position offset data value
 			Vector3f worldDown = w_angle.mult(localDown.mult(carData.sus_max_length + carData.wheelData[w_id].radius));
 			final FirstRayHitDetails col = raycaster.castRay(space, rbc, pos, worldDown);
 			
-//			/*
-			App.rally.enqueue(() -> {
-				HelperObj.use(App.rally.getRootNode(), "sus"+w_id, 
+			if (DEBUG) {
+				App.rally.enqueue(() -> {
+					HelperObj.use(App.rally.getRootNode(), "sus"+w_id, 
 						H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.Cyan, worldDown.normalize().mult(carData.sus_max_length), pos));
-				HelperObj.use(App.rally.getRootNode(), "wheel_radius"+w_id,
+					HelperObj.use(App.rally.getRootNode(), "wheel_radius"+w_id,
 						H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.Blue, worldDown.normalize().mult(carData.wheelData[w_id].radius), pos.add(worldDown.normalize().mult(carData.sus_max_length))));
-				HelperObj.use(App.rally.getRootNode(), "castPoint"+w_id, 
+					HelperObj.use(App.rally.getRootNode(), "castPoint"+w_id, 
 						H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Red, wheels[w_id].curBasePosWorld, 0.01f));
-			});
-//			*/
+				});
+			}
+			
 			if (col == null) { //no suspension ray found, extend all the way and set force to 0
 				wheels[w_id].inContact = false;
 				wheels[w_id].susDiffLength = carData.sus_max_length;
@@ -121,13 +106,17 @@ public class RayCar implements PhysicsTickListener {
 			
 			float susDist = col.dist - carData.wheelData[w_id].radius;
 			if (susDist < 0) {
-				wheels[w_id].inContact = false;
-				wheels[w_id].susDiffLength = 0;
+				wheels[w_id].inContact = true; //wheels are still touching..
+				wheels[w_id].susDiffLength = susDist;
 				wheels[w_id].curBasePosWorld = col.pos;
-				wheels[w_id].susForce = 0; //TODO suspension bottomed out, do some large force...
-				return; //no force
+				wheels[w_id].susForce = carData.sus_max_force;
+				
+				//TODO suspension bottomed out, so do some proper large damp force...
+				Vector3f f = w_angle.mult(col.hitNormalInWorld.mult(wheels[w_id].susForce * tpf));
+				rbc.applyImpulse(f, w_angle.mult(localPos));
+				return;
 			}
-						
+			
 			wheels[w_id].inContact = true;
 			wheels[w_id].curBasePosWorld = col.pos;
 
@@ -148,9 +137,9 @@ public class RayCar implements PhysicsTickListener {
 			}
 			
 			//TODO 0 length -> 0 force, which isn't valid for our new physics. needs to have some offset as max sus travel isn't max spring travel
-			wheels[w_id].susDiffLength = (carData.sus_max_length - susDist);
+			wheels[w_id].susDiffLength = susDist;
 			// Spring
-			wheels[w_id].susForce = carData.sus_stiffness * wheels[w_id].susDiffLength * clippedInvContactDotSuspension;
+			wheels[w_id].susForce = carData.sus_stiffness * (carData.sus_max_length - wheels[w_id].susDiffLength) * clippedInvContactDotSuspension;
 			
 			// Damper
 			float susp_damping = (projected_rel_vel < 0f) ? carData.susCompression() : carData.susRelax();
@@ -161,21 +150,19 @@ public class RayCar implements PhysicsTickListener {
 			
 			Vector3f f = w_angle.mult(col.hitNormalInWorld.mult(wheels[w_id].susForce * tpf));
 			rbc.applyImpulse(f, w_angle.mult(localPos));
-			/*
-			App.rally.enqueue(() -> {
-				HelperObj.use(App.rally.getRootNode(), "normalforcearrow" + w_id, 
-						H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.Black, 
-								col.hitNormalInWorld, col.pos));
-				
-				HelperObj.use(App.rally.getRootNode(), "normalforcearrow inv" + w_id,
-						H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.White,
-								col.hitNormalInWorld.mult(-denominator), col.pos));
-				
-				HelperObj.use(App.rally.getRootNode(), "forcearrow" + w_id, 
-						H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.Cyan, 
-								f.mult(1/(2*carData.mass)), vecLocalToWorld(localPos)));
-			});
-//			*/			
+			
+			if (DEBUG) {
+				App.rally.enqueue(() -> {
+					HelperObj.use(App.rally.getRootNode(), "normalforcearrow" + w_id, 
+						H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.Black, col.hitNormalInWorld, col.pos));
+					
+					HelperObj.use(App.rally.getRootNode(), "normalforcearrow inv" + w_id,
+						H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.White, col.hitNormalInWorld.mult(-denominator), col.pos));
+					
+					HelperObj.use(App.rally.getRootNode(), "forcearrow" + w_id, 
+						H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.Cyan, f.mult(1/(2*carData.mass)), vecLocalToWorld(localPos)));
+				});
+			}
 		});
 	}
 	
@@ -217,9 +204,6 @@ public class RayCar implements PhysicsTickListener {
 		final float steeringFakeRear = rearSteeringCur;
 		final float maxSlowLatFake = maxSlowLat;
 		doForEachWheel((w_id) -> {
-			if (!this.wheels[w_id].inContact || wheels[w_id].susForce <= 0)
-				return; //yay no math to do
-			
 			Vector3f wheel_force = new Vector3f();
 			
 			//* Linear Accelerations: = player.car.length * player.car.yawrate (in rad/sec)
@@ -234,11 +218,12 @@ public class RayCar implements PhysicsTickListener {
 				wheels[w_id].radSec = 0;
 			
 			float slipangle = 0;
-			if (isFrontWheel(w_id)) {
+			if (isFrontWheel(w_id)) { //TODO this can be computed out of the loop
 				float slipa_front = (velocity.x + yawspeed*carData.wheelOffset[w_id].z);
 				slipangle = (float)(FastMath.atan(slipa_front / slip_div) - steeringFake);
 			} else { //rear
 				float slipa_rear = (velocity.x - yawspeed*carData.wheelOffset[w_id].z);
+				driftAngle = slipa_rear; //set drift angle as the rear amount
 				slipangle = (float)(FastMath.atan(slipa_rear / slip_div) - steeringFakeRear); //slip_div is questionable here
 			}
 			slipangle *= slip_const;
@@ -249,13 +234,13 @@ public class RayCar implements PhysicsTickListener {
 			float p = FastMath.sqrt(ratiofract*ratiofract + anglefract*anglefract);
 			
 			//calc the longitudinal force from the slip ratio
-			wheel_force.z = (ratiofract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_long, p*this.wheels[w_id].maxLong) * wheels[w_id].susForce;
+			wheel_force.z = (ratiofract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_long, p*this.wheels[w_id].maxLong) * this.wheels[w_id].susForce;
 			
 			//latitudinal force that is calculated off the slip angle
-			wheel_force.x = -(anglefract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_lat, p*this.wheels[w_id].maxLat) * wheels[w_id].susForce;
+			wheel_force.x = -(anglefract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_lat, p*this.wheels[w_id].maxLat) * this.wheels[w_id].susForce;
 			
 			//prevents the force from exceeding the centripetal force
-			//TODO fix?
+			//TODO fix really slow speed spinning?
 			if (isSlowSpeed && Math.abs(wheel_force.x) > maxSlowLatFake) {
 				//[1-N/M] means the clamp is smaller for smaller speeds
 				float clampValue = Math.abs(maxSlowLatFake * (1-slowslipspeed/velocity.length()));
@@ -272,23 +257,27 @@ public class RayCar implements PhysicsTickListener {
 			// braking and abs
 			float brakeCurrent2 = brakingCur;
 			if (wheels[w_id].skidFraction > 1 && velocity.length() > 2 && brakingCur == 1)
-				brakeCurrent2 = 0; //abs (which works way too well i think)
+				brakeCurrent2 = 0; //abs (which i think works way too well)
 			
 			//add the wheel force after merging the forces
 			float totalLongForce = wheelTorque[w_id] - wheel_force.z - (brakeCurrent2*carData.brakeMaxTorque*Math.signum(wheels[w_id].radSec));
 			float nextRadSec = wheels[w_id].radSec + tpf*totalLongForce/(carData.e_inertia(w_id));
-			if (brakingCur != 0 && Math.signum(wheels[w_id].radSec) != Math.signum(nextRadSec)) //TODO find the real first variable in this
+			if (brakingCur != 0 && Math.signum(wheels[w_id].radSec) != Math.signum(nextRadSec))
 				wheels[w_id].radSec = 0; //maxed out the forces with braking, so prevent wheels from moving
 			else
 				wheels[w_id].radSec += tpf*totalLongForce/(carData.e_inertia(w_id));
 			
+			wheels[w_id].gripDir = w_angle.mult(wheel_force).normalize();
 			rbc.applyImpulse(w_angle.mult(wheel_force).mult(tpf), wheels[w_id].curBasePosWorld.subtract(w_pos));
 		});
 	}
 	
 	private void applyDrag(PhysicsSpace space, float tpf) {
 		//linear resistance and quadratic drag (https://en.wikipedia.org/wiki/Automobile_drag_coefficient#Drag_area)
-		//float rollingResistance = carData.rollingResistance(9.81f); //TODO was removed because i need the suspension normal force to caculate correctly
+
+		//TODO was removed because i need the suspension normal force to caculate correctly
+		//use: (and apply at wheel pos)
+		doForEachWheel((w_id) -> { carData.rollingResistance(9.81f, w_id); }); 
 		
 		Matrix3f w_angle = rbc.getPhysicsRotationMatrix();
 		Vector3f w_velocity = rbc.getLinearVelocity();
@@ -299,7 +288,7 @@ public class RayCar implements PhysicsTickListener {
 		//TODO change cross section for each xyz to make a realistic drag feeling
 		
 		Vector3f totalNeutral = new Vector3f(dragx, dragy, dragz);
-		//TODO: report this out: float dragForce = totalNeutral.length();
+		//TODO: report this out: float dragForce = totalNeutral.length(); //for debug reasons
 		
 		float dragDown = -0.5f * carData.areo_downforce * 1.225f * (w_velocity.z*w_velocity.z); //formula for downforce from wikipedia
 		rbc.applyCentralForce(w_angle.mult(totalNeutral.add(0, dragDown, 0))); //apply downforce after
@@ -312,6 +301,9 @@ public class RayCar implements PhysicsTickListener {
 	}
 	public void setSteering(float value) {
 		this.steeringCur = value;
+		
+		this.wheels[0].steering = value;
+		this.wheels[1].steering = value;
 	}
 	public float getBraking() {
 		return this.brakingCur;
@@ -343,12 +335,6 @@ public class RayCar implements PhysicsTickListener {
 	private Vector3f vecLocalToWorld(Vector3f in) {
 		Vector3f out = new Vector3f();
 		return rbc.getPhysicsRotationMatrix().mult(out.set(in), out).add(rbc.getPhysicsLocation());
-	}
-	private Vector3f vecWorldToLocal(Vector3f in) {
-		Vector3f out = new Vector3f();
-		in.subtract(rbc.getPhysicsLocation(), out);
-		rbc.getPhysicsRotation().inverse().mult(out, out);
-		return out;
 	}
 
 	private Vector3f getVelocityInLocalPoint(Vector3f rel_pos) {

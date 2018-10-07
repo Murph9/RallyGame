@@ -6,7 +6,7 @@ import com.jme3.math.Vector3f;
 import com.simsilica.lemur.Container;
 
 import car.ray.RayCarControl;
-import car.ray.WheelDataConst.WheelDataTractionConst;
+import car.ray.WheelDataTractionConst;
 import game.App;
 import helper.H;
 
@@ -57,7 +57,7 @@ public class TractionCurveGraph extends Container {
 	}
 	
 	public void update(float tpf) {
-		//TODO draw dots for current wheel values
+		//TODO draw dots for real time current values
 		//might be hard because each wheel has 2 values..
 	}
 }

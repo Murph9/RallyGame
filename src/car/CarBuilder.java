@@ -48,7 +48,8 @@ public class CarBuilder extends AbstractAppState {
 	public void setEnabled(boolean state) {
 		super.setEnabled(state);
 		for (Integer i : cars.keySet()) {
-			//cars.get(i).enableSound(state); //TODO
+			cars.get(i).setEnabled(state);
+			cars.get(i).enableSound(state);
 			
 			/* TODO this should be defined by the car, right?
 			for (int j = 0; j < 4; j++) {
@@ -110,7 +111,7 @@ public class CarBuilder extends AbstractAppState {
 		player.setPhysicsRotation(rot);
 
 		if (aPlayer) { //players get the keyboard
-//			player.attachControls(); //TODO support in raycar
+			player.attachControls();
 		} else {
 			CarAI _ai;
 			if (ai != null)
@@ -120,8 +121,8 @@ public class CarBuilder extends AbstractAppState {
 			player.attachAI(_ai);
 		}
 		
-		if (aPlayer) { //TODO support in raycar
-//			player.giveSound(new AudioNode(am, "assets/sound/engine.wav", AudioData.DataType.Buffer));
+		if (aPlayer) {
+			player.giveSound(new AudioNode(am, "assets/sound/engine.wav", AudioData.DataType.Buffer));
 		}
 		
 		cars.put(id, player);

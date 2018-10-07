@@ -14,6 +14,8 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 
+import car.JoystickEventListener;
+import car.MyKeyListener;
 import car.ai.CarAI;
 import game.App;
 import helper.H;
@@ -50,15 +52,12 @@ public class RayCarControl extends RayCarPowered {
 		//init visual wheels
 		this.wheelControls = new RayWheelControl[4];
 		for (int i = 0; i < wheelControls.length; i++) {
-			wheelControls[i] = new RayWheelControl(wheels[i], rootNode);
+			wheelControls[i] = new RayWheelControl(wheels[i], rootNode, carData.wheelOffset[i]);
 		}
 		
-		//init controls (TODO move to CarBuilder)
         this.controls = new LinkedList<RawInputListener>();
-		this.controls.add(new RayCarKeyListener(this));
-		App.rally.getInputManager().addRawInputListener(this.controls.get(0));
 		
-		//its possible to shift the center of gravity offset (TODO add value to CarDataConst)
+		//its possible to shift the center of gravity offset for the collision shape (TODO add value to CarDataConst)
 
     	this.rootNode = rootNode;
         this.rootNode.addControl(rbc);
@@ -68,9 +67,28 @@ public class RayCarControl extends RayCarPowered {
 	}
 	
 	public void update(float tpf) {
-		for (RayWheelControl wc: this.wheelControls) {
-			wc.update(tpf);
+		if (engineSound != null) {
+			//if sound exists
+			float pitch = FastMath.clamp(0.5f+1.5f*((float)curRPM/(float)carData.e_redline), 0.5f, 2);
+			engineSound.setPitch(pitch);
 		}
+	}
+	public void giveSound(AudioNode audio) {
+		if (engineSound != null) 
+			rootNode.detachChild(engineSound); //in case we have 2 sounds running
+
+		engineSound = audio;
+		engineSound.setLooping(true);
+		engineSound.play();
+		rootNode.attachChild(engineSound);
+	}
+	public void enableSound(boolean value) {
+		if (engineSound == null)
+			return;
+		if (value)
+			engineSound.play();
+		else
+			engineSound.pause();
 	}
 	
 	@Override
@@ -95,9 +113,13 @@ public class RayCarControl extends RayCarPowered {
 		setSteering(steeringCurrent);
 		
 		setBraking(brakeCurrent);
-		setHandbrake(ifHandbrake);
+		setHandbrake(handbrakeCurrent);
 		
 		super.prePhysicsTick(space, tpf);
+		
+		for (RayWheelControl wc: this.wheelControls) {
+			wc.physicsUpdate(tpf, rbc.getLinearVelocity());
+		}
 	}
 	
 	private float getMaxSteerAngle(float trySteerAngle, float sign) {
@@ -163,7 +185,7 @@ public class RayCarControl extends RayCarPowered {
 				break;
 	
 			case "Handbrake":
-				ifHandbrake = value;
+				handbrakeCurrent = value;
 				break;
 	
 			case "Flip":
@@ -205,8 +227,24 @@ public class RayCarControl extends RayCarPowered {
 	}
 	
 	
-	//TODO please only call this from the car manager
+	//Please only call this from the car manager
 	public void cleanup() {
+		if (this.controls != null && !this.controls.isEmpty()) {
+			for (RawInputListener ril: this.controls)
+				App.rally.getInputManager().removeRawInputListener(ril);
+			this.controls.clear();
+		}
+		
+		if (this.engineSound != null) {
+			rootNode.detachChild(this.engineSound);
+			App.rally.getAudioRenderer().stopSource(engineSound);
+			engineSound = null;
+		}
+		
+		for (RayWheelControl w: this.wheelControls) {
+			w.cleanup();
+		}
+		
 		space.removeTickListener(this);
 		space.remove(this.rootNode);
 		H.e("Write more RayCarControl.cleanup()");
@@ -225,6 +263,18 @@ public class RayCarControl extends RayCarPowered {
 	}
 	public CarAI getAI() {
 		return this.ai;
+	}
+	public void attachControls() {
+		if (controls.size() > 0) {
+			H.e("attachControls already called");
+			return;
+		}
+		
+		this.controls.add(new MyKeyListener(this));
+		this.controls.add(new JoystickEventListener(this));
+		
+		for (RawInputListener ril: this.controls)
+			App.rally.getInputManager().addRawInputListener(ril);
 	}
 	
 	public RayWheelControl getWheel(int w_id) {

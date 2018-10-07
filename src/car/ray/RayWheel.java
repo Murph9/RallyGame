@@ -2,10 +2,13 @@ package car.ray;
 
 import com.jme3.math.Vector3f;
 
+import helper.H;
+
 public class RayWheel {
 
+	private static float ERROR = 0.0005f; //our fixed error, we don't really care how close it is past 3 or 4 decimals
+	
 	protected final int num;
-	//protected final Spatial spat; //TODO move
 	protected final WheelDataConst data;
 	
 	public boolean inContact;
@@ -13,33 +16,33 @@ public class RayWheel {
 	public float susDiffLength;
 	public float susForce;
 	
+	public float steering;
 	public float radSec;
 	public float skidFraction; //was 'skid'
+	public Vector3f gripDir;
 	
-	public float maxLong;
-	public float maxLat;
+	public final float maxLong;
+	public final float maxLat;
 	
 	public RayWheel(int num, WheelDataConst data, Vector3f offset) {
 		this.num = num;
 		this.data = data;
 		
-		//TODO move to FakeRayWheelControl
-		/*
-		//hard coded object (roughly wheel shaped...)
-		Material material = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-		material.setColor("Color", ColorRGBA.Red);
+		//generate the slip* max force from the car wheel data
+		maxLat = RayCar.GripHelper.calcSlipMax(data.pjk_lat, ERROR);
+		maxLong = RayCar.GripHelper.calcSlipMax(data.pjk_long, ERROR);
 		
-		Cylinder cyl = new Cylinder(16, 16, data.radius, data.radius*0.6f, true);
-        Geometry cylGeometry = new Geometry("chassis", cyl);
-        cylGeometry.setMaterial(material);
-        rootNode.attachChild(cylGeometry);
-        
-        //rotate and translate the rootNode
-        rootNode.setLocalTranslation(offset);
-        
-        this.spat = cylGeometry;
-        */
+		try {	
+			if (Float.isNaN(maxLat))
+				throw new Exception("maxlat was: '" + maxLat +"'.");
+			if (Float.isNaN(maxLong))
+				throw new Exception("maxlong was: '" + maxLong +"'.");
+		} catch (Exception e) {
+			e.printStackTrace();
+			H.p("error in calculating max(lat|long) values of: " + num);
+			System.exit(1);
+		}
 	}
 	
-	//TODO what does this class actually 'do'?
+	//[softly] should this class do anything else?
 }
