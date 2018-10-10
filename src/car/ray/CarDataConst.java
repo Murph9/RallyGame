@@ -36,13 +36,16 @@ public class CarDataConst implements Serializable {
 	public float areo_crossSection = 0.47f; //m^2 front area
 	public float areo_downforce = 0.0f; //not a default yet
 	
-	public float sus_min_length = 0; //TODO use so we can offset the start of the suspension up from wheel pos
-	public float sus_max_length = 0.5f; //TODO this needs a large re-work
-	public float sus_stiffness = 50f; //20-200
+	//all relative to 'wheel' offset pos
+	public float sus_min_travel = -0.2f; //upper travel length - closer to car
+	public float sus_max_travel = 0.1f; //lower travel length - closer to ground
+	public float susTravel() { return sus_max_travel - sus_min_travel; }
+	public float sus_preload_force = 3f/4; //spring pre-load Kg (Nm from gravity) //TODO tune (balanced against gravity /4)
+	public float sus_stiffness = 20;//50f; //20-200
 	public float sus_max_force;
 	
-	protected float sus_comp = 0.6f;
-	protected float sus_relax = 0.6f;
+	protected float sus_comp = 0.2f;
+	protected float sus_relax = 0.3f;
 	public float susCompression() { return sus_comp * 2 * FastMath.sqrt(sus_stiffness); }
 	public float susRelax() { return sus_relax * 2 * FastMath.sqrt(sus_stiffness); }
 
@@ -126,7 +129,7 @@ public class CarDataConst implements Serializable {
 	//usefulMethods
 	
 	//linear drag component (https://en.wikipedia.org/wiki/Rolling_resistance)
-	public float rollingResistance(float gravity, int w_id) {
+	protected float rollingResistance(float gravity, int w_id) {
 		return gravity*mass*areo_lineardrag/wheelData[w_id].radius;
 	}
 	

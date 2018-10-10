@@ -139,9 +139,8 @@ public class ChooseCar extends AbstractAppState {
 		Duo<Float, Float> data = cd.getMaxPower();
 		out += "Max Power: " + data.first + "kW? @ " + data.second + " rpm \n";
 		out += "Weight: "+ cd.mass + "kg\n";
-		out += "Drag(linear): " + cd.areo_drag + "(" + cd.rollingResistance(9.81f, 0) + ")\n"; //TODO hardcoded 0
+		out += "Drag(linear): " + cd.areo_drag + "(" + cd.areo_lineardrag + ")\n";
 		out += "Redline: "+ cd.e_redline +"\n";
-		
 		return out;
 	}
 

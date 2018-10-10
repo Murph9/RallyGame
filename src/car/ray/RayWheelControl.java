@@ -117,13 +117,13 @@ public class RayWheelControl {
 		
 		App.rally.getRootNode().attachChild(this.skidLine);
 		
-		//TODO smoke
+		//TODO smoke from source control
 	}
 
 	//hopefully called by the FakeRayCarControl in physics step
-	public void physicsUpdate(float tpf, Vector3f velDir) {
+	public void physicsUpdate(float tpf, Vector3f velDir, float sus_min_travel) { //TODO sus_min_travel is just poor design
 		App.rally.enqueue(() -> {
-			posInLocal = new Vector3f(0, -wheel.susDiffLength, 0);
+			posInLocal = new Vector3f(0, -wheel.susRayLength - sus_min_travel, 0);
 			rootNode.setLocalTranslation(offset.add(posInLocal));
 			
 			//rotate for wheel rotation

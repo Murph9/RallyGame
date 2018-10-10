@@ -1,6 +1,6 @@
 package car.ray;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import com.jme3.bullet.PhysicsSpace;
@@ -16,25 +16,21 @@ public class CarRaycaster {
 	//https://github.com/bubblecloud/jbullet/blob/master/src/main/java/com/bulletphysics/dynamics/vehicle/DefaultVehicleRaycaster.java
 	
 	public FirstRayHitDetails castRay(PhysicsSpace space, PhysicsRigidBody body, Vector3f from, Vector3f dir) {
-		Vector3f _from = from;
-		Vector3f _dir = dir;
-		
-		List<PhysicsRayTestResult> results = new ArrayList<PhysicsRayTestResult>();
-		space.rayTest(_from, _from.add(_dir), results);
+		List<PhysicsRayTestResult> results = new LinkedList<PhysicsRayTestResult>();
+		space.rayTest(from, from.add(dir), results);
 		
 		for (PhysicsRayTestResult result: results) {
 			if (result.getCollisionObject().getObjectId() == body.getObjectId())
-				continue;
+				continue; //no self collision please
 			
 			FirstRayHitDetails rd = new FirstRayHitDetails();
-			rd.hitFraction = result.getHitFraction();
-			rd.dist = rd.hitFraction * dir.length();
-			rd.pos = _from.add(_dir.mult(rd.hitFraction));
-			rd.hitNormalInWorld = result.getHitNormalLocal(); //this may look wrong: TODO check if its relative to the object this hit
+			rd.dist = result.getHitFraction() * dir.length();
+			rd.pos = from.add(dir.mult(result.getHitFraction()));
+			rd.hitNormalInWorld = result.getHitNormalLocal(); //this may look wrong: TODO check if its relative to the object the ray hit
 			if (result.getCollisionObject() instanceof PhysicsRigidBody) {
 				rd.obj = (PhysicsRigidBody)result.getCollisionObject();
 			} else {
-				H.p("no 'real' object found ray casting from: " + body);
+				H.e("No 'real' object found ray casting for: " + body);
 			}
 			return rd;
 		}

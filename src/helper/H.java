@@ -213,6 +213,11 @@ public class H {
 	public static String roundDecimal(double num, int places) { //...
 		return roundDecimal((float)num,places);
 	}
+	public static String round3f(Vector3f vec, int places) {
+		if (vec == null)
+			return "x:?, y:?, z:?";
+		return "x:"+H.roundDecimal(vec.x, places) + ", y:"+H.roundDecimal(vec.y, places)+", z:"+H.roundDecimal(vec.z, places);
+	}
 	
 	public static List<Geometry> getGeomList(Node n) {
 		return rGeomList(n);

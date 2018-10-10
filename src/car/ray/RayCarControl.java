@@ -118,15 +118,13 @@ public class RayCarControl extends RayCarPowered {
 		super.prePhysicsTick(space, tpf);
 		
 		for (RayWheelControl wc: this.wheelControls) {
-			wc.physicsUpdate(tpf, rbc.getLinearVelocity());
+			wc.physicsUpdate(tpf, rbc.getLinearVelocity(), carData.sus_min_travel);
 		}
 	}
 	
 	private float getMaxSteerAngle(float trySteerAngle, float sign) {
-		float driftangle = 0; //TODO
-		
 		Vector3f local_vel = rbc.getPhysicsRotation().inverse().mult(rbc.getLinearVelocity());
-		if (local_vel.z < 0 || ((-sign * driftangle) < 0 && Math.abs(driftangle) > carData.minDriftAngle * FastMath.DEG_TO_RAD)) 
+		if (local_vel.z < 0 || ((-sign * this.driftAngle) < 0 && Math.abs(this.driftAngle) > carData.minDriftAngle * FastMath.DEG_TO_RAD)) 
 			return trySteerAngle; //when going backwards, slow or needing to turning against drift, you get no speed factor
 		//eg: car is pointing more left than velocity, and is also turning left
 		//and drift angle needs to be large enough to matter
@@ -213,14 +211,14 @@ public class RayCarControl extends RayCarPowered {
 	}
 	
 	private void flipMe() {
-		rbc.setPhysicsRotation(new Quaternion().fromAngleAxis(0, new Vector3f(0,0,1)));
+		rbc.setPhysicsRotation(new Quaternion());
 		rbc.setPhysicsLocation(rbc.getPhysicsLocation().add(new Vector3f(0,1,0)));
 	}
 	private void reset() {
-		rbc.setPhysicsRotation(new Quaternion().fromAngleAxis(0, new Vector3f(0,0,1)));
-		rbc.setPhysicsLocation(new Vector3f(0,0,0));
-		rbc.setAngularVelocity(new Vector3f(0,0,0));
-		rbc.setLinearVelocity(new Vector3f(0,0,0));
+		rbc.setPhysicsRotation(new Quaternion());
+		rbc.setPhysicsLocation(new Vector3f());
+		rbc.setAngularVelocity(new Vector3f());
+		rbc.setLinearVelocity(new Vector3f());
 	}
 	private void rotate180() {
 		rbc.setPhysicsRotation(new Quaternion().fromAngleAxis(FastMath.PI, new Vector3f(0,1,0)));
@@ -312,6 +310,8 @@ public class RayCarControl extends RayCarPowered {
 	}
 	
 	public float getCurrentVehicleSpeedKmHour() {
+		if (vel == null)
+			return 0;
 		return vel.length() * 3.6f;
 	}
 
@@ -320,10 +320,10 @@ public class RayCarControl extends RayCarPowered {
 	}
 	
 	public String statsString() {
-		Vector3f pos = this.getPhysicsLocation();
-		return "x:"+H.roundDecimal(pos.x, 2) + ", y:"+H.roundDecimal(pos.y, 2)+", z:"+H.roundDecimal(pos.z, 2) +
-				"\nspeed:"+ H.roundDecimal(vel.length(), 2) + "m/s\nRPM:" + curRPM +
-				"\nengine:" + engineTorque;//TODO + "\ndrag:" + dragForce + "N\ntraction:" + totalTraction + "\nG Forces:"+gForce;
+		return H.round3f(this.getPhysicsLocation(), 2)
+		 + "\nspeed:"+ H.round3f(vel, 2) + "m/s\nRPM:" + curRPM
+		 + "\nengine:" + engineTorque + "\ndrag:" + dragValue 
+		 + "N\nG Forces:" + H.roundDecimal(planarGForce.length()/rbc.getGravity().length(), 2);
 	}
 	
 	
