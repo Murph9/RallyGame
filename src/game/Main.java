@@ -148,6 +148,7 @@ public class Main extends SimpleApplication {
 		getStateManager().attach(start);
 		
 		bullet = new BulletAppState();
+//		bullet.setSpeed(0.1f); //physics second rate
 //    	bullet.setDebugEnabled(true);
 		getStateManager().attach(bullet);
 		bullet.getPhysicsSpace().setAccuracy(1f/180f); //physics rate

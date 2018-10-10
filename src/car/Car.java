@@ -200,7 +200,7 @@ public enum Car {
 		
 		@Override
 		protected void refreshWheels() {
-			
+			super.refreshWheels();
 		}
 	}
 /*

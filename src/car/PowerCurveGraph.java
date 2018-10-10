@@ -8,7 +8,7 @@ import com.jme3.font.BitmapText;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
-import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Container;
 
 import car.ray.CarDataConst;
@@ -19,8 +19,7 @@ import helper.H;
 public class PowerCurveGraph extends Container {
 
 	private CarDataConst car;
-	private List<Geometry> things;
-	private List<Node> things2;
+	private List<Spatial> things;
 	
 	public PowerCurveGraph(RayCarControl p, Vector3f size) {
 		super();
@@ -36,14 +35,10 @@ public class PowerCurveGraph extends Container {
 	
 	private void drawGraphs() {
 		if (things != null)
-			for (Geometry g: things)
+			for (Spatial g: things)
 				this.detachChild(g);
-		things = new LinkedList<Geometry>();
-		if (things2 != null)
-			for (Node g: things2)
-				this.detachChild(g);
-		things2 = new LinkedList<Node>(); //TODO merge into things(1)
-
+		things = new LinkedList<Spatial>();
+		
 		BitmapFont guiFont = App.rally.getFont();
 
 		Vector3f size = getPreferredSize();
@@ -101,7 +96,7 @@ public class PowerCurveGraph extends Container {
 		label.setText("0");
 		label.setLocalTranslation(topLeft.x-fontSize, bottomRight.y+fontSize, 0);
 		attachChild(label);
-		this.things2.add(label);
+		this.things.add(label);
 		
 		//max labels (note they aren't inside each other)
 		label = new BitmapText(guiFont, false);
@@ -110,13 +105,13 @@ public class PowerCurveGraph extends Container {
 		label.setText(maxTorque+" Nm");
 		label.setLocalTranslation(topLeft.x-fontSize, topLeft.y+fontSize, 0);
 		attachChild(label);
-		this.things2.add(label);
+		this.things.add(label);
 		label = new BitmapText(guiFont, false);
 		label.setSize(fontSize);
 		label.setColor(ColorRGBA.Red);
 		label.setText(maxKW+" Kw");
 		label.setLocalTranslation(topLeft.x-fontSize, topLeft.y, 0);
 		attachChild(label);
-		this.things2.add(label);
+		this.things.add(label);
 	}
 }

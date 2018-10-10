@@ -157,10 +157,10 @@ public class CarUI extends AbstractAppState {
 
 		int height = App.rally.getCamera().getHeight();
 		ps = new Vector3f[] {
-				new Vector3f(60, height*0.4f, 0), //60,250,0
 				new Vector3f(140, height*0.4f, 0),
-				new Vector3f(60, height*0.3f, 0),
+				new Vector3f(60, height*0.4f, 0), //60,250,0
 				new Vector3f(140, height*0.3f, 0), //140,180,0
+				new Vector3f(60, height*0.3f, 0),
 			};
 		
 		this.gripBox = new Geometry[4];
