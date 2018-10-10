@@ -19,8 +19,8 @@ public class SkyState extends AbstractAppState {
 
 	//Uses SkyControl from https://github.com/stephengold/jme3-utilities
 
-	public static final boolean IF_SHADOW = true;
-	public static final boolean IF_BLOOM = true;
+	private static final boolean IF_SHADOW = true;
+	private static final boolean IF_BLOOM = true;
 	
 	private DirectionalLight mainLight;
 	private AmbientLight ambLight;

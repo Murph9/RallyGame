@@ -10,9 +10,11 @@ import java.io.Serializable;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 
+import car.CarModelData;
+import car.CarModelData.CarPart;
 import helper.H.Duo;
 
-public class CarDataConst implements Serializable {
+public abstract class CarDataConst implements Serializable {
 	protected static final String dir = "assets/models/";
 	
 	//model strings (can be xx.obj or xx.blend)
@@ -37,12 +39,12 @@ public class CarDataConst implements Serializable {
 	public float areo_downforce = 0.0f; //not a default yet
 	
 	//all relative to 'wheel' offset pos
-	public float sus_min_travel = -0.2f; //upper travel length - closer to car
-	public float sus_max_travel = 0.1f; //lower travel length - closer to ground
+	public float sus_min_travel = -0.25f; //upper travel length - closer to car
+	public float sus_max_travel = 0f; //lower travel length - closer to ground
 	public float susTravel() { return sus_max_travel - sus_min_travel; }
 	public float sus_preload_force = 3f/4; //spring pre-load Kg (Nm from gravity) //TODO tune (balanced against gravity /4)
 	public float sus_stiffness = 20;//50f; //20-200
-	public float sus_max_force;
+	public float sus_max_force = 50*mass;
 	
 	protected float sus_comp = 0.2f;
 	protected float sus_relax = 0.3f;
@@ -87,44 +89,67 @@ public class CarDataConst implements Serializable {
 	//0.0001f < x < 5 i think is a good range
 	
 	//do not put wheel offset in the wheel obj, as they shouldn't know because the car determines their position
-	public Vector3f[] wheelOffset;
-	public WheelDataConst[] wheelData;
-	
-	
+	public Vector3f[] wheelOffset = new Vector3f[4];
+	public WheelDataConst[] wheelData = new WheelDataConst[4];
+		
 	//no idea category
 	public float minDriftAngle = 7;
-	public Vector3f JUMP_FORCE;
+	public Vector3f JUMP_FORCE = new Vector3f(0, mass, 0);
 	
-	public boolean loaded = false;
-	public void refresh() {
+	public boolean loaded = false; //TODO use?
+	public final void load() { //final = no override pls
+		if (loaded) {
+			try {
+				throw new Exception("Car data loaded twice");
+			} catch (Exception e) {
+				e.printStackTrace();
+				return;
+			}
+		}
+		
 		loaded = true;
+
+		postLoad();
 		
-		JUMP_FORCE = new Vector3f(0, mass, 0);
-		sus_max_force = 50*mass;
+		modelLoad();
 		
-		refreshWheels();
+		//load defaults when data not set by modelLoad or postLoad 
+		if (wheelOffset[0] == null) { 
+			float x_off = 0.68f;
+			float y_off = 0;//TODO try using large wheel offsets (any axis) and the car feels very wrong
+			float z_off = 1.1f;
+			for (int i = 0; i < wheelOffset.length; i++) {
+				setWheelOffset(i, x_off, y_off, z_off);
+			}
+		}
+		if (wheelData[0] == null) {
+			for (int i = 0; i < wheelData.length; i++) {
+				WheelDataTractionConst wLat = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
+				WheelDataTractionConst wLong = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
+				wheelData[i] = new WheelDataConst(wheelModel, 0.3f, 25, 0.15f, wLat, wLong);
+			}
+		}
 	}
+	protected final void setWheelOffset(int i, float x_off, float y_off, float z_off) {
+		wheelOffset[i] = new Vector3f(x_off, y_off, z_off);
+		wheelOffset[i].x *= i % 2 == 0 ? -1 : 1;
+		wheelOffset[i].z *= i < 2 ? 1 : -1;
+	}
+	
+	private void modelLoad() {
+		//init car pos things based on the physical model
 
-	//TODO try using large wheel offsets, car 'feels' very wrong
-	protected void refreshWheels() {
-		float wheel_x_off = 0.68f; //left/right
-		float wheel_y_off = 0f; //up/down //could be - for down or + for up
-		float wheel_z_off = 1.1f; //forward/back
-
-		wheelOffset = new Vector3f[4];
-		wheelData = new WheelDataConst[4];
-		for (int i = 0; i < wheelData.length; i++) {
-			WheelDataTractionConst wLat = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
-			WheelDataTractionConst wLong = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
-			wheelData[i] = new WheelDataConst(wheelModel, 0.3f, 75, 0.15f, wLat, wLong);
-			
-			wheelOffset[i] = new Vector3f(wheel_x_off, wheel_y_off, wheel_z_off);
-			wheelOffset[i].x *= i % 2 == 0 ? -1 : 1;
-			wheelOffset[i].z *= i < 2 ? 1 : -1;
+		CarModelData modelData = new CarModelData(this.carModel, this.wheelModel);
+		if (modelData.foundSomething() && modelData.foundAllWheels()) {
+			wheelOffset[0] = modelData.getPosOf(CarPart.Wheel_FL);
+			wheelOffset[1] = modelData.getPosOf(CarPart.Wheel_FR);
+			wheelOffset[2] = modelData.getPosOf(CarPart.Wheel_RL);
+			wheelOffset[3] = modelData.getPosOf(CarPart.Wheel_RR);
 		}
 	}
 	
-	
+	protected abstract void postLoad();
+
 	////////////////////////////////////////////////////////
 	//usefulMethods
 	
@@ -175,3 +200,10 @@ public class CarDataConst implements Serializable {
 		}
 	}
 }
+
+
+//TODO:
+//Some helpful notes
+
+//you can fix the oversteer at high speeds with a proper diff and different downforce scaling at higher speeds
+//and some proper stiffer suspension

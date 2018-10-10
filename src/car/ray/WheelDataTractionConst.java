@@ -12,4 +12,9 @@ public class WheelDataTractionConst {
 	public WheelDataTractionConst(float b, float c, float d, float e) {
 		B = b; C = c; D = d; E = e;
 	}
+	
+	@Override
+	public String toString() {
+		return "B:"+B+",C:"+C+",D:"+D+",E:"+E;
+	}
 }

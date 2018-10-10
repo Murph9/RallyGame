@@ -46,8 +46,6 @@ public class RayCarControl extends RayCarPowered {
 	public RayCarControl(PhysicsSpace space, CollisionShape shape, CarDataConst carData, Node rootNode) {
 		super(shape, carData);
 		this.space = space;
-		
-		carData.refresh(); //TODO this is a hack
 
 		//init visual wheels
 		this.wheelControls = new RayWheelControl[4];

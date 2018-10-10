@@ -53,7 +53,14 @@ public class RayCar implements PhysicsTickListener {
 	
 	public RayCar(CollisionShape shape, CarDataConst carData) {
 		this.carData = carData;
-		this.carData.refresh();
+		this.carData.load();
+		if (!this.carData.loaded) {
+			try {
+				throw new Exception("Car data not correctly loaded");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 		
 		this.planarGForce = new Vector3f();
 		

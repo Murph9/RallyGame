@@ -30,8 +30,8 @@ import helper.H;
 
 public class CarBuilder extends AbstractAppState {
 
-	HashMap<Integer, RayCarControl> cars;
-	Node rootNode;
+	private HashMap<Integer, RayCarControl> cars;
+	private Node rootNode;
 
 	public CarBuilder() {
 		cars = new HashMap<>();
