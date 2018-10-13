@@ -7,7 +7,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 
 import car.CarModelData;
@@ -39,19 +38,11 @@ public abstract class CarDataConst implements Serializable {
 	public float areo_downforce = 0.0f; //not a default yet
 	
 	//travel values are relative to wheel offset pos
-	public float sus_min_travel = -0.25f; //upper travel length - closer to car
-	public float sus_max_travel = 0f; //lower travel length - closer to ground
-	public float susTravel() { return sus_max_travel - sus_min_travel; }
-	public float sus_preload_force = 3f/4; //spring pre-load Kg (Nm from gravity) //TODO tune (balanced against gravity)
-	public float sus_stiffness = 20;//50f; //20-200
-	public float sus_max_force = 50*mass;
-	
-	public float sus_antiroll = 0; //TODO use (en.wikipedia.org/wiki/Anti-roll_bar)
-	
-	protected float sus_comp = 0.2f;
-	protected float sus_relax = 0.3f;
-	public float susCompression() { return sus_comp * 2 * FastMath.sqrt(sus_stiffness); }
-	public float susRelax() { return sus_relax * 2 * FastMath.sqrt(sus_stiffness); }
+	public CarSusDataConst susF;
+	public CarSusDataConst susR;
+	public CarSusDataConst susByWheelNum(int i) {
+		return (i < 2 ? susF : susR);
+	}
 
 	////////
 	//Drivetrain stuff
@@ -111,6 +102,10 @@ public abstract class CarDataConst implements Serializable {
 		
 		loaded = true;
 
+		//init suspension
+		susF = new CarSusDataConst();
+		susR = new CarSusDataConst();
+	
 		postLoad();
 		
 		modelLoad();
@@ -126,9 +121,9 @@ public abstract class CarDataConst implements Serializable {
 		}
 		if (wheelData[0] == null) {
 			for (int i = 0; i < wheelData.length; i++) {
-				WheelDataTractionConst wLat = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
-				WheelDataTractionConst wLong = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
-				wheelData[i] = new WheelDataConst(wheelModel, 0.3f, 25, 0.15f, wLat, wLong);
+				wheelData[i] = new WheelDataConst(wheelModel, 0.3f, 25, 0.15f);
+				wheelData[i].pjk_lat = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
+				wheelData[i].pjk_long = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
 			}
 		}
 	}

@@ -151,7 +151,7 @@ public class Main extends SimpleApplication {
 //		bullet.setSpeed(0.1f); //physics per second rate
 //    	bullet.setDebugEnabled(true); //show bullet wireframes
 		getStateManager().attach(bullet);
-		bullet.getPhysicsSpace().setAccuracy(1f/180f); //physics rate
+		bullet.getPhysicsSpace().setAccuracy(1f/120f); //physics rate
 		bullet.getPhysicsSpace().setGravity(new Vector3f(0, -9.81f, 0)); //yay its down
 		
 		inputManager.setCursorVisible(true);

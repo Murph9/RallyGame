@@ -43,7 +43,16 @@ public enum Car {
 		
 		@Override
 		public void postLoad() {
-			//nothing
+			//TODO nothing
+			
+			susF.stiffness = 170;
+			susR.stiffness = 120;
+			
+			for (int i = 0; i < wheelData.length; i++) {
+				wheelData[i] = new WheelDataConst(wheelModel, 0.3f, 25, 0.15f);
+				wheelData[i].pjk_lat = new WheelDataTractionConst(17, 1.9f, 1f, 0.97f);
+				wheelData[i].pjk_long = new WheelDataTractionConst(17, 1.9f, 1f, 0.98f);
+			}
 		}
 	}
 	
@@ -60,14 +69,8 @@ public enum Car {
 			auto_gearDown = 4000;
 			auto_gearUp = 6500;
 			e_redline = 7000;
-
-			sus_stiffness = 40.0f; //40 is fairly stiff //18.0
-			sus_comp = 0.5f; //(should be lower than damp)
-			sus_relax = 0.6f;
 			
 			rollFraction = 0.4f; //matters a lot when it comes to holding grip in corners
-
-			sus_max_force = 40000;
 
 			areo_drag = 0.33f;
 			areo_crossSection = 0.59f;
@@ -77,14 +80,25 @@ public enum Car {
 		
 		@Override
 		public void postLoad() {
+
+			susF.stiffness = 60.0f;
+			susF.comp = 0.5f;
+			susF.relax = 0.6f;
+			susF.max_force = 40000;
+			
+			susR.stiffness = 60.0f;
+			susR.comp = 0.5f;
+			susR.relax = 0.6f;
+			susR.max_force = 40000;
+			
 			float x_off = 0.68f;
 			float y_off = 0;
 			float z_off = 1.1f;
 			
 			for (int i = 0; i < wheelData.length; i++) {
-				WheelDataTractionConst wLat = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
-				WheelDataTractionConst wLong = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
-				wheelData[i] = new WheelDataConst(wheelModel, 0.3f, 10, 0.15f, wLat, wLong);
+				wheelData[i] = new WheelDataConst(wheelModel, 0.3f, 10, 0.15f);
+				wheelData[i].pjk_lat = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
+				wheelData[i].pjk_long = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
 				
 				setWheelOffset(i, x_off, y_off, z_off);
 			}
@@ -110,20 +124,21 @@ public enum Car {
 			auto_gearDown = 4000;
 			auto_gearUp = 6500;
 			e_redline = 7000;
-			
-			sus_max_force = 40000;
 		}
 		
 		@Override 
 		public void postLoad() {
+			susF.max_force = 40000;
+			susR.max_force = 40000;
+			
 			float x_off = 0.68f;
 			float y_off = 0;
 			float z_off = 1.1f;
 			
 			for (int i = 0; i < wheelData.length; i++) {
-				WheelDataTractionConst wLat = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
-				WheelDataTractionConst wLong = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
-				wheelData[i] = new WheelDataConst(wheelModel, 0.3f, 10, 0.15f, wLat, wLong);
+				wheelData[i] = new WheelDataConst(wheelModel, 0.3f, 10, 0.15f);
+				wheelData[i].pjk_lat = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
+				wheelData[i].pjk_long = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
 				
 				setWheelOffset(i, x_off, y_off, z_off);
 			}
@@ -162,24 +177,28 @@ public enum Car {
 			trans_effic = 0.85f;
 			trans_finaldrive = 3.69f;//final drive maybe?
 			trans_gearRatios = new float[] { -3.38f, 3.32f, 1.9f, 1.31f, 1f, 0.84f};
-			
-			sus_stiffness = 20.0f; //20 is fairly stiff
-			sus_comp = 0.5f; //(should be lower than damp)
-			sus_relax = 0.6f;
-
-			sus_max_force = mass*9.81f*4f;
 		}
 		
 		@Override 
 		public void postLoad() {
+			susF.stiffness = 20;
+			susF.comp = 0.5f;
+			susF.relax = 0.5f;
+			susF.max_force = mass*9.81f*4f;
+			
+			susR.stiffness = 20;
+			susR.comp = 0.5f;
+			susR.relax = 0.5f;
+			susR.max_force = mass*9.81f*4f;
+			
 			float x_off = 0.68f;
 			float y_off = -0.15f;
 			float z_off = 1.32f;
 			
 			for (int i = 0; i < wheelData.length; i++) {
-				WheelDataTractionConst wLat = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
-				WheelDataTractionConst wLong = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
-				wheelData[i] = new WheelDataConst(wheelModel, 0.3f, 10, 0.15f, wLat, wLong);
+				wheelData[i] = new WheelDataConst(wheelModel, 0.3f, 10, 0.15f);
+				wheelData[i].pjk_lat = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
+				wheelData[i].pjk_long = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
 				
 				setWheelOffset(i, x_off, y_off, z_off);
 			}
@@ -228,9 +247,9 @@ public enum Car {
 			float z_off = 1.32f;
 			
 			for (int i = 0; i < wheelData.length; i++) {
-				WheelDataTractionConst wLat = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
-				WheelDataTractionConst wLong = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
-				wheelData[i] = new WheelDataConst(wheelModel, 0.575f/2f, 10, 0.15f, wLat, wLong);
+				wheelData[i] = new WheelDataConst(wheelModel, 0.575f/2f, 10, 0.15f);
+				wheelData[i].pjk_lat = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
+				wheelData[i].pjk_long = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
 				
 				setWheelOffset(i, x_off, y_off, z_off);
 			}
@@ -248,11 +267,6 @@ public enum Car {
 			driveFront = true;
 			driveRear = true;
 
-			sus_stiffness  = 35.0f;
-			sus_comp = 0.4f;
-			sus_relax = 0.5f;
-			sus_max_force = 35000;
-
 			e_torque = new float[]{0,520,580,620,680,720,870,820,0};
 			e_mass = 40;
 			auto_gearDown = 3500;
@@ -266,14 +280,30 @@ public enum Car {
 		
 		@Override
 		public void postLoad() {
+			susF.stiffness  = 70.0f;
+			susF.min_travel = -0.2f;
+			susF.max_travel = 0.2f;
+			susF.comp = 0.4f;
+			susF.relax = 0.5f;
+			susF.max_force = 35000;
+			
+			susR.stiffness  = 70.0f;
+			susR.min_travel = -0.2f;
+			susR.max_travel = 0.2f;
+			susR.comp = 0.3f;
+			susR.relax = 0.5f;
+			susR.max_force = 35000;
+			
 			float x_off = 0.7f;
 			float y_off = 0.2f;
 			float z_off = 1.1f;
 			
 			for (int i = 0; i < wheelData.length; i++) {
-				WheelDataTractionConst wLat = new WheelDataTractionConst(6f, 2f, 1f, 1f);
-				WheelDataTractionConst wLong = new WheelDataTractionConst(6f, 2f, 1f, 1f);
-				wheelData[i] = new WheelDataConst(wheelModel, 0.4f, 15, 0.25f, wLat, wLong);
+				wheelData[i] = new WheelDataConst(wheelModel, 0.4f, 15, 0.25f);
+//				wheelData[i].pjk_lat = new WheelDataTractionConst(6f, 2f, 1f, 1f);
+//				wheelData[i].pjk_long = new WheelDataTractionConst(6f, 2f, 1f, 1f);
+				wheelData[i].pjk_lat = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
+				wheelData[i].pjk_long = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
 
 				setWheelOffset(i, x_off, y_off, z_off);
 			}
@@ -296,8 +326,6 @@ public enum Car {
 			rollFraction = 0.1f;
 			cam_shake *= 0.1f;
 
-			sus_stiffness = 100f;
-			
 			brakeMaxTorque = 50000;
 
 			e_redline = 15000;
@@ -316,14 +344,17 @@ public enum Car {
 		
 		@Override
 		public void postLoad() {
+			susF.stiffness = 100f;
+			susR.stiffness = 100f;
+						
 			float x_off = 0.71f;
 			float y_off = 0f;
 			float z_off = 1.2f;
 			
 			for (int i = 0; i < wheelData.length; i++) {
-				WheelDataTractionConst wLat = new WheelDataTractionConst(10f, 2f, 1.3f, 0.985f);
-				WheelDataTractionConst wLong = new WheelDataTractionConst(10f, 2f, 1.3f, 0.985f);
-				wheelData[i] = new WheelDataConst(wheelModel, 0.4f, 10, 0.15f, wLat, wLong);
+				wheelData[i] = new WheelDataConst(wheelModel, 0.4f, 10, 0.15f);
+				wheelData[i].pjk_lat = new WheelDataTractionConst(10f, 2f, 1.3f, 0.985f);
+				wheelData[i].pjk_long = new WheelDataTractionConst(10f, 2f, 1.3f, 0.985f);
 
 				setWheelOffset(i, x_off, y_off, z_off);
 			}
@@ -344,8 +375,6 @@ public enum Car {
 			width = 1.953f;
 			height = 1.125f;
 			length = 4.643f;
-						
-			sus_max_force = mass*55;
 			
 			driveFront = false;
 			driveRear = true;
@@ -370,14 +399,18 @@ public enum Car {
 		
 		@Override
 		public void postLoad() {
+
+			susF.max_force = mass*55;
+			susR.max_force = mass*55;
+			
 			float x_off = 0.71f;
 			float y_off = 0.2f;
 			float z_off = 1.2f;
 			
 			for (int i = 0; i < wheelData.length; i++) {
-				WheelDataTractionConst wLat = new WheelDataTractionConst(6f, 2f, 1f, 1f);
-				WheelDataTractionConst wLong = new WheelDataTractionConst(6f, 2f, 1f, 1f);
-				wheelData[i] = new WheelDataConst(wheelModel, 0.735f/2f, 10, 0.15f, wLat, wLong);
+				wheelData[i] = new WheelDataConst(wheelModel, 0.735f/2f, 10, 0.15f);
+				wheelData[i].pjk_lat = new WheelDataTractionConst(6f, 2f, 1f, 1f);
+				wheelData[i].pjk_long = new WheelDataTractionConst(6f, 2f, 1f, 1f);
 
 				setWheelOffset(i, x_off, y_off, z_off);
 			}
@@ -395,7 +428,6 @@ public enum Car {
 			length = 5f;
 
 			rollFraction = 0.1f;
-			sus_max_force = 85000;
 
 			driveFront = true;
 			driveRear = true;
@@ -415,14 +447,17 @@ public enum Car {
 
 		@Override
 		public void postLoad() {
+			susF.max_force = 85000;
+			susR.max_force = 85000;
+			
 			float x_off = 1.0f;
 			float y_off = -0.45f;
 			float z_off = 1.85f;
 			
 			for (int i = 0; i < wheelData.length; i++) {
-				WheelDataTractionConst wLat = new WheelDataTractionConst(6f, 2f, 1f, 1f);
-				WheelDataTractionConst wLong = new WheelDataTractionConst(6f, 2f, 1f, 1f);
-				wheelData[i] = new WheelDataConst(wheelModel, 0.4f, 10, 0.15f, wLat, wLong);
+				wheelData[i] = new WheelDataConst(wheelModel, 0.4f, 10, 0.15f);
+				wheelData[i].pjk_lat = new WheelDataTractionConst(6f, 2f, 1f, 1f);
+				wheelData[i].pjk_long = new WheelDataTractionConst(6f, 2f, 1f, 1f);
 
 				setWheelOffset(i, x_off, y_off, z_off);
 			}
@@ -455,9 +490,9 @@ public enum Car {
 			float z_off = 1.1f;
 			
 			for (int i = 0; i < wheelData.length; i++) {
-				WheelDataTractionConst wLat = new WheelDataTractionConst(10f, 1.9f, 0.9f, 0.95f);
-				WheelDataTractionConst wLong = new WheelDataTractionConst(12f, 1.9f, 0.9f, 0.95f);
-				wheelData[i] = new WheelDataConst(wheelModel, 0.4f, 10, 0.15f, wLat, wLong);
+				wheelData[i] = new WheelDataConst(wheelModel, 0.4f, 10, 0.15f);
+				wheelData[i].pjk_lat = new WheelDataTractionConst(10f, 1.9f, 0.9f, 0.95f);
+				wheelData[i].pjk_long = new WheelDataTractionConst(12f, 1.9f, 0.9f, 0.95f);
 
 				setWheelOffset(i, x_off, y_off, z_off);
 			}
@@ -472,9 +507,8 @@ public enum Car {
 			mass = 500;
 			height = 1;
 			
+			driveRear = true;
 			driveFront = true; //AWD
-						
-			sus_stiffness = 100;
 			
 			rollFraction = 1;
 			
@@ -491,14 +525,17 @@ public enum Car {
 		
 		@Override
 		public void postLoad() {
+			susF.stiffness = 100;
+			susR.stiffness = 100;
+			
 			float x_off = 0.68f;
 			float y_off = 0;
 			float z_off = 1.1f;
 			
 			for (int i = 0; i < wheelData.length; i++) {
-				WheelDataTractionConst wLat = new WheelDataTractionConst(10f, 1.9f, 0.62f, 0.95f);
-				WheelDataTractionConst wLong = new WheelDataTractionConst(10f, 1.9f, 0.62f, 0.95f);
-				wheelData[i] = new WheelDataConst(wheelModel, 0.5f, 10, 0.1f, wLat, wLong);
+				wheelData[i] = new WheelDataConst(wheelModel, 0.5f, 10, 0.1f);
+				wheelData[i].pjk_lat = new WheelDataTractionConst(10f, 1.9f, 0.62f, 0.95f);
+				wheelData[i].pjk_long = new WheelDataTractionConst(10f, 1.9f, 0.62f, 0.95f);
 
 				setWheelOffset(i, x_off, y_off, z_off);
 			}
