@@ -56,7 +56,7 @@ public abstract class DefaultBuilder extends World {
 	DefaultBuilder(WP[] type, long seed) {
 		super("builder root node");
 		this.type = type;
-		this.rootNode.setShadowMode(ShadowMode.CastAndReceive); //performance concern 1
+		this.rootNode.setShadowMode(ShadowMode.CastAndReceive); //performance concern #1342
 		
 		this.rand = new Random(seed);
 	}

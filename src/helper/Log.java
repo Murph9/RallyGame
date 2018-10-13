@@ -1,6 +1,9 @@
 package helper;
 
 public class Log {
+	//TODO class to print log messages somewhere.
+	//This should really be configurable, if you want it isn't a complex file
+	
 
 	/**Easier way of typing System.out.println(); -> Log.p();*/
 	public static void p() {

@@ -454,7 +454,7 @@ public class CarUI extends AbstractAppState {
 				if (dir != null) {
 					gripBox[i].setLocalScale(wheel.susForce/(p.getCarData().mass*2));
 					
-					gripDir[i].setLocalScale(dir.length()*75);
+					gripDir[i].setLocalScale(wheel.susForce/p.getCarData().susByWheelNum(i).max_force*150);
 					
 					float angle = FastMath.atan2(dir.z, dir.x);
 					Quaternion q = new Quaternion();
@@ -465,7 +465,7 @@ public class CarUI extends AbstractAppState {
 			
 			//g forces
 			//needs to be translated from local into screen axis
-			Vector3f gs = p.planarGForce;
+			Vector3f gs = p.planarGForce.mult(1/p.getPhysicsObject().getGravity().length());
 			gs.y = gs.z; //z is front back
 			gs.z = 0; //screen has no depth
 			g2.setLocalTranslation(gcenter.add(gs.mult(25))); //because screen pixels

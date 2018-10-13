@@ -120,8 +120,8 @@ public class RayCarControl extends RayCarPowered {
 		
 		super.prePhysicsTick(space, tpf);
 		
-		for (RayWheelControl wc: this.wheelControls) {
-			wc.physicsUpdate(tpf, rbc.getLinearVelocity(), carData.sus_min_travel);
+		for (int i = 0; i < this.wheelControls.length; i++) {
+			this.wheelControls[i].physicsUpdate(tpf, rbc.getLinearVelocity(), carData.susByWheelNum(i).min_travel);
 		}
 	}
 	
@@ -225,10 +225,27 @@ public class RayCarControl extends RayCarPowered {
 		rbc.setPhysicsLocation(rbc.getPhysicsLocation().add(new Vector3f(0,1,0)));
 	}
 	private void reset() {
-		rbc.setPhysicsRotation(new Quaternion());
-		rbc.setPhysicsLocation(new Vector3f());
-		rbc.setAngularVelocity(new Vector3f());
-		rbc.setLinearVelocity(new Vector3f());
+		setPhysicsRotation(new Matrix3f());
+		setLinearVelocity(new Vector3f());
+		setAngularVelocity(new Vector3f());
+		
+		this.curRPM = 1000;
+		for (RayWheel w: this.wheels) {
+			w.radSec = 0; //stop rotation of the wheels
+		}
+		
+		if (App.rally.drive == null) 
+			return;
+		
+		Vector3f pos = App.rally.drive.world.getStartPos();
+		Matrix3f rot = App.rally.drive.world.getStartRot();
+		if (pos != null && rot != null) {
+			setPhysicsLocation(pos);
+			setPhysicsRotation(rot);
+			setAngularVelocity(new Vector3f());
+		}
+		
+		App.rally.drive.reset(); //TODO this is a hack, the world state should be listening to the event instead
 	}
 	private void rotate180() {
 		rbc.setPhysicsRotation(new Quaternion().fromAngleAxis(FastMath.PI, new Vector3f(0,1,0)));
