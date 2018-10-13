@@ -16,6 +16,7 @@ import com.jme3.terrain.geomipmap.TerrainLodControl;
 
 import game.App;
 import helper.H;
+import helper.Log;
 import jme3tools.optimize.GeometryBatchFactory;
 
 import java.io.Closeable;
@@ -606,11 +607,11 @@ public abstract class Terrain extends AbstractAppState implements Closeable
                 		if (tq != null)
                 			list.add(new HeightTemp(v, tq, height));
                 		else
-                			H.e("!!!! Terrain: no joined chunk.", v, tLoc); //TODO probably tried to set height before the other bit was added
+                			Log.e("!!!! Terrain: no joined chunk.", v, tLoc); //TODO probably tried to set height before the other bit was added
         			}
         		} else {
 	            	v.y = height; //TODO probably tried to set height before the other bit was added
-	            	//TODO: H.e("!!!!! No TerrainChunk for:", v, x, z, locX, locZ, "tiles #:", this.worldTiles.size());
+	            	//TODO: Log.e("!!!!! No TerrainChunk for:", v, x, z, locX, locZ, "tiles #:", this.worldTiles.size());
         		}
         	}
         	app.enqueue(() -> {
@@ -658,7 +659,7 @@ public abstract class Terrain extends AbstractAppState implements Closeable
     	ht.tc.setHeight(H.v3tov2fXZ(v2), ht.height/this.worldHeight);
 
     	if (App.rally.IF_DEBUG) {
-    		H.p("Set height", ht.v, ht.tc);
+    		Log.p("Set height", ht.v, ht.tc);
     		boxNode.attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Brown, ht.v, 0.1f));
     	}
     }

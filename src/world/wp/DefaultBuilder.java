@@ -25,7 +25,7 @@ import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.shape.Box;
 
 import game.App;
-import helper.H;
+import helper.Log;
 import world.World;
 import world.WorldType;
 import world.wp.WP.NodeType;
@@ -64,7 +64,7 @@ public abstract class DefaultBuilder extends World {
 	@Override
 	public void initialize(AppStateManager stateManager, Application app) {
 		if (isInitialized()) {
-			H.e("init again, too keen");
+			Log.e("init again, too keen");
 			return;
 		}
 		super.initialize(stateManager, app);

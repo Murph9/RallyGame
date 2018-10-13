@@ -27,6 +27,7 @@ import car.ray.RayCarControl;
 import game.App;
 import game.Main;
 import helper.H;
+import helper.Log;
 
 public class CarBuilder extends AbstractAppState {
 
@@ -42,7 +43,7 @@ public class CarBuilder extends AbstractAppState {
 	
 	public void initialize(AppStateManager stateManager, Application app) {
 		super.initialize(stateManager, app);
-		H.p("carbuilder init");
+		Log.p("CarBuilder init");
 	}
 	
 	public void setEnabled(boolean state) {
@@ -50,12 +51,6 @@ public class CarBuilder extends AbstractAppState {
 		for (Integer i : cars.keySet()) {
 			cars.get(i).setEnabled(state);
 			cars.get(i).enableSound(state);
-			
-			/* TODO this should be defined by the car, right?
-			for (int j = 0; j < 4; j++) {
-				cars.get(i).getWheel(j).setEnabled(state);
-			}
-			*/
 		}
 	}
 	
@@ -188,6 +183,6 @@ public class CarBuilder extends AbstractAppState {
 			car.cleanup();
 		}
 		App.rally.getRootNode().detachChild(rootNode);
-		H.p("carbuilder cleanup");
+		Log.p("carbuilder cleanup");
 	}
 }

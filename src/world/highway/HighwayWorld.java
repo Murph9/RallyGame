@@ -29,6 +29,7 @@ import com.jme3.texture.Texture.WrapMode;
 
 import game.App;
 import helper.H;
+import helper.Log;
 import terrainWorld.NoiseBasedWorld;
 import world.World;
 import world.WorldType;
@@ -189,18 +190,18 @@ public class HighwayWorld extends World {
 	protected void generateRoad(RoadMesh road) {
 		//remember that the chunk hasn't been loaded into the world by here yet
 		if (terrain == null) {
-			H.e("STOP touching the terrain thing that you don't understand.");
+			Log.e("STOP touching the terrain thing that you don't understand.");
 			return;//????, only happens when someone plays around with the terrain init order and breaks something
 		}
 		
 		if (road == null) {
-			H.p("Road null");
+			Log.p("Road null");
 			return;
 		}
 		
 		
 		List<Vector3f> list = road.getControlPoints(); //No editing this object
-		H.e("road: ", list);
+		Log.e("road: ", list);
 
 		if (App.rally.IF_DEBUG)
 			for (int i = 0; i < list.size(); i++)

@@ -26,7 +26,7 @@ import com.jme3.terrain.geomipmap.TerrainQuad;
 import com.jme3.util.BufferUtils;
 
 import game.App;
-import helper.H;
+import helper.Log;
 
 public class Roads {
 
@@ -191,7 +191,7 @@ public class Roads {
 		g.setLocalTranslation(start);
 		rootNode.attachChild(g);
 		
-		H.p(start+ ", " + dir);
+		Log.p(start+ ", " + dir);
 	}
 	
 	private void drawMeAVerySmallBox(Node rootNode, Vector3f pos, ColorRGBA colour) {
@@ -206,11 +206,11 @@ public class Roads {
 	
 	private void drawMeAQuad(Node rootNode, PhysicsSpace phys, Vector3f[] v, ColorRGBA colour) {
 		if (v == null || v.length != 4) {
-			H.e("Roads-drawMeAQuad: Not the correct length drawMeAQuad()");
+			Log.e("Roads-drawMeAQuad: Not the correct length drawMeAQuad()");
 			return;
 		}
 		if (Arrays.asList(v).stream().anyMatch(x -> !Vector3f.isValidVector(x))) {
-			H.e("Roads-drawMeAQuad: Invalid vector given");
+			Log.e("Roads-drawMeAQuad: Invalid vector given");
 			return;
 		}
 		

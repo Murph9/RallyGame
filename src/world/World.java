@@ -8,7 +8,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 
 import game.App;
-import helper.H;
+import helper.Log;
 
 //Controls the physical (and visual) things in the level
 
@@ -27,7 +27,7 @@ public abstract class World extends AbstractAppState {
 		this.app = app;
 		
 		App.rally.getRootNode().attachChild(this.rootNode);
-		H.e("initialize() world: " + rootNode.getName());
+		Log.e("initialize() world: " + rootNode.getName());
 	}
 
 	//'Starts again'
@@ -45,14 +45,14 @@ public abstract class World extends AbstractAppState {
 	public void cleanup() {
 		//remove everything you added, you are being removed now :(
 		if (this.rootNode == null)
-			H.e("I was probably cleaned up twice or never, please don't.");
+			Log.e("I was probably cleaned up twice or never, please don't.");
 
 		this.initialized = false;
 		app = null;
 		
 		App.rally.getRootNode().detachChild(this.rootNode);
 		
-		H.e("cleanup() world: " + rootNode.getName());
+		Log.e("cleanup() world: " + rootNode.getName());
 		this.rootNode = null;
 		super.cleanup();
 	}

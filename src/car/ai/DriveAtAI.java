@@ -6,7 +6,7 @@ import com.jme3.math.Vector3f;
 
 import car.ray.RayCarControl;
 import game.App;
-import helper.H;
+import helper.Log;
 import world.WorldType;
 
 public class DriveAtAI extends CarAI {
@@ -45,7 +45,7 @@ public class DriveAtAI extends CarAI {
 		} else {
 			//currently reversing
 			onEvent("Reverse", true, 1);
-			H.e("reversing");
+			Log.e("reversing");
 			reversingTimer -= tpf;
 			if (reversingTimer < 0)
 				reversing = false;
@@ -64,7 +64,7 @@ public class DriveAtAI extends CarAI {
 
 		/*
 		if (ang < FastMath.PI/8) {
-			H.p(car.car+"nitro o");
+			Log.p(car.car+"nitro o");
 			onEvent("Nitro", true, 1);
 		} else {
 			onEvent("Nitro", false, 0);
@@ -103,7 +103,7 @@ public class DriveAtAI extends CarAI {
 			car.setLinearVelocity(driveAtThis.getLinearVelocity()); //and give them my speed
 			car.setPhysicsRotation(driveAtThis.getPhysicsRotation()); //and rotation
 			car.setAngularVelocity(driveAtThis.getAngularVelocity()); //and rot angle
-			H.p("respawned at " + driveAtThis.getPhysicsLocation());
+			Log.p("respawned at " + driveAtThis.getPhysicsLocation());
 		}
 	}
 }

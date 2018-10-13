@@ -4,7 +4,7 @@ import java.util.function.BiFunction;
 
 import com.jme3.math.Vector3f;
 
-import helper.H;
+import helper.Log;
 
 public class BeizerCurve implements Curve {
 
@@ -24,7 +24,7 @@ public class BeizerCurve implements Curve {
 	
 	public BSegment[] calcPoints() {
 		if (nodes == null || nodes.length != 4) {
-			H.e("CurveWorld: Not the correct length need 4 - CalcCubic()");
+			Log.e("CurveWorld: Not the correct length need 4 - CalcCubic()");
 			return null;
 		}
 		if (output != null){

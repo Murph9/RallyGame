@@ -28,7 +28,7 @@ import car.Car;
 import car.ray.CarDataConst;
 import drive.*;
 import game.*;
-import helper.H;
+import helper.Log;
 import settings.Configuration;
 import world.*;
 import world.highway.HighwayWorld;
@@ -108,7 +108,7 @@ public class Main extends SimpleApplication {
 		settings.setFrameRate(config.getFrameRate());
 		app.setSettings(settings);
 		app.setShowSettings(false);
-//		app.setDisplayStatView(false); //shows the triangle count and stuff
+//		app.setDisplayStatView(false); //defaults to on, shows the triangle count and stuff
 		app.start();
 	}
 	
@@ -120,11 +120,11 @@ public class Main extends SimpleApplication {
 		boolean ignoreOthers = true;
 		if (ignoreWarnings) {
 			Logger.getLogger("com.jme3").setLevel(Level.SEVERE); //remove warnings here
-			H.e("!!!! IGNORING IMPORTANT WARNINGS !!!!!");
+			Log.e("!!!! IGNORING IMPORTANT WARNINGS !!!!!");
 		}
 		if (ignoreOthers) {
 			Logger.getLogger("com.jme3.scene.plugins.").setLevel(Level.SEVERE);//remove warnings here
-			H.e("!!!! IGNORING (some) IMPORTANT WARNINGS !!!!!");
+			Log.e("!!!! IGNORING (some) IMPORTANT WARNINGS !!!!!");
 		}
 		inputManager.deleteMapping(SimpleApplication.INPUT_MAPPING_EXIT);
 		
@@ -148,8 +148,8 @@ public class Main extends SimpleApplication {
 		getStateManager().attach(start);
 		
 		bullet = new BulletAppState();
-//		bullet.setSpeed(0.1f); //physics second rate
-//    	bullet.setDebugEnabled(true);
+//		bullet.setSpeed(0.1f); //physics per second rate
+//    	bullet.setDebugEnabled(true); //show bullet wireframes
 		getStateManager().attach(bullet);
 		bullet.getPhysicsSpace().setAccuracy(1f/180f); //physics rate
 		bullet.getPhysicsSpace().setGravity(new Vector3f(0, -9.81f, 0)); //yay its down
@@ -157,10 +157,8 @@ public class Main extends SimpleApplication {
 		inputManager.setCursorVisible(true);
 		flyCam.setEnabled(false);
 		
-		//profiling in jme 3.2
-		DetailedProfilerState profiler = new DetailedProfilerState(); 
-		//TODO add physics engine stuff to this
-//		getStateManager().attach(profiler);
+		//profiling in jme 3.2 (TODO add physics engine stuff to this)
+//		getStateManager().attach(new DetailedProfilerState());
 		
 	}
 	
@@ -169,7 +167,7 @@ public class Main extends SimpleApplication {
 		super.update();
 		
 		if (Vector3f.ZERO.length() != 0) {
-			H.e("Vector3f.ZERO is not zero!!!!, considered a fatal error.");
+			Log.e("Vector3f.ZERO is not zero!!!!, considered a fatal error.");
 			System.exit(342);
 		}
 	}
@@ -253,7 +251,7 @@ public class Main extends SimpleApplication {
 			start = new Start();
 			state.attach(start);
 		} else {
-			H.p("Unexpected state called me '" + app + "' - rally.next()");
+			Log.p("Unexpected state called me '" + app + "' - rally.next()");
 			//but just start again anyway
 			state.detach(app);
 			drive = null;

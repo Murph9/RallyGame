@@ -22,6 +22,7 @@ import com.jme3.scene.Geometry;
 import car.ray.RayCarControl;
 import game.App;
 import helper.H;
+import helper.Log;
 
 public class CarCamera extends AbstractAppState implements RawInputListener {
 
@@ -121,7 +122,7 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 			Geometry g = cr.getGeometry();
 			if (!H.hasParentNode(g, p.getRootNode())) { //don't collide with the car TODO doesn't work
 				c.setLocation(cr.getContactPoint());
-				H.p("Camera contact on: ", g.getName());
+				Log.p("Camera contact on: ", g.getName());
 			}
 		}
 		

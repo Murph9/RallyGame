@@ -15,6 +15,7 @@ public class RayCarPowered extends RayCar {
 	protected float steeringCurrent;
 	protected float brakeCurrent;
 	protected boolean handbrakeCurrent;
+	protected boolean ignoreSpeedFactor;
 	
 	protected float steerLeft;
 	protected float steerRight;
@@ -27,14 +28,14 @@ public class RayCarPowered extends RayCar {
 	protected int curRPM = 1000;
 	protected int gearChangeTo;
 	protected float gearChangeTime;
-	protected float clutch; //TODO use//0 = can drive, 1 = can't drive
+	protected float clutch; //TODO use //0 = can drive, 1 = can't drive
 	 
 	protected float redlineKillTimeout;
 	
 	public RayCarPowered(CollisionShape shape, CarDataConst carData) {
 		super(shape, carData);
 		
-		//this.nitro = carData.nitro_max;
+		this.nitro = carData.nitro_max;
 	}
 
 	

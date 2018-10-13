@@ -8,7 +8,7 @@ import com.jme3.bullet.collision.PhysicsRayTestResult;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Vector3f;
 
-import helper.H;
+import helper.Log;
 
 public class CarRaycaster {
 	public CarRaycaster() {}
@@ -30,7 +30,7 @@ public class CarRaycaster {
 			if (result.getCollisionObject() instanceof PhysicsRigidBody) {
 				rd.obj = (PhysicsRigidBody)result.getCollisionObject();
 			} else {
-				H.e("No 'real' object found ray casting for: " + body);
+				Log.e("No 'real' object found ray casting for: " + body);
 			}
 			return rd;
 		}

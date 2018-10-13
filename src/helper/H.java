@@ -26,72 +26,9 @@ import com.jme3.scene.shape.Line;
 
 import game.App;
 
-//Its short for help, name length was a concern (see H.p())
+//Its short for help, name length was a concern
 public class H {
 
-	/**
-	 * Easier way of typing System.out.println(); -> H.p();
-	 * @param o The thing you wanted printed
-	 */
-	public static void p() {
-		System.out.println();
-	}
-	public static void p(Object o) {
-		System.out.println(o);
-	}
-	public static void p(Object... os) {
-		for (Object o : os) {
-	        System.out.print(o + " ");
-	    }
-		System.out.println();
-	}
-	public static void p(Object[] ol, String sep) {
-		if (sep == null) sep = "\n";
-		for (Object o: ol)
-			System.out.print(o + sep);
-		System.out.println();
-	}
-	public static void p(Iterable<Object> ol, String sep) {
-		H.p(ol, sep);
-	}
-	public static void p(Object[][] matrix, String sep) {
-		if (matrix == null)
-			return;
-		if (matrix.length == 0)
-			return;
-		
-		System.out.println("Matrix:");
-		for (int i = 0; i < matrix.length; i++) {
-			for (int j = 0; j < matrix[0].length; j++) {
-				System.out.print(matrix[i][j] + sep);
-			}
-			System.out.println();
-		}
-	}
-	
-	//System.err
-	public static void e(Object o) {
-		System.err.println(o);
-	}
-	public static void e(Object... os) {
-		for (Object o : os) {
-	        System.err.print(o + " ");
-	    }
-		System.err.println();
-	}
-	public static void e(Object[] ol, String sep) {
-		if (sep == null) sep = "\n";
-		for (Object o: ol)
-			System.err.print(o+sep);
-		System.err.println();
-	}
-	public static void e(Iterable<Object> ol, String sep) {
-		H.e(ol, sep);
-	}
-	public static void e(Exception e) {
-		e.printStackTrace(System.err);
-	}
-	
 	public static String str(Object[] ol, String sep) {
 		if (ol == null) return null;
 		String str = "";
@@ -241,7 +178,7 @@ public class H {
 	
 	public static Geometry makeShapeArrow(AssetManager am, ColorRGBA color, Vector3f dir, Vector3f pos) {
 		if (!Vector3f.isValidVector(pos) || !Vector3f.isValidVector(dir)) {
-			H.e("not valid pos or dir", pos, dir);
+			Log.e("not valid pos or dir", pos, dir);
 			return null;
 		}
 		Arrow arrow = new Arrow(dir);
@@ -251,7 +188,7 @@ public class H {
 	}
 	public static Geometry makeShapeBox(AssetManager am, ColorRGBA color, Vector3f pos, float size) {
 		if (!Vector3f.isValidVector(pos)) {
-			H.e("not valid position");
+			Log.e("not valid position");
 			return null;
 		}
 		
@@ -262,7 +199,7 @@ public class H {
 	}
 	public static Geometry makeShapeLine(AssetManager am, ColorRGBA color, Vector3f start, Vector3f end) {
 		if (!Vector3f.isValidVector(start) || !Vector3f.isValidVector(end)) {
-			H.e("not valid start or end", start, end);
+			Log.e("not valid start or end", start, end);
 			return null;
 		}
 		Line l = new Line(start, end);
@@ -358,7 +295,7 @@ public class H {
 	//copies to first array
 	public static void addTogether(float[] a, float[] b) {
 		if (a.length != b.length) {
-			H.e("Arrays not the same length: " + a.length + " and " + b.length);
+			Log.e("Arrays not the same length: " + a.length + " and " + b.length);
 			return;
 		}
 		for (int i = 1; i < a.length - 1; i++) {
@@ -368,7 +305,7 @@ public class H {
 	//copies to new array
 	public static float[] addTogetherNew(float[] a, float[] b) {
 		if (a.length != b.length) {
-			H.e("Arrays not the same length: " + a.length + " and " + b.length);
+			Log.e("Arrays not the same length: " + a.length + " and " + b.length);
 			return null;
 		}
 		float[] out = new float[a.length];

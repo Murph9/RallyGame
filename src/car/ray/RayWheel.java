@@ -2,7 +2,7 @@ package car.ray;
 
 import com.jme3.math.Vector3f;
 
-import helper.H;
+import helper.Log;
 
 public class RayWheel {
 
@@ -39,7 +39,7 @@ public class RayWheel {
 				throw new Exception("maxlong was: '" + maxLong +"'.");
 		} catch (Exception e) {
 			e.printStackTrace();
-			H.p("error in calculating max(lat|long) values of: " + num);
+			Log.p("error in calculating max(lat|long) values of: " + num);
 			System.exit(1);
 		}
 	}

@@ -14,7 +14,7 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.instancing.InstancedNode;
 
 import game.App;
-import helper.H;
+import helper.Log;
 import jme3tools.optimize.GeometryBatchFactory;
 import terrainWorld.TerrainChunk;
 import terrainWorld.TileListener;
@@ -64,7 +64,7 @@ public class TreeMaker implements TileListener {
 		if (this.treeNodes.containsKey(pos)) {
 			Node n = this.treeNodes.get(pos);
 			if (n == null) {
-				H.e("no trees with vector: ", terrainChunk.getLocalTranslation(), " :(");
+				Log.e("no trees with vector: ", terrainChunk.getLocalTranslation(), " :(");
 				return true;
 			}
 			
@@ -105,7 +105,7 @@ public class TreeMaker implements TileListener {
 	public boolean tileUnloaded(TerrainChunk terrainChunk) {
 		Node n = this.treeNodes.get(terrainChunk.getLocalTranslation());
 		if (n == null) {
-			H.e("no trees at: ", terrainChunk.getLocalTranslation(), " :(");
+			Log.e("no trees at: ", terrainChunk.getLocalTranslation(), " :(");
 			return true;
 		}
 		for (Spatial c: n.getChildren()) {

@@ -37,6 +37,7 @@ import car.ray.RayCarControl;
 import game.App;
 import game.RaceMenu;
 import helper.H;
+import helper.Log;
 
 public class DriveRace extends AbstractAppState {
 
@@ -93,7 +94,7 @@ public class DriveRace extends AbstractAppState {
     	
     	Collection<PhysicsRigidBody> list = App.rally.getPhysicsSpace().getRigidBodyList();
     	if (list.size() > 0) {
-    		H.p("some one didn't clean up after themselves..." + list.size());
+    		Log.p("some one didn't clean up after themselves..." + list.size());
     		for (PhysicsRigidBody r: list)
     			App.rally.getPhysicsSpace().remove(r);
     	}
@@ -274,7 +275,7 @@ public class DriveRace extends AbstractAppState {
 	
 	public void cleanup() {
 		super.cleanup();
-		H.p("cleaning driverace class");
+		Log.p("cleaning driverace class");
 		
 		for (RigidBodyControl r: landscapes) {
 			App.rally.getPhysicsSpace().remove(r);

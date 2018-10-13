@@ -20,7 +20,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 import game.App;
-import helper.H;
+import helper.Log;
 
 public class StaticWorldBuilder extends World {
 
@@ -98,7 +98,7 @@ public class StaticWorldBuilder extends World {
 			addWorldModel(rootNode, App.rally.getPhysicsSpace(), worldModel, ifShadow);
 		}
 		
-		H.e("Adding: "+ world.name);
+		Log.e("Adding: "+ world.name);
 	}
 	
 	private void addWorldModel(Node node, PhysicsSpace phys, Spatial s, boolean ifShadow) {

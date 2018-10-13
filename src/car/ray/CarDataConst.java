@@ -38,13 +38,15 @@ public abstract class CarDataConst implements Serializable {
 	public float areo_crossSection = 0.47f; //m^2 front area
 	public float areo_downforce = 0.0f; //not a default yet
 	
-	//all relative to 'wheel' offset pos
+	//travel values are relative to wheel offset pos
 	public float sus_min_travel = -0.25f; //upper travel length - closer to car
 	public float sus_max_travel = 0f; //lower travel length - closer to ground
 	public float susTravel() { return sus_max_travel - sus_min_travel; }
-	public float sus_preload_force = 3f/4; //spring pre-load Kg (Nm from gravity) //TODO tune (balanced against gravity /4)
+	public float sus_preload_force = 3f/4; //spring pre-load Kg (Nm from gravity) //TODO tune (balanced against gravity)
 	public float sus_stiffness = 20;//50f; //20-200
 	public float sus_max_force = 50*mass;
+	
+	public float sus_antiroll = 0; //TODO use (en.wikipedia.org/wiki/Anti-roll_bar)
 	
 	protected float sus_comp = 0.2f;
 	protected float sus_relax = 0.3f;

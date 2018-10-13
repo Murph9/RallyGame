@@ -14,6 +14,7 @@ import com.jme3.math.Vector3f;
 import game.App;
 import helper.H;
 import helper.HelperObj;
+import helper.Log;
 
 //doesn't extend anything, but here are some reference classes
 //https://github.com/jMonkeyEngine/jmonkeyengine/blob/master/jme3-core/src/main/java/com/jme3/scene/Spatial.java
@@ -49,7 +50,7 @@ public class RayCar implements PhysicsTickListener {
 	//debug values
 	protected float dragValue;
 	protected float driftAngle;
-	protected final Vector3f planarGForce;
+	public final Vector3f planarGForce;
 	
 	public RayCar(CollisionShape shape, CarDataConst carData) {
 		this.carData = carData;
@@ -76,7 +77,8 @@ public class RayCar implements PhysicsTickListener {
 		
 		// TODO check that rest suspension position is within min and max
 		Vector3f grav = new Vector3f();
-		App.rally.bullet.getPhysicsSpace().getGravity(grav);
+		App.rally.bullet.getPhysicsSpace().getGravity(grav); //becuase the rigid body doesn't have gravity yet
+		Log.p("TODO: sus min/max range calc" + carData.sus_preload_force);
 	}
 
 	@Override
@@ -159,8 +161,6 @@ public class RayCar implements PhysicsTickListener {
 				projected_rel_vel = projVel * inv;
 				clippedInvContactDotSuspension = inv;
 			}
-			
-			//how does gravity scale this?
 			
 			// Calculate spring distance from its zero length, as it should be outside the suspension range
 			float springDiff = carData.susTravel() - wheels[w_id].susRayLength;

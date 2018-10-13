@@ -273,7 +273,7 @@ public class CarUI extends AbstractAppState {
 			float angle = FastMath.interpolateLinear(i/(float)finalRPM, startAng, finalAng);
 			
 			if (i == redline) { //TODO actually show red
-				//H.p(new Vector3f(FastMath.cos(angle)*radius, FastMath.sin(angle)*radius, 1));
+				//Log.p(new Vector3f(FastMath.cos(angle)*radius, FastMath.sin(angle)*radius, 1));
 				Line l = new Line(new Vector3f(FastMath.cos(angle)*radius, FastMath.sin(angle)*radius, 1)
 						, new Vector3f(FastMath.cos(angle)*radius*0.9f, FastMath.sin(angle)*radius*0.9f, -1));
 				Geometry redLine = new Geometry("redline", l);
@@ -465,13 +465,11 @@ public class CarUI extends AbstractAppState {
 			
 			//g forces
 			//needs to be translated from local into screen axis
-			Vector3f gs = new Vector3f();//TODO p.gForce;
+			Vector3f gs = p.planarGForce;
 			gs.y = gs.z; //z is front back
 			gs.z = 0; //screen has no depth
 			g2.setLocalTranslation(gcenter.add(gs.mult(25))); //because screen pixels
-			
-//			gText.setText("x: " + H.roundDecimal(gs.x, 2) +", y: " + H.roundDecimal(gs.y, 2));
-			gText.setText("x: " + gs.x +", y: " + gs.y);
+			gText.setText("x: " + H.roundDecimal(gs.x, 2) +", y: " + H.roundDecimal(gs.y, 2));
 		}
 	}
 	

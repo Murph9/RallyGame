@@ -4,7 +4,7 @@ import java.util.function.BiFunction;
 
 import com.jme3.math.Vector3f;
 
-import helper.H;
+import helper.Log;
 
 //https://en.wikipedia.org/wiki/B%C3%A9zier_curve#Linear_B.C3.A9zier_curves
 public class StraightCurve implements Curve {
@@ -23,7 +23,7 @@ public class StraightCurve implements Curve {
 	@Override
 	public BSegment[] calcPoints() {
 		if (nodes == null || nodes.length != 2) {
-			H.e("Incorrect starting points given " + (nodes == null ? 0 : nodes.length) + ", need 2");
+			Log.e("Incorrect starting points given " + (nodes == null ? 0 : nodes.length) + ", need 2");
 			return null;
 		}
 		if (output != null){

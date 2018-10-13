@@ -87,7 +87,7 @@ public enum Valley implements WP {
 		
 		private boolean isAngleGood(WPObject wpo) {
 			float angle = angleFromHorizontal(nextRot.mult(wpo.wp.getNewAngle()));
-//			H.p(angle);
+//			Log.p(angle);
 			return FastMath.abs(angle) < FastMath.DEG_TO_RAD*9; //they happen to angle up/down at 8'
 //			return FastMath.abs(angle) < FastMath.QUARTER_PI;
 		}

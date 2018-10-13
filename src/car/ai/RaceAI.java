@@ -6,7 +6,7 @@ import com.jme3.math.Vector3f;
 
 import car.ray.RayCarControl;
 import drive.DriveRace;
-import helper.H;
+import helper.Log;
 
 public class RaceAI extends CarAI {
 
@@ -22,7 +22,7 @@ public class RaceAI extends CarAI {
 		Vector3f pos = car.getPhysicsLocation();
 		Vector3f atPos = race.getNextCheckpoint(this, pos);
 		if (atPos == null) {
-			H.e("at pos was null though?");
+			Log.e("at pos was null though?");
 			return; //don't know what to do
 		}
 		

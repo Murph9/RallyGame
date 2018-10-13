@@ -147,6 +147,6 @@ public class PerlinNoise extends AbstractHeightMap {
 				counter++;
 			}
 		}
-		H.p(m, ",");
+		Log.p(m, ",");
 	}
 }

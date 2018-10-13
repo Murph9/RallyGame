@@ -1,6 +1,5 @@
 package drive;
 
-
 import world.World;
 import world.WorldType;
 
@@ -15,8 +14,7 @@ import com.jme3.input.Joystick;
 import car.*;
 import car.ray.CarDataConst;
 import game.App;
-import helper.H;
-
+import helper.Log;
 
 public class DriveBase extends AbstractAppState {
 	
@@ -43,7 +41,7 @@ public class DriveBase extends AbstractAppState {
     	WorldType type = world.getType();
     	if (type == WorldType.NONE)
     	{
-    		H.e("not sure what world type you want");
+    		Log.e("not sure what world type you want");
     		System.exit(-1);
     	}
     }
@@ -54,7 +52,7 @@ public class DriveBase extends AbstractAppState {
 
     	Collection<PhysicsRigidBody> list = App.rally.getPhysicsSpace().getRigidBodyList();
     	if (list.size() > 0) {
-    		H.p("some one didn't clean up after themselves..." + list.size());
+    		Log.p("some one didn't clean up after themselves..." + list.size());
     		for (PhysicsRigidBody r: list)
     			App.rally.getPhysicsSpace().remove(r);
     	}
@@ -78,7 +76,7 @@ public class DriveBase extends AbstractAppState {
 		//connectJoySticks
 		Joystick[] joysticks = App.rally.getInputManager().getJoysticks();
 		if (joysticks == null) {
-			H.e("There are no joysticks :(");
+			Log.e("There are no joysticks :(");
 		}
 		
 		App.rally.bullet.setEnabled(true);
@@ -109,7 +107,7 @@ public class DriveBase extends AbstractAppState {
 	
 	public void cleanup() {
 		super.cleanup();
-		H.p("cleaning drive class");
+		Log.p("cleaning drive class");
 		
 		App.rally.getStateManager().detach(cb);
 		cb = null;

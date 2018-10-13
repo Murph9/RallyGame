@@ -10,6 +10,7 @@ import com.jme3.math.Vector3f;
 
 import game.App;
 import helper.H;
+import helper.Log;
 import terrainWorld.NoiseBasedWorld;
 import terrainWorld.TerrainChunk;
 import terrainWorld.TileListener;
@@ -50,7 +51,7 @@ public class RoadMaker implements TileListener {
 		this.terrain = world.terrain;
 		this.totalChunks = terrain.getTotalVisibleChunks();
 		
-		//TODO random start angle H.p("Terrain started with direction: ", angle);
+		//TODO random start angle Log.p("Terrain started with direction: ", angle);
 		generateRoadBit(); //init first road
 	}
 	
@@ -64,7 +65,7 @@ public class RoadMaker implements TileListener {
 	}
 	
 	private void initRoads(TerrainChunk chunk) {
-		H.p("initing roads");
+		Log.p("initing roads");
 		
 		while (true) {
 			float height = 0;
@@ -140,7 +141,7 @@ public class RoadMaker implements TileListener {
 		
 		lastPoints = newPoints;
 		
-		H.p("next road point:", lastPoints[3]);
+		Log.p("next road point:", lastPoints[3]);
 	}
 	
 	@Override

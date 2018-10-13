@@ -10,6 +10,7 @@ import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
 import helper.H;
+import helper.Log;
 import world.*;
 import world.highway.HighwayWorld;
 import world.lsystem.LSystemWorld;
@@ -106,7 +107,7 @@ public class ChooseMap extends AbstractAppState {
 	////////////////////////
 	//UI stuff
 	public void chooseMap() {
-		if (world == null) { H.e("no return value for ChooseMap()"); }
+		if (world == null) { Log.e("no return value for ChooseMap()"); return; }
 		App.rally.next(this);
 	}
 	public World getWorld() {
@@ -155,7 +156,7 @@ public class ChooseMap extends AbstractAppState {
 				break;
 				
 			default:
-				H.p("Non valid world type in ChooseMap.setWorld() method");
+				Log.p("Non valid world type in ChooseMap.setWorld() method");
 				return;
 		}
 		

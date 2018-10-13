@@ -11,7 +11,7 @@ import car.ai.FollowWorldAI;
 import car.ray.CarDataConst;
 import car.ray.RayCarControl;
 import game.App;
-import helper.H;
+import helper.Log;
 
 public class DriveDemo extends DriveBase {
 
@@ -19,7 +19,7 @@ public class DriveDemo extends DriveBase {
     	super(car, world);
     	
     	if (!(world instanceof DefaultBuilder)) {
-    		H.e("DriveDemo has wrong world type.");
+    		Log.e("DriveDemo has wrong world type.");
     		System.exit(-1);
     	}
     }

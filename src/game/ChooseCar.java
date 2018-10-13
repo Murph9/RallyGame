@@ -20,6 +20,7 @@ import car.ray.CarDataConst;
 import car.ray.RayCarControl;
 import helper.H;
 import helper.H.Duo;
+import helper.Log;
 import world.StaticWorld;
 import world.StaticWorldBuilder;
 import world.World;
@@ -162,7 +163,7 @@ public class ChooseCar extends AbstractAppState {
 	/////////////////////////////
 	//UI stuff
 	public void chooseCar() {
-		if (car == null) { H.p("no return value for ChooseCar()"); };
+		if (car == null) { Log.p("no return value for ChooseCar()"); };
 		App.rally.next(this);
 	}
 	public CarDataConst getCarData() {

@@ -29,6 +29,7 @@ import car.ray.CarDataConst;
 import car.ray.RayCarControl;
 import game.App;
 import helper.H;
+import helper.Log;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 //TODO cleanup
@@ -232,7 +233,7 @@ public class CarEditor extends Container {
 			
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			e.printStackTrace();
-			H.p("Remember this can only set public fields");
+			Log.p("Remember this can only set public fields");
 		}
 		
 		if (a != null)

@@ -19,6 +19,7 @@ import car.MyKeyListener;
 import car.ai.CarAI;
 import game.App;
 import helper.H;
+import helper.Log;
 
 //visual/input things
 public class RayCarControl extends RayCarPowered {
@@ -65,6 +66,10 @@ public class RayCarControl extends RayCarPowered {
 	}
 	
 	public void update(float tpf) {
+		if (ai != null) {
+			ai.update(tpf);
+		}
+		
 		if (engineSound != null) {
 			//if sound exists
 			float pitch = FastMath.clamp(0.5f+1.5f*((float)curRPM/(float)carData.e_redline), 0.5f, 2);
@@ -121,6 +126,9 @@ public class RayCarControl extends RayCarPowered {
 	}
 	
 	private float getMaxSteerAngle(float trySteerAngle, float sign) {
+		if (ignoreSpeedFactor)
+			return trySteerAngle;
+		
 		Vector3f local_vel = rbc.getPhysicsRotation().inverse().mult(rbc.getLinearVelocity());
 		if (local_vel.z < 0 || ((-sign * this.driftAngle) < 0 && Math.abs(this.driftAngle) > carData.minDriftAngle * FastMath.DEG_TO_RAD)) 
 			return trySteerAngle; //when going backwards, slow or needing to turning against drift, you get no speed factor
@@ -140,7 +148,7 @@ public class RayCarControl extends RayCarPowered {
 
 	public void onAction(String binding, boolean value, float tpf) {
 		if (binding == null) {
-			helper.H.p("No binding given?");
+			helper.Log.p("No binding given?");
 			return;
 		}
 		
@@ -200,6 +208,10 @@ public class RayCarControl extends RayCarPowered {
 				if (value) curGear = 0;
 				else curGear = 1;
 				break;
+				
+			case "IgnoreSteeringSpeedFactor":
+				ignoreSpeedFactor = value;
+				break;
 	
 			default:
 				//nothing
@@ -243,7 +255,7 @@ public class RayCarControl extends RayCarPowered {
 		
 		space.removeTickListener(this);
 		space.remove(this.rootNode);
-		H.e("Write more RayCarControl.cleanup()");
+		Log.e("Write more RayCarControl.cleanup()");
 	}
 	
 	//Phyics get/set methods
@@ -262,7 +274,7 @@ public class RayCarControl extends RayCarPowered {
 	}
 	public void attachControls() {
 		if (controls.size() > 0) {
-			H.e("attachControls already called");
+			Log.e("attachControls already called");
 			return;
 		}
 		
@@ -332,7 +344,7 @@ public class RayCarControl extends RayCarPowered {
         	this.rbc.setEnabled(enabled);
         	
             if (enabled && !added) {
-            	H.p("added");
+            	Log.p("added");
                 space.add(this.rootNode);
                 
                 added = true;

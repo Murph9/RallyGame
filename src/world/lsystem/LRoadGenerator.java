@@ -18,7 +18,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.shape.Box;
 
 import game.App;
-import helper.H;
+import helper.Log;
 import world.highway.RoadMesh;
 
 public class LRoadGenerator {
@@ -46,7 +46,7 @@ public class LRoadGenerator {
 	}
 	
 	public void init() {
-		H.p("|Starting L-system, size: " + lineCount);
+		Log.p("|Starting L-system, size: " + lineCount);
 		
 		// l-system like generation attempt
 		Q = new PriorityQueue<QueueObj>(10);
@@ -89,7 +89,7 @@ public class LRoadGenerator {
 				place(q);
 				
 				if (DEBUG)
-					H.p("|Placing a line with rule: " + q.rule);
+					Log.p("|Placing a line with rule: " + q.rule);
 				
 				count++;
 				
@@ -115,7 +115,7 @@ public class LRoadGenerator {
 					Geometry boxNow = box1.clone();
 					boxNow.setLocalTranslation(p);
 					rootNode.attachChild(boxNow);
-					H.p("|Placing building at: " + p);
+					Log.p("|Placing building at: " + p);
 				}
 			}
 			
@@ -277,7 +277,7 @@ public class LRoadGenerator {
 		*/
 		
 		if (DEBUG) {
-//			H.p("|Drawing line, " + obj.start + " " + obj.end + ", colour:" + obj.type.colour);
+//			Log.p("|Drawing line, " + obj.start + " " + obj.end + ", colour:" + obj.type.colour);
 			drawMeAVerySmallBox(obj.end, ColorRGBA.White);
 			
 			drawMeAVerySmallBox(list.get(0), ColorRGBA.Red);

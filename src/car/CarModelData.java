@@ -8,14 +8,13 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 import game.App;
-import helper.H;
+import helper.Log;
 
 public class CarModelData {
-	
-	boolean simple = false;
 
-	String carModel;
-	String wheelModel;
+	private String carModel;
+	@SuppressWarnings("unused") //eventually...
+	private String wheelModel;
 	
 	//chassis data
 	private HashMap<CarPart, CarPartData> pieces;
@@ -31,8 +30,8 @@ public class CarModelData {
 		Spatial rootSpat = App.rally.getAssetManager().loadModel(carModel);
 		readInModelData(rootSpat);
 		
-		H.e("Car part data for: '" + car + "'");
-		H.e(pieces.keySet().toArray(), (String)null); //casting a null...
+		Log.e("Car part data for: '" + car + "'");
+		Log.e(pieces.keySet().toArray(), (String)null); //casting a null...
 	}
 	
 	private void readInModelData(Spatial s) {

@@ -5,7 +5,7 @@ import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
 
 import car.ray.RayCarControl;
-import helper.H;
+import helper.Log;
 import world.wp.DefaultBuilder;
 
 public class FollowWorldAI extends CarAI {
@@ -35,12 +35,12 @@ public class FollowWorldAI extends CarAI {
 		float ang = car.left.normalize().angleBetween((atPos.subtract(pos)).normalize());
 		
 		//get attempted turn angle as pos or negative
-		float nowTurn = angF*Math.signum(FastMath.HALF_PI-ang); //TODO wobble
+		float nowTurn = angF*Math.signum(FastMath.HALF_PI-ang); //TODO wobbling
 
-		H.p(nowTurn, angF, ang, lastTurn);
+		Log.p(nowTurn, angF, ang, lastTurn);
 		lastTurn = FastMath.interpolateLinear(tpf*10, lastTurn, nowTurn);
 		
-		//turn towards 
+		//turn towards
 		if (lastTurn < 0) {
 			onEvent("Left", false, 0);
 			onEvent("Right", true, Math.abs(lastTurn)*reverse);
@@ -57,12 +57,12 @@ public class FollowWorldAI extends CarAI {
 			onEvent("Accel", false, 0);
 		}
 		
-		//if going to slow speed up
+		//if going too slow speed up
 		if (car.getLinearVelocity().length() < 10) {
 			onEvent("Accel", true, 1);
 			onEvent("Brake", false, 0);
 			
-			if (car.getLinearVelocity().length() < 1 && car.up.y < 0) { //very still
+			if (car.getLinearVelocity().length() < 2 && car.up.y < 0) { //very still
 				onEvent("Flip", true, 1);
 			}
 		}

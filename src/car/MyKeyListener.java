@@ -43,10 +43,11 @@ public class MyKeyListener implements RawInputListener {
 		layout.put(KeyInput.KEY_LCONTROL, "Nitro");
 		layout.put(KeyInput.KEY_RCONTROL, "Nitro");
 		
+		//hacks
 		layout.put(KeyInput.KEY_F, "Flip");
 		layout.put(KeyInput.KEY_RETURN, "Reset");
-		
 		layout.put(KeyInput.KEY_Q, "Jump");
+		layout.put(KeyInput.KEY_I, "IgnoreSteeringSpeedFactor");
 	}
 	
 	public void beginInput() {}
