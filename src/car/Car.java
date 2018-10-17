@@ -38,20 +38,20 @@ public enum Car {
 	private static class NormalCar extends CarDataConst {
 		//for using the default settings.
 		NormalCar() {
-			rollFraction = 1.2f;
+			
 		}
 		
 		@Override
 		public void postLoad() {
-			//TODO nothing
-			
-			susF.stiffness = 170;
-			susR.stiffness = 120;
+			//TODO nothing pls
 			
 			for (int i = 0; i < wheelData.length; i++) {
 				wheelData[i] = new WheelDataConst(wheelModel, 0.3f, 25, 0.15f);
 				wheelData[i].pjk_lat = new WheelDataTractionConst(17, 1.9f, 1f, 0.97f);
-				wheelData[i].pjk_long = new WheelDataTractionConst(17, 1.9f, 1f, 0.98f);
+				wheelData[i].pjk_long = new WheelDataTractionConst(17, 1.5f, 1f, 0.98f);
+				
+				wheelData[i].pjk_lat_sat = WheelDataTractionConst.BASE_SAT;
+				wheelData[i].pjk_long_sat = WheelDataTractionConst.BASE_SAT;
 			}
 		}
 	}
@@ -97,8 +97,10 @@ public enum Car {
 			
 			for (int i = 0; i < wheelData.length; i++) {
 				wheelData[i] = new WheelDataConst(wheelModel, 0.3f, 10, 0.15f);
-				wheelData[i].pjk_lat = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
-				wheelData[i].pjk_long = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
+				wheelData[i].pjk_lat = new WheelDataTractionConst(5f, 1.9f, 1f, 0.99f);
+				wheelData[i].pjk_long = new WheelDataTractionConst(5f, 1.9f, 1f, 0.97f);
+				wheelData[i].pjk_lat_sat = WheelDataTractionConst.BASE_SAT;
+				wheelData[i].pjk_long_sat = WheelDataTractionConst.BASE_SAT;
 				
 				setWheelOffset(i, x_off, y_off, z_off);
 			}
@@ -137,8 +139,10 @@ public enum Car {
 			
 			for (int i = 0; i < wheelData.length; i++) {
 				wheelData[i] = new WheelDataConst(wheelModel, 0.3f, 10, 0.15f);
-				wheelData[i].pjk_lat = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
-				wheelData[i].pjk_long = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
+				wheelData[i].pjk_lat = WheelDataTractionConst.MY_BASE;
+				wheelData[i].pjk_long = WheelDataTractionConst.MY_BASE;
+				wheelData[i].pjk_lat_sat = WheelDataTractionConst.BASE_SAT;
+				wheelData[i].pjk_long_sat = WheelDataTractionConst.BASE_SAT;
 				
 				setWheelOffset(i, x_off, y_off, z_off);
 			}
@@ -197,8 +201,10 @@ public enum Car {
 			
 			for (int i = 0; i < wheelData.length; i++) {
 				wheelData[i] = new WheelDataConst(wheelModel, 0.3f, 10, 0.15f);
-				wheelData[i].pjk_lat = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
-				wheelData[i].pjk_long = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
+				wheelData[i].pjk_lat = WheelDataTractionConst.MY_BASE;
+				wheelData[i].pjk_long = WheelDataTractionConst.MY_BASE;
+				wheelData[i].pjk_lat_sat = WheelDataTractionConst.BASE_SAT;
+				wheelData[i].pjk_long_sat = WheelDataTractionConst.BASE_SAT;
 				
 				setWheelOffset(i, x_off, y_off, z_off);
 			}
@@ -248,8 +254,10 @@ public enum Car {
 			
 			for (int i = 0; i < wheelData.length; i++) {
 				wheelData[i] = new WheelDataConst(wheelModel, 0.575f/2f, 10, 0.15f);
-				wheelData[i].pjk_lat = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
-				wheelData[i].pjk_long = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
+				wheelData[i].pjk_lat = WheelDataTractionConst.MY_BASE;
+				wheelData[i].pjk_long = WheelDataTractionConst.MY_BASE;
+				wheelData[i].pjk_lat_sat = WheelDataTractionConst.BASE_SAT;
+				wheelData[i].pjk_long_sat = WheelDataTractionConst.BASE_SAT;
 				
 				setWheelOffset(i, x_off, y_off, z_off);
 			}
@@ -300,10 +308,10 @@ public enum Car {
 			
 			for (int i = 0; i < wheelData.length; i++) {
 				wheelData[i] = new WheelDataConst(wheelModel, 0.4f, 15, 0.25f);
-//				wheelData[i].pjk_lat = new WheelDataTractionConst(6f, 2f, 1f, 1f);
-//				wheelData[i].pjk_long = new WheelDataTractionConst(6f, 2f, 1f, 1f);
-				wheelData[i].pjk_lat = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
-				wheelData[i].pjk_long = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
+				wheelData[i].pjk_lat = WheelDataTractionConst.MY_BASE;
+				wheelData[i].pjk_long = WheelDataTractionConst.MY_BASE;
+				wheelData[i].pjk_lat_sat = WheelDataTractionConst.BASE_SAT;
+				wheelData[i].pjk_long_sat = WheelDataTractionConst.BASE_SAT;
 
 				setWheelOffset(i, x_off, y_off, z_off);
 			}
@@ -355,6 +363,8 @@ public enum Car {
 				wheelData[i] = new WheelDataConst(wheelModel, 0.4f, 10, 0.15f);
 				wheelData[i].pjk_lat = new WheelDataTractionConst(10f, 2f, 1.3f, 0.985f);
 				wheelData[i].pjk_long = new WheelDataTractionConst(10f, 2f, 1.3f, 0.985f);
+				wheelData[i].pjk_lat_sat = WheelDataTractionConst.BASE_SAT;
+				wheelData[i].pjk_long_sat = WheelDataTractionConst.BASE_SAT;
 
 				setWheelOffset(i, x_off, y_off, z_off);
 			}
@@ -409,8 +419,10 @@ public enum Car {
 			
 			for (int i = 0; i < wheelData.length; i++) {
 				wheelData[i] = new WheelDataConst(wheelModel, 0.735f/2f, 10, 0.15f);
-				wheelData[i].pjk_lat = new WheelDataTractionConst(6f, 2f, 1f, 1f);
-				wheelData[i].pjk_long = new WheelDataTractionConst(6f, 2f, 1f, 1f);
+				wheelData[i].pjk_lat = WheelDataTractionConst.DEBUG;
+				wheelData[i].pjk_long = WheelDataTractionConst.DEBUG;
+				wheelData[i].pjk_lat_sat = WheelDataTractionConst.BASE_SAT;
+				wheelData[i].pjk_long_sat = WheelDataTractionConst.BASE_SAT;
 
 				setWheelOffset(i, x_off, y_off, z_off);
 			}
@@ -456,8 +468,10 @@ public enum Car {
 			
 			for (int i = 0; i < wheelData.length; i++) {
 				wheelData[i] = new WheelDataConst(wheelModel, 0.4f, 10, 0.15f);
-				wheelData[i].pjk_lat = new WheelDataTractionConst(6f, 2f, 1f, 1f);
-				wheelData[i].pjk_long = new WheelDataTractionConst(6f, 2f, 1f, 1f);
+				wheelData[i].pjk_lat = WheelDataTractionConst.DEBUG;
+				wheelData[i].pjk_long = WheelDataTractionConst.DEBUG;
+				wheelData[i].pjk_lat_sat = WheelDataTractionConst.BASE_SAT;
+				wheelData[i].pjk_long_sat = WheelDataTractionConst.BASE_SAT;
 
 				setWheelOffset(i, x_off, y_off, z_off);
 			}
@@ -493,6 +507,8 @@ public enum Car {
 				wheelData[i] = new WheelDataConst(wheelModel, 0.4f, 10, 0.15f);
 				wheelData[i].pjk_lat = new WheelDataTractionConst(10f, 1.9f, 0.9f, 0.95f);
 				wheelData[i].pjk_long = new WheelDataTractionConst(12f, 1.9f, 0.9f, 0.95f);
+				wheelData[i].pjk_lat_sat = WheelDataTractionConst.BASE_SAT;
+				wheelData[i].pjk_long_sat = WheelDataTractionConst.BASE_SAT;
 
 				setWheelOffset(i, x_off, y_off, z_off);
 			}
@@ -536,6 +552,8 @@ public enum Car {
 				wheelData[i] = new WheelDataConst(wheelModel, 0.5f, 10, 0.1f);
 				wheelData[i].pjk_lat = new WheelDataTractionConst(10f, 1.9f, 0.62f, 0.95f);
 				wheelData[i].pjk_long = new WheelDataTractionConst(10f, 1.9f, 0.62f, 0.95f);
+				wheelData[i].pjk_lat_sat = WheelDataTractionConst.BASE_SAT;
+				wheelData[i].pjk_long_sat = WheelDataTractionConst.BASE_SAT;
 
 				setWheelOffset(i, x_off, y_off, z_off);
 			}

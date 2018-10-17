@@ -136,13 +136,14 @@ public class RayCarControl extends RayCarPowered {
 		//and drift angle needs to be large enough to matter
 		
 		float maxAngle = carData.w_steerAngle/2;
-		//steering factor = atan(0.08 * vel - 1) + maxAngle*PI/2 + maxLat //TODO what is this 0.08f and 1 shouldn't they be car settings?
-		float value = Math.min(-maxAngle*FastMath.atan(0.08f*rbc.getLinearVelocity().length() - 1) + 
-				maxAngle*FastMath.HALF_PI + this.wheels[0].maxLat, Math.abs(trySteerAngle));
+		//steering factor = atan(0.08 * vel - 1) + maxAngle*PI/2 + maxLat //TODO what is this 0.08f
+		float value = Math.min(-maxAngle*FastMath.atan(0.3f*(rbc.getLinearVelocity().length() - 1))
+				+ maxAngle*FastMath.PI/2 + this.wheels[0].maxLat*2, Math.abs(trySteerAngle));
 		
 		//TODO turn back value should be vel dir + maxlat instead of just full lock
 		
 		//remember that this value is clamped after this method is called
+		Log.p(value, rbc.getLinearVelocity().length());
 		return value;
 	}
 

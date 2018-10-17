@@ -90,6 +90,8 @@ public class RayCar implements PhysicsTickListener {
 	public void prePhysicsTick(PhysicsSpace space, float tpf) {
 		applySuspension(space, tpf);
 		
+		//TODO apply the midpoint formula
+		//https://en.wikipedia.org/wiki/Midpoint_method
 		applyTraction(space, tpf);
 		
 		applyDrag(space, tpf);
@@ -275,19 +277,26 @@ public class RayCar implements PhysicsTickListener {
 			}
 			
 			wheels[w_id].skidFraction = p;
-
+			
 			// braking and abs
 			float brakeCurrent2 = brakingCur;
 			if (Math.abs(ratiofract) >= 1 && velocity.length() > 2 && brakingCur == 1)
 				brakeCurrent2 = 0; //abs (which i think works way too well)
 			
+			//self aligning torque
+			if (!isSlowSpeed) { //this doesn't play nice with slow speed physics
+				//TODO not convinced that long(z) direction traction has a self aligning torque
+				//wheel_force.z += (ratiofract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_long_sat, p*this.wheels[w_id].maxLong) * this.wheels[w_id].susForce;
+				wheel_force.x += (anglefract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_lat_sat, p*this.wheels[w_id].maxLat) * this.wheels[w_id].susForce;
+			}
+			
 			//add the wheel force after merging the forces
 			float totalLongForce = wheelTorque[w_id] - wheel_force.z - (brakeCurrent2*carData.brakeMaxTorque*Math.signum(wheels[w_id].radSec));
-			float nextRadSec = wheels[w_id].radSec + tpf*totalLongForce/(carData.e_inertia(w_id));
+			float nextRadSec = wheels[w_id].radSec + tpf*totalLongForce/(carData.e_inertia());
 			if (brakingCur != 0 && Math.signum(wheels[w_id].radSec) != Math.signum(nextRadSec))
 				wheels[w_id].radSec = 0; //maxed out the forces with braking, so prevent wheels from moving
 			else
-				wheels[w_id].radSec += tpf*totalLongForce/(carData.e_inertia(w_id));
+				wheels[w_id].radSec += tpf*totalLongForce/(carData.e_inertia());
 			
 			wheels[w_id].gripDir = wheel_force.normalize();
 			rbc.applyImpulse(w_angle.mult(wheel_force).mult(tpf), wheels[w_id].curBasePosWorld.subtract(w_pos));

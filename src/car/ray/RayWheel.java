@@ -23,6 +23,8 @@ public class RayWheel {
 	
 	public final float maxLong;
 	public final float maxLat;
+	public final float maxLongSat;
+	public final float maxLatSat;
 	
 	public RayWheel(int num, WheelDataConst data, Vector3f offset) {
 		this.num = num;
@@ -32,11 +34,19 @@ public class RayWheel {
 		maxLat = RayCar.GripHelper.calcSlipMax(data.pjk_lat, ERROR);
 		maxLong = RayCar.GripHelper.calcSlipMax(data.pjk_long, ERROR);
 		
+		maxLatSat = RayCar.GripHelper.calcSlipMax(data.pjk_lat_sat, ERROR);
+		maxLongSat = RayCar.GripHelper.calcSlipMax(data.pjk_long_sat, ERROR);
+		
 		try {	
 			if (Float.isNaN(maxLat))
-				throw new Exception("maxlat was: '" + maxLat +"'.");
+				throw new Exception("maxLat was: '" + maxLat +"'.");
 			if (Float.isNaN(maxLong))
-				throw new Exception("maxlong was: '" + maxLong +"'.");
+				throw new Exception("maxLong was: '" + maxLong +"'.");
+			
+			if (Float.isNaN(maxLatSat))
+				throw new Exception("maxLatSat was: '" + maxLatSat +"'.");
+			if (Float.isNaN(maxLongSat))
+				throw new Exception("maxLongSat was: '" + maxLongSat +"'.");
 		} catch (Exception e) {
 			e.printStackTrace();
 			Log.p("error in calculating max(lat|long) values of: " + num);

@@ -105,7 +105,7 @@ public abstract class CarDataConst implements Serializable {
 		//init suspension
 		susF = new CarSusDataConst();
 		susR = new CarSusDataConst();
-	
+		
 		postLoad();
 		
 		modelLoad();
@@ -122,8 +122,11 @@ public abstract class CarDataConst implements Serializable {
 		if (wheelData[0] == null) {
 			for (int i = 0; i < wheelData.length; i++) {
 				wheelData[i] = new WheelDataConst(wheelModel, 0.3f, 25, 0.15f);
-				wheelData[i].pjk_lat = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
-				wheelData[i].pjk_long = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
+				wheelData[i].pjk_lat = WheelDataTractionConst.MY_BASE;
+				wheelData[i].pjk_long = WheelDataTractionConst.MY_BASE;
+				
+				wheelData[i].pjk_lat_sat = WheelDataTractionConst.BASE_SAT;
+				wheelData[i].pjk_long_sat = WheelDataTractionConst.BASE_SAT;
 			}
 		}
 	}
@@ -155,8 +158,15 @@ public abstract class CarDataConst implements Serializable {
 		return gravity*mass*areo_lineardrag/wheelData[w_id].radius;
 	}
 	
-	public float e_inertia(int w_id) { //car internal engine + wheel inertia
-		float wheels = (wheelData[w_id].mass*wheelData[w_id].radius*wheelData[w_id].radius/2);
+	public float wheel_inertia(int w_id) {
+		return wheelData[w_id].mass*wheelData[w_id].radius*wheelData[w_id].radius/2;		
+	}
+	public float e_inertia() { //car internal engine + wheel inertia
+		
+		float wheels = 0;
+		for (int i = 0; i < wheelData.length; i++) 
+			wheels += wheel_inertia(i);
+		
 		if (driveFront && driveRear) {
 			return e_mass + wheels*4;
 		}

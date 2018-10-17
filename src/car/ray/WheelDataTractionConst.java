@@ -13,8 +13,22 @@ public class WheelDataTractionConst {
 		B = b; C = c; D = d; E = e;
 	}
 	
+	public WheelDataTractionConst(WheelDataTractionConst copy) {
+		B = copy.B;
+		C = copy.C;
+		D = copy.D;
+		E = copy.E;
+	}
+	
 	@Override
 	public String toString() {
 		return "B:"+B+",C:"+C+",D:"+D+",E:"+E;
 	}
+	
+	//some pre made ones:
+	public static final WheelDataTractionConst BASE = new WheelDataTractionConst(10f, 0.72f, 1.4f, -0.2f);
+	public static final WheelDataTractionConst MY_BASE = new WheelDataTractionConst(10f, 1.9f, 1f, 0.97f);
+	public static final WheelDataTractionConst DEBUG = new WheelDataTractionConst(6, 2, 1, 1);
+	
+	public static final WheelDataTractionConst BASE_SAT = new WheelDataTractionConst(0.85f, 2.3f, 0.51f, -2.75f);
 }
