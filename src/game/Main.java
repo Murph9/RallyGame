@@ -76,9 +76,9 @@ public class Main extends SimpleApplication {
 	private CarDataConst them;
 	private World world;
 	private void loadDefaults() {
-		car = Car.Runner.get();
+		car = Car.Normal.get();
 		them = Car.Runner.get();
-		world = new StaticWorldBuilder(StaticWorld.track2);
+		world = DynamicType.Simple.getBuilder();
 		//world alernatives:
 		//	new HighwayWorld();
 		//	new StaticWorldBuilder(StaticWorld.track2);
