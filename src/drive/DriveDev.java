@@ -5,12 +5,10 @@ import world.WorldEditor;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AppStateManager;
-import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
 import car.*;
 import car.ray.CarDataConst;
-import car.ray.RayCarControl;
 import game.App;
 import helper.H;
 
@@ -21,7 +19,7 @@ public class DriveDev extends DriveBase {
 	private WorldEditor worldEditor;
 	private TractionCurveGraph wheelGraphs;
 	
-	public DriveDev(CarDataConst car, World world) {
+	public DriveDev(Car car, World world) {
     	super(car, world);
     }
 	
@@ -30,7 +28,7 @@ public class DriveDev extends DriveBase {
     	super.initialize(stateManager, app);
     	
     	//init input gui
-		carEditor = new CarEditor(this.cb.get(0), () -> { reloadCar(); });
+		carEditor = new CarEditor(this.cb.get(0), (data) -> { reloadCar(data); });
 		carEditor.setLocalTranslation(H.screenTopLeft().add(0, -20, 0));
 		App.rally.getGuiNode().attachChild(carEditor);
 		
@@ -50,41 +48,10 @@ public class DriveDev extends DriveBase {
 		wheelGraphs.update(tpf);
 	}
 
-	public void reloadCar() {
-		//TODO minimap can't be reset
+	public void reloadCar(CarDataConst data) {
+		this.cb.get(0).getCarData().loaded = false; //TODO feels like a hack?
 		
-		RayCarControl car = this.cb.get(0);
-		
-		Vector3f pos = car.getPhysicsLocation();
-		Vector3f vel = car.getLinearVelocity();
-		Quaternion q = car.getPhysicsRotation();
-		
-		CarDataConst c = car.getCarData();
-		
-		this.cb.removePlayer(0);
-		this.cb.addCar(0, c, world.getStartPos(), world.getStartRot(), true, null);
-		App.rally.getStateManager().attach(cb);
-
-		App.rally.getStateManager().detach(uiNode);
-		App.rally.getStateManager().detach(menu);
-
-		menu = new DriveMenu(this);
-		App.rally.getStateManager().attach(menu);
-		uiNode = new CarUI(cb.get(0));
-		App.rally.getStateManager().attach(uiNode);
-		
-		camera.setCar(cb.get(0));
-		
-		//keep current pos, vel, rot
-		this.cb.get(0).setPhysicsLocation(pos);
-		this.cb.get(0).setLinearVelocity(vel);
-		this.cb.get(0).setPhysicsRotation(q);
-		
-		App.rally.getGuiNode().detachChild(carEditor);
-		carEditor = new CarEditor(this.cb.get(0), () -> { reloadCar(); });
-		carEditor.setLocalTranslation(H.screenTopLeft().add(0, -50, 0));
-		App.rally.getGuiNode().attachChild(carEditor);
-		
+		this.cb.setCarData(0, data);
 		wheelGraphs.updateMyPhysicsVehicle(this.cb.get(0));
 	}
 	

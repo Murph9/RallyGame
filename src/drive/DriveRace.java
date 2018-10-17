@@ -32,7 +32,6 @@ import car.CarCamera;
 import car.CarUI;
 import car.ai.CarAI;
 import car.ai.RaceAI;
-import car.ray.CarDataConst;
 import car.ray.RayCarControl;
 import game.App;
 import game.RaceMenu;
@@ -55,7 +54,7 @@ public class DriveRace extends AbstractAppState {
 	
 	//car stuff
 	public CarBuilder cb;
-	protected CarDataConst car;
+	protected Car car;
 
 	//gui and camera stuff
 	private CarCamera camera;
@@ -63,7 +62,7 @@ public class DriveRace extends AbstractAppState {
 	
 	//ai things
 	private int themCount = 4;
-	private CarDataConst themType = Car.Runner.get();
+	private Car themType = Car.Runner;
 	
 	//race start things
 	private Vector3f[] worldStarts;
@@ -83,7 +82,7 @@ public class DriveRace extends AbstractAppState {
 	
 	public DriveRace() {
 		super();
-		this.car = Car.Runner.get();
+		this.car = Car.Runner;
 		this.menu = new RaceMenu(null);
 	}
 	

@@ -5,14 +5,14 @@ import world.World;
 import com.jme3.app.Application;
 import com.jme3.app.state.AppStateManager;
 
-import car.ray.CarDataConst;
+import car.Car;
 
 public class DriveAI extends DriveBase {
 	
-	private CarDataConst them;
+	private Car them;
 	private int themCount;
 
-	public DriveAI (CarDataConst car, CarDataConst them, World world) {
+	public DriveAI (Car car, Car them, World world) {
     	super(car, world);
     	this.them = them;
     	this.themCount = 3;

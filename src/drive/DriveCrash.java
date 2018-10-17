@@ -10,7 +10,6 @@ import com.jme3.app.state.AppStateManager;
 import com.jme3.math.Vector3f;
 
 import car.*;
-import car.ray.CarDataConst;
 import car.ray.RayCarControl;
 import game.App;
 import helper.H;
@@ -21,15 +20,15 @@ public class DriveCrash extends DriveBase {
 			new Vector3f(0,0,0)
 	};
 
-	private CarDataConst them;
+	private Car them;
 	private int maxCount;
 	private int nextId;
 	
 	private int totalKilled;
 
 	public DriveCrash (World world) {
-    	super(Car.Runner.get(), world);
-    	this.them = Car.Rally.get();
+    	super(Car.Runner, world);
+    	this.them = Car.Rally;
     	this.maxCount = 30;
     	this.nextId = 1;
     	this.totalKilled = 0;

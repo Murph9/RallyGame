@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 
 import com.jme3.input.InputManager;
 import com.jme3.input.MouseInput;
@@ -33,13 +34,11 @@ import helper.Log;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 //TODO cleanup
-//TODO rewrite to work with RayCarControl
 public class CarEditor extends Container {
 
 	private RayCarControl p;
-	private CarDataConst nextCarData;
 	private HashMap<String, FieldEntry> fields;
-	private Runnable a;
+	private Consumer<CarDataConst> reloadCar;
 	
 	private boolean mouseIn = false;
 	private AnalogListener actionListener = new AnalogListener() {
@@ -49,11 +48,11 @@ public class CarEditor extends Container {
 		}
 	};
 	
-	public CarEditor(RayCarControl p, Runnable a) {
+	public CarEditor(RayCarControl p, Consumer<CarDataConst> a) {
 		super("CarEditor");
 		
 		this.p = p;
-		this.a = a;
+		this.reloadCar = a;
 		this.fields = new HashMap<String, FieldEntry>();
 		try {
 			attachTree(this.p.getCarData(), this, "Car Data");
@@ -96,32 +95,6 @@ public class CarEditor extends Container {
 			
 			//root stuff
 			addChild(new Label("Car Editor"), 0, 0);
-			
-			RollupPanel rp = new RollupPanel("Change Car Type", "");
-			addChild(rp, 1, 0);
-			rp.setOpen(false);
-			Container c = new Container();
-			int i = 0;
-			for (Car car: Car.values()) {
-				Button carButton = c.addChild(new Button(car.name()), 0, i++);
-				carButton.addClickCommands(new Command<Button>() {
-		            @Override
-		            public void execute( Button source ) {
-//		            	nextCarData = car.get();//TODO
-		            }
-		        });
-			}
-			Button setButton = c.addChild(new Button("Set"), 0, i++);
-			setButton.addClickCommands(new Command<Button>() {
-	            @Override
-	            public void execute( Button source ) {
-	            	if (nextCarData != null) {
-//	            		p.car = nextCarData; //TODO
-	            		a.run();
-	            	}
-	            }
-	        });
-			rp.setContents(c);
 			
 			Button b = new Button("Save All");
 			b.addClickCommands(new Command<Button>() {
@@ -236,8 +209,8 @@ public class CarEditor extends Container {
 			Log.p("Remember this can only set public fields");
 		}
 		
-		if (a != null)
-			a.run();
+		if (reloadCar != null)
+			reloadCar.accept(p.getCarData());
 	}
 	
 	private void saveAllFields() {

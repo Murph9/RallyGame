@@ -13,7 +13,6 @@ import com.simsilica.lemur.Label;
 
 import car.Car;
 import car.CarBuilder;
-import car.ray.CarDataConst;
 import car.ray.RayCarControl;
 import world.StaticWorld;
 import world.StaticWorldBuilder;
@@ -26,7 +25,7 @@ public class Start extends AbstractAppState {
 	
 	private StaticWorld worldType;
 	private CarBuilder cb;
-	private static CarDataConst carData;
+	private static Car carType;
 	
 	private BasicCamera camera;
 	private final float speed = 4;
@@ -36,7 +35,7 @@ public class Start extends AbstractAppState {
 	
 	public Start() {
 		Car[] c = Car.values();
-		carData = c[FastMath.rand.nextInt(c.length)].get();
+		carType = c[FastMath.rand.nextInt(c.length)];
 		
 		StaticWorld[] w = StaticWorld.values();
 		worldType = w[FastMath.rand.nextInt(w.length)];
@@ -162,7 +161,7 @@ public class Start extends AbstractAppState {
 		
 		RayCarControl car = cb.get(0);
 		if (car == null) {
-			cb.addCar(0, carData, world.getStartPos(), world.getStartRot(), true, null);
+			cb.addCar(0, carType, world.getStartPos(), world.getStartRot(), true, null);
 		} else {
 			Vector3f pos = car.getPhysicsLocation();
 			car.setPhysicsLocation(new Vector3f(0, pos.y, 0));

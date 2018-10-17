@@ -72,12 +72,12 @@ public class Main extends SimpleApplication {
 
 	public BulletAppState bullet; //one physics space always
 	
-	private CarDataConst car;
-	private CarDataConst them;
+	private Car car;
+	private Car them;
 	private World world;
 	private void loadDefaults() {
-		car = Car.Normal.get();
-		them = Car.Runner.get();
+		car = Car.Normal;
+		them = Car.Runner;
 		world = DynamicType.Simple.getBuilder();
 		//world alernatives:
 		//	new HighwayWorld();
@@ -175,14 +175,14 @@ public class Main extends SimpleApplication {
 	public void startDemo(AppState state) {
 		getStateManager().detach(state);
 		
-		drive = new DriveDemo(Car.Runner.get(), DynamicType.Valley.getBuilder()); //TODO allow other tracks
+		drive = new DriveDemo(Car.Runner, DynamicType.Valley.getBuilder()); //TODO allow other tracks
 		getStateManager().attach(drive);
 	}
 	
 	public void startDev(AppState state) {
 		getStateManager().detach(state);
 		
-		drive = new DriveDev(Car.Runner.get(), new StaticWorldBuilder(StaticWorld.track2));
+		drive = new DriveDev(Car.Runner, new StaticWorldBuilder(StaticWorld.track2));
 		getStateManager().attach(drive);
 	}
 	
@@ -203,7 +203,7 @@ public class Main extends SimpleApplication {
 			System.exit(1);
 		}
 
-		drive = new DriveAI(car, Car.Runner.get(), world);
+		drive = new DriveAI(car, Car.Runner, world);
 		getStateManager().attach(drive);
 	}
 	public void startRace(AppState state) {
@@ -241,7 +241,7 @@ public class Main extends SimpleApplication {
 		} else if (app instanceof ChooseMap) {
 			state.detach(chooseMap);
 			
-			startDrive(chooseCar.getCarData(), chooseMap.getWorld());
+			startDrive(chooseCar.getCarType(), chooseMap.getWorld());
 			
 		} else if (app instanceof DriveBase) {
 			state.detach(drive);
@@ -270,7 +270,7 @@ public class Main extends SimpleApplication {
 		getStateManager().attach(chooseMap);
 	}
 	
-	private void startDrive(CarDataConst car, World world) {
+	private void startDrive(Car car, World world) {
 		if (drive != null) return; //not sure what this is actually hoping to stop
 				
 		drive = new DriveBase(car, world);

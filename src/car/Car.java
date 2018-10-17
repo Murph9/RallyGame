@@ -1,5 +1,8 @@
 package car;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
 import com.jme3.math.Vector3f;
 
 import car.ray.CarDataConst;
@@ -12,32 +15,39 @@ import car.ray.WheelDataTractionConst;
 //like using the enum to actually generate the data, instead of using extended classes
 
 public enum Car {
-	Normal(new NormalCar()),
-	Runner(new Runner()),
-	Rally(new RallyCar()),
-	Miata(new Miata()),
-	Gt(new Gt()),
+	Normal(NormalCar.class),
+	Runner(Runner.class),
+	Rally(RallyCar.class),
+	Miata(Miata.class),
+	Gt(Gt.class),
 	
-	Hunter(new Hunter()),
-	Ricer(new Ricer()),
-	Muscle(new Muscle()),
-	Wagon(new Wagon()),
+	Hunter(Hunter.class),
+	Ricer(Ricer.class),
+	Muscle(Muscle.class),
+	Wagon(Wagon.class),
 	
-	WhiteSloth(new WhiteSloth()),
-	Rocket(new Rocket())
+	WhiteSloth(WhiteSloth.class),
+	Rocket(Rocket.class)
 	;
-	private CarDataConst car;
-	Car(CarDataConst car) {
-		this.car = car;
+	private Class<? extends CarDataConst> c;
+	Car(Class<? extends CarDataConst> c) {
+		this.c = c;
 	}
 	
 	public CarDataConst get() {
-		return car;
+		try {
+			Constructor<? extends CarDataConst> cons = c.getConstructor();
+			return cons.newInstance();
+		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			e.printStackTrace();
+			System.exit(-56345); //unique enough?
+		}
+		return null;
 	}
 	
-	private static class NormalCar extends CarDataConst {
+	static class NormalCar extends CarDataConst {
 		//for using the default settings.
-		NormalCar() {
+		public NormalCar() {
 			
 		}
 		
@@ -56,8 +66,8 @@ public enum Car {
 		}
 	}
 	
-	private static class Runner extends CarDataConst {
-		Runner() {
+	static class Runner extends CarDataConst {
+		public Runner() {
 			carModel = dir+"track1_2.blend";
 
 			e_torque = new float[] {0, 300, 450, 500, 530, 550, 500, 400};
@@ -108,8 +118,8 @@ public enum Car {
 	}
 	
 	
-	private static class Miata extends CarDataConst {
-		Miata() {
+	static class Miata extends CarDataConst {
+		public Miata() {
 			carModel = dir+"miata.blend";
 			wheelModel = dir+"miata_wheel.blend";
 			
@@ -151,10 +161,10 @@ public enum Car {
 	
 	//TODO it rolls realy easy compared to the runner car
 	//TODO tune in general
-	private static class Ricer extends CarDataConst {
+	static class Ricer extends CarDataConst {
 		//for using the default settings.
 		//probably shouldn't have a custom constructor
-		Ricer() {
+		public Ricer() {
 			wheelModel = dir+"wheel3.blend";
 			carModel = dir+"ricer.blend";
 			
@@ -212,9 +222,9 @@ public enum Car {
 	}
 
 	
-	private static class WhiteSloth extends CarDataConst {
+	static class WhiteSloth extends CarDataConst {
 		//http://www.automobile-catalog.com/auta_details1.php
-		WhiteSloth() {
+		public WhiteSloth() {
 			carModel = dir+"Mazda_121_Metro.blend";
 			wheelModel = dir+"Mazda_121_Metro_wheel.blend";
 			
@@ -264,8 +274,8 @@ public enum Car {
 		}
 	}
 
-	private static class RallyCar extends CarDataConst {
-		RallyCar() {
+	static class RallyCar extends CarDataConst {
+		public RallyCar() {
 			carModel = dir+"car4raid_1.obj";
 			wheelModel = dir+"wheelraid1.obj";
 
@@ -318,8 +328,8 @@ public enum Car {
 		}
 	}
 
-	private static class Rocket extends CarDataConst {
-		Rocket() {
+	static class Rocket extends CarDataConst {
+		public Rocket() {
 			carModel = dir + "rocket1_1.blend";
 			
 			driveFront = true;
@@ -371,8 +381,8 @@ public enum Car {
 		}
 	}
 
-	private static class Gt extends CarDataConst {
-		Gt() {
+	static class Gt extends CarDataConst {
+		public Gt() {
 			//http://www.automobile-catalog.com/auta_details1.php
 			//Ford Gt (2005)
 			
@@ -429,8 +439,8 @@ public enum Car {
 		}
 	}
 
-	private static class Hunter extends CarDataConst {
-		Hunter() {
+	static class Hunter extends CarDataConst {
+		public Hunter() {
 			carModel = dir+"sa_hummer.blend";
 			wheelModel = dir+"sa_hummer_wheel.blend";
 
@@ -478,8 +488,8 @@ public enum Car {
 		}
 	}
 	
-	private static class Muscle extends CarDataConst {
-		Muscle() {
+	static class Muscle extends CarDataConst {
+		public Muscle() {
 			carModel = dir+"muscle.blend";
 			
 			mass = 1520;
@@ -515,8 +525,8 @@ public enum Car {
 		}
 	}
 	
-	private static class Wagon extends CarDataConst {
-		Wagon() {
+	static class Wagon extends CarDataConst {
+		public Wagon() {
 			carModel = dir+"Wagon.blend";
 			wheelModel = dir+"Wagon_Wheel.blend";
 			

@@ -30,7 +30,7 @@ public abstract class CarDataConst implements Serializable {
 	public float height = 1f; //y size meter, roof to ground
 	public float length = 4f; //z size meter, from front to back
 
-	public float rollFraction = 1; //TODO use in new physics //fake to allow high cars to not roll as much
+	public float rollFraction = 1; //TODO use in new physics //fake value to allow high cars to not roll as much as they should
 	
 	public float areo_drag = 1;
 	public float areo_lineardrag = 0; //TODO use
@@ -213,4 +213,4 @@ public abstract class CarDataConst implements Serializable {
 //Some helpful notes
 
 //you can fix the oversteer at high speeds with a proper diff and different downforce scaling at higher speeds
-//and some proper stiffer suspension
+//and some stiffer front suspension?

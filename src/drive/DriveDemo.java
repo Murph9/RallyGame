@@ -8,14 +8,13 @@ import com.jme3.app.state.AppStateManager;
 
 import car.*;
 import car.ai.FollowWorldAI;
-import car.ray.CarDataConst;
 import car.ray.RayCarControl;
 import game.App;
 import helper.Log;
 
 public class DriveDemo extends DriveBase {
 
-	public DriveDemo (CarDataConst car, World world) {
+	public DriveDemo (Car car, World world) {
     	super(car, world);
     	
     	if (!(world instanceof DefaultBuilder)) {

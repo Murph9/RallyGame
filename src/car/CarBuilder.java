@@ -55,7 +55,7 @@ public class CarBuilder extends AbstractAppState {
 	}
 	
 	//TODO this should be giving the ai
-	public RayCarControl addCar(int id, CarDataConst carData, Vector3f start, Matrix3f rot, boolean aPlayer, BiFunction<RayCarControl, RayCarControl, CarAI> ai) {
+	public RayCarControl addCar(int id, Car car, Vector3f start, Matrix3f rot, boolean aPlayer, BiFunction<RayCarControl, RayCarControl, CarAI> ai) {
 		if (cars.containsKey(id)) {
 			try {
 				throw new Exception("A car already has that id: " + id);
@@ -64,8 +64,7 @@ public class CarBuilder extends AbstractAppState {
 			}
 		}
 		
-		//clone CarData so if its edited, only this one changes not the global one
-		carData = carData.cloneWithSerialization(); //TODO should be removable at some point
+		CarDataConst carData = car.get();
 		
 		Main r = App.rally;
 		AssetManager am = r.getAssetManager();
@@ -124,6 +123,14 @@ public class CarBuilder extends AbstractAppState {
 		return player;
 	}
 
+	public void setCarData(int id, CarDataConst carData) {
+		RayCarControl car = this.get(0);
+		if (car == null)
+			return;
+		
+		car.setCarData(carData);
+	}
+	
 	public void removePlayer(int id) {
 		if (!cars.containsKey(id)) {
 			try {

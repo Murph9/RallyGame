@@ -36,7 +36,7 @@ public class RayCar implements PhysicsTickListener {
 	
 	private static final Vector3f localDown = new Vector3f(0, -1, 0);
 	
-	protected final CarDataConst carData;
+	protected CarDataConst carData;
 	private final CarRaycaster raycaster;
 	protected final RigidBodyControl rbc;
 	

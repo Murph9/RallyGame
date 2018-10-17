@@ -61,7 +61,7 @@ public class ChooseCar extends AbstractAppState {
 		
 		cb = new CarBuilder();
 		app.getStateManager().attach(cb);
-		cb.addCar(0, car.get(), start, dir, true, null);
+		cb.addCar(0, car, start, dir, true, null);
 		//TODO remove smoke
 
 		//make camera
@@ -89,7 +89,7 @@ public class ChooseCar extends AbstractAppState {
                     car = c;
 
                     cb.removePlayer(0);
-    				cb.addCar(0, car.get(), worldType.start, new Matrix3f(), true, null);
+    				cb.addCar(0, car, worldType.start, new Matrix3f(), true, null);
     				
     				String carinfotext = getCarInfoText(car);
     				label.setText(carinfotext);
@@ -166,7 +166,7 @@ public class ChooseCar extends AbstractAppState {
 		if (car == null) { Log.p("no return value for ChooseCar()"); };
 		App.rally.next(this);
 	}
-	public CarDataConst getCarData() {
-		return car.get();
+	public Car getCarType() {
+		return car;
 	}
 }

@@ -283,6 +283,10 @@ public class RayCarControl extends RayCarPowered {
 	public CarDataConst getCarData() {
 		return carData;
 	}
+	public void setCarData(CarDataConst data) {
+		this.carData = data;
+		this.carData.load();
+	}
 	
 	public void attachAI(CarAI ai) {
 		this.ai = ai;
