@@ -12,8 +12,10 @@ import com.jme3.input.event.KeyInputEvent;
 import com.jme3.input.event.MouseButtonEvent;
 import com.jme3.input.event.MouseMotionEvent;
 import com.jme3.input.event.TouchEvent;
+import com.jme3.math.FastMath;
 
 import car.ray.RayCarControl;
+import helper.Log;
 
 public class JoystickEventListener implements RawInputListener {
 
@@ -23,7 +25,7 @@ public class JoystickEventListener implements RawInputListener {
 	private Map<String, String> buttonToAction = new HashMap<String, String>();
 	
 	private RayCarControl a;
-	private double stickdeadzone = 0.2f;
+	private float stickdeadzone = 0.2f;
 	
 	public JoystickEventListener (RayCarControl a) {
 		this.a = a;
@@ -63,10 +65,10 @@ public class JoystickEventListener implements RawInputListener {
 		if (axis == axis.getJoystick().getXAxis()) { // left/right normal stick
 			if (value > 0) {
 				a.onAction("Left", false, 0);
-				a.onAction("Right", true, valueAbs < stickdeadzone ? 0 : valueAbs); //less than deadzone = 0
+				a.onAction("Right", true, nonLinearInput(valueAbs, stickdeadzone));
 			} else {
 				a.onAction("Right", false, 0);
-				a.onAction("Left", true, valueAbs < stickdeadzone ? 0 : valueAbs);
+				a.onAction("Left", true, nonLinearInput(valueAbs, stickdeadzone));
 			}
 		} else if (axis == axis.getJoystick().getYAxis()) { //up/down normal stick
 			//not mapped yet			
@@ -74,10 +76,10 @@ public class JoystickEventListener implements RawInputListener {
 		} else if (axis == axis.getJoystick().getAxis(JoystickAxis.Z_AXIS)) { //triggers?
 			if (value > 0) { //brake
 				a.onAction("Accel", false, 0);
-				a.onAction("Brake", true, valueAbs < stickdeadzone ? 0 : valueAbs); //less than deadzone = 0
+				a.onAction("Brake", true, nonLinearInput(valueAbs, stickdeadzone));
 			} else {
 				a.onAction("Brake", false, 0);
-				a.onAction("Accel", true, valueAbs < stickdeadzone ? 0 : valueAbs);
+				a.onAction("Accel", true, nonLinearInput(valueAbs, stickdeadzone));
 			}
 			
 		} else if (axis == axis.getJoystick().getAxis(JoystickAxis.Z_ROTATION)) {
@@ -113,4 +115,16 @@ public class JoystickEventListener implements RawInputListener {
 	public void onMouseButtonEvent(MouseButtonEvent arg0) {}
 	public void onMouseMotionEvent(MouseMotionEvent arg0) {}
 	public void onTouchEvent(TouchEvent arg0) {}
+	
+	private float nonLinearInput(float input, float deadzone) {
+		if (input < deadzone)//less than deadzone = 0
+			return 0;
+		
+		float offsetValue = ((1)*(input - deadzone))/(1 - deadzone); 
+		
+		
+		float output =1/(1+FastMath.exp(-offsetValue*8 + 4)) + 0.03f; //0.03 hack so 1=1
+		Log.p(input, output);
+		return output;
+	}
 }
