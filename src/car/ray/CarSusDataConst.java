@@ -20,12 +20,12 @@ public class CarSusDataConst {
 	public CarSusDataConst() {
 		//init some defaults
 		min_travel = -0.25f;
-		max_travel = 0f;
-		preload_force = 3f/4;
-		stiffness = 15;
+		max_travel = 0.05f;
+		preload_force = 0.9f;
+		stiffness = 11;
 		max_force = 50*1000;
 		antiroll = 0;
-		comp = 0.2f;
-		relax = 0.3f;
+		comp = 0.15f;
+		relax = 0.4f;
 	}
 }

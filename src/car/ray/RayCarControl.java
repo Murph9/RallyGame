@@ -143,7 +143,6 @@ public class RayCarControl extends RayCarPowered {
 		//TODO turn back value should be vel dir + maxlat instead of just full lock
 		
 		//remember that this value is clamped after this method is called
-		Log.p(value, rbc.getLinearVelocity().length());
 		return value;
 	}
 

@@ -121,7 +121,7 @@ public abstract class CarDataConst implements Serializable {
 		}
 		if (wheelData[0] == null) {
 			for (int i = 0; i < wheelData.length; i++) {
-				wheelData[i] = new WheelDataConst(wheelModel, 0.3f, 25, 0.15f);
+				wheelData[i] = new WheelDataConst(wheelModel, 0.3f, 15, 0.15f);
 				wheelData[i].pjk_lat = WheelDataTractionConst.MY_BASE;
 				wheelData[i].pjk_long = WheelDataTractionConst.MY_BASE;
 				

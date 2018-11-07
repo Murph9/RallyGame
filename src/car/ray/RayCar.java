@@ -140,7 +140,7 @@ public class RayCar implements PhysicsTickListener {
 			
 			if (wheels[w_id].susRayLength < 0) { //suspension bottomed out 
 				//TODO do some proper large sus/damp force...
-				wheels[w_id].susForce = sus.max_force;
+				wheels[w_id].susForce = carData.mass;
 				Vector3f f = w_angle.invert().mult(col.hitNormalInWorld.mult(wheels[w_id].susForce * tpf));
 				rbc.applyImpulse(f, w_angle.mult(localPos));
 				return;

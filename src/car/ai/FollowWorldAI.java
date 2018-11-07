@@ -37,7 +37,7 @@ public class FollowWorldAI extends CarAI {
 		//get attempted turn angle as pos or negative
 		float nowTurn = angF*Math.signum(FastMath.HALF_PI-ang); //TODO wobbling
 
-		Log.p(nowTurn, angF, ang, lastTurn);
+		Log.p("Follow", nowTurn, angF, ang, lastTurn);
 		lastTurn = FastMath.interpolateLinear(tpf*10, lastTurn, nowTurn);
 		
 		//turn towards

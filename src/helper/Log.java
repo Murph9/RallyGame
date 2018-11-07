@@ -29,7 +29,7 @@ public class Log {
 	}
 
 	public static void p(Iterable<Object> ol, String sep) {
-		Log.p(ol, sep);
+		p(ol, sep);
 	}
 
 	public static void p(Object[][] matrix, String sep) {

@@ -15,7 +15,6 @@ import com.jme3.input.event.TouchEvent;
 import com.jme3.math.FastMath;
 
 import car.ray.RayCarControl;
-import helper.Log;
 
 public class JoystickEventListener implements RawInputListener {
 
@@ -121,10 +120,8 @@ public class JoystickEventListener implements RawInputListener {
 			return 0;
 		
 		float offsetValue = ((1)*(input - deadzone))/(1 - deadzone); 
-		
-		
+
 		float output =1/(1+FastMath.exp(-offsetValue*8 + 4)) + 0.03f; //0.03 hack so 1=1
-		Log.p(input, output);
 		return output;
 	}
 }
