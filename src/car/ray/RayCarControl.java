@@ -74,6 +74,9 @@ public class RayCarControl extends RayCarPowered {
 			//if sound exists
 			float pitch = FastMath.clamp(0.5f+1.5f*((float)curRPM/(float)carData.e_redline), 0.5f, 2);
 			engineSound.setPitch(pitch);
+			
+			float volume = 0.75f + this.accelCurrent * 0.25f;
+			engineSound.setVolume(volume);
 		}
 	}
 	public void giveSound(AudioNode audio) {
