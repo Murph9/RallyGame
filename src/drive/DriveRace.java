@@ -26,12 +26,12 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
-import car.Car;
 import car.CarBuilder;
 import car.CarCamera;
 import car.CarUI;
 import car.ai.CarAI;
 import car.ai.RaceAI;
+import car.data.Car;
 import car.ray.RayCarControl;
 import game.App;
 import game.RaceMenu;

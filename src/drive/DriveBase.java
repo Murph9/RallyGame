@@ -12,6 +12,7 @@ import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.input.Joystick;
 
 import car.*;
+import car.data.Car;
 import game.App;
 import helper.Log;
 

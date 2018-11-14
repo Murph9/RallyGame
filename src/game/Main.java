@@ -24,7 +24,7 @@ import com.simsilica.lemur.event.MouseAppState;
 import com.simsilica.lemur.input.InputMapper;
 import com.simsilica.lemur.style.BaseStyles;
 
-import car.Car;
+import car.data.Car;
 import car.ray.CarDataConst;
 import drive.*;
 import game.*;

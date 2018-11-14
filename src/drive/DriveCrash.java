@@ -9,7 +9,7 @@ import com.jme3.app.Application;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.math.Vector3f;
 
-import car.*;
+import car.data.Car;
 import car.ray.RayCarControl;
 import game.App;
 import helper.H;

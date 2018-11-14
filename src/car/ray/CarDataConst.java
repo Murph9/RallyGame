@@ -13,29 +13,28 @@ import car.CarModelData;
 import car.CarModelData.CarPart;
 import helper.H.Duo;
 
-public abstract class CarDataConst implements Serializable {
-	protected static final String dir = "assets/models/";
-	
+public class CarDataConst implements Serializable {
+
 	//model strings (can be xx.obj or xx.blend)
-	public String carModel = dir+"car4.obj";
-	public String wheelModel = dir+"wheel.obj";
+	public String carModel;
+	public String wheelModel;
 	
 	//camera options
-	public Vector3f cam_lookAt = new Vector3f(0,1.3f,0); //top of car usually
-	public Vector3f cam_offset = new Vector3f(0,2.1f,-6); //where the camera is
-	public float cam_shake = 0.000002f;
+	public Vector3f cam_lookAt; //top of car usually
+	public Vector3f cam_offset; //where the camera is
+	public float cam_shake;
 	
-	public float mass = 1100; //kg (total, do NOT add wheel or engine mass/inertia to this)
-	public float width = 1.4f; //x size meter, door handle to door handle
-	public float height = 1f; //y size meter, roof to ground
-	public float length = 4f; //z size meter, from front to back
+	public float mass; //kg (total, do NOT add wheel or engine mass/inertia to this)
+	public float width; //x size meter, door handle to door handle
+	public float height; //y size meter, roof to ground
+	public float length; //z size meter, from front to back
 
-	public float rollFraction = 1; //TODO use in new physics //fake value to allow high cars to not roll as much as they should
+	public float rollFraction; //TODO use in new physics //fake value to allow high cars to not roll as much as they should
 	
-	public float areo_drag = 1;
-	public float areo_lineardrag = 0; //TODO use
-	public float areo_crossSection = 0.47f; //m^2 front area
-	public float areo_downforce = 0.0f; //not a default yet
+	public float areo_drag;
+	public float areo_lineardrag; //TODO use
+	public float areo_crossSection; //m^2 front area
+	public float areo_downforce; //not a default yet
 	
 	//travel values are relative to wheel offset pos
 	public CarSusDataConst susF;
@@ -46,48 +45,51 @@ public abstract class CarDataConst implements Serializable {
 
 	////////
 	//Drivetrain stuff
-	public boolean driveFront = false, driveRear = true; //this would be rear wheel drive
+	public boolean driveFront, driveRear;
 	
 	//this one is from the notes, is a ~1999 corvette c6 
-	public float[] e_torque = new float[]{0,390,445,460,480,475,360,10}; //starts at 0 rpm, steps every 1000rpm (until done)
+	public float[] e_torque; //starts at 0 rpm, steps every 1000rpm (until done)
 	//found a porsche boxter engine curve:
 //	public float[] e_torque = new float[]{0,223,250,280,300,310,280,245,10};
 	
-	public int auto_gearDown = 2400; //rpm triggering a gear down
-	public int auto_gearUp = 5500; //rpm triggering a gear up
-	public int e_redline = 6500;
-	public int e_idle = 1000; 
+	public int auto_gearDown; //rpm triggering a gear down
+	public int auto_gearUp; //rpm triggering a gear up
+	public int e_redline;
+	public int e_idle; 
 	
-	public float e_compression = 0.1f; //is going to be multiplied by the RPM
-	public float e_mass = 30; //kg, this is the interia of the engine, 100 is high	
+	public float e_compression; //is going to be multiplied by the RPM
+	public float e_mass; //kg, this is the interia of the engine, 100 is high	
 	
 	//TODO check hoursepowercurves are on crank before using this as anything other than 1
-	public float trans_effic = 0.85f; //apparently 0.9 is common (power is lost to rotating the transmission gears)
-	public float trans_finaldrive = 3.0f; //helps set the total drive ratio
-	public float[] trans_gearRatios = new float[]{-2.9f,3.6f,2.5f,1.8f,1.3f,1.0f,0.74f}; //reverse,gear1,gear2,g3,g4,g5,g6,...
+	public float trans_effic; //apparently 0.9 is common (power is lost to rotating the transmission gears)
+	public float trans_finaldrive; //helps set the total drive ratio
+	public float[] trans_gearRatios; //reverse,gear1,gear2,g3,g4,g5,g6,...
 	
-	public boolean nitro_on = true;
-	public float nitro_force = 300;
-	public float nitro_rate = 1;
-	public float nitro_max = 15;
+	public boolean nitro_on;
+	public float nitro_force;
+	public float nitro_rate;
+	public float nitro_max;
 	
 	
-	public float brakeMaxTorque = 4000;
+	public float brakeMaxTorque;
 	
 	////////
 	//Wheels
-	public float w_steerAngle = 0.5f; //in radians
-	public float w_difflock = 0.1f;
-	//small=slip large=locked
-	//0.0001f < x < 5 i think is a good range
+	public float w_steerAngle; //in radians
+	public float w_difflock; //small=slip large=locked -> 0.0001f < x < 5 i think is a good range
 	
 	//do not put wheel offset in the wheel obj, as they shouldn't know because the car determines their position
-	public Vector3f[] wheelOffset = new Vector3f[4];
-	public WheelDataConst[] wheelData = new WheelDataConst[4];
+	public Vector3f[] wheelOffset;
+	public WheelDataConst[] wheelData;
 		
 	//no idea category
-	public float minDriftAngle = 7;
-	public Vector3f JUMP_FORCE = new Vector3f(0, mass, 0);
+	public float minDriftAngle;
+	public Vector3f JUMP_FORCE;
+	
+	
+	
+	public CarDataConst() {} 
+
 	
 	public boolean loaded = false; //TODO use?
 	public final void load() { //final = no override pls
@@ -102,43 +104,16 @@ public abstract class CarDataConst implements Serializable {
 		
 		loaded = true;
 
-		//init suspension
-		susF = new CarSusDataConst();
-		susR = new CarSusDataConst();
-		
-		postLoad();
-		
 		modelLoad();
 		
-		//load defaults when data not set by modelLoad or postLoad 
-		if (wheelOffset[0] == null) { 
-			float x_off = 0.68f;
-			float y_off = 0;//TODO try using large wheel offsets (any axis) and the car feels very wrong
-			float z_off = 1.1f;
-			for (int i = 0; i < wheelOffset.length; i++) {
-				setWheelOffset(i, x_off, y_off, z_off);
-			}
-		}
-		if (wheelData[0] == null) {
-			for (int i = 0; i < wheelData.length; i++) {
-				wheelData[i] = new WheelDataConst(wheelModel, 0.3f, 15, 0.15f);
-				wheelData[i].pjk_lat = WheelDataTractionConst.MY_BASE;
-				wheelData[i].pjk_long = WheelDataTractionConst.MY_BASE;
-				
-				wheelData[i].pjk_lat_sat = WheelDataTractionConst.BASE_SAT;
-				wheelData[i].pjk_long_sat = WheelDataTractionConst.BASE_SAT;
-			}
-		}
-	}
-	protected final void setWheelOffset(int i, float x_off, float y_off, float z_off) {
-		wheelOffset[i] = new Vector3f(x_off, y_off, z_off);
-		wheelOffset[i].x *= i % 2 == 0 ? -1 : 1;
-		wheelOffset[i].z *= i < 2 ? 1 : -1;
+		//TODO value validations because they are now read from file :(
 	}
 	
 	private void modelLoad() {
 		//init car pos things based on the physical model
 
+		//TODO make this mandatory
+		
 		CarModelData modelData = new CarModelData(this.carModel, this.wheelModel);
 		if (modelData.foundSomething() && modelData.foundAllWheels()) {
 			wheelOffset[0] = modelData.getPosOf(CarPart.Wheel_FL);
@@ -147,8 +122,6 @@ public abstract class CarDataConst implements Serializable {
 			wheelOffset[3] = modelData.getPosOf(CarPart.Wheel_RR);
 		}
 	}
-	
-	protected abstract void postLoad();
 
 	////////////////////////////////////////////////////////
 	//usefulMethods

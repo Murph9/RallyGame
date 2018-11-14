@@ -11,8 +11,8 @@ import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
-import car.Car;
 import car.CarBuilder;
+import car.data.Car;
 import car.ray.RayCarControl;
 import world.StaticWorld;
 import world.StaticWorldBuilder;

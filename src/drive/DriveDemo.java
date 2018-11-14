@@ -8,6 +8,7 @@ import com.jme3.app.state.AppStateManager;
 
 import car.*;
 import car.ai.FollowWorldAI;
+import car.data.Car;
 import car.ray.RayCarControl;
 import game.App;
 import helper.Log;

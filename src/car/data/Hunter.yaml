@@ -1,0 +1,64 @@
+!!car.ray.CarDataConst
+JUMP_FORCE: {x: 0.0, y: 1100.0, z: 0.0}
+areo_crossSection: 0.47
+areo_downforce: 0.0
+areo_drag: 1.0
+areo_lineardrag: 0.0
+auto_gearDown: 2900
+auto_gearUp: 5700
+brakeMaxTorque: 4000.0
+cam_lookAt: {x: 0.0, y: 1.3, z: 0.0}
+cam_offset: {x: 0.0, y: 2.1, z: -6.0}
+cam_shake: 2.0E-6
+carModel: assets/models/sa_hummer.blend
+driveFront: true
+driveRear: true
+e_compression: 0.1
+e_idle: 1000
+e_mass: 30
+e_redline: 6500
+e_torque: [0,520,680,720,760,773,520,110]
+height: 1.5
+length: 5
+mass: 2500
+minDriftAngle: 7.0
+nitro_force: 300.0
+nitro_max: 15.0
+nitro_on: true
+nitro_rate: 1.0
+rollFraction: 1.0
+susF: &sus {
+  antiroll: 0.0, 
+  comp: 0.2,
+  max_force: 85000, 
+  max_travel: 0.1,
+  min_travel: -0.2,
+  preload_force: 2.0,
+  relax: 0.4, 
+  stiffness: 6.0
+}
+susR: *sus
+trans_effic: 0.75 #TODO why so low
+trans_finaldrive: 3.0
+trans_gearRatios: [-3.5, 3.66, 2.5, 1.9, 1.4, 1.02, 0.7]
+w_difflock: 0.1
+w_steerAngle: 0.5
+wheelData:
+- &w
+  mass: 10.0
+  modelName: assets/models/sa_hummer_wheel.blend
+  pjk_lat: {B: 6, C: 2, D: 1, E: 1}
+  pjk_lat_sat: &w_sat {B: 0.85, C: 2.3, D: 0.51, E: -2.75}
+  pjk_long: {B: 6, C: 2, D: 1, E: 1}
+  pjk_long_sat: *w_sat
+  radius: 0.3
+  width: 0.15
+- *w
+- *w
+- *w
+wheelOffset:
+- {x: 1, y: -0.45, z: 1.85}
+- {x: -1, y: -0.45, z: 1.85}
+- {x: 1, y: -0.45, z: -1.85}
+- {x: -1, y: -0.45, z: -1.85}
+width: 1.8

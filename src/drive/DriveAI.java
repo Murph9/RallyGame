@@ -5,7 +5,7 @@ import world.World;
 import com.jme3.app.Application;
 import com.jme3.app.state.AppStateManager;
 
-import car.Car;
+import car.data.Car;
 
 public class DriveAI extends DriveBase {
 	

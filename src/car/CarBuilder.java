@@ -22,6 +22,7 @@ import com.jme3.scene.Spatial;
 
 import car.ai.CarAI;
 import car.ai.DriveAtAI;
+import car.data.Car;
 import car.ray.CarDataConst;
 import car.ray.RayCarControl;
 import game.App;
