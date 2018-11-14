@@ -35,6 +35,8 @@ public enum Car {
 	}
 	
 	public CarDataConst get() {
+		//TODO change into reading a file (from disk or even just code) with the data, think gta sa 
+		
 		try {
 			Constructor<? extends CarDataConst> cons = c.getConstructor();
 			return cons.newInstance();
@@ -120,8 +122,8 @@ public enum Car {
 	
 	static class Miata extends CarDataConst {
 		public Miata() {
-			carModel = dir+"miata.blend";
-			wheelModel = dir+"miata_wheel.blend";
+			carModel = dir+"na_2_out.blend";
+			wheelModel = dir+"na_w_1_out.blend";
 			
 			mass = 1000;
 			
