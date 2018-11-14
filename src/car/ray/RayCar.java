@@ -140,15 +140,12 @@ public class RayCar implements PhysicsTickListener {
 			
 			if (wheels[w_id].susRayLength < 0) { //suspension bottomed out 
 				//TODO do some proper large sus/damp force...
-				wheels[w_id].susForce = carData.mass;
+				wheels[w_id].susForce = (sus.preload_force+sus.travelTotal())*sus.stiffness*1000;
 				Vector3f f = w_angle.invert().mult(col.hitNormalInWorld.mult(wheels[w_id].susForce * tpf));
-				rbc.applyImpulse(f, w_angle.mult(localPos));
+				rbc.applyImpulse(f, wheels[w_id].curBasePosWorld.subtract(w_pos));
 				return;
 			}
 			
-			wheels[w_id].inContact = true;
-			wheels[w_id].curBasePosWorld = col.pos;
-
 			float denominator = col.hitNormalInWorld.dot(w_angle.mult(localDown)); //loss due to difference between collision and localdown (cos ish)
 			Vector3f relpos = wheels[w_id].curBasePosWorld.subtract(rbc.getPhysicsLocation()); //pos of sus contact point relative to car
 			Vector3f velAtContactPoint = getVelocityInLocalPoint(relpos); //get sus vel at point on ground
@@ -176,7 +173,8 @@ public class RayCar implements PhysicsTickListener {
 			wheels[w_id].susForce -= susp_damping * projected_rel_vel;
 			
 			// Limit: no negative forces or stupid high numbers pls
-			wheels[w_id].susForce = FastMath.clamp(wheels[w_id].susForce * carData.mass, 0, sus.max_force);
+			wheels[w_id].susForce = FastMath.clamp(wheels[w_id].susForce * 1000, 0, sus.max_force);
+			
 			
 			Vector3f f = w_angle.invert().mult(col.hitNormalInWorld.mult(wheels[w_id].susForce * tpf));
 			rbc.applyImpulse(f, wheels[w_id].curBasePosWorld.subtract(w_pos));

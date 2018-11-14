@@ -25,7 +25,7 @@ public abstract class CarDataConst implements Serializable {
 	public Vector3f cam_offset = new Vector3f(0,2.1f,-6); //where the camera is
 	public float cam_shake = 0.000002f;
 	
-	public float mass = 1200; //kg (total, do NOT add wheel or engine mass/inertia to this)
+	public float mass = 1100; //kg (total, do NOT add wheel or engine mass/inertia to this)
 	public float width = 1.4f; //x size meter, door handle to door handle
 	public float height = 1f; //y size meter, roof to ground
 	public float length = 4f; //z size meter, from front to back
@@ -159,7 +159,8 @@ public abstract class CarDataConst implements Serializable {
 	}
 	
 	public float wheel_inertia(int w_id) {
-		return wheelData[w_id].mass*wheelData[w_id].radius*wheelData[w_id].radius/2;		
+		//TODO this is a disc, pls make a thicc pipe so its closer to real life
+		return wheelData[w_id].mass*wheelData[w_id].radius*wheelData[w_id].radius/2;
 	}
 	public float e_inertia() { //car internal engine + wheel inertia
 		

@@ -31,7 +31,6 @@ import car.ray.RayCarControl;
 import game.App;
 import helper.H;
 import helper.Log;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 //TODO cleanup
 public class CarEditor extends Container {
@@ -201,7 +200,7 @@ public class CarEditor extends Container {
 				}
 				f.set(fe.o, values);
 			} else {
-				throw new NotImplementedException();
+				throw new UnsupportedOperationException();
 			}
 			
 		} catch (IllegalArgumentException | IllegalAccessException e) {
@@ -215,7 +214,7 @@ public class CarEditor extends Container {
 	
 	private void saveAllFields() {
 		try {
-			throw new NotImplementedException();
+			throw new UnsupportedOperationException();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
