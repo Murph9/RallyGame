@@ -14,7 +14,7 @@ public enum Car {
 	Normal("Normal"),
 	Runner("Runner"),
 	Rally("Rally"),
-	Miata("Roadster"),
+	Roadster("Roadster"),
 	Gt("Gt"),
 	
 	Hunter("Hunter"),

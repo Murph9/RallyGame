@@ -76,7 +76,7 @@ public class Main extends SimpleApplication {
 	private Car them;
 	private World world;
 	private void loadDefaults() {
-		car = Car.Normal;
+		car = Car.Roadster;
 		them = Car.Runner;
 		world = DynamicType.Simple.getBuilder();
 		//world alernatives:
