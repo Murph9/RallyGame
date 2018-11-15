@@ -130,27 +130,34 @@ public class RayCar implements PhysicsTickListener {
 				wheels[w_id].inContact = false;
 				wheels[w_id].susRayLength = susTravel;
 				wheels[w_id].curBasePosWorld = localDown.mult(susTravel + carData.wheelData[w_id].radius);
-				wheels[w_id].susForce = 0;
 				return; //no force
 			}
 			
+			wheels[w_id].hitNormalInWorld = col.hitNormalInWorld;
 			wheels[w_id].susRayLength = col.dist - carData.wheelData[w_id].radius; //remove the wheel radius
 			wheels[w_id].curBasePosWorld = col.pos;
 			wheels[w_id].inContact = true; //wheels are still touching..
+		});
+		doForEachWheel((w_id) -> {
+			CarSusDataConst sus = carData.susByWheelNum(w_id);
+			if (!wheels[w_id].inContact) {
+				wheels[w_id].susForce = 0;
+				return;
+			}
 			
 			if (wheels[w_id].susRayLength < 0) { //suspension bottomed out 
 				//TODO do some proper large sus/damp force...
 				wheels[w_id].susForce = (sus.preload_force+sus.travelTotal())*sus.stiffness*1000;
-				Vector3f f = w_angle.invert().mult(col.hitNormalInWorld.mult(wheels[w_id].susForce * tpf));
+				Vector3f f = w_angle.invert().mult(wheels[w_id].hitNormalInWorld.mult(wheels[w_id].susForce * tpf));
 				rbc.applyImpulse(f, wheels[w_id].curBasePosWorld.subtract(w_pos));
 				return;
 			}
 			
-			float denominator = col.hitNormalInWorld.dot(w_angle.mult(localDown)); //loss due to difference between collision and localdown (cos ish)
+			float denominator = wheels[w_id].hitNormalInWorld.dot(w_angle.mult(localDown)); //loss due to difference between collision and localdown (cos ish)
 			Vector3f relpos = wheels[w_id].curBasePosWorld.subtract(rbc.getPhysicsLocation()); //pos of sus contact point relative to car
 			Vector3f velAtContactPoint = getVelocityInLocalPoint(relpos); //get sus vel at point on ground
 			
-			float projVel = col.hitNormalInWorld.dot(velAtContactPoint); //percentage of normal force that applies to the current motion
+			float projVel = wheels[w_id].hitNormalInWorld.dot(velAtContactPoint); //percentage of normal force that applies to the current motion
 			float projected_rel_vel = 0;
 			float clippedInvContactDotSuspension = 0;
 			if (denominator >= -0.1f) {
@@ -172,26 +179,31 @@ public class RayCar implements PhysicsTickListener {
 			float susp_damping = (projected_rel_vel < 0f) ? sus.compression() : sus.relax();
 			wheels[w_id].susForce -= susp_damping * projected_rel_vel;
 			
+			//Sway bars need to wait until the normal suspension is done https://forum.miata.net/vb/showthread.php?t=25716
+			int w_id_other = w_id == 0 ? 1 : w_id == 1 ? 0 : w_id == 2 ? 3 : 2; //TODO better
+			float swayDiff = wheels[w_id_other].susRayLength - wheels[w_id].susRayLength;
+			wheels[w_id].susForce += swayDiff*sus.antiroll;
+
 			// Limit: no negative forces or stupid high numbers pls
 			wheels[w_id].susForce = FastMath.clamp(wheels[w_id].susForce * 1000, 0, sus.max_force);
 			
-			
-			Vector3f f = w_angle.invert().mult(col.hitNormalInWorld.mult(wheels[w_id].susForce * tpf));
+			Vector3f f = w_angle.invert().mult(wheels[w_id].hitNormalInWorld.mult(wheels[w_id].susForce * tpf));
 			rbc.applyImpulse(f, wheels[w_id].curBasePosWorld.subtract(w_pos));
 			
 			if (DEBUG_SUS2) {
 				App.rally.enqueue(() -> {
 					HelperObj.use(App.rally.getRootNode(), "normalforcearrow" + w_id, 
-						H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.Black, col.hitNormalInWorld, col.pos));
+						H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.Black, wheels[w_id].hitNormalInWorld, wheels[w_id].curBasePosWorld));
 					
 					HelperObj.use(App.rally.getRootNode(), "normalforcearrow inv" + w_id,
-						H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.White, col.hitNormalInWorld.mult(-denominator), col.pos));
+						H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.White, wheels[w_id].hitNormalInWorld.mult(-denominator), wheels[w_id].curBasePosWorld));
 					
-					HelperObj.use(App.rally.getRootNode(), "forcearrow" + w_id, 
-						H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.Cyan, f.mult(1/(carData.mass)), vecLocalToWorld(localPos)));
+//					HelperObj.use(App.rally.getRootNode(), "forcearrow" + w_id, 
+//						H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.Cyan, f.mult(1/(carData.mass)), vecLocalToWorld(localPos)));
 				});
 			}
 		});
+
 	}
 	
 	private void applyTraction(PhysicsSpace space, float tpf) {

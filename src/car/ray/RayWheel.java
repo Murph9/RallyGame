@@ -13,6 +13,7 @@ public class RayWheel {
 	
 	public boolean inContact;
 	public Vector3f curBasePosWorld;
+	public Vector3f hitNormalInWorld;
 	public float susRayLength; //length from start of sus vector
 	public float susForce;
 	

@@ -28,11 +28,11 @@ nitro_on: true
 nitro_rate: 1.0
 rollFraction: 1.0
 susF: &sus {
-  antiroll: 0.0, 
+  antiroll: 10.0, 
   comp: 0.2,
-  max_force: 40000.0, 
+  max_force: 50000.0, 
   max_travel: 0.1,
-  min_travel: -0.2,
+  min_travel: -0.1,
   preload_force: 2.0,
   relax: 0.4, 
   stiffness: 6.0
@@ -56,9 +56,4 @@ wheelData:
 - *w
 - *w
 - *w
-wheelOffset:
-- {x: 0.68, y: 0, z: 1.1}
-- {x: -0.68, y: 0, z: 1.1}
-- {x: 0.68, y: 0, z: -1.1}
-- {x: -0.68, y: 0, z: -1.1}
 width: 1.74
