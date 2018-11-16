@@ -31,8 +31,8 @@ susF: &sus {
   antiroll: 10.0, 
   comp: 0.2,
   max_force: 50000.0, 
-  max_travel: 0.1,
-  min_travel: -0.1,
+  max_travel: 0.0,
+  min_travel: -0.2,
   preload_force: 2.0,
   relax: 0.4, 
   stiffness: 6.0

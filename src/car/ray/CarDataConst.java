@@ -123,7 +123,7 @@ public class CarDataConst implements Serializable {
 			wheelOffset[2] = modelData.getPosOf(CarPart.Wheel_RL);
 			wheelOffset[3] = modelData.getPosOf(CarPart.Wheel_RR);
 		} else {
-			Log.e("!!! No Car model data invalid for: " + this.carModel);
+			Log.e("!!! Missing car model wheel position data for: " + this.carModel);
 			System.exit(-50203);
 		}
 	}

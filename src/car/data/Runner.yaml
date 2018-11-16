@@ -47,9 +47,9 @@ wheelData:
 - &w
   mass: 10.0
   modelName: assets/models/wheel.obj
-  pjk_lat: {B: 5.0, C: 1.9, D: 1.0, E: 0.99} #TODO WRONG
+  pjk_lat: {B: 17.0, C: 1.9, D: 1.0, E: 0.97}
   pjk_lat_sat: &w_sat {B: 0.85, C: 2.3, D: 0.51, E: -2.75}
-  pjk_long: {B: 5.0, C: 1.5, D: 1.0, E: 0.97} #TODO WRONG
+  pjk_long: {B: 17.0, C: 1.5, D: 1.0, E: 0.98}
   pjk_long_sat: *w_sat
   radius: 0.3
   width: 0.15
