@@ -123,7 +123,7 @@ public class RayCarPowered extends RayCar {
 		float eTorque = (carData.lerpTorque(curRPM) + nitroForce)*accelCurrent;
 		float engineDrag = 0;
 		if (accelCurrent < 0.05f || curRPM > carData.e_redline) //so compression only happens on no accel
-			engineDrag = (curRPM-carData.e_idle)*carData.e_compression * (curGear>0?1:-1); //reverse goes the other way
+			engineDrag = (curRPM-carData.e_idle)*carData.e_compression * (Math.signum(wheelrot)); //reverse goes the other way
 		
 		float engineOutTorque = 0;
 		if (Math.abs(curRPM) > carData.e_redline)

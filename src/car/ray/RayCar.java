@@ -103,6 +103,7 @@ public class RayCar implements PhysicsTickListener {
 		Vector3f w_pos = rbc.getPhysicsLocation();
 		Matrix3f w_angle = rbc.getPhysicsRotationMatrix();
 		
+		//Do suspension ray cast
 		doForEachWheel((w_id) -> {
 			Vector3f localPos = carData.wheelOffset[w_id];
 			
@@ -138,6 +139,8 @@ public class RayCar implements PhysicsTickListener {
 			wheels[w_id].curBasePosWorld = col.pos;
 			wheels[w_id].inContact = true; //wheels are still touching..
 		});
+		
+		//Do suspension forces
 		doForEachWheel((w_id) -> {
 			CarSusDataConst sus = carData.susByWheelNum(w_id);
 			if (!wheels[w_id].inContact) {
@@ -223,21 +226,8 @@ public class RayCar implements PhysicsTickListener {
 			steeringCur *= -1;
 		}
 		
-		//a 'few' slow speed hacks
-		float maxSlowLat = Float.MAX_VALUE;
-		float slowslipspeed = 10; //TODO some proportion of car.w_Off, so cars don't feel so weird at slow speeds
-		boolean isSlowSpeed = velocity.length() <= slowslipspeed;
-		if (isSlowSpeed && steeringCur != 0) {
-			float radius = carData.wheelOffset[0].z/FastMath.sin(steeringCur);
-			
-			float forceToKeepCircle = (carData.mass*rbc.getGravity().y/4)*velocity.lengthSquared()/radius;
-			maxSlowLat = FastMath.abs(forceToKeepCircle/4);
-		}
-		
 		final float slip_div = Math.abs(velocity.length());
-		final float slip_const = (isSlowSpeed ? 2 : 1);
 		final float steeringFake = steeringCur;
-		final float maxSlowLatFake = maxSlowLat;
 		doForEachWheel((w_id) -> {
 			Vector3f wheel_force = new Vector3f();
 			
@@ -246,27 +236,27 @@ public class RayCar implements PhysicsTickListener {
 			if (!Float.isNaN(w_angVel.y))
 				angVel = w_angVel.y;
 			
-			float slipr = slip_const*wheels[w_id].radSec * carData.wheelData[w_id].radius - velocity.z;
+			float slipr = wheels[w_id].radSec * carData.wheelData[w_id].radius - velocity.z;
 			float slipratio = slipr/slip_div;
 			
 			if (handbrakeCur && !isFrontWheel(w_id)) //rearwheels only
 				wheels[w_id].radSec = 0;
 			
 			float slipangle = 0;
-			if (isFrontWheel(w_id)) { //TODO this can be computed out of the loop
+			if (isFrontWheel(w_id)) {
 				float slipa_front = velocity.x + carData.wheelOffset[w_id].z * angVel;
 				slipangle = (float)(FastMath.atan2(slipa_front, slip_div) - steeringFake);
-			} else { //rear
+			} else { //so rear
 				float slipa_rear = velocity.x + carData.wheelOffset[w_id].z * angVel;
 				driftAngle = slipa_rear; //set drift angle as the rear amount
 				slipangle = (float)(FastMath.atan2(slipa_rear, slip_div)); //slip_div is questionable here
 			}
-			slipangle *= slip_const;
 			
 			//start work on merging the forces into a traction circle
 			float ratiofract = slipratio/this.wheels[w_id].maxLong;
 			float anglefract = slipangle/this.wheels[w_id].maxLat;
 			float p = FastMath.sqrt(ratiofract*ratiofract + anglefract*anglefract);
+			wheels[w_id].skidFraction = p;
 			
 			//calc the longitudinal force from the slip ratio
 			wheel_force.z = (ratiofract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_long, p*this.wheels[w_id].maxLong) * this.wheels[w_id].susForce; //TODO normalise susforce to prevent very large forces
@@ -274,31 +264,15 @@ public class RayCar implements PhysicsTickListener {
 			//latitudinal force that is calculated off the slip angle
 			wheel_force.x = -(anglefract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_lat, p*this.wheels[w_id].maxLat) * this.wheels[w_id].susForce;
 			
-			//prevents the force from exceeding the centripetal force 'sometimes'
-			if (isSlowSpeed && Math.abs(wheel_force.x) > maxSlowLatFake) {
-				//[1-N/M] means the clamp is smaller for smaller speeds
-				float clampValue = Math.abs(maxSlowLatFake * (1-slowslipspeed/velocity.length()));
-				wheel_force.x = FastMath.clamp(wheel_force.x, -clampValue, clampValue);
-			}
-			//prevent the x forces from being larger than the force that would stop us from changing our x velocity sign
-			if (isSlowSpeed) { //does cause us to not be able to turn for like ~0.2sec sometimes
-				float limit = Math.max(Math.abs(velocity.x)*(carData.mass/4)/tpf, 1000);
-				wheel_force.x = FastMath.clamp(wheel_force.x, -limit, limit);
-			}
-			
-			wheels[w_id].skidFraction = p;
-			
 			// braking and abs
 			float brakeCurrent2 = brakingCur;
 			if (Math.abs(ratiofract) >= 1 && velocity.length() > 2 && brakingCur == 1)
 				brakeCurrent2 = 0; //abs (which i think works way too well)
 			
 			//self aligning torque
-			if (!isSlowSpeed) { //this doesn't play nice with slow speed physics
-				//TODO not convinced that long(z) direction traction has a self aligning torque
-				//wheel_force.z += (ratiofract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_long_sat, p*this.wheels[w_id].maxLong) * this.wheels[w_id].susForce;
-				wheel_force.x += (anglefract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_lat_sat, p*this.wheels[w_id].maxLat) * this.wheels[w_id].susForce;
-			}
+			//TODO not convinced that long(z) direction traction has a self aligning torque
+			//wheel_force.z += (ratiofract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_long_sat, p*this.wheels[w_id].maxLong) * this.wheels[w_id].susForce;
+			wheel_force.x += (anglefract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_lat_sat, p*this.wheels[w_id].maxLat) * this.wheels[w_id].susForce;
 			
 			//add the wheel force after merging the forces
 			float totalLongForce = wheelTorque[w_id] - wheel_force.z - (brakeCurrent2*carData.brakeMaxTorque*Math.signum(wheels[w_id].radSec));
