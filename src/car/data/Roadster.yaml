@@ -28,7 +28,7 @@ nitro_on: true
 nitro_rate: 1.0
 rollFraction: 1.0
 susF: &sus {
-  antiroll: 10.0, 
+  antiroll: 5.0,
   comp: 0.2,
   max_force: 50000.0, 
   max_travel: 0.0,
@@ -37,7 +37,9 @@ susF: &sus {
   relax: 0.4, 
   stiffness: 6.0
 }
-susR: *sus
+susR:
+  <<: *sus #https://blog.daemonl.com/2016/02/yaml.html
+  antiroll: 2.0
 trans_effic: 0.85
 trans_finaldrive: 3.5
 trans_gearRatios: [-2.9, 3.6, 2.5, 1.8, 1.3, 1.0, 0.84]
