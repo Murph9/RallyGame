@@ -356,8 +356,7 @@ public class RayCarControl extends RayCarPowered {
 	public String statsString() {
 		return H.round3f(this.getPhysicsLocation(), 2)
 		 + "\nspeed:"+ H.round3f(vel, 2) + "m/s\nRPM:" + curRPM
-		 + "\nengine:" + engineTorque + "\ndrag:" + dragValue 
-		 + "N\nG Forces:" + H.roundDecimal(planarGForce.length()/rbc.getGravity().length(), 2);
+		 + "\nengine:" + engineTorque + "\ndrag:" + dragValue + "N";
 	}
 	
 	

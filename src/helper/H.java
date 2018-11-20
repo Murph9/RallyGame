@@ -100,7 +100,7 @@ public class H {
 		if (i < 0) i = 0; //prevent array issues
 		int whole = (int) i;
 		float rem = i - whole;
-		float low = array[clamp(whole, 0, array.length-1)];
+		float low = array[clamp(whole, 0, array.length-1)]; //clamp to the the end of the array to prevent an index exeception
 		float high = array[clamp(whole+1, 0, array.length-1)];
 		return FastMath.interpolateLinear(rem, low, high);
 	}

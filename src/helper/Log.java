@@ -14,20 +14,19 @@ public class Log {
 		System.out.println(o);
 	}
 
-	public static void p(Object... os) {
-		for (Object o : os) {
-	        System.out.print(o + " ");
-	    }
-		System.out.println();
-	}
-
 	public static void p(Object[] ol, String sep) {
 		if (sep == null) sep = "\n";
 		for (Object o: ol)
 			System.out.print(o + sep);
 		System.out.println();
 	}
-
+	public static void p(Object... os) {
+		for (Object o : os) {
+	        System.out.print(o + " ");
+	    }
+		System.out.println();
+	}
+	
 	public static void p(Iterable<Object> ol, String sep) {
 		p(ol, sep);
 	}
