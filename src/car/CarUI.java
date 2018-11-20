@@ -12,19 +12,16 @@ import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
-import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial.CullHint;
-import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Line;
 import com.jme3.scene.shape.Quad;
 import com.jme3.system.AppSettings;
 
 import car.ray.RayCarControl;
 import car.ray.RayCarPowered.PoweredState;
-import car.ray.RayWheel;
 import game.App;
 import game.Main;
 import helper.H;
@@ -70,22 +67,7 @@ public class CarUI extends AbstractAppState {
 
 	/////telemetry
 	private boolean showTelemetry;
-	private Node telemetry;
-
-	private Geometry gripBox[];
-	private Geometry gripDir[];
-	private BitmapText gripValue[];
-	private BitmapText wheelRot[];
-	private Vector3f[] ps;
-	
-	//the g force meter circles
-	private Geometry g1;
-	private Geometry g2;
-	private Vector3f gcenter;
-	private BitmapText gText;
-	
-	//some debug text
-	private BitmapText statsText;
+	private CarUITelemetry telemetry;
 	
 	private ActionListener actionListener = new ActionListener() {
 		public void onAction(String name, boolean keyPressed, float tpf) {
@@ -133,101 +115,10 @@ public class CarUI extends AbstractAppState {
 		i.addMapping("Telemetry", new KeyTrigger(KeyInput.KEY_HOME));
 		i.addListener(actionListener, "Telemetry");
 		
-		showTelemetry = true;
-		telemetry = new Node("telemetry");
-		
-		if (showTelemetry) {
-			rootNode.attachChild(telemetry);
-		}
-		
-		makeTelemetry(am, telemetry);
+		telemetry = new CarUITelemetry(p);
+		App.rally.getStateManager().attach(telemetry);
 	}
-	
 
-	private void makeTelemetry(AssetManager am, Node n) {
-		Material white = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-		white.setColor("Color", ColorRGBA.White);
-		white.getAdditionalRenderState().setLineWidth(3);
-		Material black = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-		black.setColor("Color", ColorRGBA.Black);
-		black.getAdditionalRenderState().setLineWidth(3);
-		
-		BitmapFont guiFont = App.rally.getFont();
-
-
-		int height = App.rally.getCamera().getHeight();
-		ps = new Vector3f[] {
-				new Vector3f(60, height*0.4f, 0), //60,250,0
-				new Vector3f(140, height*0.4f, 0),
-				new Vector3f(60, height*0.3f, 0),
-				new Vector3f(140, height*0.3f, 0), //140,180,0
-			};
-		
-		this.gripBox = new Geometry[4];
-		this.gripDir = new Geometry[4];
-		this.gripValue = new BitmapText[4];
-		this.wheelRot = new BitmapText[4];
-		
-
-		Box b = new Box(20, 20, 1);
-		Line l = new Line(new Vector3f(0,0,10), new Vector3f(1,0,10));
-		
-		for (int i = 0; i < 4; i++) {
-			gripBox[i] = new Geometry("box-"+i, b);
-			gripBox[i].setLocalTranslation(ps[i]);
-			gripBox[i].setMaterial(white);
-			n.attachChild(gripBox[i]);
-
-			gripDir[i] = new Geometry("line-"+i, l);
-			gripDir[i].setLocalTranslation(ps[i]);
-			gripDir[i].setMaterial(black);
-			n.attachChild(gripDir[i]);
-			
-			gripValue[i] = new BitmapText(guiFont, false);
-			gripValue[i].setSize(guiFont.getCharSet().getRenderedSize());
-			gripValue[i].setColor(ColorRGBA.Black);
-			gripValue[i].setText("");
-			gripValue[i].setLocalTranslation(ps[i]);
-			n.attachChild(gripValue[i]);
-			
-			wheelRot[i] = new BitmapText(guiFont, false);
-			wheelRot[i].setSize(guiFont.getCharSet().getRenderedSize());
-			wheelRot[i].setColor(ColorRGBA.DarkGray);
-			wheelRot[i].setText("");
-			wheelRot[i].setLocalTranslation(ps[i].add(new Vector3f(0,20,0)));
-			n.attachChild(wheelRot[i]);
-		}
-		
-		//stats text 
-		statsText = new BitmapText(guiFont, false);		  
-		statsText.setSize(guiFont.getCharSet().getRenderedSize());	  		// font size
-		statsText.setColor(ColorRGBA.White);								// font color
-		statsText.setText("");												// the text
-		statsText.setLocalTranslation(App.rally.getSettings().getWidth()-200, 500, 0); // position
-		n.attachChild(statsText);
-		
-		//g force
-		gcenter = new Vector3f(100, height*0.5f, 0);
-		
-		b = new Box(5, 5, 1);
-		g1 = new Geometry("g-circle1", b);
-		g1.setLocalTranslation(gcenter);
-		g1.setMaterial(white);
-		n.attachChild(g1);
-		
-		g2 = new Geometry("g-circle2", b);
-		g2.setLocalTranslation(gcenter);
-		g2.setMaterial(white);
-		n.attachChild(g2);
-		
-		gText = new BitmapText(guiFont, false);
-		gText.setSize(guiFont.getCharSet().getRenderedSize());	  		// font size
-		gText.setColor(ColorRGBA.Black);								// font color
-		gText.setText("...");												// the text
-		gText.setLocalTranslation(gcenter.subtract(40, 5, 0)); 			// position
-		n.attachChild(gText);
-	}
-	
 	private void makeSpeedo(AssetManager am, AppSettings settings) {
 		makeKmH(settings);
 		
@@ -382,7 +273,6 @@ public class CarUI extends AbstractAppState {
 		rootNode.attachChild(gear);
 	}
 
-	
 	private Node addRPMNumber(float angle, int i, Quad quad, float x, float y) {
 		Node n = new Node("rpm "+i);
 		n.setLocalTranslation(x, y, 0);
@@ -410,11 +300,7 @@ public class CarUI extends AbstractAppState {
 
 	public void toggleTelemetry() {
 		showTelemetry = !showTelemetry;
-		if (showTelemetry) {
-			rootNode.attachChild(telemetry);
-		} else {
-			rootNode.detachChild(telemetry);
-		}
+		telemetry.setEnabled(showTelemetry);
 	}
 	
 	//main update method
@@ -422,68 +308,18 @@ public class CarUI extends AbstractAppState {
 		PoweredState powerState = p.getPoweredState();
 		
 		int speedKMH = (int)Math.abs(p.getCurrentVehicleSpeedKmHour());
-
 		setSpeedDigits(speedKMH);
+
 		setGearDigit(powerState.curGear);
 		
 		//rpm bar 2
 		rpmMat.setFloat("Threshold", Math.min(1, 1 - (powerState.curRPM/(float)Math.ceil(redline+1000))*(5/(float)8)));
 		
-		angle.setText(powerState.driftAngle+"'");
+		angle.setText(H.roundDecimal(powerState.driftAngle, 1)+"'");
 		nitro.setLocalScale(1, powerState.nitro/p.getCarData().nitro_max, 1);
 		throttle.setLocalScale(1, powerState.accelCurrent, 1);
 		brake.setLocalScale(1, powerState.brakeCurrent, 1);
 		steer.setLocalTranslation(centerx - 35 + (powerState.steeringCurrent*-1 + 0.5f)*60 - 6/2, centery + 40, 0); //steering is a translated square
-		
-		// http://forum.projectcarsgame.com/showthread.php?23037-Telemetry-detail&p=892187&viewfull=1#post892187
-		if (showTelemetry) {
-			//stats
-			statsText.setText(p.statsString());
-			
-			//grips
-			for (int i = 0 ; i < 4; i++) {
-				RayWheel wheel = p.getWheel(i).getRayWheel();
-				
-				Material m = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-				gripValue[i].setText(String.format("%.2f", wheel.skidFraction));
-				wheelRot[i].setText(String.format("%.2f", wheel.radSec));
-				m.setColor("Color", getGripBoxColour(wheel.skidFraction));
-				gripBox[i].setMaterial(m);
-				
-				Vector3f dir = wheel.gripDir;
-				if (dir != null) {
-					gripBox[i].setLocalScale(wheel.susForce/(p.getCarData().mass*2));
-					
-					gripDir[i].setLocalScale(wheel.susForce/p.getCarData().susByWheelNum(i).max_force*150);
-					
-					float angle = FastMath.atan2(dir.z, dir.x);
-					Quaternion q = new Quaternion();
-					q.fromAngleAxis(angle, Vector3f.UNIT_Z);
-					gripDir[i].setLocalRotation(q);
-				}
-			}
-			
-			//g forces
-			//needs to be translated from local into screen axis
-			Vector3f gs = p.planarGForce.mult(1/p.getPhysicsObject().getGravity().length());
-			gs.y = gs.z; //z is front back
-			gs.z = 0; //screen has no depth
-			g2.setLocalTranslation(gcenter.add(gs.mult(25))); //because screen pixels
-			gText.setText("x: " + H.roundDecimal(gs.x, 2) +", y: " + H.roundDecimal(gs.y, 2));
-		}
-	}
-	
-	private ColorRGBA getGripBoxColour(float value) {
-		//0 is white, 1 is green, 2 is red, 5 is blue
-		value = Math.abs(value);
-		if (value < 1)
-			return H.lerpColor(value, ColorRGBA.White, ColorRGBA.Green);
-		else if (value < 2)
-			return H.lerpColor((value - 1f), ColorRGBA.Green, ColorRGBA.Red);
-		else if (value < 5.0)
-			return H.lerpColor((value - 2f)/(3f), ColorRGBA.Red, ColorRGBA.Blue);
-		
-		return ColorRGBA.Blue;
 	}
 
 	private void setSpeedDigits(int speedKMH) {
@@ -513,5 +349,6 @@ public class CarUI extends AbstractAppState {
 		i.removeListener(actionListener);
 		
 		App.rally.getGuiNode().detachChild(rootNode);
+		App.rally.getStateManager().detach(telemetry);
 	}
 }
