@@ -32,11 +32,11 @@ public class RayWheel {
 		this.data = data;
 		
 		//generate the slip* max force from the car wheel data
-		maxLat = RayCar.GripHelper.calcSlipMax(data.pjk_lat, ERROR);
-		maxLong = RayCar.GripHelper.calcSlipMax(data.pjk_long, ERROR);
+		maxLat = RayCar.GripHelper.calcSlipMax(data.pjk_lat, 0.2, ERROR);
+		maxLong = RayCar.GripHelper.calcSlipMax(data.pjk_long, 0.2, ERROR);
 		
-		maxLatSat = RayCar.GripHelper.calcSlipMax(data.pjk_lat_sat, ERROR);
-		maxLongSat = RayCar.GripHelper.calcSlipMax(data.pjk_long_sat, ERROR);
+		maxLatSat = RayCar.GripHelper.calcSlipMax(data.pjk_lat_sat, 0.2, ERROR);
+		maxLongSat = RayCar.GripHelper.calcSlipMax(data.pjk_long_sat, 0.2, ERROR);
 		
 		try {	
 			if (Float.isNaN(maxLat))

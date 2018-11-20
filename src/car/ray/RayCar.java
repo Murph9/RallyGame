@@ -256,6 +256,9 @@ public class RayCar implements PhysicsTickListener {
 			float ratiofract = slipratio/this.wheels[w_id].maxLong;
 			float anglefract = slipangle/this.wheels[w_id].maxLat;
 			float p = FastMath.sqrt(ratiofract*ratiofract + anglefract*anglefract);
+			if (p == 0)
+				p = 0.001f;
+			
 			wheels[w_id].skidFraction = p;
 			
 			//calc the longitudinal force from the slip ratio
@@ -270,17 +273,15 @@ public class RayCar implements PhysicsTickListener {
 				brakeCurrent2 = 0; //abs (which i think works way too well)
 			
 			//self aligning torque
-			//TODO not convinced that long(z) direction traction has a self aligning torque
-			//wheel_force.z += (ratiofract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_long_sat, p*this.wheels[w_id].maxLong) * this.wheels[w_id].susForce;
 			wheel_force.x += (anglefract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_lat_sat, p*this.wheels[w_id].maxLat) * this.wheels[w_id].susForce;
 			
 			//add the wheel force after merging the forces
 			float totalLongForce = wheelTorque[w_id] - wheel_force.z - (brakeCurrent2*carData.brakeMaxTorque*Math.signum(wheels[w_id].radSec));
-			float nextRadSec = wheels[w_id].radSec + tpf*totalLongForce/(carData.e_inertia());
-			if (brakingCur != 0 && Math.signum(wheels[w_id].radSec) != Math.signum(nextRadSec))
+			float totalLongForceTorque = tpf*totalLongForce/(carData.e_inertia()) * carData.wheelData[w_id].radius;
+			if (brakingCur != 0 && Math.signum(wheels[w_id].radSec) != Math.signum(wheels[w_id].radSec + totalLongForceTorque))
 				wheels[w_id].radSec = 0; //maxed out the forces with braking, so prevent wheels from moving
 			else
-				wheels[w_id].radSec += tpf*totalLongForce/(carData.e_inertia());
+				wheels[w_id].radSec += totalLongForceTorque;
 			
 			wheels[w_id].gripDir = wheel_force.normalize();
 			rbc.applyImpulse(w_angle.mult(wheel_force).mult(tpf), wheels[w_id].curBasePosWorld.subtract(w_pos));
@@ -392,8 +393,8 @@ public class RayCar implements PhysicsTickListener {
 		}
 
 		//returns the slip value that gives the closest to 1 from the magic formula (should be called twice, lat and long)
-		public static float calcSlipMax(WheelDataTractionConst w, double error) {
-			double lastX = 0.2f; //our first guess (usually finishes about 0.25f)
+		public static float calcSlipMax(WheelDataTractionConst w, double firstGuess, double error) {
+			double lastX = firstGuess; //our first guess (usually finishes about 0.25f)
 			double nextX = lastX + 5*error; //just so its a larger diff that error
 
 			while (Math.abs(lastX - nextX) > error) {

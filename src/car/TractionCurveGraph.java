@@ -34,14 +34,14 @@ public class TractionCurveGraph extends Container {
 		this.detachAllChildren();
 		
 		Vector3f size = getPreferredSize();
-		float max = GripHelper.tractionFormula(latData, GripHelper.calcSlipMax(latData, 0.0005f));
+		float max = GripHelper.tractionFormula(latData, GripHelper.calcSlipMax(latData, 0.25, 0.0005f));
 		Float[] points = simulateGraphPoints(latData);
 		for (int i = 0; i < points.length; i++) {
 			Vector3f pos = new Vector3f(i*(size.x/points.length), -(size.y/2)+(size.y/2)*(points[i]/max), 0);
 			this.attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Blue, pos, 1));
 		}
 		
-		max = GripHelper.tractionFormula(longData, GripHelper.calcSlipMax(longData, 0.0005f));
+		max = GripHelper.tractionFormula(longData, GripHelper.calcSlipMax(longData, 0.25, 0.0005f));
 		points = simulateGraphPoints(longData);
 		for (int i = 0; i < points.length; i++) {
 			Vector3f pos = new Vector3f(i*(size.x/points.length), -(size.y)+(size.y/2)*(points[i]/max), 0);
