@@ -19,7 +19,7 @@ driveFront: false
 driveRear: true
 e_compression: 0.1
 e_idle: 1000
-e_mass: 5 #fast reving because this is a drift car /s
+e_mass: 1 #fast reving because this is a drift car /s
 e_redline: 6700
 #http://www.automobile-catalog.com/curve/1991/2179700/nissan_200_sx_turbo_16v.html
 e_torque: [0, 50, 150, 210, 226, 223, 200, 140]

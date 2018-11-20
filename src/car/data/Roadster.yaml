@@ -2,7 +2,7 @@
 JUMP_FORCE: {x: 0.0, y: 1100.0, z: 0.0}
 areo_crossSection: 0.47
 areo_downforce: 0.0
-areo_drag: 1.0
+areo_drag: 0.38 #https://en.wikipedia.org/wiki/Automobile_drag_coefficient
 areo_lineardrag: 0.0
 auto_gearDown: 4000
 auto_gearUp: 6500
@@ -15,9 +15,9 @@ driveFront: false
 driveRear: true
 e_compression: 0.1
 e_idle: 1000
-e_mass: 20
+e_mass: 2 #caluclated off the flywheel weight/radius/shape
 e_redline: 7000
-e_torque: [0, 300, 450, 500, 530, 550, 500, 400] #its slower than this
+e_torque: [0, 60, 74, 85, 86, 93, 90, 72] #some online dyno data OR try: http://www.bayareamiatadrivers.com/miataspeed.php
 height: 1
 length: 4
 mass: 960.0
@@ -40,9 +40,9 @@ susF: &sus {
 susR:
   <<: *sus #https://blog.daemonl.com/2016/02/yaml.html
   antiroll: 2.0
-trans_effic: 0.85
-trans_finaldrive: 3.5
-trans_gearRatios: [-2.9, 3.6, 2.5, 1.8, 1.3, 1.0, 0.84]
+trans_effic: 1 #traction curve is from a dyno
+trans_finaldrive: 4.3
+trans_gearRatios: [-2.9, 3.136, 1.88, 1.33, 1.0, 0.814]
 w_difflock: 0.1
 w_steerAngle: 0.5
 wheelData:
@@ -53,8 +53,8 @@ wheelData:
   pjk_lat_sat: &w_sat {B: 0.85, C: 2.3, D: 0.51, E: -2.75}
   pjk_long: {B: 10, C: 1.9, D: 1.4, E: 0.97}
   pjk_long_sat: *w_sat
-  radius: 0.3
-  width: 0.15
+  radius: 0.289 #https://www.tyresizecalculator.com/tyre-wheel-calculators/tire-size-calculator-tire-dimensions
+  width: 0.185
 - *w
 - *w
 - *w

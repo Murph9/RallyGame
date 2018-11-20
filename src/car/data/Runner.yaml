@@ -15,7 +15,7 @@ driveFront: false
 driveRear: true
 e_compression: 0.1
 e_idle: 1000
-e_mass: 20
+e_mass: 2
 e_redline: 7000
 e_torque: [0.0, 300.0, 450.0, 500.0, 530.0, 550.0, 500.0, 400.0]
 height: 1
