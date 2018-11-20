@@ -1,10 +1,14 @@
 package car.ray;
 
+import java.util.Arrays;
+
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
+
+import helper.Log;
 
 //handles engine/drivetrain stuff (it is an arbitrary feature split)
 public class RayCarPowered extends RayCar {
@@ -82,7 +86,7 @@ public class RayCarPowered extends RayCar {
 	
 	private float getEngineWheelTorque(float tpf, float vz) {
 		float curGearRatio = carData.trans_gearRatios[curGear];//0 = reverse, >= 1 make normal sense
-		float diffRatio = carData.trans_finaldrive/2; //the 2 makes it fit the real world for some reason?
+		float diffRatio = carData.trans_finaldrive;
 		
 		float wheelrot = 0;
 		//get the drive wheels rotation speed
@@ -93,11 +97,11 @@ public class RayCarPowered extends RayCar {
 		else if (carData.driveRear) 
 			wheelrot = (wheels[2].radSec + wheels[3].radSec)/2;
 		
-		curRPM = (int)(wheelrot*curGearRatio*diffRatio*60*carData.wheelData[0].radius); //rad/(m*sec) to rad/min and the drive ratios to engine
+		curRPM = (int)(wheelrot*curGearRatio*diffRatio*(60/FastMath.TWO_PI)); //rad/(m*sec) to rad/min and the drive ratios to engine
 		//wheel rad/s, gearratio, diffratio, conversion from rad/sec to rad/min
 		
 		curRPM = Math.max(curRPM, carData.e_idle); //no stall please, its bad enough that we don't have torque here
-
+		
 		autoTransmission(curRPM, vz);
 
 		float nitroForce = 0;
@@ -135,19 +139,20 @@ public class RayCarPowered extends RayCar {
 	}
 	
 	private void autoTransmission(int rpm, float vz) {
-		if (curGear == 0) 
-			return; //no changing out of reverse on me please..
+		if (curGear == 0)
+			return; //no changing out of reverse on me please...
 		if (helper.H.allTrue((w) -> { return !w.inContact; }, wheels))
 			return; //if no contact, no changing of gear
 		
-		float driveSpeed = (carData.trans_gearRatios[curGear]*carData.trans_finaldrive/2*60);
+		float driveSpeed = (carData.trans_gearRatios[curGear]*carData.trans_finaldrive*(60/FastMath.TWO_PI))/carData.wheelData[0].radius;
 		float gearUpSpeed = carData.auto_gearUp/driveSpeed; //TODO pre compute, as it doesn't change
 		float gearDownSpeed = carData.auto_gearDown/driveSpeed;
-		//TODO: error checking that there isn't over lap  [2-----[3--2]----3] not [2------2]--[3-----3]
+		
+		//TODO: error checking that there is over lap  [2-----[3--2]----3] not [2------2]--[3-----3]
 
 		//TODO check that these values are actually working
 		
-		if (vz > gearUpSpeed && curGear < carData.trans_gearRatios.length-1) { //TODO should also work off speed so you can redline (both up and down)
+		if (vz > gearUpSpeed && curGear < carData.trans_gearRatios.length-1) {
 			curGear++;
 			//TODO:
 			/*clutch = 1;
