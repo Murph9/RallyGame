@@ -179,13 +179,13 @@ public class RayWheelControl {
 		Vector3f rot = new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y).mult(velDir.normalize());
 		colors[verticesPos] = lastColor;
 		vertices[verticesPos++] = lastl;
-		lastl = cur.add(rot.mult(wheel.data.width));
+		lastl = cur.add(rot.mult(wheel.data.width/2));
 		colors[verticesPos] = c;
 		vertices[verticesPos++] = lastl;
 		
 		colors[verticesPos] = lastColor;
 		vertices[verticesPos++] = lastr;
-		lastr = cur.add(rot.negate().mult(wheel.data.width));
+		lastr = cur.add(rot.negate().mult(wheel.data.width/2));
 		colors[verticesPos] = c;
 		vertices[verticesPos++] = lastr;
 		
