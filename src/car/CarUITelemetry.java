@@ -17,7 +17,9 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Line;
+import com.jme3.scene.shape.Quad;
 
+import car.ray.CarDataConst;
 import car.ray.RayCarControl;
 import car.ray.RayWheel;
 import game.App;
@@ -30,13 +32,8 @@ public class CarUITelemetry extends AbstractAppState {
 	
 	private Node rootNode;
 
-	private final Vector3f[] ps = new Vector3f[4];
-	private Geometry gripBox[];
-	private Geometry gripDir[];
-	private BitmapText gripValue[];
-	private BitmapText wheelRot[];
-	
-	
+	private final WheelUI[] w = new WheelUI[4];
+		
 	//the g force meter circles
 	private Geometry g1;
 	private Geometry g2;
@@ -65,10 +62,10 @@ public class CarUITelemetry extends AbstractAppState {
 
 		//set the positions of the wheel grid
 		int height = App.rally.getCamera().getHeight();
-		ps[0] = new Vector3f(80, height*0.9f, 0);
-		ps[1] = new Vector3f(200, height*0.9f, 0);
-		ps[2] = new Vector3f(80, height*0.75f, 0);
-		ps[3] = new Vector3f(200, height*0.75f, 0);
+		w[0] = new WheelUI(new Vector3f(80, height*0.9f, 0));
+		w[1] = new WheelUI(new Vector3f(200, height*0.9f, 0));
+		w[2] = new WheelUI(new Vector3f(80, height*0.75f, 0));
+		w[3] = new WheelUI(new Vector3f(200, height*0.75f, 0));
 		
 		makeTelemetry(r.getAssetManager());
 	}
@@ -83,39 +80,52 @@ public class CarUITelemetry extends AbstractAppState {
 		
 		BitmapFont guiFont = App.rally.getFont();
 		
-		this.gripBox = new Geometry[4];
-		this.gripDir = new Geometry[4];
-		this.gripValue = new BitmapText[4];
-		this.wheelRot = new BitmapText[4];
-		
-
 		Box b = new Box(20, 20, 1);
 		Line l = new Line(new Vector3f(0,0,10), new Vector3f(1,0,10));
 		
 		for (int i = 0; i < 4; i++) {
-			gripBox[i] = new Geometry("box-"+i, b);
-			gripBox[i].setLocalTranslation(ps[i]);
-			gripBox[i].setMaterial(white);
-			rootNode.attachChild(gripBox[i]);
+			WheelUI w = this.w[i];
+			
+			w.gripBox = new Geometry("box-"+i, b);
+			w.gripBox.setLocalTranslation(w.ps);
+			w.gripBox.setMaterial(white);
+			rootNode.attachChild(w.gripBox);
 
-			gripDir[i] = new Geometry("line-"+i, l);
-			gripDir[i].setLocalTranslation(ps[i]);
-			gripDir[i].setMaterial(black);
-			rootNode.attachChild(gripDir[i]);
+			w.gripDir = new Geometry("line-"+i, l);
+			w.gripDir.setLocalTranslation(w.ps);
+			w.gripDir.setMaterial(black);
+			rootNode.attachChild(w.gripDir);
 			
-			gripValue[i] = new BitmapText(guiFont, false);
-			gripValue[i].setSize(guiFont.getCharSet().getRenderedSize());
-			gripValue[i].setColor(ColorRGBA.Black);
-			gripValue[i].setText("");
-			gripValue[i].setLocalTranslation(ps[i].add(new Vector3f(-80, 0 ,0)));
-			rootNode.attachChild(gripValue[i]);
+			w.gripValue = new BitmapText(guiFont, false);
+			w.gripValue.setSize(guiFont.getCharSet().getRenderedSize());
+			w.gripValue.setColor(ColorRGBA.Black);
+			w.gripValue.setText("");
+			w.gripValue.setLocalTranslation(w.ps.add(new Vector3f(-80, 0 ,0)));
+			rootNode.attachChild(w.gripValue);
 			
-			wheelRot[i] = new BitmapText(guiFont, false);
-			wheelRot[i].setSize(guiFont.getCharSet().getRenderedSize());
-			wheelRot[i].setColor(ColorRGBA.DarkGray);
-			wheelRot[i].setText("");
-			wheelRot[i].setLocalTranslation(ps[i].add(new Vector3f(-80,20,0)));
-			rootNode.attachChild(wheelRot[i]);
+			w.wheelRot = new BitmapText(guiFont, false);
+			w.wheelRot.setSize(guiFont.getCharSet().getRenderedSize());
+			w.wheelRot.setColor(ColorRGBA.DarkGray);
+			w.wheelRot.setText("");
+			w.wheelRot.setLocalTranslation(w.ps.add(new Vector3f(-80,20,0)));
+			rootNode.attachChild(w.wheelRot);
+			
+			Quad q = new Quad(5, 60);
+			w.susOff = new Geometry("susOff", q);
+			Material susM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+			susM.setColor("Color", new ColorRGBA(ColorRGBA.White).mult(0.2f));
+			w.susOff.setMaterial(susM);
+			w.susOff.rotate(0, 0, FastMath.PI);
+			w.susOff.setLocalTranslation(w.ps.add(new Vector3f(30,30,0)));
+			rootNode.attachChild(w.susOff);
+			
+			w.sus = new Geometry("sus", q);
+			susM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+			susM.setColor("Color", new ColorRGBA(ColorRGBA.White));
+			w.sus.setMaterial(susM);
+			w.sus.rotate(0, 0, FastMath.PI);
+			w.sus.setLocalTranslation(w.ps.add(new Vector3f(30,30,0)));
+			rootNode.attachChild(w.sus);
 		}
 		
 		//stats text 
@@ -168,29 +178,33 @@ public class CarUITelemetry extends AbstractAppState {
 		statsText.setText(p.statsString());
 		
 		//grips
+		CarDataConst data = p.getCarData();
 		for (int i = 0 ; i < 4; i++) {
+			WheelUI w = this.w[i];
 			RayWheel wheel = p.getWheel(i).getRayWheel();
 			
 			Material m = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-			gripValue[i].setText(String.format("%.2f", wheel.skidFraction));
-			wheelRot[i].setText(String.format("%.2f", wheel.radSec));
+			w.gripValue.setText(String.format("%.2f", wheel.skidFraction));
+			w.wheelRot.setText(String.format("%.2f", wheel.radSec));
 			m.setColor("Color", getGripBoxColour(wheel.skidFraction));
-			gripBox[i].setMaterial(m);
+			w.gripBox.setMaterial(m);
 			
 			Vector3f dir = wheel.gripDir;
 			if (dir != null) {
-				gripBox[i].setLocalScale(wheel.susForce/(p.getCarData().mass*2));
-				
-				gripDir[i].setLocalScale(wheel.susForce/p.getCarData().susByWheelNum(i).max_force*150);
+				w.gripBox.setLocalScale(wheel.susForce/(p.getCarData().mass*2));
+				w.gripDir.setLocalScale(wheel.susForce/p.getCarData().susByWheelNum(i).max_force*1000);
 				
 				float angle = FastMath.atan2(dir.z, dir.x);
 				Quaternion q = new Quaternion();
 				q.fromAngleAxis(angle, Vector3f.UNIT_Z);
-				gripDir[i].setLocalRotation(q);
+				w.gripDir.setLocalRotation(q);
 			}
+			
+			w.sus.setLocalScale(1, wheel.susRayLength/data.susByWheelNum(i).travelTotal(), 1);
 		}
 		
 		//g forces
+		//TODO average
 		//needs to be translated from local into screen axis
 		Vector3f gs = p.planarGForce.mult(1/p.getPhysicsObject().getGravity().length());
 		gs.y = gs.z; //z is front back
@@ -219,5 +233,20 @@ public class CarUITelemetry extends AbstractAppState {
 		i.removeListener(actionListener);
 		
 		App.rally.getGuiNode().detachChild(rootNode);
+	}
+	
+	class WheelUI {
+		public final Vector3f ps;
+		public Geometry gripBox;
+		public Geometry gripDir;
+		public BitmapText gripValue;
+		public BitmapText wheelRot;
+		
+		public Geometry sus; //value
+		public Geometry susOff; //background color
+		
+		public WheelUI(Vector3f pos) {
+			this.ps = pos;
+		}
 	}
 }
