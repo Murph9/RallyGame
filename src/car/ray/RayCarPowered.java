@@ -1,14 +1,10 @@
 package car.ray;
 
-import java.util.Arrays;
-
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
-
-import helper.Log;
 
 //handles engine/drivetrain stuff (it is an arbitrary feature split)
 public class RayCarPowered extends RayCar {
