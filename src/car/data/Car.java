@@ -24,6 +24,8 @@ public enum Car {
 	
 	WhiteSloth("WhiteSloth"),
 	Rocket("Rocket"),
+	
+	Debug("Debug"),
 	;
 	
 	private String c;
