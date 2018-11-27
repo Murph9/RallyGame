@@ -283,7 +283,7 @@ public class RayCar implements PhysicsTickListener {
 			else
 				wheels[w_id].radSec += totalLongForceTorque;
 			
-			wheels[w_id].gripDir = wheel_force.normalize();
+			wheels[w_id].gripDir = wheel_force;
 			rbc.applyImpulse(w_angle.mult(wheel_force).mult(tpf), wheels[w_id].curBasePosWorld.subtract(w_pos));
 			
 			planarGForce.addLocal(wheel_force);
