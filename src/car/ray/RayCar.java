@@ -252,7 +252,8 @@ public class RayCar implements PhysicsTickListener {
 				slipangle = (float)(FastMath.atan2(slipa_rear, slip_div)); //slip_div is questionable here
 			}
 			
-			//start work on merging the forces into a traction circle
+			//merging the forces into a traction circle
+			//normalise based on their independant max values 
 			float ratiofract = slipratio/this.wheels[w_id].maxLong;
 			float anglefract = slipangle/this.wheels[w_id].maxLat;
 			float p = FastMath.sqrt(ratiofract*ratiofract + anglefract*anglefract);
@@ -263,8 +264,7 @@ public class RayCar implements PhysicsTickListener {
 			
 			//calc the longitudinal force from the slip ratio
 			wheel_force.z = (ratiofract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_long, p*this.wheels[w_id].maxLong) * this.wheels[w_id].susForce; //TODO normalise susforce to prevent very large forces
-			
-			//latitudinal force that is calculated off the slip angle
+			//calc the latitudinal force from the slip angle
 			wheel_force.x = -(anglefract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_lat, p*this.wheels[w_id].maxLat) * this.wheels[w_id].susForce;
 			
 			// braking and abs
@@ -281,7 +281,7 @@ public class RayCar implements PhysicsTickListener {
 			if (brakingCur != 0 && Math.signum(wheels[w_id].radSec) != Math.signum(wheels[w_id].radSec + totalLongForceTorque))
 				wheels[w_id].radSec = 0; //maxed out the forces with braking, so prevent wheels from moving
 			else
-				wheels[w_id].radSec += totalLongForceTorque;
+				wheels[w_id].radSec += totalLongForceTorque; //so the radSec can be used next frame, to calculate slip ratio
 			
 			wheels[w_id].gripDir = wheel_force;
 			rbc.applyImpulse(w_angle.mult(wheel_force).mult(tpf), wheels[w_id].curBasePosWorld.subtract(w_pos));
@@ -289,7 +289,7 @@ public class RayCar implements PhysicsTickListener {
 			planarGForce.addLocal(wheel_force);
 		});
 		
-		planarGForce.multLocal(1/carData.mass);
+		planarGForce.multLocal(1/carData.mass); //F=m*a => a=F/m
 	}
 	
 	private void applyDrag(PhysicsSpace space, float tpf) {
