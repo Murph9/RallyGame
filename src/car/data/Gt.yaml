@@ -5,6 +5,7 @@ areo_crossSection: 0.47
 areo_downforce: 0.0
 areo_drag: 0.31
 areo_lineardrag: 0.0
+auto_changeTime: 0.2
 auto_gearDown: 2400
 auto_gearUp: 6700
 brakeMaxTorque: 8000

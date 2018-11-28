@@ -8,6 +8,7 @@ areo_downforce: 0.0
 #https://en.wikipedia.org/wiki/Automobile_drag_coefficient
 areo_drag: 0.33
 areo_lineardrag: 0.0
+auto_changeTime: 0.2
 auto_gearDown: 3500
 auto_gearUp: 6500
 brakeMaxTorque: 4000.0

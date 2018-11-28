@@ -25,12 +25,9 @@ public class RayCarPowered extends RayCar {
 	protected float nitro;
 	
 	protected int curGear = 1;
-	protected int curRPM = 1000;
+	protected int curRPM;
 	protected int gearChangeTo;
 	protected float gearChangeTime;
-	protected float clutch; //TODO use //0 = can drive, 1 = can't drive
-	 
-	protected float redlineKillTimeout;
 	
 	public RayCarPowered(CollisionShape shape, CarDataConst carData) {
 		super(shape, carData);
@@ -96,10 +93,23 @@ public class RayCarPowered extends RayCar {
 		curRPM = (int)(wheelrot*curGearRatio*diffRatio*(60/FastMath.TWO_PI)); //rad/(m*sec) to rad/min and the drive ratios to engine
 		//wheel rad/s, gearratio, diffratio, conversion from rad/sec to rad/min
 		
-		curRPM = Math.max(curRPM, carData.e_idle); //no stall please, its bad enough that we don't have torque here
+		//no stall please, its bad enough that we don't have torque here
+		//'fake clutch'
+		curRPM = Math.max(curRPM, carData.e_idle);
 		
-		autoTransmission(curRPM, vz);
 
+		if (gearChangeTime != 0) {
+			gearChangeTime -= tpf;
+			if (gearChangeTime > 0) {
+				return 0; //because not connected to wheels
+			} else if (gearChangeTime < 0) { //if equal probably shouldn't be trying to set the gear
+				curGear = gearChangeTo;
+				gearChangeTime = 0;
+			}
+		} else { //only check while NOT changing gear 
+			autoTransmission(curRPM, vz);
+		}
+		
 		float nitroForce = 0;
 		if (carData.nitro_on) { //TODO this is not bug free [surprising with its length huh?]
 			if (ifNitro && this.nitro > 0) {
@@ -118,7 +128,6 @@ public class RayCarPowered extends RayCar {
 			}
 		}
 
-		//TODO fake some kind of clutch at slow speeds in first (to prevent very low torques at 1000 rpm)
 		
 		float eTorque = (carData.lerpTorque(curRPM) + nitroForce)*accelCurrent;
 		float engineDrag = 0;
@@ -145,18 +154,13 @@ public class RayCarPowered extends RayCar {
 		float gearDownSpeed = carData.auto_gearDown/driveSpeed;
 		
 		//TODO: error checking that there is over lap  [2-----[3--2]----3] not [2------2]--[3-----3]
-
-		//TODO check that these values are actually working
 		
 		if (vz > gearUpSpeed && curGear < carData.trans_gearRatios.length-1) {
-			curGear++;
-			//TODO:
-			/*clutch = 1;
-			gearChangeTo = curGear + 1;*/
+			gearChangeTime = carData.auto_changeTime;
+			gearChangeTo = curGear + 1;
 		} else if (vz < gearDownSpeed && curGear > 1) {
-			curGear--;
-			/*clutch = 1;
-			gearChangeTo = curGear - 1;*/
+			gearChangeTime = carData.auto_changeTime;
+			gearChangeTo = curGear - 1;
 		}
 	}
 	

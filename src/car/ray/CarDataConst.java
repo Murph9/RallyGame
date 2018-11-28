@@ -55,6 +55,7 @@ public class CarDataConst implements Serializable {
 	
 	public int auto_gearDown; //rpm triggering a gear down
 	public int auto_gearUp; //rpm triggering a gear up
+	public float auto_changeTime;
 	public int e_redline;
 	public int e_idle; 
 	
