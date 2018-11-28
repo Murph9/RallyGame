@@ -130,10 +130,9 @@ public class Main extends SimpleApplication {
 		
 		//initialize Lemur (GUI thing)
 		GuiGlobals.initialize(this);
-		//Load the 'glass' style
-		BaseStyles.loadGlassStyle();
-		//Set 'glass' as the default style when not specified
-		GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
+		//Load my style
+		LemurGuiStyle.load(assetManager);
+		
 		//Init the lemur mouse listener
 		getStateManager().attach(new MouseAppState(this));
 		
