@@ -184,10 +184,11 @@ public class RayCarControl extends RayCarPowered {
 	
 			case "Jump":
 				if (value) {
-					rbc.applyImpulse(carData.JUMP_FORCE, new Vector3f(0,0,0)); //push up
+					rbc.applyImpulse(carData.JUMP_FORCE, new Vector3f()); //push up
 					Vector3f old = rbc.getPhysicsLocation();
 					old.y += 2; //and move up
 					rbc.setPhysicsLocation(old);
+					rbc.setLinearVelocity(new Vector3f());
 				}
 				break;
 	
