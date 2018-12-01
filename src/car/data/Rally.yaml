@@ -7,7 +7,7 @@ areo_lineardrag: 0.0
 auto_changeTime: 0.2
 auto_gearDown: 3500
 auto_gearUp: 6800
-brakeMaxTorque: 4000.0
+brakeMaxTorque: 8000.0
 cam_lookAt: {x: 0.0, y: 1.3, z: 0.0}
 cam_offset: {x: 0.0, y: 2.1, z: -6.0}
 cam_shake: 2.0E-6
@@ -18,7 +18,7 @@ e_compression: 0.1
 e_idle: 1000
 e_mass: 2
 e_redline: 7800
-e_torque: [0,310,320,325,320,310,300,290,295]
+e_torque: [100,400,460,465,450,390,330,280,220]
 height: 1
 length: 4
 mass: 1500.0
@@ -29,30 +29,31 @@ nitro_on: true
 nitro_rate: 1.0
 rollFraction: 1.0
 susF: &sus {
-  antiroll: 6.0, 
+  antiroll: 3.0,
   comp: 0.3,
   max_force: 35000.0, 
   max_travel: 0.3,
   min_travel: -0.1,
-  preload_force: 1.8,
-  relax: 0.5, 
-  stiffness: 12.0
+  preload_force: 2,
+  relax: 0.3,
+  stiffness: 10.0
 }
 susR: *sus
 trans_effic: 0.85
-trans_finaldrive: 4
-trans_gearRatios: [-3.5, 3.0, 2.3, 1.6, 1.2, 0.87, 0.7]
+trans_finaldrive: 5.5
+trans_gearRatios: [-3.5, 3.0, 2.3, 1.6, 1.2, 1, 0.9]
+w_diff: false
 w_difflock: 0.1
 w_steerAngle: 0.5
 wheelData:
 - &w
-  mass: 10.0
+  mass: 4.0
   modelName: assets/models/wheelraid1.obj
   pjk_lat: {B: 10, C: 1.9, D: 1.4, E: 0.97}
   pjk_lat_sat: &w_sat {B: 0.85, C: 2.3, D: 0.51, E: -2.75}
   pjk_long: {B: 10, C: 1.9, D: 1.4, E: 0.97}
   pjk_long_sat: *w_sat
-  radius: 0.3
+  radius: 0.45
   width: 0.4
 - *w
 - *w
