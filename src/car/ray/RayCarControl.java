@@ -188,7 +188,10 @@ public class RayCarControl extends RayCarPowered {
 					Vector3f old = rbc.getPhysicsLocation();
 					old.y += 2; //and move up
 					rbc.setPhysicsLocation(old);
-					rbc.setLinearVelocity(new Vector3f());
+					
+					Vector3f vel = rbc.getLinearVelocity();
+					vel.y = 0;
+					rbc.setLinearVelocity(vel);
 				}
 				break;
 	
