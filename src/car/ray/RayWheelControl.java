@@ -135,7 +135,7 @@ public class RayWheelControl {
 			q.fromAngleNormalAxis(wheel.steering, new Vector3f(0,1,0));
 			rootNode.setLocalRotation(q);
 			//lastly the odd side needs rotating (but every frame?)
-			if (wheel.num % 2 == 0)
+			if (wheel.num % 2 == 1)
 				rootNode.rotate(0, FastMath.PI, 0);
 			
 			sinceLastPos -= tpf;

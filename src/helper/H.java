@@ -364,9 +364,13 @@ public class H {
 		return m;
 	}
 	
-	
-	public static Vector3f randV3f() {
-		return new Vector3f(FastMath.nextRandomFloat()*2-1, FastMath.nextRandomFloat()*2-1, FastMath.nextRandomFloat()*2-1);
+	/**Generate a random Vector3f([0,1), [0,1), [0,1))
+	 * scaleNegative for [-1, 1) parts
+	 */
+	public static Vector3f randV3f(float max, boolean scaleNegative) {
+		float offset = scaleNegative ? max : 0;
+		float scale = scaleNegative ? 2 : 1;
+		return new Vector3f(FastMath.nextRandomFloat()*scale*max-offset, FastMath.nextRandomFloat()*scale*max-offset, FastMath.nextRandomFloat()*scale*max-offset);
 	}
 	public static <T> T randFromArray(T[] array) {
 		return array[FastMath.nextRandomInt(0, array.length-1)];

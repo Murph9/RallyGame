@@ -15,10 +15,14 @@ import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.material.Material;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
+import com.jme3.math.Vector4f;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.shader.VarType;
+import com.jme3.texture.Image.Format;
+import com.jme3.texture.TextureCubeMap;
 
 import car.ai.CarAI;
 import car.ai.DriveAtAI;
@@ -32,11 +36,13 @@ import helper.Log;
 
 public class CarBuilder extends AbstractAppState {
 
+	private HashMap<RayCarControl, CarReflectionMap> reflectionMaps;
 	private HashMap<Integer, RayCarControl> cars;
 	private Node rootNode;
 
 	public CarBuilder() {
 		cars = new HashMap<>();
+		reflectionMaps = new HashMap<>();
 		rootNode = new Node("Car Builder Root");
 		
 		App.rally.getRootNode().attachChild(rootNode);
@@ -45,6 +51,8 @@ public class CarBuilder extends AbstractAppState {
 	public void initialize(AppStateManager stateManager, Application app) {
 		super.initialize(stateManager, app);
 		Log.p("CarBuilder init");
+		
+		
 	}
 	
 	public void setEnabled(boolean state) {
@@ -52,6 +60,9 @@ public class CarBuilder extends AbstractAppState {
 		for (Integer i : cars.keySet()) {
 			cars.get(i).setEnabled(state);
 			cars.get(i).enableSound(state);
+		}
+		for (CarReflectionMap map: reflectionMaps.values()) {
+			map.setEnabled(state);
 		}
 	}
 	
@@ -71,6 +82,8 @@ public class CarBuilder extends AbstractAppState {
 		AssetManager am = r.getAssetManager();
 		
 		Spatial carModel = am.loadModel(carData.carModel);
+		
+		TextureCubeMap environmentMap = new TextureCubeMap(512, 512, Format.RGBA8);
 		if (carModel instanceof Geometry) {
 
 		} else {
@@ -84,7 +97,22 @@ public class CarBuilder extends AbstractAppState {
 					m.setBoolean("UseMaterialColors", true);
 					m.setVector3("FresnelParams", new Vector3f(0.05f, 0.18f, 0.11f));
 				}
-				g.setMaterial(m);
+				
+				//add environment map
+				Material newM = new Material(am, "Common/MatDefs/Light/Lighting.j3md");
+				newM.setBoolean("UseMaterialColors", true);
+				newM.setBoolean("VertexLighting", false);
+				
+				newM.setParam("EnvMap", VarType.TextureCubeMap, environmentMap);
+				
+				newM.setVector4("Ambient", new Vector4f(0.5f, 0.5f, 0.5f, 1));
+				newM.setVector4("Diffuse", new Vector4f(1, 1, 1, 1));
+				newM.setVector4("Specular", new Vector4f(1, 1, 1, 1));
+				newM.setFloat("Shininess", 2);
+//				newM.setVector3("FresnelParams", new Vector3f(0.05f, 0.18f, 0.11f));
+				newM.setVector3("FresnelParams", new Vector3f(0.2f, 0.5f, 0.2f)); //TODO
+				
+				g.setMaterial(newM);
 			}
 		}
 		
@@ -116,11 +144,17 @@ public class CarBuilder extends AbstractAppState {
 			player.attachAI(_ai);
 		}
 		
-		if (aPlayer) {
+		if (aPlayer) { //players get sound (and some reflections)
 			player.giveSound(new AudioNode(am, "assets/sound/engine.wav", AudioData.DataType.Buffer));
+		
+			//lastly add a reflection map
+			CarReflectionMap reflectionMap = new CarReflectionMap(player, environmentMap);
+			reflectionMaps.put(player, reflectionMap);
+			App.rally.getStateManager().attach(reflectionMap);
 		}
 		
 		cars.put(id, player);
+		
 		return player;
 	}
 
@@ -144,6 +178,12 @@ public class CarBuilder extends AbstractAppState {
 		RayCarControl car = cars.get(id);
 		car.cleanup();
 		cars.remove(id);
+		
+		if (reflectionMaps.containsKey(car)) {
+			CarReflectionMap reflectionMap = reflectionMaps.get(car);
+			App.rally.getStateManager().detach(reflectionMap);
+			reflectionMaps.remove(car);
+		}
 	}
 	public void removePlayer(RayCarControl mpv) {
 		for (int key: cars.keySet()) {

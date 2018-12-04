@@ -47,29 +47,43 @@ public class RayCarPowered extends RayCar {
 		
 		float[] torques = new float[] { 0, 0, 0, 0 };
 
+		//TODO diff doesn't change based on car value
+		
 		//split once for each 2 wheels
 		float frontTorque = engineTorque/2;
 		float rearTorque = engineTorque/2;
-		if (carData.driveFront && carData.driveRear) {
-			float frontForce = (wheels[0].gripDir.z + wheels[1].gripDir.z)/2;
-			float rearForce = (wheels[2].gripDir.z + wheels[3].gripDir.z)/2;
-			//calc center diff
-			float diff = (frontForce - rearForce)*FastMath.sign((frontForce + rearForce)/2);
-			frontTorque = (engineTorque/2)*(1f - 2*FastMath.atan(carData.w_difflock*diff)/FastMath.PI); //TODO constant for center diff
-			rearTorque = (engineTorque/2)*(1f + 2*FastMath.atan(carData.w_difflock*diff)/FastMath.PI);
+		if (carData.w_diff) {
+			if (carData.driveFront && carData.driveRear) {
+				float frontForce = (wheels[0].gripDir.z + wheels[1].gripDir.z)/2;
+				float rearForce = (wheels[2].gripDir.z + wheels[3].gripDir.z)/2;
+				//calc center diff
+				float diff = (frontForce - rearForce)*FastMath.sign((frontForce + rearForce)/2);
+				frontTorque = (engineTorque/2)*(1f - 2*FastMath.atan(carData.w_difflock*diff)/FastMath.PI); //TODO constant for center diff
+				rearTorque = (engineTorque/2)*(1f + 2*FastMath.atan(carData.w_difflock*diff)/FastMath.PI);
+			}
+			if (carData.driveFront) {
+				//calc front diff
+				float diff = (wheels[0].gripDir.z - wheels[1].gripDir.z)*FastMath.sign((wheels[0].gripDir.z + wheels[1].gripDir.z)/2);
+				torques[0] = frontTorque*(1f - 2*FastMath.atan(carData.w_difflock*diff)/FastMath.PI);
+				torques[1] = frontTorque*(1f + 2*FastMath.atan(carData.w_difflock*diff)/FastMath.PI);
+			}
+			if (carData.driveRear) {
+				//calc rear diff
+				float diff = (wheels[2].gripDir.z - wheels[3].gripDir.z)*FastMath.sign((wheels[2].gripDir.z + wheels[3].gripDir.z)/2);
+				torques[2] = rearTorque*(1f - 2*FastMath.atan(carData.w_difflock*diff)/FastMath.PI);
+				torques[3] = rearTorque*(1f + 2*FastMath.atan(carData.w_difflock*diff)/FastMath.PI);
+			}
+		} else {
+			if (carData.driveFront) {
+				torques[0] = frontTorque;
+				torques[1] = frontTorque;
+			}
+			if (carData.driveRear) {
+				torques[2] = rearTorque;
+				torques[3] = rearTorque;
+			}
 		}
-		if (carData.driveFront) {
-			//calc front diff
-			float diff = (wheels[0].gripDir.z - wheels[1].gripDir.z)*FastMath.sign((wheels[0].gripDir.z + wheels[1].gripDir.z)/2);
-			torques[0] = frontTorque*(1f - 2*FastMath.atan(carData.w_difflock*diff)/FastMath.PI);
-			torques[1] = frontTorque*(1f + 2*FastMath.atan(carData.w_difflock*diff)/FastMath.PI);
-		}
-		if (carData.driveRear) {
-			//calc rear diff
-			float diff = (wheels[2].gripDir.z - wheels[3].gripDir.z)*FastMath.sign((wheels[2].gripDir.z + wheels[3].gripDir.z)/2);
-			torques[2] = rearTorque*(1f - 2*FastMath.atan(carData.w_difflock*diff)/FastMath.PI);
-			torques[3] = rearTorque*(1f + 2*FastMath.atan(carData.w_difflock*diff)/FastMath.PI);
-		}
+				
 		doForEachWheel((w_id) -> {
 			setWheelTorque(w_id, torques[w_id]);			
 		});
