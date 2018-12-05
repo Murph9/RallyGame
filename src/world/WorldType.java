@@ -7,13 +7,12 @@ public enum WorldType {
 	OBJECT,
 	FULLCITY,
 	
+	TRACK,
 	LSYSTEM,
 	HIGHWAY,
 	
 	BASIC,
 	FLAT,
-	NONE,
-	
-	TEST,
+	NONE
 	;
 }

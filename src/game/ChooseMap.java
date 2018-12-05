@@ -14,6 +14,7 @@ import helper.Log;
 import world.*;
 import world.highway.HighwayWorld;
 import world.lsystem.LSystemWorld;
+import world.track.TrackWorld;
 import world.wp.WP.DynamicType;
 
 public class ChooseMap extends AbstractAppState {
@@ -154,9 +155,15 @@ public class ChooseMap extends AbstractAppState {
 			case FLAT:
 				world = new FlatWorld();
 				break;
+			case BASIC:
+				world = new BasicWorld();
+				break;
+			case TRACK:
+				world = new TrackWorld();
+				break;
 				
 			default:
-				Log.p("Non valid world type in ChooseMap.setWorld() method");
+				Log.p("Non valid world type in ChooseMap.setWorld() method: " + worldType.name());
 				return;
 		}
 		

@@ -33,6 +33,7 @@ import settings.Configuration;
 import world.*;
 import world.highway.HighwayWorld;
 import world.lsystem.LSystemWorld;
+import world.track.TrackWorld;
 import world.wp.WP.DynamicType;
 
 ////TODO Ideas for game modes:
@@ -76,9 +77,9 @@ public class Main extends SimpleApplication {
 	private Car them;
 	private World world;
 	private void loadDefaults() {
-		car = Car.Roadster;
+		car = Car.Rally;
 		them = Car.Runner;
-		world = DynamicType.Simple.getBuilder();
+		world = new TrackWorld();
 		//world alernatives:
 		//	new HighwayWorld();
 		//	new StaticWorldBuilder(StaticWorld.track2);
