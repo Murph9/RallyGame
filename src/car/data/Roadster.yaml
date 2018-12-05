@@ -34,9 +34,9 @@ susF: &sus {
   max_force: 50000.0, 
   max_travel: 0.0,
   min_travel: -0.2,
-  preload_force: 2.0,
+  preload_force: 1.3,
   relax: 0.4, 
-  stiffness: 6.0
+  stiffness: 12.0 #real value has a sprinf rate of 8kg front and 6 rear
 }
 susR:
   <<: *sus #https://blog.daemonl.com/2016/02/yaml.html
