@@ -128,7 +128,7 @@ public class RayWheelControl {
 			
 			//rotate for wheel rotation
 			Quaternion q = new Quaternion();
-			q.fromAngleNormalAxis(wheel.radSec*tpf*FastMath.sign(wheel.num % 2 == 1? 1 : -1), new Vector3f(1,0,0));
+			q.fromAngleNormalAxis(-wheel.radSec*tpf*FastMath.sign(wheel.num % 2 == 1? 1 : -1), new Vector3f(1,0,0));
 			spat.setLocalRotation(spat.getLocalRotation().mult(q));
 			
 			//rotate for wheel steering
