@@ -220,6 +220,11 @@ public class RayCarControl extends RayCarPowered {
 				ignoreSpeedFactor = value;
 				break;
 	
+			case "IgnoreTractionModel":
+				if (value)
+					tractionEnabled = !tractionEnabled;
+				break;
+				
 			default:
 				//nothing
 				System.err.println("unknown binding: "+binding);

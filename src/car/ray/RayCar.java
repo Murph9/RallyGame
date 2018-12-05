@@ -52,6 +52,9 @@ public class RayCar implements PhysicsTickListener {
 	protected float driftAngle;
 	public final Vector3f planarGForce;
 	
+	//hacks
+	protected boolean tractionEnabled = true;
+	
 	public RayCar(CollisionShape shape, CarDataConst carData) {
 		this.carData = carData;
 		this.carData.load();
@@ -92,7 +95,8 @@ public class RayCar implements PhysicsTickListener {
 		
 		//TODO apply the midpoint formula
 		//https://en.wikipedia.org/wiki/Midpoint_method
-		applyTraction(space, tpf);
+		if (tractionEnabled)
+			applyTraction(space, tpf);
 		
 		applyDrag(space, tpf);
 		
@@ -160,6 +164,9 @@ public class RayCar implements PhysicsTickListener {
 			Vector3f relpos = wheels[w_id].curBasePosWorld.subtract(rbc.getPhysicsLocation()); //pos of sus contact point relative to car
 			Vector3f velAtContactPoint = getVelocityInLocalPoint(relpos); //get sus vel at point on ground
 			
+			//a hack to include gravity in the calulation, this 'should not' be required
+			//denominator *= w_angle.mult(localDown).dot(this.rbc.getGravity().normalize());
+						
 			float projVel = wheels[w_id].hitNormalInWorld.dot(velAtContactPoint); //percentage of normal force that applies to the current motion
 			float projected_rel_vel = 0;
 			float clippedInvContactDotSuspension = 0;
@@ -182,7 +189,7 @@ public class RayCar implements PhysicsTickListener {
 			float susp_damping = (projected_rel_vel < 0f) ? sus.compression() : sus.relax();
 			wheels[w_id].susForce -= susp_damping * projected_rel_vel;
 			
-			//Sway bars need to wait until the normal suspension is done https://forum.miata.net/vb/showthread.php?t=25716
+			//Sway bars https://forum.miata.net/vb/showthread.php?t=25716
 			int w_id_other = w_id == 0 ? 1 : w_id == 1 ? 0 : w_id == 2 ? 3 : 2; //TODO better
 			float swayDiff = wheels[w_id_other].susRayLength - wheels[w_id].susRayLength;
 			wheels[w_id].susForce += swayDiff*sus.antiroll;

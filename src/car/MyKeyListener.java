@@ -48,6 +48,7 @@ public class MyKeyListener implements RawInputListener {
 		layout.put(KeyInput.KEY_RETURN, "Reset");
 		layout.put(KeyInput.KEY_Q, "Jump");
 		layout.put(KeyInput.KEY_I, "IgnoreSteeringSpeedFactor");
+		layout.put(KeyInput.KEY_T, "IgnoreTractionModel");
 	}
 	
 	public void beginInput() {}
