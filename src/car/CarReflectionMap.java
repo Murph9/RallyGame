@@ -80,7 +80,7 @@ public class CarReflectionMap extends AbstractAppState {
 	        offViews[i].attachScene(App.rally.getRootNode());
 	        
 	        //setup framebuffer's cam
-	        cams[i].setFrustumPerspective(90f, 1f, 2f, 1000f); //does this always avoid car visual collision?
+	        cams[i].setFrustumPerspective(90f, 1f, 2f, 1000f); //does this always avoid car visual collision? [no pls use car size]
 	 
 	        // create offscreen framebuffer
 	        framebuffers[i] = new FrameBuffer(512, 512, 1);
