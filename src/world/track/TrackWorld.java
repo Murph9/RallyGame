@@ -2,7 +2,6 @@ package world.track;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -27,7 +26,6 @@ import com.jme3.renderer.Camera;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
-import com.jme3.scene.Node;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.terrain.geomipmap.TerrainLodControl;
 import com.jme3.terrain.geomipmap.TerrainQuad;
@@ -56,66 +54,93 @@ public class TrackWorld extends World {
 	
 	private final long seed;
 	private final int worldSize;
-	private final float worldVerticalScale;
+	private final Vector3f worldScale;
 	
 	private TerrainQuad terrain;
 	private List<PhysicsControl> physicsPieces;
-	private List<Vector3f> controlPoints;
 	
+	private TerrainTrackHelper terrainHelper;
 	private List<TrackSegment> trackSegments;
-		
+	
+	private Vector3f unnormalizeHeightIn(Vector3f pos) {
+		Vector3f p = pos.clone();
+		p.y *= worldScale.y;
+		return p;
+	}
+	
 	public TrackWorld() {
 		super("trackworld");
-		
+
 		seed = FastMath.rand.nextLong();
-		worldSize = (2 << 7); //8
-		worldVerticalScale = 300;
-		Log.p("Track World size:" + worldSize + " seed:" + seed +" worldscale:"+worldVerticalScale);
+		worldSize = (1 << 9); //9
+		worldScale = new Vector3f(1, 300, 1); //pls only 1 on non-y axis
+		
+		Log.p("Track World size:" + worldSize + " seed:" + seed +" worldscale:"+worldScale);
 	}
 
 	@Override
 	public void initialize(AppStateManager stateManager, Application app) {
 		super.initialize(stateManager, app);
-		createTerrain();
-		createTrack(app.getAssetManager());
+		
+		float[] map = createHeightMap();
+		
+		this.terrainHelper = new TerrainTrackHelper(map, this.worldSize, 0.003f);
+		
+		this.trackSegments = createTrack(terrainHelper, app.getAssetManager());
+		
+		this.physicsPieces = new LinkedList<>();
 		
 		//add them as quads
-		physicsPieces = new LinkedList<>();
-		List<Vector3f[]> quads = new LinkedList<>();
 		for (TrackSegment seg: trackSegments) {
 			TrackSlice[] slices = seg.getSlices();
 			for (int i = 1; i < slices.length; i++) {
 				for (int j = 2; j < slices[i].points.length; j++) { //avoid the first one
-					Vector3f[] vs = new Vector3f[] {
-							slices[i-1].points[j-1],
-							slices[i-1].points[j],
-							slices[i].points[j-1],
-							slices[i].points[j],
+					Vector3f[] quadP = new Vector3f[] {
+							slices[i-1].points[j-1].clone(),
+							slices[i-1].points[j].clone(),
+							slices[i].points[j-1].clone(),
+							slices[i].points[j].clone(),
 						};
-				
-					Geometry geo = createQuad(rootNode, vs, ColorRGBA.Brown);
-					if (geo == null) {
-						continue;
+					//set the relevent terrain heights
+					TrackWorld.setTerrainHeights(terrainHelper, Arrays.asList(new Vector3f[][] {quadP}), (quad) -> {
+						return new Vector3f[] { quad[0], quad[1], quad[3], quad[2] };
+					});
+					
+					for (int k = 0; k < quadP.length; k++) {
+						quadP[k] = unnormalizeHeightIn(quadP[k]);
 					}
+					
+					Geometry geo = createQuad(quadP, ColorRGBA.Brown);
+					if (geo == null)
+						continue;
+					
 //					CollisionShape col = CollisionShapeFactory.createMeshShape(geo);
 //					RigidBodyControl c = new RigidBodyControl(col, 0);
 					
-					rootNode.attachChild(geo);
 //					physicsPieces.add(c);
 //					App.rally.getPhysicsSpace().add(c);
 					
-					quads.add(vs);
-					
-//					TrackWorld.setHeightsFor(terrain, this.worldVerticalScale, Arrays.asList(new Vector3f[][] {vs}), (quad) -> {
-//						return new Vector3f[] { quad[0], quad[1], quad[3], quad[2] };
-//					});
+					rootNode.attachChild(geo);
 				}
 			}
-		}
+		}		
 		
-		TrackWorld.setHeightsSlow(terrain, this.worldVerticalScale, quads, (quad) -> {
-			return new Vector3f[] { quad[0], quad[1], quad[3], quad[2] };
-		});
+	    terrain = new TerrainQuad("trackworld", (this.worldSize/4)+1, this.worldSize + 1, map);
+
+	    Material mat = new Material(app.getAssetManager(), "Common/MatDefs/Misc/ShowNormals.j3md");
+		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
+	    
+	    terrain.setMaterial(mat);
+	    terrain.setShadowMode(ShadowMode.CastAndReceive);
+
+	    terrain.setLocalScale(worldScale);
+	    rootNode.attachChild(terrain);
+	    
+	    // Add a LOD which depends on were the camera is
+	    List<Camera> cameras = new LinkedList<Camera>();
+	    cameras.add(app.getViewPort().getCamera());
+	    TerrainLodControl control = new TerrainLodControl(terrain, cameras);
+	    terrain.addControl(control);
 		
 		//finally add the terrain to physics engine
 	    RigidBodyControl rbc = new RigidBodyControl(0.0f);
@@ -123,7 +148,9 @@ public class TrackWorld extends World {
 	    App.rally.getPhysicsSpace().add(rbc);
 	}
 	
-	private void createTerrain() {
+	private float[] createHeightMap() {
+		//TODO seed?
+		
 		//Create a noise based height variance filter
 		FractalSum base = new FractalSum();
 		base.setRoughness(0.7f);
@@ -158,39 +185,21 @@ public class TrackWorld extends World {
 
 		ground.addPreFilter(iterate);
 		
-		float[] map = ground.getBuffer((this.worldSize), (this.worldSize), 0, this.worldSize+1).array();
-		
-		
-	    terrain = new TerrainQuad("trackworld", (this.worldSize+1)/4, this.worldSize + 1, map);
-
-	    Material mat = new Material(app.getAssetManager(), "Common/MatDefs/Misc/ShowNormals.j3md");
-		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
-	    
-	    terrain.setMaterial(mat);
-	    terrain.setLocalTranslation(0, -worldVerticalScale/2, 0);
-	    terrain.setLocalScale(2f, worldVerticalScale, 2f);
-	    terrain.setShadowMode(ShadowMode.CastAndReceive);
-	    rootNode.attachChild(terrain);
-
-	    // Add a LOD which depends on were the camera is
-	    List<Camera> cameras = new LinkedList<Camera>();
-	    cameras.add(app.getViewPort().getCamera());
-	    TerrainLodControl control = new TerrainLodControl(terrain, cameras);
-	    terrain.addControl(control);
+		return ground.getBuffer((this.worldSize), (this.worldSize), 0, this.worldSize+1).array();
     }
 	
-	private void createTrack(AssetManager am) {
-		controlPoints = new LinkedList<>();
+	private List<TrackSegment> createTrack(TerrainTrackHelper terrainHelper, AssetManager am) {
+		List<Vector3f> controlPoints = new LinkedList<>();
 		
 		//generate some random points
 		for (int i = 0; i < POINT_COUNT; i++) {
-			Vector3f pos = H.randV3f(this.worldSize, true);
-			pos.y = 0;
+			Vector3f pos = H.randV3f(this.worldSize/2, true);
+			pos.y = terrainHelper.getHeight(pos);
 			
 			controlPoints.add(pos);
 			
 			if (DEBUG) {
-				HelperObj.use(this.rootNode, "ControlPoint"+i, H.makeShapeBox(am, ColorRGBA.Cyan, pos, 0.5f));
+				HelperObj.use(this.rootNode, "ControlPoint"+i, H.makeShapeBox(am, ColorRGBA.Cyan, unnormalizeHeightIn(pos), 0.5f));
 			}
 		}
 	
@@ -200,7 +209,7 @@ public class TrackWorld extends World {
 		//"epiphany" -> just join in polar co-ord order around the origin [good enough and O(n)]
 		
 		//sort by angle in polar co-ords
-		this.controlPoints.sort(new Comparator<Vector3f>() {
+		controlPoints.sort(new Comparator<Vector3f>() {
 			public int compare(Vector3f v1, Vector3f v2) {
 				Vector3f p1 = FastMath.cartesianToSpherical(v1, null);
 				Vector3f p2 = FastMath.cartesianToSpherical(v2, null);
@@ -209,15 +218,15 @@ public class TrackWorld extends World {
 			};
 		});
 		
-		trackSegments = new LinkedList<>();
+		List<TrackSegment> trackSegments = new LinkedList<>();
 		//link all the segments in order
 		Vector3f pos = controlPoints.get(0);
 		for (int i = 1; i < controlPoints.size(); i++) {
 			Vector3f cur = controlPoints.get(i);
-			trackSegments.add(new TrackSegmentStraight(new Vector3f[] {pos, cur}, TrackWorld.CurveFunction(0.05f)));
-		
+			trackSegments.add(new TrackSegmentStraight(new Vector3f[] {pos, cur}, TrackWorld.CurveFunction()));
+			
 			if (DEBUG) {
-				HelperObj.use(this.rootNode, "RoadSegment"+i, H.makeShapeArrow(am, ColorRGBA.Blue, cur.subtract(pos), pos));
+				HelperObj.use(this.rootNode, "RoadSegment"+i, H.makeShapeArrow(am, ColorRGBA.Blue, unnormalizeHeightIn(cur).subtract(unnormalizeHeightIn(pos)), unnormalizeHeightIn(pos)));
 			}
 			
 			pos = cur;
@@ -226,10 +235,15 @@ public class TrackWorld extends World {
 		//then add last -> first
 		Vector3f first = controlPoints.get(0);
 		Vector3f last = controlPoints.get(controlPoints.size()-1);
-		trackSegments.add(new TrackSegmentStraight(new Vector3f[] {first, last}, TrackWorld.CurveFunction(0.05f)));
+		trackSegments.add(new TrackSegmentStraight(new Vector3f[] {first, last}, TrackWorld.CurveFunction()));
 		if (DEBUG) {
-			HelperObj.use(this.rootNode, "RoadSegment"+-1, H.makeShapeArrow(am, ColorRGBA.Blue, last.subtract(first), first));
+			HelperObj.use(this.rootNode, "RoadSegment"+-1, H.makeShapeArrow(am, ColorRGBA.Blue, unnormalizeHeightIn(last).subtract(unnormalizeHeightIn(first)), unnormalizeHeightIn(first)));
 		}
+		
+		//TODO use
+		new BezierPolygonInterpolation();
+		
+		return trackSegments;
 	}
 	
 	@Override
@@ -245,7 +259,7 @@ public class TrackWorld extends World {
 		if (segment.getControlPoints().length < 1)
 			return new Vector3f();
 		
-		return segment.getControlPoints()[0].add(0, 2, 0);
+		return unnormalizeHeightIn(segment.getControlPoints()[0]).add(0, 2, 0);
 	}
 	@Override //player rotation
 	public Matrix3f getStartRot() { return new Matrix3f(Matrix3f.IDENTITY); }
@@ -264,9 +278,8 @@ public class TrackWorld extends World {
 	
 	
 	private static Quaternion rot90 = new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y);
-	private static BiFunction<Vector3f, Vector3f, TrackSlice> CurveFunction(float verticalOffset) { 
+	private static BiFunction<Vector3f, Vector3f, TrackSlice> CurveFunction() { 
 		return (Vector3f off, Vector3f tang) -> {
-			off.y += verticalOffset;
 //			Vector3f angleOff = new Vector3f(0, -1, 0);
 			Vector3f normal = rot90.mult(tang.normalize());
 			return new TrackSlice(new Vector3f[] { 
@@ -279,13 +292,15 @@ public class TrackWorld extends World {
 		};
 	}
 	
-	private static Geometry createQuad(Node rootNode, Vector3f[] v, ColorRGBA colour) {
+	private static Geometry createQuad(Vector3f[] v, ColorRGBA colour) {
 		if (v == null || v.length != 4) {
-			Log.e("Roads-drawMeAQuad: Not the correct length drawMeAQuad()");
+			Log.e("TrackWorld-createQuad: Not the correct length drawMeAQuad():");
+			helper.Log.e(v, ",");
 			return null;
 		}
 		if (Arrays.asList(v).stream().anyMatch(x -> !Vector3f.isValidVector(x))) {
-			Log.e("Roads-drawMeAQuad: Invalid vector given");
+			Log.e("TrackWorld-createQuad: Invalid vector given in:");
+			helper.Log.e(v, ",");
 			return null;
 		}
 		
@@ -302,7 +317,7 @@ public class TrackWorld extends World {
 		normals = new float[]{0,1,0, 0,1,0, 0,1,0, 0,1,0};
 		
 		mesh.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(v));
-		mesh.setBuffer(Type.Normal, 3, BufferUtils.createFloatBuffer(normals));
+		mesh.setBuffer(Type.Normal,   3, BufferUtils.createFloatBuffer(normals));
 		mesh.setBuffer(Type.TexCoord, 2, BufferUtils.createFloatBuffer(texCoord));
 		mesh.setBuffer(Type.Index,    3, BufferUtils.createIntBuffer(indexes));
 
@@ -330,8 +345,8 @@ public class TrackWorld extends World {
 		return geo;
 	}
 
-	private static void setHeightsFor(TerrainQuad terrain, float heightScale, List<Vector3f[]> quads, Function<Vector3f[], Vector3f[]> order) {
-		List<Vector3f> heightList = new LinkedList<Vector3f>();
+	private static void setTerrainHeights(TerrainTrackHelper helper, List<Vector3f[]> quads, Function<Vector3f[], Vector3f[]> order) {
+		List<Vector3f> posList = new LinkedList<>();
 		
 		for (Vector3f[] quad: quads) {
 			
@@ -349,92 +364,21 @@ public class TrackWorld extends World {
 					//use the jme3 library method for point in triangle
 					if (FastMath.pointInsideTriangle(H.v3tov2fXZ(quad[0]), H.v3tov2fXZ(quad[2]), H.v3tov2fXZ(quad[3]), H.v3tov2fXZ(pos)) != 0) {
 						pos.y = H.heightInTri(quad[0], quad[2], quad[3], pos);
-						heightList.add(pos);
+						posList.add(pos);
 						
 					} else if (FastMath.pointInsideTriangle(H.v3tov2fXZ(quad[0]), H.v3tov2fXZ(quad[2]), H.v3tov2fXZ(quad[1]), H.v3tov2fXZ(pos)) != 0) {
 						pos.y = H.heightInTri(quad[0], quad[2], quad[1], pos);
-						heightList.add(pos);
+						posList.add(pos);
 					}
 				}
 			}
 		}
 		
-		for (Vector3f vec: heightList)
-			terrain.setHeight(H.v3tov2fXZ(vec), (vec.y + heightScale/2)/heightScale + 0.0002f); //TODO so i can see it
-	}
-
-	private static void setHeightsSlow(TerrainQuad terrain, float heightScale, List<Vector3f[]> quads, Function<Vector3f[], Vector3f[]> order) {
-		int size = terrain.getTotalSize();
-		float scaleX = terrain.getWorldScale().x;
-		float scaleZ = terrain.getWorldScale().z;
 		
-		HashMap<Vector2f, Vector3f> heightList = new HashMap<>();
-		
-		for (int i = (int)(-size*scaleX); i < size*scaleX; i++) {
-			for (int j = (int)(-size*scaleZ); j < size*scaleZ; j++) {
-				Vector3f pos = new Vector3f(i, 0, j);
-				
-				for (Vector3f[] quad: quads) {
-					quad = order.apply(quad);
-					
-					//use the jme3 library method for point in triangle
-					if (FastMath.pointInsideTriangle(H.v3tov2fXZ(quad[0]), H.v3tov2fXZ(quad[2]), H.v3tov2fXZ(quad[3]), H.v3tov2fXZ(pos)) != 0) {
-						pos.y = H.heightInTri(quad[0], quad[2], quad[3], pos);
-						
-						heightList.put(H.v3tov2fXZ(pos), pos);
-						continue;
-						
-					} else if (FastMath.pointInsideTriangle(H.v3tov2fXZ(quad[0]), H.v3tov2fXZ(quad[2]), H.v3tov2fXZ(quad[1]), H.v3tov2fXZ(pos)) != 0) {
-						pos.y = H.heightInTri(quad[0], quad[2], quad[1], pos);
-						
-						heightList.put(H.v3tov2fXZ(pos), pos);
-						continue;
-					} else {
-						
-						//scale it so it smoothes the ground around it
-						float distFromQuad = H.distFromLineXZ(new Vector3f().interpolateLocal(quad[0], quad[1], 1/2), 
-								new Vector3f().interpolateLocal(quad[2], quad[3], 1/2), pos);
-						float curHeight = terrain.getHeight(H.v3tov2fXZ(pos));
-						
-						if (distFromQuad < 10) {
-//							pos.y = new Vector3f().interpolateLocal(quad[0], quad[1], 1/2).y;
-						}
-						
-						//TODO
-						//set the height of points outside the road to smooth the edge transisions
-					}
-				}
-			}
+		try {			
+			helper.setHeights(posList);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		
-		for (Vector3f vec: heightList.values())
-			terrain.setHeight(H.v3tov2fXZ(vec), (vec.y + heightScale/2)/heightScale + 0.0002f); //TODO so i can see it
-
-		//smooth using the filter		
-		float[] map = smoothHeightMap(size, size, 1, terrain.getHeightMap(), size+1);
-		
-		//TODO how to set this back on the terrain 
 	}
-	
-	//https://github.com/jMonkeyEngine/jmonkeyengine/blob/master/jme3-terrain/src/main/java/com/jme3/terrain/noise/filter/SmoothFilter.java
-	private static float[] smoothHeightMap(float sx, float sy, float base, float[] data, int size) {
-        float[] retval = new float[data.length];
-        int radius = 1;
-        float effect = 0.7f;
-
-        for (int y = radius; y < size - radius; y++) {
-            for (int x = radius; x < size - radius; x++) {
-                int idx = y * size + x;
-                float n = 0;
-                for (int i = -radius; i < radius + 1; i++) {
-                    for (int j = -radius; j < radius + 1; j++) {
-                        n += data[(y + i) * size + x + j];
-                    }
-                }
-                retval[idx] = effect * n / (4 * radius * (radius + 1) + 1) + (1 - effect) * data[idx];
-            }
-        }
-
-        return retval;
-    }
 }

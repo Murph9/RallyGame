@@ -48,5 +48,4 @@ public class TrackSegmentStraight implements TrackSegment {
 	public Vector3f[] getControlPoints() {
 		return points;
 	}
-
 }
