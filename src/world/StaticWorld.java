@@ -28,7 +28,8 @@ public enum StaticWorld {
 	rainbow_road("rainbow_road.blend", 1, new Vector3f(0,0,0), null, true),
 	wuhu_island("wuhu_island.blend", 2, new Vector3f(0,0,0), H.FromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y), true),
 	
-	//debug ones: (not working now)
+	//debug ones:
+	slope_test("slope_test.blend", 1, new Vector3f(), null, true)
 //	paris1("paris1.blend", 1, new Vector3f(40,75,0), true), //be careful with this one, large
 //	track1("track1.blend", 1, new Vector3f(255.12906f, 0.7663503f, -40.224197f), false),
 //	track3("track3.blend", 1, new Vector3f(-24.227085f, 0.7908745f, 98.21415f), false),

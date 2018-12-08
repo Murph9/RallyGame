@@ -9,7 +9,7 @@ auto_gearDown: 3500
 auto_gearUp: 6800
 brakeMaxTorque: 8000.0
 cam_lookAt: {x: 0.0, y: 1.3, z: 0.0}
-cam_offset: {x: 0.0, y: 2.1, z: -6.0}
+cam_offset: {x: 0.0, y: 2.6, z: -7.5}
 cam_shake: 2.0E-6
 carModel: assets/models/car4raid_1.blend
 driveFront: true
@@ -30,13 +30,13 @@ nitro_rate: 1.0
 rollFraction: 1.0
 susF: &sus {
   antiroll: 3.0,
-  comp: 0.3,
+  comp: 0.36,
   max_force: 35000.0, 
   max_travel: 0.3,
   min_travel: -0.1,
   preload_force: 2,
-  relax: 0.3,
-  stiffness: 10.0
+  relax: 0.6,
+  stiffness: 20.0
 }
 susR: *sus
 trans_effic: 0.85

@@ -27,7 +27,7 @@ import helper.Log;
 public class RayCar implements PhysicsTickListener {
 
 	private static final boolean DEBUG = false;
-	private static final boolean DEBUG_SUS = DEBUG || false; //prevents a warning done this way
+	private static final boolean DEBUG_SUS = DEBUG || false;
 	private static final boolean DEBUG_SUS2 = DEBUG || false;
 	private static final boolean DEBUG_DRAG = DEBUG || false;
 	
@@ -197,8 +197,9 @@ public class RayCar implements PhysicsTickListener {
 			// Limit: no negative forces or stupid high numbers pls
 			wheels[w_id].susForce = FastMath.clamp(wheels[w_id].susForce * 1000, 0, sus.max_force);
 			
-			Vector3f f = w_angle.invert().mult(wheels[w_id].hitNormalInWorld.mult(wheels[w_id].susForce * tpf));
-			rbc.applyImpulse(f, wheels[w_id].curBasePosWorld.subtract(w_pos));
+			//applyImpulse (force = world space, pos = relative to local)
+			Vector3f f = wheels[w_id].hitNormalInWorld.mult(wheels[w_id].susForce * tpf);
+			rbc.applyImpulse(f, wheels[w_id].curBasePosWorld.subtract(w_pos)); 
 			
 			if (DEBUG_SUS2) {
 				App.rally.enqueue(() -> {

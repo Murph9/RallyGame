@@ -122,7 +122,7 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 			Geometry g = cr.getGeometry();
 			if (!H.hasParentNode(g, p.getRootNode())) { //don't collide with the car TODO doesn't work
 				c.setLocation(cr.getContactPoint());
-				Log.p("Camera contact on: ", g.getName());
+				//Log.p("Camera contact on: ", g.getName());
 			}
 		}
 		
