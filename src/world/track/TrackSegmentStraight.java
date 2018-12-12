@@ -27,7 +27,7 @@ public class TrackSegmentStraight implements TrackSegment {
 		if (output != null)
 			return output;
 		
-		int N = 2; //start/end
+		int N = 1; //start/end
 		output = new TrackSlice[N + 1];
 		
 		Vector3f g = points[1].subtract(points[0]); //derivative (happens to be constant)

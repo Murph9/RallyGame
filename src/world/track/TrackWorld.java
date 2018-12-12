@@ -26,6 +26,7 @@ import com.jme3.renderer.Camera;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
+import com.jme3.scene.Node;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.terrain.geomipmap.TerrainLodControl;
 import com.jme3.terrain.geomipmap.TerrainQuad;
@@ -64,7 +65,7 @@ public class TrackWorld extends World {
 	
 	private Vector3f unnormalizeHeightIn(Vector3f pos) {
 		Vector3f p = pos.clone();
-		p.y *= worldScale.y;
+		p.multLocal(worldScale);
 		return p;
 	}
 	
@@ -73,7 +74,7 @@ public class TrackWorld extends World {
 
 		seed = FastMath.rand.nextLong();
 		worldSize = (1 << 9); //9
-		worldScale = new Vector3f(1, 300, 1); //pls only 1 on non-y axis
+		worldScale = new Vector3f(2, 300, 2); //pls only 1 on non-y axis
 		
 		Log.p("Track World size:" + worldSize + " seed:" + seed +" worldscale:"+worldScale);
 	}
@@ -120,6 +121,7 @@ public class TrackWorld extends World {
 //					physicsPieces.add(c);
 //					App.rally.getPhysicsSpace().add(c);
 					
+					geo.setLocalTranslation(geo.getLocalTranslation().add(0,0.001f,0)); //to stop flickering
 					rootNode.attachChild(geo);
 				}
 			}
@@ -146,6 +148,13 @@ public class TrackWorld extends World {
 	    RigidBodyControl rbc = new RigidBodyControl(0.0f);
 	    terrain.addControl(rbc);
 	    App.rally.getPhysicsSpace().add(rbc);
+	    
+
+	    //tree world doesn't need to know the world before the scale
+	    Node treeNode = new TreeTrackHelper(terrain, worldSize, 2000).getTreeNode();
+	    rootNode.attachChild(treeNode);
+	    
+	    
 	}
 	
 	private float[] createHeightMap() {
