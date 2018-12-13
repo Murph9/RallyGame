@@ -193,7 +193,7 @@ public class TrackWorld extends World {
 		iterate.addPreFilter(perturb);
 		iterate.addPostFilter(smooth);
 		iterate.setFilter(therm);
-		iterate.setIterations(1); //higher numbers make it really smooth
+		iterate.setIterations(3); //higher numbers make it really smooth
 
 		ground.addPreFilter(iterate);
 		
@@ -237,7 +237,6 @@ public class TrackWorld extends World {
 	            new Vector3f(worldSize/4, terrainHelper.getHeight(new Vector3f(worldSize/4,0,worldSize/4)),worldSize/4)
 	        );
 */
-		//TODO use
 		List<TrackSegment> trackSegments = BezierPolygonInterpolation.GetBezierCurvesN(controlPoints, 1, TrackWorld.CurveFunction());
 		
 		for (int i = 1; i < trackSegments.size(); i++) {
@@ -250,29 +249,6 @@ public class TrackWorld extends World {
 			}
 		}
 		
-		/*
-		List<TrackSegment> trackSegments = new LinkedList<>();
-		//link all the segments in order
-		Vector3f pos = controlPoints.get(0);
-		for (int i = 1; i < controlPoints.size(); i++) {
-			Vector3f cur = controlPoints.get(i);
-			trackSegments.add(new TrackSegmentStraight(new Vector3f[] {pos, cur}, TrackWorld.CurveFunction()));
-			
-			if (DEBUG) {
-				HelperObj.use(this.rootNode, "RoadSegment"+i, H.makeShapeArrow(am, ColorRGBA.Blue, unnormalizeHeightIn(cur).subtract(unnormalizeHeightIn(pos)), unnormalizeHeightIn(pos)));
-			}
-			
-			pos = cur;
-		}
-
-		//then add last -> first
-		Vector3f first = controlPoints.get(0);
-		Vector3f last = controlPoints.get(controlPoints.size()-1);
-		trackSegments.add(new TrackSegmentStraight(new Vector3f[] {first, last}, TrackWorld.CurveFunction()));
-		if (DEBUG) {
-			HelperObj.use(this.rootNode, "RoadSegment"+-1, H.makeShapeArrow(am, ColorRGBA.Blue, unnormalizeHeightIn(last).subtract(unnormalizeHeightIn(first)), unnormalizeHeightIn(first)));
-		}
-		*/
 		return trackSegments;
 	}
 	
@@ -289,22 +265,22 @@ public class TrackWorld extends World {
         Texture grass = am.loadTexture("assets/terrain/grass.jpg");
         grass.setWrap(WrapMode.Repeat);
         terrainMaterial.setTexture("region1ColorMap", grass);
-        terrainMaterial.setVector3("region1", new Vector3f(58*2, 200*2, grassScale));
+        terrainMaterial.setVector3("region1", new Vector3f(58, worldScale.y, grassScale));
 
         // DIRT texture
         Texture dirt = am.loadTexture("assets/terrain/dirt.jpg");
         dirt.setWrap(WrapMode.Repeat);
         terrainMaterial.setTexture("region2ColorMap", dirt);
-        terrainMaterial.setVector3("region2", new Vector3f(0, 60*2, dirtScale));
+        terrainMaterial.setVector3("region2", new Vector3f(0, 60, dirtScale));
 
         // ROCK textures
         Texture rock = am.loadTexture("assets/terrain/Rock.PNG");
         rock.setWrap(WrapMode.Repeat);
         terrainMaterial.setTexture("region3ColorMap", rock);
-        terrainMaterial.setVector3("region3", new Vector3f(198*2, 260*2, rockScale));
+        terrainMaterial.setVector3("region3", new Vector3f(worldScale.y, 260*2, rockScale));
 
         terrainMaterial.setTexture("region4ColorMap", rock);
-        terrainMaterial.setVector3("region4", new Vector3f(198*2, 260*2, rockScale));
+        terrainMaterial.setVector3("region4", new Vector3f(worldScale.y, 260*2, rockScale));
 
         Texture rock2 = am.loadTexture("assets/terrain/rock.jpg");
         rock2.setWrap(WrapMode.Repeat);
@@ -341,6 +317,8 @@ public class TrackWorld extends World {
 		App.rally.getPhysicsSpace().remove(terrain);
 		for (PhysicsControl c: physicsPieces)
 			App.rally.getPhysicsSpace().remove(c);
+		
+		super.cleanup();
 	}
 	
 	@Override
