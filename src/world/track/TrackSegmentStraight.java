@@ -21,7 +21,7 @@ public class TrackSegmentStraight implements TrackSegment {
 		}
 		this.funct = funct;
 	}
-	
+		
 	@Override
 	public TrackSlice[] getSlices() {
 		if (output != null)

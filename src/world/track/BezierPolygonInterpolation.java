@@ -7,10 +7,12 @@ import java.util.function.BiFunction;
 
 import com.jme3.math.Vector3f;
 
-import helper.Log;
-
 public class BezierPolygonInterpolation {
 
+	private BezierPolygonInterpolation() {
+		//prevent accidental use
+	}
+	
 	public static void BezierCurvePolygonInterpolation()
     {
 		BezierPolygonInterpolation.GetBezierCurvesN(
@@ -19,15 +21,12 @@ public class BezierPolygonInterpolation {
             new Vector3f(-1,0,-1),
             new Vector3f(1,0,-1),
             new Vector3f(1,0,1)
-        ), 0.5f);
+        ), 0.5f, null);
     }
 	
-	public static List<TrackSegment> GetBezierCurvesN(List<Vector3f> points, float k)
+	public static List<TrackSegment> GetBezierCurvesN(List<Vector3f> points, float k, BiFunction<Vector3f, Vector3f, TrackSlice> funct)
     {
         //See: http://www.antigrain.com/research/bezier_interpolation/
-
-		Log.p(points);
-
 		int count = points.size();
 		
         //calculate mid points [step 1]
@@ -36,7 +35,6 @@ public class BezierPolygonInterpolation {
         {
             midPoints.add(lerp(points.get(i), points.get((i + 1) % points.size()), 0.5f));
         }
-        Log.p(midPoints);
 
         //calculate proportional points of the mid points [step2]
         List<Vector3f> midmidPoints = new LinkedList<Vector3f>();
@@ -47,24 +45,17 @@ public class BezierPolygonInterpolation {
             midmidPoints.add(lerp(midPoints.get(i), midPoints.get(Math.floorMod(i - 1, count)), _diff));
         }
 
-        Log.p(midmidPoints);
-
         //calculate the pos of the points moved from the control points [step 3]
         List<TrackSegment> curves = new LinkedList<TrackSegment>();
 
         for (int i = 0; i < count; i++)
         {
-            Vector3f dirab = midmidPoints.get(i).subtract(midPoints.get(i)).mult(k);
-            Vector3f dirba = midmidPoints.get((i + 1) % count).subtract(midPoints.get(i)).mult(k);
-            curves.add(new TrackSegmentStraight(new Vector3f[]
+            Vector3f dirab = midPoints.get(i).subtract(midmidPoints.get(i)).mult(k);
+            Vector3f dirba = midPoints.get(i).subtract(midmidPoints.get((i + 1) % count)).mult(k);
+            curves.add(new TrackSegmentCurve(new Vector3f[]
             {
                 points.get(i), points.get(i).add(dirab), points.get((i + 1) % count).add(dirba), points.get((i + 1) % count)
-            }, (BiFunction<Vector3f, Vector3f, TrackSlice>)null));
-        }
-
-        for (int i = 0; i < points.size(); i++)
-        {
-            Log.p(curves.get(i).getControlPoints(), "curves[" + i + "]");
+            }, funct));
         }
 
         return curves;

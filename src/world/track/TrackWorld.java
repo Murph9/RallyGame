@@ -10,10 +10,8 @@ import java.util.function.Function;
 import com.jme3.app.Application;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
-import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.PhysicsControl;
 import com.jme3.bullet.control.RigidBodyControl;
-import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
@@ -38,6 +36,8 @@ import com.jme3.terrain.noise.filter.PerturbFilter;
 import com.jme3.terrain.noise.filter.SmoothFilter;
 import com.jme3.terrain.noise.fractal.FractalSum;
 import com.jme3.terrain.noise.modulator.NoiseModulator;
+import com.jme3.texture.Texture;
+import com.jme3.texture.Texture.WrapMode;
 import com.jme3.util.BufferUtils;
 
 import game.App;
@@ -49,9 +49,9 @@ import world.WorldType;
 
 public class TrackWorld extends World {
 
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 	
-	private static final int POINT_COUNT = 8;
+	private static final int POINT_COUNT = 12;
 	
 	private final long seed;
 	private final int worldSize;
@@ -129,10 +129,13 @@ public class TrackWorld extends World {
 		
 	    terrain = new TerrainQuad("trackworld", (this.worldSize/4)+1, this.worldSize + 1, map);
 
-	    Material mat = new Material(app.getAssetManager(), "Common/MatDefs/Misc/ShowNormals.j3md");
-		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
-	    
-	    terrain.setMaterial(mat);
+	    Material terrainMaterial = createTerrainMaterial(app.getAssetManager());
+	    if (DEBUG) {
+	    	terrainMaterial = new Material(app.getAssetManager(), "Common/MatDefs/Misc/ShowNormals.j3md");
+	    	terrainMaterial.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
+	    }
+		
+	    terrain.setMaterial(terrainMaterial);
 	    terrain.setShadowMode(ShadowMode.CastAndReceive);
 
 	    terrain.setLocalScale(worldScale);
@@ -226,7 +229,28 @@ public class TrackWorld extends World {
 				return (int)(FastMath.sign(diff)*FastMath.ceil(FastMath.abs(diff))); //prevent any precision loss on cast
 			};
 		});
+/* debug 'circle'
+		controlPoints = Arrays.asList(
+	            new Vector3f(-worldSize/4, terrainHelper.getHeight(new Vector3f(-worldSize/4,0,worldSize/4)), worldSize/4),
+	            new Vector3f(-worldSize/4, terrainHelper.getHeight(new Vector3f(-worldSize/4,0,-worldSize/4)), -worldSize/4),
+	            new Vector3f(worldSize/4, terrainHelper.getHeight(new Vector3f(worldSize/4,0,-worldSize/4)), -worldSize/4),
+	            new Vector3f(worldSize/4, terrainHelper.getHeight(new Vector3f(worldSize/4,0,worldSize/4)),worldSize/4)
+	        );
+*/
+		//TODO use
+		List<TrackSegment> trackSegments = BezierPolygonInterpolation.GetBezierCurvesN(controlPoints, 1, TrackWorld.CurveFunction());
 		
+		for (int i = 1; i < trackSegments.size(); i++) {
+			Vector3f cur = trackSegments.get(i).getControlPoints()[0];
+			Vector3f pos = trackSegments.get(i).getControlPoints()[3];
+			if (DEBUG) {
+				Log.p(i);
+				Log.p(trackSegments.get(i));
+				HelperObj.use(this.rootNode, "RoadSegment"+i, H.makeShapeArrow(am, ColorRGBA.Blue, unnormalizeHeightIn(cur).subtract(unnormalizeHeightIn(pos)), unnormalizeHeightIn(pos)));
+			}
+		}
+		
+		/*
 		List<TrackSegment> trackSegments = new LinkedList<>();
 		//link all the segments in order
 		Vector3f pos = controlPoints.get(0);
@@ -248,11 +272,50 @@ public class TrackWorld extends World {
 		if (DEBUG) {
 			HelperObj.use(this.rootNode, "RoadSegment"+-1, H.makeShapeArrow(am, ColorRGBA.Blue, unnormalizeHeightIn(last).subtract(unnormalizeHeightIn(first)), unnormalizeHeightIn(first)));
 		}
-		
-		//TODO use
-		new BezierPolygonInterpolation();
-		
+		*/
 		return trackSegments;
+	}
+	
+	private Material createTerrainMaterial(AssetManager am) {
+        Material terrainMaterial = new Material(am, "Common/MatDefs/Terrain/HeightBasedTerrain.j3md");
+
+		float grassScale = 16;
+		float dirtScale = 16;
+		float rockScale = 16;
+
+		//TODO lighting
+		
+        // GRASS texture
+        Texture grass = am.loadTexture("assets/terrain/grass.jpg");
+        grass.setWrap(WrapMode.Repeat);
+        terrainMaterial.setTexture("region1ColorMap", grass);
+        terrainMaterial.setVector3("region1", new Vector3f(58*2, 200*2, grassScale));
+
+        // DIRT texture
+        Texture dirt = am.loadTexture("assets/terrain/dirt.jpg");
+        dirt.setWrap(WrapMode.Repeat);
+        terrainMaterial.setTexture("region2ColorMap", dirt);
+        terrainMaterial.setVector3("region2", new Vector3f(0, 60*2, dirtScale));
+
+        // ROCK textures
+        Texture rock = am.loadTexture("assets/terrain/Rock.PNG");
+        rock.setWrap(WrapMode.Repeat);
+        terrainMaterial.setTexture("region3ColorMap", rock);
+        terrainMaterial.setVector3("region3", new Vector3f(198*2, 260*2, rockScale));
+
+        terrainMaterial.setTexture("region4ColorMap", rock);
+        terrainMaterial.setVector3("region4", new Vector3f(198*2, 260*2, rockScale));
+
+        Texture rock2 = am.loadTexture("assets/terrain/rock.jpg");
+        rock2.setWrap(WrapMode.Repeat);
+
+        terrainMaterial.setTexture("slopeColorMap", rock2);
+        terrainMaterial.setFloat("slopeTileFactor", 32);
+
+        terrainMaterial.setFloat("terrainSize", worldScale.y);
+
+        return terrainMaterial;
+
 	}
 	
 	@Override
