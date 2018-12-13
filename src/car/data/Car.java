@@ -21,6 +21,7 @@ public enum Car {
 	Ricer("Ricer"),
 	Muscle("Muscle"),
 	Wagon("Wagon"),
+	Bus("Bus"),
 	
 	WhiteSloth("WhiteSloth"),
 	Rocket("Rocket"),
