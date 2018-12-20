@@ -23,18 +23,17 @@ public class TrackSegmentStraight implements TrackSegment {
 	}
 		
 	@Override
-	public TrackSlice[] getSlices() {
+	public TrackSlice[] getSlices(int segmentCount) {
 		if (output != null)
 			return output;
 		
-		int N = 1; //start/end
-		output = new TrackSlice[N + 1];
+		output = new TrackSlice[segmentCount + 1];
 		
 		Vector3f g = points[1].subtract(points[0]); //derivative (happens to be constant)
 		g.y = 0; //always flat
 		
-		for (int i = 0; i < N + 1; i++) {
-			float t = ((float) i)/N;
+		for (int i = 0; i < segmentCount + 1; i++) {
+			float t = ((float) i)/segmentCount;
 			
 			Vector3f p = points[0].add(points[1].subtract(points[0]).mult(t)); //point
 			
@@ -47,5 +46,15 @@ public class TrackSegmentStraight implements TrackSegment {
 	@Override
 	public Vector3f[] getControlPoints() {
 		return points;
+	}
+	
+	@Override
+	public Vector3f getProjectedPointFrom(Vector3f pos) {
+		try {
+			throw new Exception("Not done");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

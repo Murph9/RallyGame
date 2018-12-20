@@ -49,7 +49,7 @@ import world.WorldType;
 
 public class TrackWorld extends World {
 
-	private static final boolean DEBUG = false;
+	private static final boolean DEBUG = true;
 	
 	private static final int POINT_COUNT = 12;
 	
@@ -63,6 +63,11 @@ public class TrackWorld extends World {
 	private TerrainTrackHelper terrainHelper;
 	private List<TrackSegment> trackSegments;
 	
+	private Vector3f normalizeHeightIn(Vector3f pos) {
+		Vector3f p = pos.clone();
+		p.divideLocal(worldScale);
+		return p;
+	}
 	private Vector3f unnormalizeHeightIn(Vector3f pos) {
 		Vector3f p = pos.clone();
 		p.multLocal(worldScale);
@@ -93,7 +98,7 @@ public class TrackWorld extends World {
 		
 		//add them as quads
 		for (TrackSegment seg: trackSegments) {
-			TrackSlice[] slices = seg.getSlices();
+			TrackSlice[] slices = seg.getSlices(16); //TODO hardcoded number
 			for (int i = 1; i < slices.length; i++) {
 				for (int j = 2; j < slices[i].points.length; j++) { //avoid the first one
 					Vector3f[] quadP = new Vector3f[] {
@@ -295,7 +300,15 @@ public class TrackWorld extends World {
 	}
 	
 	@Override
-	public void update(float tpf) {}
+	public void update(float tpf) {
+		
+		if (DEBUG) {
+			//hack to see if the bezier curve stuff works
+			Vector3f pos = getClosestPointTo(this.trackSegments, normalizeHeightIn(App.rally.drive.cb.get(0).getPhysicsLocation()));
+			HelperObj.use(this.rootNode, "closestpointtocurve", 
+					H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.LightGray, unnormalizeHeightIn(pos), 1));
+		}
+	}
 	@Override
 	public void reset() {}
 	
@@ -326,6 +339,21 @@ public class TrackWorld extends World {
 		return WorldType.TRACK;
 	}
 	
+	private static Vector3f getClosestPointTo(List<TrackSegment> segments, Vector3f pos) {
+		Vector3f point = new Vector3f();
+		float dist = Float.MAX_VALUE;
+		
+		for (TrackSegment seg: segments) {
+			Vector3f curPoint = seg.getProjectedPointFrom(pos);
+			float d = curPoint.distance(pos);
+			if (d < dist) {
+				point = curPoint;
+				dist = d;
+			}
+		}
+		
+		return point;
+	}
 	
 	private static Quaternion rot90 = new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y);
 	private static BiFunction<Vector3f, Vector3f, TrackSlice> CurveFunction() { 
