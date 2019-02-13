@@ -36,6 +36,8 @@ import helper.Log;
 
 public class CarBuilder extends AbstractAppState {
 
+	private static final boolean IF_REFLECTIONS = false;
+	
 	private HashMap<RayCarControl, CarReflectionMap> reflectionMaps;
 	private HashMap<Integer, RayCarControl> cars;
 	private Node rootNode;
@@ -51,8 +53,6 @@ public class CarBuilder extends AbstractAppState {
 	public void initialize(AppStateManager stateManager, Application app) {
 		super.initialize(stateManager, app);
 		Log.p("CarBuilder init");
-		
-		
 	}
 	
 	public void setEnabled(boolean state) {
@@ -144,13 +144,15 @@ public class CarBuilder extends AbstractAppState {
 			player.attachAI(_ai);
 		}
 		
-		if (aPlayer) { //players get sound (and some reflections)
+		if (aPlayer) { //players get sound
 			player.giveSound(new AudioNode(am, "assets/sound/engine.wav", AudioData.DataType.Buffer));
 		
-			//lastly add a reflection map
-			CarReflectionMap reflectionMap = new CarReflectionMap(player, environmentMap);
-			reflectionMaps.put(player, reflectionMap);
-			App.rally.getStateManager().attach(reflectionMap);
+			if (IF_REFLECTIONS) {
+				//lastly add a reflection map
+				CarReflectionMap reflectionMap = new CarReflectionMap(player, environmentMap);
+				reflectionMaps.put(player, reflectionMap);
+				App.rally.getStateManager().attach(reflectionMap);
+			}
 		}
 		
 		cars.put(id, player);

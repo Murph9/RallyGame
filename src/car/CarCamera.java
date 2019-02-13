@@ -22,7 +22,6 @@ import com.jme3.scene.Geometry;
 import car.ray.RayCarControl;
 import game.App;
 import helper.H;
-import helper.Log;
 
 public class CarCamera extends AbstractAppState implements RawInputListener {
 

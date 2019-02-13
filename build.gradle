@@ -1,0 +1,36 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+def mainClassName = 'game.Main'
+
+repositories {
+	jcenter()
+	maven { 
+		url "https://dl.bintray.com/jmonkeyengine/org.jmonkeyengine"
+		url "https://dl.bintray.com/stephengold/jme3utilities" 
+	}
+}
+
+jar {
+	manifest {
+		attributes 'Main-Class': '${mainClassName}'
+	}
+	
+	exclude ('META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA')
+}
+
+dependencies {
+	compile 'org.jmonkeyengine:jme3-blender:3.2.2-stable'
+	compile 'org.jmonkeyengine:jme3-bullet:3.2.2-stable'
+	compile 'org.jmonkeyengine:jme3-bullet-native:3.2.2-stable'
+	compile 'org.jmonkeyengine:jme3-core:3.2.2-stable'
+	compile 'org.jmonkeyengine:jme3-desktop:3.2.2-stable'
+	compile 'org.jmonkeyengine:jme3-effects:3.2.2-stable'
+	compile 'org.jmonkeyengine:jme3-lwjgl:3.2.2-stable'
+	compile 'org.jmonkeyengine:jme3-plugins:3.2.2-stable'
+	compile 'org.jmonkeyengine:jme3-terrain:3.2.2-stable'
+	
+	compile 'org.yaml:snakeyaml:1.23'
+	compile 'com.simsilica:lemur:1.11.0'
+	compile 'jme3utilities:SkyControl:0.9.16'
+}

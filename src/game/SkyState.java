@@ -14,6 +14,7 @@ import com.jme3.shadow.EdgeFilteringMode;
 
 import jme3utilities.Misc;
 import jme3utilities.sky.SkyControl;
+import jme3utilities.sky.StarsOption;
 
 public class SkyState extends AbstractAppState {
 
@@ -43,7 +44,7 @@ public class SkyState extends AbstractAppState {
         ambLight.setName("ambient");
         skyRoot.addLight(ambLight);
 		
-		SkyControl sky = new SkyControl(am, r.getCamera(), 0.7f, false, true);
+		SkyControl sky = new SkyControl(am, r.getCamera(), 0.7f, StarsOption.Cube, true);
 		skyRoot.addControl(sky);
 		sky.setCloudiness(0.2f);
 		sky.getSunAndStars().setHour(9f);
