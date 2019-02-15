@@ -27,7 +27,7 @@ public class DriveAtAI extends CarAI {
 	public void update(float tpf) {
 		float velocity = car.getLinearVelocity().length();
 		
-		//try and fix a stuck situation TODO test this works
+		//try and fix a stuck situation
 		if (!reversing) {
 			if (velocity < 0.5f) {
 				reversingTimer += tpf;
@@ -45,7 +45,6 @@ public class DriveAtAI extends CarAI {
 		} else {
 			//currently reversing
 			onEvent("Reverse", true, 1);
-			Log.e("reversing");
 			reversingTimer -= tpf;
 			if (reversingTimer < 0)
 				reversing = false;

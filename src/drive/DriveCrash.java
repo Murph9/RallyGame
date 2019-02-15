@@ -29,7 +29,7 @@ public class DriveCrash extends DriveBase {
 	public DriveCrash (World world) {
     	super(Car.Runner, world);
     	this.them = Car.Rally;
-    	this.maxCount = 30;
+    	this.maxCount = 10;
     	this.nextId = 1;
     	this.totalKilled = 0;
     }
@@ -52,7 +52,7 @@ public class DriveCrash extends DriveBase {
 		//TODO check if collisions are from the player
 		List<RayCarControl> toKill = new ArrayList<RayCarControl>();
 		for (RayCarControl c: this.cb.getAll()) {
-			if (c.up.y < 0 && c != this.cb.get(0)) {
+			if (c.up != null && c.up.y < 0 && c != this.cb.get(0)) {
 				toKill.add(c); //TODO
 			}
 		}

@@ -27,8 +27,7 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 
 	private Camera c;
 	private RayCarControl p;
-	private Vector3f prevVel; //for smoothing the velocity vector
-	private Vector3f prevPos;
+	private Vector3f lastPos;
 	
 	private float lastTimeout;
 	private float rotRad;
@@ -69,19 +68,15 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 		//TODO smooth the mouse stuff
 		if (p == null)
 			return;
-		
-		if (prevPos == null) //doesn't exist on the first loop
-			prevPos = c.getLocation();
-		if (prevVel == null) prevVel = p.vel.normalize();
+
 		
 		Vector3f carPos = p.getRootNode().getLocalTranslation();
-		
 		Quaternion pRot = p.getRootNode().getLocalRotation();
 		
 		if (!FastMath.approximateEquals(rotRad, 0)) {
 			lastTimeout += tpf;
 			if (lastTimeout > 2) { //TODO static number/setting
-				rotRad *= 0.6f; //reset to back of car slowly TODO static number/setting
+				rotRad *= tpf; //reset to back of car slowly TODO setting
 			}
 			
 			Quaternion q = new Quaternion();
@@ -89,26 +84,36 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 			pRot.multLocal(q);
 		}
 		
-		Vector3f vec1 = pRot.mult(new Vector3f(0, 0, 1)).normalize();
-		prevVel.interpolateLocal(p.vel.normalize(), 1f*tpf);
-		
+		//calculate world pos of a camera
 		Vector3f vec = new Vector3f();
-		vec.interpolateLocal(vec1, prevVel, 0.4f).normalize();
+		float smoothing = tpf*10;
+		if (p.vel.length() > 1f)
+			vec.interpolateLocal(pRot.mult(new Vector3f(0, 0, 1)).normalize(), p.vel.normalize(), 0.5f);
+		else {
+			//at slow speeds use just the rotation
+			vec = pRot.mult(new Vector3f(0, 0, 1)).normalize();
+			//reduce interpolation to much slower
+			smoothing /= 10;
+		}
+
+		//make it smooth
+		if (lastPos == null)
+			lastPos = vec;
 		
-		vec.y = 1;
+		lastPos.interpolateLocal(vec, smoothing);
+		
+		//force it to be the same distance away at all times (TODO vary on g forces)
 		
 		Vector3f next = new Vector3f();
-		Vector2f vec_2 = H.v3tov2fXZ(vec).normalize();
+		Vector2f vec_2 = H.v3tov2fXZ(lastPos).normalize();
 		
 		next.x = vec_2.x*p.getCarData().cam_offset.z;
-		next.y = vec.y*p.getCarData().cam_offset.y;
+		next.y = p.getCarData().cam_offset.y; //ignore y
 		next.z = vec_2.y*p.getCarData().cam_offset.z;
 		
 		next = carPos.add(next);
-		next.interpolateLocal(next, prevPos, 0.1f*tpf);//maybe
-		prevPos = next; 
 		
-		c.setLocation(prevPos); //already set for next frame
+		c.setLocation(next);
 
 		//lastly do a ray cast to make sure that you can still see the car
 		//TODO actually avoid the car model, and maybe not so touchy...

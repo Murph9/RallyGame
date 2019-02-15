@@ -48,6 +48,8 @@ public class RayCarControl extends RayCarPowered {
 		super(shape, carData);
 		this.space = space;
 
+		vel = forward = up = left = right = new Vector3f();
+		
 		//init visual wheels
 		this.wheelControls = new RayWheelControl[4];
 		for (int i = 0; i < wheelControls.length; i++) {
