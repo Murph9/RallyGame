@@ -1,5 +1,8 @@
 package game;
 
+import java.util.HashMap;
+import java.util.Map.Entry;
+
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
@@ -42,31 +45,6 @@ public class Start extends AbstractAppState {
 		
 		world = new StaticWorldBuilder(worldType);
 	}
-	
-	public void startFast() {
-		App.rally.startFast(this);
-	}
-	
-	public void startBasic() {
-		App.rally.next(this);
-	}
-	
-	public void startAI() {
-		App.rally.startAI(this);
-	}
-	
-	public void startDemo() {
-		App.rally.startDemo(this);
-	}
-	public void startDev() {
-		App.rally.startDev(this);
-	}
-	public void startRace() {
-		App.rally.startRace(this);
-	}
-	public void startCrash() {
-		App.rally.startCrash(this);
-	}
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -88,62 +66,27 @@ public class Start extends AbstractAppState {
 		myWindow.setLocalTranslation(300, 300, 0);
 		
         myWindow.addChild(new Label("Main Menu"));
-        Button startFast = myWindow.addChild(new Button("Start Fast"));
-        startFast.addClickCommands(new Command<Button>() {
-                @Override
-                public void execute( Button source ) {
-                    startFast();
-                    App.rally.getGuiNode().detachChild(myWindow);
-                }
-            });
-        Button start = myWindow.addChild(new Button("Start"));
-        start.addClickCommands(new Command<Button>() {
-                @Override
-                public void execute( Button source ) {
-                    startBasic();
-                    App.rally.getGuiNode().detachChild(myWindow);
-                }
-            });
-        Button startAI = myWindow.addChild(new Button("StartAI"));
-        startAI.addClickCommands(new Command<Button>() {
-                @Override
-                public void execute( Button source ) {
-                    startAI();
-                    App.rally.getGuiNode().detachChild(myWindow);
-                }
-            });
-        Button startDemo = myWindow.addChild(new Button("Start Demo"));
-        startDemo.addClickCommands(new Command<Button>() {
-                @Override
-                public void execute( Button source ) {
-                    startDemo();
-                    App.rally.getGuiNode().detachChild(myWindow);
-                }
-            });
-        Button startCrash = myWindow.addChild(new Button("Start Crash"));
-        startCrash.addClickCommands(new Command<Button>() {
-                @Override
-                public void execute( Button source ) {
-                    startCrash();
-                    App.rally.getGuiNode().detachChild(myWindow);
-                }
-            });
-        Button startRace = myWindow.addChild(new Button("Start Race"));
-        startRace.addClickCommands(new Command<Button>() {
-                @Override
-                public void execute( Button source ) {
-                    startRace();
-                    App.rally.getGuiNode().detachChild(myWindow);
-                }
-            });
-        Button startDev = myWindow.addChild(new Button("Start Dev"));
-        startDev.addClickCommands(new Command<Button>() {
-                @Override
-                public void execute( Button source ) {
-                    startDev();
-                    App.rally.getGuiNode().detachChild(myWindow);
-                }
-            });
+        HashMap<String, Runnable> buttonMap = new HashMap<>();
+        buttonMap.put("Start Fast", ()->{App.rally.startFast(this);});
+        buttonMap.put("Start", ()->{App.rally.next(this);});
+        buttonMap.put("Start AI", ()->{App.rally.startAI(this);});
+        buttonMap.put("Start Demo", ()->{App.rally.startDemo(this);});
+        buttonMap.put("Start Crash", ()->{App.rally.startCrash(this);});
+        buttonMap.put("Start Getaway", ()->{App.rally.startMainRoad(this);});
+        buttonMap.put("Start Race", ()->{App.rally.startRace(this);});
+        buttonMap.put("Start Dev", ()->{App.rally.startDev(this);});
+        
+        for (Entry<String, Runnable> e: buttonMap.entrySet()) {
+	        Button startFast = myWindow.addChild(new Button(e.getKey()));
+	        startFast.addClickCommands(new Command<Button>() {
+	                @Override
+	                public void execute( Button source ) {
+	                    e.getValue().run();
+	                    App.rally.getGuiNode().detachChild(myWindow);
+	                }
+	            });
+        }
+        
         Button exit = myWindow.addChild(new Button("Exit"));
         exit.addClickCommands(new Command<Button>() {
                 @Override
