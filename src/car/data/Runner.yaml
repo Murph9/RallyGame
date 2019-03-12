@@ -36,7 +36,7 @@ susF: &sus {
   min_travel: -0.2,
   preload_force: 2.0,
   relax: 0.6, 
-  stiffness: 60.0
+  stiffness: 15.0
 }
 susR: *sus
 trans_effic: 0.85
@@ -49,9 +49,9 @@ wheelData:
 - &w
   mass: 10.0
   modelName: assets/models/wheel.obj
-  pjk_lat: {B: 17.0, C: 1.9, D: 1.0, E: 0.97}
-  pjk_lat_sat: &w_sat {B: 0.85, C: 2.3, D: 0.51, E: -2.75}
-  pjk_long: {B: 17.0, C: 1.5, D: 1.0, E: 0.98}
+  pjk_lat: {B: 10, C: 1.9, D: 1.4, E: 0.97}
+  pjk_lat_sat: &w_sat {B: 0.85, C: 2.3, D: 0.51, E: -2.75} #TODO test
+  pjk_long: {B: 10, C: 1.9, D: 1.4, E: 0.97}
   pjk_long_sat: *w_sat
   radius: 0.3
   width: 0.15
