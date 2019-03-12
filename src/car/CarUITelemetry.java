@@ -4,10 +4,6 @@ import com.jme3.app.state.AbstractAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
-import com.jme3.input.InputManager;
-import com.jme3.input.KeyInput;
-import com.jme3.input.controls.ActionListener;
-import com.jme3.input.controls.KeyTrigger;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
@@ -42,22 +38,11 @@ public class CarUITelemetry extends AbstractAppState {
 	
 	//some debug text
 	private BitmapText statsText;
-	
-	private ActionListener actionListener = new ActionListener() {
-		public void onAction(String name, boolean keyPressed, float tpf) {
-			//TODO add any key action to listen to?
-		}
-	};
-	
+		
 	public CarUITelemetry(RayCarControl p) {
 		Main r = App.rally;
 		this.p = p;
-		
-		InputManager i = App.rally.getInputManager();
-		
-		i.addMapping("Telemetry", new KeyTrigger(KeyInput.KEY_HOME));
-		i.addListener(actionListener, "Telemetry");
-		
+				
 		rootNode = new Node("telemetry");
 
 		//set the positions of the wheel grid
@@ -228,10 +213,6 @@ public class CarUITelemetry extends AbstractAppState {
 	}
 
 	public void cleanup() {
-		InputManager i = App.rally.getInputManager();
-		i.deleteMapping("Telemetry");
-		i.removeListener(actionListener);
-		
 		App.rally.getGuiNode().detachChild(rootNode);
 	}
 	

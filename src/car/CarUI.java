@@ -1,6 +1,8 @@
 package car;
 
-import com.jme3.app.state.AbstractAppState;
+import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
+import com.jme3.app.state.BaseAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
@@ -26,10 +28,10 @@ import game.App;
 import game.Main;
 import helper.H;
 
-public class CarUI extends AbstractAppState {
+public class CarUI extends BaseAppState {
 
 	//TODO scale it with monitor size (forza doesn't deal with this)
-	private RayCarControl p;
+	private final RayCarControl p;
 	
 	private Node rootNode;
 	
@@ -48,7 +50,7 @@ public class CarUI extends AbstractAppState {
 	Geometry steer, steerOff; //quads that display turn value
 	
 	//texture
-	final String numDir = "assets/number/"; //texture location
+	static final String numDir = "assets/number/"; //texture location
 	Material[] numMats = new Material[10]; //texture set
 	
 	Geometry[] speedo = new Geometry[3]; //speed squares
@@ -78,12 +80,15 @@ public class CarUI extends AbstractAppState {
 		}
 	};
 	
-	public CarUI (RayCarControl p) {
-		Main r = App.rally;
+	public CarUI(RayCarControl p) {
 		this.p = p;
 		
 		this.redline = p.getCarData().e_redline;
 		this.finalRPM = (int)FastMath.ceil(this.redline) + 1000;
+	}
+	@Override
+	protected void initialize(Application app) {
+		Main r = (Main)app;
 
 		BitmapFont guiFont = r.getFont();
 		AppSettings settings = r.getSettings();
@@ -95,14 +100,14 @@ public class CarUI extends AbstractAppState {
 		angle.setSize(guiFont.getCharSet().getRenderedSize());
 		angle.setColor(ColorRGBA.White);
 		angle.setText("blaj");
-		angle.setLocalTranslation(settings.getWidth()-300, 30, 0); // position
+		angle.setLocalTranslation(settings.getWidth() - 300, 30, 0); // position
 		rootNode.attachChild(angle);
 		
 		//////////////////////////////
 		//speedo number textures
 		for (int i = 0 ; i < 10; i++) {
 			numMats[i] = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-			numMats[i].setTexture("ColorMap", am.loadTexture(numDir+i+".png"));
+			numMats[i].setTexture("ColorMap", am.loadTexture(numDir + i + ".png"));
 			numMats[i].getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
 		}
 		
@@ -116,7 +121,7 @@ public class CarUI extends AbstractAppState {
 		i.addListener(actionListener, "Telemetry");
 		
 		telemetry = new CarUITelemetry(p);
-		App.rally.getStateManager().attach(telemetry);
+		App.rally.getStateManager().attach(telemetry);		
 	}
 
 	private void makeSpeedo(AssetManager am, AppSettings settings) {
@@ -134,10 +139,10 @@ public class CarUI extends AbstractAppState {
 		background = new Geometry("ui-background", qback);
 		background.setCullHint(CullHint.Never);
 		Material trans = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-		trans.setColor("Color", new ColorRGBA(0,0,0,0.5f));
+		trans.setColor("Color", new ColorRGBA(0, 0, 0, 0.5f));
 		trans.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
 		background.setMaterial(trans);
-		background.setLocalTranslation(settings.getWidth()-270, 0, -10);
+		background.setLocalTranslation(settings.getWidth() - 270, 0, -10);
 		
 		speedoNode.attachChild(background);
 		
@@ -152,13 +157,13 @@ public class CarUI extends AbstractAppState {
 		rpmMat.setColor("Color", ColorRGBA.White);
 		rpmMat.getAdditionalRenderState().setBlendMode(BlendMode.AlphaAdditive);
 		rpmQuad.setMaterial(rpmMat);
-		rpmQuad.setLocalTranslation(App.rally.getSettings().getWidth()-240, -25, -10);
+		rpmQuad.setLocalTranslation(App.rally.getSettings().getWidth() - 240, -25, -10);
 		speedoNode.attachChild(rpmQuad);
 		
 		//rpm bars
 		Quad quad = new Quad(20, 20);
 		
-		centerx = App.rally.getSettings().getWidth()-127;
+		centerx = App.rally.getSettings().getWidth() - 127;
 		
 		for (int i = 0; i < finalRPM+1; i += 1000) {
 			float angle = FastMath.interpolateLinear(i/(float)finalRPM, startAng, finalAng);
@@ -342,13 +347,19 @@ public class CarUI extends AbstractAppState {
 		gearIn = (int)FastMath.clamp(gearIn, 0, 9); //so we don't go off the end of the texture array
 		gear.setMaterial(numMats[gearIn]);
 	}
-	
-	public void cleanup() {
-		InputManager i = App.rally.getInputManager();
+
+	@Override
+	protected void cleanup(Application app) {
+		InputManager i = app.getInputManager();
 		i.deleteMapping("Telemetry");
 		i.removeListener(actionListener);
 		
-		App.rally.getGuiNode().detachChild(rootNode);
-		App.rally.getStateManager().detach(telemetry);
+		((SimpleApplication)app).getGuiNode().detachChild(rootNode);
+		((SimpleApplication)app).getStateManager().detach(telemetry);
 	}
+
+	@Override
+	protected void onEnable() {}
+	@Override
+	protected void onDisable() {}
 }
