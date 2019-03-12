@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import com.jme3.input.InputManager;
 import com.jme3.input.MouseInput;
@@ -26,6 +27,7 @@ import com.simsilica.lemur.component.InsetsComponent;
 import com.simsilica.lemur.event.DefaultMouseListener;
 import com.simsilica.lemur.event.MouseEventControl;
 
+import car.data.Car;
 import car.ray.CarDataConst;
 import car.ray.RayCarControl;
 import game.App;
@@ -38,6 +40,7 @@ public class CarEditor extends Container {
 	private RayCarControl p;
 	private HashMap<String, FieldEntry> fields;
 	private Consumer<CarDataConst> reloadCar;
+	private Function<Car, RayCarControl> resetCar;
 	
 	private boolean mouseIn = false;
 	private AnalogListener actionListener = new AnalogListener() {
@@ -47,11 +50,12 @@ public class CarEditor extends Container {
 		}
 	};
 	
-	public CarEditor(RayCarControl p, Consumer<CarDataConst> a) {
+	public CarEditor(RayCarControl p, Consumer<CarDataConst> a, Function<Car, RayCarControl> reset) {
 		super("CarEditor");
 		
 		this.p = p;
 		this.reloadCar = a;
+		this.resetCar = reset;
 		this.fields = new HashMap<String, FieldEntry>();
 		try {
 			attachTree(this.p.getCarData(), this, "Car Data");
@@ -92,8 +96,24 @@ public class CarEditor extends Container {
 		if (root == this) {
 			this.fields.clear(); //reset fields
 			
+			RollupPanel rp = new RollupPanel("Change Car Type", "");
+			addChild(rp, 0, 0);
+			rp.setOpen(false);
+			Container c = new Container();
+			int i = 0;
+			for (Car car: Car.values()) {
+				Button carButton = c.addChild(new Button(car.name()), 0, i++);
+				carButton.addClickCommands(new Command<Button>() {
+		            @Override
+		            public void execute(Button source) {
+		            	p = resetCar.apply(car);
+		            }
+		        });
+			}
+			rp.setContents(c);
+			
 			//root stuff
-			addChild(new Label("Car Editor"), 0, 0);
+			addChild(new Label("Car Editor"), 1, 0);
 			
 			Button b = new Button("Save All");
 			b.addClickCommands(new Command<Button>() {
@@ -149,7 +169,9 @@ public class CarEditor extends Container {
 			
 			List<TextField> fields = new LinkedList<TextField>();
 			rpContents.addChild(new Label(str), ++i, ++j);
-			if (value.getClass().isArray()) {
+			if (value == null) {
+				//TODO no idea
+			} else if (value.getClass().isArray()) {
 				Object[] os = (Object[])value;
 				for (int index = 0; index < os.length; index++) {
 					TextField tf = new TextField(os[index].toString());

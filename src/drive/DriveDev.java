@@ -10,6 +10,7 @@ import com.jme3.math.Vector3f;
 import car.*;
 import car.data.Car;
 import car.ray.CarDataConst;
+import car.ray.RayCarControl;
 import game.App;
 import helper.H;
 
@@ -29,7 +30,7 @@ public class DriveDev extends DriveBase {
     	super.initialize(stateManager, app);
     	
     	//init input gui
-		carEditor = new CarEditor(this.cb.get(0), (data) -> { reloadCar(data); });
+		carEditor = new CarEditor(this.cb.get(0), (data) -> { reloadCar(data);}, (car) -> { return resetCar(car); });
 		carEditor.setLocalTranslation(H.screenTopLeft().add(0, -20, 0));
 		App.rally.getGuiNode().attachChild(carEditor);
 		
@@ -49,11 +50,15 @@ public class DriveDev extends DriveBase {
 		wheelGraphs.update(tpf);
 	}
 
-	public void reloadCar(CarDataConst data) {
+	private void reloadCar(CarDataConst data) {
 		this.cb.get(0).getCarData().loaded = false; //TODO feels like a hack?
 		
 		this.cb.setCarData(0, data);
 		wheelGraphs.updateMyPhysicsVehicle(this.cb.get(0));
+	}
+	private RayCarControl resetCar(Car car) {
+		this.reInitPlayerCar(car);
+		return this.cb.get(0);
 	}
 	
 	public void reloadWorld(World world) {

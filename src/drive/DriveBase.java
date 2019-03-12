@@ -13,6 +13,7 @@ import com.jme3.input.Joystick;
 
 import car.*;
 import car.data.Car;
+import car.ray.RayCarControl;
 import game.App;
 import helper.Log;
 
@@ -52,18 +53,18 @@ public class DriveBase extends AbstractAppState {
 
     	Collection<PhysicsRigidBody> list = App.rally.getPhysicsSpace().getRigidBodyList();
     	if (list.size() > 0) {
-    		Log.p("some one didn't clean up after themselves..." + list.size());
+    		Log.p("Someone didn't clean up after themselves...: " + list.size());
     		for (PhysicsRigidBody r: list)
     			App.rally.getPhysicsSpace().remove(r);
     	}
     	
     	app.getStateManager().attach(world);
+    	app.getStateManager().attach(menu);
     	
 		//build player
 		this.cb = new CarBuilder();
 		cb.addCar(0, car, world.getStartPos(), world.getStartRot(), true, null);
 		app.getStateManager().attach(cb);
-		app.getStateManager().attach(menu);
 		
 		uiNode = new CarUI(cb.get(0));
 		app.getStateManager().attach(uiNode);
@@ -124,5 +125,25 @@ public class DriveBase extends AbstractAppState {
 		App.rally.getStateManager().detach(camera);
 		App.rally.getInputManager().removeRawInputListener(camera);
 		camera = null;
+	}
+	
+	protected void reInitPlayerCar(Car car) {
+		//remove camera and ui
+		App.rally.getStateManager().detach(camera);
+		App.rally.getInputManager().removeRawInputListener(camera);
+		
+		App.rally.getStateManager().detach(uiNode);
+		
+		this.cb.removeCar(0);
+
+		RayCarControl c = this.cb.addCar(0, car, world.getStartPos(), world.getStartRot(), true, null); 
+		
+		//initCamera and ui again
+		camera = new CarCamera("Camera", App.rally.getCamera(), c);
+		App.rally.getStateManager().attach(camera);
+		App.rally.getInputManager().addRawInputListener(camera);
+		
+		uiNode = new CarUI(c);
+		App.rally.getStateManager().attach(uiNode);
 	}
 }
