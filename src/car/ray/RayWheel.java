@@ -33,6 +33,7 @@ public class RayWheel {
 		this.gripDir = new Vector3f();
 		
 		//generate the slip* max force from the car wheel data
+		//TODO precompute in the yaml file?
 		maxLat = RayCar.GripHelper.calcSlipMax(data.pjk_lat, 0.2, ERROR);
 		maxLong = RayCar.GripHelper.calcSlipMax(data.pjk_long, 0.2, ERROR);
 		

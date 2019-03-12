@@ -1,7 +1,7 @@
 package drive;
 
-import world.World;
 import world.wp.DefaultBuilder;
+import world.wp.WP.DynamicType;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AppStateManager;
@@ -11,17 +11,11 @@ import car.ai.FollowWorldAI;
 import car.data.Car;
 import car.ray.RayCarControl;
 import game.App;
-import helper.Log;
 
 public class DriveDemo extends DriveBase {
 
-	public DriveDemo (Car car, World world) {
-    	super(car, world);
-    	
-    	if (!(world instanceof DefaultBuilder)) {
-    		Log.e("DriveDemo has wrong world type.");
-    		System.exit(-1);
-    	}
+	public DriveDemo (Car car) {
+    	super(car, DynamicType.Valley.getBuilder());
     }
 	
 	@Override
@@ -30,7 +24,7 @@ public class DriveDemo extends DriveBase {
     	
     	//remove all stuff we want and player from everything
     	
-    	this.cb.removePlayer(0);
+    	this.cb.removeCar(0);
     	this.cb.addCar(0, car, world.getStartPos(), world.getStartRot(), true, null); //even though they aren't a player
 
     	RayCarControl car = this.cb.get(0);

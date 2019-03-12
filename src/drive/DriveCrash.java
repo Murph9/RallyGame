@@ -5,8 +5,6 @@ import world.World;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.jme3.app.Application;
-import com.jme3.app.state.AppStateManager;
 import com.jme3.math.Vector3f;
 
 import car.data.Car;
@@ -17,7 +15,9 @@ import helper.H;
 public class DriveCrash extends DriveBase {
 
 	private static Vector3f[] spawns = new Vector3f[] {
-			new Vector3f(0,0,0)
+			new Vector3f(0,0,0),
+			new Vector3f(0,10,0),
+			new Vector3f(5,5,0)
 	};
 
 	private Car them;
@@ -33,11 +33,6 @@ public class DriveCrash extends DriveBase {
     	this.nextId = 1;
     	this.totalKilled = 0;
     }
-	
-	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
-    	super.initialize(stateManager, app);
-	}
 	
 	public void update(float tpf) {
 		super.update(tpf);
@@ -59,9 +54,9 @@ public class DriveCrash extends DriveBase {
 		for (RayCarControl c: toKill) {
 			//killed
 			totalKilled++;
-			cb.removePlayer(c);
+			cb.removeCar(c);
 		}
-			
+
 		
 		if (this.menu.randomthing != null)
 			this.menu.randomthing.setText("Total Killed: " + totalKilled);

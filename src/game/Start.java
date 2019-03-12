@@ -1,8 +1,5 @@
 package game;
 
-import java.util.HashMap;
-import java.util.Map.Entry;
-
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
@@ -66,22 +63,35 @@ public class Start extends AbstractAppState {
 		myWindow.setLocalTranslation(300, 300, 0);
 		
         myWindow.addChild(new Label("Main Menu"));
-        HashMap<String, Runnable> buttonMap = new HashMap<>();
-        buttonMap.put("Start Fast", ()->{App.rally.startFast(this);});
-        buttonMap.put("Start", ()->{App.rally.next(this);});
-        buttonMap.put("Start AI", ()->{App.rally.startAI(this);});
-        buttonMap.put("Start Demo", ()->{App.rally.startDemo(this);});
-        buttonMap.put("Start Crash", ()->{App.rally.startCrash(this);});
-        buttonMap.put("Start Getaway", ()->{App.rally.startMainRoad(this);});
-        buttonMap.put("Start Race", ()->{App.rally.startRace(this);});
-        buttonMap.put("Start Dev", ()->{App.rally.startDev(this);});
         
-        for (Entry<String, Runnable> e: buttonMap.entrySet()) {
-	        Button startFast = myWindow.addChild(new Button(e.getKey()));
+        String[] names = {
+        		"Start Fast",
+        		"Start",
+        		"Start AI",
+        		"Start Demo",
+        		"Start Crash",
+        		"Start Getaway",
+        		"Start Race",
+        		"Start Dev",
+        };
+        Runnable[] methods = {
+        		() -> { App.rally.startFast(this); },
+        		() -> { App.rally.next(this); },
+        		() -> { App.rally.startAI(this); },
+        		() -> { App.rally.startDemo(this); },
+        		() -> { App.rally.startCrash(this); },
+        		() -> { App.rally.startMainRoad(this); },
+        		() -> { App.rally.startRace(this); },
+        		() -> { App.rally.startDev(this); }
+		};
+        
+        for (int i = 0; i < methods.length; i++) {
+        	final Runnable method = methods[i];
+	        Button startFast = myWindow.addChild(new Button(names[i]));
 	        startFast.addClickCommands(new Command<Button>() {
 	                @Override
 	                public void execute( Button source ) {
-	                    e.getValue().run();
+	                    method.run();
 	                    App.rally.getGuiNode().detachChild(myWindow);
 	                }
 	            });
@@ -127,7 +137,7 @@ public class Start extends AbstractAppState {
 		App.rally.getRootNode().detachChild(myWindow);
 		myWindow = null;
 		
-		cb.removePlayer(0);
+		cb.removeCar(0);
 		App.rally.getStateManager().detach(cb);
 		cb = null;
 		

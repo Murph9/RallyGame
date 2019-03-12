@@ -88,7 +88,7 @@ public class ChooseCar extends AbstractAppState {
                 public void execute( Button source ) {
                     car = c;
 
-                    cb.removePlayer(0);
+                    cb.removeCar(0);
     				cb.addCar(0, car, worldType.start, new Matrix3f(), true, null);
     				
     				String carinfotext = getCarInfoText(car);

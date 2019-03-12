@@ -42,6 +42,7 @@ public interface WP {
 		Underground(new Underground.Builder()),
 		Valley(new Valley.Builder()),
 		Rocks(new Rocks.Builder()),
+		MainRoad(new MainRoad.Builder())
 		;
 		
 		private World builder;

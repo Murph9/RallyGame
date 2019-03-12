@@ -151,7 +151,7 @@ public class Main extends SimpleApplication {
 //		bullet.setSpeed(0.1f); //physics per second rate
 //    	bullet.setDebugEnabled(true); //show bullet wireframes
 		getStateManager().attach(bullet);
-		bullet.getPhysicsSpace().setAccuracy(1f/120f); //physics rate
+		bullet.getPhysicsSpace().setAccuracy(1f/120f); //physics rate //TODO setting
 		bullet.getPhysicsSpace().setGravity(new Vector3f(0, -9.81f, 0)); //yay its down
 		
 		inputManager.setCursorVisible(true);
@@ -175,7 +175,7 @@ public class Main extends SimpleApplication {
 	public void startDemo(AppState state) {
 		getStateManager().detach(state);
 		
-		drive = new DriveDemo(Car.Runner, DynamicType.Valley.getBuilder()); //TODO allow other tracks
+		drive = new DriveDemo(Car.Runner);
 		getStateManager().attach(drive);
 	}
 	
@@ -190,6 +190,13 @@ public class Main extends SimpleApplication {
 		getStateManager().detach(state);
 		
 		drive = new DriveCrash(new StaticWorldBuilder(StaticWorld.duct2));
+		getStateManager().attach(drive);
+	}
+	
+	public void startMainRoad(AppState state) {
+		getStateManager().detach(state);
+		
+		drive = new DriveMainRoadGetaway(Car.Runner);
 		getStateManager().attach(drive);
 	}
 	

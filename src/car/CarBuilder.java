@@ -66,13 +66,13 @@ public class CarBuilder extends AbstractAppState {
 		}
 	}
 	
-	//TODO this should be giving the ai
 	public RayCarControl addCar(int id, Car car, Vector3f start, Matrix3f rot, boolean aPlayer, BiFunction<RayCarControl, RayCarControl, CarAI> ai) {
 		if (cars.containsKey(id)) {
 			try {
 				throw new Exception("A car already has that id: " + id);
 			} catch (Exception e) {
 				e.printStackTrace();
+				return null;
 			}
 		}
 		
@@ -120,7 +120,7 @@ public class CarBuilder extends AbstractAppState {
 		
 		//update the collision shape, NOTE: a convex collision shape or hull might be faster here
 		CollisionShape colShape = CollisionShapeFactory.createDynamicMeshShape(carModel);
-		RayCarControl player = new RayCarControl(App.rally.getPhysicsSpace(), colShape, carData, carNode);
+		RayCarControl carControl = new RayCarControl(App.rally.getPhysicsSpace(), colShape, carData, carNode);
 		carNode.attachChild(carModel);
 
 		if (aPlayer) { //player gets a shadow
@@ -130,34 +130,34 @@ public class CarBuilder extends AbstractAppState {
 		}
 
 		rootNode.attachChild(carNode);
-		player.setPhysicsLocation(start);
-		player.setPhysicsRotation(rot);
+		carControl.setPhysicsLocation(start);
+		carControl.setPhysicsRotation(rot);
 
 		if (aPlayer) { //players get the keyboard
-			player.attachControls();
+			carControl.attachControls();
 		} else {
 			CarAI _ai;
 			if (ai != null)
-				_ai = ai.apply(player, get(0));
+				_ai = ai.apply(carControl, get(0));
 			else
-				_ai = new DriveAtAI(player, get(0).getPhysicsObject());
-			player.attachAI(_ai);
+				_ai = new DriveAtAI(carControl, get(0).getPhysicsObject());
+			carControl.attachAI(_ai);
 		}
 		
 		if (aPlayer) { //players get sound
-			player.giveSound(new AudioNode(am, "assets/sound/engine.wav", AudioData.DataType.Buffer));
+			carControl.giveSound(new AudioNode(am, "assets/sound/engine.wav", AudioData.DataType.Buffer));
 		
 			if (IF_REFLECTIONS) {
 				//lastly add a reflection map
-				CarReflectionMap reflectionMap = new CarReflectionMap(player, environmentMap);
-				reflectionMaps.put(player, reflectionMap);
+				CarReflectionMap reflectionMap = new CarReflectionMap(carControl, environmentMap);
+				reflectionMaps.put(carControl, reflectionMap);
 				App.rally.getStateManager().attach(reflectionMap);
 			}
 		}
 		
-		cars.put(id, player);
+		cars.put(id, carControl);
 		
-		return player;
+		return carControl;
 	}
 
 	public void setCarData(int id, CarDataConst carData) {
@@ -168,7 +168,7 @@ public class CarBuilder extends AbstractAppState {
 		car.setCarData(carData);
 	}
 	
-	public void removePlayer(int id) {
+	public void removeCar(int id) {
 		if (!cars.containsKey(id)) {
 			try {
 				throw new Exception("A car doesn't have that id: " + id);
@@ -187,7 +187,7 @@ public class CarBuilder extends AbstractAppState {
 			reflectionMaps.remove(car);
 		}
 	}
-	public void removePlayer(RayCarControl mpv) {
+	public void removeCar(RayCarControl mpv) {
 		for (int key: cars.keySet()) {
 			RayCarControl car = cars.get(key);
 			if (car == mpv) {
