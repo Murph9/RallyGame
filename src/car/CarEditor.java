@@ -92,7 +92,7 @@ public class CarEditor extends Container {
 		if (o == null)
 			return;
 		if (o instanceof com.jme3.math.Vector3f)
-			return;
+			return; //:(
 		if (root == this) {
 			this.fields.clear(); //reset fields
 			
@@ -107,6 +107,12 @@ public class CarEditor extends Container {
 		            @Override
 		            public void execute(Button source) {
 		            	p = resetCar.apply(car);
+		            	try {
+		            		detachAllChildren();
+		        			attachTree(p.getCarData(), CarEditor.this, "Car Data");
+		        		} catch (IllegalArgumentException | IllegalAccessException e) {
+		        			e.printStackTrace();
+		        		}
 		            }
 		        });
 			}
