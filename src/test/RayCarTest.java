@@ -26,14 +26,14 @@ public class RayCarTest {
 		curveConstLong.C = 1.9f;
 		curveConstLong.D = 1;
 		curveConstLong.E = 0.1f; //aggressive so you can see the color gradient 
-		float maxLong = CalcSlipMax(curveConstLong, 0.1f, 0.005f);
+		float maxLong = CalcSlipMax(curveConstLong);
 		
 		WheelDataTractionConst curveConstLat = new WheelDataTractionConst();
         curveConstLat.B = 40;
 		curveConstLat.C = 1.9f;
 		curveConstLat.D = 1;
 		curveConstLat.E = 0.1f;
-        float maxLat = CalcSlipMax(curveConstLat, 0.05f, 0.005f);
+        float maxLat = CalcSlipMax(curveConstLat);
         
         if (Float.isNaN(maxLong)) {
         	Log.e("Maxlong is NaN");
@@ -114,9 +114,9 @@ public class RayCarTest {
         }
     }
     
-    private static float CalcSlipMax(WheelDataTractionConst w, double guess, double error) {
+    private static float CalcSlipMax(WheelDataTractionConst w) {
     	if (COMPLEX_FORMULA)
-    		return RayCar.GripHelper.calcSlipMax(w, guess, error);
+    		return RayCar.GripHelper.calcSlipMax(w);
         else
             return 0.1f;
     }

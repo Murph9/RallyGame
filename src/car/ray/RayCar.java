@@ -385,6 +385,8 @@ public class RayCar implements PhysicsTickListener {
 
 
 	public static class GripHelper {
+		private static float ERROR = 0.0005f; //our fixed error, we don't really care how close it is past 3 or 4 decimals
+		
 		//http://www.gamedev.net/topic/462784-simplified-pacejka-magic-formula/
 
 		//There were fancy versions of the Pacejka's Formula here but there were removed
@@ -401,13 +403,13 @@ public class RayCar implements PhysicsTickListener {
 		}
 
 		//returns the slip value that gives the closest to 1 from the magic formula (should be called twice, lat and long)
-		public static float calcSlipMax(WheelDataTractionConst w, double firstGuess, double error) {
-			double lastX = firstGuess; //our first guess (usually finishes about 0.25f)
-			double nextX = lastX + 5*error; //just so its a larger diff that error
+		public static float calcSlipMax(WheelDataTractionConst w) {
+			double lastX = 0.2f; //our first guess (usually finishes about 0.25f)
+			double nextX = lastX + 5*ERROR; //just so its a larger diff that error
 
-			while (Math.abs(lastX - nextX) > error) {
+			while (Math.abs(lastX - nextX) > ERROR) {
 				lastX = nextX;
-				nextX = iterate(w, lastX, error);
+				nextX = iterate(w, lastX, ERROR);
 			}
 			return (float)nextX;
 		}

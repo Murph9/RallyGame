@@ -10,7 +10,7 @@ import car.ray.WheelDataTractionConst;
 import game.App;
 import helper.H;
 
-import car.ray.RayCar.GripHelper;
+import car.ray.RayCar;
 
 public class TractionCurveGraph extends Container {
 
@@ -34,14 +34,14 @@ public class TractionCurveGraph extends Container {
 		this.detachAllChildren();
 		
 		Vector3f size = getPreferredSize();
-		float max = GripHelper.tractionFormula(latData, GripHelper.calcSlipMax(latData, 0.25, 0.0005f));
+		float max = RayCar.GripHelper.tractionFormula(latData, RayCar.GripHelper.calcSlipMax(latData));
 		Float[] points = simulateGraphPoints(latData);
 		for (int i = 0; i < points.length; i++) {
 			Vector3f pos = new Vector3f(i*(size.x/points.length), -(size.y/2)+(size.y/2)*(points[i]/max), 0);
 			this.attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Blue, pos, 1));
 		}
 		
-		max = GripHelper.tractionFormula(longData, GripHelper.calcSlipMax(longData, 0.25, 0.0005f));
+		max = RayCar.GripHelper.tractionFormula(longData, RayCar.GripHelper.calcSlipMax(longData));
 		points = simulateGraphPoints(longData);
 		for (int i = 0; i < points.length; i++) {
 			Vector3f pos = new Vector3f(i*(size.x/points.length), -(size.y)+(size.y/2)*(points[i]/max), 0);
@@ -52,7 +52,7 @@ public class TractionCurveGraph extends Container {
 		Vector3f size = getPreferredSize();
 		Float[] list = new Float[(int)size.x/2];
 		for (int i = 0; i < list.length; i++)
-			list[i] = GripHelper.tractionFormula(d, (float)i*FastMath.PI/size.x);
+			list[i] = RayCar.GripHelper.tractionFormula(d, (float)i*FastMath.PI/size.x);
 		return list;
 	}
 	

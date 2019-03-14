@@ -6,8 +6,6 @@ import helper.Log;
 
 public class RayWheel {
 
-	private static float ERROR = 0.0005f; //our fixed error, we don't really care how close it is past 3 or 4 decimals
-	
 	protected final int num;
 	protected final WheelDataConst data;
 	
@@ -34,13 +32,13 @@ public class RayWheel {
 		
 		//generate the slip* max force from the car wheel data
 		//TODO precompute in the yaml file?
-		maxLat = RayCar.GripHelper.calcSlipMax(data.pjk_lat, 0.2, ERROR);
-		maxLong = RayCar.GripHelper.calcSlipMax(data.pjk_long, 0.2, ERROR);
+		maxLat = RayCar.GripHelper.calcSlipMax(data.pjk_lat);
+		maxLong = RayCar.GripHelper.calcSlipMax(data.pjk_long);
 		
-		maxLatSat = RayCar.GripHelper.calcSlipMax(data.pjk_lat_sat, 0.2, ERROR);
-		maxLongSat = RayCar.GripHelper.calcSlipMax(data.pjk_long_sat, 0.2, ERROR);
+		maxLatSat = RayCar.GripHelper.calcSlipMax(data.pjk_lat_sat);
+		maxLongSat = RayCar.GripHelper.calcSlipMax(data.pjk_long_sat);
 		
-		try {	
+		try {
 			if (Float.isNaN(maxLat))
 				throw new Exception("maxLat was: '" + maxLat +"'.");
 			if (Float.isNaN(maxLong))
