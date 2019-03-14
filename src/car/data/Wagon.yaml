@@ -30,13 +30,13 @@ nitro_rate: 1.0
 rollFraction: 1.0
 susF: &sus {
   antiroll: 0.0, 
-  comp: 0.2,
+  comp: 0.13,
   max_force: 50000.0, 
   max_travel: 0.1,
-  min_travel: -0.2,
-  preload_force: 2.0,
-  relax: 0.4, 
-  stiffness: 100
+  min_travel: -0.1,
+  preload_force: 0.6,
+  relax: 0.16,
+  stiffness: 17
 }
 susR: *sus
 trans_effic: 0.85
@@ -53,7 +53,7 @@ wheelData:
   pjk_lat_sat: &w_sat {B: 0.85, C: 2.3, D: 0.51, E: -2.75}
   pjk_long: {B: 10.0, C: 1.9, D: 0.62, E: 0.95}
   pjk_long_sat: *w_sat
-  radius: 0.3
+  radius: 0.5
   width: 0.15
 - *w
 - *w

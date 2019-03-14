@@ -30,14 +30,14 @@ nitro_on: true
 nitro_rate: 1.0
 rollFraction: 1.0
 susF: &sus {
-  antiroll: 0.0, 
-  comp: 0.2,
+  antiroll: 22.0,
+  comp: 0.4,
   max_force: 83600, 
   max_travel: 0.1,
-  min_travel: -0.2,
-  preload_force: 2.0,
-  relax: 0.4, 
-  stiffness: 6.0
+  min_travel: -0.1,
+  preload_force: 2.3,
+  relax: 0.5, 
+  stiffness: 18.0
 }
 susR: *sus
 trans_effic: 1 #torque is probably measured at wheels 

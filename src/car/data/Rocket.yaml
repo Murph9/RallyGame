@@ -29,7 +29,7 @@ nitro_on: true
 nitro_rate: 1.0
 rollFraction: 1.0
 susF: &sus {
-  antiroll: 12.0,
+  antiroll: 23.0,
   comp: 0.5,
   max_force: 50000.0, 
   max_travel: 0.1,

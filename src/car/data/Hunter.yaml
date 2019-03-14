@@ -29,14 +29,14 @@ nitro_on: true
 nitro_rate: 1.0
 rollFraction: 1.0
 susF: &sus {
-  antiroll: 0.0, 
+  antiroll: 9.0, 
   comp: 0.2,
   max_force: 85000, 
-  max_travel: 0.1,
-  min_travel: -0.2,
-  preload_force: 2.0,
-  relax: 0.4, 
-  stiffness: 6.0
+  max_travel: 0.3,
+  min_travel: -0.3,
+  preload_force: 2.5,
+  relax: 0.23, 
+  stiffness: 14.0
 }
 susR: *sus
 trans_effic: 0.75 #TODO why so low
