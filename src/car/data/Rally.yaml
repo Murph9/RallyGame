@@ -29,14 +29,14 @@ nitro_on: true
 nitro_rate: 1.0
 rollFraction: 1.0
 susF: &sus {
-  antiroll: 3.0,
+  antiroll: 1.0,
   comp: 0.36,
-  max_force: 35000.0, 
+  max_force: 45000.0, 
   max_travel: 0.3,
   min_travel: -0.1,
-  preload_force: 2,
+  preload_force: 1,
   relax: 0.6,
-  stiffness: 20.0
+  stiffness: 12.0
 }
 susR: *sus
 trans_effic: 0.85
