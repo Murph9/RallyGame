@@ -356,6 +356,11 @@ public class RayCar implements PhysicsTickListener {
 	public void setWheelTorque(int w_id, float torque) {
 		wheelTorque[w_id] = torque;
 	}
+	public float getWheelTorque(int w_id) {
+		if (w_id < 0 || w_id > 4)
+			return 0;
+		return wheelTorque[w_id];
+	}
 	
 	/////////////////
 	//helper functions

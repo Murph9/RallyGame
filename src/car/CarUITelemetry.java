@@ -1,5 +1,7 @@
 package car;
 
+import java.text.DecimalFormat;
+
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.font.BitmapFont;
@@ -29,6 +31,7 @@ public class CarUITelemetry extends AbstractAppState {
 	private Node rootNode;
 
 	private final WheelUI[] w = new WheelUI[4];
+	private static final DecimalFormat Force_Format = new DecimalFormat("00000");
 		
 	//the g force meter circles
 	private Geometry g1;
@@ -94,6 +97,13 @@ public class CarUITelemetry extends AbstractAppState {
 			w.wheelRot.setText("");
 			w.wheelRot.setLocalTranslation(w.ps.add(new Vector3f(-80,20,0)));
 			rootNode.attachChild(w.wheelRot);
+			
+			w.engineTorque = new BitmapText(guiFont, false);
+			w.engineTorque.setSize(guiFont.getCharSet().getRenderedSize());
+			w.engineTorque.setColor(ColorRGBA.Magenta);
+			w.engineTorque.setText("");
+			w.engineTorque.setLocalTranslation(w.ps.add(new Vector3f(-80,-20,0)));
+			rootNode.attachChild(w.engineTorque);
 			
 			Quad q = new Quad(5, 60);
 			w.susOff = new Geometry("susOff", q);
@@ -171,6 +181,7 @@ public class CarUITelemetry extends AbstractAppState {
 			Material m = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 			w.gripValue.setText(String.format("%.2f", wheel.skidFraction));
 			w.wheelRot.setText(String.format("%.2f", wheel.radSec));
+			w.engineTorque.setText(Force_Format.format(Math.abs(p.getWheelTorque(i))));
 			m.setColor("Color", getGripBoxColour(wheel.skidFraction));
 			w.gripBox.setMaterial(m);
 			
@@ -222,6 +233,7 @@ public class CarUITelemetry extends AbstractAppState {
 		public Geometry gripDir;
 		public BitmapText gripValue;
 		public BitmapText wheelRot;
+		public BitmapText engineTorque;
 		
 		public Geometry sus; //value
 		public Geometry susOff; //background color
