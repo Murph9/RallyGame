@@ -139,35 +139,42 @@ public class CarEditor extends Container {
 		Container rpContents = new Container();
 
 		int i = 0;
-		int j = 0;
-		
 		for (Field f: clazz.getFields()) {
-			if (Modifier.isFinal(f.getModifiers()))
-				continue;
 			if (Modifier.isStatic(f.getModifiers()))
 				continue;
 			
-			j = 0;
+			Class<?> t = f.getType();
+			int j = 0;
 			
 			String str = null;
 			Object value = null;
-			if (f.getType() == float.class) {
+			
+			if (t == float.class) {
 				str = f.getName();
 				value = f.getFloat(o);
-			} else if (f.getType() == String.class) {
+			} else if (t == String.class) {
 				str = f.getName();
 				value = f.get(o);
-			} else if (f.getType() == int.class) {
+			} else if (t == int.class) {
 				str = f.getName();
 				value = f.getInt(o);
-			} else if (f.getType() == boolean.class) {
+			} else if (t == boolean.class) {
 				str = f.getName();
 				value = f.getBoolean(o);
-			} else if (f.getType().isArray()) {
-				str = f.getName() + f.get(o).getClass().getComponentType().getName();
-				value = unpackArray(f.get(o));
+			} else if (t.isArray()) {
+				if (f.get(o).getClass().getComponentType() == float.class) {
+					str = f.getName() + f.get(o).getClass().getComponentType().getName();
+					value = unpackArray(f.get(o));
+				} else {
+					int k = 0;
+					for (Object o2: (Object[])f.get(o)) {
+						attachTree(o2, rpContents, " "+k+" " + f.getName());
+						k++;
+					}
+					continue;
+				}
 			} else {
-				attachTree(f.get(o), rpContents, f.getName());
+				attachTree(f.get(o), rpContents, " - " + f.getName());
 				continue;
 			}
 			
