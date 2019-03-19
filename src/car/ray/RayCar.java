@@ -278,7 +278,7 @@ public class RayCar implements PhysicsTickListener {
 			// braking and abs
 			float brakeCurrent2 = brakingCur;
 			if (Math.abs(ratiofract) >= 1 && velocity.length() > 2 && brakingCur == 1)
-				brakeCurrent2 = 0; //abs (which i think works way too well)
+				brakeCurrent2 = 0; //abs (which i think works way too well gameplay wise)
 			
 			//self aligning torque
 			wheel_force.x += (anglefract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_lat_sat, p*this.wheels[w_id].maxLat) * this.wheels[w_id].susForce;
@@ -410,13 +410,31 @@ public class RayCar implements PhysicsTickListener {
 		//returns the slip value that gives the closest to 1 from the magic formula (should be called twice, lat and long)
 		public static float calcSlipMax(WheelDataTractionConst w) {
 			double lastX = 0.2f; //our first guess (usually finishes about 0.25f)
-			double nextX = lastX + 5*ERROR; //just so its a larger diff that error
+			double nextX = lastX + 10*ERROR; //just so its a larger diff that error
 
 			while (Math.abs(lastX - nextX) > ERROR) {
 				lastX = nextX;
 				nextX = iterate(w, lastX, ERROR);
 			}
-			return (float)nextX;
+			
+			if (!Double.isNaN(nextX))
+				return (float)nextX;
+
+			//attempt guess type 2 (numerical) (must be between 0 and 2)
+			double max = -1;
+			float pos = -1;
+			for (int i = 0; i < 200; i++) {
+				float value = tractionFormula(w, i/100f);
+				if (value > max) {
+					max = value;
+					pos = i/100f;
+				}
+			}
+			
+			if (max < 0)
+				return Float.NaN;
+			
+			return pos;
 		}
 		private static double iterate(WheelDataTractionConst w, double x, double error) {
 			return x - ((tractionFormula(w, (float)x)-w.D) / dtractionFormula(w, (float)x, error)); 
