@@ -45,46 +45,35 @@ public class RayCarPowered extends RayCar {
 		
 		engineTorque = getEngineWheelTorque(tpf, velocity.length() * Math.signum(velocity.z));
 		
-		float[] torques = new float[] { 0, 0, 0, 0 };
-
 		//split once for each 2 wheels
 		float frontTorque = engineTorque/2;
 		float rearTorque = engineTorque/2;
-		if (carData.driveFront && carData.driveRear && carData.w_fdiff && carData.w_rdiff) {
-			float frontForce = (wheels[0].gripDir.z + wheels[1].gripDir.z)/2;
-			float rearForce = (wheels[2].gripDir.z + wheels[3].gripDir.z)/2;
-			//calc center diff
-			float diff = (frontForce - rearForce)*FastMath.sign((frontForce + rearForce)/2);
-			frontTorque = (engineTorque/2)*(1f - 2*FastMath.atan(carData.w_cdifflock*diff)/FastMath.PI);
-			rearTorque = (engineTorque/2)*(1f + 2*FastMath.atan(carData.w_cdifflock*diff)/FastMath.PI);
+		
+		/* TODO:
+		 * //https://forum.unity.com/threads/limited-slip-differential-modelling.517992/
+		 * logic goes:
+		 * LSD is trying to keep the 2 wheels rotating at the same speed (or at least near)
+		 * Maximum is the TBR (torque bias ratio), which is a ratio between the 2 input torques
+		 * The only config value should be the TBR of like 1 or 2
+		 * 
+		 * In summary it looks like the torque to each of the tyres is the same.
+		 * The lsd might actually be doing the opposite of what i think.
+		 * And the below code is actually very wrong, not just a little.
+		 * 
+		 * TODO also understand:
+		 * https://github.com/VDrift/vdrift/blob/89e78a55a3cd0f5babac74ab7440f457a8848f25/src/physics/cardynamics.cpp
+		*/
+
+		//TODO use the w_xdiff cardata values 
+		
+		if (carData.driveFront) {
+			wheelTorque[0] = frontTorque;
+			wheelTorque[1] = frontTorque;
 		}
-		
-		if (carData.driveFront && carData.w_fdiff) {
-			//calc front diff
-			float diff = (wheels[0].gripDir.z - wheels[1].gripDir.z)*FastMath.sign((wheels[0].gripDir.z + wheels[1].gripDir.z)/2);
-			torques[0] = frontTorque*(1f - 2*FastMath.atan(carData.w_fdifflock*diff)/FastMath.PI);
-			torques[1] = frontTorque*(1f + 2*FastMath.atan(carData.w_fdifflock*diff)/FastMath.PI);
-		
-		} else if (carData.driveRear && carData.w_rdiff) {
-			//calc rear diff
-			float diff = (wheels[2].gripDir.z - wheels[3].gripDir.z)*FastMath.sign((wheels[2].gripDir.z + wheels[3].gripDir.z)/2);
-			torques[2] = rearTorque*(1f - 2*FastMath.atan(carData.w_rdifflock*diff)/FastMath.PI);
-			torques[3] = rearTorque*(1f + 2*FastMath.atan(carData.w_rdifflock*diff)/FastMath.PI);
-		
-		} else {
-			if (carData.driveFront) {
-				torques[0] = frontTorque;
-				torques[1] = frontTorque;
-			}
-			if (carData.driveRear) {
-				torques[2] = rearTorque;
-				torques[3] = rearTorque;
-			}
+		if (carData.driveRear) {
+			wheelTorque[2] = rearTorque;
+			wheelTorque[3] = rearTorque;
 		}
-				
-		doForEachWheel((w_id) -> {
-			setWheelTorque(w_id, torques[w_id]);
-		});
 		
 		super.prePhysicsTick(space, tpf);
 	}
