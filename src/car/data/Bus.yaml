@@ -3,7 +3,7 @@ JUMP_FORCE: {x: 0.0, y: 1100.0, z: 0.0}
 areo_crossSection: 2
 areo_downforce: 0.0
 areo_drag: 0.7 #wiki says it may be higher
-areo_lineardrag: 0.0
+areo_lineardrag: 0.012
 auto_changeTime: 0.3
 auto_gearDown: 800
 auto_gearUp: 2200
@@ -27,7 +27,6 @@ nitro_force: 300.0
 nitro_max: 15.0
 nitro_on: true
 nitro_rate: 1.0
-rollFraction: 1.0
 susF: &sus {
   antiroll: 10, 
   comp: 0.18,

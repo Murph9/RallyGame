@@ -48,6 +48,7 @@ public class RayCar implements PhysicsTickListener {
 	protected final float[] wheelTorque;
 	
 	//debug values
+	protected float rollingResistance;
 	protected float dragValue;
 	protected float driftAngle;
 	public final Vector3f planarGForce;
@@ -93,14 +94,15 @@ public class RayCar implements PhysicsTickListener {
 	public void prePhysicsTick(PhysicsSpace space, float tpf) {
 		applySuspension(space, tpf);
 		
-		//TODO apply the midpoint formula
+		//TODO apply the midpoint formula or any kind of actual simulation
 		//https://en.wikipedia.org/wiki/Midpoint_method
 		if (tractionEnabled)
 			applyTraction(space, tpf);
 		
 		applyDrag(space, tpf);
 		
-		//TODO give a force back to the collision object
+		//TODO give any forces back to the collision object the wheel hits
+		//TODO also use the velocity of the object in calculations
 	}
 	
 	private void applySuspension(PhysicsSpace space, float tpf) {
@@ -271,7 +273,7 @@ public class RayCar implements PhysicsTickListener {
 			wheels[w_id].skidFraction = p;
 			
 			//calc the longitudinal force from the slip ratio
-			wheel_force.z = (ratiofract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_long, p*this.wheels[w_id].maxLong) * this.wheels[w_id].susForce; //TODO normalise susforce to prevent very large forces
+			wheel_force.z = (ratiofract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_long, p*this.wheels[w_id].maxLong) * this.wheels[w_id].susForce;
 			//calc the latitudinal force from the slip angle
 			wheel_force.x = -(anglefract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_lat, p*this.wheels[w_id].maxLat) * this.wheels[w_id].susForce;
 			
@@ -281,7 +283,8 @@ public class RayCar implements PhysicsTickListener {
 				brakeCurrent2 = 0; //abs (which i think works way too well gameplay wise)
 			
 			//self aligning torque
-			wheel_force.x += (anglefract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_lat_sat, p*this.wheels[w_id].maxLat) * this.wheels[w_id].susForce;
+			if (carData.wheelData[w_id].pjk_lat_sat.D != 0)
+				wheel_force.x += (anglefract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_lat_sat, p*this.wheels[w_id].maxLat) * this.wheels[w_id].susForce;
 			
 			//add the wheel force after merging the forces
 			float totalLongForce = wheelTorque[w_id] - wheel_force.z - (brakeCurrent2*carData.brakeMaxTorque*Math.signum(wheels[w_id].radSec));
@@ -301,13 +304,24 @@ public class RayCar implements PhysicsTickListener {
 	}
 	
 	private void applyDrag(PhysicsSpace space, float tpf) {
-		//linear resistance and quadratic drag (https://en.wikipedia.org/wiki/Automobile_drag_coefficient#Drag_area)
-
-		//TODO was removed because i need the suspension normal force to caculate correctly
-		//use: (and apply at wheel pos)
-		doForEachWheel((w_id) -> { carData.rollingResistance(9.81f, w_id); }); 
-		
+		//rolling resistance (https://en.wikipedia.org/wiki/Rolling_resistance)
+		Vector3f w_pos = rbc.getPhysicsLocation();
+		Matrix3f w_angle = rbc.getPhysicsRotationMatrix();
 		Vector3f w_velocity = rbc.getLinearVelocity();
+		
+		Vector3f velocity = w_angle.invert().mult(w_velocity);
+		rollingResistance = 0;
+		doForEachWheel((w_id) -> {
+			if (!wheels[w_id].inContact)
+				return;
+			
+			//apply rolling resistance in the negative direction
+			Vector3f wheel_force = new Vector3f(0, 0, FastMath.sign(velocity.z)* - carData.rollingResistance(w_id, wheels[w_id].susForce));
+			rollingResistance += Math.abs(wheel_force.z); //for debug reasons
+			rbc.applyImpulse(w_angle.mult(wheel_force).mult(tpf), wheels[w_id].curBasePosWorld.subtract(w_pos));
+		});
+
+		//quadratic drag (https://en.wikipedia.org/wiki/Automobile_drag_coefficient#Drag_area)
 		float dragx = -(1.225f * carData.areo_drag * carData.areo_crossSection * w_velocity.x * FastMath.abs(w_velocity.x));
 		float dragy = -(1.225f * carData.areo_drag * carData.areo_crossSection * w_velocity.y * FastMath.abs(w_velocity.y));
 		float dragz = -(1.225f * carData.areo_drag * carData.areo_crossSection * w_velocity.z * FastMath.abs(w_velocity.z));
@@ -319,12 +333,12 @@ public class RayCar implements PhysicsTickListener {
 		float dragDown = -0.5f * carData.areo_downforce * 1.225f * (w_velocity.z*w_velocity.z); //formula for downforce from wikipedia
 		rbc.applyCentralForce(totalNeutral.add(0, dragDown, 0)); //apply downforce after
 		
-		//TODO rotational drag (or at least a fake one)
+		//TODO angular rotational drag (or at least a fake one)
 		
 		if (DEBUG_DRAG) {
 			App.rally.enqueue(() -> {
 				HelperObj.use(App.rally.getRootNode(), "dragarrow",
-					H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.Black, totalNeutral, rbc.getPhysicsLocation()));
+					H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.Black, totalNeutral, w_pos));
 			});
 		}
 	}

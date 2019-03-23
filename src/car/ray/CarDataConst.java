@@ -30,10 +30,8 @@ public class CarDataConst implements Serializable {
 	public float height; //y size meter, roof to ground
 	public float length; //z size meter, from front to back
 
-	public float rollFraction; //TODO use in new physics //fake value to allow high cars to not roll as much as they should
-	
 	public float areo_drag;
-	public float areo_lineardrag; //TODO use
+	public float areo_lineardrag; //0.003 to 0.02 (dimensionless number)
 	public float areo_crossSection; //m^2 front area
 	public float areo_downforce; //not a default yet
 	
@@ -62,7 +60,7 @@ public class CarDataConst implements Serializable {
 	public float e_compression; //is going to be multiplied by the RPM
 	public float e_mass; //kg, this is the interia of the engine, 100 is high	
 	
-	//TODO check hoursepowercurves are on crank before using this as anything other than 1
+	//NOTE: please check hoursepowercurves are crank before using this value as anything other than 1.0f
 	public float trans_effic; //apparently 0.9 is common (power is lost to rotating the transmission gears)
 	public float trans_finaldrive; //helps set the total drive ratio
 	public float[] trans_gearRatios; //reverse,gear1,gear2,g3,g4,g5,g6,...
@@ -98,7 +96,7 @@ public class CarDataConst implements Serializable {
 	public CarDataConst() {} 
 
 	
-	public boolean loaded = false; //TODO use?
+	public boolean loaded = false;
 	public final void load() { //final = no override pls
 		if (loaded) {
 			try {
@@ -119,7 +117,7 @@ public class CarDataConst implements Serializable {
 	private void modelLoad() {
 		//init car pos things based on the physical model
 
-		//TODO make model data mandatory
+		//TODO make model data mandatory so they can all be updated correctly
 		
 		CarModelData modelData = new CarModelData(this.carModel, this.wheelModel);
 		if (modelData.foundSomething() && modelData.foundAllWheels()) {
@@ -138,8 +136,8 @@ public class CarDataConst implements Serializable {
 	//usefulMethods
 	
 	//linear drag component (https://en.wikipedia.org/wiki/Rolling_resistance)
-	protected float rollingResistance(float gravity, int w_id) {
-		return gravity*mass*areo_lineardrag/wheelData[w_id].radius;
+	protected float rollingResistance(int w_id, float susForce) {
+		return susForce*areo_lineardrag/wheelData[w_id].radius;
 	}
 	
 	public float wheel_inertia(int w_id) {
