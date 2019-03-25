@@ -28,7 +28,7 @@ nitro_max: 15.0
 nitro_on: true
 nitro_rate: 1.0
 susF: &sus {
-  antiroll: 2.0, 
+  antiroll: 4.0, 
   comp: 0.5,
   max_force: 40000.0, 
   max_travel: 0.1,
@@ -38,7 +38,7 @@ susF: &sus {
   stiffness: 15.0
 }
 susR: {
-  antiroll: 4.0, 
+  antiroll: 6.0, 
   comp: 0.5,
   max_force: 40000.0, 
   max_travel: 0.1,

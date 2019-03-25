@@ -58,8 +58,6 @@ public class RayCarControl extends RayCarPowered {
 		
         this.controls = new LinkedList<RawInputListener>();
 		
-		//its possible to shift the center of gravity offset for the collision shape (TODO add value to CarDataConst)
-
     	this.rootNode = rootNode;
         this.rootNode.addControl(rbc);
         space.addTickListener(this);
@@ -142,13 +140,16 @@ public class RayCarControl extends RayCarPowered {
 		
 		float maxAngle = carData.w_steerAngle/2;
 		//steering factor = atan(0.08 * vel - 1) + maxAngle*PI/2 + maxLat //TODO what is this 0.08f
-		float value = Math.min(-maxAngle*FastMath.atan(0.3f*(rbc.getLinearVelocity().length() - 1))
-				+ maxAngle*FastMath.PI/2 + this.wheels[0].maxLat*2, Math.abs(trySteerAngle));
+//		return Math.min(-maxAngle*FastMath.atan(0.3f*(rbc.getLinearVelocity().length() - 1))
+//				+ maxAngle*FastMath.PI/2 + this.wheels[0].maxLat*2, Math.abs(trySteerAngle));
+		
+		//TODO PLEASE FIX THIS
+		//TODO max turn angle really should just be the best angle on the lat traction curve
+		
+		return Math.min(maxAngle, Math.abs(trySteerAngle)); //???
 		
 		//TODO turn back value should be vel dir + maxlat instead of just full lock
-		
 		//remember that this value is clamped after this method is called
-		return value;
 	}
 
 	public void onAction(String binding, boolean value, float tpf) {
@@ -367,7 +368,7 @@ public class RayCarControl extends RayCarPowered {
 	public String statsString() {
 		return H.round3f(this.getPhysicsLocation(), 2)
 		 + "\nspeed:"+ H.round3f(vel, 2) + "m/s\nRPM:" + curRPM
-		 + "\nengine:" + engineTorque + "\ndrag:" + dragValue + "N";
+		 + "\nengine:" + engineTorque + "\ndrag:" + dragValue +" rr("+ rollingResistance+")" + "N";
 	}
 	
 	

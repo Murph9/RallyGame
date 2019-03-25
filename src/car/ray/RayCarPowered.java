@@ -50,7 +50,8 @@ public class RayCarPowered extends RayCar {
 		float rearTorque = engineTorque/2;
 		
 		/* TODO:
-		 * //https://forum.unity.com/threads/limited-slip-differential-modelling.517992/
+		 * https://forum.unity.com/threads/limited-slip-differential-modelling.517992/
+		 * 
 		 * logic goes:
 		 * LSD is trying to keep the 2 wheels rotating at the same speed (or at least near)
 		 * Maximum is the TBR (torque bias ratio), which is a ratio between the 2 input torques
@@ -64,6 +65,10 @@ public class RayCarPowered extends RayCar {
 		 * https://github.com/VDrift/vdrift/blob/89e78a55a3cd0f5babac74ab7440f457a8848f25/src/physics/cardynamics.cpp
 		*/
 
+		//i think this evenetually means the system needs to be a matrix solver state system rather than real time timestep stuff
+		//http://myselph.de/gamePhysics/equalityConstraints.html
+		//but this might be too much work
+		
 		//TODO use the w_xdiff cardata values 
 		
 		if (carData.driveFront) {
