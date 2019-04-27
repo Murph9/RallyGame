@@ -11,6 +11,7 @@ import com.jme3.app.StatsAppState;
 import com.jme3.app.state.AppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.bullet.BulletAppState;
+import com.jme3.bullet.BulletAppState.ThreadingType;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.font.BitmapFont;
 import com.jme3.math.FastMath;
@@ -150,6 +151,8 @@ public class Main extends SimpleApplication {
 		bullet = new BulletAppState();
 //		bullet.setSpeed(0.1f); //physics per second rate
 //    	bullet.setDebugEnabled(true); //show bullet wireframes
+    	bullet.setThreadingType(ThreadingType.PARALLEL);
+    	
 		getStateManager().attach(bullet);
 		bullet.getPhysicsSpace().setAccuracy(1f/120f); //physics rate //TODO setting
 		bullet.getPhysicsSpace().setGravity(new Vector3f(0, -9.81f, 0)); //yay its down
@@ -158,8 +161,7 @@ public class Main extends SimpleApplication {
 		flyCam.setEnabled(false);
 		
 		//profiling in jme 3.2 (TODO add physics engine stuff to this)
-//		getStateManager().attach(new DetailedProfilerState());
-		
+		getStateManager().attach(new DetailedProfilerState());
 	}
 	
 	@Override
@@ -196,7 +198,7 @@ public class Main extends SimpleApplication {
 	public void startMainRoad(AppState state) {
 		getStateManager().detach(state);
 		
-		drive = new DriveMainRoadGetaway(Car.Runner);
+		drive = new DriveMainRoadGetaway();
 		getStateManager().attach(drive);
 	}
 	
@@ -285,9 +287,6 @@ public class Main extends SimpleApplication {
 	}
 
 	/////////////////////
-	public BitmapFont getFont() {
-		return guiFont;
-	}
 	public AppSettings getSettings() {
 		return settings;
 	}

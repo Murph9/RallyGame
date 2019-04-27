@@ -39,7 +39,7 @@ public class PowerCurveGraph extends Container {
 				this.detachChild(g);
 		things = new LinkedList<Spatial>();
 		
-		BitmapFont guiFont = App.rally.getFont();
+		BitmapFont guiFont = App.rally.getAssetManager().loadFont("Interface/Fonts/Default.fnt");
 
 		Vector3f size = getPreferredSize();
 		Vector3f topleftPadding = new Vector3f(size.x*0.1f, size.y*0.1f, 0);

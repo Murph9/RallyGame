@@ -66,7 +66,7 @@ public class CarUITelemetry extends AbstractAppState {
 		black.setColor("Color", ColorRGBA.Black);
 		black.getAdditionalRenderState().setLineWidth(3);
 		
-		BitmapFont guiFont = App.rally.getFont();
+		BitmapFont guiFont = App.rally.getAssetManager().loadFont("Interface/Fonts/Default.fnt");
 		
 		Box b = new Box(20, 20, 1);
 		Line l = new Line(new Vector3f(0,0,10), new Vector3f(1,0,10));

@@ -90,7 +90,7 @@ public class CarUI extends BaseAppState {
 	protected void initialize(Application app) {
 		Main r = (Main)app;
 
-		BitmapFont guiFont = r.getFont();
+		BitmapFont guiFont = app.getAssetManager().loadFont("Interface/Fonts/Default.fnt");
 		AppSettings settings = r.getSettings();
 		rootNode = new Node("local root");
 		r.getGuiNode().attachChild(rootNode);
