@@ -25,11 +25,10 @@ public class DriveMainRoadGetaway extends DriveBase {
 	private final int maxCount;
 	private int nextId;
 	
-	
-	public DriveMainRoadGetaway(Car car) {
-		super(car, DynamicType.MainRoad.getBuilder());
+	public DriveMainRoadGetaway() {
+		super(Car.Rocket, DynamicType.MainRoad.getBuilder());
 		
-		maxCount = 7; //6 + me + chaser
+		maxCount = 8; //6 + me + chaser
 		chaser = Car.Rally;
 	}
 	
@@ -47,15 +46,15 @@ public class DriveMainRoadGetaway extends DriveBase {
 		super.update(tpf);
 		
 		if (this.cb.getCount() < maxCount && App.rally.frameCount % 60 == 0) {
-			final float z = xOffGivenCarNum(this.cb.getCount());
+			final float z = nextXOff();
 			final boolean posDir = dirGivenCarNum(this.cb.getCount()); //TODO use when they go in reverse
 			BiFunction<RayCarControl, RayCarControl, CarAI> ai = (me, target) -> new DriveAlongAI(me, (vec) -> {
 				return new Vector3f(vec.x+20, 0, z);
 			}); //next pos math
 			
 			//calculate spawn pos
-			RayCarControl c = this.cb.addCar(nextId, Car.Normal, new Vector3f(this.cb.get(0).getPhysicsLocation().x - 5, 0, z), world.getStartRot(), false, ai);
-			c.setLinearVelocity(new Vector3f(100, 0, 0));
+			RayCarControl c = this.cb.addCar(nextId, Car.Runner, new Vector3f(this.cb.get(0).getPhysicsLocation().x - 5, 0.3f, z), world.getStartRot(), false, ai);
+			c.setLinearVelocity(new Vector3f(20, 0, 0));
 			nextId++;
 		}
 
@@ -73,20 +72,24 @@ public class DriveMainRoadGetaway extends DriveBase {
 		}
 	}
 	
-	private float xOffGivenCarNum(int i) {
-		if (i == 7)
-			return -8f;
-		if (i == 6)
-			return -4.75f;
+	private int CarSpawnCounter = 0; 
+	private float nextXOff() {
+		CarSpawnCounter++;
+		int i = CarSpawnCounter % 6;
 		if (i == 5)
+			return -8f;
+		else if (i == 4)
+			return -4.75f;
+		else if (i == 3)
 			return -1.5f;
-		if (i == 4)
+		else if (i == 2)
 			return 1.5f;
-		if (i == 2)
+		else if (i == 1)
 			return 4.75f;
-		if (i == 3)
+		else if (i == 0)
 			return 8f;
-		return 0;
+		else 
+			return 8f;
 	}
 	private boolean dirGivenCarNum(int i) {
 		return i > 0;
