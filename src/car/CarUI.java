@@ -91,7 +91,7 @@ public class CarUI extends BaseAppState {
 		Main r = (Main)app;
 
 		BitmapFont guiFont = app.getAssetManager().loadFont("Interface/Fonts/Default.fnt");
-		AppSettings settings = r.getSettings();
+		AppSettings settings = app.getContext().getSettings();
 		rootNode = new Node("local root");
 		r.getGuiNode().attachChild(rootNode);
 		AssetManager am = r.getAssetManager();
@@ -157,13 +157,13 @@ public class CarUI extends BaseAppState {
 		rpmMat.setColor("Color", ColorRGBA.White);
 		rpmMat.getAdditionalRenderState().setBlendMode(BlendMode.AlphaAdditive);
 		rpmQuad.setMaterial(rpmMat);
-		rpmQuad.setLocalTranslation(App.rally.getSettings().getWidth() - 240, -25, -10);
+		rpmQuad.setLocalTranslation(settings.getWidth() - 240, -25, -10);
 		speedoNode.attachChild(rpmQuad);
 		
 		//rpm bars
 		Quad quad = new Quad(20, 20);
 		
-		centerx = App.rally.getSettings().getWidth() - 127;
+		centerx = settings.getWidth() - 127;
 		
 		for (int i = 0; i < finalRPM+1; i += 1000) {
 			float angle = FastMath.interpolateLinear(i/(float)finalRPM, startAng, finalAng);
