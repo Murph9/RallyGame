@@ -302,7 +302,7 @@ public class TrackWorld extends World {
 	@Override
 	public void update(float tpf) {
 		
-		if (DEBUG) {
+		if (this.trackSegments != null && App.rally.drive !=null && App.rally.drive.cb.get(0) != null && DEBUG) {
 			//hack to see if the bezier curve stuff works
 			Vector3f pos = getClosestPointTo(this.trackSegments, normalizeHeightIn(App.rally.drive.cb.get(0).getPhysicsLocation()));
 			HelperObj.use(this.rootNode, "closestpointtocurve", 
