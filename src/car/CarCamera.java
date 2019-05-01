@@ -63,15 +63,19 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 	
 	@Override
 	public void render(RenderManager rm) {
-		//TODO use the direction of the wheels
-		//TODO also react to g forces
-		//TODO smooth the mouse stuff
+		//TODO:
+		//use the direction of the wheels
+		//react to g forces
+		//use and smooth the mouse stuff
 		if (p == null)
 			return;
-
 		
 		Vector3f carPos = p.getRootNode().getLocalTranslation();
 		Quaternion pRot = p.getRootNode().getLocalRotation();
+		
+		Vector3f velocity = pRot.inverse().mult(p.getLinearVelocity());
+//		if (velocity.z < 0) //in reverse so reverse the rotation matrix
+//			pRot.inverseLocal();
 		
 		if (!FastMath.approximateEquals(rotRad, 0)) {
 			lastTimeout += tpf;
