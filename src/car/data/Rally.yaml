@@ -49,7 +49,7 @@ w_steerAngle: 0.5
 wheelData:
 - &w
   mass: 4.0
-  modelName: assets/models/wheelraid1.obj
+  modelName: assets/models/wheel_raid_1.blend
   pjk_lat: {B: 10, C: 1.9, D: 1.4, E: 0.97}
   pjk_lat_sat: &w_sat {B: 0.85, C: 2.3, D: 0.51, E: -2.75}
   pjk_long: {B: 10, C: 1.9, D: 1.4, E: 0.97}

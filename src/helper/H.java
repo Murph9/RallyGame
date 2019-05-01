@@ -156,12 +156,16 @@ public class H {
 		return "x:"+H.roundDecimal(vec.x, places) + ", y:"+H.roundDecimal(vec.y, places)+", z:"+H.roundDecimal(vec.z, places);
 	}
 	
-	public static List<Geometry> getGeomList(Node n) {
+	public static List<Geometry> getGeomList(Spatial n) {
 		return rGeomList(n);
 	}
-	private static List<Geometry> rGeomList(Node n) {
+	private static List<Geometry> rGeomList(Spatial s) {
 		List<Geometry> listg = new LinkedList<Geometry>();
-		
+		if (s instanceof Geometry) {
+    		listg.add((Geometry)s);
+    		return listg;
+    	}
+		Node n = (Node)s;
 		List<Spatial> list = n.getChildren();
 		if (list.isEmpty()) return listg;
 		

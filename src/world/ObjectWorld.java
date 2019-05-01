@@ -11,13 +11,14 @@ import com.jme3.material.Material;
 import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
-import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 
 import game.App;
+import game.WireframeHighlighter;
+import helper.H;
 import jme3tools.optimize.GeometryBatchFactory;
 
 public class ObjectWorld extends World {
@@ -30,7 +31,7 @@ public class ObjectWorld extends World {
 	
 	private static final String ITEM = "assets/objects/tree_0.blend";
 	
-	private Geometry floor;
+	private Spatial floor;
 	
 	private Spatial geomI;
 	private List<Spatial> addedObjects;
@@ -39,7 +40,6 @@ public class ObjectWorld extends World {
 	
 	public ObjectWorld() {
 		super("object world rootNode");
-		rootNode.setShadowMode(ShadowMode.CastAndReceive);
 		
 		addedObjects = new LinkedList<Spatial>();
 		grid = new boolean[GRID_SIZE][GRID_SIZE];
@@ -65,8 +65,9 @@ public class ObjectWorld extends World {
 		floor = new Geometry("floor", floorBox);
 		floor.setMaterial(matfloor);
 		floor.setLocalTranslation(0, 0, 0);
+		floor = WireframeHighlighter.create(app.getAssetManager(), floor, ColorRGBA.Black, ColorRGBA.White);
 		
-		Spatial spat = am.loadModel(ITEM);
+		Spatial spat = WireframeHighlighter.create(app.getAssetManager(), ITEM, ColorRGBA.Black, ColorRGBA.White);
 		if (spat instanceof Node) {
 			for (Spatial s: ((Node) spat).getChildren()) {
 				geomI = s;
@@ -117,8 +118,10 @@ public class ObjectWorld extends World {
 		
 		Vector3f offset = new Vector3f((x-GRID_SIZE/2)*TILE_SIZE, 0, (y-GRID_SIZE/2)*TILE_SIZE);
 		
-		Geometry f = floor.clone();
-		f.getMaterial().setColor("Color", ColorRGBA.randomColor());
+		Spatial f = floor.clone();
+		for (Geometry g: H.getGeomList(f))
+			g.getMaterial().setColor("Color", ColorRGBA.randomColor());
+		
 		f.setLocalTranslation(offset);
 		f.addControl(new RigidBodyControl(0));
 		

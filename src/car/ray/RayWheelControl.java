@@ -18,6 +18,7 @@ import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.util.BufferUtils;
 
 import game.App;
+import game.WireframeHighlighter;
 
 public class RayWheelControl {
 	
@@ -50,16 +51,17 @@ public class RayWheelControl {
 	private final Vector3f offset;
 	private Vector3f posInLocal;
 	
+	//TODO change to just be a wireframe and not triangles to fit the wireframe theme
+	
 	public RayWheelControl(RayWheel wheel, Node carRootNode, Vector3f pos) {
 		this.wheel = wheel;
 		this.offset = pos;
 		
 		//rotate and translate the wheel rootNode
 		rootNode = new Node("wheel " + wheel.num);
-		spat = App.rally.getAssetManager().loadModel(wheel.data.modelName);
-		rootNode.attachChild(spat);
+		spat = WireframeHighlighter.create(App.rally.getAssetManager(), wheel.data.modelName, ColorRGBA.Black, ColorRGBA.Blue);
 		spat.center();
-		spat.setShadowMode(ShadowMode.Cast);
+		rootNode.attachChild(spat);
 		
 		carRootNode.attachChild(rootNode);
 		
@@ -109,12 +111,14 @@ public class RayWheelControl {
 		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		mat.setBoolean("VertexColor", true);
 		mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
-
+		mat.getAdditionalRenderState().setWireframe(true);
+		mat.getAdditionalRenderState().setLineWidth(WireframeHighlighter.LINE_WIDTH);
+		
+		//skid line is a special wireframe
 		this.skidLine.setMaterial(mat);
 		
-		this.skidLine.setShadowMode(ShadowMode.Off);
 		this.skidLine.setQueueBucket(Bucket.Transparent);
-		
+				
 		App.rally.getRootNode().attachChild(this.skidLine);
 		
 		//TODO smoke from source control

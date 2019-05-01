@@ -17,7 +17,10 @@ import com.jme3.font.BitmapFont;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.post.FilterPostProcessor;
+import com.jme3.post.filters.BloomFilter;
 import com.jme3.renderer.Camera;
+import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.system.AppSettings;
 import com.jme3.system.NanoTimer;
 import com.simsilica.lemur.GuiGlobals;
@@ -58,7 +61,7 @@ import world.wp.WP.DynamicType;
 //http://stackoverflow.com/questions/3915961/how-to-view-hierarchical-package-structure-in-eclipse-package-explorer
 
 //TODO
-//still need to get fog working..
+//remove all ShadowMode.* things
 //night time or something because loading looks easier to do
 
 
@@ -70,7 +73,6 @@ public class Main extends SimpleApplication {
 	public ChooseMap chooseMap;
 	
 	public DriveBase drive;
-	public SkyState sky;
 
 	public BulletAppState bullet; //one physics space always
 	
@@ -138,13 +140,18 @@ public class Main extends SimpleApplication {
 		//Init the lemur mouse listener
 		getStateManager().attach(new MouseAppState(this));
 		
+		// Bloom for the wireframes
+		FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
+		BloomFilter bloom = new BloomFilter();
+		bloom.setBlurScale(.5f);
+		bloom.setBloomIntensity(5);
+		fpp.addFilter(bloom);
+		viewPort.addProcessor(fpp);
 		
-		InputMapper inputMapper = GuiGlobals.getInstance().getInputMapper();
-		inputMapper.release(); //no keyboard inputs after init
+		//no keyboard inputs after init please
+		GuiGlobals.getInstance().getInputMapper().release();
 		
-		sky = new SkyState(); //lighting and shadow stuff is global
-		getStateManager().attach(sky);
-		
+		//init game states
 		start = new Start();
 		getStateManager().attach(start);
 		
@@ -161,7 +168,7 @@ public class Main extends SimpleApplication {
 		flyCam.setEnabled(false);
 		
 		//profiling in jme 3.2 (TODO add physics engine stuff to this)
-		getStateManager().attach(new DetailedProfilerState());
+//		getStateManager().attach(new DetailedProfilerState());
 	}
 	
 	@Override

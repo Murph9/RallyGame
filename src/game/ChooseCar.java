@@ -129,9 +129,6 @@ public class ChooseCar extends AbstractAppState {
 		rotation += FastMath.DEG_TO_RAD*tpf;
 		Quaternion q = new Quaternion();
 		q.fromAngleAxis(rotation, Vector3f.UNIT_Y);
-
-//TODO removed so you can drive yourself		
-//		car.setPhysicsRotation(q);
 	}
 
 	private String getCarInfoText(Car car) {

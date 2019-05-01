@@ -9,13 +9,15 @@ import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 
 import game.App;
+import game.WireframeHighlighter;
 
 public class FlatWorld extends World {
 	
-	private Geometry startGeometry; 
+	private Spatial startGeometry; 
 	
 	public FlatWorld() {
 		super("flatWorldRoot");
@@ -41,6 +43,7 @@ public class FlatWorld extends World {
 		startGeometry.setMaterial(matfloor);
 		startGeometry.setLocalTranslation(0, -0.1f, 0);
 		startGeometry.addControl(new RigidBodyControl(0));
+		startGeometry = WireframeHighlighter.create(app.getAssetManager(), startGeometry, ColorRGBA.Black, ColorRGBA.Green);
 		
 		this.rootNode.attachChild(startGeometry);
 		App.rally.getPhysicsSpace().add(startGeometry);
@@ -54,6 +57,7 @@ public class FlatWorld extends World {
 	@Override
 	public void update(float tpf) {
 		//TODO mod 1000 the car pos, so the grounds bumps don't occur
+		
 		Vector3f pos = App.rally.getCamera().getLocation();
 		pos.y = 0;
 		startGeometry.setLocalTranslation(pos);
