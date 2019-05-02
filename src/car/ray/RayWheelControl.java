@@ -9,7 +9,6 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
-import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
@@ -22,7 +21,7 @@ import game.WireframeHighlighter;
 
 public class RayWheelControl {
 	
-	//Skid marks:
+	//Skid marks count
 	private static final int QUAD_COUNT = 200;
 	
 	private static final int VERTEX_BUFFER_SIZE = 4*QUAD_COUNT; //Vector3f.size * triangle size * 2 (2 tri per quad) * count
@@ -30,6 +29,8 @@ public class RayWheelControl {
 	private static final Vector2f[] texCoord = new Vector2f[] { //texture of quad with order
 		new Vector2f(0, 0), new Vector2f(0, 1), new Vector2f(1, 0), new Vector2f(1, 1),
 	};
+	
+	private static final ColorRGBA BASE_HIGHLIGHT_COLOUR = ColorRGBA.Blue; //TODO make it an input
 	
 	private Geometry skidLine;
 	private Vector3f[] vertices;
@@ -59,7 +60,7 @@ public class RayWheelControl {
 		
 		//rotate and translate the wheel rootNode
 		rootNode = new Node("wheel " + wheel.num);
-		spat = WireframeHighlighter.create(App.rally.getAssetManager(), wheel.data.modelName, ColorRGBA.Black, ColorRGBA.Blue);
+		spat = WireframeHighlighter.create(App.rally.getAssetManager(), wheel.data.modelName, ColorRGBA.Black, BASE_HIGHLIGHT_COLOUR);
 		spat.center();
 		rootNode.attachChild(spat);
 		
@@ -104,21 +105,21 @@ public class RayWheelControl {
 		
 		mesh.setBuffer(Type.TexCoord, 2, BufferUtils.createFloatBuffer(coord)); 
 		
-		mesh.setBuffer(Type.Color, 4, BufferUtils.createFloatBuffer(ColorRGBA.BlackNoAlpha, ColorRGBA.BlackNoAlpha, ColorRGBA.BlackNoAlpha, ColorRGBA.BlackNoAlpha));
+		mesh.setBuffer(Type.Color, 4, BufferUtils.createFloatBuffer(BASE_HIGHLIGHT_COLOUR, BASE_HIGHLIGHT_COLOUR, BASE_HIGHLIGHT_COLOUR, BASE_HIGHLIGHT_COLOUR));
 		this.skidLine.setMesh(mesh);
 		
-		Material mat = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+		WireframeHighlighter.addWireframeMat(App.rally.getAssetManager(), this.skidLine, ColorRGBA.Blue);
+		Material mat = this.skidLine.getMaterial();
 		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		mat.setBoolean("VertexColor", true);
 		mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
-		mat.getAdditionalRenderState().setWireframe(true);
-		mat.getAdditionalRenderState().setLineWidth(WireframeHighlighter.LINE_WIDTH);
+		
 		
 		//skid line is a special wireframe
 		this.skidLine.setMaterial(mat);
 		
 		this.skidLine.setQueueBucket(Bucket.Transparent);
-				
+		
 		App.rally.getRootNode().attachChild(this.skidLine);
 		
 		//TODO smoke from source control
@@ -151,7 +152,7 @@ public class RayWheelControl {
 	}
 	
 	private void addSkidLine(Vector3f velDir) {
-		if (!wheel.inContact) {
+		if (!wheel.inContact || velDir.length() < 1) {
 			lastl = new Vector3f(0,0,0);
 			lastr = new Vector3f(0,0,0);
 			lastColor = null;
@@ -175,8 +176,8 @@ public class RayWheelControl {
 			return; //don't make a line because they aren't valid positions
 		} //exit early if there is no mesh to create
 		
-		ColorRGBA c = new ColorRGBA(0,0,0,clampSkid);
-		cur.y += 0.005f; //z-buffering (i.e. to stop it "fighting" with the ground texture)
+		ColorRGBA c = BASE_HIGHLIGHT_COLOUR.clone().mult(clampSkid);
+		cur.y += 0.015f; //z-buffering (i.e. to stop it "fighting" with the ground texture)
 		
 		//TODO change to just be smaller on a large drift angle (look at most wanted's skid marks)
 		

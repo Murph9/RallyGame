@@ -22,7 +22,6 @@ import com.jme3.util.BufferUtils;
 
 import helper.H;
 
-
 public class WireframeHighlighter {
 
 	public static final int LINE_WIDTH = 3;
@@ -45,14 +44,23 @@ public class WireframeHighlighter {
 		for (Geometry g: H.getGeomList(n)) {
 			Mesh m = g.getMesh();
 			if (m.getMode() != Mode.Triangles) {
-				continue; //ignore or just blindly add?
+				addWireframeMat(am, g, highlight);
+				continue; //just blindly add?
 			}
 			
 			g.getParent().attachChild(_do(am, m, base, highlight));
 		}
 		return n;
 	}
-		
+	
+	public static void addWireframeMat(AssetManager am, Geometry g, ColorRGBA highlight) {
+		Material mat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+		mat.setColor("Color", highlight);
+		mat.getAdditionalRenderState().setWireframe(true);
+		mat.getAdditionalRenderState().setLineWidth(LINE_WIDTH);
+		g.setMaterial(mat);
+	}
+	
 	private static Geometry _do(AssetManager am, Mesh m, ColorRGBA base, ColorRGBA highlight) {
 		// 1 load
 		Geometry baseG = new Geometry("model", m);
@@ -66,11 +74,7 @@ public class WireframeHighlighter {
 		// 3 make a new Geometry out of them
 		Geometry highlightGeom = new Geometry("highlight", highlightMesh);
 		highlightGeom.scale(1.0001f);
-		// 3.1 show it
-		Material mat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-		mat.setColor("Color", highlight);
-		mat.getAdditionalRenderState().setLineWidth(LINE_WIDTH);
-		highlightGeom.setMaterial(mat);
+		addWireframeMat(am, highlightGeom, highlight);
 		
 		return highlightGeom;
 	}
