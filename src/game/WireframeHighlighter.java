@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
+import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Triangle;
 import com.jme3.math.Vector3f;
@@ -26,6 +27,8 @@ public class WireframeHighlighter {
 
 	public static final int LINE_WIDTH = 3;
 	private static final float DIFF = 0.91f;
+	//TODO cache the wireframes some how
+	//TODO whatever the race drive mode is on doesn't have lines
 	
 	public static Spatial create(AssetManager am, String model, ColorRGBA base, ColorRGBA highlight) {
 		return create(am, am.loadModel(model), base, highlight);
@@ -37,18 +40,19 @@ public class WireframeHighlighter {
 		if (s instanceof Geometry) {
 			Node n = new Node();
 			n.attachChild(s);
-			n.attachChild(_do(am, ((Geometry)s).getMesh(), base, highlight));
+			n.attachChild(_do(am, (Geometry)s, base, highlight));
 			return s;
 		}
 		Node n = (Node)s;
-		for (Geometry g: H.getGeomList(n)) {
+		List<Geometry> gList = H.getGeomList(n);
+		for (Geometry g: gList) {
 			Mesh m = g.getMesh();
 			if (m.getMode() != Mode.Triangles) {
 				addWireframeMat(am, g, highlight);
 				continue; //just blindly add?
 			}
 			
-			g.getParent().attachChild(_do(am, m, base, highlight));
+			g.getParent().attachChild(_do(am, g, base, highlight));
 		}
 		return n;
 	}
@@ -56,25 +60,28 @@ public class WireframeHighlighter {
 	public static void addWireframeMat(AssetManager am, Geometry g, ColorRGBA highlight) {
 		Material mat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
 		mat.setColor("Color", highlight);
+		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		mat.getAdditionalRenderState().setWireframe(true);
 		mat.getAdditionalRenderState().setLineWidth(LINE_WIDTH);
 		g.setMaterial(mat);
 	}
 	
-	private static Geometry _do(AssetManager am, Mesh m, ColorRGBA base, ColorRGBA highlight) {
+	private static Geometry _do(AssetManager am, Geometry g, ColorRGBA base, ColorRGBA highlight) {
 		// 1 load
-		Geometry baseG = new Geometry("model", m);
 		Material baseMat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
 		baseMat.setColor("Color", base);
-		baseG.setMaterial(baseMat);
+		baseMat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
+		g.setMaterial(baseMat);
 
 		// 2 find all the edges which are only connected to one polygon
-		Mesh highlightMesh = findAllHighlightEdges(baseG.getMesh());
+		Mesh highlightMesh = findAllHighlightEdges(g.getMesh());
 		
 		// 3 make a new Geometry out of them
 		Geometry highlightGeom = new Geometry("highlight", highlightMesh);
 		highlightGeom.scale(1.0001f);
 		addWireframeMat(am, highlightGeom, highlight);
+		
+		App.rally.getRootNode().attachChild(highlightGeom);
 		
 		return highlightGeom;
 	}
@@ -98,11 +105,11 @@ public class WireframeHighlighter {
 			addToMap(edgeMap, new Edge(tri.get1(), tri.get3()), tri);
 		}
 
-		Map<Edge, List<Triangle>> edges = new HashMap<Edge, List<Triangle>>();
+		List<Edge> edges = new LinkedList<>();
 		for (Entry<Edge, List<Triangle>> a : edgeMap.entrySet()) {
 			//detect empty edges (only have a triangle on one side)
 			if (a.getValue().size() == 1) {
-				edges.put(a.getKey(), a.getValue());
+				edges.add(a.getKey());
 			}
 			
 			//detect large normal differences
@@ -117,14 +124,14 @@ public class WireframeHighlighter {
 				Vector3f normal2 = tri2.getNormal();
 				
 				if (normal1.dot(normal2) < DIFF) {
-					edges.put(a.getKey(), a.getValue());
+					edges.add(a.getKey());
 				}
 			}
 		}
 
 		Vector3f[] vertices = new Vector3f[edges.size()*2];
 		int i = 0;
-		for (Edge e: edges.keySet()) {
+		for (Edge e: edges) {
 			vertices[i] = e.a;
 			vertices[i+1] = e.b;
 			i+=2;
@@ -180,9 +187,8 @@ class Edge {
 
     @Override
     public int hashCode() {
-        return (int)(this.a.x * 900007 + this.a.y*900019 + this.a.z*900037
-        + this.b.x * 900007 + this.b.y*900019 + this.b.z*900037
-        ); //TODO yay
+    	return this.b.toString().hashCode() + this.a.toString().hashCode();
+        //i am kind of annoyed at this as using a 'correct' number based hash was causing too many collisions
     }
 
     @Override
