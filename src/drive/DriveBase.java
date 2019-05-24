@@ -15,6 +15,7 @@ import car.*;
 import car.data.Car;
 import car.ray.RayCarControl;
 import game.App;
+import game.ParticleAtmosphere;
 import helper.Log;
 
 public class DriveBase extends AbstractAppState {
@@ -68,6 +69,11 @@ public class DriveBase extends AbstractAppState {
 		
 		uiNode = new CarUI(cb.get(0));
 		app.getStateManager().attach(uiNode);
+		
+		//Particle emitter
+		ParticleAtmosphere particles = new ParticleAtmosphere(cb.get(0).getRootNode());
+		app.getStateManager().attach(particles);
+		
 		
 		//initCameras
 		camera = new CarCamera("Camera", App.rally.getCamera(), cb.get(0));
