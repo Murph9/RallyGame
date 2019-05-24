@@ -30,7 +30,6 @@ public class DriveDemo extends DriveBase {
     	RayCarControl car = this.cb.get(0);
     	car.attachAI(new FollowWorldAI(car, (DefaultBuilder)world));
     	
-    	uiNode.cleanup(); //TODO why?
     	app.getStateManager().detach(uiNode);
     	uiNode = new CarUI(cb.get(0));
 		app.getStateManager().attach(uiNode);

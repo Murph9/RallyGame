@@ -80,13 +80,14 @@ public class Main extends SimpleApplication {
 	private Car them;
 	private World world;
 	private void loadDefaults() {
-		car = Car.Rally;
-		them = Car.Runner;
-		world = new TrackWorld();
+		car = Car.Runner;
+		them = Car.Rally;
+		world = new StaticWorldBuilder(StaticWorld.track2);
 		//world alernatives:
-		//	new HighwayWorld();
-		//	new StaticWorldBuilder(StaticWorld.track2);
-		//	DynamicType.Simple.getBuilder();
+		// new HighwayWorld();
+		// new TrackWorld(); 
+		// new StaticWorldBuilder(StaticWorld.track2);
+		// DynamicType.Simple.getBuilder();
 	}
 
 	public int frameCount = 0; //global frame timer

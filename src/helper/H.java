@@ -165,13 +165,14 @@ public class H {
     		listg.add((Geometry)s);
     		return listg;
     	}
+		
 		Node n = (Node)s;
 		List<Spatial> list = n.getChildren();
 		if (list.isEmpty()) return listg;
 		
 		for (Spatial sp: list) {
         	if (sp instanceof Node) {
-        		listg.addAll(getGeomList((Node)sp));
+        		listg.addAll(rGeomList(sp));
         	}
         	if (sp instanceof Geometry) {
         		listg.add((Geometry)sp);

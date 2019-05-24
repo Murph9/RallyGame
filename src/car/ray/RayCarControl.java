@@ -287,7 +287,6 @@ public class RayCarControl extends RayCarPowered {
 		
 		space.removeTickListener(this);
 		space.remove(this.rootNode);
-		Log.e("Write more RayCarControl.cleanup()");
 	}
 	
 	//Phyics get/set methods
