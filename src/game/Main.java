@@ -14,11 +14,13 @@ import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.BulletAppState.ThreadingType;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.font.BitmapFont;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.post.FilterPostProcessor;
 import com.jme3.post.filters.BloomFilter;
+import com.jme3.post.filters.FogFilter;
 import com.jme3.renderer.Camera;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.system.AppSettings;
@@ -148,6 +150,13 @@ public class Main extends SimpleApplication {
 		bloom.setBloomIntensity(5);
 		fpp.addFilter(bloom);
 		viewPort.addProcessor(fpp);
+		
+		//fog
+		FogFilter fog = new FogFilter();
+        fog.setFogColor(new ColorRGBA(0.8f, 0.8f, 0.8f, 1.0f));
+        fog.setFogDistance(190);
+        fog.setFogDensity(1.0f);
+        fpp.addFilter(fog);
 		
 		//no keyboard inputs after init please
 		GuiGlobals.getInstance().getInputMapper().release();
