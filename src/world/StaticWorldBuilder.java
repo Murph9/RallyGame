@@ -80,7 +80,7 @@ public class StaticWorldBuilder extends World {
 		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		
 	    //imported model
-		Spatial worldModel = WireframeHighlighter.create(as, world.name, ColorRGBA.DarkGray, ColorRGBA.White);
+		Spatial worldModel = WireframeHighlighter.create(as, world.name, ColorRGBA.White);
 		worldModel.scale(world.scale);
 		
 		CollisionShape col = CollisionShapeFactory.createMeshShape(worldModel);

@@ -1,11 +1,14 @@
 package game;
 
+import java.awt.Color;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
@@ -22,6 +25,7 @@ import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.util.BufferUtils;
 
 import helper.H;
+import helper.Log;
 
 public class WireframeHighlighter {
 
@@ -30,17 +34,17 @@ public class WireframeHighlighter {
 	//TODO cache the wireframes some how
 	//TODO whatever the race drive mode is on doesn't have lines
 	
-	public static Spatial create(AssetManager am, String model, ColorRGBA base, ColorRGBA highlight) {
-		return create(am, am.loadModel(model), base, highlight);
+	public static Spatial create(AssetManager am, String model, ColorRGBA highlight) {
+		return create(am, am.loadModel(model), highlight);
 	}
-	public static Spatial create(AssetManager am, Spatial s, ColorRGBA base, ColorRGBA highlight) {
+	public static Spatial create(AssetManager am, Spatial s, ColorRGBA highlight) {
 		if (s == null)
 			return s;
 		
 		if (s instanceof Geometry) {
 			Node n = new Node();
 			n.attachChild(s);
-			n.attachChild(_do(am, (Geometry)s, base, highlight));
+			n.attachChild(_do(am, (Geometry)s, highlight));
 			return s;
 		}
 		Node n = (Node)s;
@@ -52,7 +56,7 @@ public class WireframeHighlighter {
 				continue; //just blindly add?
 			}
 			
-			g.getParent().attachChild(_do(am, g, base, highlight));
+			g.getParent().attachChild(_do(am, g, highlight));
 		}
 		return n;
 	}
@@ -66,7 +70,15 @@ public class WireframeHighlighter {
 		g.setMaterial(mat);
 	}
 	
-	private static Geometry _do(AssetManager am, Geometry g, ColorRGBA base, ColorRGBA highlight) {
+	private static Geometry _do(AssetManager am, Geometry g, ColorRGBA highlight) {
+		ColorRGBA defColour = getColorFromGeometry(g);
+		if (defColour != null)
+			highlight = defColour; //TODO use
+		else
+			Log.e("Geometry:", g.getName(), "doesn't have a colour set!");
+		
+		ColorRGBA base = highlight.mult(0.2f); //TODO test
+		
 		// 1 load
 		Material baseMat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
 		baseMat.setColor("Color", base);
@@ -149,6 +161,30 @@ public class WireframeHighlighter {
 			map.get(edge).add(tri);
 		} else {
 			map.put(edge, new LinkedList<>(Arrays.asList(tri)));
+		}
+	}
+	
+	private static Pattern GEO_NAME_REGEX = Pattern.compile(".*\\[(.+)\\].*"); 
+	private static ColorRGBA getColorFromGeometry(Geometry g) {
+		String name = g.getName();
+		Matcher m = GEO_NAME_REGEX.matcher(name);
+		if (!m.find())
+			return null;
+		String colour = m.group(1);
+
+		if (colour.startsWith("#")) {
+			return parseAsHex(colour);
+		}
+		
+		//geometry format required: <blah blah>[<colour>]
+		return null;
+	}
+	private static ColorRGBA parseAsHex(String hex) {
+		try {
+			Color r = Color.decode(hex); //= me being lazy
+			return new ColorRGBA().fromIntARGB(r.getRGB()); //probably
+		} catch (Exception e) {
+			return null;
 		}
 	}
 }

@@ -69,7 +69,7 @@ public class FullCityWorld extends World {
 		grid[y][x] = decidePiece(x, y);
 		
 		Vector3f offset = new Vector3f((x-GRID_SIZE/2)*TILE_SIZE, 0, (y-GRID_SIZE/2)*TILE_SIZE);
-		Spatial spat = WireframeHighlighter.create(app.getAssetManager(), grid[y][x].p.getName(), ColorRGBA.Black, ColorRGBA.White);
+		Spatial spat = WireframeHighlighter.create(app.getAssetManager(), grid[y][x].p.getName(), ColorRGBA.White);
 		
 		spat.setLocalTranslation(offset);
 		CollisionShape coll = CollisionShapeFactory.createMeshShape(spat);

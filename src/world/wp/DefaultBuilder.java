@@ -72,7 +72,7 @@ public abstract class DefaultBuilder extends World {
 			WPObject wpo = new WPObject();
 			wpo.wp = type[i];
 			
-			Spatial piece = WireframeHighlighter.create(app.getAssetManager(), type[i].getName(), ColorRGBA.Black, ColorRGBA.Green);
+			Spatial piece = WireframeHighlighter.create(app.getAssetManager(), type[i].getName(), ColorRGBA.Green);
 			piece.setCullHint(CullHint.Never);
 			wpo.sp = ((Node)piece).getChild(0); //there is only one object in there (hopefully)
 

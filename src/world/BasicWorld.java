@@ -43,7 +43,7 @@ public class BasicWorld extends World {
 		startGeometry.setLocalTranslation(0, -0.1f, 0);
 		startGeometry.addControl(new RigidBodyControl(0));
 		
-		startGeometry = WireframeHighlighter.create(app.getAssetManager(), startGeometry, ColorRGBA.Black, ColorRGBA.Green);
+		startGeometry = WireframeHighlighter.create(app.getAssetManager(), startGeometry, ColorRGBA.Green);
 		
 		this.rootNode.attachChild(startGeometry);
 		App.rally.getPhysicsSpace().add(startGeometry);

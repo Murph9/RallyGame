@@ -65,9 +65,9 @@ public class ObjectWorld extends World {
 		floor = new Geometry("floor", floorBox);
 		floor.setMaterial(matfloor);
 		floor.setLocalTranslation(0, 0, 0);
-		floor = WireframeHighlighter.create(app.getAssetManager(), floor, ColorRGBA.Black, ColorRGBA.White);
+		floor = WireframeHighlighter.create(app.getAssetManager(), floor, ColorRGBA.White);
 		
-		Spatial spat = WireframeHighlighter.create(app.getAssetManager(), ITEM, ColorRGBA.Black, ColorRGBA.White);
+		Spatial spat = WireframeHighlighter.create(app.getAssetManager(), ITEM, ColorRGBA.White);
 		if (spat instanceof Node) {
 			for (Spatial s: ((Node) spat).getChildren()) {
 				geomI = s;

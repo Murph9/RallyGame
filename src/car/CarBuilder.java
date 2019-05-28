@@ -68,7 +68,7 @@ public class CarBuilder extends AbstractAppState {
 		AssetManager am = App.rally.getAssetManager();
 		
 		Node carNode = new Node(id+"");
-		Spatial carModel = WireframeHighlighter.create(am, carData.carModel, ColorRGBA.DarkGray, ColorRGBA.Magenta);
+		Spatial carModel = WireframeHighlighter.create(am, carData.carModel, ColorRGBA.Magenta);
 		
 		//update the collision shape, NOTE: a static convex collision shape or hull might be faster here
 		CollisionShape colShape = CollisionShapeFactory.createDynamicMeshShape(carModel);

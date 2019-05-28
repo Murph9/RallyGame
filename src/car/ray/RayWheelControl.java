@@ -60,7 +60,7 @@ public class RayWheelControl {
 		
 		//rotate and translate the wheel rootNode
 		rootNode = new Node("wheel " + wheel.num);
-		spat = WireframeHighlighter.create(App.rally.getAssetManager(), wheel.data.modelName, ColorRGBA.Black, BASE_HIGHLIGHT_COLOUR);
+		spat = WireframeHighlighter.create(App.rally.getAssetManager(), wheel.data.modelName, BASE_HIGHLIGHT_COLOUR);
 		spat.center();
 		rootNode.attachChild(spat);
 		
