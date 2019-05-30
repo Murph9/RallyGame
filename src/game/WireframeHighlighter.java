@@ -71,11 +71,11 @@ public class WireframeHighlighter {
 	}
 	
 	private static Geometry _do(AssetManager am, Geometry g, ColorRGBA highlight) {
-		ColorRGBA defColour = getColorFromGeometry(g);
+		ColorRGBA defColour = getColorFromMaterialName(g.getMaterial());
 		if (defColour != null)
 			highlight = defColour; //TODO use
 		else
-			Log.e("Geometry:", g.getName(), "doesn't have a colour set!");
+			Log.e("Material in geom:", g.getName(), "doesn't have a colour set!");
 		
 		ColorRGBA base = highlight.mult(0.2f); //TODO test
 		
@@ -164,19 +164,21 @@ public class WireframeHighlighter {
 		}
 	}
 	
+	//geometry format required: <blah blah>[<colour>]
 	private static Pattern GEO_NAME_REGEX = Pattern.compile(".*\\[(.+)\\].*"); 
-	private static ColorRGBA getColorFromGeometry(Geometry g) {
-		String name = g.getName();
-		Matcher m = GEO_NAME_REGEX.matcher(name);
-		if (!m.find())
+	private static ColorRGBA getColorFromMaterialName(Material m) {
+		String name = m.getName();
+		if (name == null)
 			return null;
-		String colour = m.group(1);
+		
+		Matcher mat = GEO_NAME_REGEX.matcher(name);
+		if (!mat.find())
+			return null;
+		String colour = mat.group(1);
 
 		if (colour.startsWith("#")) {
 			return parseAsHex(colour);
 		}
-		
-		//geometry format required: <blah blah>[<colour>]
 		return null;
 	}
 	private static ColorRGBA parseAsHex(String hex) {
