@@ -93,8 +93,6 @@ public class WireframeHighlighter {
 		highlightGeom.scale(1.0001f);
 		addWireframeMat(am, highlightGeom, highlight);
 		
-		App.rally.getRootNode().attachChild(highlightGeom);
-		
 		return highlightGeom;
 	}
 	
