@@ -223,8 +223,10 @@ class Edge {
 
     @Override
     public int hashCode() {
-    	return this.b.toString().hashCode() + this.a.toString().hashCode();
-        //i am kind of annoyed at this as using a 'correct' number based hash was causing too many collisions
+    	return Float.floatToIntBits(
+                a.x * 17 + a.y*23 + a.z*53 +
+                b.x * 19 + b.y*29 + b.z*57
+            );
     }
 
     @Override
