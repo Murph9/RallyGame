@@ -31,6 +31,7 @@ public class WireframeHighlighter {
 
 	public static final int LINE_WIDTH = 3;
 	private static final float DIFF = 0.91f;
+	private static final float BASE_MULT = 0.2f;
 	//TODO cache the wireframes some how
 	//TODO whatever the race drive mode is on doesn't have lines
 	
@@ -73,11 +74,11 @@ public class WireframeHighlighter {
 	private static Geometry _do(AssetManager am, Geometry g, ColorRGBA highlight) {
 		ColorRGBA defColour = getColorFromMaterialName(g.getMaterial());
 		if (defColour != null)
-			highlight = defColour; //TODO use
+			highlight = defColour;
 		else
-			Log.e("Material in geom:", g.getName(), "doesn't have a colour set!");
+			Log.e("Material in geom:", g.getName(), "doesn't have a colour set! Using the default given: " + highlight);
 		
-		ColorRGBA base = highlight.mult(0.2f); //TODO test
+		ColorRGBA base = highlight.mult(BASE_MULT);
 		
 		// 1 load
 		Material baseMat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
