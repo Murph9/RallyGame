@@ -73,9 +73,9 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 		Vector3f carPos = p.getRootNode().getLocalTranslation();
 		Quaternion pRot = p.getRootNode().getLocalRotation();
 		
-		Vector3f velocity = pRot.inverse().mult(p.getLinearVelocity());
-//		if (velocity.z < 0) //in reverse so reverse the rotation matrix
-//			pRot.inverseLocal();
+		// Vector3f velocity = pRot.inverse().mult(p.getLinearVelocity());
+		// if (velocity.z < 0) //in reverse so reverse the rotation matrix
+			// pRot.inverseLocal();
 		
 		if (!FastMath.approximateEquals(rotRad, 0)) {
 			lastTimeout += tpf;
@@ -91,7 +91,7 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 		//calculate world pos of a camera
 		Vector3f vec = new Vector3f();
 		float smoothing = tpf*10;
-		if (p.vel.length() > 1f)
+		if (p.vel.length() > 4f)
 			vec.interpolateLocal(pRot.mult(new Vector3f(0, 0, 1)).normalize(), p.vel.normalize(), 0.5f);
 		else {
 			//at slow speeds use just the rotation
@@ -139,7 +139,7 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 		Vector3f lookAt = carPos.add(p.getCarData().cam_lookAt);
 		lastShake.addLocal(new Vector3f(FastMath.nextRandomFloat(), FastMath.nextRandomFloat(), FastMath.nextRandomFloat()).normalize().mult(shakeFactor*FastMath.nextRandomInt(-1, 1)));
 		if (lastShake.length() > 0.01f)
-			lastShake.interpolateLocal(Vector3f.ZERO, 0.7f); //TODO shake slower
+			lastShake.interpolateLocal(Vector3f.ZERO, 0.3f);
 		else
 			lastShake = new Vector3f();
 		
