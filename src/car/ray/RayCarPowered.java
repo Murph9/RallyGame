@@ -6,6 +6,8 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
 
+import helper.Log;
+
 //handles engine/drivetrain stuff (it is an arbitrary feature split)
 public class RayCarPowered extends RayCar {
 	
@@ -146,7 +148,19 @@ public class RayCarPowered extends RayCar {
 		else //normal path
 			engineOutTorque = eTorque*curGearRatio*diffRatio*carData.trans_effic - engineDrag;
 
-		return engineOutTorque/carData.wheelData[0].radius; //TODO pick a better wheel for drive wheel size
+		return engineOutTorque/driveWheelRadius();
+	}
+
+	private float driveWheelRadius() {
+		if (carData.driveFront && carData.driveRear)
+			return (carData.wheelData[0].radius + carData.wheelData[1].radius + carData.wheelData[2].radius + carData.wheelData[3].radius)/4f;
+		if (carData.driveFront)
+			return (carData.wheelData[0].radius + carData.wheelData[1].radius)/2f;
+		if (carData.driveRear)
+			return (carData.wheelData[2].radius + carData.wheelData[3].radius)/2f;
+
+		Log.e("No drive wheels found");
+		return 1;
 	}
 	
 	private void autoTransmission(int rpm, float vz) {
@@ -156,7 +170,7 @@ public class RayCarPowered extends RayCar {
 			return; //if no contact, no changing of gear
 		
 		float driveSpeed = (carData.trans_gearRatios[curGear]*carData.trans_finaldrive*(60/FastMath.TWO_PI))/carData.wheelData[0].radius;
-		float gearUpSpeed = carData.auto_gearUp/driveSpeed; //TODO pre compute, as it doesn't change
+		float gearUpSpeed = carData.auto_gearUp/driveSpeed; //TODO pre compute, as it doesn't change (you can also find the optimal gear change point based on the torque curve)
 		float gearDownSpeed = carData.auto_gearDown/driveSpeed;
 		
 		//TODO: error checking that there is over lap  [2-----[3--2]----3] not [2------2]--[3-----3]
