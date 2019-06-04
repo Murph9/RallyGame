@@ -8,7 +8,7 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import car.ray.CarDataConst;
 import helper.Log;
 
-//TODO use ridge racer cars
+//TODO use ridge racer cars with wireframe views
 
 public enum Car {
 	Normal("Normal"),

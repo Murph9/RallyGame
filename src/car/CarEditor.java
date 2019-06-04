@@ -183,7 +183,7 @@ public class CarEditor extends Container {
 			List<TextField> fields = new LinkedList<TextField>();
 			rpContents.addChild(new Label(str), ++i, ++j);
 			if (value == null) {
-				//TODO no idea
+				continue;
 			} else if (value.getClass().isArray()) {
 				Object[] os = (Object[])value;
 				for (int index = 0; index < os.length; index++) {
@@ -228,8 +228,7 @@ public class CarEditor extends Container {
 			} else if (f.getType() == boolean.class) {
 				f.setBoolean(fe.o, Boolean.parseBoolean(str));
 			} else if (f.getType().isArray()) {
-				//TODO setting float arrays is untested, probably need to check the type of the elements
-				float[] values = new float[fe.inputs.length]; //TODO other types
+				float[] values = new float[fe.inputs.length]; //TODO other array types
 				for (int i = 0; i < fe.inputs.length; i++) {
 					values[i] = Float.parseFloat(fe.inputs[i].getText());
 				}

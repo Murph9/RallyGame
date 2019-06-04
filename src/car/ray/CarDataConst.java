@@ -16,7 +16,9 @@ import helper.H.Duo;
 
 public class CarDataConst implements Serializable {
 
-	//model strings (can be xx.obj or xx.blend)
+	private static final long serialVersionUID = 2121279530710074151L;
+
+	// model strings (can be xx.obj or xx.blend)
 	public String carModel;
 	public String wheelModel;
 	
@@ -79,7 +81,7 @@ public class CarDataConst implements Serializable {
 	
 	public float w_cdifflock;
 	public boolean w_fdiff;
-	public float w_fdifflock; //small=slip large=locked -> 0.0001f < x < 5 i think is a good range TODO pls verify
+	public float w_fdifflock; //small=slip large=locked -> 0.0001f < x < 5 i think is a good range
 	public boolean w_rdiff;
 	public float w_rdifflock;
 	

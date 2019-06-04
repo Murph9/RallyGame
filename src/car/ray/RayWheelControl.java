@@ -30,7 +30,7 @@ public class RayWheelControl {
 		new Vector2f(0, 0), new Vector2f(0, 1), new Vector2f(1, 0), new Vector2f(1, 1),
 	};
 	
-	private static final ColorRGBA BASE_HIGHLIGHT_COLOUR = ColorRGBA.Blue; //TODO make it an input
+	private static final ColorRGBA BASE_HIGHLIGHT_COLOUR = ColorRGBA.Blue; //TODO remove, as the model should define it
 	
 	private Geometry skidLine;
 	private Vector3f[] vertices;
@@ -51,9 +51,7 @@ public class RayWheelControl {
 	
 	private final Vector3f offset;
 	private Vector3f posInLocal;
-	
-	//TODO change to just be a wireframe and not triangles to fit the wireframe theme
-	
+		
 	public RayWheelControl(RayWheel wheel, Node carRootNode, Vector3f pos) {
 		this.wheel = wheel;
 		this.offset = pos;
@@ -167,7 +165,7 @@ public class RayWheelControl {
 			return; //don't make a line because they aren't valid positions
 		}
 		
-		//TODO better scaling for grip value
+		//TODO better scaling for grip value (maybe not full colour on max slip)
 		float clampSkid = FastMath.clamp((this.wheel.skidFraction - 0.85f)/2, 0, 1);
 		if (clampSkid < 0.1f) {
 			lastl = cur;
@@ -179,7 +177,8 @@ public class RayWheelControl {
 		ColorRGBA c = BASE_HIGHLIGHT_COLOUR.clone().mult(clampSkid);
 		cur.y += 0.015f; //z-buffering (i.e. to stop it "fighting" with the ground texture)
 		
-		//TODO change to just be smaller on a large drift angle (look at most wanted's skid marks)
+		//TODO change to just be thinner with a larger drift angle
+		//i have tested this is real life, width is lower when sliding sideways, but does it fit the theme?
 		
 		Vector3f rot = new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y).mult(velDir.normalize());
 		colors[verticesPos] = lastColor;

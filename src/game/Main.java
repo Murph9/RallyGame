@@ -59,12 +59,8 @@ import world.wp.WP.DynamicType;
 //kind of like the the snowboarding phone game, where you do challenges on the way down
 //	might work well going down one road
 
-//Using eclipse: why isn't this a default?
+//Using eclipse? then why isn't this the default file view:
 //http://stackoverflow.com/questions/3915961/how-to-view-hierarchical-package-structure-in-eclipse-package-explorer
-
-//TODO
-//remove all ShadowMode.* things
-//night time or something because loading looks easier to do
 
 
 @SuppressWarnings("unused")
@@ -171,7 +167,7 @@ public class Main extends SimpleApplication {
     	bullet.setThreadingType(ThreadingType.PARALLEL);
     	
 		getStateManager().attach(bullet);
-		bullet.getPhysicsSpace().setAccuracy(1f/120f); //physics rate //TODO setting
+		bullet.getPhysicsSpace().setAccuracy(1f/120f); //physics rate
 		bullet.getPhysicsSpace().setGravity(new Vector3f(0, -9.81f, 0)); //yay its down
 		
 		inputManager.setCursorVisible(true);

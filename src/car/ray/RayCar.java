@@ -79,7 +79,7 @@ public class RayCar implements PhysicsTickListener {
 
 		rbc = new RigidBodyControl(shape, carData.mass);
 		
-		// TODO check that rest suspension position is within min and max
+		// TODO validate that rest suspension position is within min and max
 		Vector3f grav = new Vector3f();
 		App.rally.bullet.getPhysicsSpace().getGravity(grav); //becuase the rigid body doesn't have gravity yet
 		Log.p("TODO: sus min/max range calc for both front and rear" + carData.susF.preload_force);
@@ -192,7 +192,7 @@ public class RayCar implements PhysicsTickListener {
 			wheels[w_id].susForce -= susp_damping * projected_rel_vel;
 			
 			//Sway bars https://forum.miata.net/vb/showthread.php?t=25716
-			int w_id_other = w_id == 0 ? 1 : w_id == 1 ? 0 : w_id == 2 ? 3 : 2; //TODO better
+			int w_id_other = w_id == 0 ? 1 : w_id == 1 ? 0 : w_id == 2 ? 3 : 2; //fetch the id or the other side
 			float swayDiff = wheels[w_id_other].susRayLength - wheels[w_id].susRayLength;
 			wheels[w_id].susForce += swayDiff*sus.antiroll;
 

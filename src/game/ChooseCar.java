@@ -62,7 +62,6 @@ public class ChooseCar extends AbstractAppState {
 		cb = new CarBuilder();
 		app.getStateManager().attach(cb);
 		cb.addCar(0, car, start, dir, true, null);
-		//TODO remove smoke
 
 		//make camera
 		camera = new BasicCamera("Camera", App.rally.getCamera(), new Vector3f(0,3,7), new Vector3f(0,1.2f, 0));
