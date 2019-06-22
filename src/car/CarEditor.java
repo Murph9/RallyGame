@@ -34,7 +34,6 @@ import game.App;
 import helper.H;
 import helper.Log;
 
-//TODO cleanup
 public class CarEditor extends Container {
 
 	private RayCarControl p;

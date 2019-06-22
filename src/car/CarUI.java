@@ -31,8 +31,8 @@ import helper.H;
 public class CarUI extends BaseAppState {
 
 	//TODO scale it with monitor size (forza doesn't deal with this)
-	private final RayCarControl p;
 	
+	private final RayCarControl p;
 	private Node rootNode;
 	
 	//hud stuff
@@ -168,7 +168,7 @@ public class CarUI extends BaseAppState {
 		for (int i = 0; i < finalRPM+1; i += 1000) {
 			float angle = FastMath.interpolateLinear(i/(float)finalRPM, startAng, finalAng);
 			
-			if (i >= redline) { //TODO actually show red
+			if (i >= redline) { //TODO actually show red..
 				//Log.p(new Vector3f(FastMath.cos(angle)*radius, FastMath.sin(angle)*radius, 1));
 				Line l = new Line(new Vector3f(FastMath.cos(angle)*radius, FastMath.sin(angle)*radius, 1)
 						, new Vector3f(FastMath.cos(angle)*radius*0.9f, FastMath.sin(angle)*radius*0.9f, -1));

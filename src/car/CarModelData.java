@@ -104,7 +104,8 @@ public class CarModelData {
 		
 		Headlight_L("headlight"), //only one side
 		Taillight_L("taillight_l"), //only one side
-		//TODO more
+
+		//Please add more when needed
 		;
 		
 		private String name;
