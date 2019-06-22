@@ -33,7 +33,6 @@ public class WireframeHighlighter {
 	private static final float DIFF = 0.91f;
 	private static final float BASE_MULT = 0.2f;
 	//TODO cache the wireframes some how
-	//TODO whatever the race drive mode is on doesn't have lines
 	
 	public static Spatial create(AssetManager am, String model, ColorRGBA highlight) {
 		return create(am, am.loadModel(model), highlight);
