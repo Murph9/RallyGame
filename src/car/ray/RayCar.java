@@ -79,10 +79,24 @@ public class RayCar implements PhysicsTickListener {
 
 		rbc = new RigidBodyControl(shape, carData.mass);
 		
-		// TODO validate that rest suspension position is within min and max
+		// Validate that rest suspension position is within min and max
 		Vector3f grav = new Vector3f();
 		App.rally.bullet.getPhysicsSpace().getGravity(grav); //becuase the rigid body doesn't have gravity yet
-		Log.p("TODO: sus min/max range calc for both front and rear" + carData.susF.preload_force);
+
+		float quarterMassForce = Math.abs(grav.y)*carData.mass/4f;
+		for (int i  = 0; i < wheels.length; i++) {
+			CarSusDataConst sus = carData.susByWheelNum(i);
+			
+			float minSusForce = (sus.preload_force + sus.stiffness * 0)*1000;
+			float maxSusForce = (sus.preload_force + sus.stiffness * (sus.max_travel - sus.min_travel))*1000;
+			if (quarterMassForce < minSusForce) {
+				Log.e("!! Sus min range too high: " + quarterMassForce + " < " + minSusForce + ", decrease pre-load");
+			}
+			if (quarterMassForce > maxSusForce) {
+				Log.e("!! Sus max range too low: " + quarterMassForce + " > " + maxSusForce + ", increase pre-load or stiffness");
+			}
+		}
+		
 	}
 
 	@Override
