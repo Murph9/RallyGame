@@ -78,6 +78,9 @@ public class RayCar implements PhysicsTickListener {
 		this.wheelTorque = new float[4];
 
 		rbc = new RigidBodyControl(shape, carData.mass);
+
+		//a fake angular rotational, very important for feel
+		rbc.setAngularDamping(0.4f);
 		
 		// Validate that rest suspension position is within min and max
 		Vector3f grav = new Vector3f();
@@ -346,9 +349,7 @@ public class RayCar implements PhysicsTickListener {
 		
 		float dragDown = -0.5f * carData.areo_downforce * 1.225f * (w_velocity.z*w_velocity.z); //formula for downforce from wikipedia
 		rbc.applyCentralForce(totalNeutral.add(0, dragDown, 0)); //apply downforce after
-		
-		//TODO angular rotational drag (or at least a fake one)
-		
+				
 		if (DEBUG_DRAG) {
 			App.rally.enqueue(() -> {
 				HelperObj.use(App.rally.getRootNode(), "dragarrow",
