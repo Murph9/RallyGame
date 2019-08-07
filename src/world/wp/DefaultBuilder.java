@@ -17,7 +17,6 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -25,6 +24,7 @@ import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.shape.Box;
 
 import game.App;
+import game.LoadModelWrapper;
 import helper.Log;
 import world.World;
 import world.WorldType;
@@ -38,7 +38,6 @@ public abstract class DefaultBuilder extends World {
 	
 	protected List<Spatial> curPieces = new ArrayList<Spatial>();
 	protected List<WPObject> wpos;
-	protected Material mat;
 	
 	protected Vector3f start = new Vector3f();
 	protected Vector3f nextPos = new Vector3f();
@@ -56,7 +55,6 @@ public abstract class DefaultBuilder extends World {
 	DefaultBuilder(WP[] type, long seed) {
 		super("builder root node");
 		this.type = type;
-		this.rootNode.setShadowMode(ShadowMode.CastAndReceive); //performance concern #1342
 		
 		this.rand = new Random(seed);
 	}
@@ -69,23 +67,14 @@ public abstract class DefaultBuilder extends World {
 		}
 		super.initialize(stateManager, app);
 		
-		boolean mat = type[0].needsMaterial();
-		if (mat) {
-			this.mat = new Material(app.getAssetManager(), "Common/MatDefs/Misc/ShowNormals.j3md");		
-			this.mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
-		}
-		
 		this.wpos = new ArrayList<WPObject>();
 		for (int i = 0; i < type.length; i++) {
 			WPObject wpo = new WPObject();
 			wpo.wp = type[i];
 			
-			Spatial piece = app.getAssetManager().loadModel(type[i].getName());
+			Spatial piece = LoadModelWrapper.create(app.getAssetManager(), type[i].getName(), ColorRGBA.Green);
 			piece.setCullHint(CullHint.Never);
 			wpo.sp = ((Node)piece).getChild(0); //there is only one object in there (hopefully)
-			if (this.mat != null) {
-				wpo.sp.setMaterial(this.mat);
-			}
 
 			//scale and unscale spatials so that the collision shape size is correct
 			wpo.sp.scale(type[i].getScale());

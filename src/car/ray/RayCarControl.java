@@ -144,7 +144,7 @@ public class RayCarControl extends RayCarPowered {
 //				+ maxAngle*FastMath.PI/2 + this.wheels[0].maxLat*2, Math.abs(trySteerAngle));
 		
 		//TODO PLEASE FIX THIS
-		//TODO max turn angle really should just be the best angle on the lat traction curve
+		//TODO max turn angle really should just be the best angle on the lat traction curve (while going straight)
 		
 		return Math.min(maxAngle, Math.abs(trySteerAngle)); //???
 		
@@ -287,7 +287,6 @@ public class RayCarControl extends RayCarPowered {
 		
 		space.removeTickListener(this);
 		space.remove(this.rootNode);
-		Log.e("Write more RayCarControl.cleanup()");
 	}
 	
 	//Phyics get/set methods

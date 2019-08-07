@@ -78,11 +78,28 @@ public class RayCar implements PhysicsTickListener {
 		this.wheelTorque = new float[4];
 
 		rbc = new RigidBodyControl(shape, carData.mass);
+
+		//a fake angular rotational, very important for feel
+		rbc.setAngularDamping(0.4f);
 		
-		// TODO check that rest suspension position is within min and max
+		// Validate that rest suspension position is within min and max
 		Vector3f grav = new Vector3f();
 		App.rally.bullet.getPhysicsSpace().getGravity(grav); //becuase the rigid body doesn't have gravity yet
-		Log.p("TODO: sus min/max range calc for both front and rear" + carData.susF.preload_force);
+
+		float quarterMassForce = Math.abs(grav.y)*carData.mass/4f;
+		for (int i  = 0; i < wheels.length; i++) {
+			CarSusDataConst sus = carData.susByWheelNum(i);
+			
+			float minSusForce = (sus.preload_force + sus.stiffness * 0)*1000;
+			float maxSusForce = (sus.preload_force + sus.stiffness * (sus.max_travel - sus.min_travel))*1000;
+			if (quarterMassForce < minSusForce) {
+				Log.e("!! Sus min range too high: " + quarterMassForce + " < " + minSusForce + ", decrease pre-load");
+			}
+			if (quarterMassForce > maxSusForce) {
+				Log.e("!! Sus max range too low: " + quarterMassForce + " > " + maxSusForce + ", increase pre-load or stiffness");
+			}
+		}
+		
 	}
 
 	@Override
@@ -192,7 +209,7 @@ public class RayCar implements PhysicsTickListener {
 			wheels[w_id].susForce -= susp_damping * projected_rel_vel;
 			
 			//Sway bars https://forum.miata.net/vb/showthread.php?t=25716
-			int w_id_other = w_id == 0 ? 1 : w_id == 1 ? 0 : w_id == 2 ? 3 : 2; //TODO better
+			int w_id_other = w_id == 0 ? 1 : w_id == 1 ? 0 : w_id == 2 ? 3 : 2; //fetch the id or the other side
 			float swayDiff = wheels[w_id_other].susRayLength - wheels[w_id].susRayLength;
 			wheels[w_id].susForce += swayDiff*sus.antiroll;
 
@@ -332,9 +349,7 @@ public class RayCar implements PhysicsTickListener {
 		
 		float dragDown = -0.5f * carData.areo_downforce * 1.225f * (w_velocity.z*w_velocity.z); //formula for downforce from wikipedia
 		rbc.applyCentralForce(totalNeutral.add(0, dragDown, 0)); //apply downforce after
-		
-		//TODO angular rotational drag (or at least a fake one)
-		
+				
 		if (DEBUG_DRAG) {
 			App.rally.enqueue(() -> {
 				HelperObj.use(App.rally.getRootNode(), "dragarrow",

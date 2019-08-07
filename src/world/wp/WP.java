@@ -6,7 +6,7 @@ import com.jme3.math.Vector3f;
 import world.World;
 
 /** World Piece
- * @author Jake
+ * @author murph9
  */
 public interface WP {
 	
@@ -64,7 +64,6 @@ public interface WP {
 	
 	//shouldn't change per model in the set
 	float getScale();
-	boolean needsMaterial();
 	//boolean canMirror(); //This is commented out so if you are ever thinking of trying to make the inverses: DO NOT - [5]hrs wasted so far
 	
 	//change per model

@@ -1,30 +1,33 @@
 package helper;
 
+import java.io.PrintStream;
+
 public class Log {
 	//TODO class to print log messages somewhere.
 	//This should really be configurable, if you want it isn't a complex file
-	
+	private static PrintStream OUT = System.out;
+	private static PrintStream ERR = System.err;
 
-	/**Easier way of typing System.out.println(); -> Log.p();*/
+	/**Easier way of typing OUT.println(); -> Log.p();*/
 	public static void p() {
-		System.out.println();
+		OUT.println();
 	}
 
 	public static void p(Object o) {
-		System.out.println(o);
+		OUT.println(o);
 	}
 
 	public static void p(Object[] ol, String sep) {
 		if (sep == null) sep = "\n";
 		for (Object o: ol)
-			System.out.print(o + sep);
-		System.out.println();
+			OUT.print(o + sep);
+		OUT.println();
 	}
 	public static void p(Object... os) {
 		for (Object o : os) {
-	        System.out.print(o + " ");
+	        OUT.print(o + " ");
 	    }
-		System.out.println();
+		OUT.println();
 	}
 	
 	public static void p(Iterable<Object> ol, String sep) {
@@ -37,32 +40,32 @@ public class Log {
 		if (matrix.length == 0)
 			return;
 		
-		System.out.println("Matrix:");
+		OUT.println("Matrix:");
 		for (int i = 0; i < matrix.length; i++) {
 			for (int j = 0; j < matrix[i].length; j++) {
-				System.out.print(matrix[i][j] + sep);
+				OUT.print(matrix[i][j] + sep);
 			}
-			System.out.println();
+			OUT.println();
 		}
 	}
 
-	/**Easier way of typing System.err.println(); -> Log.e();*/
+	/**Easier way of typing ERR.println(); -> Log.e();*/
 	public static void e(Object o) {
-		System.err.println(o);
+		ERR.println(o);
 	}
 
 	public static void e(Object... os) {
 		for (Object o : os) {
-	        System.err.print(o + " ");
+	        ERR.print(o + " ");
 	    }
-		System.err.println();
+		ERR.println();
 	}
 
 	public static void e(Object[] ol, String sep) {
 		if (sep == null) sep = "\n";
 		for (Object o: ol)
-			System.err.print(o+sep);
-		System.err.println();
+			ERR.print(o+sep);
+		ERR.println();
 	}
 
 	public static void e(Iterable<Object> ol, String sep) {

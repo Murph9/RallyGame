@@ -14,10 +14,15 @@ import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.BulletAppState.ThreadingType;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.font.BitmapFont;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.post.FilterPostProcessor;
+import com.jme3.post.filters.BloomFilter;
+import com.jme3.post.filters.FogFilter;
 import com.jme3.renderer.Camera;
+import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.system.AppSettings;
 import com.jme3.system.NanoTimer;
 import com.simsilica.lemur.GuiGlobals;
@@ -54,12 +59,8 @@ import world.wp.WP.DynamicType;
 //kind of like the the snowboarding phone game, where you do challenges on the way down
 //	might work well going down one road
 
-//Using eclipse: why isn't this a default?
+//Using eclipse? then why isn't this the default file view:
 //http://stackoverflow.com/questions/3915961/how-to-view-hierarchical-package-structure-in-eclipse-package-explorer
-
-//TODO
-//still need to get fog working..
-//night time or something because loading looks easier to do
 
 
 @SuppressWarnings("unused")
@@ -70,7 +71,6 @@ public class Main extends SimpleApplication {
 	public ChooseMap chooseMap;
 	
 	public DriveBase drive;
-	public SkyState sky;
 
 	public BulletAppState bullet; //one physics space always
 	
@@ -78,13 +78,14 @@ public class Main extends SimpleApplication {
 	private Car them;
 	private World world;
 	private void loadDefaults() {
-		car = Car.Rally;
-		them = Car.Runner;
-		world = new TrackWorld();
+		car = Car.Runner;
+		them = Car.Rally;
+		world = new StaticWorldBuilder(StaticWorld.track2);
 		//world alernatives:
-		//	new HighwayWorld();
-		//	new StaticWorldBuilder(StaticWorld.track2);
-		//	DynamicType.Simple.getBuilder();
+		// new HighwayWorld();
+		// new TrackWorld(); 
+		// new StaticWorldBuilder(StaticWorld.track2);
+		// DynamicType.Simple.getBuilder();
 	}
 
 	public int frameCount = 0; //global frame timer
@@ -138,13 +139,32 @@ public class Main extends SimpleApplication {
 		//Init the lemur mouse listener
 		getStateManager().attach(new MouseAppState(this));
 		
+
+		//Processors
+		FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
 		
-		InputMapper inputMapper = GuiGlobals.getInstance().getInputMapper();
-		inputMapper.release(); //no keyboard inputs after init
+		//Wireframe style
+		EdgeMaskFilter emf = new EdgeMaskFilter();
+		fpp.addFilter(emf);
+
+		// Bloom for the wireframes
+		BloomFilter bloom = new BloomFilter();
+		bloom.setBlurScale(.5f);
+		bloom.setBloomIntensity(5);
+		fpp.addFilter(bloom);
+		viewPort.addProcessor(fpp);
 		
-		sky = new SkyState(); //lighting and shadow stuff is global
-		getStateManager().attach(sky);
+		//fog
+		FogFilter fog = new FogFilter();
+        fog.setFogColor(new ColorRGBA(0.8f, 0.8f, 0.8f, 1.0f));
+        fog.setFogDistance(190);
+        fog.setFogDensity(1.0f);
+        fpp.addFilter(fog);
 		
+		//no keyboard inputs after init please
+		GuiGlobals.getInstance().getInputMapper().release();
+		
+		//init game states
 		start = new Start();
 		getStateManager().attach(start);
 		
@@ -154,14 +174,14 @@ public class Main extends SimpleApplication {
     	bullet.setThreadingType(ThreadingType.PARALLEL);
     	
 		getStateManager().attach(bullet);
-		bullet.getPhysicsSpace().setAccuracy(1f/120f); //physics rate //TODO setting
+		bullet.getPhysicsSpace().setAccuracy(1f/120f); //physics rate
 		bullet.getPhysicsSpace().setGravity(new Vector3f(0, -9.81f, 0)); //yay its down
 		
 		inputManager.setCursorVisible(true);
 		flyCam.setEnabled(false);
 		
 		//profiling in jme 3.2 (TODO add physics engine stuff to this)
-		getStateManager().attach(new DetailedProfilerState());
+//		getStateManager().attach(new DetailedProfilerState());
 	}
 	
 	@Override

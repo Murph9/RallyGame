@@ -16,7 +16,9 @@ import helper.H.Duo;
 
 public class CarDataConst implements Serializable {
 
-	//model strings (can be xx.obj or xx.blend)
+	private static final long serialVersionUID = 2121279530710074151L;
+
+	// model strings (can be xx.obj or xx.blend)
 	public String carModel;
 	public String wheelModel;
 	
@@ -79,7 +81,7 @@ public class CarDataConst implements Serializable {
 	
 	public float w_cdifflock;
 	public boolean w_fdiff;
-	public float w_fdifflock; //small=slip large=locked -> 0.0001f < x < 5 i think is a good range TODO pls verify
+	public float w_fdifflock; //small=slip large=locked -> 0.0001f < x < 5 i think is a good range
 	public boolean w_rdiff;
 	public float w_rdifflock;
 	
@@ -111,14 +113,12 @@ public class CarDataConst implements Serializable {
 
 		modelLoad();
 		
-		//TODO value validations because they are now read from file :(
+		//TODO validate values because they are now read from a file
 	}
 	
 	private void modelLoad() {
 		//init car pos things based on the physical model
 
-		//TODO make model data mandatory so they can all be updated correctly
-		
 		CarModelData modelData = new CarModelData(this.carModel, this.wheelModel);
 		if (modelData.foundSomething() && modelData.foundAllWheels()) {
 			wheelOffset = new Vector3f[4];
@@ -141,7 +141,7 @@ public class CarDataConst implements Serializable {
 	}
 	
 	public float wheel_inertia(int w_id) {
-		//TODO this is a disc, pls make a thicc pipe so its closer to real life
+		//NOTE: PERF: this is a disc, pls make a thicc pipe so its closer to real life
 		return wheelData[w_id].mass*wheelData[w_id].radius*wheelData[w_id].radius/2;
 	}
 	public float e_inertia() { //car internal engine + wheel inertia

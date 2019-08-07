@@ -56,9 +56,6 @@ public enum Rocks implements WP {
 	@Override
 	public float getScale() { return 1; }
 	@Override
-	public boolean needsMaterial() { return false; }
-
-	@Override
 	public String getName() { return dir+name; }
 
 	@Override

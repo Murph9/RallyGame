@@ -3,13 +3,13 @@ package world;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
-import com.jme3.renderer.queue.RenderQueue.ShadowMode;
-import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 import game.App;
+import game.LoadModelWrapper;
 import jme3tools.optimize.GeometryBatchFactory;
 
 public class FullCityWorld extends World {
@@ -22,7 +22,6 @@ public class FullCityWorld extends World {
 	
 	public FullCityWorld() {
 		super("full city world rootNode");
-		rootNode.setShadowMode(ShadowMode.CastAndReceive);
 		
 		grid = new CityPiece[40][40];
 	}
@@ -70,7 +69,7 @@ public class FullCityWorld extends World {
 		grid[y][x] = decidePiece(x, y);
 		
 		Vector3f offset = new Vector3f((x-GRID_SIZE/2)*TILE_SIZE, 0, (y-GRID_SIZE/2)*TILE_SIZE);
-		Spatial spat = ((Node)(App.rally.getAssetManager().loadModel(grid[y][x].p.getName()))).getChild(0); 
+		Spatial spat = LoadModelWrapper.create(app.getAssetManager(), grid[y][x].p.getName(), ColorRGBA.White);
 		
 		spat.setLocalTranslation(offset);
 		CollisionShape coll = CollisionShapeFactory.createMeshShape(spat);

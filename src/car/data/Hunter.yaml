@@ -38,7 +38,7 @@ susF: &sus {
   stiffness: 14.0
 }
 susR: *sus
-trans_effic: 0.75 #TODO why so low
+trans_effic: 0.86
 trans_finaldrive: 3.0
 trans_gearRatios: [-3.5, 3.66, 2.5, 1.9, 1.4, 1.02, 0.7]
 w_fdiff: true

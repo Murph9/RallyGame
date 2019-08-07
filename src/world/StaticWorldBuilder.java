@@ -12,15 +12,14 @@ import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.FaceCullMode;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
-import com.jme3.renderer.queue.RenderQueue.ShadowMode;
-import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 import game.App;
-import helper.Log;
+import game.LoadModelWrapper;
 
 public class StaticWorldBuilder extends World {
 
@@ -40,7 +39,7 @@ public class StaticWorldBuilder extends World {
 	@Override
 	public void initialize(AppStateManager stateManager, Application app) {
 		super.initialize(stateManager, app);
-		addStaticWorld(true);
+		addStaticWorld();
 	}
 	@Override
 	public void reset() {
@@ -74,48 +73,25 @@ public class StaticWorldBuilder extends World {
 	
 	
 	////making the world exist
-	public void addStaticWorld(boolean ifShadow) {
+	public void addStaticWorld() {
 		AssetManager as = App.rally.getAssetManager();
 		
 		Material mat = new Material(as, "Common/MatDefs/Misc/ShowNormals.j3md");
 		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		
 	    //imported model
-		Spatial worldNode = as.loadModel(world.name);
-		if (worldNode instanceof Node) {
-			for (Spatial s: ((Node) worldNode).getChildren()) {
-				if (world.ifNeedsTexture) {
-					s.setMaterial(mat);
-				}
-				addWorldModel(rootNode, App.rally.getPhysicsSpace(), s, ifShadow);
-			}
-		} else {
-			Geometry worldModel = (Geometry) as.loadModel(world.name);
-			
-			if (world.ifNeedsTexture) {
-				worldModel.setMaterial(mat);
-			}
-			addWorldModel(rootNode, App.rally.getPhysicsSpace(), worldModel, ifShadow);
-		}
+		Spatial worldModel = LoadModelWrapper.create(as, world.name, ColorRGBA.White);
+		worldModel.scale(world.scale);
 		
-		Log.e("Adding: "+ world.name);
-	}
-	
-	private void addWorldModel(Node node, PhysicsSpace phys, Spatial s, boolean ifShadow) {
-		s.scale(world.scale);
-		
-		CollisionShape col = CollisionShapeFactory.createMeshShape(s);
+		CollisionShape col = CollisionShapeFactory.createMeshShape(worldModel);
 		RigidBodyControl landscape = new RigidBodyControl(col, 0);
-		s.addControl(landscape);
-		if (ifShadow) {
-			s.setShadowMode(ShadowMode.Receive);
-		}
+		worldModel.addControl(landscape);
 
 		landscapes.add(landscape);
-		models.add(s);
+		models.add(worldModel);
 		
-		phys.add(landscape);
-		node.attachChild(s);
+		App.rally.getPhysicsSpace().add(landscape);
+		rootNode.attachChild(worldModel);
 	}
 	
 	

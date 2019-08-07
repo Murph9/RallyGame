@@ -35,6 +35,7 @@ import car.data.Car;
 import car.ray.RayCarControl;
 import game.App;
 import game.RaceMenu;
+import game.LoadModelWrapper;
 import helper.H;
 import helper.Log;
 
@@ -318,7 +319,7 @@ public class DriveRace extends AbstractAppState {
 		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		
 	    //imported model
-		Spatial worldNode = as.loadModel("assets/staticworld/lakelooproad.blend");
+		Spatial worldNode = LoadModelWrapper.create(as, "assets/staticworld/lakelooproad.blend", ColorRGBA.White);
 		if (worldNode instanceof Node) {
 			Spatial s = ((Node) worldNode).getChild(0);
 			addWorldModel(rootNode, App.rally.getPhysicsSpace(), s, ifShadow);
@@ -330,7 +331,7 @@ public class DriveRace extends AbstractAppState {
 				}
 			}
 		} else {
-			Geometry worldModel = (Geometry) as.loadModel("assets/staticworld/lakelooproad.blend");
+			Geometry worldModel = (Geometry) worldNode;
 			addWorldModel(rootNode, App.rally.getPhysicsSpace(), worldModel, ifShadow);
 		}
 		

@@ -124,8 +124,6 @@ public class Start extends AbstractAppState {
 				
 				Quaternion q = new Quaternion();
 				q.fromAngleAxis(rotation, Vector3f.UNIT_Y);
-				//camera.setLocalTranslation(q.mult(start).add(car.getPhysicsLocation()));
-				//camera.lookAt(car.getPhysicsLocation(), Vector3f.UNIT_Y);
 			}
 		}
 	}

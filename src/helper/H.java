@@ -1,5 +1,6 @@
 package helper;
 
+import java.awt.Color;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -7,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
@@ -156,18 +159,23 @@ public class H {
 		return "x:"+H.roundDecimal(vec.x, places) + ", y:"+H.roundDecimal(vec.y, places)+", z:"+H.roundDecimal(vec.z, places);
 	}
 	
-	public static List<Geometry> getGeomList(Node n) {
+	public static List<Geometry> getGeomList(Spatial n) {
 		return rGeomList(n);
 	}
-	private static List<Geometry> rGeomList(Node n) {
+	private static List<Geometry> rGeomList(Spatial s) {
 		List<Geometry> listg = new LinkedList<Geometry>();
+		if (s instanceof Geometry) {
+    		listg.add((Geometry)s);
+    		return listg;
+    	}
 		
+		Node n = (Node)s;
 		List<Spatial> list = n.getChildren();
 		if (list.isEmpty()) return listg;
 		
 		for (Spatial sp: list) {
         	if (sp instanceof Node) {
-        		listg.addAll(getGeomList((Node)sp));
+        		listg.addAll(rGeomList(sp));
         	}
         	if (sp instanceof Geometry) {
         		listg.add((Geometry)sp);
@@ -461,5 +469,33 @@ public class H {
 		for (int i = 0; i < array.length; i++)
 			result = Math.max(result, func.apply(array[i], i));
 		return result;
+	}
+
+
+
+	//geometry format required: <blah blah>[<colour>]
+	private static Pattern GEO_NAME_REGEX = Pattern.compile(".*\\[(.+)\\].*"); 
+	public static ColorRGBA getColorFromMaterialName(Material m) {
+		String name = m.getName();
+		if (name == null)
+			return null;
+		
+		Matcher mat = GEO_NAME_REGEX.matcher(name);
+		if (!mat.find())
+			return null;
+		String colour = mat.group(1);
+
+		if (colour.startsWith("#")) {
+			return parseAsHex(colour);
+		}
+		return null;
+	}
+	private static ColorRGBA parseAsHex(String hex) {
+		try {
+			Color r = Color.decode(hex); //= me being lazy
+			return new ColorRGBA().fromIntARGB(r.getRGB()); //probably
+		} catch (Exception e) {
+			return null;
+		}
 	}
 }

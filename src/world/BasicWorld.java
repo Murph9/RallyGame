@@ -8,13 +8,15 @@ import com.jme3.material.Material;
 import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 
 import game.App;
+import game.LoadModelWrapper;
 
 public class BasicWorld extends World {
 	
-	private Geometry startGeometry; 
+	private Spatial startGeometry; 
 	
 	public BasicWorld() {
 		super("basicWorldRoot");
@@ -40,6 +42,8 @@ public class BasicWorld extends World {
 		startGeometry.setMaterial(matfloor);
 		startGeometry.setLocalTranslation(0, -0.1f, 0);
 		startGeometry.addControl(new RigidBodyControl(0));
+		
+		startGeometry = LoadModelWrapper.create(app.getAssetManager(), startGeometry, ColorRGBA.Green);
 		
 		this.rootNode.attachChild(startGeometry);
 		App.rally.getPhysicsSpace().add(startGeometry);

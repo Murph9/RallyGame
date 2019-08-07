@@ -1,0 +1,33 @@
+MaterialDef Cartoon Edge {
+
+    MaterialParameters {
+        Int NumSamples
+        Int NumSamplesDepth
+        Texture2D Texture
+        Texture2D NormalsTexture
+        Texture2D DepthTexture
+        Color EdgeColor
+        Float EdgeWidth
+        Float EdgeIntensity
+        Float NormalThreshold
+        Float DepthThreshold
+        Float NormalSensitivity
+        Float DepthSensitivity
+    }
+
+     Technique {
+        VertexShader GLSL150 GLSL100:   Common/MatDefs/Post/Post.vert
+        FragmentShader GLSL150 GLSL100: assets/mat/EdgeMaskFilter.frag
+
+        WorldParameters {
+            WorldViewMatrix
+            ResolutionInverse
+        }
+
+        Defines {
+            RESOLVE_MS : NumSamples
+            RESOLVE_DEPTH_MS : NumSamplesDepth
+        }
+    }
+
+}
