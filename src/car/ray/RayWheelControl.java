@@ -17,6 +17,7 @@ import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.util.BufferUtils;
 
 import game.App;
+import game.LoadModelWrapper;
 import game.WireframeHighlighter;
 
 public class RayWheelControl {
@@ -58,7 +59,7 @@ public class RayWheelControl {
 		
 		//rotate and translate the wheel rootNode
 		rootNode = new Node("wheel " + wheel.num);
-		spat = WireframeHighlighter.create(App.rally.getAssetManager(), wheel.data.modelName, BASE_HIGHLIGHT_COLOUR);
+		spat = LoadModelWrapper.create(App.rally.getAssetManager(), wheel.data.modelName, BASE_HIGHLIGHT_COLOUR);
 		spat.center();
 		rootNode.attachChild(spat);
 		

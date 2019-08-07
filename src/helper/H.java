@@ -1,5 +1,6 @@
 package helper;
 
+import java.awt.Color;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -7,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
@@ -466,5 +469,33 @@ public class H {
 		for (int i = 0; i < array.length; i++)
 			result = Math.max(result, func.apply(array[i], i));
 		return result;
+	}
+
+
+
+	//geometry format required: <blah blah>[<colour>]
+	private static Pattern GEO_NAME_REGEX = Pattern.compile(".*\\[(.+)\\].*"); 
+	public static ColorRGBA getColorFromMaterialName(Material m) {
+		String name = m.getName();
+		if (name == null)
+			return null;
+		
+		Matcher mat = GEO_NAME_REGEX.matcher(name);
+		if (!mat.find())
+			return null;
+		String colour = mat.group(1);
+
+		if (colour.startsWith("#")) {
+			return parseAsHex(colour);
+		}
+		return null;
+	}
+	private static ColorRGBA parseAsHex(String hex) {
+		try {
+			Color r = Color.decode(hex); //= me being lazy
+			return new ColorRGBA().fromIntARGB(r.getRGB()); //probably
+		} catch (Exception e) {
+			return null;
+		}
 	}
 }

@@ -17,7 +17,7 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 
 import game.App;
-import game.WireframeHighlighter;
+import game.LoadModelWrapper;
 import helper.H;
 import jme3tools.optimize.GeometryBatchFactory;
 
@@ -65,9 +65,9 @@ public class ObjectWorld extends World {
 		floor = new Geometry("floor", floorBox);
 		floor.setMaterial(matfloor);
 		floor.setLocalTranslation(0, 0, 0);
-		floor = WireframeHighlighter.create(app.getAssetManager(), floor, ColorRGBA.White);
+		floor = LoadModelWrapper.create(app.getAssetManager(), floor, ColorRGBA.White);
 		
-		Spatial spat = WireframeHighlighter.create(app.getAssetManager(), ITEM, ColorRGBA.White);
+		Spatial spat = LoadModelWrapper.create(app.getAssetManager(), ITEM, ColorRGBA.White);
 		if (spat instanceof Node) {
 			for (Spatial s: ((Node) spat).getChildren()) {
 				geomI = s;

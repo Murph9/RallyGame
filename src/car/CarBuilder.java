@@ -25,7 +25,7 @@ import car.data.Car;
 import car.ray.CarDataConst;
 import car.ray.RayCarControl;
 import game.App;
-import game.WireframeHighlighter;
+import game.LoadModelWrapper;
 import helper.Log;
 
 public class CarBuilder extends AbstractAppState {
@@ -68,7 +68,7 @@ public class CarBuilder extends AbstractAppState {
 		AssetManager am = App.rally.getAssetManager();
 		
 		Node carNode = new Node(id+"");
-		Spatial carModel = WireframeHighlighter.create(am, carData.carModel, ColorRGBA.Magenta);
+		Spatial carModel = LoadModelWrapper.create(am, carData.carModel, ColorRGBA.Magenta);
 		
 		//update the collision shape, NOTE: a static convex collision shape or hull might be faster here
 		CollisionShape colShape = CollisionShapeFactory.createDynamicMeshShape(carModel);

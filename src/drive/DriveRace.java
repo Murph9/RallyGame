@@ -35,7 +35,7 @@ import car.data.Car;
 import car.ray.RayCarControl;
 import game.App;
 import game.RaceMenu;
-import game.WireframeHighlighter;
+import game.LoadModelWrapper;
 import helper.H;
 import helper.Log;
 
@@ -319,7 +319,7 @@ public class DriveRace extends AbstractAppState {
 		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		
 	    //imported model
-		Spatial worldNode = WireframeHighlighter.create(as, "assets/staticworld/lakelooproad.blend", ColorRGBA.White);
+		Spatial worldNode = LoadModelWrapper.create(as, "assets/staticworld/lakelooproad.blend", ColorRGBA.White);
 		if (worldNode instanceof Node) {
 			Spatial s = ((Node) worldNode).getChild(0);
 			addWorldModel(rootNode, App.rally.getPhysicsSpace(), s, ifShadow);

@@ -19,7 +19,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 import game.App;
-import game.WireframeHighlighter;
+import game.LoadModelWrapper;
 
 public class StaticWorldBuilder extends World {
 
@@ -80,7 +80,7 @@ public class StaticWorldBuilder extends World {
 		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		
 	    //imported model
-		Spatial worldModel = WireframeHighlighter.create(as, world.name, ColorRGBA.White);
+		Spatial worldModel = LoadModelWrapper.create(as, world.name, ColorRGBA.White);
 		worldModel.scale(world.scale);
 		
 		CollisionShape col = CollisionShapeFactory.createMeshShape(worldModel);

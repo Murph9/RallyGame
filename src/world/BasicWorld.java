@@ -12,7 +12,7 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 
 import game.App;
-import game.WireframeHighlighter;
+import game.LoadModelWrapper;
 
 public class BasicWorld extends World {
 	
@@ -43,7 +43,7 @@ public class BasicWorld extends World {
 		startGeometry.setLocalTranslation(0, -0.1f, 0);
 		startGeometry.addControl(new RigidBodyControl(0));
 		
-		startGeometry = WireframeHighlighter.create(app.getAssetManager(), startGeometry, ColorRGBA.Green);
+		startGeometry = LoadModelWrapper.create(app.getAssetManager(), startGeometry, ColorRGBA.Green);
 		
 		this.rootNode.attachChild(startGeometry);
 		App.rally.getPhysicsSpace().add(startGeometry);

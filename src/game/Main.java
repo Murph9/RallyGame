@@ -139,8 +139,15 @@ public class Main extends SimpleApplication {
 		//Init the lemur mouse listener
 		getStateManager().attach(new MouseAppState(this));
 		
-		// Bloom for the wireframes
+
+		//Processors
 		FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
+		
+		//Wireframe style
+		EdgeMaskFilter emf = new EdgeMaskFilter();
+		fpp.addFilter(emf);
+
+		// Bloom for the wireframes
 		BloomFilter bloom = new BloomFilter();
 		bloom.setBlurScale(.5f);
 		bloom.setBloomIntensity(5);
