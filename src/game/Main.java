@@ -18,6 +18,7 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.post.Filter;
 import com.jme3.post.FilterPostProcessor;
 import com.jme3.post.filters.BloomFilter;
 import com.jme3.post.filters.FogFilter;
@@ -182,6 +183,8 @@ public class Main extends SimpleApplication {
 		
 		//profiling in jme 3.2 (TODO add physics engine stuff to this)
 //		getStateManager().attach(new DetailedProfilerState());
+
+		FilterManager fm = new FilterManager(App.rally.getInputManager(), new Filter[] {emf, bloom, fog});
 	}
 	
 	@Override
