@@ -14,10 +14,10 @@ public class EdgeMaskFilter extends Filter {
     private Pass normalPass;
     private float edgeWidth = 1.49f;
     private float edgeIntensity = 1.0f;
-    private float normalThreshold = 0.01f;
-    private float depthThreshold = 0.1f;
+    private float normalThreshold = 0.1f;
+    private float depthThreshold = 0.01f;
     private float normalSensitivity = 1.0f;
-    private float depthSensitivity = 10.0f;
+    private float depthSensitivity = 70.0f;
     private RenderManager renderManager;
     private ViewPort viewPort;
 
