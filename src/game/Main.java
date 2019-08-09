@@ -43,26 +43,7 @@ import world.lsystem.LSystemWorld;
 import world.track.TrackWorld;
 import world.wp.WP.DynamicType;
 
-////TODO Ideas for game modes:
-//being chased. (with them spawning all lightning sci-fi like?)
-//  time based
-//  score based (closeness to them)
-//  touch all of them in one run
-//    or get them all the same colour (like the pads in mario galaxy)
-//  get them to fall in a hole
-//  follow points for being close
-//the infinite road thing
-//  overtake as many as you can
-//  like the crew
-//    get away from the start
-//    stay on road at speed thing
-
-//kind of like the the snowboarding phone game, where you do challenges on the way down
-//	might work well going down one road
-
-//Using eclipse? then why isn't this the default file view:
-//http://stackoverflow.com/questions/3915961/how-to-view-hierarchical-package-structure-in-eclipse-package-explorer
-
+//Entry point to the project.
 
 @SuppressWarnings("unused")
 public class Main extends SimpleApplication {
