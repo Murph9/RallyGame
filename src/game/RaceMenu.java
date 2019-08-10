@@ -27,7 +27,7 @@ public class RaceMenu extends DriveMenu {
 		raceLabel = new Label("Race state?");
 		state.attachChild(raceLabel);
 		state.setLocalTranslation(H.screenTopLeft().subtract(new Vector3f(0,300,0)));
-		App.rally.getGuiNode().attachChild(state);
+		App.CUR.getGuiNode().attachChild(state);
 	}
 
 	public void setText(String text) {

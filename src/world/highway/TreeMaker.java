@@ -43,10 +43,10 @@ public class TreeMaker implements TileListener {
 		this.treeNodes = new HashMap<Vector3f, Node>();
 		
 		this.treeNode.setShadowMode(ShadowMode.CastAndReceive);
-		App.rally.getRootNode().attachChild(this.treeNode);
+		App.CUR.getRootNode().attachChild(this.treeNode);
 		
 		for (int i = 0; i < Tree_Strings.length; i++) {
-			Spatial spat = App.rally.getAssetManager().loadModel(Tree_Strings[i]);
+			Spatial spat = App.CUR.getAssetManager().loadModel(Tree_Strings[i]);
 			if (spat instanceof Node) {
 				for (Spatial s: ((Node) spat).getChildren()) {
 					this.treeGeoms[i] = s;
@@ -69,7 +69,7 @@ public class TreeMaker implements TileListener {
 			}
 			
 			for (Spatial c: n.getChildren()) {
-				App.rally.getPhysicsSpace().add(c);
+				App.CUR.getPhysicsSpace().add(c);
 			}
 			this.treeNode.attachChild(this.treeNodes.get(pos));
 		} else {
@@ -94,7 +94,7 @@ public class TreeMaker implements TileListener {
 				s.setLocalTranslation(newPos);
 				s.addControl(new RigidBodyControl(0));
 				node.attachChild(s);
-				App.rally.getPhysicsSpace().add(s);
+				App.CUR.getPhysicsSpace().add(s);
 			}
 			GeometryBatchFactory.optimize(node);
 		}
@@ -109,7 +109,7 @@ public class TreeMaker implements TileListener {
 			return true;
 		}
 		for (Spatial c: n.getChildren()) {
-			App.rally.getPhysicsSpace().remove(c);
+			App.CUR.getPhysicsSpace().remove(c);
 		}
 		this.treeNode.detachChild(n);
 		return true; 
@@ -121,6 +121,6 @@ public class TreeMaker implements TileListener {
 	public String imageHeightmapRequired(int x, int z) { return null; }
 
 	public void cleanup() {
-		App.rally.getRootNode().detachChild(treeNode);
+		App.CUR.getRootNode().detachChild(treeNode);
 	}
 }

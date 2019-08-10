@@ -96,7 +96,7 @@ public class DriveAtAI extends CarAI {
 		//TODO some kind of ray cast so they can drive around things properly
 		
 		//hack so they don't lose too bad on dynamic tracks
-		if (App.rally.drive.world.getType() == WorldType.DYNAMIC
+		if (App.CUR.drive.world.getType() == WorldType.DYNAMIC
 				&& atPos.y - pos.y > 50 || atPos.subtract(pos).length() > 500) {
 			car.setPhysicsLocation(atPos.add(4, 1, 0)); //spawn 3 up and left of me
 			car.setLinearVelocity(driveAtThis.getLinearVelocity()); //and give them my speed

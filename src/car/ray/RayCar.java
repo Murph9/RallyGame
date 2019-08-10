@@ -84,7 +84,7 @@ public class RayCar implements PhysicsTickListener {
 		
 		// Validate that rest suspension position is within min and max
 		Vector3f grav = new Vector3f();
-		App.rally.bullet.getPhysicsSpace().getGravity(grav); //becuase the rigid body doesn't have gravity yet
+		App.CUR.getPhysicsSpace().getGravity(grav); //becuase the rigid body doesn't have gravity yet
 
 		float quarterMassForce = Math.abs(grav.y)*carData.mass/4f;
 		for (int i  = 0; i < wheels.length; i++) {
@@ -139,14 +139,14 @@ public class RayCar implements PhysicsTickListener {
 			final FirstRayHitDetails col = raycaster.castRay(space, rbc, startPos, dir);
 			
 			if (DEBUG_SUS) {
-				App.rally.enqueue(() -> {
-					HelperObj.use(App.rally.getRootNode(), "sus_wheel_radius"+w_id,
-							H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.Blue, dir.normalize().mult(carData.wheelData[w_id].radius), startPos));
-					HelperObj.use(App.rally.getRootNode(), "sus"+w_id,
-						H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.Cyan, dir.normalize().mult(susTravel), startPos.add(dir.normalize().mult(carData.wheelData[w_id].radius))));
+				App.CUR.enqueue(() -> {
+					HelperObj.use(App.CUR.getRootNode(), "sus_wheel_radius"+w_id,
+							H.makeShapeArrow(App.CUR.getAssetManager(), ColorRGBA.Blue, dir.normalize().mult(carData.wheelData[w_id].radius), startPos));
+					HelperObj.use(App.CUR.getRootNode(), "sus"+w_id,
+						H.makeShapeArrow(App.CUR.getAssetManager(), ColorRGBA.Cyan, dir.normalize().mult(susTravel), startPos.add(dir.normalize().mult(carData.wheelData[w_id].radius))));
 					
-					HelperObj.use(App.rally.getRootNode(), "col_point"+w_id,
-						H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Red, wheels[w_id].curBasePosWorld, 0.01f));
+					HelperObj.use(App.CUR.getRootNode(), "col_point"+w_id,
+						H.makeShapeBox(App.CUR.getAssetManager(), ColorRGBA.Red, wheels[w_id].curBasePosWorld, 0.01f));
 				});
 			}
 			
@@ -221,12 +221,12 @@ public class RayCar implements PhysicsTickListener {
 			rbc.applyImpulse(f, wheels[w_id].curBasePosWorld.subtract(w_pos)); 
 			
 			if (DEBUG_SUS2) {
-				App.rally.enqueue(() -> {
-					HelperObj.use(App.rally.getRootNode(), "normalforcearrow" + w_id, 
-						H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.Black, wheels[w_id].hitNormalInWorld, wheels[w_id].curBasePosWorld));
+				App.CUR.enqueue(() -> {
+					HelperObj.use(App.CUR.getRootNode(), "normalforcearrow" + w_id, 
+						H.makeShapeArrow(App.CUR.getAssetManager(), ColorRGBA.Black, wheels[w_id].hitNormalInWorld, wheels[w_id].curBasePosWorld));
 					
-					HelperObj.use(App.rally.getRootNode(), "normalforcearrow inv" + w_id,
-						H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.White, wheels[w_id].hitNormalInWorld.mult(-denominator), wheels[w_id].curBasePosWorld));
+					HelperObj.use(App.CUR.getRootNode(), "normalforcearrow inv" + w_id,
+						H.makeShapeArrow(App.CUR.getAssetManager(), ColorRGBA.White, wheels[w_id].hitNormalInWorld.mult(-denominator), wheels[w_id].curBasePosWorld));
 					
 //					HelperObj.use(App.rally.getRootNode(), "forcearrow" + w_id, 
 //						H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.Cyan, f.mult(1/(carData.mass)), vecLocalToWorld(localPos)));
@@ -351,9 +351,9 @@ public class RayCar implements PhysicsTickListener {
 		rbc.applyCentralForce(totalNeutral.add(0, dragDown, 0)); //apply downforce after
 				
 		if (DEBUG_DRAG) {
-			App.rally.enqueue(() -> {
-				HelperObj.use(App.rally.getRootNode(), "dragarrow",
-					H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.Black, totalNeutral, w_pos));
+			App.CUR.enqueue(() -> {
+				HelperObj.use(App.CUR.getRootNode(), "dragarrow",
+					H.makeShapeArrow(App.CUR.getAssetManager(), ColorRGBA.Black, totalNeutral, w_pos));
 			});
 		}
 	}

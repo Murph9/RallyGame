@@ -63,7 +63,7 @@ public class CarEditor extends Container {
 		}
 		
 		//and scroll listener
-		InputManager i = App.rally.getInputManager();
+		InputManager i = App.CUR.getInputManager();
 		i.addMapping("scroll", new MouseAxisTrigger(MouseInput.AXIS_WHEEL, true));
 		i.addMapping("scroll_neg", new MouseAxisTrigger(MouseInput.AXIS_WHEEL, false));
 		i.addListener(actionListener, "scroll");

@@ -1,6 +1,7 @@
 package world;
 
 import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.math.Matrix3f;
@@ -14,7 +15,7 @@ import helper.Log;
 
 public abstract class World extends AbstractAppState {
 
-	protected Application app;
+	protected SimpleApplication app;
 	protected Node rootNode;
 	
 	public World (String name) {
@@ -24,9 +25,9 @@ public abstract class World extends AbstractAppState {
 	@Override
 	public void initialize(AppStateManager stateManager, Application app) {
 		super.initialize(stateManager, app);
-		this.app = app;
+		this.app = (SimpleApplication)app;
 		
-		App.rally.getRootNode().attachChild(this.rootNode);
+		this.app.getRootNode().attachChild(this.rootNode);
 		Log.e("initialize() world: " + rootNode.getName());
 	}
 
@@ -50,7 +51,7 @@ public abstract class World extends AbstractAppState {
 		this.initialized = false;
 		app = null;
 		
-		App.rally.getRootNode().detachChild(this.rootNode);
+		App.CUR.getRootNode().detachChild(this.rootNode);
 		
 		Log.e("cleanup() world: " + rootNode.getName());
 		this.rootNode = null;

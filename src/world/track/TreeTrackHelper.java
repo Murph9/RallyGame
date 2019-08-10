@@ -35,7 +35,7 @@ public class TreeTrackHelper {
 		this.treeCount = treeCount;
 		this.worldSize = worldSize*world.getLocalScale().x;
 		for (int i = 0; i < Tree_Strings.length; i++) {
-			Spatial spat = App.rally.getAssetManager().loadModel(Tree_Strings[i]);
+			Spatial spat = App.CUR.getAssetManager().loadModel(Tree_Strings[i]);
 			if (spat instanceof Node) {
 				for (Spatial s: ((Node) spat).getChildren()) {
 					this.treeGeoms[i] = s;
@@ -60,7 +60,7 @@ public class TreeTrackHelper {
 			s.setLocalTranslation(newPos);
 			s.addControl(new RigidBodyControl(0));
 			node.attachChild(s);
-			App.rally.getPhysicsSpace().add(s);
+			App.CUR.getPhysicsSpace().add(s);
 		}
 		GeometryBatchFactory.optimize(node);
 		

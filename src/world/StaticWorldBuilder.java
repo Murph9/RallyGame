@@ -62,7 +62,7 @@ public class StaticWorldBuilder extends World {
 
 	@Override
 	public void cleanup() {
-		removeStaticWorld(rootNode, App.rally.getPhysicsSpace());
+		removeStaticWorld(rootNode, ((App)this.app).getPhysicsSpace());
 		super.cleanup();
 	}
 	
@@ -74,7 +74,7 @@ public class StaticWorldBuilder extends World {
 	
 	////making the world exist
 	public void addStaticWorld() {
-		AssetManager as = App.rally.getAssetManager();
+		AssetManager as = App.CUR.getAssetManager();
 		
 		Material mat = new Material(as, "Common/MatDefs/Misc/ShowNormals.j3md");
 		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
@@ -90,7 +90,7 @@ public class StaticWorldBuilder extends World {
 		landscapes.add(landscape);
 		models.add(worldModel);
 		
-		App.rally.getPhysicsSpace().add(landscape);
+		((App)this.app).getPhysicsSpace().add(landscape);
 		rootNode.attachChild(worldModel);
 	}
 	

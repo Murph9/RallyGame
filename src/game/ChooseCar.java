@@ -50,33 +50,33 @@ public class ChooseCar extends AbstractAppState {
 	public void initialize(AppStateManager stateManager, Application app) {
 		super.initialize(stateManager, app);
 
-		App.rally.bullet.setEnabled(true);
+		((App)app).setPhysicsSpaceEnabled(true);
 		
 		//init player
 		Vector3f start = worldType.start;
 		Matrix3f dir = new Matrix3f();
 
 		world = new StaticWorldBuilder(worldType);
-		App.rally.getStateManager().attach(world);
+		App.CUR.getStateManager().attach(world);
 		
-		cb = new CarBuilder();
+		cb = new CarBuilder((App)app);
 		app.getStateManager().attach(cb);
 		cb.addCar(0, car, start, dir, true, null);
 
 		//make camera
-		camera = new BasicCamera("Camera", App.rally.getCamera(), new Vector3f(0,3,7), new Vector3f(0,1.2f, 0));
-		App.rally.getStateManager().attach(camera);
+		camera = new BasicCamera("Camera", App.CUR.getCamera(), new Vector3f(0,3,7), new Vector3f(0,1.2f, 0));
+		App.CUR.getStateManager().attach(camera);
 		
 		//init gui
 		//info window first so the event listeners can delete it
 		Container infoWindow = new Container();
-        App.rally.getGuiNode().attachChild(infoWindow);
+        App.CUR.getGuiNode().attachChild(infoWindow);
         infoWindow.setLocalTranslation(H.screenTopLeft());
 		label = new Label(getCarInfoText(car));
         infoWindow.addChild(label, 0, 0);
 		
 		Container myWindow = new Container();
-		App.rally.getGuiNode().attachChild(myWindow);
+		App.CUR.getGuiNode().attachChild(myWindow);
 		myWindow.setLocalTranslation(300, 300, 0);
 		myWindow.addChild(new Label("Choose Car"), 0, 0);
 		int i = 0;
@@ -104,15 +104,15 @@ public class ChooseCar extends AbstractAppState {
             @Override
             public void execute( Button source ) {
             	chooseCar();
-            	App.rally.getGuiNode().detachChild(myWindow);
-            	App.rally.getGuiNode().detachChild(infoWindow);
+            	App.CUR.getGuiNode().detachChild(myWindow);
+            	App.CUR.getGuiNode().detachChild(infoWindow);
             }
         });
         
         Vector3f size = new Vector3f(400,400,0);
 		graph = new PowerCurveGraph(this.cb.get(0), size);
 		graph.setLocalTranslation(H.screenBottomRight().subtract(size.add(5,-25,0)));
-		App.rally.getGuiNode().attachChild(graph);
+		App.CUR.getGuiNode().attachChild(graph);
 	}
 
 
@@ -143,16 +143,16 @@ public class ChooseCar extends AbstractAppState {
 
 
 	public void cleanup() {
-		App.rally.getStateManager().detach(cb);
+		App.CUR.getStateManager().detach(cb);
 		cb = null;
 		
-		App.rally.getStateManager().detach(world);
+		App.CUR.getStateManager().detach(world);
 		world = null;
 		
-		App.rally.getStateManager().detach(camera);
+		App.CUR.getStateManager().detach(camera);
 		camera = null;
 		
-		App.rally.getGuiNode().detachChild(graph);
+		App.CUR.getGuiNode().detachChild(graph);
 		graph = null;
 	}
 
@@ -160,7 +160,7 @@ public class ChooseCar extends AbstractAppState {
 	//UI stuff
 	public void chooseCar() {
 		if (car == null) { Log.p("no return value for ChooseCar()"); };
-		App.rally.next(this);
+		App.CUR.next(this);
 	}
 	public Car getCarType() {
 		return car;

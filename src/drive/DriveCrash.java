@@ -37,7 +37,7 @@ public class DriveCrash extends DriveBase {
 	public void update(float tpf) {
 		super.update(tpf);
 		
-		if (this.cb.getCount() < maxCount && App.rally.frameCount % 60 == 0) {
+		if (this.cb.getCount() < maxCount && App.CUR.frameCount % 60 == 0) {
 			Vector3f spawn = H.randFromArray(spawns);
 			this.cb.addCar(nextId, them, spawn, world.getStartRot(), false, null);
 			nextId++;

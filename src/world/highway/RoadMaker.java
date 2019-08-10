@@ -89,8 +89,8 @@ public class RoadMaker implements TileListener {
 	public boolean tileLoaded(TerrainChunk chunk) {
 		totalLoaded++;
 		
-		if (App.rally.IF_DEBUG)
-			App.rally.getRootNode().attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Green, chunk.getLocalTranslation().add(0,110,0), 2));
+		if (App.CUR.IF_DEBUG)
+			App.CUR.getRootNode().attachChild(H.makeShapeBox(App.CUR.getAssetManager(), ColorRGBA.Green, chunk.getLocalTranslation().add(0,110,0), 2));
 		
 		//terrain needs to load all of its tiles before we will use the grow method
 		//this prevents the order of the tiles screwing with placements
@@ -136,8 +136,8 @@ public class RoadMaker implements TileListener {
 		RoadMesh m = new RoadMesh(5, 2, Arrays.asList(newPoints));
 		world.generateRoad(m);
 		
-		App.rally.getRootNode().attachChild(H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.White, q.mult(new Vector3f(10,0,0)), lastPoints[3]));
-		App.rally.getRootNode().attachChild(H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.Red, newPoints[3].subtract(newPoints[0]), newPoints[0]));
+		App.CUR.getRootNode().attachChild(H.makeShapeArrow(App.CUR.getAssetManager(), ColorRGBA.White, q.mult(new Vector3f(10,0,0)), lastPoints[3]));
+		App.CUR.getRootNode().attachChild(H.makeShapeArrow(App.CUR.getAssetManager(), ColorRGBA.Red, newPoints[3].subtract(newPoints[0]), newPoints[0]));
 		
 		lastPoints = newPoints;
 		

@@ -39,7 +39,7 @@ public class PowerCurveGraph extends Container {
 				this.detachChild(g);
 		things = new LinkedList<Spatial>();
 		
-		BitmapFont guiFont = App.rally.getAssetManager().loadFont("Interface/Fonts/Default.fnt");
+		BitmapFont guiFont = App.CUR.getAssetManager().loadFont("Interface/Fonts/Default.fnt");
 
 		Vector3f size = getPreferredSize();
 		Vector3f topleftPadding = new Vector3f(size.x*0.1f, size.y*0.1f, 0);
@@ -53,13 +53,13 @@ public class PowerCurveGraph extends Container {
 		//grid lines
 		for (int i = 0; i <= 3; i++) {
 			Vector3f start = new Vector3f(topLeft.x, topLeft.y+((bottomRight.y-topLeft.y)*i/3), 0);
-			Geometry g = H.makeShapeLine(App.rally.getAssetManager(), ColorRGBA.Gray, start, start.add(new Vector3f(sx, 0, 0)));
+			Geometry g = H.makeShapeLine(App.CUR.getAssetManager(), ColorRGBA.Gray, start, start.add(new Vector3f(sx, 0, 0)));
 			this.attachChild(g);
 			this.things.add(g);
 		}
 		for (int i = 0; i <= car.e_torque.length; i++) {
 			Vector3f start = new Vector3f(topLeft.x+(sx*i/car.e_torque.length), topLeft.y, 0);
-			Geometry g = H.makeShapeLine(App.rally.getAssetManager(), ColorRGBA.Gray, start, start.add(new Vector3f(0, -sy, 0)));
+			Geometry g = H.makeShapeLine(App.CUR.getAssetManager(), ColorRGBA.Gray, start, start.add(new Vector3f(0, -sy, 0)));
 			this.attachChild(g);
 			this.things.add(g);
 		}
@@ -74,13 +74,13 @@ public class PowerCurveGraph extends Container {
 		//actual values
 		for (int i = 1; i < car.e_torque.length; i++) {
 			Vector3f torque = new Vector3f(topLeft.x+i*(sx/car.e_torque.length), bottomRight.y+(sy*car.e_torque[i]/maxTorque), 0);
-			Geometry g = H.makeShapeLine(App.rally.getAssetManager(), ColorRGBA.Blue, lastTorquePos, torque);
+			Geometry g = H.makeShapeLine(App.CUR.getAssetManager(), ColorRGBA.Blue, lastTorquePos, torque);
 			this.attachChild(g);
 			this.things.add(g);
 			lastTorquePos = torque;
 			
 			Vector3f kw = new Vector3f(topLeft.x+i*(sx/car.e_torque.length), bottomRight.y+(sy*car.e_torque[i]*i*1000/(9549*maxKW)), 0);
-			Geometry g2 = H.makeShapeLine(App.rally.getAssetManager(), ColorRGBA.Red, lastKWPos, kw);
+			Geometry g2 = H.makeShapeLine(App.CUR.getAssetManager(), ColorRGBA.Red, lastKWPos, kw);
 			this.attachChild(g2);
 			this.things.add(g2);
 			lastKWPos = kw;

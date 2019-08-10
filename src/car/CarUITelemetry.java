@@ -2,7 +2,9 @@ package car;
 
 import java.text.DecimalFormat;
 
+import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
+import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
@@ -21,11 +23,11 @@ import car.ray.CarDataConst;
 import car.ray.RayCarControl;
 import car.ray.RayWheel;
 import game.App;
-import game.Main;
 import helper.H;
 
 public class CarUITelemetry extends AbstractAppState {
 
+	private App app;
 	private RayCarControl p;
 	
 	private Node rootNode;
@@ -43,22 +45,29 @@ public class CarUITelemetry extends AbstractAppState {
 	private BitmapText statsText;
 		
 	public CarUITelemetry(RayCarControl p) {
-		Main r = App.rally;
+		this.rootNode = new Node("telemetry");
 		this.p = p;
-				
-		rootNode = new Node("telemetry");
+	}
+	
+	@Override
+	public void initialize(AppStateManager stateManager, Application app) {
+		super.initialize(stateManager, app);
+
+		this.app = (App)app;
 
 		//set the positions of the wheel grid
-		int height = App.rally.getCamera().getHeight();
+		int height = app.getCamera().getHeight();
 		w[0] = new WheelUI(new Vector3f(80, height*0.9f, 0));
 		w[1] = new WheelUI(new Vector3f(200, height*0.9f, 0));
 		w[2] = new WheelUI(new Vector3f(80, height*0.75f, 0));
 		w[3] = new WheelUI(new Vector3f(200, height*0.75f, 0));
 		
-		makeTelemetry(r.getAssetManager());
+		makeTelemetry((App)app);
 	}
 	
-	private void makeTelemetry(AssetManager am) {
+	private void makeTelemetry(App app) {
+		AssetManager am = app.getAssetManager();
+
 		Material white = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
 		white.setColor("Color", ColorRGBA.White);
 		white.getAdditionalRenderState().setLineWidth(3);
@@ -66,7 +75,7 @@ public class CarUITelemetry extends AbstractAppState {
 		black.setColor("Color", ColorRGBA.Black);
 		black.getAdditionalRenderState().setLineWidth(3);
 		
-		BitmapFont guiFont = App.rally.getAssetManager().loadFont("Interface/Fonts/Default.fnt");
+		BitmapFont guiFont = am.loadFont("Interface/Fonts/Default.fnt");
 		
 		Box b = new Box(20, 20, 1);
 		Line l = new Line(new Vector3f(0,0,10), new Vector3f(1,0,10));
@@ -132,7 +141,7 @@ public class CarUITelemetry extends AbstractAppState {
 		rootNode.attachChild(statsText);
 		
 		//g force
-		gcenter = new Vector3f(100, App.rally.getCamera().getHeight()*0.5f, 0);
+		gcenter = new Vector3f(100, app.getCamera().getHeight()*0.5f, 0);
 		
 		b = new Box(5, 5, 1);
 		g1 = new Geometry("g-circle1", b);
@@ -158,9 +167,9 @@ public class CarUITelemetry extends AbstractAppState {
 	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
 		if (enabled) {
-			App.rally.getGuiNode().attachChild(rootNode);			
+			app.getGuiNode().attachChild(rootNode);			
 		} else {
-			App.rally.getGuiNode().detachChild(rootNode);			
+			app.getGuiNode().detachChild(rootNode);			
 		}
 	}
 	
@@ -178,7 +187,7 @@ public class CarUITelemetry extends AbstractAppState {
 			WheelUI w = this.w[i];
 			RayWheel wheel = p.getWheel(i).getRayWheel();
 			
-			Material m = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+			Material m = new Material(app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 			w.gripValue.setText(String.format("%.2f", wheel.skidFraction));
 			w.wheelRot.setText(String.format("%.2f", wheel.radSec));
 			w.engineTorque.setText(Force_Format.format(Math.abs(p.getWheelTorque(i))));
@@ -226,7 +235,8 @@ public class CarUITelemetry extends AbstractAppState {
 	}
 
 	public void cleanup() {
-		App.rally.getGuiNode().detachChild(rootNode);
+		app.getGuiNode().detachChild(rootNode);
+		app = null;
 	}
 	
 	class WheelUI {

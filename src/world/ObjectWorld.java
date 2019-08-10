@@ -127,7 +127,7 @@ public class ObjectWorld extends World {
 		
 		addedObjects.add(f);
 		rootNode.attachChild(f);
-		App.rally.getPhysicsSpace().add(f);
+		((App)this.app).getPhysicsSpace().add(f);
 		
 		for (int i = 0; i < COUNT_A_TILE; i++) {
 			Spatial s = geomI.clone();
@@ -139,7 +139,7 @@ public class ObjectWorld extends World {
 			
 			addedObjects.add(s);
 			rootNode.attachChild(s);
-			App.rally.getPhysicsSpace().add(s);
+			((App)this.app).getPhysicsSpace().add(s);
 		}
 		
 		//If you remove this line: fps = fps/n for large n
@@ -153,14 +153,14 @@ public class ObjectWorld extends World {
 
 	@Override
 	public void update(float tpf) {
-		placeTiles(App.rally.getCamera().getLocation());
+		placeTiles(((App)this.app).getCamera().getLocation());
 	}
 
 	@Override
 	public void reset() {
 		rootNode.detachAllChildren();
 		for (Spatial g: addedObjects) {
-			App.rally.getPhysicsSpace().remove(g); //not really sure why removing the rootNode thing doesn't work from the loop
+			((App)this.app).getPhysicsSpace().remove(g); //not really sure why removing the rootNode thing doesn't work from the loop
 		}
 		addedObjects.clear();
 		
@@ -176,7 +176,7 @@ public class ObjectWorld extends World {
 		super.cleanup();
 		
 		for (Spatial g: addedObjects) {
-			App.rally.getPhysicsSpace().remove(g); //not really sure why removing the rootNode thing doesn't work from the loop
+			((App)this.app).getPhysicsSpace().remove(g); //not really sure why removing the rootNode thing doesn't work from the loop
 		}
 	}
 }

@@ -1,3 +1,4 @@
+
 package terrainWorld;
 
 import com.jme3.app.SimpleApplication;
@@ -637,7 +638,7 @@ public abstract class Terrain extends AbstractAppState implements Closeable
             	
             	rootNode.attachChild(boxNode);
             	
-            	if (App.rally.IF_DEBUG)
+            	if (((App)app).IF_DEBUG)
             		GeometryBatchFactory.optimize(boxNode);
             });
         });
@@ -658,9 +659,9 @@ public abstract class Terrain extends AbstractAppState implements Closeable
     	Vector3f v2 = ht.v.subtract(ht.tc.getLocalTranslation().mult(1/ht.tc.getWorldScale().x));
     	ht.tc.setHeight(H.v3tov2fXZ(v2), ht.height/this.worldHeight);
 
-    	if (App.rally.IF_DEBUG) {
+    	if (((App)app).IF_DEBUG) {
     		Log.p("Set height", ht.v, ht.tc);
-    		boxNode.attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Brown, ht.v, 0.1f));
+    		boxNode.attachChild(H.makeShapeBox(app.getAssetManager(), ColorRGBA.Brown, ht.v, 0.1f));
     	}
     }
 

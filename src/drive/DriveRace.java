@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
@@ -44,6 +45,7 @@ public class DriveRace extends AbstractAppState {
 	//TODO:
 	//- better AI, otherwise this actually sucks
 	
+	private SimpleApplication app;
 	public RaceMenu menu;
 	
 	//things that should be in a world class
@@ -89,17 +91,19 @@ public class DriveRace extends AbstractAppState {
 	
 	@Override
     public void initialize(AppStateManager stateManager, Application app) {
-    	super.initialize(stateManager, app);
+		super.initialize(stateManager, app);
+		this.app = (SimpleApplication)app;
+
     	nextState();
     	
-    	Collection<PhysicsRigidBody> list = App.rally.getPhysicsSpace().getRigidBodyList();
+    	Collection<PhysicsRigidBody> list = App.CUR.getPhysicsSpace().getRigidBodyList();
     	if (list.size() > 0) {
     		Log.p("some one didn't clean up after themselves..." + list.size());
     		for (PhysicsRigidBody r: list)
-    			App.rally.getPhysicsSpace().remove(r);
+    			App.CUR.getPhysicsSpace().remove(r);
     	}
     	
-		App.rally.getRootNode().attachChild(rootNode);
+		this.app.getRootNode().attachChild(rootNode);
 		addTrack(true);
     	
 		worldStart = checkpoints[checkpoints.length - 1];
@@ -114,7 +118,7 @@ public class DriveRace extends AbstractAppState {
 		}
     	
 		//buildCars
-		this.cb = new CarBuilder();
+		this.cb = new CarBuilder((App)app);
 		cb.addCar(0, car, worldStarts[0], worldRot, true, null);
 		app.getStateManager().attach(cb);
 		app.getStateManager().attach(menu);
@@ -126,11 +130,11 @@ public class DriveRace extends AbstractAppState {
     		this.cb.addCar(i + 1, themType, worldStarts[i+1], worldRot, false, (c,s) -> new RaceAI(c, s, this));
 		
 		//initCameras
-		camera = new CarCamera("Camera", App.rally.getCamera(), cb.get(0));
-		App.rally.getStateManager().attach(camera);
+		camera = new CarCamera("Camera", App.CUR.getCamera(), cb.get(0));
+		stateManager.attach(camera);
 		app.getInputManager().addRawInputListener(camera);
 		
-		App.rally.bullet.setEnabled(true);
+		((App)app).setPhysicsSpaceEnabled(true);
 		
 		Object[] a = cb.getAll().toArray();
 		cars = Arrays.copyOf(a, a.length, RayCarControl[].class);
@@ -239,7 +243,7 @@ public class DriveRace extends AbstractAppState {
 		for (int i = 0; i < cars.length; i++) {
 			Vector3f pos = cars[i].getPhysicsLocation().add(0,3,0);
 			Vector3f dir = checkpoints[carCheckpointNext[i]].subtract(pos);
-			carArrows[i] = H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.Cyan, dir, pos);
+			carArrows[i] = H.makeShapeArrow(App.CUR.getAssetManager(), ColorRGBA.Cyan, dir, pos);
 			debugNode.attachChild(carArrows[i]);
 		}
 		rootNode.attachChild(debugNode);
@@ -278,7 +282,7 @@ public class DriveRace extends AbstractAppState {
 		Log.p("cleaning driverace class");
 		
 		for (RigidBodyControl r: landscapes) {
-			App.rally.getPhysicsSpace().remove(r);
+			App.CUR.getPhysicsSpace().remove(r);
 		}
 		landscapes.clear();
 		for (Spatial s: models) {
@@ -286,33 +290,33 @@ public class DriveRace extends AbstractAppState {
 		}
 		models.clear();
 		
-		App.rally.getStateManager().detach(cb);
+		App.CUR.getStateManager().detach(cb);
 		cb = null;
 		
-		App.rally.getStateManager().detach(menu);
+		App.CUR.getStateManager().detach(menu);
 		menu = null;
 		
-		App.rally.getStateManager().detach(uiNode);
+		App.CUR.getStateManager().detach(uiNode);
 		uiNode = null;
 				
-		App.rally.getStateManager().detach(camera);
-		App.rally.getInputManager().removeRawInputListener(camera);
+		App.CUR.getStateManager().detach(camera);
+		App.CUR.getInputManager().removeRawInputListener(camera);
 		camera = null;
 		
-		App.rally.getRootNode().detachChild(rootNode);
+		App.CUR.getRootNode().detachChild(rootNode);
 	}
 	
 	@Override
 	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
-		App.rally.bullet.setEnabled(enabled);
+		((App)app).setPhysicsSpaceEnabled(enabled);
 		this.camera.setEnabled(enabled);
 		this.cb.setEnabled(enabled);
 	}
 	
 	//making the world exist
 	public void addTrack(boolean ifShadow) {
-		AssetManager as = App.rally.getAssetManager();
+		AssetManager as = App.CUR.getAssetManager();
 		List<Vector3f> _checkpoints = new LinkedList<Vector3f>();
 		
 		Material mat = new Material(as, "Common/MatDefs/Misc/ShowNormals.j3md");
@@ -322,7 +326,7 @@ public class DriveRace extends AbstractAppState {
 		Spatial worldNode = LoadModelWrapper.create(as, "assets/staticworld/lakelooproad.blend", ColorRGBA.White);
 		if (worldNode instanceof Node) {
 			Spatial s = ((Node) worldNode).getChild(0);
-			addWorldModel(rootNode, App.rally.getPhysicsSpace(), s, ifShadow);
+			addWorldModel(rootNode, App.CUR.getPhysicsSpace(), s, ifShadow);
 			for (Spatial points: ((Node)s).getChildren()) {
 				if (points.getName().equals("Points")) {
 					for (Spatial checkpoint: ((Node)points).getChildren()) {
@@ -332,7 +336,7 @@ public class DriveRace extends AbstractAppState {
 			}
 		} else {
 			Geometry worldModel = (Geometry) worldNode;
-			addWorldModel(rootNode, App.rally.getPhysicsSpace(), worldModel, ifShadow);
+			addWorldModel(rootNode, App.CUR.getPhysicsSpace(), worldModel, ifShadow);
 		}
 		
 		checkpoints = _checkpoints.toArray(new Vector3f[_checkpoints.size()-1]);

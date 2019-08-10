@@ -53,7 +53,7 @@ public class LSystemWorld extends World {
 		startBox.addControl(new RigidBodyControl(0));
 		
 		this.rootNode.attachChild(startBox);
-		App.rally.getPhysicsSpace().add(startBox);
+		App.CUR.getPhysicsSpace().add(startBox);
 	}
 
 	@Override

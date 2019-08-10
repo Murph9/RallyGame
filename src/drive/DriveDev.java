@@ -32,16 +32,16 @@ public class DriveDev extends DriveBase {
     	//init input gui
 		carEditor = new CarEditor(this.cb.get(0), (data) -> { reloadCar(data);}, (car) -> { return resetCar(car); });
 		carEditor.setLocalTranslation(H.screenTopLeft().add(0, -20, 0));
-		App.rally.getGuiNode().attachChild(carEditor);
+		App.CUR.getGuiNode().attachChild(carEditor);
 		
 		worldEditor = new WorldEditor((a) -> { reloadWorld(a); });
 		worldEditor.setLocalTranslation(H.screenTopRight().add(-worldEditor.width, 0, 0));
-		App.rally.getGuiNode().attachChild(worldEditor);
+		App.CUR.getGuiNode().attachChild(worldEditor);
 		
 		Vector3f size = new Vector3f(400,400,0);
 		wheelGraphs = new TractionCurveGraph(this.cb.get(0), size);
 		wheelGraphs.setLocalTranslation(H.screenBottomRight().subtract(size.add(-5,-25,0)));
-		App.rally.getGuiNode().attachChild(wheelGraphs);
+		App.CUR.getGuiNode().attachChild(wheelGraphs);
 	}
 	
 	public void update(float tpf) {
@@ -63,9 +63,9 @@ public class DriveDev extends DriveBase {
 	
 	public void reloadWorld(World world) {
 		//reload new world
-		App.rally.getStateManager().detach(this.world);
+		App.CUR.getStateManager().detach(this.world);
 		this.world = world;
-		App.rally.getStateManager().attach(this.world);
+		App.CUR.getStateManager().attach(this.world);
 		
 		//reset car
 		this.cb.get(0).setPhysicsLocation(world.getStartPos());
@@ -76,8 +76,8 @@ public class DriveDev extends DriveBase {
 	@Override
 	public void cleanup() {
 		super.cleanup();
-		App.rally.getGuiNode().detachChild(carEditor);
-		App.rally.getGuiNode().detachChild(worldEditor);
-		App.rally.getGuiNode().detachChild(wheelGraphs);
+		App.CUR.getGuiNode().detachChild(carEditor);
+		App.CUR.getGuiNode().detachChild(worldEditor);
+		App.CUR.getGuiNode().detachChild(wheelGraphs);
 	}
 }

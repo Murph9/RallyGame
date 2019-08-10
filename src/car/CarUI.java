@@ -88,7 +88,7 @@ public class CarUI extends BaseAppState {
 	}
 	@Override
 	protected void initialize(Application app) {
-		Main r = (Main)app;
+		App r = (App)app;
 
 		BitmapFont guiFont = app.getAssetManager().loadFont("Interface/Fonts/Default.fnt");
 		AppSettings settings = app.getContext().getSettings();
@@ -115,13 +115,13 @@ public class CarUI extends BaseAppState {
 
 		/////////////
 		//telemetry
-		InputManager i = App.rally.getInputManager();
+		InputManager i = r.getInputManager();
 		
 		i.addMapping("Telemetry", new KeyTrigger(KeyInput.KEY_HOME));
 		i.addListener(actionListener, "Telemetry");
 		
 		telemetry = new CarUITelemetry(p);
-		App.rally.getStateManager().attach(telemetry);		
+		app.getStateManager().attach(telemetry);		
 	}
 
 	private void makeSpeedo(AssetManager am, AppSettings settings) {

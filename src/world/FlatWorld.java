@@ -46,7 +46,7 @@ public class FlatWorld extends World {
 		startGeometry = LoadModelWrapper.create(app.getAssetManager(), startGeometry, ColorRGBA.Green);
 		
 		this.rootNode.attachChild(startGeometry);
-		App.rally.getPhysicsSpace().add(startGeometry);
+		((App)this.app).getPhysicsSpace().add(startGeometry);
 	}
 	
 	@Override
@@ -58,7 +58,7 @@ public class FlatWorld extends World {
 	public void update(float tpf) {
 		//TODO mod 1000 the car pos, so the grounds bumps don't occur
 		
-		Vector3f pos = App.rally.getCamera().getLocation();
+		Vector3f pos = App.CUR.getCamera().getLocation();
 		pos.y = 0;
 		startGeometry.setLocalTranslation(pos);
 		startGeometry.getControl(RigidBodyControl.class).setPhysicsLocation(pos);
@@ -66,6 +66,8 @@ public class FlatWorld extends World {
 	
 	public void cleanup() {
 		this.rootNode.detachChild(startGeometry);
-		App.rally.getPhysicsSpace().remove(startGeometry);
+		((App)this.app).getPhysicsSpace().remove(startGeometry);
+
+		super.cleanup();
 	}
 }

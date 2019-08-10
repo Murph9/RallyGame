@@ -184,7 +184,7 @@ public class Roads {
 	private void drawMeAnArrow(Node rootNode, Vector3f start, Vector3f dir) {  
 		Arrow arrow = new Arrow(dir);
 		Geometry g = new Geometry("coordinate axis", arrow);
-		Material mat = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+		Material mat = new Material(App.CUR.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 		mat.getAdditionalRenderState().setWireframe(true);
 		mat.setColor("Color", ColorRGBA.Green);
 		g.setMaterial(mat);
@@ -197,7 +197,7 @@ public class Roads {
 	private void drawMeAVerySmallBox(Node rootNode, Vector3f pos, ColorRGBA colour) {
 		Box b = new Box(0.1f, 0.1f, 0.1f);
 		Geometry geometry = new Geometry("box", b);
-		Material mat = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+		Material mat = new Material(App.CUR.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 		mat.setColor("Color", colour);
 		geometry.setMaterial(mat);
 		geometry.setLocalTranslation(pos);
@@ -235,7 +235,7 @@ public class Roads {
 		
 		Geometry geo = new Geometry("Quad", mesh);
 		
-		AssetManager am = App.rally.getAssetManager();
+		AssetManager am = App.CUR.getAssetManager();
 		Material mat = null;
 		if (colour != null) {
 			mat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");

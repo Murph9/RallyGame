@@ -1,6 +1,8 @@
 package car;
 
+import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
+import com.jme3.app.state.AppStateManager;
 import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
 import com.jme3.input.RawInputListener;
@@ -25,6 +27,7 @@ import helper.H;
 
 public class CarCamera extends AbstractAppState implements RawInputListener {
 
+	private App app;
 	private Camera c;
 	private RayCarControl p;
 	private Vector3f lastPos;
@@ -46,6 +49,13 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 			c.setLocation(pPos.add(p.getCarData().cam_offset)); //starting position of the camera
 			c.lookAt(pPos.add(p.getCarData().cam_lookAt), new Vector3f(0,1,0)); //look at car
 		}
+	}
+
+	@Override
+	public void initialize(AppStateManager stateManager, Application app) {
+		super.initialize(stateManager, app);
+
+		this.app = (App)app;
 	}
 
 	@Override
@@ -124,7 +134,7 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 		CollisionResults results = new CollisionResults();
 		Vector3f dir = c.getLocation().subtract(carPos.add(p.getCarData().cam_lookAt));
 		Ray ray = new Ray(carPos.add(p.getCarData().cam_lookAt), dir);
-		App.rally.getRootNode().collideWith(ray, results);
+		app.getRootNode().collideWith(ray, results);
 		CollisionResult cr = results.getClosestCollision();
 		if (cr != null && cr.getDistance() < dir.length()) {
 			Geometry g = cr.getGeometry();

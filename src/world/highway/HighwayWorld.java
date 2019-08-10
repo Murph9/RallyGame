@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
@@ -56,6 +57,8 @@ Later Things:
 //Set the height in the filteredBasis
 
 public class HighwayWorld extends World {
+	private SimpleApplication app;
+
 	public NoiseBasedWorld terrain;
 	private int blockSize; //(distance between points)/tileSize
 	private int tileSize; //the grid piece size
@@ -80,6 +83,8 @@ public class HighwayWorld extends World {
 	@Override
 	public void initialize(AppStateManager stateManager, Application app) {
 		super.initialize(stateManager, app);
+		this.app = (SimpleApplication)app;
+
 		blockSize = 128 + 1;
 		tileSize = 128 + 1; //testing occured with these on 128 ish
 
@@ -92,7 +97,7 @@ public class HighwayWorld extends World {
 	private void createWorldWithNoise(AssetManager am) {
 		// TODO change settings
 		// TODO remember the ./world folder with the cached terrain pieces
-		NoiseBasedWorld newWorld = new NoiseBasedWorld(App.rally, App.rally.getPhysicsSpace(), tileSize, blockSize, rootNode);
+		NoiseBasedWorld newWorld = new NoiseBasedWorld(this.app, ((App)this.app).getPhysicsSpace(), tileSize, blockSize, rootNode);
 
 		newWorld.setWorldHeight(500); //TODO change to set the height range (needs to be scaled with the texture heights)
 		newWorld.setViewDistance(2);
@@ -136,7 +141,7 @@ public class HighwayWorld extends World {
 		//which can have points individually set so that i don't have to look at the terrain heights
 
 		this.terrain = newWorld;
-		App.rally.getStateManager().attach(this.terrain);
+		this.app.getStateManager().attach(this.terrain);
 		
 		//set after so the terrain exists first
 		rM = new RoadMaker(this);
@@ -203,14 +208,14 @@ public class HighwayWorld extends World {
 		List<Vector3f> list = road.getControlPoints(); //No editing this object
 		Log.e("road: ", list);
 
-		if (App.rally.IF_DEBUG)
+		if (((App)this.app).IF_DEBUG)
 			for (int i = 0; i < list.size(); i++)
-				App.rally.getRootNode().attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Green, list.get(i), 0.2f));
+				this.app.getRootNode().attachChild(H.makeShapeBox(this.app.getAssetManager(), ColorRGBA.Green, list.get(i), 0.2f));
 		
 		roads.add(road);
 		
 		Geometry geo = new Geometry("highway", road);
-		Material mat = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+		Material mat = new Material(this.app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		mat.setColor("Color", new ColorRGBA(0,0,0,0.5f));
 		mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
@@ -229,11 +234,11 @@ public class HighwayWorld extends World {
 		List<Vector3f> heightList = new LinkedList<Vector3f>();
 		
 		for (Vector3f[] quad: quads) {
-			if (App.rally.IF_DEBUG) {
-				App.rally.getRootNode().attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Green, quad[0].add(0,0.1f,0), 0.2f));
-				App.rally.getRootNode().attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.White, quad[1].add(0,0.1f,0), 0.2f));
-				App.rally.getRootNode().attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Blue, quad[2].add(0,-0.1f,0), 0.2f));
-				App.rally.getRootNode().attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Red, quad[3].add(0,-0.1f,0), 0.2f));
+			if (((App)this.app).IF_DEBUG) {
+				this.app.getRootNode().attachChild(H.makeShapeBox(this.app.getAssetManager(), ColorRGBA.Green, quad[0].add(0,0.1f,0), 0.2f));
+				this.app.getRootNode().attachChild(H.makeShapeBox(this.app.getAssetManager(), ColorRGBA.White, quad[1].add(0,0.1f,0), 0.2f));
+				this.app.getRootNode().attachChild(H.makeShapeBox(this.app.getAssetManager(), ColorRGBA.Blue, quad[2].add(0,-0.1f,0), 0.2f));
+				this.app.getRootNode().attachChild(H.makeShapeBox(this.app.getAssetManager(), ColorRGBA.Red, quad[3].add(0,-0.1f,0), 0.2f));
 			}
 			
 			quad = order.apply(quad);
@@ -315,8 +320,9 @@ public class HighwayWorld extends World {
 		this.rootNode.detachAllChildren();
 		this.terrain.close();
 		this.tM.cleanup();
-		App.rally.getStateManager().detach(this.terrain);
-		
+		this.app.getStateManager().detach(this.terrain);
+		this.app = null;
+
 		super.cleanup();
 	}
 }

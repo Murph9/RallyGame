@@ -1,6 +1,7 @@
 package game;
 
 import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.math.FastMath;
@@ -20,7 +21,7 @@ import world.StaticWorldBuilder;
 public class Start extends AbstractAppState {
 
 	//TODO version number on screen somewhere
-	
+	private SimpleApplication app;
 	private StaticWorldBuilder world;
 	
 	private StaticWorld worldType;
@@ -47,19 +48,19 @@ public class Start extends AbstractAppState {
 	@Override
 	public void initialize(AppStateManager stateManager, Application app) {
 		super.initialize(stateManager, app);
+		this.app = ((SimpleApplication)app);
+
+		((App)app).setPhysicsSpaceEnabled(true);
+		stateManager.attach(world);
 		
-		App.rally.bullet.setEnabled(true);
-		App.rally.getStateManager().attach(world);
+		cb = new CarBuilder((App)app);
+		stateManager.attach(cb);
 		
-		cb = new CarBuilder();
-		App.rally.getStateManager().attach(cb);
-		
-		camera = new BasicCamera("Cam -start", App.rally.getCamera(), new Vector3f(-70,50,0), new Vector3f(20,1,0)); 
-		
-		App.rally.getStateManager().attach(camera);
+		camera = new BasicCamera("Cam -start", App.CUR.getCamera(), new Vector3f(-70,50,0), new Vector3f(20,1,0)); 
+		stateManager.attach(camera);
 		
 		myWindow = new Container();
-		App.rally.getGuiNode().attachChild(myWindow);
+		((SimpleApplication)app).getGuiNode().attachChild(myWindow);
 		myWindow.setLocalTranslation(300, 300, 0);
 		
         myWindow.addChild(new Label("Main Menu"));
@@ -73,16 +74,17 @@ public class Start extends AbstractAppState {
         		"Start Getaway",
         		"Start Race",
         		"Start Dev",
-        };
+		};
+		App myapp = ((App)app);
         Runnable[] methods = {
-        		() -> { App.rally.startFast(this); },
-        		() -> { App.rally.next(this); },
-        		() -> { App.rally.startAI(this); },
-        		() -> { App.rally.startDemo(this); },
-        		() -> { App.rally.startCrash(this); },
-        		() -> { App.rally.startMainRoad(this); },
-        		() -> { App.rally.startRace(this); },
-        		() -> { App.rally.startDev(this); }
+        		() -> { myapp.startFast(this); },
+        		() -> { myapp.next(this); },
+        		() -> { myapp.startAI(this); },
+        		() -> { myapp.startDemo(this); },
+        		() -> { myapp.startCrash(this); },
+        		() -> { myapp.startMainRoad(this); },
+        		() -> { myapp.startRace(this); },
+        		() -> { myapp.startDev(this); }
 		};
         
         for (int i = 0; i < methods.length; i++) {
@@ -92,7 +94,7 @@ public class Start extends AbstractAppState {
 	                @Override
 	                public void execute( Button source ) {
 	                    method.run();
-	                    App.rally.getGuiNode().detachChild(myWindow);
+	                    myapp.getGuiNode().detachChild(myWindow);
 	                }
 	            });
         }
@@ -101,7 +103,7 @@ public class Start extends AbstractAppState {
         exit.addClickCommands(new Command<Button>() {
                 @Override
                 public void execute( Button source ) {
-                    App.rally.stop();
+                    myapp.stop();
                 }
             });
 	}
@@ -129,17 +131,19 @@ public class Start extends AbstractAppState {
 	}
 	
 	public void cleanup() {
-		App.rally.getStateManager().detach(camera);
+		app.getStateManager().detach(camera);
 		camera = null;
 		
-		App.rally.getRootNode().detachChild(myWindow);
+		app.getRootNode().detachChild(myWindow);
 		myWindow = null;
 		
 		cb.removeCar(0);
-		App.rally.getStateManager().detach(cb);
+		app.getStateManager().detach(cb);
 		cb = null;
 		
-		App.rally.getStateManager().detach(world);
+		app.getStateManager().detach(world);
 		world = null;
+
+		this.app = null;
 	}
 }

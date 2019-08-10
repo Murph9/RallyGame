@@ -249,18 +249,18 @@ public class RayCarControl extends RayCarPowered {
 			w.radSec = 0; //stop rotation of the wheels
 		}
 		
-		if (App.rally.drive == null) 
+		if (App.CUR.drive == null) 
 			return;
 		
-		Vector3f pos = App.rally.drive.world.getStartPos();
-		Matrix3f rot = App.rally.drive.world.getStartRot();
+		Vector3f pos = App.CUR.drive.world.getStartPos();
+		Matrix3f rot = App.CUR.drive.world.getStartRot();
 		if (pos != null && rot != null) {
 			setPhysicsLocation(pos);
 			setPhysicsRotation(rot);
 			setAngularVelocity(new Vector3f());
 		}
 		
-		App.rally.drive.reset(); //TODO this is a hack, the world state should be listening to the event instead
+		App.CUR.drive.reset(); //TODO this is a hack, the world state should be listening to the event instead
 	}
 	private void rotate180() {
 		rbc.setPhysicsRotation(new Quaternion().fromAngleAxis(FastMath.PI, new Vector3f(0,1,0)));
@@ -271,13 +271,13 @@ public class RayCarControl extends RayCarPowered {
 	public void cleanup() {
 		if (this.controls != null && !this.controls.isEmpty()) {
 			for (RawInputListener ril: this.controls)
-				App.rally.getInputManager().removeRawInputListener(ril);
+				App.CUR.getInputManager().removeRawInputListener(ril);
 			this.controls.clear();
 		}
 		
 		if (this.engineSound != null) {
 			rootNode.detachChild(this.engineSound);
-			App.rally.getAudioRenderer().stopSource(engineSound);
+			App.CUR.getAudioRenderer().stopSource(engineSound);
 			engineSound = null;
 		}
 		
@@ -317,7 +317,7 @@ public class RayCarControl extends RayCarPowered {
 		this.controls.add(new JoystickEventListener(this));
 		
 		for (RawInputListener ril: this.controls)
-			App.rally.getInputManager().addRawInputListener(ril);
+			App.CUR.getInputManager().addRawInputListener(ril);
 	}
 	
 	public RayWheelControl getWheel(int w_id) {

@@ -385,16 +385,16 @@ public class H {
 	}
 	
 	public static Vector3f screenTopLeft() {
-		return new Vector3f(0, App.rally.getContext().getSettings().getHeight(), 0);
+		return new Vector3f(0, App.CUR.getContext().getSettings().getHeight(), 0);
 	}
 	public static Vector3f screenTopRight() {
-		return new Vector3f(App.rally.getContext().getSettings().getWidth(), App.rally.getContext().getSettings().getHeight(), 0);
+		return new Vector3f(App.CUR.getContext().getSettings().getWidth(), App.CUR.getContext().getSettings().getHeight(), 0);
 	}
 	public static Vector3f screenBottomRight() {
-		return new Vector3f(App.rally.getContext().getSettings().getWidth(), App.rally.getContext().getSettings().getHeight(), 0);
+		return new Vector3f(App.CUR.getContext().getSettings().getWidth(), App.CUR.getContext().getSettings().getHeight(), 0);
 	}
 	public static Vector3f screenMiddle() {
-		return new Vector3f(App.rally.getContext().getSettings().getWidth()/2, App.rally.getContext().getSettings().getHeight()/2, 0);
+		return new Vector3f(App.CUR.getContext().getSettings().getWidth()/2, App.CUR.getContext().getSettings().getHeight()/2, 0);
 	}
 	
 	//http://stackoverflow.com/a/677248

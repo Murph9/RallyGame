@@ -32,17 +32,24 @@ public class CarBuilder extends AbstractAppState {
 
 	private final HashMap<Integer, RayCarControl> cars;
 	private final Node rootNode;
+	private App app;
 
-	public CarBuilder() {
+	public CarBuilder(App app) {
+		this.app = app;
 		cars = new HashMap<>();
 		rootNode = new Node("Car Builder Root");
-		
-		App.rally.getRootNode().attachChild(rootNode);
 	}
 	
+	@Override
 	public void initialize(AppStateManager stateManager, Application app) {
 		super.initialize(stateManager, app);
 		Log.p("CarBuilder init");
+		if (this.app != app) {
+			Log.e("!!!!!!! Car builder found a different application to run against.");
+			System.exit(-6754);
+		}
+
+		this.app.getRootNode().attachChild(rootNode);
 	}
 	
 	public void setEnabled(boolean state) {
@@ -54,6 +61,14 @@ public class CarBuilder extends AbstractAppState {
 	}
 	
 	public RayCarControl addCar(int id, Car car, Vector3f start, Matrix3f rot, boolean aPlayer, BiFunction<RayCarControl, RayCarControl, CarAI> ai) {
+		if (this.app == null) {
+			try {
+				throw new Exception("App hasn't been initialised");
+			} catch (Exception e) {
+				e.printStackTrace();
+				return null;
+			}
+		}
 		if (cars.containsKey(id)) {
 			try {
 				throw new Exception("A car already has that id: " + id);
@@ -65,14 +80,14 @@ public class CarBuilder extends AbstractAppState {
 		
 		CarDataConst carData = car.get();
 		
-		AssetManager am = App.rally.getAssetManager();
+		AssetManager am = this.app.getAssetManager();
 		
 		Node carNode = new Node(id+"");
 		Spatial carModel = LoadModelWrapper.create(am, carData.carModel, ColorRGBA.Magenta);
 		
 		//update the collision shape, NOTE: a static convex collision shape or hull might be faster here
 		CollisionShape colShape = CollisionShapeFactory.createDynamicMeshShape(carModel);
-		RayCarControl carControl = new RayCarControl(App.rally.getPhysicsSpace(), colShape, carData, carNode);
+		RayCarControl carControl = new RayCarControl(this.app.getPhysicsSpace(), colShape, carData, carNode);
 		
 		carNode.attachChild(carModel);
 
@@ -168,12 +183,16 @@ public class CarBuilder extends AbstractAppState {
 		return cars.size();
 	}
 
+	@Override
 	public void cleanup() {
+		super.cleanup();
 		for (int key : cars.keySet()) {
 			RayCarControl car = cars.get(key);
 			car.cleanup();
 		}
-		App.rally.getRootNode().detachChild(rootNode);
+		this.app.getRootNode().detachChild(rootNode);
 		Log.p("carbuilder cleanup");
+		
+		this.app = null;
 	}
 }

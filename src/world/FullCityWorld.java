@@ -76,7 +76,7 @@ public class FullCityWorld extends World {
 		spat.addControl(new RigidBodyControl(coll, 0));
 		
 		rootNode.attachChild(spat);
-		App.rally.getPhysicsSpace().add(spat);
+		((App)this.app).getPhysicsSpace().add(spat);
 		
 		//If you remove this line: fps = fps/n for large n
 		GeometryBatchFactory.optimize(rootNode);
@@ -92,7 +92,7 @@ public class FullCityWorld extends World {
 
 	@Override
 	public void update(float tpf) {
-		placeTiles(App.rally.getCamera().getLocation());
+		placeTiles(((App)this.app).getCamera().getLocation());
 	}
 
 	@Override

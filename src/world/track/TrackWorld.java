@@ -155,7 +155,7 @@ public class TrackWorld extends World {
 		//finally add the terrain to physics engine
 	    RigidBodyControl rbc = new RigidBodyControl(0.0f);
 	    terrain.addControl(rbc);
-	    App.rally.getPhysicsSpace().add(rbc);
+	    ((App)this.app).getPhysicsSpace().add(rbc);
 	    
 
 	    //tree world doesn't need to know the world before the scale
@@ -302,11 +302,11 @@ public class TrackWorld extends World {
 	@Override
 	public void update(float tpf) {
 		
-		if (this.trackSegments != null && App.rally.drive !=null && App.rally.drive.cb.get(0) != null && DEBUG) {
+		if (this.trackSegments != null && ((App)this.app).drive != null && ((App)this.app).drive.cb.get(0) != null && DEBUG) {
 			//hack to see if the bezier curve stuff works
-			Vector3f pos = getClosestPointTo(this.trackSegments, normalizeHeightIn(App.rally.drive.cb.get(0).getPhysicsLocation()));
+			Vector3f pos = getClosestPointTo(this.trackSegments, normalizeHeightIn(((App)this.app).drive.cb.get(0).getPhysicsLocation()));
 			HelperObj.use(this.rootNode, "closestpointtocurve", 
-					H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.LightGray, unnormalizeHeightIn(pos), 1));
+					H.makeShapeBox(this.app.getAssetManager(), ColorRGBA.LightGray, unnormalizeHeightIn(pos), 1));
 		}
 	}
 	@Override
@@ -327,9 +327,9 @@ public class TrackWorld extends World {
 	
 	public void cleanup() {
 		this.rootNode.detachChild(terrain);
-		App.rally.getPhysicsSpace().remove(terrain);
+		((App)this.app).getPhysicsSpace().remove(terrain);
 		for (PhysicsControl c: physicsPieces)
-			App.rally.getPhysicsSpace().remove(c);
+			((App)this.app).getPhysicsSpace().remove(c);
 		
 		super.cleanup();
 	}
@@ -403,7 +403,7 @@ public class TrackWorld extends World {
 		
 		Geometry geo = new Geometry("Quad", mesh);
 		
-		AssetManager am = App.rally.getAssetManager();
+		AssetManager am = App.CUR.getAssetManager();
 		Material mat = null;
 		if (colour != null) {
 			mat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");

@@ -95,7 +95,7 @@ public abstract class DefaultBuilder extends World {
 		startGeometry.addControl(new RigidBodyControl(0));
 		
 		this.rootNode.attachChild(startGeometry);
-		App.rally.getPhysicsSpace().add(startGeometry);
+		((App)this.app).getPhysicsSpace().add(startGeometry);
 	}
 
 	@Override
@@ -103,7 +103,7 @@ public abstract class DefaultBuilder extends World {
 		if (!isEnabled())
 			return;
 		
-		Vector3f pos = App.rally.getCamera().getLocation();
+		Vector3f pos = this.app.getCamera().getLocation();
 		
 		while (nextPos.subtract(pos).length() < distance) {
 			selectNewPiece();
@@ -114,7 +114,7 @@ public abstract class DefaultBuilder extends World {
 			Vector3f endSpPos = sp.getWorldTranslation();
 			if (endSpPos.subtract(pos).length() > distance/2) {
 				//2 because don't delete the ones we just placed
-				App.rally.getPhysicsSpace().remove(sp.getControl(0));
+				((App)this.app).getPhysicsSpace().remove(sp.getControl(0));
 				rootNode.detachChild(sp);
 				curPieces.remove(sp);
 			} else {
@@ -178,7 +178,7 @@ public abstract class DefaultBuilder extends World {
 		landscape.setKinematic(false);
 		s.addControl(landscape);
 
-		App.rally.getPhysicsSpace().add(landscape);
+		((App)this.app).getPhysicsSpace().add(landscape);
 		rootNode.attachChild(s);
 
 		curPieces.add(s);
@@ -199,7 +199,7 @@ public abstract class DefaultBuilder extends World {
 	public void reset() {
 		List<Spatial> ne = new LinkedList<Spatial>(curPieces);
 		for (Spatial s: ne) {
-			App.rally.getPhysicsSpace().remove(s.getControl(0));
+			((App)this.app).getPhysicsSpace().remove(s.getControl(0));
 			rootNode.detachChild(s);
 			curPieces.remove(s);
 		}
@@ -242,7 +242,7 @@ public abstract class DefaultBuilder extends World {
 	
 	public void cleanup() {
 		for (Spatial s: curPieces) {
-			App.rally.getPhysicsSpace().remove(s.getControl(0));
+			((App)this.app).getPhysicsSpace().remove(s.getControl(0));
 			rootNode.detachChild(s);
 		}
 		

@@ -50,7 +50,7 @@ public class DriveMenu extends AbstractAppState {
 	public void initialize(AppStateManager stateManager, Application app) {
 		super.initialize(stateManager, app);
 
-		InputManager i = App.rally.getInputManager();
+		InputManager i = App.CUR.getInputManager();
 		
 		i.addMapping("Pause", new KeyTrigger(KeyInput.KEY_ESCAPE));
 		i.addMapping("TabMenu", new KeyTrigger(KeyInput.KEY_TAB));
@@ -73,7 +73,7 @@ public class DriveMenu extends AbstractAppState {
             @Override
             public void execute( Button source ) {
             	mainMenu();
-            	App.rally.getGuiNode().detachChild(pauseMenu);
+            	App.CUR.getGuiNode().detachChild(pauseMenu);
             }
         });
 		pauseMenu.setLocalTranslation(H.screenMiddle().add(pauseMenu.getPreferredSize().mult(-0.5f)));
@@ -81,7 +81,7 @@ public class DriveMenu extends AbstractAppState {
 		infoHint = new Container();
 		infoHint.attachChild(new Label("TAB for info"));
 		infoHint.setLocalTranslation(H.screenTopLeft());
-		App.rally.getGuiNode().attachChild(infoHint);
+		App.CUR.getGuiNode().attachChild(infoHint);
 		
 		info = new Container();
 		info.attachChild(new Label("Controls: move: wasd and arrows , flip: f, handbrake: space, reverse: leftshift, camera: e,z, tab: this, pause: esc, reset: enter, jump: q, nitro: leftcontrol, telemetry: home"));
@@ -91,21 +91,21 @@ public class DriveMenu extends AbstractAppState {
 		randomthing = new Label("");
 		random.attachChild(randomthing);
 		random.setLocalTranslation(H.screenTopRight().add(-100, 0, 0));
-		App.rally.getGuiNode().attachChild(random);
+		App.CUR.getGuiNode().attachChild(random);
 	}
 
 	public void togglePause() {
-		Node guiRoot = App.rally.getGuiNode();
+		Node guiRoot = App.CUR.getGuiNode();
 		if (guiRoot.hasChild(pauseMenu)) {
 			guiRoot.detachChild(pauseMenu);
-            App.rally.drive.setEnabled(true);
+            App.CUR.drive.setEnabled(true);
 		} else {
 			guiRoot.attachChild(pauseMenu);
-			App.rally.drive.setEnabled(false);
+			App.CUR.drive.setEnabled(false);
 		}
 	}
 	public void toggleMenu() {
-		Node guiRoot = App.rally.getGuiNode();
+		Node guiRoot = App.CUR.getGuiNode();
 		if (guiRoot.hasChild(info)) {
 			guiRoot.attachChild(infoHint);
 			guiRoot.detachChild(info);
@@ -120,7 +120,7 @@ public class DriveMenu extends AbstractAppState {
 		if (drive != null)
 			drive.next();
 		else //TODO fix
-			App.rally.next(null);
+			App.CUR.next(null);
 	}
 
 	public void update(float tpf) {
@@ -131,7 +131,7 @@ public class DriveMenu extends AbstractAppState {
 	public void cleanup() {
 		super.cleanup();
 		
-		InputManager i = App.rally.getInputManager();
+		InputManager i = App.CUR.getInputManager();
 		i.deleteMapping("Pause");
 		i.deleteMapping("TabMenu");
 		

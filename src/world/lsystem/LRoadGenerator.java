@@ -61,7 +61,7 @@ public class LRoadGenerator {
 		box1 = new Geometry("building", b);
 		Box b2 = new Box(1, 3, 1);
 		box2 = new Geometry("building2", b2);
-		Material mat = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/ShowNormals.j3md");
+		Material mat = new Material(App.CUR.getAssetManager(), "Common/MatDefs/Misc/ShowNormals.j3md");
 		box1.setMaterial(mat);
 		box2.setMaterial(mat);
 		
@@ -257,14 +257,14 @@ public class LRoadGenerator {
 		RoadMesh m = new RoadMesh(dir.length()/12, 2, list);
 		
 		Geometry geometry = new Geometry("line", m);
-		Material mat = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+		Material mat = new Material(App.CUR.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 		mat.setColor("Color", obj.type.colour);
 		geometry.setMaterial(mat);
 		rootNode.attachChild(geometry);
 		
 		CollisionShape col = CollisionShapeFactory.createMeshShape(geometry);
 		RigidBodyControl landscape = new RigidBodyControl(col, 0);
-		App.rally.getPhysicsSpace().add(landscape);
+		App.CUR.getPhysicsSpace().add(landscape);
 		
 		/*
         Line line = new Line(obj.start, obj.end);
@@ -290,7 +290,7 @@ public class LRoadGenerator {
 	private void drawMeAVerySmallBox(Vector3f pos, ColorRGBA colour) {
 		Box b = new Box(0.1f, 0.1f, 0.1f);
 		Geometry geometry = new Geometry("box", b);
-		Material mat = new Material(App.rally.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+		Material mat = new Material(App.CUR.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 		mat.setColor("Color", colour);
 		geometry.setMaterial(mat);
 		geometry.setLocalTranslation(pos);

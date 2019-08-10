@@ -38,14 +38,14 @@ public class TractionCurveGraph extends Container {
 		Float[] points = simulateGraphPoints(latData);
 		for (int i = 0; i < points.length; i++) {
 			Vector3f pos = new Vector3f(i*(size.x/points.length), -(size.y/2)+(size.y/2)*(points[i]/max), 0);
-			this.attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Blue, pos, 1));
+			this.attachChild(H.makeShapeBox(App.CUR.getAssetManager(), ColorRGBA.Blue, pos, 1));
 		}
 		
 		max = RayCar.GripHelper.tractionFormula(longData, RayCar.GripHelper.calcSlipMax(longData));
 		points = simulateGraphPoints(longData);
 		for (int i = 0; i < points.length; i++) {
 			Vector3f pos = new Vector3f(i*(size.x/points.length), -(size.y)+(size.y/2)*(points[i]/max), 0);
-			this.attachChild(H.makeShapeBox(App.rally.getAssetManager(), ColorRGBA.Red, pos, 1));
+			this.attachChild(H.makeShapeBox(App.CUR.getAssetManager(), ColorRGBA.Red, pos, 1));
 		}
 	}
 	private Float[] simulateGraphPoints(WheelDataTractionConst d) {

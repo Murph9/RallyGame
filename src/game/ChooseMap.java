@@ -29,14 +29,14 @@ public class ChooseMap extends AbstractAppState {
 	public void initialize(AppStateManager stateManager, Application app) {
 		super.initialize(stateManager, app);
 
-		App.rally.bullet.setEnabled(true);
+		((App)app).setPhysicsSpaceEnabled(true);
 		
-		camera = new BasicCamera("Camera", App.rally.getCamera(), new Vector3f(-70,50,0), new Vector3f(20,1,0));
-		App.rally.getStateManager().attach(camera);
+		camera = new BasicCamera("Camera", App.CUR.getCamera(), new Vector3f(-70,50,0), new Vector3f(20,1,0));
+		App.CUR.getStateManager().attach(camera);
 		
 		//init gui
 		Container myWindow = new Container();
-		App.rally.getGuiNode().attachChild(myWindow);
+		App.CUR.getGuiNode().attachChild(myWindow);
 		myWindow.setLocalTranslation(H.screenTopLeft());
 		
 		//these values are not x and y because they are causing confusion
@@ -76,7 +76,7 @@ public class ChooseMap extends AbstractAppState {
             public void execute( Button source ) {
             	if (worldType == WorldType.NONE)
             		return; //do not select it
-            	App.rally.getGuiNode().detachChild(myWindow);
+            	App.CUR.getGuiNode().detachChild(myWindow);
             	chooseMap();
             }
         });
@@ -99,9 +99,9 @@ public class ChooseMap extends AbstractAppState {
 	}
 
 	public void cleanup() {
-		App.rally.getStateManager().detach(camera);
+		App.CUR.getStateManager().detach(camera);
 		camera = null;
-		App.rally.getStateManager().detach(world);
+		App.CUR.getStateManager().detach(world);
 		world = null;
 	}
 
@@ -109,13 +109,13 @@ public class ChooseMap extends AbstractAppState {
 	//UI stuff
 	public void chooseMap() {
 		if (world == null) { Log.e("no return value for ChooseMap()"); return; }
-		App.rally.next(this);
+		App.CUR.next(this);
 	}
 	public World getWorld() {
 		World newWorld = null;
 		try {
 			newWorld = world.copy();
-			App.rally.getStateManager().detach(world);
+			App.CUR.getStateManager().detach(world);
 		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -126,7 +126,7 @@ public class ChooseMap extends AbstractAppState {
 
 	public void setWorld(String typeStr, String subType) {
 		if (world != null && world.isInitialized()) {
-			App.rally.getStateManager().detach(world);
+			App.CUR.getStateManager().detach(world);
 			world = null;
 		}
 		worldType = WorldType.valueOf(WorldType.class, typeStr);
@@ -167,6 +167,6 @@ public class ChooseMap extends AbstractAppState {
 				return;
 		}
 		
-		App.rally.getStateManager().attach(world);
+		App.CUR.getStateManager().attach(world);
 	}
 }

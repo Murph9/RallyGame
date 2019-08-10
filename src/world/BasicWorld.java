@@ -46,7 +46,7 @@ public class BasicWorld extends World {
 		startGeometry = LoadModelWrapper.create(app.getAssetManager(), startGeometry, ColorRGBA.Green);
 		
 		this.rootNode.attachChild(startGeometry);
-		App.rally.getPhysicsSpace().add(startGeometry);
+		((App)this.app).getPhysicsSpace().add(startGeometry);
 	}
 	
 	@Override
@@ -61,6 +61,8 @@ public class BasicWorld extends World {
 	
 	public void cleanup() {
 		this.rootNode.detachChild(startGeometry);
-		App.rally.getPhysicsSpace().add(startGeometry);
+		((App)this.app).getPhysicsSpace().add(startGeometry);
+
+		super.cleanup();
 	}
 }

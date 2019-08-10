@@ -27,7 +27,7 @@ public class CarModelData {
 		
 		this.possibleParts = CarPart.GetNames();
 		
-		Spatial rootSpat = App.rally.getAssetManager().loadModel(carModel);
+		Spatial rootSpat = App.CUR.getAssetManager().loadModel(carModel);
 		readInModelData(rootSpat);
 		
 		Log.e("Car part data for: '" + car + "'");
