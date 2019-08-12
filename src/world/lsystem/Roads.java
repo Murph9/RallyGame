@@ -25,7 +25,6 @@ import com.jme3.scene.shape.Box;
 import com.jme3.terrain.geomipmap.TerrainQuad;
 import com.jme3.util.BufferUtils;
 
-import game.App;
 import helper.Log;
 
 public class Roads {
@@ -33,8 +32,9 @@ public class Roads {
 	private static Quaternion rot90 = new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y);
 	
 	//TODO use actual curves
-	
-	public Roads() {
+	private AssetManager am;
+	public Roads(AssetManager am) {
+		this.am = am;
 		//TODO use the input function
 	}
 
@@ -71,7 +71,7 @@ public class Roads {
 		if (cqo.rule != null && cqo.rule.equals("+")) {
 			Vector3f a = curveNodes[0];
 			Vector3f dir = curveNodes[3].subtract(a).normalize();
-			drawMeAnArrow(rootNode, a.add(0,2,0), dir);
+			drawMeAnArrow(am, rootNode, a.add(0,2,0), dir);
 			dir.y = 0;
 			dir.normalizeLocal();
 			Vector3f left = rot90.mult(dir);
@@ -88,7 +88,7 @@ public class Roads {
 			Vector3f rb = a.add(left.mult(-10));
 			Vector3f rt = rb.add(dir.mult(20));
 			
-			drawMeAQuad(rootNode, phys, new Vector3f[]{lb,rb,lt,rt}, ColorRGBA.Cyan);
+			drawMeAQuad(am, rootNode, phys, new Vector3f[]{lb,rb,lt,rt}, ColorRGBA.Cyan);
 			return;
 		}
 		
@@ -96,7 +96,7 @@ public class Roads {
 		Vector3f dir = curveNodes[curveNodes.length-1].subtract(a);
 		dir.y = 0; //no height please
 		dir.normalizeLocal();
-		drawMeAnArrow(rootNode, a.add(0,2,0), dir);
+		drawMeAnArrow(am, rootNode, a.add(0,2,0), dir);
 		
 		for (int i = 1; i < nodes.length; i++) {
 			for (int j = 2; j < nodes[i].v.length; j++) { //avoid the first one
@@ -107,14 +107,14 @@ public class Roads {
 					nodes[i].v[j],
 				};
 				
-				drawMeAQuad(rootNode, phys, vs, null);
+				drawMeAQuad(am, rootNode, phys, vs, null);
 			}
 		}
 		
 		if (helpPoints) {
 			Vector3f[] nds = cqo.curve.getNodes();
 			for (Vector3f v: nds)
-				drawMeAVerySmallBox(rootNode, v, ColorRGBA.LightGray);
+				drawMeAVerySmallBox(am, rootNode, v, ColorRGBA.LightGray);
 //			drawMeALine(nds[0], nds[1], ColorRGBA.Blue);
 //			drawMeALine(nds[2], nds[3], ColorRGBA.Blue);
 		}
@@ -181,10 +181,10 @@ public class Roads {
 		return new CurveQueueObj[0];
 	}
 	
-	private void drawMeAnArrow(Node rootNode, Vector3f start, Vector3f dir) {  
+	private void drawMeAnArrow(AssetManager am, Node rootNode, Vector3f start, Vector3f dir) {  
 		Arrow arrow = new Arrow(dir);
 		Geometry g = new Geometry("coordinate axis", arrow);
-		Material mat = new Material(App.CUR.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+		Material mat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
 		mat.getAdditionalRenderState().setWireframe(true);
 		mat.setColor("Color", ColorRGBA.Green);
 		g.setMaterial(mat);
@@ -194,17 +194,17 @@ public class Roads {
 		Log.p(start+ ", " + dir);
 	}
 	
-	private void drawMeAVerySmallBox(Node rootNode, Vector3f pos, ColorRGBA colour) {
+	private void drawMeAVerySmallBox(AssetManager am, Node rootNode, Vector3f pos, ColorRGBA colour) {
 		Box b = new Box(0.1f, 0.1f, 0.1f);
 		Geometry geometry = new Geometry("box", b);
-		Material mat = new Material(App.CUR.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+		Material mat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
 		mat.setColor("Color", colour);
 		geometry.setMaterial(mat);
 		geometry.setLocalTranslation(pos);
 		rootNode.attachChild(geometry);
 	}
 	
-	private void drawMeAQuad(Node rootNode, PhysicsSpace phys, Vector3f[] v, ColorRGBA colour) {
+	private void drawMeAQuad(AssetManager am, Node rootNode, PhysicsSpace phys, Vector3f[] v, ColorRGBA colour) {
 		if (v == null || v.length != 4) {
 			Log.e("Roads-drawMeAQuad: Not the correct length drawMeAQuad()");
 			return;
@@ -235,7 +235,6 @@ public class Roads {
 		
 		Geometry geo = new Geometry("Quad", mesh);
 		
-		AssetManager am = App.CUR.getAssetManager();
 		Material mat = null;
 		if (colour != null) {
 			mat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");

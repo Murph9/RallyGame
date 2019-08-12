@@ -56,7 +56,7 @@ public class RayCar implements PhysicsTickListener {
 	//hacks
 	protected boolean tractionEnabled = true;
 	
-	public RayCar(CollisionShape shape, CarDataConst carData) {
+	public RayCar(CollisionShape shape, CarDataConst carData, Vector3f grav) {
 		this.carData = carData;
 		this.carData.load();
 		if (!this.carData.loaded) {
@@ -83,9 +83,7 @@ public class RayCar implements PhysicsTickListener {
 		rbc.setAngularDamping(0.4f);
 		
 		// Validate that rest suspension position is within min and max
-		Vector3f grav = new Vector3f();
-		App.CUR.getPhysicsSpace().getGravity(grav); //becuase the rigid body doesn't have gravity yet
-
+		//TODO move to application init, just like the loading of all the car models
 		float quarterMassForce = Math.abs(grav.y)*carData.mass/4f;
 		for (int i  = 0; i < wheels.length; i++) {
 			CarSusDataConst sus = carData.susByWheelNum(i);

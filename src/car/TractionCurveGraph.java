@@ -1,5 +1,6 @@
 package car;
 
+import com.jme3.asset.AssetManager;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
@@ -7,7 +8,6 @@ import com.simsilica.lemur.Container;
 
 import car.ray.RayCarControl;
 import car.ray.WheelDataTractionConst;
-import game.App;
 import helper.H;
 
 import car.ray.RayCar;
@@ -16,10 +16,12 @@ public class TractionCurveGraph extends Container {
 
 	private WheelDataTractionConst latData;
 	private WheelDataTractionConst longData;
-	
-	public TractionCurveGraph(RayCarControl p, Vector3f size) {
+	private AssetManager am;
+
+	public TractionCurveGraph(AssetManager am, RayCarControl p, Vector3f size) {
 		super();
 		
+		this.am = am;
 		this.setPreferredSize(size);
 		updateMyPhysicsVehicle(p);
 	}
@@ -38,14 +40,14 @@ public class TractionCurveGraph extends Container {
 		Float[] points = simulateGraphPoints(latData);
 		for (int i = 0; i < points.length; i++) {
 			Vector3f pos = new Vector3f(i*(size.x/points.length), -(size.y/2)+(size.y/2)*(points[i]/max), 0);
-			this.attachChild(H.makeShapeBox(App.CUR.getAssetManager(), ColorRGBA.Blue, pos, 1));
+			this.attachChild(H.makeShapeBox(am, ColorRGBA.Blue, pos, 1));
 		}
 		
 		max = RayCar.GripHelper.tractionFormula(longData, RayCar.GripHelper.calcSlipMax(longData));
 		points = simulateGraphPoints(longData);
 		for (int i = 0; i < points.length; i++) {
 			Vector3f pos = new Vector3f(i*(size.x/points.length), -(size.y)+(size.y/2)*(points[i]/max), 0);
-			this.attachChild(H.makeShapeBox(App.CUR.getAssetManager(), ColorRGBA.Red, pos, 1));
+			this.attachChild(H.makeShapeBox(am, ColorRGBA.Red, pos, 1));
 		}
 	}
 	private Float[] simulateGraphPoints(WheelDataTractionConst d) {

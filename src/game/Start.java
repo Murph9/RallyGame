@@ -56,7 +56,7 @@ public class Start extends AbstractAppState {
 		cb = new CarBuilder((App)app);
 		stateManager.attach(cb);
 		
-		camera = new BasicCamera("Cam -start", App.CUR.getCamera(), new Vector3f(-70,50,0), new Vector3f(20,1,0)); 
+		camera = new BasicCamera("Cam -start", this.app.getCamera(), new Vector3f(-70,50,0), new Vector3f(20,1,0)); 
 		stateManager.attach(camera);
 		
 		myWindow = new Container();

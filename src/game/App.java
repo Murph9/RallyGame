@@ -71,7 +71,8 @@ public class App extends SimpleApplication {
 		DynamicType.Simple.getBuilder();
 	}
 
-	public int frameCount = 0; //global frame timer
+	private static int frameCount = 0; //global frame timer
+	public static int getFrameCount() { return frameCount; } //useful for many
 	public final Boolean IF_DEBUG = false;
 	
 
@@ -282,8 +283,9 @@ public class App extends SimpleApplication {
 
 	@Override
 	public void simpleUpdate(float tpf) {
-		super.simpleUpdate(tpf);
 		frameCount++; //global frame timer update
+
+		super.simpleUpdate(tpf);
 	}
 
 	/////////////// menu

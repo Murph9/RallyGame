@@ -1,6 +1,7 @@
 package drive;
 
 import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.input.InputManager;
@@ -17,6 +18,8 @@ import game.App;
 import helper.H;
 
 public class DriveMenu extends AbstractAppState {
+
+	private SimpleApplication app;
 
 	//GUI objects
 	private Container pauseMenu;
@@ -50,13 +53,13 @@ public class DriveMenu extends AbstractAppState {
 	public void initialize(AppStateManager stateManager, Application app) {
 		super.initialize(stateManager, app);
 
-		InputManager i = App.CUR.getInputManager();
+		this.app = (SimpleApplication)app;
 		
-		i.addMapping("Pause", new KeyTrigger(KeyInput.KEY_ESCAPE));
-		i.addMapping("TabMenu", new KeyTrigger(KeyInput.KEY_TAB));
+		app.getInputManager().addMapping("Pause", new KeyTrigger(KeyInput.KEY_ESCAPE));
+		app.getInputManager().addMapping("TabMenu", new KeyTrigger(KeyInput.KEY_TAB));
 		
-		i.addListener(actionListener, "Pause");
-		i.addListener(actionListener, "TabMenu");
+		app.getInputManager().addListener(actionListener, "Pause");
+		app.getInputManager().addListener(actionListener, "TabMenu");
 		
 		//init gui
 		pauseMenu = new Container();
@@ -73,7 +76,7 @@ public class DriveMenu extends AbstractAppState {
             @Override
             public void execute( Button source ) {
             	mainMenu();
-            	App.CUR.getGuiNode().detachChild(pauseMenu);
+            	((App)app).getGuiNode().detachChild(pauseMenu);
             }
         });
 		pauseMenu.setLocalTranslation(H.screenMiddle().add(pauseMenu.getPreferredSize().mult(-0.5f)));
@@ -81,7 +84,7 @@ public class DriveMenu extends AbstractAppState {
 		infoHint = new Container();
 		infoHint.attachChild(new Label("TAB for info"));
 		infoHint.setLocalTranslation(H.screenTopLeft());
-		App.CUR.getGuiNode().attachChild(infoHint);
+		this.app.getGuiNode().attachChild(infoHint);
 		
 		info = new Container();
 		info.attachChild(new Label("Controls: move: wasd and arrows , flip: f, handbrake: space, reverse: leftshift, camera: e,z, tab: this, pause: esc, reset: enter, jump: q, nitro: leftcontrol, telemetry: home"));
@@ -91,21 +94,21 @@ public class DriveMenu extends AbstractAppState {
 		randomthing = new Label("");
 		random.attachChild(randomthing);
 		random.setLocalTranslation(H.screenTopRight().add(-100, 0, 0));
-		App.CUR.getGuiNode().attachChild(random);
+		this.app.getGuiNode().attachChild(random);
 	}
 
 	public void togglePause() {
-		Node guiRoot = App.CUR.getGuiNode();
+		Node guiRoot = this.app.getGuiNode();
 		if (guiRoot.hasChild(pauseMenu)) {
 			guiRoot.detachChild(pauseMenu);
-            App.CUR.drive.setEnabled(true);
+            drive.setEnabled(true);
 		} else {
 			guiRoot.attachChild(pauseMenu);
-			App.CUR.drive.setEnabled(false);
+			drive.setEnabled(false);
 		}
 	}
 	public void toggleMenu() {
-		Node guiRoot = App.CUR.getGuiNode();
+		Node guiRoot = this.app.getGuiNode();
 		if (guiRoot.hasChild(info)) {
 			guiRoot.attachChild(infoHint);
 			guiRoot.detachChild(info);
@@ -120,7 +123,7 @@ public class DriveMenu extends AbstractAppState {
 		if (drive != null)
 			drive.next();
 		else //TODO fix
-			App.CUR.next(null);
+			((App)this.app).next(null);
 	}
 
 	public void update(float tpf) {
@@ -131,7 +134,7 @@ public class DriveMenu extends AbstractAppState {
 	public void cleanup() {
 		super.cleanup();
 		
-		InputManager i = App.CUR.getInputManager();
+		InputManager i = this.app.getInputManager();
 		i.deleteMapping("Pause");
 		i.deleteMapping("TabMenu");
 		

@@ -33,20 +33,22 @@ public class TreeMaker implements TileListener {
 	
 	private Spatial treeGeoms[] = new Spatial[Tree_Strings.length];
 		
+	private App app;
 	private HighwayWorld world;
 
 	private InstancedNode treeNode = new InstancedNode("tree node");
 	private Map<Vector3f, Node> treeNodes;
 	
-	public TreeMaker(HighwayWorld world) {
+	public TreeMaker(App app, HighwayWorld world) {
+		this.app = app;
 		this.world = world;
 		this.treeNodes = new HashMap<Vector3f, Node>();
 		
 		this.treeNode.setShadowMode(ShadowMode.CastAndReceive);
-		App.CUR.getRootNode().attachChild(this.treeNode);
+		this.app.getRootNode().attachChild(this.treeNode);
 		
 		for (int i = 0; i < Tree_Strings.length; i++) {
-			Spatial spat = App.CUR.getAssetManager().loadModel(Tree_Strings[i]);
+			Spatial spat = this.app.getAssetManager().loadModel(Tree_Strings[i]);
 			if (spat instanceof Node) {
 				for (Spatial s: ((Node) spat).getChildren()) {
 					this.treeGeoms[i] = s;
@@ -69,7 +71,7 @@ public class TreeMaker implements TileListener {
 			}
 			
 			for (Spatial c: n.getChildren()) {
-				App.CUR.getPhysicsSpace().add(c);
+				this.app.getPhysicsSpace().add(c);
 			}
 			this.treeNode.attachChild(this.treeNodes.get(pos));
 		} else {
@@ -94,7 +96,7 @@ public class TreeMaker implements TileListener {
 				s.setLocalTranslation(newPos);
 				s.addControl(new RigidBodyControl(0));
 				node.attachChild(s);
-				App.CUR.getPhysicsSpace().add(s);
+				this.app.getPhysicsSpace().add(s);
 			}
 			GeometryBatchFactory.optimize(node);
 		}
@@ -109,7 +111,7 @@ public class TreeMaker implements TileListener {
 			return true;
 		}
 		for (Spatial c: n.getChildren()) {
-			App.CUR.getPhysicsSpace().remove(c);
+			this.app.getPhysicsSpace().remove(c);
 		}
 		this.treeNode.detachChild(n);
 		return true; 
@@ -121,6 +123,6 @@ public class TreeMaker implements TileListener {
 	public String imageHeightmapRequired(int x, int z) { return null; }
 
 	public void cleanup() {
-		App.CUR.getRootNode().detachChild(treeNode);
+		this.app.getRootNode().detachChild(treeNode);
 	}
 }

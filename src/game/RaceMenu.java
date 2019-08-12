@@ -1,6 +1,7 @@
 package game;
 
 import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.math.Vector3f;
 import com.simsilica.lemur.Container;
@@ -27,7 +28,7 @@ public class RaceMenu extends DriveMenu {
 		raceLabel = new Label("Race state?");
 		state.attachChild(raceLabel);
 		state.setLocalTranslation(H.screenTopLeft().subtract(new Vector3f(0,300,0)));
-		App.CUR.getGuiNode().attachChild(state);
+		((SimpleApplication)app).getGuiNode().attachChild(state);
 	}
 
 	public void setText(String text) {

@@ -1,5 +1,6 @@
 package car.ray;
 
+import com.jme3.app.SimpleApplication;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;
 import com.jme3.material.RenderState.FaceCullMode;
@@ -16,7 +17,6 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.util.BufferUtils;
 
-import game.App;
 import game.LoadModelWrapper;
 import game.WireframeHighlighter;
 
@@ -46,20 +46,22 @@ public class RayWheelControl {
 	private float sinceLastPos;
 	//end skid marks
 	
+	private final SimpleApplication app;
 	private final RayWheel wheel;
 	private final Node rootNode;
 	protected final Spatial spat;
 	
 	private final Vector3f offset;
 	private Vector3f posInLocal;
-		
-	public RayWheelControl(RayWheel wheel, Node carRootNode, Vector3f pos) {
+	
+	public RayWheelControl(SimpleApplication app, RayWheel wheel, Node carRootNode, Vector3f pos) {
+		this.app = app;
 		this.wheel = wheel;
 		this.offset = pos;
 		
 		//rotate and translate the wheel rootNode
 		rootNode = new Node("wheel " + wheel.num);
-		spat = LoadModelWrapper.create(App.CUR.getAssetManager(), wheel.data.modelName, BASE_HIGHLIGHT_COLOUR);
+		spat = LoadModelWrapper.create(app.getAssetManager(), wheel.data.modelName, BASE_HIGHLIGHT_COLOUR);
 		spat.center();
 		rootNode.attachChild(spat);
 		
@@ -107,7 +109,7 @@ public class RayWheelControl {
 		mesh.setBuffer(Type.Color, 4, BufferUtils.createFloatBuffer(BASE_HIGHLIGHT_COLOUR, BASE_HIGHLIGHT_COLOUR, BASE_HIGHLIGHT_COLOUR, BASE_HIGHLIGHT_COLOUR));
 		this.skidLine.setMesh(mesh);
 		
-		WireframeHighlighter.addWireframeMat(App.CUR.getAssetManager(), this.skidLine, ColorRGBA.Blue);
+		WireframeHighlighter.addWireframeMat(app.getAssetManager(), this.skidLine, ColorRGBA.Blue);
 		Material mat = this.skidLine.getMaterial();
 		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		mat.setBoolean("VertexColor", true);
@@ -119,14 +121,14 @@ public class RayWheelControl {
 		
 		this.skidLine.setQueueBucket(Bucket.Transparent);
 		
-		App.CUR.getRootNode().attachChild(this.skidLine);
+		app.getRootNode().attachChild(this.skidLine);
 		
 		//TODO smoke from source control
 	}
 
 	//hopefully called by the FakeRayCarControl in physics step
 	public void physicsUpdate(float tpf, Vector3f velDir, float sus_min_travel) { //TODO sus_min_travel is just poor design
-		App.CUR.enqueue(() -> {
+		app.enqueue(() -> {
 			posInLocal = new Vector3f(0, -wheel.susRayLength - sus_min_travel, 0);
 			rootNode.setLocalTranslation(offset.add(posInLocal));
 			
@@ -210,6 +212,6 @@ public class RayWheelControl {
 	
 	public void cleanup() {
 		rootNode.detachChild(spat);
-		App.CUR.getRootNode().detachChild(skidLine);
+		app.getRootNode().detachChild(skidLine);
 	}
 }

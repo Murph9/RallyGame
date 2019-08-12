@@ -58,7 +58,7 @@ public class FlatWorld extends World {
 	public void update(float tpf) {
 		//TODO mod 1000 the car pos, so the grounds bumps don't occur
 		
-		Vector3f pos = App.CUR.getCamera().getLocation();
+		Vector3f pos = this.app.getCamera().getLocation();
 		pos.y = 0;
 		startGeometry.setLocalTranslation(pos);
 		startGeometry.getControl(RigidBodyControl.class).setPhysicsLocation(pos);

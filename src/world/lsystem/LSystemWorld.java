@@ -1,6 +1,7 @@
 package world.lsystem;
 
 import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.material.Material;
@@ -37,7 +38,7 @@ public class LSystemWorld extends World {
 
 		placeLargeFlatBox(app);
 		
-		lrg = new LRoadGenerator(rootNode, 0.2f);
+		lrg = new LRoadGenerator((SimpleApplication)app, rootNode, 0.2f);
 		lrg.init();
 	}
 	
@@ -53,7 +54,7 @@ public class LSystemWorld extends World {
 		startBox.addControl(new RigidBodyControl(0));
 		
 		this.rootNode.attachChild(startBox);
-		App.CUR.getPhysicsSpace().add(startBox);
+		((App)this.app).getPhysicsSpace().add(startBox);
 	}
 
 	@Override

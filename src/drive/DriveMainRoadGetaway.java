@@ -44,7 +44,7 @@ public class DriveMainRoadGetaway extends DriveBase {
 	public void update(float tpf) {
 		super.update(tpf);
 		
-		if (this.cb.getCount() < maxCount && App.CUR.frameCount % 60 == 0) {
+		if (this.cb.getCount() < maxCount && App.getFrameCount() % 60 == 0) {
 			final float z = nextXOff();
 			final boolean posDir = dirGivenCarNum(this.cb.getCount()); //TODO use when they go in reverse
 			BiFunction<RayCarControl, RayCarControl, CarAI> ai = (me, target) -> new DriveAlongAI(me, (vec) -> {

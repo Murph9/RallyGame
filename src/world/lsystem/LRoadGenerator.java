@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 
+import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
@@ -25,6 +26,8 @@ public class LRoadGenerator {
 
 	private static Quaternion ROT90 = new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y);
 	
+	private SimpleApplication app;
+
 	Node rootNode;
 	private final boolean DEBUG = false;
 	float height;
@@ -40,7 +43,8 @@ public class LRoadGenerator {
 	private Geometry box1;
 	private Geometry box2;
 	
-	LRoadGenerator(Node rootNode, float height) {
+	LRoadGenerator(SimpleApplication app, Node rootNode, float height) {
+		this.app = app;		
 		this.rootNode = rootNode;
 		this.height = height;
 	}
@@ -61,7 +65,7 @@ public class LRoadGenerator {
 		box1 = new Geometry("building", b);
 		Box b2 = new Box(1, 3, 1);
 		box2 = new Geometry("building2", b2);
-		Material mat = new Material(App.CUR.getAssetManager(), "Common/MatDefs/Misc/ShowNormals.j3md");
+		Material mat = new Material(app.getAssetManager(), "Common/MatDefs/Misc/ShowNormals.j3md");
 		box1.setMaterial(mat);
 		box2.setMaterial(mat);
 		
@@ -257,14 +261,14 @@ public class LRoadGenerator {
 		RoadMesh m = new RoadMesh(dir.length()/12, 2, list);
 		
 		Geometry geometry = new Geometry("line", m);
-		Material mat = new Material(App.CUR.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+		Material mat = new Material(this.app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 		mat.setColor("Color", obj.type.colour);
 		geometry.setMaterial(mat);
 		rootNode.attachChild(geometry);
 		
 		CollisionShape col = CollisionShapeFactory.createMeshShape(geometry);
 		RigidBodyControl landscape = new RigidBodyControl(col, 0);
-		App.CUR.getPhysicsSpace().add(landscape);
+		((App)this.app).getPhysicsSpace().add(landscape);
 		
 		/*
         Line line = new Line(obj.start, obj.end);
@@ -290,7 +294,7 @@ public class LRoadGenerator {
 	private void drawMeAVerySmallBox(Vector3f pos, ColorRGBA colour) {
 		Box b = new Box(0.1f, 0.1f, 0.1f);
 		Geometry geometry = new Geometry("box", b);
-		Material mat = new Material(App.CUR.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+		Material mat = new Material(this.app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 		mat.setColor("Color", colour);
 		geometry.setMaterial(mat);
 		geometry.setLocalTranslation(pos);

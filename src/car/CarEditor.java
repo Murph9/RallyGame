@@ -30,7 +30,6 @@ import com.simsilica.lemur.event.MouseEventControl;
 import car.data.Car;
 import car.ray.CarDataConst;
 import car.ray.RayCarControl;
-import game.App;
 import helper.H;
 import helper.Log;
 
@@ -42,14 +41,9 @@ public class CarEditor extends Container {
 	private Function<Car, RayCarControl> resetCar;
 	
 	private boolean mouseIn = false;
-	private AnalogListener actionListener = new AnalogListener() {
-		public void onAnalog(String name, float value, float tpf) {
-			value *= name.equals("scroll_neg") ? -1 : 1;
-			scrollFields(value);
-		}
-	};
+	private AnalogListener actionListener;
 	
-	public CarEditor(RayCarControl p, Consumer<CarDataConst> a, Function<Car, RayCarControl> reset) {
+	public CarEditor(InputManager im, RayCarControl p, Consumer<CarDataConst> a, Function<Car, RayCarControl> reset) {
 		super("CarEditor");
 		
 		this.p = p;
@@ -62,12 +56,18 @@ public class CarEditor extends Container {
 			e.printStackTrace();
 		}
 		
+		this.actionListener = new AnalogListener() {
+			public void onAnalog(String name, float value, float tpf) {
+				value *= name.equals("scroll_neg") ? -1 : 1;
+				scrollFields(value);
+			}
+		};
+
 		//and scroll listener
-		InputManager i = App.CUR.getInputManager();
-		i.addMapping("scroll", new MouseAxisTrigger(MouseInput.AXIS_WHEEL, true));
-		i.addMapping("scroll_neg", new MouseAxisTrigger(MouseInput.AXIS_WHEEL, false));
-		i.addListener(actionListener, "scroll");
-		i.addListener(actionListener, "scroll_neg");
+		im.addMapping("scroll", new MouseAxisTrigger(MouseInput.AXIS_WHEEL, true));
+		im.addMapping("scroll_neg", new MouseAxisTrigger(MouseInput.AXIS_WHEEL, false));
+		im.addListener(actionListener, "scroll");
+		im.addListener(actionListener, "scroll_neg");
 		
 		MouseEventControl.addListenersToSpatial(this, new DefaultMouseListener() {
 			@Override

@@ -87,7 +87,9 @@ public class CarBuilder extends AbstractAppState {
 		
 		//update the collision shape, NOTE: a static convex collision shape or hull might be faster here
 		CollisionShape colShape = CollisionShapeFactory.createDynamicMeshShape(carModel);
-		RayCarControl carControl = new RayCarControl(this.app.getPhysicsSpace(), colShape, carData, carNode);
+		Vector3f grav = new Vector3f();
+		this.app.getPhysicsSpace().getGravity(grav); //becuase the rigid body doesn't have gravity yet
+		RayCarControl carControl = new RayCarControl(this.app, colShape, carData, carNode, grav);
 		
 		carNode.attachChild(carModel);
 
@@ -102,7 +104,7 @@ public class CarBuilder extends AbstractAppState {
 		carControl.setPhysicsRotation(rot);
 
 		if (aPlayer) { //players get the keyboard
-			carControl.attachControls();
+			carControl.attachControls(app.getInputManager());
 		} else {
 			CarAI _ai;
 			if (ai != null)
@@ -139,7 +141,7 @@ public class CarBuilder extends AbstractAppState {
 		}
 		rootNode.detachChildNamed(id+"");
 		RayCarControl car = cars.get(id);
-		car.cleanup();
+		car.cleanup(this.app);
 		cars.remove(id);
 	}
 	
@@ -148,7 +150,7 @@ public class CarBuilder extends AbstractAppState {
 			RayCarControl car = cars.get(key);
 			if (car == mpv) {
 				rootNode.detachChildNamed(key+"");
-				car.cleanup();
+				car.cleanup(this.app);
 				cars.remove(key);
 				return;
 			}
@@ -188,7 +190,7 @@ public class CarBuilder extends AbstractAppState {
 		super.cleanup();
 		for (int key : cars.keySet()) {
 			RayCarControl car = cars.get(key);
-			car.cleanup();
+			car.cleanup(this.app);
 		}
 		this.app.getRootNode().detachChild(rootNode);
 		Log.p("carbuilder cleanup");

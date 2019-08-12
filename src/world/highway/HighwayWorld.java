@@ -144,10 +144,10 @@ public class HighwayWorld extends World {
 		this.app.getStateManager().attach(this.terrain);
 		
 		//set after so the terrain exists first
-		rM = new RoadMaker(this);
+		rM = new RoadMaker((App)this.app, this);
 		newWorld.addTileListener(rM);
 		
-		tM = new TreeMaker(this);
+		tM = new TreeMaker((App)this.app, this);
 		newWorld.addTileListener(tM);
 	}
 	private Material createTerrainMaterial(AssetManager am) {

@@ -5,9 +5,6 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 
 import car.ray.RayCarControl;
-import game.App;
-import helper.Log;
-import world.WorldType;
 
 public class DriveAtAI extends CarAI {
 
@@ -94,15 +91,5 @@ public class DriveAtAI extends CarAI {
 		}
 		
 		//TODO some kind of ray cast so they can drive around things properly
-		
-		//hack so they don't lose too bad on dynamic tracks
-		if (App.CUR.drive.world.getType() == WorldType.DYNAMIC
-				&& atPos.y - pos.y > 50 || atPos.subtract(pos).length() > 500) {
-			car.setPhysicsLocation(atPos.add(4, 1, 0)); //spawn 3 up and left of me
-			car.setLinearVelocity(driveAtThis.getLinearVelocity()); //and give them my speed
-			car.setPhysicsRotation(driveAtThis.getPhysicsRotation()); //and rotation
-			car.setAngularVelocity(driveAtThis.getAngularVelocity()); //and rot angle
-			Log.p("respawned at " + driveAtThis.getPhysicsLocation());
-		}
 	}
 }

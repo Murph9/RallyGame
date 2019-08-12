@@ -1,6 +1,7 @@
 package game;
 
 import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.math.Vector3f;
@@ -19,6 +20,8 @@ import world.wp.WP.DynamicType;
 
 public class ChooseMap extends AbstractAppState {
 
+	private SimpleApplication app;
+
 	private static WorldType worldType = WorldType.NONE;
 	private static World world = null;
 	
@@ -29,14 +32,15 @@ public class ChooseMap extends AbstractAppState {
 	public void initialize(AppStateManager stateManager, Application app) {
 		super.initialize(stateManager, app);
 
+		this.app = (SimpleApplication)app;
 		((App)app).setPhysicsSpaceEnabled(true);
 		
-		camera = new BasicCamera("Camera", App.CUR.getCamera(), new Vector3f(-70,50,0), new Vector3f(20,1,0));
-		App.CUR.getStateManager().attach(camera);
+		camera = new BasicCamera("Camera", this.app.getCamera(), new Vector3f(-70,50,0), new Vector3f(20,1,0));
+		this.app.getStateManager().attach(camera);
 		
 		//init gui
 		Container myWindow = new Container();
-		App.CUR.getGuiNode().attachChild(myWindow);
+		this.app.getGuiNode().attachChild(myWindow);
 		myWindow.setLocalTranslation(H.screenTopLeft());
 		
 		//these values are not x and y because they are causing confusion
@@ -76,7 +80,7 @@ public class ChooseMap extends AbstractAppState {
             public void execute( Button source ) {
             	if (worldType == WorldType.NONE)
             		return; //do not select it
-            	App.CUR.getGuiNode().detachChild(myWindow);
+				((SimpleApplication)app).getGuiNode().detachChild(myWindow);
             	chooseMap();
             }
         });
@@ -99,9 +103,9 @@ public class ChooseMap extends AbstractAppState {
 	}
 
 	public void cleanup() {
-		App.CUR.getStateManager().detach(camera);
+		this.app.getStateManager().detach(camera);
 		camera = null;
-		App.CUR.getStateManager().detach(world);
+		this.app.getStateManager().detach(world);
 		world = null;
 	}
 
@@ -109,13 +113,13 @@ public class ChooseMap extends AbstractAppState {
 	//UI stuff
 	public void chooseMap() {
 		if (world == null) { Log.e("no return value for ChooseMap()"); return; }
-		App.CUR.next(this);
+		((App)this.app).next(this);
 	}
 	public World getWorld() {
 		World newWorld = null;
 		try {
 			newWorld = world.copy();
-			App.CUR.getStateManager().detach(world);
+			this.app.getStateManager().detach(world);
 		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -126,7 +130,7 @@ public class ChooseMap extends AbstractAppState {
 
 	public void setWorld(String typeStr, String subType) {
 		if (world != null && world.isInitialized()) {
-			App.CUR.getStateManager().detach(world);
+			this.app.getStateManager().detach(world);
 			world = null;
 		}
 		worldType = WorldType.valueOf(WorldType.class, typeStr);
@@ -167,6 +171,6 @@ public class ChooseMap extends AbstractAppState {
 				return;
 		}
 		
-		App.CUR.getStateManager().attach(world);
+		this.app.getStateManager().attach(world);
 	}
 }

@@ -39,7 +39,7 @@ public class StaticWorldBuilder extends World {
 	@Override
 	public void initialize(AppStateManager stateManager, Application app) {
 		super.initialize(stateManager, app);
-		addStaticWorld();
+		addStaticWorld(app.getAssetManager());
 	}
 	@Override
 	public void reset() {
@@ -73,14 +73,12 @@ public class StaticWorldBuilder extends World {
 	
 	
 	////making the world exist
-	public void addStaticWorld() {
-		AssetManager as = App.CUR.getAssetManager();
-		
-		Material mat = new Material(as, "Common/MatDefs/Misc/ShowNormals.j3md");
+	public void addStaticWorld(AssetManager am) {		
+		Material mat = new Material(am, "Common/MatDefs/Misc/ShowNormals.j3md");
 		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		
 	    //imported model
-		Spatial worldModel = LoadModelWrapper.create(as, world.name, ColorRGBA.White);
+		Spatial worldModel = LoadModelWrapper.create(am, world.name, ColorRGBA.White);
 		worldModel.scale(world.scale);
 		
 		CollisionShape col = CollisionShapeFactory.createMeshShape(worldModel);

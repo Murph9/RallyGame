@@ -27,6 +27,7 @@ public class CarModelData {
 		
 		this.possibleParts = CarPart.GetNames();
 		
+		//TODO maybe cache all car data, and load using the assetmanager in one step
 		Spatial rootSpat = App.CUR.getAssetManager().loadModel(carModel);
 		readInModelData(rootSpat);
 		

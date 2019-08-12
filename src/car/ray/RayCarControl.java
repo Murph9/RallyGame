@@ -7,6 +7,7 @@ import com.jme3.audio.AudioNode;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.objects.PhysicsRigidBody;
+import com.jme3.input.InputManager;
 import com.jme3.input.RawInputListener;
 import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
@@ -24,6 +25,7 @@ import helper.Log;
 //visual/input things
 public class RayCarControl extends RayCarPowered {
 
+	private final App app;
 	private final RayWheelControl[] wheelControls;
 	
 	//sound stuff
@@ -44,16 +46,17 @@ public class RayCarControl extends RayCarPowered {
     //some directional world vectors for ease of direction/ai computation
     public Vector3f vel, forward, up, left, right;
 	
-	public RayCarControl(PhysicsSpace space, CollisionShape shape, CarDataConst carData, Node rootNode) {
-		super(shape, carData);
-		this.space = space;
+	public RayCarControl(App app, CollisionShape shape, CarDataConst carData, Node rootNode, Vector3f grav) {
+		super(shape, carData, grav);
+		this.app = app;
+		this.space = app.getPhysicsSpace();
 
 		vel = forward = up = left = right = new Vector3f();
 		
 		//init visual wheels
 		this.wheelControls = new RayWheelControl[4];
 		for (int i = 0; i < wheelControls.length; i++) {
-			wheelControls[i] = new RayWheelControl(wheels[i], rootNode, carData.wheelOffset[i]);
+			wheelControls[i] = new RayWheelControl(app, wheels[i], rootNode, carData.wheelOffset[i]);
 		}
 		
         this.controls = new LinkedList<RawInputListener>();
@@ -249,18 +252,18 @@ public class RayCarControl extends RayCarPowered {
 			w.radSec = 0; //stop rotation of the wheels
 		}
 		
-		if (App.CUR.drive == null) 
+		if (app.drive == null)
 			return;
 		
-		Vector3f pos = App.CUR.drive.world.getStartPos();
-		Matrix3f rot = App.CUR.drive.world.getStartRot();
+		Vector3f pos = app.drive.world.getStartPos();
+		Matrix3f rot = app.drive.world.getStartRot();
 		if (pos != null && rot != null) {
 			setPhysicsLocation(pos);
 			setPhysicsRotation(rot);
 			setAngularVelocity(new Vector3f());
 		}
 		
-		App.CUR.drive.reset(); //TODO this is a hack, the world state should be listening to the event instead
+		app.drive.reset(); //TODO this is a hack, the world state should be listening to the event instead
 	}
 	private void rotate180() {
 		rbc.setPhysicsRotation(new Quaternion().fromAngleAxis(FastMath.PI, new Vector3f(0,1,0)));
@@ -268,16 +271,16 @@ public class RayCarControl extends RayCarPowered {
 	
 	
 	//Please only call this from the car manager
-	public void cleanup() {
+	public void cleanup(App app) {
 		if (this.controls != null && !this.controls.isEmpty()) {
 			for (RawInputListener ril: this.controls)
-				App.CUR.getInputManager().removeRawInputListener(ril);
+				app.getInputManager().removeRawInputListener(ril);
 			this.controls.clear();
 		}
 		
 		if (this.engineSound != null) {
 			rootNode.detachChild(this.engineSound);
-			App.CUR.getAudioRenderer().stopSource(engineSound);
+			app.getAudioRenderer().stopSource(engineSound);
 			engineSound = null;
 		}
 		
@@ -307,7 +310,7 @@ public class RayCarControl extends RayCarPowered {
 	public CarAI getAI() {
 		return this.ai;
 	}
-	public void attachControls() {
+	public void attachControls(InputManager im) {
 		if (controls.size() > 0) {
 			Log.e("attachControls already called");
 			return;
@@ -317,7 +320,7 @@ public class RayCarControl extends RayCarPowered {
 		this.controls.add(new JoystickEventListener(this));
 		
 		for (RawInputListener ril: this.controls)
-			App.CUR.getInputManager().addRawInputListener(ril);
+			im.addRawInputListener(ril);
 	}
 	
 	public RayWheelControl getWheel(int w_id) {

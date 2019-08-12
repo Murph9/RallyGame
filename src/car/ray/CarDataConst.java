@@ -108,17 +108,9 @@ public class CarDataConst implements Serializable {
 				return;
 			}
 		}
-		
 		loaded = true;
-
-		modelLoad();
 		
-		//TODO validate values because they are now read from a file
-	}
-	
-	private void modelLoad() {
 		//init car pos things based on the physical model
-
 		CarModelData modelData = new CarModelData(this.carModel, this.wheelModel);
 		if (modelData.foundSomething() && modelData.foundAllWheels()) {
 			wheelOffset = new Vector3f[4];
@@ -130,6 +122,8 @@ public class CarDataConst implements Serializable {
 			Log.e("!!! Missing car model wheel position data for: " + this.carModel);
 			System.exit(-50203);
 		}
+
+		//TODO validate values because they are now read from a file
 	}
 
 	////////////////////////////////////////////////////////

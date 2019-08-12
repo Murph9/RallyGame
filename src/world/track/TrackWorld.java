@@ -116,7 +116,7 @@ public class TrackWorld extends World {
 						quadP[k] = unnormalizeHeightIn(quadP[k]);
 					}
 					
-					Geometry geo = createQuad(quadP, ColorRGBA.Brown);
+					Geometry geo = createQuad(app.getAssetManager(), quadP, ColorRGBA.Brown);
 					if (geo == null)
 						continue;
 					
@@ -157,12 +157,9 @@ public class TrackWorld extends World {
 	    terrain.addControl(rbc);
 	    ((App)this.app).getPhysicsSpace().add(rbc);
 	    
-
 	    //tree world doesn't need to know the world before the scale
-	    Node treeNode = new TreeTrackHelper(terrain, worldSize, 2000).getTreeNode();
+	    Node treeNode = new TreeTrackHelper((App)this.app, terrain, worldSize, 2000).getTreeNode();
 	    rootNode.attachChild(treeNode);
-	    
-	    
 	}
 	
 	private float[] createHeightMap() {
@@ -370,7 +367,7 @@ public class TrackWorld extends World {
 		};
 	}
 	
-	private static Geometry createQuad(Vector3f[] v, ColorRGBA colour) {
+	private static Geometry createQuad(AssetManager am, Vector3f[] v, ColorRGBA colour) {
 		if (v == null || v.length != 4) {
 			Log.e("TrackWorld-createQuad: Not the correct length drawMeAQuad():");
 			helper.Log.e(v, ",");
@@ -403,7 +400,6 @@ public class TrackWorld extends World {
 		
 		Geometry geo = new Geometry("Quad", mesh);
 		
-		AssetManager am = App.CUR.getAssetManager();
 		Material mat = null;
 		if (colour != null) {
 			mat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");

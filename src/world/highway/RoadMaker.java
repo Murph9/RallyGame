@@ -36,6 +36,7 @@ public class RoadMaker implements TileListener {
 		}
 	}
 	
+	private App app;
 	private HighwayWorld world;
 	private NoiseBasedWorld terrain;
 	
@@ -46,7 +47,8 @@ public class RoadMaker implements TileListener {
 	private int totalLoaded;
 	private boolean terrainDoneLoading;
 	
-	public RoadMaker(HighwayWorld world) {
+	public RoadMaker(App app, HighwayWorld world) {
+		this.app = app;
 		this.world = world;
 		this.terrain = world.terrain;
 		this.totalChunks = terrain.getTotalVisibleChunks();
@@ -89,8 +91,8 @@ public class RoadMaker implements TileListener {
 	public boolean tileLoaded(TerrainChunk chunk) {
 		totalLoaded++;
 		
-		if (App.CUR.IF_DEBUG)
-			App.CUR.getRootNode().attachChild(H.makeShapeBox(App.CUR.getAssetManager(), ColorRGBA.Green, chunk.getLocalTranslation().add(0,110,0), 2));
+		if (app.IF_DEBUG)
+			app.getRootNode().attachChild(H.makeShapeBox(app.getAssetManager(), ColorRGBA.Green, chunk.getLocalTranslation().add(0,110,0), 2));
 		
 		//terrain needs to load all of its tiles before we will use the grow method
 		//this prevents the order of the tiles screwing with placements
@@ -136,8 +138,8 @@ public class RoadMaker implements TileListener {
 		RoadMesh m = new RoadMesh(5, 2, Arrays.asList(newPoints));
 		world.generateRoad(m);
 		
-		App.CUR.getRootNode().attachChild(H.makeShapeArrow(App.CUR.getAssetManager(), ColorRGBA.White, q.mult(new Vector3f(10,0,0)), lastPoints[3]));
-		App.CUR.getRootNode().attachChild(H.makeShapeArrow(App.CUR.getAssetManager(), ColorRGBA.Red, newPoints[3].subtract(newPoints[0]), newPoints[0]));
+		app.getRootNode().attachChild(H.makeShapeArrow(app.getAssetManager(), ColorRGBA.White, q.mult(new Vector3f(10,0,0)), lastPoints[3]));
+		app.getRootNode().attachChild(H.makeShapeArrow(app.getAssetManager(), ColorRGBA.Red, newPoints[3].subtract(newPoints[0]), newPoints[0]));
 		
 		lastPoints = newPoints;
 		

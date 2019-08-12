@@ -8,7 +8,6 @@ import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 
-import game.App;
 import helper.Log;
 
 //Controls the physical (and visual) things in the level
@@ -49,10 +48,10 @@ public abstract class World extends AbstractAppState {
 			Log.e("I was probably cleaned up twice or never, please don't.");
 
 		this.initialized = false;
-		app = null;
-		
-		App.CUR.getRootNode().detachChild(this.rootNode);
-		
+				
+		this.app.getRootNode().detachChild(this.rootNode);
+		this.app = null;
+
 		Log.e("cleanup() world: " + rootNode.getName());
 		this.rootNode = null;
 		super.cleanup();
