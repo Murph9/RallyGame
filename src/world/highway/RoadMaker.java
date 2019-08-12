@@ -91,7 +91,7 @@ public class RoadMaker implements TileListener {
 	public boolean tileLoaded(TerrainChunk chunk) {
 		totalLoaded++;
 		
-		if (app.IF_DEBUG)
+		if (App.IF_DEBUG)
 			app.getRootNode().attachChild(H.makeShapeBox(app.getAssetManager(), ColorRGBA.Green, chunk.getLocalTranslation().add(0,110,0), 2));
 		
 		//terrain needs to load all of its tiles before we will use the grow method

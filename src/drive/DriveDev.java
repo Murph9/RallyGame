@@ -50,8 +50,6 @@ public class DriveDev extends DriveBase {
 	}
 
 	private void reloadCar(CarDataConst data) {
-		this.cb.get(0).getCarData().loaded = false; //this is a hack, but this whole file is
-		
 		this.cb.setCarData(0, data);
 		wheelGraphs.updateMyPhysicsVehicle(this.cb.get(0));
 	}

@@ -638,7 +638,7 @@ public abstract class Terrain extends AbstractAppState implements Closeable
             	
             	rootNode.attachChild(boxNode);
             	
-            	if (((App)app).IF_DEBUG)
+            	if (App.IF_DEBUG)
             		GeometryBatchFactory.optimize(boxNode);
             });
         });
@@ -659,7 +659,7 @@ public abstract class Terrain extends AbstractAppState implements Closeable
     	Vector3f v2 = ht.v.subtract(ht.tc.getLocalTranslation().mult(1/ht.tc.getWorldScale().x));
     	ht.tc.setHeight(H.v3tov2fXZ(v2), ht.height/this.worldHeight);
 
-    	if (((App)app).IF_DEBUG) {
+    	if (App.IF_DEBUG) {
     		Log.p("Set height", ht.v, ht.tc);
     		boxNode.attachChild(H.makeShapeBox(app.getAssetManager(), ColorRGBA.Brown, ht.v, 0.1f));
     	}

@@ -78,7 +78,9 @@ public class CarBuilder extends AbstractAppState {
 			}
 		}
 		
-		CarDataConst carData = car.get();
+		Vector3f grav = new Vector3f();
+		this.app.getPhysicsSpace().getGravity(grav);
+		CarDataConst carData = car.get(grav);
 		
 		AssetManager am = this.app.getAssetManager();
 		
@@ -87,9 +89,7 @@ public class CarBuilder extends AbstractAppState {
 		
 		//update the collision shape, NOTE: a static convex collision shape or hull might be faster here
 		CollisionShape colShape = CollisionShapeFactory.createDynamicMeshShape(carModel);
-		Vector3f grav = new Vector3f();
-		this.app.getPhysicsSpace().getGravity(grav); //becuase the rigid body doesn't have gravity yet
-		RayCarControl carControl = new RayCarControl(this.app, colShape, carData, carNode, grav);
+		RayCarControl carControl = new RayCarControl(this.app, colShape, carData, carNode);
 		
 		carNode.attachChild(carModel);
 

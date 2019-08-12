@@ -31,9 +31,8 @@ public class RayCarPowered extends RayCar {
 	protected int gearChangeTo;
 	protected float gearChangeTime;
 	
-	public RayCarPowered(CollisionShape shape, CarDataConst carData, Vector3f grav) {
-		super(shape, carData, grav);
-		
+	public RayCarPowered(CollisionShape shape, CarDataConst carData) {
+		super(shape, carData);
 		this.nitro = carData.nitro_max;
 	}
 

@@ -9,9 +9,6 @@ import java.io.Serializable;
 
 import com.jme3.math.Vector3f;
 
-import car.CarModelData;
-import car.CarModelData.CarPart;
-import helper.Log;
 import helper.H.Duo;
 
 public class CarDataConst implements Serializable {
@@ -97,34 +94,6 @@ public class CarDataConst implements Serializable {
 	
 	public CarDataConst() {} 
 
-	
-	public boolean loaded = false;
-	public final void load() { //final = no override pls
-		if (loaded) {
-			try {
-				throw new Exception("Car data loaded twice");
-			} catch (Exception e) {
-				e.printStackTrace();
-				return;
-			}
-		}
-		loaded = true;
-		
-		//init car pos things based on the physical model
-		CarModelData modelData = new CarModelData(this.carModel, this.wheelModel);
-		if (modelData.foundSomething() && modelData.foundAllWheels()) {
-			wheelOffset = new Vector3f[4];
-			wheelOffset[0] = modelData.getPosOf(CarPart.Wheel_FL);
-			wheelOffset[1] = modelData.getPosOf(CarPart.Wheel_FR);
-			wheelOffset[2] = modelData.getPosOf(CarPart.Wheel_RL);
-			wheelOffset[3] = modelData.getPosOf(CarPart.Wheel_RR);
-		} else {
-			Log.e("!!! Missing car model wheel position data for: " + this.carModel);
-			System.exit(-50203);
-		}
-
-		//TODO validate values because they are now read from a file
-	}
 
 	////////////////////////////////////////////////////////
 	//usefulMethods

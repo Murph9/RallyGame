@@ -46,8 +46,8 @@ public class RayCarControl extends RayCarPowered {
     //some directional world vectors for ease of direction/ai computation
     public Vector3f vel, forward, up, left, right;
 	
-	public RayCarControl(App app, CollisionShape shape, CarDataConst carData, Node rootNode, Vector3f grav) {
-		super(shape, carData, grav);
+	public RayCarControl(App app, CollisionShape shape, CarDataConst carData, Node rootNode) {
+		super(shape, carData);
 		this.app = app;
 		this.space = app.getPhysicsSpace();
 
@@ -127,7 +127,7 @@ public class RayCarControl extends RayCarPowered {
 		super.prePhysicsTick(space, tpf);
 		
 		for (int i = 0; i < this.wheelControls.length; i++) {
-			this.wheelControls[i].physicsUpdate(tpf, rbc.getLinearVelocity(), carData.susByWheelNum(i).min_travel);
+			this.wheelControls[i].viewUpdate(tpf, rbc.getLinearVelocity(), carData.susByWheelNum(i).min_travel);
 		}
 	}
 	
@@ -301,7 +301,6 @@ public class RayCarControl extends RayCarPowered {
 	}
 	public void setCarData(CarDataConst data) {
 		this.carData = data;
-		this.carData.load();
 	}
 	
 	public void attachAI(CarAI ai) {

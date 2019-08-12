@@ -208,7 +208,7 @@ public class HighwayWorld extends World {
 		List<Vector3f> list = road.getControlPoints(); //No editing this object
 		Log.e("road: ", list);
 
-		if (((App)this.app).IF_DEBUG)
+		if (App.IF_DEBUG)
 			for (int i = 0; i < list.size(); i++)
 				this.app.getRootNode().attachChild(H.makeShapeBox(this.app.getAssetManager(), ColorRGBA.Green, list.get(i), 0.2f));
 		
@@ -234,7 +234,7 @@ public class HighwayWorld extends World {
 		List<Vector3f> heightList = new LinkedList<Vector3f>();
 		
 		for (Vector3f[] quad: quads) {
-			if (((App)this.app).IF_DEBUG) {
+			if (App.IF_DEBUG) {
 				this.app.getRootNode().attachChild(H.makeShapeBox(this.app.getAssetManager(), ColorRGBA.Green, quad[0].add(0,0.1f,0), 0.2f));
 				this.app.getRootNode().attachChild(H.makeShapeBox(this.app.getAssetManager(), ColorRGBA.White, quad[1].add(0,0.1f,0), 0.2f));
 				this.app.getRootNode().attachChild(H.makeShapeBox(this.app.getAssetManager(), ColorRGBA.Blue, quad[2].add(0,-0.1f,0), 0.2f));

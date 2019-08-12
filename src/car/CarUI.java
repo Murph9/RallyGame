@@ -25,7 +25,6 @@ import com.jme3.system.AppSettings;
 import car.ray.RayCarControl;
 import car.ray.RayCarPowered.PoweredState;
 import game.App;
-import game.Main;
 import helper.H;
 
 public class CarUI extends BaseAppState {

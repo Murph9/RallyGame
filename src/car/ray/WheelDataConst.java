@@ -2,6 +2,11 @@ package car.ray;
 
 public class WheelDataConst {
 	
+	public float maxLong;
+	public float maxLat;
+	public float maxLongSat;
+	public float maxLatSat;
+
 	public String modelName;
 	public float radius;
 	public float mass;

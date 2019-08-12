@@ -135,7 +135,11 @@ public class ChooseCar extends AbstractAppState {
 	}
 
 	private String getCarInfoText(Car car) {
-		CarDataConst cd = car.get();
+				
+		Vector3f grav = new Vector3f();
+		((App)this.app).getPhysicsSpace().getGravity(grav);
+	
+		CarDataConst cd = car.get(grav);
 		String out = "Name: "+ car.name() + "\n";
 		Duo<Float, Float> data = cd.getMaxPower();
 		out += "Max Power: " + data.first + "kW? @ " + data.second + " rpm \n";

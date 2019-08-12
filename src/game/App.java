@@ -46,10 +46,12 @@ import world.wp.WP.DynamicType;
 @SuppressWarnings("unused")
 public class App extends SimpleApplication {
 
+	public static final Boolean IF_DEBUG = false;
 	public static App CUR;
-	//public 
+	private static int frameCount = 0; //global frame timer
+	public static int getFrameCount() { return frameCount; } //useful for many
 
-	public Start start;
+	private Start start;
 	private ChooseCar chooseCar;
 	private ChooseMap chooseMap;
 	
@@ -65,16 +67,11 @@ public class App extends SimpleApplication {
 		them = Car.Rally;
 		world = new StaticWorldBuilder(StaticWorld.track2);
 		//world alernatives:
-		new HighwayWorld();
-		new TrackWorld(); 
-		new StaticWorldBuilder(StaticWorld.track2);
-		DynamicType.Simple.getBuilder();
+		//new HighwayWorld();
+		//new TrackWorld();
+		//new StaticWorldBuilder(StaticWorld.track2);
+		//DynamicType.Simple.getBuilder();
 	}
-
-	private static int frameCount = 0; //global frame timer
-	public static int getFrameCount() { return frameCount; } //useful for many
-	public final Boolean IF_DEBUG = false;
-	
 
 	@Override
 	public void simpleInitApp() {

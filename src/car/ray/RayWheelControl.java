@@ -115,8 +115,7 @@ public class RayWheelControl {
 		mat.setBoolean("VertexColor", true);
 		mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
 		
-		
-		//skid line is a special wireframe
+		//skid line is a special wireframe, TODO change to use the normal flat colour mode
 		this.skidLine.setMaterial(mat);
 		
 		this.skidLine.setQueueBucket(Bucket.Transparent);
@@ -127,7 +126,7 @@ public class RayWheelControl {
 	}
 
 	//hopefully called by the FakeRayCarControl in physics step
-	public void physicsUpdate(float tpf, Vector3f velDir, float sus_min_travel) { //TODO sus_min_travel is just poor design
+	public void viewUpdate(float tpf, Vector3f velDir, float sus_min_travel) { //TODO sus_min_travel is just poor design
 		app.enqueue(() -> {
 			posInLocal = new Vector3f(0, -wheel.susRayLength - sus_min_travel, 0);
 			rootNode.setLocalTranslation(offset.add(posInLocal));

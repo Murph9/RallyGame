@@ -14,7 +14,6 @@ import com.jme3.math.Vector3f;
 import game.App;
 import helper.H;
 import helper.HelperObj;
-import helper.Log;
 
 //doesn't extend anything, but here are some reference classes
 //https://github.com/jMonkeyEngine/jmonkeyengine/blob/master/jme3-core/src/main/java/com/jme3/scene/Spatial.java
@@ -23,7 +22,7 @@ import helper.Log;
 //https://github.com/jMonkeyEngine/jmonkeyengine/blob/master/jme3-jbullet/src/main/java/com/jme3/bullet/objects/PhysicsVehicle.java
 //https://github.com/bubblecloud/jbullet/blob/master/src/main/java/com/bulletphysics/dynamics/vehicle/RaycastVehicle.java
 
-//handles suspension/traction/drag
+/** Handles suspension/traction/drag and real-time data of this car */
 public class RayCar implements PhysicsTickListener {
 
 	private static final boolean DEBUG = false;
@@ -56,19 +55,10 @@ public class RayCar implements PhysicsTickListener {
 	//hacks
 	protected boolean tractionEnabled = true;
 	
-	public RayCar(CollisionShape shape, CarDataConst carData, Vector3f grav) {
+	public RayCar(CollisionShape shape, CarDataConst carData) {
 		this.carData = carData;
-		this.carData.load();
-		if (!this.carData.loaded) {
-			try {
-				throw new Exception("Car data not correctly loaded");
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
 		
 		this.planarGForce = new Vector3f();
-		
 		this.raycaster = new CarRaycaster();
 		
 		this.wheels = new RayWheel[carData.wheelData.length];
@@ -76,28 +66,10 @@ public class RayCar implements PhysicsTickListener {
 			wheels[i] = new RayWheel(i, carData.wheelData[i], carData.wheelOffset[i]);
 		}
 		this.wheelTorque = new float[4];
+		this.rbc = new RigidBodyControl(shape, carData.mass);
 
-		rbc = new RigidBodyControl(shape, carData.mass);
-
-		//a fake angular rotational, very important for feel
-		rbc.setAngularDamping(0.4f);
-		
-		// Validate that rest suspension position is within min and max
-		//TODO move to application init, just like the loading of all the car models
-		float quarterMassForce = Math.abs(grav.y)*carData.mass/4f;
-		for (int i  = 0; i < wheels.length; i++) {
-			CarSusDataConst sus = carData.susByWheelNum(i);
-			
-			float minSusForce = (sus.preload_force + sus.stiffness * 0)*1000;
-			float maxSusForce = (sus.preload_force + sus.stiffness * (sus.max_travel - sus.min_travel))*1000;
-			if (quarterMassForce < minSusForce) {
-				Log.e("!! Sus min range too high: " + quarterMassForce + " < " + minSusForce + ", decrease pre-load");
-			}
-			if (quarterMassForce > maxSusForce) {
-				Log.e("!! Sus max range too low: " + quarterMassForce + " > " + maxSusForce + ", increase pre-load or stiffness");
-			}
-		}
-		
+		//a fake angular rotational, very important for driving feel
+		this.rbc.setAngularDamping(0.4f);
 	}
 
 	@Override
@@ -279,8 +251,8 @@ public class RayCar implements PhysicsTickListener {
 			
 			//merging the forces into a traction circle
 			//normalise based on their independant max values 
-			float ratiofract = slipratio/this.wheels[w_id].maxLong;
-			float anglefract = slipangle/this.wheels[w_id].maxLat;
+			float ratiofract = slipratio/carData.wheelData[w_id].maxLong;
+			float anglefract = slipangle/carData.wheelData[w_id].maxLat;
 			float p = FastMath.sqrt(ratiofract*ratiofract + anglefract*anglefract);
 			if (p == 0)
 				p = 0.001f;
@@ -288,18 +260,14 @@ public class RayCar implements PhysicsTickListener {
 			wheels[w_id].skidFraction = p;
 			
 			//calc the longitudinal force from the slip ratio
-			wheel_force.z = (ratiofract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_long, p*this.wheels[w_id].maxLong) * this.wheels[w_id].susForce;
+			wheel_force.z = (ratiofract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_long, p*carData.wheelData[w_id].maxLong) * this.wheels[w_id].susForce;
 			//calc the latitudinal force from the slip angle
-			wheel_force.x = -(anglefract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_lat, p*this.wheels[w_id].maxLat) * this.wheels[w_id].susForce;
+			wheel_force.x = -(anglefract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_lat, p*carData.wheelData[w_id].maxLat) * this.wheels[w_id].susForce;
 			
 			// braking and abs
 			float brakeCurrent2 = brakingCur;
 			if (Math.abs(ratiofract) >= 1 && velocity.length() > 2 && brakingCur == 1)
 				brakeCurrent2 = 0; //abs (which i think works way too well gameplay wise)
-			
-			//self aligning torque
-			if (carData.wheelData[w_id].pjk_lat_sat.D != 0)
-				wheel_force.x += (anglefract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_lat_sat, p*this.wheels[w_id].maxLat) * this.wheels[w_id].susForce;
 			
 			//add the wheel force after merging the forces
 			float totalLongForce = wheelTorque[w_id] - wheel_force.z - (brakeCurrent2*carData.brakeMaxTorque*Math.signum(wheels[w_id].radSec));
