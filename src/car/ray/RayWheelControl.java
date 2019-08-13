@@ -17,7 +17,7 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.util.BufferUtils;
 
-import game.LoadModelWrapper;
+import effects.LoadModelWrapper;
 
 public class RayWheelControl {
 	
@@ -167,7 +167,7 @@ public class RayWheelControl {
 			lastr = curR;
 			lastColor = null;
 			return;
-		} //exit early
+		}
 
 		//i.e. we just started skidding again, then set the this in prep for the next block
 		if (lastColor == null) {

@@ -1,4 +1,4 @@
-package game;
+package effects;
 
 import java.util.HashMap;
 import java.util.Map;

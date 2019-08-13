@@ -15,7 +15,6 @@ import terrainWorld.NoiseBasedWorld;
 import terrainWorld.TerrainChunk;
 import terrainWorld.TileListener;
 
-//TODO rename to road maker or something
 //TODO should fetch the heights based on the noise generator, instead of the terrain
 //	should help generation code, and also allow preperation for more world at once
 public class RoadMaker implements TileListener {

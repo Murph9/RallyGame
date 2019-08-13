@@ -48,7 +48,7 @@ public class DriveCrash extends DriveBase {
 		List<RayCarControl> toKill = new ArrayList<RayCarControl>();
 		for (RayCarControl c: this.cb.getAll()) {
 			if (c.up != null && c.up.y < 0 && c != this.cb.get(0)) {
-				toKill.add(c); //TODO
+				toKill.add(c);
 			}
 		}
 		for (RayCarControl c: toKill) {

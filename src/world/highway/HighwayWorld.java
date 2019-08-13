@@ -156,8 +156,6 @@ public class HighwayWorld extends World {
 		float grassScale = 16;
 		float dirtScale = 16;
 		float rockScale = 16;
-
-		//TODO lighting
 		
         // GRASS texture
         Texture grass = am.loadTexture("assets/terrain/grass.jpg");

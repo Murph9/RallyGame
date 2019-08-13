@@ -3,7 +3,7 @@ package helper;
 import java.io.PrintStream;
 
 public class Log {
-	//TODO class to print log messages somewhere.
+	
 	//This should really be configurable, if you want it isn't a complex file
 	private static PrintStream OUT = System.out;
 	private static PrintStream ERR = System.err;

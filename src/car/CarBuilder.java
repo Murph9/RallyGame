@@ -24,8 +24,8 @@ import car.ai.DriveAtAI;
 import car.data.Car;
 import car.ray.CarDataConst;
 import car.ray.RayCarControl;
+import effects.LoadModelWrapper;
 import game.App;
-import game.LoadModelWrapper;
 import helper.Log;
 
 public class CarBuilder extends AbstractAppState {

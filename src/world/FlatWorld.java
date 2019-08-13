@@ -13,7 +13,7 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 
 import game.App;
-import game.LoadModelWrapper;
+import effects.LoadModelWrapper;
 
 public class FlatWorld extends World {
 	
@@ -56,7 +56,8 @@ public class FlatWorld extends World {
 
 	@Override
 	public void update(float tpf) {
-		//TODO mod 1000 the car pos, so the grounds bumps don't occur
+		//Ideally we would mod 1000 the car position so the grounds bumps don't occur
+		//but doing so would require the car, and we just don't have the power for that here
 		
 		Vector3f pos = this.app.getCamera().getLocation();
 		pos.y = 0;

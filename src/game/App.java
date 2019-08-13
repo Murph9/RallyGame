@@ -34,6 +34,8 @@ import com.simsilica.lemur.style.BaseStyles;
 import car.data.Car;
 import car.ray.CarDataConst;
 import drive.*;
+import effects.EdgeMaskFilter;
+import effects.FilterManager;
 import game.*;
 import helper.Log;
 import settings.Configuration;
@@ -138,11 +140,10 @@ public class App extends SimpleApplication {
 		inputManager.setCursorVisible(true);
 		flyCam.setEnabled(false);
 		
-		//profiling in jme 3.2 (TODO add physics engine stuff using custom sections
+		//profiling in jme 3.2: TODO add physics engine stuff using custom sections
 //		getStateManager().attach(new DetailedProfilerState());
 
 		new FilterManager(getInputManager(), new Filter[] {emf, bloom, fog});
-		//TODO clean
 	}
 	
 	@Override

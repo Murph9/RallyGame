@@ -23,10 +23,10 @@ public class TractionCurveGraph extends Container {
 		
 		this.am = am;
 		this.setPreferredSize(size);
-		updateMyPhysicsVehicle(p);
+		setCar(p);
 	}
 	
-	public void updateMyPhysicsVehicle(RayCarControl p) {
+	public void setCar(RayCarControl p) {
 		this.latData = p.getCarData().wheelData[0].pjk_lat;
 		this.longData = p.getCarData().wheelData[0].pjk_long;
 		drawGraphs();

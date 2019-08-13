@@ -122,7 +122,7 @@ public class DriveMenu extends AbstractAppState {
 	public void mainMenu() {
 		if (drive != null)
 			drive.next();
-		else //TODO fix
+		else
 			((App)this.app).next(null);
 	}
 

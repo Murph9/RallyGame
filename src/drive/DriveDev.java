@@ -51,7 +51,7 @@ public class DriveDev extends DriveBase {
 
 	private void reloadCar(CarDataConst data) {
 		this.cb.setCarData(0, data);
-		wheelGraphs.updateMyPhysicsVehicle(this.cb.get(0));
+		wheelGraphs.setCar(this.cb.get(0));
 	}
 	private RayCarControl resetCar(Car car) {
 		this.reInitPlayerCar(car);
@@ -66,8 +66,9 @@ public class DriveDev extends DriveBase {
 		
 		//reset car
 		this.cb.get(0).setPhysicsLocation(world.getStartPos());
-		this.cb.get(0).setLinearVelocity(new Vector3f(0,0,0));
 		this.cb.get(0).setPhysicsRotation(world.getStartRot());
+		this.cb.get(0).setLinearVelocity(new Vector3f(0, 0, 0));
+		this.cb.get(0).setAngularVelocity(new Vector3f(0, 0, 0));
 	}
 	
 	@Override

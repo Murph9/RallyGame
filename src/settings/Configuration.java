@@ -10,15 +10,15 @@ import java.util.Properties;
 
 public class Configuration implements UserSettings {
 
-	private final static String APP_DATA = System.getProperty("user.home")+"/.murph9/";
-	private final static String CONFIG_FILE_PATH = APP_DATA + "rally/config.text";
+	protected final static String APP_DATA = System.getProperty("user.home") + "/.murph9/rally/";
+	private final static String CONFIG_FILE = APP_DATA + "config.text";
 	
 	public static void Write(Configuration config) {
 		Properties prop = config.getProperties();
 
 		OutputStream output = null;
 		try {
-			output = new FileOutputStream(CONFIG_FILE_PATH);
+			output = new FileOutputStream(CONFIG_FILE);
 			prop.store(output, null);
 			
 		} catch (IOException io) {
@@ -41,7 +41,7 @@ public class Configuration implements UserSettings {
 		
 		try {
 			//make file if it doesn't exist
-			File saveFile = new File(CONFIG_FILE_PATH);
+			File saveFile = new File(CONFIG_FILE);
 			
 			if (!saveFile.exists()) {//need to write if not exists
 				saveFile.getParentFile().mkdirs();

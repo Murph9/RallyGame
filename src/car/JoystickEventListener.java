@@ -18,8 +18,6 @@ import car.ray.RayCarControl;
 
 public class JoystickEventListener implements RawInputListener {
 
-	//TODO its very hardcoded
-	
 	private Map<String, String> intToButton = new HashMap<String, String>();
 	private Map<String, String> buttonToAction = new HashMap<String, String>();
 	
@@ -29,21 +27,21 @@ public class JoystickEventListener implements RawInputListener {
 	public JoystickEventListener (RayCarControl a) {
 		this.a = a;
 		
-		intToButton.put(JoystickButton.BUTTON_0, "A"); //A
-		intToButton.put(JoystickButton.BUTTON_1, "B"); //B
-		intToButton.put(JoystickButton.BUTTON_2, "X"); //X
-		intToButton.put(JoystickButton.BUTTON_3, "Y"); //Y
+		intToButton.put(JoystickButton.BUTTON_0, "A");
+		intToButton.put(JoystickButton.BUTTON_1, "B");
+		intToButton.put(JoystickButton.BUTTON_2, "X");
+		intToButton.put(JoystickButton.BUTTON_3, "Y");
 		
-		intToButton.put(JoystickButton.BUTTON_4, "LeftBumper"); //LeftBumper
-		intToButton.put(JoystickButton.BUTTON_5, "RightBumper"); //RightBumper
+		intToButton.put(JoystickButton.BUTTON_4, "LeftBumper");
+		intToButton.put(JoystickButton.BUTTON_5, "RightBumper");
 		
-		intToButton.put(JoystickButton.BUTTON_6, "Select"); //Select
-		intToButton.put(JoystickButton.BUTTON_7, "Start"); //Start
+		intToButton.put(JoystickButton.BUTTON_6, "Select");
+		intToButton.put(JoystickButton.BUTTON_7, "Start");
 		
-		intToButton.put(JoystickButton.BUTTON_8, "LeftStick"); //LeftStick
-		intToButton.put(JoystickButton.BUTTON_9, "RightStick"); //RightStick
+		intToButton.put(JoystickButton.BUTTON_8, "LeftStick");
+		intToButton.put(JoystickButton.BUTTON_9, "RightStick");
 		
-		
+		//map to game actions
 		buttonToAction.put("A", "Handbrake");
 		buttonToAction.put("B", "Nitro");
 		
@@ -60,7 +58,6 @@ public class JoystickEventListener implements RawInputListener {
 		float value = arg0.getValue();
 		float valueAbs = Math.abs(value);
 		
-		//TODO fix
 		if (axis == axis.getJoystick().getXAxis()) { // left/right normal stick
 			if (value > 0) {
 				a.onAction("Left", false, 0);
@@ -91,7 +88,7 @@ public class JoystickEventListener implements RawInputListener {
 			//not mapped yet
 		
 		} else if (axis == axis.getJoystick().getPovXAxis()) { //DPAD
-			// TODO - fix the pov_x and pov_y buttons
+			//not mapped yet
 
 		} else if (axis == axis.getJoystick().getPovYAxis()) {
 		

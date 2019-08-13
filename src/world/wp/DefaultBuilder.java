@@ -24,7 +24,7 @@ import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.shape.Box;
 
 import game.App;
-import game.LoadModelWrapper;
+import effects.LoadModelWrapper;
 import helper.Log;
 import world.World;
 import world.WorldType;
@@ -105,8 +105,12 @@ public abstract class DefaultBuilder extends World {
 		
 		Vector3f pos = this.app.getCamera().getLocation();
 		
-		while (nextPos.subtract(pos).length() < distance) {
-			selectNewPiece();
+		try {
+			while (nextPos.subtract(pos).length() < distance)
+				selectNewPiece();
+		} catch (Exception e) {
+			//probably couldn't find something to place
+			e.printStackTrace();
 		}
 		
 		List<Spatial> temp = new LinkedList<Spatial>(curPieces);
@@ -123,7 +127,7 @@ public abstract class DefaultBuilder extends World {
 		}
 	}
 
-	protected void selectNewPiece() {
+	protected void selectNewPiece() throws Exception {
 		//get list of valid pieces (i.e. pieces with the correct node type)
 		List<WPObject> wpoList = new ArrayList<>();
 		for (WPObject w: wpos) {
@@ -132,41 +136,49 @@ public abstract class DefaultBuilder extends World {
 			}
 		}
 
-		if (wpoList.isEmpty()) { 
-			try {
-				throw new Exception("No pieces with the node start " + nextNode.name() + " found.");
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+		if (wpoList.isEmpty())
+			throw new Exception("No pieces with the node start " + nextNode.name() + " found.");
 
 		int i = (int)(rand.nextDouble()*wpoList.size());
 		WPObject wpo = wpoList.get(i);
-		int count = 0;
-		while (!PlacePiece(wpo)) {
-			i = (int)(rand.nextDouble()*wpoList.size()); //so select a new one
-			count++;
-			if (count > 100) {
-				break; //please no loops huh?
+		boolean success = PlacePiece(wpo);
+		if (!success) {
+			// if it fails, try from the remaining list
+			// and remove items until there is nothing to select
+			List<WPObject> pieceList = new LinkedList<WPObject>(wpoList);
+			while (!success) {
+				pieceList.remove(wpo);
+				if (pieceList.isEmpty())
+					throw new Exception("DefaultBuilder ran out of pieces that fit. Type: " + WPObject.class);
+
+				i = rand.nextInt(pieceList.size());
+				wpo = pieceList.get(i);
+
+				success = PlacePiece(wpo);
 			}
 		}
 	}
 	
+	// Please attempt to use the wonderful getRotation().toAngles() and fromAngles() methods
+	// which should stop the slowly getting off track if you just create the quaternion everytime
+	// there will always be floating point errors though, unless we really care about that...
 	protected boolean PlacePiece(WPObject wpo) {
 		WP world = wpo.wp;
 		Spatial s = wpo.sp.clone();
 		CollisionShape coll = wpo.col;
 
-		//TODO attempt to use the wonderful getRotation().toAngles() and fromAngles() methods
-		//which should stop the slowly getting off track if you just create the quaternion everytime
-		
 		Quaternion inv = nextRot.mult(world.getNewAngle()).inverse();
 		Quaternion result = Quaternion.IDENTITY.mult(inv);
 		float angle = FastMath.acos(result.getW())*2; //believe me that this gets the angle between them
 
-		if (!(FastMath.abs(angle) < FastMath.PI)) { //try *3/2 if its not interesting enough
+		// Prevent it turning back onto itself - try PI*3/2 if its not interesting enough
+		if (!(FastMath.abs(angle) < FastMath.PI))
 			return false;
-		}
+		
+		// checking the difference from vertical helps from the weird ever increasing hill
+		Vector3f newUp = nextRot.mult(Vector3f.UNIT_Y);
+		if (newUp.angleBetween(Vector3f.UNIT_Y) > 0.5f)
+			return false;
 
 		float scale = world.getScale();
 		//translate, rotate, scale

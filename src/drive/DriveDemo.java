@@ -34,12 +34,9 @@ public class DriveDemo extends DriveBase {
 		
 		stateManager.detach(camera);
 		app.getInputManager().removeRawInputListener(camera);
-		camera = new CarCamera("Camera", app.getCamera(), cb.get(0));
+		camera = new CarCamera("Demo Camera", app.getCamera(), cb.get(0));
 		stateManager.attach(camera);
 		app.getInputManager().addRawInputListener(camera);
-		
-//		App.rally.getRootNode().detachChild(minimap.rootNode); //TODO causes crash
-//		minimap = new MiniMap(cb.get(0));
 	}
 	
 	public void update(float tpf) {

@@ -33,9 +33,9 @@ import car.ai.CarAI;
 import car.ai.RaceAI;
 import car.data.Car;
 import car.ray.RayCarControl;
+import effects.LoadModelWrapper;
 import game.App;
 import game.RaceMenu;
-import game.LoadModelWrapper;
 import helper.H;
 import helper.Log;
 

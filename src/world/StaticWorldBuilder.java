@@ -18,8 +18,8 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
+import effects.LoadModelWrapper;
 import game.App;
-import game.LoadModelWrapper;
 
 public class StaticWorldBuilder extends World {
 
@@ -72,7 +72,7 @@ public class StaticWorldBuilder extends World {
 	}
 	
 	
-	////making the world exist
+	//making the world exist
 	public void addStaticWorld(AssetManager am) {		
 		Material mat = new Material(am, "Common/MatDefs/Misc/ShowNormals.j3md");
 		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);

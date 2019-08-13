@@ -17,7 +17,7 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 
 import game.App;
-import game.LoadModelWrapper;
+import effects.LoadModelWrapper;
 import helper.H;
 import jme3tools.optimize.GeometryBatchFactory;
 

@@ -14,7 +14,7 @@ import com.jme3.input.event.TouchEvent;
 
 import car.ray.RayCarControl;
 
-//TODO move to global scope so other things can listen, and it doesn't depend on the car
+
 public class MyKeyListener implements RawInputListener {
 
 	RayCarControl a;

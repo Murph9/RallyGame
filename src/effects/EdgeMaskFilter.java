@@ -1,4 +1,4 @@
-package game;
+package effects;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;

@@ -227,11 +227,13 @@ public class CarEditor extends Container {
 			} else if (f.getType() == boolean.class) {
 				f.setBoolean(fe.o, Boolean.parseBoolean(str));
 			} else if (f.getType().isArray()) {
-				float[] values = new float[fe.inputs.length]; //TODO other array types
-				for (int i = 0; i < fe.inputs.length; i++) {
-					values[i] = Float.parseFloat(fe.inputs[i].getText());
+				if (f.getClass().getComponentType() == float.class) {
+					float[] values = new float[fe.inputs.length];
+					for (int i = 0; i < fe.inputs.length; i++) {
+						values[i] = Float.parseFloat(fe.inputs[i].getText());
+					}
+					f.set(fe.o, values);
 				}
-				f.set(fe.o, values);
 			} else {
 				throw new UnsupportedOperationException();
 			}

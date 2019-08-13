@@ -9,7 +9,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
 
 import game.App;
-import game.LoadModelWrapper;
+import effects.LoadModelWrapper;
 import jme3tools.optimize.GeometryBatchFactory;
 
 public class FullCityWorld extends World {
@@ -133,7 +133,7 @@ public class FullCityWorld extends World {
 		
 		//straight = 1, left = 2, right = 4, back = 8
 		private boolean[] cons;
-		@SuppressWarnings("unused") //TODO
+		@SuppressWarnings("unused")
 		public boolean Straight() { return cons[0]; }
 		@SuppressWarnings("unused")
 		public boolean Left() { return cons[1]; }
