@@ -20,8 +20,9 @@ public class CarDataConst implements Serializable {
 	public String wheelModel;
 	
 	//camera options
-	public Vector3f cam_lookAt; //top of car usually
-	public Vector3f cam_offset; //where the camera is
+	public float cam_lookAtHeight; //from the middle of the model up
+	public float cam_offsetLength; //from the middle of the model back
+	public float cam_offsetHeight; //from the middle of the model up
 	public float cam_shake;
 	
 	public float mass; //kg (total, do NOT add wheel or engine mass/inertia to this)

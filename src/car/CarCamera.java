@@ -21,6 +21,7 @@ import com.jme3.renderer.Camera;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
 
+import car.ray.CarDataConst;
 import car.ray.RayCarControl;
 import game.App;
 import helper.H;
@@ -34,7 +35,7 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 	
 	private float lastTimeout;
 	private float rotRad;
-	private static final float ROT_SPEED = 0.01f;
+	private static final float ROT_SPEED = 0.008f;
 	
 	private Vector3f lastShake = new Vector3f();
 	
@@ -46,8 +47,10 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 		if (p != null) {
 			this.p = p;
 			Vector3f pPos = p.getPhysicsLocation();
-			c.setLocation(pPos.add(p.getCarData().cam_offset)); //starting position of the camera
-			c.lookAt(pPos.add(p.getCarData().cam_lookAt), new Vector3f(0,1,0)); //look at car
+			Vector3f cam_offset = new Vector3f(0, p.getCarData().cam_offsetHeight, p.getCarData().cam_offsetLength);
+			c.setLocation(cam_offset); //starting position of the camera
+			Vector3f cam_lookAt = new Vector3f(0, p.getCarData().cam_lookAtHeight, 0);
+			c.lookAt(pPos.add(cam_lookAt), new Vector3f(0,1,0)); //look at car
 		}
 	}
 
@@ -73,16 +76,19 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 	
 	@Override
 	public void render(RenderManager rm) {
+		if (p == null)
+			return;
+
 		//TODO:
 		//use the direction of the wheels
 		//react to g forces
 		//use and smooth the mouse stuff
-		if (p == null)
-			return;
 		
 		Vector3f carPos = p.getRootNode().getLocalTranslation();
 		Quaternion pRot = p.getRootNode().getLocalRotation();
 		
+		CarDataConst data = p.getCarData();
+
 		// Vector3f velocity = pRot.inverse().mult(p.getLinearVelocity());
 		// if (velocity.z < 0) //in reverse so reverse the rotation matrix
 			// pRot.inverseLocal();
@@ -116,37 +122,35 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 		
 		lastPos.interpolateLocal(vec, smoothing);
 		
-		//force it to be the same distance away at all times (TODO vary on g forces)
-		
+		//force it to be the same distance away at all times
 		Vector3f next = new Vector3f();
 		Vector2f vec_2 = H.v3tov2fXZ(lastPos).normalize();
 		
-		next.x = vec_2.x*p.getCarData().cam_offset.z;
-		next.y = p.getCarData().cam_offset.y; //ignore y
-		next.z = vec_2.y*p.getCarData().cam_offset.z;
+		next.x = vec_2.x * data.cam_offsetLength;
+		next.y = data.cam_offsetHeight; //ignore y last
+		next.z = vec_2.y * data.cam_offsetLength;
 		
 		next = carPos.add(next);
 		
 		c.setLocation(next);
 
-		//lastly do a ray cast to make sure that you can still see the car
-		//TODO actually avoid the car model, and maybe not so touchy...
+		//do a ray cast to make sure that you can still see the car
 		CollisionResults results = new CollisionResults();
-		Vector3f dir = c.getLocation().subtract(carPos.add(p.getCarData().cam_lookAt));
-		Ray ray = new Ray(carPos.add(p.getCarData().cam_lookAt), dir);
+		Vector3f cam_lookAt = new Vector3f(0, data.cam_lookAtHeight, 0);
+		Vector3f dir = c.getLocation().subtract(carPos.add(cam_lookAt));
+		Ray ray = new Ray(carPos.add(cam_lookAt), dir);
 		app.getRootNode().collideWith(ray, results);
 		CollisionResult cr = results.getClosestCollision();
 		if (cr != null && cr.getDistance() < dir.length()) {
 			Geometry g = cr.getGeometry();
 			if (!H.hasParentNode(g, p.getRootNode())) { //don't collide with the car TODO doesn't work
 				c.setLocation(cr.getContactPoint());
-				//Log.p("Camera contact on: ", g.getName());
 			}
 		}
 		
-		//at high speeds shake the camera a little
+		//at high speeds shake the camera a little TODO not the motion sickness type
 		float shakeFactor = p.vel.length() * p.vel.length() * p.getCarData().cam_shake;
-		Vector3f lookAt = carPos.add(p.getCarData().cam_lookAt);
+		Vector3f lookAt = carPos.add(cam_lookAt);
 		lastShake.addLocal(new Vector3f(FastMath.nextRandomFloat(), FastMath.nextRandomFloat(), FastMath.nextRandomFloat()).normalize().mult(shakeFactor*FastMath.nextRandomInt(-1, 1)));
 		if (lastShake.length() > 0.01f)
 			lastShake.interpolateLocal(Vector3f.ZERO, 0.3f);

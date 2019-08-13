@@ -9,8 +9,9 @@ auto_changeTime: 0.2
 auto_gearDown: 2400
 auto_gearUp: 6700
 brakeMaxTorque: 8000
-cam_lookAt: {x: 0.0, y: 1.3, z: 0.0}
-cam_offset: {x: 0.0, y: 3.1, z: -9.0}
+cam_lookAtHeight: 1.3
+cam_offsetLength: -9.0
+cam_offsetHeight: 3.1
 cam_shake: 2.0E-6
 carModel: assets/models/gt.blend
 driveFront: false

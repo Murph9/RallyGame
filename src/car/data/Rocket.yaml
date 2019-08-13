@@ -8,8 +8,9 @@ auto_changeTime: 0.1
 auto_gearDown: 7000
 auto_gearUp: 13500
 brakeMaxTorque: 50000
-cam_lookAt: {x: 0.0, y: 1.3, z: 0.0}
-cam_offset: {x: 0.0, y: 2.1, z: -6.0}
+cam_lookAtHeight: 1.3
+cam_offsetLength: -6.0
+cam_offsetHeight: 2.1
 cam_shake: 2.0E-7
 carModel: assets/models/rocket1_1.blend
 driveFront: true

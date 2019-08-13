@@ -8,8 +8,9 @@ auto_changeTime: 0.3
 auto_gearDown: 800
 auto_gearUp: 2200
 brakeMaxTorque: 40000.0
-cam_lookAt: {x: 0.0, y: 1.5, z: 0.0}
-cam_offset: {x: 0.0, y: 4.1, z: -15.0}
+cam_lookAtHeight: 1.5
+cam_offsetLength: -15.0
+cam_offsetHeight: 4.1
 cam_shake: 2.0E-6
 carModel: assets/models/busbus.blend
 driveFront: false
