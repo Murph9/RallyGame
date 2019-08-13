@@ -18,7 +18,6 @@ import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.util.BufferUtils;
 
 import game.LoadModelWrapper;
-import game.WireframeHighlighter;
 
 public class RayWheelControl {
 	
@@ -31,7 +30,7 @@ public class RayWheelControl {
 		new Vector2f(0, 0), new Vector2f(0, 1), new Vector2f(1, 0), new Vector2f(1, 1),
 	};
 	
-	private static final ColorRGBA BASE_HIGHLIGHT_COLOUR = ColorRGBA.Blue; //TODO remove, as the model should define it
+	private static final ColorRGBA BASE_HIGHLIGHT_COLOUR = ColorRGBA.DarkGray; //TODO remove, as the model should define it
 	
 	private Geometry skidLine;
 	private Vector3f[] vertices;
@@ -70,9 +69,6 @@ public class RayWheelControl {
 		//skid mark stuff
 		this.skidLine = new Geometry();
 		
-		this.lastl = new Vector3f(0,0,0);
-		this.lastr = new Vector3f(0,0,0);
-		
 		Mesh mesh = new Mesh(); //making a quad positions
 		vertices = new Vector3f[VERTEX_BUFFER_SIZE];
 		verticesPos = 0;
@@ -106,27 +102,27 @@ public class RayWheelControl {
 		
 		mesh.setBuffer(Type.TexCoord, 2, BufferUtils.createFloatBuffer(coord)); 
 		
-		mesh.setBuffer(Type.Color, 4, BufferUtils.createFloatBuffer(BASE_HIGHLIGHT_COLOUR, BASE_HIGHLIGHT_COLOUR, BASE_HIGHLIGHT_COLOUR, BASE_HIGHLIGHT_COLOUR));
+		mesh.setBuffer(Type.Color, 4, BufferUtils.createFloatBuffer(new ColorRGBA(0,0,0,1), new ColorRGBA(0,0,0,1), new ColorRGBA(0,0,0,1), new ColorRGBA(0,0,0,1)));
 		this.skidLine.setMesh(mesh);
 		
-		WireframeHighlighter.addWireframeMat(app.getAssetManager(), this.skidLine, ColorRGBA.Blue);
-		Material mat = this.skidLine.getMaterial();
+		//material uses vertex colours
+		Material mat = new Material(app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
-		mat.setBoolean("VertexColor", true);
+		mat.getAdditionalRenderState().setLineWidth(3);
 		mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
-		
-		//skid line is a special wireframe, TODO change to use the normal flat colour mode
+		mat.setBoolean("VertexColor", true);
 		this.skidLine.setMaterial(mat);
 		
 		this.skidLine.setQueueBucket(Bucket.Transparent);
 		
 		app.getRootNode().attachChild(this.skidLine);
 		
-		//TODO smoke from source control
+		//Smoke is can be found from source control
 	}
 
 	//hopefully called by the FakeRayCarControl in physics step
-	public void viewUpdate(float tpf, Vector3f velDir, float sus_min_travel) { //TODO sus_min_travel is just poor design
+	public void viewUpdate(float tpf, Vector3f velDir, float sus_min_travel) { 
+		//NOTE: sus_min_travel is just poor design, but how else will the wheel object know a car const?
 		app.enqueue(() -> {
 			posInLocal = new Vector3f(0, -wheel.susRayLength - sus_min_travel, 0);
 			rootNode.setLocalTranslation(offset.add(posInLocal));
@@ -143,55 +139,54 @@ public class RayWheelControl {
 			if (wheel.num % 2 == 1)
 				rootNode.rotate(0, FastMath.PI, 0);
 			
-			sinceLastPos -= tpf;
-			if (sinceLastPos < 0) {
-				sinceLastPos = skidMarkTimeout;
-				addSkidLine(velDir);
-			}
+			addSkidLine(tpf, velDir);
 		});
 	}
 	
-	private void addSkidLine(Vector3f velDir) {
-		if (!wheel.inContact || velDir.length() < 1) {
-			lastl = new Vector3f(0,0,0);
-			lastr = new Vector3f(0,0,0);
+	private void addSkidLine(float tpf, Vector3f velDir) {
+		sinceLastPos -= tpf;
+		if (sinceLastPos > 0) {
+			//then just update the current position
+			return;
+		}
+
+		sinceLastPos = skidMarkTimeout;
+
+		Vector3f cur = wheel.curBasePosWorld;
+		cur.y += 0.015f; // hacky z-buffering (i.e. to stop it "fighting" with the ground texture)
+		Vector3f rot = new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y).mult(velDir.normalize());
+		Vector3f curL = cur.add(rot.mult(wheel.data.width / 2));
+		Vector3f curR = cur.add(rot.negate().mult(wheel.data.width / 2));
+
+		// TODO better scaling for grip value
+		float clampSkid = FastMath.clamp((this.wheel.skidFraction - 0.85f) / 2, 0, 1);
+		ColorRGBA c = BASE_HIGHLIGHT_COLOUR.clone().mult(clampSkid);
+
+		if (!wheel.inContact || velDir.length() < 1 || clampSkid < 0.1f) { //no contact or slow speed = no skid marks
+			lastl = curL;
+			lastr = curR;
 			lastColor = null;
 			return;
 		} //exit early
 
-		Vector3f cur = wheel.curBasePosWorld;
-		if (lastl.equals(Vector3f.ZERO) || lastr.equals(Vector3f.ZERO) || cur.equals(Vector3f.ZERO)) {
-			lastl = cur; 
-			lastr = cur;
-			lastColor = null;
-			return; //don't make a line because they aren't valid positions
+		//i.e. we just started skidding again, then set the this in prep for the next block
+		if (lastColor == null) {
+			lastColor = c;
+			return;
 		}
-		
-		//TODO better scaling for grip value (maybe not full colour on max slip)
-		float clampSkid = FastMath.clamp((this.wheel.skidFraction - 0.85f)/2, 0, 1);
-		if (clampSkid < 0.1f) {
-			lastl = cur;
-			lastr = cur;
-			lastColor = null;
-			return; //don't make a line because they aren't valid positions
-		} //exit early if there is no mesh to create
-		
-		ColorRGBA c = BASE_HIGHLIGHT_COLOUR.clone().mult(clampSkid);
-		cur.y += 0.015f; //z-buffering (i.e. to stop it "fighting" with the ground texture)
 		
 		//TODO change to just be thinner with a larger drift angle
 		//i have tested this is real life, width is lower when sliding sideways, but does it fit the theme?
 		
-		Vector3f rot = new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y).mult(velDir.normalize());
 		colors[verticesPos] = lastColor;
 		vertices[verticesPos++] = lastl;
-		lastl = cur.add(rot.mult(wheel.data.width/2));
+		lastl = curL;
 		colors[verticesPos] = c;
 		vertices[verticesPos++] = lastl;
 		
 		colors[verticesPos] = lastColor;
 		vertices[verticesPos++] = lastr;
-		lastr = cur.add(rot.negate().mult(wheel.data.width/2));
+		lastr = curR;
 		colors[verticesPos] = c;
 		vertices[verticesPos++] = lastr;
 		
