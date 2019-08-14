@@ -8,6 +8,9 @@ public abstract class CarAI {
 
 	public CarAI(RayCarControl car) {
 		this.car = car;
+
+		//ignore all turning speed factor code for AIs
+		car.onAction("IgnoreSteeringSpeedFactor", true, 1);
 	}
 	
 	public abstract void update(float tpf);
