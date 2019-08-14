@@ -141,7 +141,6 @@ public class RayCarControl extends RayCarPowered {
 		//eg: car is pointing more left than velocity, and is also turning left
 		//and drift angle needs to be large enough to matter
 		
-		float maxAngle = carData.w_steerAngle/2;
 		//steering factor = atan(0.08 * vel - 1) + maxAngle*PI/2 + maxLat //TODO what is this 0.08f
 //		return Math.min(-maxAngle*FastMath.atan(0.3f*(rbc.getLinearVelocity().length() - 1))
 //				+ maxAngle*FastMath.PI/2 + this.wheels[0].maxLat*2, Math.abs(trySteerAngle));
@@ -149,7 +148,7 @@ public class RayCarControl extends RayCarPowered {
 		//TODO PLEASE FIX THIS
 		//TODO max turn angle really should just be the best angle on the lat traction curve (while going straight)
 		
-		return Math.min(maxAngle, Math.abs(trySteerAngle)); //???
+		return Math.abs(trySteerAngle);
 		
 		//TODO turn back value should be vel dir + maxlat instead of just full lock
 		//remember that this value is clamped after this method is called
@@ -292,7 +291,7 @@ public class RayCarControl extends RayCarPowered {
 		space.remove(this.rootNode);
 	}
 	
-	//Phyics get/set methods
+
 	public Node getRootNode() {
 		return rootNode;
 	}
@@ -303,8 +302,17 @@ public class RayCarControl extends RayCarPowered {
 		this.carData = data;
 	}
 	
-	public void attachAI(CarAI ai) {
+	public void attachAI(CarAI ai, boolean setNotPlayer) {
 		this.ai = ai;
+
+		if (setNotPlayer) {
+			//remove any controls on the car
+			if (this.controls != null && !this.controls.isEmpty()) {
+				for (RawInputListener ril : this.controls)
+					app.getInputManager().removeRawInputListener(ril);
+				this.controls.clear();
+			}
+		}
 	}
 	public CarAI getAI() {
 		return this.ai;

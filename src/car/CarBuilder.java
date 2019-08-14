@@ -15,7 +15,6 @@ import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
-import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
@@ -93,12 +92,6 @@ public class CarBuilder extends AbstractAppState {
 		
 		carNode.attachChild(carModel);
 
-		if (aPlayer) { //player gets a shadow
-			carNode.setShadowMode(ShadowMode.CastAndReceive);
-		} else {
-			carNode.setShadowMode(ShadowMode.Receive);
-		}
-
 		rootNode.attachChild(carNode);
 		carControl.setPhysicsLocation(start);
 		carControl.setPhysicsRotation(rot);
@@ -111,7 +104,7 @@ public class CarBuilder extends AbstractAppState {
 				_ai = ai.apply(carControl, get(0));
 			else
 				_ai = new DriveAtAI(carControl, get(0).getPhysicsObject());
-			carControl.attachAI(_ai);
+			carControl.attachAI(_ai, true);
 		}
 		
 		if (aPlayer) { //players get sound
