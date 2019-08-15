@@ -3,13 +3,10 @@ package drive;
 import world.World;
 import world.WorldType;
 
-import java.util.Collection;
-
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
-import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.input.Joystick;
 
 import car.*;
@@ -56,13 +53,6 @@ public class DriveBase extends AbstractAppState {
     	super.initialize(stateManager, app);
 
 		this.app = (SimpleApplication)app;
-
-    	Collection<PhysicsRigidBody> list = ((App)app).getPhysicsSpace().getRigidBodyList();
-    	if (list.size() > 0) {
-    		Log.p("Someone didn't clean up after themselves...: " + list.size());
-    		for (PhysicsRigidBody r: list)
-				((App)app).getPhysicsSpace().remove(r);
-    	}
 		
 		stateManager.attach(world);
     	stateManager.attach(menu);
@@ -76,7 +66,7 @@ public class DriveBase extends AbstractAppState {
 		stateManager.attach(uiNode);
 		
 		//Particle emitter
-		ParticleAtmosphere particles = new ParticleAtmosphere(cb.get(0).getRootNode());
+		ParticleAtmosphere particles = new ParticleAtmosphere(this.app.getCamera());
 		stateManager.attach(particles);
 		
 		

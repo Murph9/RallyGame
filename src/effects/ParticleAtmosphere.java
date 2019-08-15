@@ -1,6 +1,7 @@
 package effects;
 
 import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.effect.ParticleEmitter;
@@ -9,16 +10,16 @@ import com.jme3.effect.shapes.EmitterSphereShape;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Node;
+import com.jme3.renderer.Camera;
 
 public class ParticleAtmosphere extends AbstractAppState {
 
 	private Vector3f prevPos;
-	private Node root;
+	private Camera cam;
 	private ParticleEmitter particles;
 	
-	public ParticleAtmosphere(Node root) {
-		this.root = root;
+	public ParticleAtmosphere(Camera cam) {
+		this.cam = cam;
 	}
 	
 	@Override
@@ -45,7 +46,7 @@ public class ParticleAtmosphere extends AbstractAppState {
 		
 		particles.setNumParticles(5000);
 
-		root.attachChild(particles);
+		((SimpleApplication)app).getRootNode().attachChild(particles);
 	}
 	
 	@Override
@@ -59,9 +60,9 @@ public class ParticleAtmosphere extends AbstractAppState {
 			prevPos = new Vector3f();
 		
 		//get vel of node
-		float speed = root.getWorldTranslation().subtract(prevPos).length() / tpf;
+		float speed = cam.getLocation().subtract(prevPos).length() / tpf;
 		particles.setParticlesPerSec(25*speed);
 		
-		prevPos = root.getWorldTranslation().clone(); //doesn't work without clone, suspect world translation uses the same object
+		prevPos = cam.getLocation().clone();
 	}
 }
