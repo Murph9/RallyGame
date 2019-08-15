@@ -33,7 +33,7 @@ import world.wp.WP.NodeType;
 public abstract class DefaultBuilder extends World {
 
 	//designed to generate the world infront of the player dynamically from static pieces
-
+	private Geometry startGeometry;
 	protected WP[] type;
 	
 	protected List<Spatial> curPieces = new ArrayList<Spatial>();
@@ -89,7 +89,7 @@ public abstract class DefaultBuilder extends World {
 		matfloor.setColor("Color", ColorRGBA.Green);
 		
 		Box start = new Box(10, 0.25f, 10); //Something to spawn on (or in hint hint)
-		Geometry startGeometry = new Geometry("Starting Box", start);
+		startGeometry = new Geometry("Starting Box", start);
 		startGeometry.setMaterial(matfloor);
 		startGeometry.setLocalTranslation(0, -0.1f, 0);
 		startGeometry.addControl(new RigidBodyControl(0));
@@ -258,6 +258,8 @@ public abstract class DefaultBuilder extends World {
 			rootNode.detachChild(s);
 		}
 		
+		((App) this.app).getPhysicsSpace().remove(startGeometry);
+
 		super.cleanup();
 	}
 	

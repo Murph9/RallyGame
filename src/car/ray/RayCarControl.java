@@ -388,7 +388,6 @@ public class RayCarControl extends RayCarPowered {
         	this.rbc.setEnabled(enabled);
         	
             if (enabled && !added) {
-            	Log.p("added");
                 space.add(this.rootNode);
                 
                 added = true;

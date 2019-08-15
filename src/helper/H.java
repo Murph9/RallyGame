@@ -384,6 +384,7 @@ public class H {
 		return array[FastMath.nextRandomInt(0, array.length-1)];
 	}
 	
+	//TODO these need to take in Application
 	public static Vector3f screenTopLeft() {
 		return new Vector3f(0, App.CUR.getContext().getSettings().getHeight(), 0);
 	}

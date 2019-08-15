@@ -32,7 +32,7 @@ public class CarModelData {
 		readInModelData(rootSpat);
 		
 		Log.p("Car part data for: '" + car + "'");
-		Log.e(pieces.keySet().toArray(), (String)null); //casting a null...
+		Log.p(pieces.keySet().toArray(), ",");
 	}
 	
 	private void readInModelData(Spatial s) {

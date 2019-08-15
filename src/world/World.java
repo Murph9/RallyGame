@@ -27,7 +27,7 @@ public abstract class World extends AbstractAppState {
 		this.app = (SimpleApplication)app;
 		
 		this.app.getRootNode().attachChild(this.rootNode);
-		Log.e("initialize() world: " + rootNode.getName());
+		Log.p("initialize() world: " + rootNode.getName());
 	}
 
 	//'Starts again'
@@ -48,7 +48,7 @@ public abstract class World extends AbstractAppState {
 			Log.e("I was probably cleaned up twice or never, please don't.");
 
 		this.initialized = false;
-				
+		
 		this.app.getRootNode().detachChild(this.rootNode);
 		this.app = null;
 

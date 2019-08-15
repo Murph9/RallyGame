@@ -20,7 +20,8 @@ public class BasicCamera extends AbstractAppState {
 		this.c.setLocation(pos);
 		this.c.lookAt(lookAt, Vector3f.UNIT_Y);
 
-		//TODO change to use the same logic as CarCamera.render
+		//Please avoid changing the camera too often 
+		//change to use the same logic as CarCamera.render
 		//otherwise the camera kind of jumps around on unstable framerates
 	}
 }
