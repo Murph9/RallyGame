@@ -1,6 +1,7 @@
 package game;
 
 
+import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,6 +13,7 @@ import com.jme3.app.state.AppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.BulletAppState.ThreadingType;
+import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.font.BitmapFont;
 import com.jme3.math.ColorRGBA;
@@ -36,6 +38,7 @@ import car.ray.CarDataConst;
 import drive.*;
 import effects.EdgeMaskFilter;
 import effects.FilterManager;
+import effects.ParticleAtmosphere;
 import game.*;
 import helper.Log;
 import settings.Configuration;
@@ -91,15 +94,17 @@ public class App extends SimpleApplication {
 		}
 		inputManager.deleteMapping(SimpleApplication.INPUT_MAPPING_EXIT);
 		
-		//initialize Lemur (GUI thing)
+		//initialize Lemur (the GUI manager)
 		GuiGlobals.initialize(this);
-		//Load my style
+		//Load my Lemur style
 		LemurGuiStyle.load(assetManager);
-		
 		//Init the lemur mouse listener
 		getStateManager().attach(new MouseAppState(this));
 		
+		// no keyboard inputs after init please
+		GuiGlobals.getInstance().getInputMapper().release();
 
+		///////
 		//Processors
 		FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
 		
@@ -120,30 +125,34 @@ public class App extends SimpleApplication {
         fog.setFogDistance(190);
         fog.setFogDensity(1.0f);
         fpp.addFilter(fog);
-		
-		//no keyboard inputs after init please
-		GuiGlobals.getInstance().getInputMapper().release();
-		
-		//init game states
+
+		new FilterManager(getInputManager(), new Filter[] { emf, bloom, fog });
+
+		// Particle emitter
+		ParticleAtmosphere particles = new ParticleAtmosphere(getCamera());
+		stateManager.attach(particles);
+
+		///////
+		//Init the Physics space
+		bullet = new BulletAppState();
+		// bullet.setSpeed(0.1f); //physics per second rate
+		// bullet.setDebugEnabled(true); //show bullet wireframes
+		bullet.setThreadingType(ThreadingType.PARALLEL);
+		getStateManager().attach(bullet);
+		bullet.getPhysicsSpace().setAccuracy(1f / 120f); // physics rate
+		bullet.getPhysicsSpace().setGravity(new Vector3f(0, -9.81f, 0)); // yay its down
+
+		inputManager.setCursorVisible(true);
+		flyCam.setEnabled(false);
+
+		///////
+		//Game logic start:
 		start = new Start();
 		getStateManager().attach(start);
 		
-		bullet = new BulletAppState();
-//		bullet.setSpeed(0.1f); //physics per second rate
-//    	bullet.setDebugEnabled(true); //show bullet wireframes
-    	bullet.setThreadingType(ThreadingType.PARALLEL);
-    	
-		getStateManager().attach(bullet);
-		bullet.getPhysicsSpace().setAccuracy(1f/120f); //physics rate
-		bullet.getPhysicsSpace().setGravity(new Vector3f(0, -9.81f, 0)); //yay its down
-		
-		inputManager.setCursorVisible(true);
-		flyCam.setEnabled(false);
-		
+	
 		//profiling in jme 3.2: TODO add physics engine stuff using custom sections
 //		getStateManager().attach(new DetailedProfilerState());
-
-		new FilterManager(getInputManager(), new Filter[] {emf, bloom, fog});
 	}
 	
 	@Override
@@ -154,13 +163,6 @@ public class App extends SimpleApplication {
 			Log.e("Vector3f.ZERO is not zero!!!!, considered a fatal error.");
 			System.exit(342);
 		}
-	}
-	
-	public void startDemo(AppState state) {
-		getStateManager().detach(state);
-		
-		drive = new DriveDemo(Car.Runner);
-		getStateManager().attach(drive);
 	}
 	
 	public void startDev(AppState state) {
@@ -284,6 +286,23 @@ public class App extends SimpleApplication {
 		frameCount++; //global frame timer update
 
 		super.simpleUpdate(tpf);
+	}
+
+	@Override
+	public void destroy() {
+		super.destroy();
+
+		Log.p("Closing " + this.getClass().getName());
+
+		PhysicsSpace space = bullet.getPhysicsSpace();
+		Collection<PhysicsRigidBody> list = space.getRigidBodyList();
+		if (list.size() > 0) {
+			Log.e("Someone didn't clean up after themselves: " + list.size() + " physics bodies remain. (or this was called too early)");
+			for (PhysicsRigidBody r : list)
+				Log.p(r);
+			for (PhysicsRigidBody r : list)
+				space.remove(r);
+		}
 	}
 
 	/////////////// menu
