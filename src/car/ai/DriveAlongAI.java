@@ -11,16 +11,23 @@ import helper.Log;
 public class DriveAlongAI extends CarAI {
 
 	private final Function<Vector3f, Vector3f> getGoal;
-	
+	private float maxSpeed;
+
 	public DriveAlongAI(RayCarControl car, Function<Vector3f, Vector3f> getGoal) {
 		super(car);
 		
+		this.maxSpeed = Float.MAX_VALUE;
+
 		if (getGoal != null) {
 			this.getGoal = getGoal;			
 		} else {
 			this.getGoal = (pos) -> { return new Vector3f(); }; //basically a no-op position
 			Log.p("WARNING: Goal not given, using the origin.");
 		}
+	}
+
+	public void setMaxSpeed(float value) {
+		this.maxSpeed = value;
 	}
 
 	@Override
@@ -59,6 +66,11 @@ public class DriveAlongAI extends CarAI {
 		float velocity = car.getLinearVelocity().length();
 		if (velocity < 4) {
 			onEvent("Accel", true, 1);
+			onEvent("Brake", false, 0);
+		}
+
+		if (velocity > maxSpeed) {
+			onEvent("Accel", false, 0); //do not
 			onEvent("Brake", false, 0);
 		}
 	}
