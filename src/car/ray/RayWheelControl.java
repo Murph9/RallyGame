@@ -14,6 +14,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.Mesh.Mode;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.util.BufferUtils;
 
@@ -102,7 +103,6 @@ public class RayWheelControl {
 		
 		mesh.setBuffer(Type.TexCoord, 2, BufferUtils.createFloatBuffer(coord)); 
 		
-		mesh.setBuffer(Type.Color, 4, BufferUtils.createFloatBuffer(new ColorRGBA(0,0,0,1), new ColorRGBA(0,0,0,1), new ColorRGBA(0,0,0,1), new ColorRGBA(0,0,0,1)));
 		this.skidLine.setMesh(mesh);
 		
 		//material uses vertex colours
@@ -112,6 +112,9 @@ public class RayWheelControl {
 		mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
 		mat.setBoolean("VertexColor", true);
 		this.skidLine.setMaterial(mat);
+
+		// this is the default, but i have to come looking for this again...
+		this.skidLine.getMesh().setMode(Mode.Triangles);
 		
 		this.skidLine.setQueueBucket(Bucket.Transparent);
 		
@@ -149,8 +152,10 @@ public class RayWheelControl {
 			//then just update the current position
 			return;
 		}
-
 		sinceLastPos = skidMarkTimeout;
+
+		// TODO change to just be thinner with a larger drift angle
+		// i have tested this is real life, width is lower when sliding sideways
 
 		Vector3f cur = wheel.curBasePosWorld;
 		cur.y += 0.015f; // hacky z-buffering (i.e. to stop it "fighting" with the ground texture)
@@ -162,40 +167,45 @@ public class RayWheelControl {
 		float clampSkid = FastMath.clamp((this.wheel.skidFraction - 0.85f) / 2, 0, 1);
 		ColorRGBA c = BASE_HIGHLIGHT_COLOUR.clone().mult(clampSkid);
 
-		if (!wheel.inContact || velDir.length() < 1 || clampSkid < 0.1f) { //no contact or slow speed = no skid marks
-			lastl = curL;
-			lastr = curR;
-			lastColor = null;
-			return;
+		if (!wheel.inContact || velDir.length() < 1 || clampSkid < 0.1f) { //no contact or slow speed = no visible skid marks
+			if (lastColor != null && lastColor.equals(new ColorRGBA(0, 0, 0, 0))) {
+				//the last one was null, ignore
+				return;
+			}
+			lastColor = c = new ColorRGBA(0, 0, 0, 0);
 		}
 
-		//i.e. we just started skidding again, then set the this in prep for the next block
-		if (lastColor == null) {
+		if (lastColor != null && lastColor.equals(new ColorRGBA(0, 0, 0, 0))) {
+			lastl = curL;
+			lastr = curR;
 			lastColor = c;
-			return;
 		}
 		
-		//TODO change to just be thinner with a larger drift angle
-		//i have tested this is real life, width is lower when sliding sideways, but does it fit the theme?
+		colors[verticesPos] = lastColor;
+		vertices[verticesPos] = lastl;
+		verticesPos++;
+		
+		colors[verticesPos] = c;
+		vertices[verticesPos] = curL;
+		verticesPos++;
 		
 		colors[verticesPos] = lastColor;
-		vertices[verticesPos++] = lastl;
+		vertices[verticesPos] = lastr;
+		verticesPos++;
+
+		colors[verticesPos] = c;
+		vertices[verticesPos] = curR;
+		verticesPos++;
+
 		lastl = curL;
-		colors[verticesPos] = c;
-		vertices[verticesPos++] = lastl;
-		
-		colors[verticesPos] = lastColor;
-		vertices[verticesPos++] = lastr;
 		lastr = curR;
-		colors[verticesPos] = c;
-		vertices[verticesPos++] = lastr;
-		
+		lastColor = c;
+
 		verticesPos = verticesPos % VERTEX_BUFFER_SIZE; //wrap around vertex pos
 		
 		Mesh mesh = this.skidLine.getMesh();
 		mesh.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(vertices));
 		mesh.setBuffer(Type.Color, 4, BufferUtils.createFloatBuffer(colors));
-		lastColor = c;
 		
 		this.skidLine.updateModelBound();
 	}
