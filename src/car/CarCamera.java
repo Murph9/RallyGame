@@ -97,6 +97,8 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 			Quaternion q = new Quaternion();
 			q.fromAngleAxis((rotRad-lastRad)*ROT_SPEED, p.up);
 
+			if (lastPos == null)
+				lastPos = Vector3f.UNIT_Z;
 			lastPos = q.mult(lastPos);
 			lastRad = rotRad;
 
@@ -105,10 +107,10 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 			Vector3f vec = new Vector3f();
 			float smoothing = tpf*10;
 			if (p.vel.length() > 4f)
-				vec.interpolateLocal(pRot.mult(new Vector3f(0, 0, 1)).normalize(), p.vel.normalize(), 0.5f);
+				vec.interpolateLocal(pRot.mult(Vector3f.UNIT_Z).normalize(), p.vel.normalize(), 0.5f);
 			else {
 				//at slow speeds use just the rotation
-				vec = pRot.mult(new Vector3f(0, 0, 1)).normalize();
+				vec = pRot.mult(Vector3f.UNIT_Z).normalize();
 				//reduce interpolation to much slower
 				smoothing /= 3;
 			}
