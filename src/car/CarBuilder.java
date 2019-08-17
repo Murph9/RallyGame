@@ -94,7 +94,14 @@ public class CarBuilder extends AbstractAppState {
 		Spatial collisionShape = H.removeNamedSpatial(carModel, CarPart.Collision.getPartName());
 		CollisionShape colShape = null;
 		try {
-			Mesh collisionMesh = ((Geometry)collisionShape).getMesh();
+			Geometry collisionGeometry = null;
+			if (collisionGeometry instanceof Geometry) {
+				collisionGeometry = (Geometry)collisionShape;
+			} else {
+				//Node
+				collisionGeometry = H.getGeomList(collisionShape).get(0); //lets hope its the only one too
+			}
+			Mesh collisionMesh = collisionGeometry.getMesh();
 			colShape = new HullCollisionShape(collisionMesh);
 		} catch (Exception e) {
 			Log.e("!! car type " + carData.carModel + " is missing a collision shape.");
