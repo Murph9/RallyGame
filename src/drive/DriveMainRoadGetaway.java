@@ -1,5 +1,6 @@
 package drive;
 
+import java.io.NotActiveException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -19,7 +20,7 @@ import car.ai.DriveAlongAI;
 import car.data.Car;
 import car.ray.RayCarControl;
 import game.App;
-import helper.Log;
+import helper.H;
 import world.wp.DefaultBuilder;
 import world.wp.WP.DynamicType;
 
@@ -35,11 +36,12 @@ public class DriveMainRoadGetaway extends DriveBase {
 	// - stopping
 	// - hitting traffic
 
-	private static final int TRAFFIC_COUNT = 6;
+	private static final int TRAFFIC_COUNT = 60;
 	private static final float TRAFFIC_BUFFER = 100;
 	private static final float HUNTER_BUFFER = 25;
 
 	private final Car hunterType;
+	private final Car[] trafficTypes;
 	private final int maxCount;
 
 	private RayCarControl hunter;
@@ -56,10 +58,11 @@ public class DriveMainRoadGetaway extends DriveBase {
 	private Label lifeLabel;
 	
 	public DriveMainRoadGetaway() {
-		super(Car.Normal, DynamicType.MainRoad.getBuilder());
+		super(Car.Runner, DynamicType.MainRoad.getBuilder());
 		
 		maxCount = 2 + TRAFFIC_COUNT; // me chaser + x
-		hunterType = Car.Rally;
+		hunterType = Car.Rocket;
+		trafficTypes = new Car[] {Car.Ricer, Car.WhiteSloth};
 
 		life = 10; // seconds of 'slowness' is your life
 	}
@@ -102,19 +105,18 @@ public class DriveMainRoadGetaway extends DriveBase {
 			// the chase car must stay still, for now
 			hunter.setPhysicsLocation(new Vector3f(HUNTER_BUFFER-10, 0.3f, 0));
 			hunter.setPhysicsRotation(this.world.getStartRot());
-			Log.p("still");
 			return;
 		}
 
 		readyToSpawnTraffic = distanceFromStart > TRAFFIC_BUFFER;
-		if (!readyToSpawnTraffic) 
+		if (!readyToSpawnTraffic)
 			return;
 
 		//spawn more if required
 		if (this.cb.getCount() < maxCount && App.getFrameCount() % 10 == 0) {
 			final float z = nextZOff();
 			final boolean spawnPlayerDirection = spawnPlayerDirection();
-
+			
 			BiFunction<RayCarControl, RayCarControl, CarAI> ai = (me, target) -> { 
 				DriveAlongAI daai = new DriveAlongAI(me, (vec) -> {
 					return new Vector3f(vec.x+20*(spawnPlayerDirection ? 1: -1), 0, z); // next pos math
@@ -131,9 +133,8 @@ public class DriveMainRoadGetaway extends DriveBase {
 				? world.getStartRot()
 				: new Quaternion().fromAngleAxis(FastMath.PI, Vector3f.UNIT_Y).toRotationMatrix().mult(world.getStartRot());
 
-			//calculate spawn pos
-			RayCarControl c = this.cb.addCar(nextId, Car.WhiteSloth, spawnPos, spawnDir, false, ai);
-			c.setLinearVelocity(new Vector3f(20, 0, 0));
+			RayCarControl c = this.cb.addCar(nextId, H.randFromArray(this.trafficTypes), spawnPos, spawnDir, false, ai);
+			c.setLinearVelocity(new Vector3f(20*(spawnPlayerDirection ? 1: -1), 0, 0));
 			nextId++;
 		}
 		
@@ -142,7 +143,7 @@ public class DriveMainRoadGetaway extends DriveBase {
 		for (RayCarControl c: this.cb.getAll()) {
 			if (c == player) continue; 
 			
-			if (c.up != null && (c.getPhysicsLocation().y < -10 || c.up.y < 0)) {
+			if (c.getPhysicsLocation().y < -10) {
 				if (c == chaser) {
 					//we only reset their position behind the player at the same speed, please don't delete them
 					c.setPhysicsLocation(player.getPhysicsLocation().add(-15, 0, 0));
@@ -166,8 +167,7 @@ public class DriveMainRoadGetaway extends DriveBase {
 		}
 
 		if (life < 0) {
-			//TODO killing the game seems good enough.
-			this.cb.cleanup();
+			//TODO something..
 		}
 	}
 	
