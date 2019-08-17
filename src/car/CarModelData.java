@@ -106,12 +106,16 @@ public class CarModelData {
 		Headlight_L("headlight"), //only one side
 		Taillight_L("taillight_l"), //only one side
 
+		Collision("collision")
 		//Please add more when needed
 		;
 		
-		private String name;
-		CarPart(String name) {
-			this.name = name;
+		private String partName;
+		CarPart(String partName) {
+			this.partName = partName;
+		}
+		public String getPartName() {
+			return this.partName;
 		}
 		
 		static HashMap<String, CarPart> GetNames() {
@@ -119,7 +123,7 @@ public class CarModelData {
 			
 			HashMap<String, CarPart> out = new HashMap<>();
 			for (int i = 0; i < names.length; i++) {
-				out.put(names[i].name, names[i]);
+				out.put(names[i].partName, names[i]);
 			}
 			
 			return out;

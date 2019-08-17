@@ -159,6 +159,13 @@ public class H {
 		return "x:"+H.roundDecimal(vec.x, places) + ", y:"+H.roundDecimal(vec.y, places)+", z:"+H.roundDecimal(vec.z, places);
 	}
 	
+	public static Spatial removeNamedSpatial(Node s, String name) {
+		Spatial result = s.getChild(name);
+		if (result == null)
+			return null;
+		result.removeFromParent();
+		return result;
+	}
 	public static List<Geometry> getGeomList(Spatial n) {
 		return rGeomList(n);
 	}

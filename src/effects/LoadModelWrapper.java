@@ -14,18 +14,18 @@ import helper.H;
 import helper.Log;
 
 public class LoadModelWrapper {
-    public static Spatial create(AssetManager am, String model, ColorRGBA color) {
+    public static Node create(AssetManager am, String model, ColorRGBA color) {
 		return create(am, am.loadModel(model), color);
 	}
 
-    public static Spatial create(AssetManager am, Spatial s, ColorRGBA color) {
+    public static Node create(AssetManager am, Spatial s, ColorRGBA color) {
 		if (s == null)
-			return s;
+			return null;
 		
 		if (s instanceof Geometry) {
 			Node n = new Node();
 			n.attachChild(_do(am, (Geometry)s, color));
-			return s;
+			return n;
 		}
 		Node n = (Node)s;
 		List<Geometry> gList = H.getGeomList(n);

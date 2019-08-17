@@ -11,13 +11,16 @@ import com.jme3.asset.AssetManager;
 import com.jme3.audio.AudioData;
 import com.jme3.audio.AudioNode;
 import com.jme3.bullet.collision.shapes.CollisionShape;
-import com.jme3.bullet.util.CollisionShapeFactory;
+import com.jme3.bullet.collision.shapes.HullCollisionShape;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
+import car.CarModelData.CarPart;
 import car.ai.CarAI;
 import car.ai.DriveAtAI;
 import car.data.Car;
@@ -25,6 +28,7 @@ import car.ray.CarDataConst;
 import car.ray.RayCarControl;
 import effects.LoadModelWrapper;
 import game.App;
+import helper.H;
 import helper.Log;
 
 public class CarBuilder extends AbstractAppState {
@@ -84,10 +88,21 @@ public class CarBuilder extends AbstractAppState {
 		AssetManager am = this.app.getAssetManager();
 		
 		Node carNode = new Node(id+"");
-		Spatial carModel = LoadModelWrapper.create(am, carData.carModel, ColorRGBA.Magenta);
+		Node carModel = LoadModelWrapper.create(am, carData.carModel, ColorRGBA.Magenta);
 		
-		//update the collision shape, NOTE: a static convex collision shape or hull might be faster here
-		CollisionShape colShape = CollisionShapeFactory.createDynamicMeshShape(carModel);
+		//fetch the collision shape (if there is one in car model file)
+		Spatial collisionShape = H.removeNamedSpatial(carModel, CarPart.Collision.getPartName());
+		CollisionShape colShape = null;
+		try {
+			Mesh collisionMesh = ((Geometry)collisionShape).getMesh();
+			colShape = new HullCollisionShape(collisionMesh);
+		} catch (Exception e) {
+			Log.e("!! car type " + carData.carModel + " is missing a collision shape.");
+			e.printStackTrace();
+			return null; //to make it clear this failed, and you need to fix it
+		}
+
+		//init car
 		RayCarControl carControl = new RayCarControl(this.app, colShape, carData, carNode);
 		
 		carNode.attachChild(carModel);
