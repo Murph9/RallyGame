@@ -35,6 +35,7 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 	
 	private float lastTimeout;
 	private float rotRad;
+	private float lastRad;
 	private static final float ROT_SPEED = 0.008f;
 	
 	private Vector3f lastShake = new Vector3f();
@@ -79,49 +80,45 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 		if (p == null)
 			return;
 
-		//TODO:
-		//use the direction of the wheels
-		//react to g forces
-		//use and smooth the mouse stuff
+		//TODO: react to g forces
 		
 		Vector3f carPos = p.getRootNode().getLocalTranslation();
 		Quaternion pRot = p.getRootNode().getLocalRotation();
 		
 		CarDataConst data = p.getCarData();
 
-		// Vector3f velocity = pRot.inverse().mult(p.getLinearVelocity());
-		// if (velocity.z < 0) //in reverse so reverse the rotation matrix
-			// pRot.inverseLocal();
-		
+	
 		if (!FastMath.approximateEquals(rotRad, 0)) {
 			lastTimeout += tpf;
-			if (lastTimeout > 2) { //TODO static number/setting
-				rotRad *= tpf; //reset to back of car slowly TODO setting
+			if (lastTimeout > 2) { //TODO static number
+				rotRad *= tpf; //reset to back of car slowly
 			}
 			
 			Quaternion q = new Quaternion();
-			q.fromAngleAxis(rotRad*ROT_SPEED, p.up);
-			pRot.multLocal(q);
-		}
-		
-		//calculate world pos of a camera
-		Vector3f vec = new Vector3f();
-		float smoothing = tpf*10;
-		if (p.vel.length() > 4f)
-			vec.interpolateLocal(pRot.mult(new Vector3f(0, 0, 1)).normalize(), p.vel.normalize(), 0.5f);
-		else {
-			//at slow speeds use just the rotation
-			vec = pRot.mult(new Vector3f(0, 0, 1)).normalize();
-			//reduce interpolation to much slower
-			smoothing /= 10;
+			q.fromAngleAxis((rotRad-lastRad)*ROT_SPEED, p.up);
+
+			lastPos = q.mult(lastPos);
+			lastRad = rotRad;
+
+		} else {
+			//calculate world pos of a camera
+			Vector3f vec = new Vector3f();
+			float smoothing = tpf*10;
+			if (p.vel.length() > 4f)
+				vec.interpolateLocal(pRot.mult(new Vector3f(0, 0, 1)).normalize(), p.vel.normalize(), 0.5f);
+			else {
+				//at slow speeds use just the rotation
+				vec = pRot.mult(new Vector3f(0, 0, 1)).normalize();
+				//reduce interpolation to much slower
+				smoothing /= 3;
+			}
+
+			//make it smooth
+			if (lastPos == null)
+				lastPos = vec;
+			lastPos.interpolateLocal(vec, smoothing);
 		}
 
-		//make it smooth
-		if (lastPos == null)
-			lastPos = vec;
-		
-		lastPos.interpolateLocal(vec, smoothing);
-		
 		//force it to be the same distance away at all times
 		Vector3f next = new Vector3f();
 		Vector2f vec_2 = H.v3tov2fXZ(lastPos).normalize();
@@ -159,7 +156,7 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 		
 		lookAt.addLocal(lastShake);
 		
-		c.lookAt(lookAt, new Vector3f(0,1,0));
+		c.lookAt(lookAt, new Vector3f(0,data.cam_lookAtHeight,0));
 	}
 	
 	
