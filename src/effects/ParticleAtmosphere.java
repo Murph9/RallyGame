@@ -14,6 +14,9 @@ import com.jme3.renderer.Camera;
 
 public class ParticleAtmosphere extends AbstractAppState {
 
+	private final static int PARTICLE_MULT = 50;
+	private final static int PARTICLE_MAX = 5000;
+
 	private Vector3f prevPos;
 	private Camera cam;
 	private ParticleEmitter particles;
@@ -44,7 +47,7 @@ public class ParticleAtmosphere extends AbstractAppState {
 		mat.setTexture("Texture", app.getAssetManager().loadTexture("assets/image/solid-white.png"));
 		particles.setMaterial(mat);
 		
-		particles.setNumParticles(5000);
+		particles.setNumParticles(PARTICLE_MAX);
 
 		((SimpleApplication)app).getRootNode().attachChild(particles);
 	}
@@ -61,8 +64,9 @@ public class ParticleAtmosphere extends AbstractAppState {
 		
 		//get vel of node
 		float speed = cam.getLocation().subtract(prevPos).length() / tpf;
-		particles.setParticlesPerSec(25*speed);
+		particles.setParticlesPerSec(PARTICLE_MULT*speed);
 		
 		prevPos = cam.getLocation().clone();
+		particles.setLocalTranslation(prevPos);
 	}
 }
