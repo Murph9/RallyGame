@@ -11,16 +11,25 @@ repositories {
 	}
 }
 
-sourceSets {
-        main.java.srcDirs = ['src/']
+sourceSets.main {
+	java.srcDirs = ['src/']
+	resources {
+		includes = ['src/']
+		excludes = ['!assets/'] //only to keep the top 'assets' folder
+	}
 }
 
-jar {
+task createFatJar(type: Jar) {
+    baseName = 'rally'
 	manifest {
-		attributes 'Main-Class': '${mainClassName}'
+		attributes 'Main-Class': 'game.Main'
 	}
-	
-	exclude ('META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA')
+
+	from  {
+		sourceSets.main.output + sourceSets.main.resources.includes + configurations.compileClasspath.filter{ it.exists() }.collect { it.isDirectory() ? it : zipTree(it) }
+	}
+
+	dependsOn 'build'
 }
 
 dependencies {
