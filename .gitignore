@@ -46,3 +46,4 @@ local.properties
 # blender save files
 *.blend1
 /target/
+.vscode/settings.json
