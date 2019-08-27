@@ -360,6 +360,9 @@ public class RayCarControl extends RayCarPowered {
 	public void setPhysicsRotation(Quaternion rot) {
 		rbc.setPhysicsRotation(rot);
 	}
+	public Vector3f getAngularVelocity() {
+		return rbc.getAngularVelocity();
+	}
 	public void setAngularVelocity(Vector3f vel) {
 		rbc.setAngularVelocity(vel);
 	}

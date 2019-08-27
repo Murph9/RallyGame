@@ -112,7 +112,7 @@ public class DriveMainRoadGetaway extends DriveBase {
 			return;
 
 		//spawn more if required
-		if (this.cb.getCount() < maxCount && App.getFrameCount() % 10 == 0) {
+		if (this.cb.getCount() < maxCount && App.getFrameCount() % 30 == 0) {
 			final float z = nextZOff();
 			final boolean spawnPlayerDirection = spawnPlayerDirection();
 			
@@ -146,7 +146,9 @@ public class DriveMainRoadGetaway extends DriveBase {
 				if (c == chaser) {
 					//we only reset their position behind the player at the same speed, please don't delete them
 					c.setPhysicsLocation(player.getPhysicsLocation().add(-15, 0, 0));
+					c.setPhysicsRotation(player.getPhysicsRotation());
 					c.setLinearVelocity(player.getLinearVelocity());
+					c.setAngularVelocity(player.getAngularVelocity());
 					continue;
 				}
 			
@@ -173,11 +175,9 @@ public class DriveMainRoadGetaway extends DriveBase {
 	private boolean spawnPlayerDirection() {
 		return FastMath.rand.nextBoolean();
 	}
-
-	private int CarSpawnCounter = 0; 
+ 
 	private float nextZOff() {
-		CarSpawnCounter++;
-		int i = CarSpawnCounter % 6;
+		int i = FastMath.nextRandomInt(0, 5);
 		if (i == 5)
 			return -8f;
 		else if (i == 4)

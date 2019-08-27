@@ -115,7 +115,7 @@ public class App extends SimpleApplication {
 		// Bloom for the wireframes
 		BloomFilter bloom = new BloomFilter();
 		bloom.setBlurScale(.5f);
-		bloom.setBloomIntensity(5);
+		bloom.setBloomIntensity(2);
 		fpp.addFilter(bloom);
 		viewPort.addProcessor(fpp);
 		
