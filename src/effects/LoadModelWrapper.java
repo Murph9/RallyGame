@@ -1,6 +1,9 @@
 package effects;
 
+import java.awt.Color;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
@@ -36,7 +39,7 @@ public class LoadModelWrapper {
     }
 
     private static Geometry _do(AssetManager am, Geometry g, ColorRGBA color) {
-		ColorRGBA defColour = H.getColorFromMaterialName(g.getMaterial());
+		ColorRGBA defColour = getColorFromMaterialName(g.getMaterial());
 		if (defColour != null)
 			color = defColour;
 		else
@@ -48,5 +51,33 @@ public class LoadModelWrapper {
 		g.setMaterial(baseMat);
 		
 		return g;
+	}
+
+	// geometry format required: <blah blah>[<colour>]
+	private static Pattern GEO_NAME_REGEX = Pattern.compile(".*\\[(.+)\\].*");
+
+	public static ColorRGBA getColorFromMaterialName(Material m) {
+		String name = m.getName();
+		if (name == null)
+			return null;
+
+		Matcher mat = GEO_NAME_REGEX.matcher(name);
+		if (!mat.find())
+			return null;
+		String colour = mat.group(1);
+
+		if (colour.startsWith("#")) {
+			return parseAsHex(colour);
+		}
+		return null;
+	}
+
+	private static ColorRGBA parseAsHex(String hex) {
+		try {
+			Color r = Color.decode(hex); // = me being lazy
+			return new ColorRGBA().fromIntARGB(r.getRGB()); // probably
+		} catch (Exception e) {
+			return null;
+		}
 	}
 }
