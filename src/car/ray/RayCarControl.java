@@ -347,6 +347,9 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 	public Vector3f getLinearVelocity() {
 		return rbc.getLinearVelocity();
 	}
+	public Vector3f getAngularVelocity() {
+		return rbc.getAngularVelocity();
+	}
 	
 	public void setPhysicsLocation(Vector3f pos) {
 		rbc.setPhysicsLocation(pos);
