@@ -23,7 +23,7 @@ import helper.H;
 import helper.Log;
 
 //visual/input things
-public class RayCarControl extends RayCarPowered {
+public class RayCarControl extends RayCarPowered implements ICarPowered {
 
 	private final App app;
 	private final RayWheelControl[] wheelControls;
@@ -141,7 +141,7 @@ public class RayCarControl extends RayCarPowered {
 		//eg: car is pointing more left than velocity, and is also turning left
 		//and drift angle needs to be large enough to matter
 		
-		//steering factor = atan(0.08 * vel - 1) + maxAngle*PI/2 + maxLat //TODO what is this 0.08f
+		//steering factor = atan(0.08 * vel - 1) + maxAngle*PI/2 + maxLat
 //		return Math.min(-maxAngle*FastMath.atan(0.3f*(rbc.getLinearVelocity().length() - 1))
 //				+ maxAngle*FastMath.PI/2 + this.wheels[0].maxLat*2, Math.abs(trySteerAngle));
 		
@@ -217,7 +217,7 @@ public class RayCarControl extends RayCarPowered {
 				break;
 	
 			case "Reverse":
-				if (value) curGear = 0;
+				if (value) curGear = REVERSE_GEAR_INDEX;
 				else curGear = 1;
 				break;
 				
@@ -360,9 +360,6 @@ public class RayCarControl extends RayCarPowered {
 	public void setPhysicsRotation(Quaternion rot) {
 		rbc.setPhysicsRotation(rot);
 	}
-	public Vector3f getAngularVelocity() {
-		return rbc.getAngularVelocity();
-	}
 	public void setAngularVelocity(Vector3f vel) {
 		rbc.setAngularVelocity(vel);
 	}
@@ -402,5 +399,17 @@ public class RayCarControl extends RayCarPowered {
     }
 	public boolean isEnabled() {
         return enabled;
-    }
+	}
+	
+
+		
+	public ICarPowered getPoweredState() { return (ICarPowered)this; }
+	public float accelCurrent() { return accelCurrent; }
+	public float brakeCurrent() { return brakeCurrent; }
+	public int curGear() { return this.curGear; }
+	public float nitro() { return this.nitroRemaining; }
+	public float steeringCurrent() { return this.steeringCurrent; }
+	public int curRPM() { return this.curRPM; }
+	public boolean ifHandbrake() { return this.handbrakeCurrent; }
+	public float driftAngle() { return this.driftAngle; }
 }

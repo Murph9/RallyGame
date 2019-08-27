@@ -153,11 +153,20 @@ public class CarDataConst implements Serializable {
 			return null;
 		}
 	}
+
+	public float driveWheelRadius() {
+		if (driveFront && driveRear)
+			return (wheelData[0].radius + wheelData[1].radius + wheelData[2].radius + wheelData[3].radius) / 4f;
+		if (driveFront)
+			return (wheelData[0].radius + wheelData[1].radius) / 2f;
+		if (driveRear)
+			return (wheelData[2].radius + wheelData[3].radius) / 2f;
+
+		return 1;
+	}
 }
 
 
-//TODO:
 //Some helpful notes
-
 //you can fix the oversteer at high speeds with a proper diff and different downforce scaling at higher speeds
 //and some stiffer front suspension?

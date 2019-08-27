@@ -212,6 +212,7 @@ public class CarUITelemetry extends AbstractAppState {
 		//needs to be translated from local into screen axis
 
 		//TODO average to slow down the jumpiness
+		//use helper.Averager
 
 		Vector3f gs = p.planarGForce.mult(1/p.getPhysicsObject().getGravity().length());
 		gs.y = gs.z; //z is front back

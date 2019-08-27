@@ -23,7 +23,7 @@ import com.jme3.scene.shape.Quad;
 import com.jme3.system.AppSettings;
 
 import car.ray.RayCarControl;
-import car.ray.RayCarPowered.PoweredState;
+import car.ray.ICarPowered;
 import game.App;
 import helper.H;
 
@@ -309,21 +309,21 @@ public class CarUI extends BaseAppState {
 	
 	//main update method
 	public void update(float tpf) {
-		PoweredState powerState = p.getPoweredState();
+		ICarPowered powerState = p.getPoweredState();
 		
 		int speedKMH = (int)Math.abs(p.getCurrentVehicleSpeedKmHour());
 		setSpeedDigits(speedKMH);
 
-		setGearDigit(powerState.curGear);
+		setGearDigit(powerState.curGear());
 		
 		//rpm bar 2
-		rpmMat.setFloat("Threshold", Math.min(1, 1 - (powerState.curRPM/(float)Math.ceil(redline+1000))*(5/(float)8)));
+		rpmMat.setFloat("Threshold", Math.min(1, 1 - (powerState.curRPM()/(float)Math.ceil(redline+1000))*(5/(float)8)));
 		
-		angle.setText(H.roundDecimal(powerState.driftAngle, 1)+"'");
-		nitro.setLocalScale(1, powerState.nitro/p.getCarData().nitro_max, 1);
-		throttle.setLocalScale(1, powerState.accelCurrent, 1);
-		brake.setLocalScale(1, powerState.brakeCurrent, 1);
-		steer.setLocalTranslation(centerx - 35 + (powerState.steeringCurrent*-1 + 0.5f)*60 - 6/2, centery + 40, 0); //steering is a translated square
+		angle.setText(H.roundDecimal(powerState.driftAngle(), 1)+"'");
+		nitro.setLocalScale(1, powerState.nitro()/p.getCarData().nitro_max, 1);
+		throttle.setLocalScale(1, powerState.accelCurrent(), 1);
+		brake.setLocalScale(1, powerState.brakeCurrent(), 1);
+		steer.setLocalTranslation(centerx - 35 + (powerState.steeringCurrent()*-1 + 0.5f)*60 - 6/2, centery + 40, 0); //steering is a translated square
 	}
 
 	private void setSpeedDigits(int speedKMH) {
