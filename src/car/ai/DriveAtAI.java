@@ -1,14 +1,13 @@
 package car.ai;
 
 import com.jme3.bullet.objects.PhysicsRigidBody;
-import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 
 import car.ray.RayCarControl;
 
 public class DriveAtAI extends CarAI {
 
-	private PhysicsRigidBody driveAtThis;
+	private final PhysicsRigidBody driveAtThis;
 	
 	private float reversingTimer;
 	private boolean reversing;
@@ -26,6 +25,8 @@ public class DriveAtAI extends CarAI {
 		
 		//try and fix a stuck situation
 		if (!reversing) {
+			onEvent("Reverse", false);
+			
 			if (velocity < 0.5f) {
 				reversingTimer += tpf;
 				if (reversingTimer > 5) {
@@ -37,11 +38,11 @@ public class DriveAtAI extends CarAI {
 			}
 	
 			if (velocity < 1 && car.up.y < 0) { //if very still and not the right way up then flip over
-				onEvent("Flip", true, 1);
+				onEvent("Flip", true);
 			}
 		} else {
 			//currently reversing
-			onEvent("Reverse", true, 1);
+			onEvent("Reverse", true);
 			reversingTimer -= tpf;
 			if (reversingTimer < 0)
 				reversing = false;
@@ -51,45 +52,12 @@ public class DriveAtAI extends CarAI {
 		Vector3f pos = car.getPhysicsLocation();
 		Vector3f atPos = driveAtThis.getPhysicsLocation();
 
-		Vector3f myforward = car.forward;
-		
-		float angF = myforward.normalize().angleBetween((atPos.subtract(pos)).normalize());
-		float ang = car.left.normalize().angleBetween((atPos.subtract(pos)).normalize());
-		
-		float turndeg = (angF > FastMath.QUARTER_PI) ? 1 : angF/FastMath.QUARTER_PI;
+		driveAt(pos, atPos);
 
-		/*
-		if (ang < FastMath.PI/8) {
-			Log.p(car.car+"nitro o");
-			onEvent("Nitro", true, 1);
-		} else {
-			onEvent("Nitro", false, 0);
-		}
-		*/
-		
-		//turn towards player
-		if (ang > FastMath.HALF_PI) {
-			onEvent("Left", false, 0);
-			onEvent("Right", true, turndeg);
-		} else {
-			onEvent("Right", false, 0);
-			onEvent("Left", true, turndeg);
-		}
-		//slow down to turn
-		if (FastMath.abs(angF) < FastMath.QUARTER_PI) {
-			onEvent("Brake", false, 0);
-			onEvent("Accel", true, 1);
-		} else {
-			onEvent("Brake", true, 1);
-			onEvent("Accel", false, 0);
-		}
-		
 		//if going to slow speed up
 		if (velocity < 10) {
-			onEvent("Accel", true, 1);
-			onEvent("Brake", false, 0);
+			onEvent("Accel", true);
+			onEvent("Brake", false);
 		}
-		
-		//TODO some kind of ray cast so they can drive around things properly
 	}
 }
