@@ -23,7 +23,9 @@ import car.ray.CarDataConst;
 import car.ray.RayCarControl;
 import car.ray.RayWheel;
 import game.App;
+import helper.AverageV3f;
 import helper.H;
+import helper.IAverager;
 
 public class CarUITelemetry extends AbstractAppState {
 
@@ -40,6 +42,7 @@ public class CarUITelemetry extends AbstractAppState {
 	private Geometry g2;
 	private Vector3f gcenter;
 	private BitmapText gText;
+	private final IAverager<Vector3f> gAverage;
 	
 	//some debug text
 	private BitmapText statsText;
@@ -47,6 +50,8 @@ public class CarUITelemetry extends AbstractAppState {
 	public CarUITelemetry(RayCarControl p) {
 		this.rootNode = new Node("telemetry");
 		this.p = p;
+
+		this.gAverage = new AverageV3f(15);
 	}
 	
 	@Override
@@ -211,15 +216,12 @@ public class CarUITelemetry extends AbstractAppState {
 		//g forces
 		//needs to be translated from local into screen axis
 
-		//TODO average to slow down the jumpiness
-		//use helper.Averager
-
 		Vector3f gs = p.planarGForce.mult(1/p.getPhysicsObject().getGravity().length());
 		gs.y = gs.z; //z is front back
 		gs.z = 0; //screen has no depth
+		gs = gAverage.get(gs);
 		g2.setLocalTranslation(gcenter.add(gs.mult(25))); //because screen pixels
 		gText.setText("x: " + H.roundDecimal(gs.x, 2) +", y: " + H.roundDecimal(gs.y, 2));
-		
 	}
 	
 	private ColorRGBA getGripBoxColour(float value) {
