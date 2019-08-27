@@ -1,5 +1,6 @@
 package car.ray;
 
+import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Vector3f;
 
 /** Class to store real-time data of this wheel */
@@ -11,6 +12,8 @@ public class RayWheel {
 	public boolean inContact;
 	public Vector3f curBasePosWorld;
 	public Vector3f hitNormalInWorld;
+	public PhysicsRigidBody collisionObject;
+
 	public float susRayLength; //length from start of sus vector
 	public float susForce;
 	

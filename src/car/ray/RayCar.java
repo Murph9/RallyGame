@@ -81,7 +81,7 @@ public class RayCar implements PhysicsTickListener {
 	public void prePhysicsTick(PhysicsSpace space, float tpf) {
 		applySuspension(space, tpf);
 		
-		//TODO apply the midpoint formula or any kind of actual simulation
+		//TODO apply the midpoint formula or any kind of actual physics stepped simulation method
 		//https://en.wikipedia.org/wiki/Midpoint_method
 		if (tractionEnabled)
 			applyTraction(space, tpf);
@@ -89,7 +89,9 @@ public class RayCar implements PhysicsTickListener {
 		applyDrag(space, tpf);
 		
 		//TODO give any forces back to the collision object the wheel hits
-		//TODO also use the velocity of the object in calculations
+		//should use wheels[i].collisionObject
+		
+		//TODO use the velocity of the object in calculations (suspension and traction)
 	}
 	
 	private void applySuspension(PhysicsSpace space, float tpf) {
@@ -128,6 +130,7 @@ public class RayCar implements PhysicsTickListener {
 			}
 			
 			wheels[w_id].hitNormalInWorld = col.hitNormalInWorld;
+			wheels[w_id].collisionObject = col.obj;
 			wheels[w_id].susRayLength = col.dist - carData.wheelData[w_id].radius; //remove the wheel radius
 			wheels[w_id].curBasePosWorld = col.pos;
 			wheels[w_id].inContact = true; //wheels are still touching..
@@ -142,7 +145,7 @@ public class RayCar implements PhysicsTickListener {
 			}
 			
 			if (wheels[w_id].susRayLength < 0) { //suspension bottomed out 
-				//TODO do some proper large sus/damp force...
+				//TODO do some proper large sus/damp force to stop vehicle motion/rotation down
 				wheels[w_id].susForce = (sus.preload_force+sus.travelTotal())*sus.stiffness*1000;
 				Vector3f f = w_angle.invert().mult(wheels[w_id].hitNormalInWorld.mult(wheels[w_id].susForce * tpf));
 				rbc.applyImpulse(f, wheels[w_id].curBasePosWorld.subtract(w_pos));
@@ -150,7 +153,7 @@ public class RayCar implements PhysicsTickListener {
 			}
 			
 			float denominator = wheels[w_id].hitNormalInWorld.dot(w_angle.mult(localDown)); //loss due to difference between collision and localdown (cos ish)
-			Vector3f relpos = wheels[w_id].curBasePosWorld.subtract(rbc.getPhysicsLocation()); //pos of sus contact point relative to car
+			Vector3f relpos = wheels[w_id].curBasePosWorld.subtract(rbc.getPhysicsLocation()); //pos of sus contact point relative to car origin
 			Vector3f velAtContactPoint = getVelocityInLocalPoint(relpos); //get sus vel at point on ground
 			
 			//a hack to include gravity in the calulation, this 'should not' be required
@@ -197,9 +200,6 @@ public class RayCar implements PhysicsTickListener {
 					
 					HelperObj.use(App.CUR.getRootNode(), "normalforcearrow inv" + w_id,
 						H.makeShapeArrow(App.CUR.getAssetManager(), ColorRGBA.White, wheels[w_id].hitNormalInWorld.mult(-denominator), wheels[w_id].curBasePosWorld));
-					
-//					HelperObj.use(App.rally.getRootNode(), "forcearrow" + w_id, 
-//						H.makeShapeArrow(App.rally.getAssetManager(), ColorRGBA.Cyan, f.mult(1/(carData.mass)), vecLocalToWorld(localPos)));
 				});
 			}
 		});
@@ -228,7 +228,7 @@ public class RayCar implements PhysicsTickListener {
 		doForEachWheel((w_id) -> {
 			Vector3f wheel_force = new Vector3f();
 			
-			//* Linear Accelerations: = player.car.length * player.car.yawrate (in rad/sec)
+			// Linear Accelerations: = player.car.length * player.car.yawrate (in rad/sec)
 			float angVel = 0;
 			if (!Float.isNaN(w_angVel.y))
 				angVel = w_angVel.y;
