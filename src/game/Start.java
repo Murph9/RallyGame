@@ -1,5 +1,9 @@
 package game;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
@@ -13,10 +17,9 @@ import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
 import car.CarBuilder;
-import car.ai.FollowWorldAI;
+import car.ai.DriveAlongAI;
 import car.data.Car;
 import car.ray.RayCarControl;
-import world.World;
 import world.wp.DefaultBuilder;
 import world.wp.WP.DynamicType;
 
@@ -24,10 +27,10 @@ public class Start extends AbstractAppState {
 
 	//TODO version number on screen somewhere
 
-	//TODO maybe add some other cars
+	//TODO maybe add some other cars to preview
 
 	private SimpleApplication app;
-	private World world;
+	private DefaultBuilder world;
 
 	private CarBuilder cb;
 	private Car carType;
@@ -57,7 +60,7 @@ public class Start extends AbstractAppState {
 		RayCarControl car = cb.addCar(0, this.carType, world.getStartPos(), world.getStartRot(), true, null);
 
 		//attach basic ai, for the view
-		FollowWorldAI ai = new FollowWorldAI(car, (DefaultBuilder) world);
+		DriveAlongAI ai = new DriveAlongAI(car, (vec) -> world.getNextPieceClosestTo(vec));
 		ai.setMaxSpeed(27.7778f); // 27.7 = 100 km/h
 		car.attachAI(ai, true);
 		
@@ -72,32 +75,14 @@ public class Start extends AbstractAppState {
 		myWindow.setLocalTranslation(300, 300, 0);
 		
         myWindow.addChild(new Label("Main Menu"));
-        
-        String[] names = {
-        		"Start Fast",
-        		"Start",
-        		"Start AI",
-        		"Start Crash",
-        		"Start Getaway",
-        		"Start Race",
-        		"Start Dev",
-		};
 		
-        Runnable[] methods = {
-        		() -> { myapp.startFast(this); },
-        		() -> { myapp.next(this); },
-        		() -> { myapp.startAI(this); },
-        		() -> { myapp.startCrash(this); },
-        		() -> { myapp.startMainRoad(this); },
-        		() -> { myapp.startRace(this); },
-        		() -> { myapp.startDev(this); }
-		};
-        
-        for (int i = 0; i < methods.length; i++) {
-        	final Runnable method = methods[i];
-	        Button startFast = myWindow.addChild(new Button(names[i]));
-	        startFast.addClickCommands(source -> {
-			    method.run();
+		Map<String, Runnable> buttonActions = generateButtonMappings(myapp);
+		
+		for (Entry<String, Runnable> action: buttonActions.entrySet()) {
+			final Runnable method = action.getValue();
+			Button startFast = myWindow.addChild(new Button(action.getKey()));
+			startFast.addClickCommands(source -> {
+				method.run();
 				myapp.getGuiNode().detachChild(myWindow);
 			});
 		}
@@ -133,6 +118,18 @@ public class Start extends AbstractAppState {
 		super.cleanup();
 	}
 
+	private Map<String, Runnable> generateButtonMappings(App myapp) {
+
+		Map<String, Runnable> buttonActions = new LinkedHashMap<String, Runnable>();
+		buttonActions.put("Start Fast", () -> { myapp.startFast(this); });
+		buttonActions.put("Start", () -> { myapp.next(this); });
+		buttonActions.put("Start AI", () -> { myapp.startAI(this); });
+		buttonActions.put("Start Crash", () -> { myapp.startCrash(this); });
+		buttonActions.put("Start Getaway", () -> { myapp.startMainRoad(this); });
+		buttonActions.put("Start Race", () -> { myapp.startRace(this); });
+		buttonActions.put("Start Dev", () -> { myapp.startDev(this); });
+		return buttonActions;
+	}
 
 	class StartCamera extends AbstractAppState {
 		// render() based camera to prevent jumpiness
@@ -169,7 +166,6 @@ public class Start extends AbstractAppState {
 
 		@Override
 		public void render(RenderManager rm) {
-
 			Vector3f movedOffset = new Quaternion().fromAngleAxis(angle, Vector3f.UNIT_Y).mult(this.offset);
 			Vector3f camPos = rcc.getRootNode().getLocalTranslation().add(movedOffset);
 

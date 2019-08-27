@@ -30,9 +30,9 @@ import world.World;
 import world.WorldType;
 import world.wp.WP.NodeType;
 
+/** Generates the world infront of the player dynamically from static set pieces */
 public abstract class DefaultBuilder extends World {
 
-	//designed to generate the world infront of the player dynamically from static pieces
 	private Geometry startGeometry;
 	protected WP[] type;
 	
@@ -267,7 +267,7 @@ public abstract class DefaultBuilder extends World {
 		return WorldType.DYNAMIC;
 	}
 	
-	public abstract World copy();
+	public abstract DefaultBuilder copy();
 	
 	protected class WPObject {
 		WP wp;

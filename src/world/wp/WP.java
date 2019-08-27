@@ -3,8 +3,6 @@ package world.wp;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
-import world.World;
-
 /** World Piece
  * @author murph9
  */
@@ -45,20 +43,14 @@ public interface WP {
 		MainRoad(new MainRoad.Builder())
 		;
 		
-		private World builder;
-		DynamicType(World db) {
+		private DefaultBuilder builder;
+		DynamicType(DefaultBuilder db) {
 			this.builder = db;
 		}
 		
-		public World getBuilder() {
+		public DefaultBuilder getBuilder() {
 			builder.reset(); //just incase its already been used, physics space is probably wrong for example
-			try {
-				return builder.copy();
-			} catch (InstantiationException | IllegalAccessException e) {
-				e.printStackTrace();
-				System.exit(-1);
-			}
-			return null;
+			return builder.copy();
 		}
 	}
 	
