@@ -1,5 +1,4 @@
 !!car.ray.CarDataConst
-#http://www.automobile-catalog.com/curve/2005/894440/ford_gt.html
 JUMP_FORCE: {x: 0.0, y: 1100.0, z: 0.0}
 areo_crossSection: 0.47
 areo_downforce: 0.0

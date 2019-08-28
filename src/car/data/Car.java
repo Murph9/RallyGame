@@ -21,7 +21,6 @@ public enum Car {
 	Runner("Runner"),
 	Rally("Rally"),
 	Roadster("Roadster"),
-	Gt("Gt"),
 	
 	Hunter("Hunter"),
 	Ricer("Ricer"),
@@ -29,6 +28,12 @@ public enum Car {
 	Wagon("Wagon"),
 	Bus("Bus"),
 	
+	Ultra("Ultra"),
+	LeMans("LeMans"),
+	Inline("Inline"),
+	TouringCar("Touring"),
+	Hill("Hill"),
+
 	WhiteSloth("WhiteSloth"),
 	Rocket("Rocket"),
 	

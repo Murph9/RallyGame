@@ -1,0 +1,63 @@
+!!car.ray.CarDataConst
+JUMP_FORCE: {x: 0.0, y: 1100.0, z: 0.0}
+areo_crossSection: 0.47
+areo_downforce: 0.0
+areo_drag: 0.31
+areo_lineardrag: 0.012
+auto_changeTime: 0.2
+auto_gearDown: 2400
+auto_gearUp: 6700
+brakeMaxTorque: 8000
+cam_lookAtHeight: 1.3
+cam_offsetLength: -9.0
+cam_offsetHeight: 3.1
+cam_shake: 2.0E-6
+carModel: assets/models/rt_ryukyu.blend
+driveFront: false
+driveRear: true
+e_compression: 0.1
+e_idle: 1000
+e_mass: 2
+e_redline: 6800
+e_torque: [0, 322.9, 565, 645.7, 677.4, 662.4, 627.3, 503.4, 0]
+height: 1.125
+length: 4.643
+mass: 1520
+minDriftAngle: 7.0
+nitro_force: 300.0
+nitro_max: 15.0
+nitro_on: true
+nitro_rate: 1.0
+susF: &sus {
+  antiroll: 22.0,
+  comp: 0.4,
+  max_force: 83600, 
+  max_travel: 0.1,
+  min_travel: -0.1,
+  preload_force: 2.3,
+  relax: 0.5, 
+  stiffness: 24.0
+}
+susR: *sus
+trans_effic: 1 #torque is probably measured at wheels 
+trans_finaldrive: 3.36
+trans_gearRatios: [-3.135, 2.611, 1.708, 1.233, 0.943, 0.767, 0.625]
+w_fdiff: false
+w_fdifflock: 0
+w_rdiff: true
+w_rdifflock: 0.1
+w_steerAngle: 0.5
+wheelData:
+- &w
+  mass: 10.0
+  modelName: assets/models/gt_wheel.blend
+  pjk_lat: {B: 20, C: 1.39, D: 1.1, E: 0.05}
+  pjk_lat_sat: {B: 18, C: 2.24, D: 00, E: -2.73}
+  pjk_long: {B: 21, C: 1.8, D: 2, E: 0.98}
+  pjk_long_sat: {B: 18, C: 2.24, D: 00, E: -2.73}
+  radius: 0.3675
+  width: 0.3
+- *w
+- *w
+- *w
+width: 1.953
