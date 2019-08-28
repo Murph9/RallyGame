@@ -20,8 +20,6 @@ e_idle: 400
 e_mass: 4
 e_redline: 2800
 e_torque: [500.0, 800.0, 1050.0, 870.0] #??
-height: 2.6
-length: 10.8
 mass: 8700
 minDriftAngle: 3.0
 nitro_force: 300.0
@@ -58,4 +56,3 @@ wheelData:
 - *w
 - *w
 - *w
-width: 2.5

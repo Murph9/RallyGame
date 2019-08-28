@@ -26,9 +26,6 @@ public class CarDataConst implements Serializable {
 	public float cam_shake;
 	
 	public float mass; //kg (total, do NOT add wheel or engine mass/inertia to this)
-	public float width; //x size meter, door handle to door handle
-	public float height; //y size meter, roof to ground
-	public float length; //z size meter, from front to back
 
 	public float areo_drag;
 	public float areo_lineardrag; //0.003 to 0.02 (dimensionless number)

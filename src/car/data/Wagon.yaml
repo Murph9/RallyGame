@@ -20,8 +20,6 @@ e_idle: 1000
 e_mass: 1 #its electric
 e_redline: 15000
 e_torque: [200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200]
-height: 1
-length: 4
 mass: 500
 minDriftAngle: 7.0
 nitro_force: 300.0
@@ -60,4 +58,3 @@ wheelData:
 - *w
 - *w
 - *w
-width: 1.74
