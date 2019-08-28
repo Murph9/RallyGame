@@ -1,5 +1,5 @@
 !!car.ray.CarDataConst
-JUMP_FORCE: {x: 0.0, y: *mass, z: 0.0}
+JUMP_FORCE: {x: 0.0, y: 878, z: 0.0}
 areo_crossSection: 0.4
 areo_downforce: 0.0
 areo_drag: 0.29
@@ -20,7 +20,7 @@ e_idle: 1400
 e_mass: 2
 e_redline: 8500
 e_torque: [0, 450, 500, 590, 650, 710, 740, 710, 600]
-mass: &mass 878
+mass: 878
 minDriftAngle: 7.0
 nitro_force: 1.0
 nitro_max: 1.0
@@ -48,7 +48,7 @@ w_steerAngle: 0.5
 wheelData:
 - &w
   mass: 7.0
-  modelName: assets/models/gt_wheel.blend
+  modelName: assets/models/wheel.obj
   pjk_lat: {B: 20, C: 1.39, D: 1.1, E: 0.05} #TODO much harsher
   pjk_lat_sat: {B: 18, C: 2.24, D: 00, E: -2.73}
   pjk_long: {B: 21, C: 1.8, D: 2, E: 0.98}
