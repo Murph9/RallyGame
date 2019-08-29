@@ -14,12 +14,8 @@ import helper.Log;
 public class RayCarTest {
 
 	private static final boolean COMPLEX_FORMULA = true;
-	
-	public static void main(String[] args) {
-		TestCombinedSlip();
-	}
-	
-	private static void TestCombinedSlip()
+		
+	public static void RunCombinedSlip()
     {
 		WheelDataTractionConst curveConstLong = new WheelDataTractionConst();
 		curveConstLong.B = 17;

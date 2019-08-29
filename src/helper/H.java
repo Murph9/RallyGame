@@ -52,7 +52,7 @@ public class H {
 		return s;
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SafeVarargs
 	public static <T> Boolean allTrue(Function<T, Boolean> f, T... ts) {
 		for (T t: ts)
 			if (!f.apply(t))
@@ -134,18 +134,9 @@ public class H {
 	
 	public static String roundDecimal(float num, int places) {
 		if (places == 0) {
-			return Integer.toString((int)num);
+			return Integer.toString(Math.round(num));
 		}
-		
-		String s = Float.toString(num);
-		String[] sa = s.split("\\.");
-		
-		if (sa.length > 1) {
-			places = Math.min(sa[1].length(), places);
-			return sa[0]+"."+sa[1].substring(0, places);
-		} else {
-			return sa.toString();
-		}
+		return String.format("%."+places+"f", num);
 	}
 	public static String roundDecimal(double num, int places) { //...
 		return roundDecimal((float)num,places);
@@ -304,17 +295,19 @@ public class H {
 	}
 	
 	
-	//copies to first array
+	
+	
+	/** copies to first array */
 	public static void addTogether(float[] a, float[] b) {
 		if (a.length != b.length) {
 			Log.e("Arrays not the same length: " + a.length + " and " + b.length);
 			return;
 		}
-		for (int i = 1; i < a.length - 1; i++) {
+		for (int i = 0; i < a.length; i++) {
 			a[i] += b[i];
 		}
 	}
-	//copies to new array
+	/** copies to new array */
 	public static float[] addTogetherNew(float[] a, float[] b) {
 		if (a.length != b.length) {
 			Log.e("Arrays not the same length: " + a.length + " and " + b.length);
@@ -322,7 +315,7 @@ public class H {
 		}
 		float[] out = new float[a.length];
 		System.arraycopy(a, 0, out, 0, a.length);
-		for (int i = 1; i < a.length - 1; i++) {
+		for (int i = 0; i < a.length; i++) {
 			out[i] += b[i];
 		}
 		return out;
