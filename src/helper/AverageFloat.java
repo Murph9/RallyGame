@@ -1,30 +1,23 @@
 package helper;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
+public class AverageFloat extends AveragerBase<Float> {
 
-public class AverageFloat implements IAverager<Float> {
-
-    private final int size;
-    private final Deque<Float> list;
-
-    public AverageFloat(int size) {
-        this.size = Math.max(size, 1);
-        this.list = new ArrayDeque<>();
+    public AverageFloat(int size, IAverager.Type type) {
+        super(size, type);
     }
 
-    public Float get(Float value) {
-        if (size <= 1)
-            return value;
+    @Override
+    protected Float add(Float value1, Float value2) {
+        return value1 + value2;
+    }
 
-        list.addFirst(value);
-        if (list.size() > size)
-            list.removeLast();
-        
-        float total = 0;
-        for (float f: this.list) {
-            total += f;
-        }
-        return total /= size;
+    @Override
+    protected Float createBlank() {
+        return 0f;
+    }
+
+    @Override
+    protected Float mult(Float value, float mult) {
+        return value*mult;
     }
 }

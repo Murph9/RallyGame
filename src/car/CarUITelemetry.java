@@ -26,6 +26,7 @@ import game.App;
 import helper.AverageV3f;
 import helper.H;
 import helper.IAverager;
+import helper.IAverager.Type;
 
 public class CarUITelemetry extends AbstractAppState {
 
@@ -51,7 +52,7 @@ public class CarUITelemetry extends AbstractAppState {
 		this.rootNode = new Node("telemetry");
 		this.p = p;
 
-		this.gAverage = new AverageV3f(15);
+		this.gAverage = new AverageV3f(10, Type.Simple);
 	}
 	
 	@Override

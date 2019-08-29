@@ -1,34 +1,25 @@
 package helper;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-
 import com.jme3.math.Vector3f;
 
-public class AverageV3f implements IAverager<Vector3f> {
+public class AverageV3f extends AveragerBase<Vector3f> {
 
-    private final int size;
-    private final Deque<Vector3f> list;
-
-    public AverageV3f(int size) {
-        this.size = Math.max(size, 1);
-        this.list = new ArrayDeque<>();
+    public AverageV3f(int size, IAverager.Type type) {
+        super(size, type);
     }
 
-    public Vector3f get(Vector3f value) {
-        if (size <= 1)
-            return value;
+    @Override
+    protected Vector3f add(Vector3f value1, Vector3f value2) {
+        return value1.add(value2);
+    }
 
-        list.addFirst(value);
-        if (list.size() > size)
-            list.removeLast();
-        
-        Vector3f total = new Vector3f();
-        for (Vector3f f: this.list) {
-            total.x += f.x;
-            total.y += f.y;
-            total.z += f.z;
-        }
-        return total.divide(size);
+    @Override
+    protected Vector3f createBlank() {
+        return new Vector3f();
+    }
+
+    @Override
+    protected Vector3f mult(Vector3f value, float mult) {
+        return value.mult(mult);
     }
 }
