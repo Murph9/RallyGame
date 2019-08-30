@@ -1,5 +1,4 @@
 apply plugin: 'java'
-apply plugin: 'eclipse'
 
 def mainClassName = 'game.Main'
 
@@ -12,12 +11,22 @@ repositories {
 }
 
 sourceSets.main {
-	java.srcDirs = ['src/']
+	java {
+		srcDir 'src/'
+		exclude '**/test/**'
+	} 
 	resources {
 		includes = ['src/']
 		excludes = ['!assets/'] //only to keep the top 'assets' folder
 	}
 }
+sourceSets.test {
+	java {
+		srcDir 'src/'
+		exclude '!**/test/**'
+	}
+}
+
 
 task createFatJar(type: Jar) {
     baseName = 'rally'
@@ -30,6 +39,10 @@ task createFatJar(type: Jar) {
 	}
 
 	dependsOn 'build'
+}
+
+test {
+    useJUnitPlatform()
 }
 
 dependencies {
@@ -45,4 +58,8 @@ dependencies {
 	
 	compile 'org.yaml:snakeyaml:1.23'
 	compile 'com.simsilica:lemur:1.11.0'
+
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.1'
+	testImplementation 'org.junit.jupiter:junit-jupiter-params:5.5.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.1'
 }

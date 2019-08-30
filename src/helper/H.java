@@ -81,11 +81,13 @@ public class H {
 		return (Math.abs((y2-y1)*x0 - (x2-x1)*y0 + x2*y1 - y2*x1))/
 				FastMath.sqrt((y2-y1)*(y2-y1) + (x2-x1)*(x2-x1));
 	}
+
+	/** Returns extents of V3f in xz directions. [xmin, zmin, xmax, zmax] */
 	public static float[] boundingBoxXZ(Vector3f... p) {
-		float xmin = Float.MAX_VALUE;
-		float xmax = Float.MIN_VALUE;
-		float zmin = Float.MAX_VALUE;
-		float zmax = Float.MIN_VALUE;
+		float xmin = Float.POSITIVE_INFINITY;
+		float xmax = Float.NEGATIVE_INFINITY;
+		float zmin = Float.POSITIVE_INFINITY;
+		float zmax = Float.NEGATIVE_INFINITY;
 		for (Vector3f v: p) {
 			xmin = Math.min(xmin, v.x);
 			xmax = Math.max(xmax, v.x);
@@ -93,7 +95,6 @@ public class H {
 			zmax = Math.max(zmax, v.z);
 		}
 		return new float[] { xmin, zmin, xmax, zmax };
-		//return new Vector3f[] { new Vector3f(xmin, 0, zmin), new Vector3f(xmin, 0, zmax),new Vector3f(xmax, 0, zmax),new Vector3f(xmax, 0, zmin)};
 	}
 	
 	public static float lerpArray(float i, float[] array) {
@@ -120,7 +121,7 @@ public class H {
 				FastMath.interpolateLinear(value, a.r, b.r),
 				FastMath.interpolateLinear(value, a.g, b.g),
 				FastMath.interpolateLinear(value, a.b, b.b),
-				1
+				FastMath.interpolateLinear(value, a.a, b.a)
 			);
 	}
 	
@@ -457,13 +458,13 @@ public class H {
         return map;
 	}
 	public static float maxInArray(float[] array) {
-		float result = Float.MIN_VALUE;
+		float result = Float.NEGATIVE_INFINITY;
 		for (float value: array)
 			result = Math.max(result, value);
 		return result;
 	}
 	public static float maxInArray(float[] array, BiFunction<Float, Integer, Float> func) {
-		float result = Float.MIN_VALUE;
+		float result = Float.NEGATIVE_INFINITY;
 		for (int i = 0; i < array.length; i++)
 			result = Math.max(result, func.apply(array[i], i));
 		return result;

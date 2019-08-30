@@ -27,13 +27,13 @@ public abstract class AveragerBase<T extends Object> implements IAverager<T> {
         if (list.size() > size)
             list.removeLast();
 
+        float size = list.size(); //float for dividing
         T total = createBlank();
         switch (type) {
         case Simple:
             for (T t : this.list) {
                 total = add(total, t);
             }
-            Log.p(total);
             return mult(total, 1/(float)size);
         case Weighted:
             int i = 0;

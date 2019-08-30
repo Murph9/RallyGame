@@ -1,5 +1,8 @@
 package test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -7,39 +10,52 @@ import java.io.PrintWriter;
 
 import com.jme3.math.FastMath;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
 import car.ray.RayCar;
 import car.ray.WheelDataTractionConst;
 import helper.Log;
 
 public class RayCarTest {
 
-	private static final boolean COMPLEX_FORMULA = true;
-		
-	public static void RunCombinedSlip()
-    {
-		WheelDataTractionConst curveConstLong = new WheelDataTractionConst();
-		curveConstLong.B = 17;
-		curveConstLong.C = 1.9f;
-		curveConstLong.D = 1;
-		curveConstLong.E = 0.1f; //aggressive so you can see the color gradient 
-		float maxLong = CalcSlipMax(curveConstLong);
-		
-		WheelDataTractionConst curveConstLat = new WheelDataTractionConst();
-        curveConstLat.B = 40;
-		curveConstLat.C = 1.9f;
-		curveConstLat.D = 1;
-		curveConstLat.E = 0.1f;
-        float maxLat = CalcSlipMax(curveConstLat);
-        
-        if (Float.isNaN(maxLong)) {
-        	Log.e("Maxlong is NaN");
-        	System.exit(-87000);
-        }
-        if (Float.isNaN(maxLat)) {
-        	Log.e("Maxlat is NaN");
-        	System.exit(-87001);
-        }
+    private WheelDataTractionConst curveConstLong;
+    private WheelDataTractionConst curveConstLat;
+    private float maxLong;
+    private float maxLat;
 
+    @BeforeEach
+    public void initConsts() {
+        curveConstLong = new WheelDataTractionConst();
+        curveConstLong.B = 17;
+        curveConstLong.C = 1.9f;
+        curveConstLong.D = 1;
+        curveConstLong.E = 0.1f;
+
+        curveConstLat = new WheelDataTractionConst();
+        curveConstLat.B = 40;
+        curveConstLat.C = 1.9f;
+        curveConstLat.D = 1;
+        curveConstLat.E = 0.1f;
+
+        maxLong = CalcSlipMax(curveConstLong);
+        maxLat = CalcSlipMax(curveConstLat);
+
+        assumeFalse(Float.isNaN(maxLat));
+        assumeFalse(Float.isNaN(maxLong));
+    }
+
+    @Test
+	public void TestSlipFormula()
+    {
+        assertEquals(curveConstLong.D, TractionFormula(curveConstLong, maxLong), 0.001f);
+        assertEquals(curveConstLat.D, TractionFormula(curveConstLat, maxLat), 0.01f);
+    }
+
+    @Test
+    @Disabled
+    public void generateCurveImage() {
         StringBuilder sb = new StringBuilder();
         int scale = 100;
         for (int i = -scale; i <= scale; i++)
@@ -74,7 +90,6 @@ public class RayCarTest {
 
     private static float GetFromSlips(WheelDataTractionConst curveConstLong, WheelDataTractionConst curveConstLat, float maxLong, float maxLat, float slipRatio, float slipAngle)
     {
-        //original
     	float ratiofract = slipRatio / maxLong;
     	float anglefract = slipAngle / maxLat;
     	float p = (float)Math.sqrt(ratiofract * ratiofract + anglefract * anglefract);
@@ -83,37 +98,14 @@ public class RayCarTest {
     	float fZ = (ratiofract / p) * TractionFormula(curveConstLong, p*maxLong);
     	float fX = (anglefract / p) * TractionFormula(curveConstLat, p*maxLat);
     	return FastMath.sqrt(fX * fX + fZ * fZ);
-        
-        //v2 will make a circle
-    	/*
-        float p2 = FastMath.sqrt(slipRatio * slipRatio + slipAngle * slipAngle);
-        float fX = slipRatio*TractionFormula(curveConst, p2)/p2;
-        
-        float fZ = slipAngle*TractionFormula(curveConst2, p2)/p2;
-        
-        return FastMath.sqrt(fX * fX + fZ * fZ);
-        */
     }
 
     private static float TractionFormula(WheelDataTractionConst w, float slip)
     {
-        if (COMPLEX_FORMULA)
-            return RayCar.GripHelper.tractionFormula(w, slip);
-        else
-        {   //hack simple forumla
-            if (Math.abs(slip) <= 0.1f)
-                return slip * 10;
-            if (slip > 0)
-            	return -(slip - 0.1f) + 1;
-            else
-            	return (slip + 0.1f) + 1;
-        }
+        return RayCar.GripHelper.tractionFormula(w, slip);
     }
     
     private static float CalcSlipMax(WheelDataTractionConst w) {
-    	if (COMPLEX_FORMULA)
-    		return RayCar.GripHelper.calcSlipMax(w);
-        else
-            return 0.1f;
+        return RayCar.GripHelper.calcSlipMax(w);
     }
 }
