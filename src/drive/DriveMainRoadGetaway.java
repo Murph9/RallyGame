@@ -44,7 +44,6 @@ public class DriveMainRoadGetaway extends DriveBase {
 	private final int maxCount;
 
 	private RayCarControl hunter;
-	private int nextId;
 
 	private boolean readyToSpawnTraffic = false;
 	private boolean readyForHunter = false;
@@ -71,8 +70,7 @@ public class DriveMainRoadGetaway extends DriveBase {
 		super.initialize(stateManager, app);
 		
 		//add the chase car
-		hunter = this.cb.addCar(1, hunterType, new Vector3f(HUNTER_BUFFER - 10, 0.3f, 0), world.getStartRot(), false, null);
-		nextId = 2;
+		hunter = this.cb.addCar(hunterType, new Vector3f(HUNTER_BUFFER - 10, 0.3f, 0), world.getStartRot(), false, null);
 
 		display = new Container();
 		display.addChild(new Label("Score: "));
@@ -132,9 +130,8 @@ public class DriveMainRoadGetaway extends DriveBase {
 				? world.getStartRot()
 				: new Quaternion().fromAngleAxis(FastMath.PI, Vector3f.UNIT_Y).toRotationMatrix().mult(world.getStartRot());
 
-			RayCarControl c = this.cb.addCar(nextId, H.randFromArray(this.trafficTypes), spawnPos, spawnDir, false, ai);
+			RayCarControl c = this.cb.addCar(H.randFromArray(this.trafficTypes), spawnPos, spawnDir, false, ai);
 			c.setLinearVelocity(new Vector3f(20*(spawnPlayerDirection ? 1: -1), 0, 0));
-			nextId++;
 		}
 		
 		//check if any traffic is falling and remove them

@@ -22,7 +22,6 @@ public class DriveCrash extends DriveBase {
 
 	private Car them;
 	private int maxCount;
-	private int nextId;
 	
 	private int totalKilled;
 
@@ -30,7 +29,6 @@ public class DriveCrash extends DriveBase {
     	super(Car.Runner, world);
     	this.them = Car.Rally;
     	this.maxCount = 10;
-    	this.nextId = 1;
     	this.totalKilled = 0;
     }
 	
@@ -39,8 +37,7 @@ public class DriveCrash extends DriveBase {
 		
 		if (this.cb.getCount() < maxCount && App.getFrameCount() % 60 == 0) {
 			Vector3f spawn = H.randFromArray(spawns);
-			this.cb.addCar(nextId, them, spawn, world.getStartRot(), false, null);
-			nextId++;
+			this.cb.addCar(them, spawn, world.getStartRot(), false, null);
 		}
 		
 		//check if any are upside down, if so kill them

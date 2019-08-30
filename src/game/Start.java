@@ -57,7 +57,7 @@ public class Start extends AbstractAppState {
 		// build player
 		this.cb = new CarBuilder(myapp);
 		stateManager.attach(cb);
-		RayCarControl car = cb.addCar(0, this.carType, world.getStartPos(), world.getStartRot(), true, null);
+		RayCarControl car = cb.addCar(this.carType, world.getStartPos(), world.getStartRot(), true, null);
 
 		//attach basic ai, for the view
 		DriveAlongAI ai = new DriveAlongAI(car, (vec) -> world.getNextPieceClosestTo(vec));
@@ -107,7 +107,7 @@ public class Start extends AbstractAppState {
 		app.getRootNode().detachChild(myWindow);
 		myWindow = null;
 		
-		cb.removeCar(0);
+		cb.removeAll();
 		app.getStateManager().detach(cb);
 		cb = null;
 		

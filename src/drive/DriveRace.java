@@ -117,19 +117,19 @@ public class DriveRace extends AbstractAppState {
 		}
     	
 		//buildCars
-		this.cb = new CarBuilder((App)app);
-		cb.addCar(0, car, worldStarts[0], worldRot, true, null);
+		this.cb = new CarBuilder(this.app);
+		RayCarControl rayCar = cb.addCar(car, worldStarts[0], worldRot, true, null);
 		app.getStateManager().attach(cb);
 		app.getStateManager().attach(menu);
 		
-		uiNode = new CarUI(cb.get(0));
+		uiNode = new CarUI(rayCar);
 		app.getStateManager().attach(uiNode);
 		
     	for (int i = 0; i < this.themCount; i++)
-    		this.cb.addCar(i + 1, themType, worldStarts[i+1], worldRot, false, (c,s) -> new RaceAI(c, s, this));
+    		this.cb.addCar(themType, worldStarts[i+1], worldRot, false, (c,s) -> new RaceAI(c, s, this));
 		
 		//initCameras
-		camera = new CarCamera("Camera", this.app.getCamera(), cb.get(0));
+		camera = new CarCamera("Camera", this.app.getCamera(), rayCar);
 		stateManager.attach(camera);
 		app.getInputManager().addRawInputListener(camera);
 		

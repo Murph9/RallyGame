@@ -12,7 +12,7 @@ public class DriveAI extends DriveBase {
 	private Car them;
 	private int themCount;
 
-	public DriveAI (Car car, Car them, World world) {
+	public DriveAI(Car car, Car them, World world) {
     	super(car, world);
     	this.them = them;
     	this.themCount = 3;
@@ -23,7 +23,7 @@ public class DriveAI extends DriveBase {
     	super.initialize(stateManager, app);
     	
     	for (int i = 0; i < this.themCount; i++)
-    		this.cb.addCar(i + 1, them, world.getStartPos(), world.getStartRot(), false, null);
+    		this.cb.addCar(them, world.getStartPos(), world.getStartRot(), false, null);
 	}
 	
 	public void update(float tpf) {

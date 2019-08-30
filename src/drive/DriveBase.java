@@ -58,11 +58,11 @@ public class DriveBase extends AbstractAppState {
     	stateManager.attach(menu);
     	
 		//build player
-		this.cb = new CarBuilder((App)this.app);
-		cb.addCar(0, car, world.getStartPos(), world.getStartRot(), true, null);
+		this.cb = new CarBuilder((App)app);
+		RayCarControl rayCar = cb.addCar(car, world.getStartPos(), world.getStartRot(), true, null);
 		stateManager.attach(cb);
 		
-		uiNode = new CarUI(cb.get(0));
+		uiNode = new CarUI(rayCar);
 		stateManager.attach(uiNode);
 		
 		//Particle emitter
@@ -71,7 +71,7 @@ public class DriveBase extends AbstractAppState {
 		
 		
 		//initCameras
-		camera = new CarCamera("Camera", app.getCamera(), cb.get(0));
+		camera = new CarCamera("Camera", app.getCamera(), rayCar);
 		stateManager.attach(camera);
 		app.getInputManager().addRawInputListener(camera);
 		
@@ -135,9 +135,9 @@ public class DriveBase extends AbstractAppState {
 		
 		app.getStateManager().detach(uiNode);
 		
-		this.cb.removeCar(0);
+		this.cb.removeCar(cb.get(0));
 
-		RayCarControl c = this.cb.addCar(0, car, world.getStartPos(), world.getStartRot(), true, null); 
+		RayCarControl c = this.cb.addCar(car, world.getStartPos(), world.getStartRot(), true, null); 
 		
 		//initCamera and ui again
 		camera = new CarCamera("Camera", app.getCamera(), c);
