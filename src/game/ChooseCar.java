@@ -63,9 +63,10 @@ public class ChooseCar extends AbstractAppState {
 		world = new StaticWorldBuilder(worldType);
 		app.getStateManager().attach(world);
 		
-		cb = new CarBuilder((App)app);
+		cb = new CarBuilder((App)this.app);
 		app.getStateManager().attach(cb);
-		cb.addCar(0, car, start, dir, true, null);
+		
+		cb.addCar(car, start, dir, true, null);
 
 		//make camera
 		camera = new BasicCamera("Camera", this.app.getCamera(), new Vector3f(0,3,7), new Vector3f(0,1.2f, 0));
@@ -75,7 +76,7 @@ public class ChooseCar extends AbstractAppState {
 		//info window first so the event listeners can delete it
 		Container infoWindow = new Container();
         this.app.getGuiNode().attachChild(infoWindow);
-        infoWindow.setLocalTranslation(H.screenTopLeft());
+        infoWindow.setLocalTranslation(H.screenTopLeft(app.getContext().getSettings()));
 		label = new Label(getCarInfoText(car));
         infoWindow.addChild(label, 0, 0);
 		
@@ -91,8 +92,8 @@ public class ChooseCar extends AbstractAppState {
                 public void execute( Button source ) {
                     car = c;
 
-                    cb.removeCar(0);
-    				cb.addCar(0, car, worldType.start, new Matrix3f(), true, null);
+                    cb.removeCar(cb.get(0));
+    				cb.addCar(car, worldType.start, new Matrix3f(), true, null);
     				
     				String carinfotext = getCarInfoText(car);
     				label.setText(carinfotext);
@@ -115,7 +116,7 @@ public class ChooseCar extends AbstractAppState {
         
         Vector3f size = new Vector3f(400,400,0);
 		graph = new PowerCurveGraph(this.app.getAssetManager(), this.cb.get(0), size);
-		graph.setLocalTranslation(H.screenBottomRight().subtract(size.add(5,-25,0)));
+		graph.setLocalTranslation(H.screenBottomRight(app.getContext().getSettings()).subtract(size.add(5,-25,0)));
 		this.app.getGuiNode().attachChild(graph);
 	}
 
@@ -135,11 +136,7 @@ public class ChooseCar extends AbstractAppState {
 	}
 
 	private String getCarInfoText(Car car) {
-				
-		Vector3f grav = new Vector3f();
-		((App)this.app).getPhysicsSpace().getGravity(grav);
-	
-		CarDataConst cd = car.get(grav);
+		CarDataConst cd = this.cb.get(0).getCarData();
 		String out = "Name: "+ car.name() + "\n";
 		Duo<Float, Float> data = cd.getMaxPower();
 		out += "Max Power: " + data.first + "kW? @ " + data.second + " rpm \n";

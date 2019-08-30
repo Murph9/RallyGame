@@ -23,8 +23,7 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Line;
-
-import game.App;
+import com.jme3.system.AppSettings;
 
 //Its short for help, name length was a concern
 public class H {
@@ -383,17 +382,17 @@ public class H {
 	}
 	
 	//TODO these need to take in Application
-	public static Vector3f screenTopLeft() {
-		return new Vector3f(0, App.CUR.getContext().getSettings().getHeight(), 0);
+	public static Vector3f screenTopLeft(AppSettings set) {
+		return new Vector3f(0, set.getHeight(), 0);
 	}
-	public static Vector3f screenTopRight() {
-		return new Vector3f(App.CUR.getContext().getSettings().getWidth(), App.CUR.getContext().getSettings().getHeight(), 0);
+	public static Vector3f screenTopRight(AppSettings set) {
+		return new Vector3f(set.getWidth(), set.getHeight(), 0);
 	}
-	public static Vector3f screenBottomRight() {
-		return new Vector3f(App.CUR.getContext().getSettings().getWidth(), App.CUR.getContext().getSettings().getHeight(), 0);
+	public static Vector3f screenBottomRight(AppSettings set) {
+		return new Vector3f(set.getWidth(), set.getHeight(), 0);
 	}
-	public static Vector3f screenMiddle() {
-		return new Vector3f(App.CUR.getContext().getSettings().getWidth()/2, App.CUR.getContext().getSettings().getHeight()/2, 0);
+	public static Vector3f screenMiddle(AppSettings set) {
+		return new Vector3f(set.getWidth()/2, set.getHeight()/2, 0);
 	}
 	
 	//http://stackoverflow.com/a/677248

@@ -27,19 +27,19 @@ public class DriveDev extends DriveBase {
 	@Override
 	public void initialize(AppStateManager stateManager, Application app) {
     	super.initialize(stateManager, app);
-    	
+		
     	//init input gui
 		carEditor = new CarEditor(app.getInputManager(), this.cb.get(0), (data) -> { reloadCar(data);}, (car) -> { return resetCar(car); });
-		carEditor.setLocalTranslation(H.screenTopLeft().add(0, -20, 0));
+		carEditor.setLocalTranslation(H.screenTopLeft(app.getContext().getSettings()).add(0, -20, 0));
 		this.app.getGuiNode().attachChild(carEditor);
 		
 		worldEditor = new WorldEditor((a) -> { reloadWorld(a); });
-		worldEditor.setLocalTranslation(H.screenTopRight().add(-worldEditor.width, 0, 0));
+		worldEditor.setLocalTranslation(H.screenTopRight(app.getContext().getSettings()).add(-worldEditor.width, 0, 0));
 		this.app.getGuiNode().attachChild(worldEditor);
 		
 		Vector3f size = new Vector3f(400,400,0);
 		wheelGraphs = new TractionCurveGraph(this.app.getAssetManager(), this.cb.get(0), size);
-		wheelGraphs.setLocalTranslation(H.screenBottomRight().subtract(size.add(-5,-25,0)));
+		wheelGraphs.setLocalTranslation(H.screenBottomRight(app.getContext().getSettings()).subtract(size.add(-5,-25,0)));
 		this.app.getGuiNode().attachChild(wheelGraphs);
 	}
 	
