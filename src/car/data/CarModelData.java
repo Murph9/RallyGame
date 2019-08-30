@@ -1,34 +1,23 @@
-package car;
+package car.data;
 
 import java.util.HashMap;
 
+import com.jme3.asset.AssetManager;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
-import game.App;
 import helper.Log;
 
 public class CarModelData {
-
-	private String carModel;
-	@SuppressWarnings("unused") //eventually...
-	private String wheelModel;
 	
-	//chassis data
 	private HashMap<CarPart, CarPartData> pieces;
-	private HashMap<String, CarPart> possibleParts;
 	
-	public CarModelData(String car, String wheel) {
-		this.carModel = car;
-		this.wheelModel = wheel;
+	public CarModelData(AssetManager am, String car, String wheel) {
 		this.pieces = new HashMap<>();
 		
-		this.possibleParts = CarPart.GetNames();
-		
-		//TODO maybe cache all car data, and load using the assetmanager in one step
-		Spatial rootSpat = App.CUR.getAssetManager().loadModel(carModel);
+		Spatial rootSpat = am.loadModel(car);
 		readInModelData(rootSpat);
 		
 		Log.p("Car part data for: '" + car + "'");
@@ -38,8 +27,10 @@ public class CarModelData {
 	private void readInModelData(Spatial s) {
 		if (s == null) return;
 		
+		HashMap<String, CarPart> possibleParts = CarPart.GetNames();
+
 		if (possibleParts.containsKey(s.getName())) {
-			pieces.put(possibleParts.get(s.getName()), MakeCPDFrom(s));
+			pieces.put(possibleParts.get(s.getName()), makeFrom(s));
 		}
 		
 		if (s instanceof Node) {
@@ -49,12 +40,16 @@ public class CarModelData {
 		}
 	}
 	
-	private CarPartData MakeCPDFrom(Spatial s) {
+	private CarPartData makeFrom(Spatial s) {
 		return new CarPartData(s.getLocalTranslation(), s.getLocalRotation(), s.getLocalScale());
 	}
 
 	//////////////
 	//get methods
+	public boolean hasCollision() {
+		return pieces.containsKey(CarPart.Collision);
+	}
+
 	public Vector3f getPosOf(CarPart part) {
 		if (pieces.containsKey(part)) {
 			return pieces.get(part).pos;
@@ -106,7 +101,8 @@ public class CarModelData {
 		Headlight_L("headlight"), //only one side
 		Taillight_L("taillight_l"), //only one side
 
-		Collision("collision")
+		Collision("collision") //model for collision in bullet physics (dynamic shapes were expensive)
+
 		//Please add more when needed
 		;
 		
