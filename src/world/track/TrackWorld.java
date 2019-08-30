@@ -298,12 +298,12 @@ public class TrackWorld extends World {
 	
 	@Override
 	public void update(float tpf) {
-		
-		if (this.trackSegments != null && ((App)this.app).drive != null && ((App)this.app).drive.cb.get(0) != null && DEBUG) {
+		App a = (App)this.app;
+		if (this.trackSegments != null && a.drive != null && a.drive.cb.get(0) != null && DEBUG) {
 			//hack to see if the bezier curve stuff works
-			Vector3f pos = getClosestPointTo(this.trackSegments, normalizeHeightIn(((App)this.app).drive.cb.get(0).getPhysicsLocation()));
+			Vector3f pos = getClosestPointTo(this.trackSegments, normalizeHeightIn(a.drive.cb.get(0).getPhysicsLocation()));
 			HelperObj.use(this.rootNode, "closestpointtocurve", 
-					H.makeShapeBox(this.app.getAssetManager(), ColorRGBA.LightGray, unnormalizeHeightIn(pos), 1));
+					H.makeShapeBox(a.getAssetManager(), ColorRGBA.LightGray, unnormalizeHeightIn(pos), 1));
 		}
 	}
 	@Override

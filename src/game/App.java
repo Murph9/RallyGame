@@ -83,15 +83,11 @@ public class App extends SimpleApplication {
 		CUR = this;
 
 		boolean ignoreWarnings = false;
-		boolean ignoreOthers = true;
 		if (ignoreWarnings) {
 			Logger.getLogger("com.jme3").setLevel(Level.SEVERE); //remove warnings here
 			Log.e("!!!! IGNORING IMPORTANT WARNINGS !!!!!");
 		}
-		if (ignoreOthers) {
-			Logger.getLogger("com.jme3.scene.plugins.").setLevel(Level.SEVERE);//remove warnings here
-			Log.e("!!!! IGNORING (some) IMPORTANT WARNINGS !!!!!");
-		}
+
 		inputManager.deleteMapping(SimpleApplication.INPUT_MAPPING_EXIT);
 		
 		//initialize Lemur (the GUI manager)
