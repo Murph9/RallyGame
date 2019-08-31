@@ -56,27 +56,10 @@ public class App extends SimpleApplication {
 
 	public static final Vector3f GRAVITY = new Vector3f(0, -9.81f, 0); // yay its down
 	public static final Boolean IF_DEBUG = false;
+	
 	public static App CUR;
 
-	private Start start;
-	private ChooseCar chooseCar;
-	private ChooseMap chooseMap;
-	
-	public DriveBase drive;
-
-	private Car car;
-	private Car them;
-	private World world;
-	private void loadDefaults() {
-		car = Car.Runner;
-		them = Car.Rally;
-		world = new StaticWorldBuilder(StaticWorld.track2);
-		//world alernatives:
-		//new HighwayWorld();
-		//new TrackWorld();
-		//new StaticWorldBuilder(StaticWorld.track2);
-		//DynamicType.Simple.getBuilder();
-	}
+	private AppFlow flow;
 
 	public App() {
 		super(new ParticleAtmosphere()
@@ -89,7 +72,7 @@ public class App extends SimpleApplication {
 
 	@Override
 	public void simpleInitApp() {
-		CUR = this;
+		CUR = this; //TODO remove
 
 		boolean ignoreWarnings = false;
 		if (ignoreWarnings) {
@@ -119,8 +102,7 @@ public class App extends SimpleApplication {
 
 		///////
 		//Game logic start:
-		start = new Start();
-		getStateManager().attach(start);
+		flow = new AppFlow(this);
 	}
 	
 	@Override
@@ -137,111 +119,6 @@ public class App extends SimpleApplication {
 		boolean printAppState = false;
 		if (printAppState)
 			Log.p(a);
-	}
-	
-	public void startDev(AppState state) {
-		getStateManager().detach(state);
-		
-		drive = new DriveDev(Car.Runner, new StaticWorldBuilder(StaticWorld.track2));
-		getStateManager().attach(drive);
-	}
-	
-	public void startCrash(AppState state) {
-		getStateManager().detach(state);
-		
-		drive = new DriveCrash(new StaticWorldBuilder(StaticWorld.duct2));
-		getStateManager().attach(drive);
-	}
-	
-	public void startMainRoad(AppState state) {
-		getStateManager().detach(state);
-		
-		drive = new DriveMainRoadGetaway();
-		getStateManager().attach(drive);
-	}
-	
-	
-	public void startAI(AppState state) {
-		getStateManager().detach(state);
-		
-		loadDefaults();
-		if (car == null || world == null) {
-			System.err.println("Defaults not set.");
-			System.exit(1);
-		}
-
-		drive = new DriveAI(car, Car.Runner, world);
-		getStateManager().attach(drive);
-	}
-	public void startRace(AppState state) {
-		getStateManager().detach(state); 
-		getStateManager().attach(new DriveRace()); //TODO bit of a hack
-	}
-	
-	public void startFast(AppState state) {
-		//use the default option and just init straight away
-		getStateManager().detach(state);
-		
-		loadDefaults(); //load default values
-		
-		if (car == null || world == null) {
-			System.err.println("Main.startFast(): Defaults not set.");
-			System.exit(1);
-		}
-		
-		startDrive(car, world);
-	}
-	
-	//HERE is the logic for the app progress.
-	// its the thing you call when the app state is done with itself
-	public void next(AppState app) {
-		AppStateManager state = getStateManager();
-		
-		if (app instanceof Start) {
-			state.detach(start);
-			startChooseCar();
-
-		} else if (app instanceof ChooseCar) {
-			state.detach(chooseCar);
-			startChooseMap();
-			
-		} else if (app instanceof ChooseMap) {
-			state.detach(chooseMap);
-			
-			startDrive(chooseCar.getCarType(), chooseMap.getWorld());
-			
-		} else if (app instanceof DriveBase) {
-			state.detach(drive);
-			drive = null;
-			
-			//then start again
-			start = new Start();
-			state.attach(start);
-		} else {
-			Log.p("Unexpected state called me '" + app + "' - rally.next()");
-			//but just start again anyway
-			state.detach(app);
-			drive = null;
-			start = new Start();
-			state.attach(start);
-		}
-	}
-	
-	private void startChooseCar() {
-		chooseCar = new ChooseCar();
-		getStateManager().attach(chooseCar);
-	}
-	
-	private void startChooseMap() {
-		chooseMap = new ChooseMap();
-		getStateManager().attach(chooseMap);
-	}
-	
-	private void startDrive(Car car, World world) {
-		if (drive != null) return; //not sure what this is actually hoping to stop
-				
-		drive = new DriveBase(car, world);
-		getStateManager().attach(drive);
 	}
 
 	/////////////////////

@@ -1,19 +1,22 @@
 package drive;
 
+import world.StaticWorld;
+import world.StaticWorldBuilder;
 import world.World;
 
 import com.jme3.app.Application;
 
 import car.data.Car;
+import game.IDriveDone;
 
 public class DriveAI extends DriveBase {
 	
 	private Car them;
 	private int themCount;
 
-	public DriveAI(Car car, Car them, World world) {
-    	super(car, world);
-    	this.them = them;
+	public DriveAI(IDriveDone done) {
+    	super(done, Car.Runner, (World)new StaticWorldBuilder(StaticWorld.track2));
+    	this.them = Car.Runner;
     	this.themCount = 3;
     }
 	

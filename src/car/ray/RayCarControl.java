@@ -19,6 +19,7 @@ import com.jme3.scene.Node;
 import car.JoystickEventListener;
 import car.MyKeyListener;
 import car.ai.CarAI;
+import drive.DriveBase;
 import game.App;
 import helper.H;
 import helper.Log;
@@ -252,18 +253,19 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 			w.radSec = 0; //stop rotation of the wheels
 		}
 		
-		if (app.drive == null)
+		DriveBase drive = this.app.getStateManager().getState(DriveBase.class);
+		if (drive == null)
 			return;
 		
-		Vector3f pos = app.drive.world.getStartPos();
-		Matrix3f rot = app.drive.world.getStartRot();
+		Vector3f pos = drive.world.getStartPos();
+		Matrix3f rot = drive.world.getStartRot();
 		if (pos != null && rot != null) {
 			setPhysicsLocation(pos);
 			setPhysicsRotation(rot);
 			setAngularVelocity(new Vector3f());
 		}
 		
-		app.drive.reset(); //TODO this is a hack, the world state should be listening to the event instead
+		drive.reset(); //TODO this is a hack, the world state should be listening to the event instead
 	}
 	private void rotate180() {
 		rbc.setPhysicsRotation(new Quaternion().fromAngleAxis(FastMath.PI, new Vector3f(0,1,0)));

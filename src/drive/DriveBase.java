@@ -13,10 +13,12 @@ import car.*;
 import car.data.Car;
 import car.ray.RayCarControl;
 import game.App;
+import game.IDriveDone;
 import helper.Log;
 
 public class DriveBase extends BaseAppState {
 	
+	private final IDriveDone done;
 	public DriveMenu menu;
 	public World world;
 
@@ -31,8 +33,9 @@ public class DriveBase extends BaseAppState {
 	//debug stuff
 	public boolean ifDebug = false;
 	
-    public DriveBase(Car car, World world) {
-    	super();
+    public DriveBase(IDriveDone done, Car car, World world) {
+		super();
+		this.done = done;
     	this.car = car;
     	this.world = world;
     	this.menu = new DriveMenu(this);
@@ -91,7 +94,7 @@ public class DriveBase extends BaseAppState {
 	}
 	
 	public void next() {
-		((App)getApplication()).next(this);
+		this.done.done(this);
 	}
 	
 	public void reset() {

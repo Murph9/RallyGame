@@ -1,6 +1,7 @@
 package drive;
 
-import world.World;
+import world.StaticWorld;
+import world.StaticWorldBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +10,7 @@ import com.jme3.math.Vector3f;
 
 import car.data.Car;
 import car.ray.RayCarControl;
+import game.IDriveDone;
 import helper.H;
 
 public class DriveCrash extends DriveBase {
@@ -26,8 +28,8 @@ public class DriveCrash extends DriveBase {
 	
 	private int frameCount = 0; //global frame timer
 
-	public DriveCrash (World world) {
-    	super(Car.Runner, world);
+	public DriveCrash(IDriveDone done) {
+    	super(done, Car.Runner, new StaticWorldBuilder(StaticWorld.duct2));
     	this.them = Car.Rally;
     	this.maxCount = 10;
     	this.totalKilled = 0;

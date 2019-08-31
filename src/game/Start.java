@@ -20,6 +20,7 @@ import car.CarBuilder;
 import car.ai.DriveAlongAI;
 import car.data.Car;
 import car.ray.RayCarControl;
+import drive.IFlow;
 import world.wp.DefaultBuilder;
 import world.wp.WP.DynamicType;
 
@@ -29,6 +30,8 @@ public class Start extends BaseAppState {
 
 	//TODO maybe add some other cars to preview
 
+	private final IFlow flow;
+
 	private DefaultBuilder world;
 
 	private CarBuilder cb;
@@ -37,8 +40,9 @@ public class Start extends BaseAppState {
 	private StartCamera camera;
 	private Container myWindow;
 	
-	public Start() {
+	public Start(IFlow flow) {
 		super();
+		this.flow = flow;
 
 		carType = Car.Runner;
 		world = DynamicType.Valley.getBuilder();
@@ -73,7 +77,7 @@ public class Start extends BaseAppState {
 		
         myWindow.addChild(new Label("Main Menu"));
 		
-		Map<String, Runnable> buttonActions = generateButtonMappings(myapp);
+		Map<String, Runnable> buttonActions = generateButtonMappings(flow);
 		
 		for (Entry<String, Runnable> action: buttonActions.entrySet()) {
 			final Runnable method = action.getValue();
@@ -120,16 +124,11 @@ public class Start extends BaseAppState {
 		world = null;
 	}
 
-	private Map<String, Runnable> generateButtonMappings(App myapp) {
-
+	private Map<String, Runnable> generateButtonMappings(IFlow flow) {
 		Map<String, Runnable> buttonActions = new LinkedHashMap<String, Runnable>();
-		buttonActions.put("Start Fast", () -> { myapp.startFast(this); });
-		buttonActions.put("Start", () -> { myapp.next(this); });
-		buttonActions.put("Start AI", () -> { myapp.startAI(this); });
-		buttonActions.put("Start Crash", () -> { myapp.startCrash(this); });
-		buttonActions.put("Start Getaway", () -> { myapp.startMainRoad(this); });
-		buttonActions.put("Start Race", () -> { myapp.startRace(this); });
-		buttonActions.put("Start Dev", () -> { myapp.startDev(this); });
+		for (AppFlow.StartType t: AppFlow.StartType.values()) {
+			buttonActions.put(t.name(), () -> { flow.startCallback(t); });
+		}
 		return buttonActions;
 	}
 

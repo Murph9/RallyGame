@@ -1,5 +1,7 @@
 package drive;
 
+import world.StaticWorld;
+import world.StaticWorldBuilder;
 import world.World;
 import world.WorldEditor;
 
@@ -11,6 +13,7 @@ import car.*;
 import car.data.Car;
 import car.ray.CarDataConst;
 import car.ray.RayCarControl;
+import game.IDriveDone;
 import helper.H;
 
 
@@ -20,8 +23,8 @@ public class DriveDev extends DriveBase {
 	private WorldEditor worldEditor;
 	private TractionCurveGraph wheelGraphs;
 	
-	public DriveDev(Car car, World world) {
-    	super(car, world);
+	public DriveDev(IDriveDone done) {
+    	super(done, Car.Rally, new StaticWorldBuilder(StaticWorld.track2));
     }
 	
 	@Override

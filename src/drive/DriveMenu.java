@@ -13,8 +13,8 @@ import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
-import game.App;
 import helper.H;
+import helper.Log;
 
 public class DriveMenu extends BaseAppState {
 
@@ -94,6 +94,9 @@ public class DriveMenu extends BaseAppState {
 	}
 
 	public void togglePause() {
+		if (drive != null)
+			return;
+			
 		Node guiRoot = ((SimpleApplication)getApplication()).getGuiNode();
 		if (guiRoot.hasChild(pauseMenu)) {
 			guiRoot.detachChild(pauseMenu);
@@ -124,8 +127,9 @@ public class DriveMenu extends BaseAppState {
 	public void mainMenu() {
 		if (drive != null)
 			drive.next();
-		else
-			((App)getApplication()).next(null);
+		else {
+			Log.p("!!!unknown state");
+		}
 	}
 
 	public void update(float tpf) {

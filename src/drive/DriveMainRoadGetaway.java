@@ -18,6 +18,7 @@ import car.ai.CarAI;
 import car.ai.DriveAlongAI;
 import car.data.Car;
 import car.ray.RayCarControl;
+import game.IDriveDone;
 import helper.H;
 import world.wp.DefaultBuilder;
 import world.wp.WP.DynamicType;
@@ -56,8 +57,8 @@ public class DriveMainRoadGetaway extends DriveBase {
 	private Label scoreLabel;
 	private Label lifeLabel;
 	
-	public DriveMainRoadGetaway() {
-		super(Car.Runner, DynamicType.MainRoad.getBuilder());
+	public DriveMainRoadGetaway(IDriveDone done) {
+		super(done, Car.Runner, DynamicType.MainRoad.getBuilder());
 		
 		maxCount = 2 + TRAFFIC_COUNT; // me chaser + x
 		hunterType = Car.Rocket;

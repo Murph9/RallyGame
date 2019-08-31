@@ -28,6 +28,8 @@ import world.World;
 
 public class ChooseCar extends BaseAppState {
 
+	private final IChooseStuff choose;
+
 	private World world;
 	private StaticWorld worldType;
 
@@ -41,7 +43,8 @@ public class ChooseCar extends BaseAppState {
 	
 	private PowerCurveGraph graph;
 
-	public ChooseCar() {
+	public ChooseCar(IChooseStuff choose) {
+		this.choose = choose;
 		worldType = StaticWorld.garage2;
 		car = Car.values()[0];
 	}
@@ -169,10 +172,6 @@ public class ChooseCar extends BaseAppState {
 	//UI stuff
 	public void chooseCar() {
 		if (car == null) { Log.p("no return value for ChooseCar()"); };
-		((App)getApplication()).next(this);
+		choose.chooseCar(car);
 	}
-	public Car getCarType() {
-		return car;
-	}
-
 }

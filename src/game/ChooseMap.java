@@ -23,7 +23,13 @@ public class ChooseMap extends BaseAppState {
 	private static WorldType worldType = WorldType.NONE;
 	private static World world = null;
 	
+	private final IChooseStuff choose;
+
 	private BasicCamera camera;
+
+	public ChooseMap(IChooseStuff choose) {
+		this.choose = choose;
+	}
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -116,16 +122,15 @@ public class ChooseMap extends BaseAppState {
 	//UI stuff
 	public void chooseMap() {
 		if (world == null) { Log.e("no return value for ChooseMap()"); return; }
-		((App)getApplication()).next(this);
+		choose.chooseMap(getWorld());
 	}
-	public World getWorld() {
+	private World getWorld() {
 		World newWorld = null;
 		try {
 			newWorld = world.copy();
 			getStateManager().detach(world);
 		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
-			System.exit(1);
 		}
 		world = null;
 		return newWorld;
