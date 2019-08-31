@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
+import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
@@ -23,7 +24,7 @@ import car.ray.RayCarControl;
 import world.wp.DefaultBuilder;
 import world.wp.WP.DynamicType;
 
-public class Start extends IStart {
+public class Start extends BaseAppState {
 
 	//TODO version number on screen somewhere
 

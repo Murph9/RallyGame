@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
@@ -79,7 +80,7 @@ public class DriveMainRoadGetaway extends DriveBase {
 		
 		AppSettings set = app.getContext().getSettings();
 		display.setLocalTranslation(new Vector3f(set.getWidth() / 2, set.getHeight(), 0));
-		this.app.getGuiNode().attachChild(display);
+		((SimpleApplication)app).getGuiNode().attachChild(display);
 	}
 	
 	@Override

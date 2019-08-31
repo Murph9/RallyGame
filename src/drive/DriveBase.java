@@ -4,7 +4,6 @@ import world.World;
 import world.WorldType;
 
 import com.jme3.app.Application;
-import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.BulletAppState;
@@ -18,8 +17,6 @@ import helper.Log;
 
 public class DriveBase extends BaseAppState {
 	
-	public SimpleApplication app;
-
 	public DriveMenu menu;
 	public World world;
 
@@ -94,7 +91,7 @@ public class DriveBase extends BaseAppState {
 	}
 	
 	public void next() {
-		((App)app).next(this);
+		((App)getApplication()).next(this);
 	}
 	
 	public void reset() {
@@ -124,21 +121,22 @@ public class DriveBase extends BaseAppState {
 	
 	protected void reInitPlayerCar(Car car) {
 		//remove camera and ui
-		app.getStateManager().detach(camera);
-		app.getInputManager().removeRawInputListener(camera);
+		AppStateManager sm = getStateManager();
+		sm.detach(camera);
+		getApplication().getInputManager().removeRawInputListener(camera);
 		
-		app.getStateManager().detach(uiNode);
+		sm.detach(uiNode);
 		
 		this.cb.removeCar(cb.get(0));
 
 		RayCarControl c = this.cb.addCar(car, world.getStartPos(), world.getStartRot(), true, null); 
 		
 		//initCamera and ui again
-		camera = new CarCamera("Camera", app.getCamera(), c);
-		app.getStateManager().attach(camera);
-		app.getInputManager().addRawInputListener(camera);
+		camera = new CarCamera("Camera", getApplication().getCamera(), c);
+		sm.attach(camera);
+		getApplication().getInputManager().addRawInputListener(camera);
 		
 		uiNode = new CarUI(c);
-		app.getStateManager().attach(uiNode);
+		sm.attach(uiNode);
 	}
 }

@@ -11,6 +11,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.app.StatsAppState;
 import com.jme3.app.state.AppState;
 import com.jme3.app.state.AppStateManager;
+import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.BulletAppState.ThreadingType;
 import com.jme3.bullet.objects.PhysicsRigidBody;
@@ -128,7 +129,8 @@ public class App extends SimpleApplication {
 			System.exit(342);
 		}
 		
-		IStart a = getStateManager().getState(IStart.class);
+		//TODO this can check if a state is active
+		BaseAppState a = getStateManager().getState(BaseAppState.class);
 		Log.p(a);
 	}
 	

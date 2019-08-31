@@ -4,6 +4,7 @@ import world.World;
 import world.WorldEditor;
 
 import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 import com.jme3.math.Vector3f;
 
 import car.*;
@@ -30,16 +31,16 @@ public class DriveDev extends DriveBase {
     	//init input gui
 		carEditor = new CarEditor(app.getInputManager(), this.cb.get(0), (data) -> { reloadCar(data);}, (car) -> { return resetCar(car); });
 		carEditor.setLocalTranslation(H.screenTopLeft(app.getContext().getSettings()).add(0, -20, 0));
-		this.app.getGuiNode().attachChild(carEditor);
+		((SimpleApplication)app).getGuiNode().attachChild(carEditor);
 		
 		worldEditor = new WorldEditor((a) -> { reloadWorld(a); });
 		worldEditor.setLocalTranslation(H.screenTopRight(app.getContext().getSettings()).add(-worldEditor.width, 0, 0));
-		this.app.getGuiNode().attachChild(worldEditor);
+		((SimpleApplication)app).getGuiNode().attachChild(worldEditor);
 		
 		Vector3f size = new Vector3f(400,400,0);
-		wheelGraphs = new TractionCurveGraph(this.app.getAssetManager(), this.cb.get(0), size);
+		wheelGraphs = new TractionCurveGraph(app.getAssetManager(), this.cb.get(0), size);
 		wheelGraphs.setLocalTranslation(H.screenBottomRight(app.getContext().getSettings()).subtract(size.add(-5,-25,0)));
-		this.app.getGuiNode().attachChild(wheelGraphs);
+		((SimpleApplication)app).getGuiNode().attachChild(wheelGraphs);
 	}
 	
 	public void update(float tpf) {
@@ -60,9 +61,9 @@ public class DriveDev extends DriveBase {
 	
 	public void reloadWorld(World world) {
 		//reload new world
-		this.app.getStateManager().detach(this.world);
+		getStateManager().detach(this.world);
 		this.world = world;
-		this.app.getStateManager().attach(this.world);
+		getStateManager().attach(this.world);
 		
 		//reset car
 		this.cb.get(0).setPhysicsLocation(world.getStartPos());
@@ -73,9 +74,10 @@ public class DriveDev extends DriveBase {
 	
 	@Override
 	public void cleanup(Application app) {
+		((SimpleApplication)app).getGuiNode().detachChild(carEditor);
+		((SimpleApplication)app).getGuiNode().detachChild(worldEditor);
+		((SimpleApplication)app).getGuiNode().detachChild(wheelGraphs);
+
 		super.cleanup(app);
-		this.app.getGuiNode().detachChild(carEditor);
-		this.app.getGuiNode().detachChild(worldEditor);
-		this.app.getGuiNode().detachChild(wheelGraphs);
 	}
 }
