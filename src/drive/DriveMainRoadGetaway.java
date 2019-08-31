@@ -18,7 +18,6 @@ import car.ai.CarAI;
 import car.ai.DriveAlongAI;
 import car.data.Car;
 import car.ray.RayCarControl;
-import game.App;
 import helper.H;
 import world.wp.DefaultBuilder;
 import world.wp.WP.DynamicType;
@@ -38,6 +37,8 @@ public class DriveMainRoadGetaway extends DriveBase {
 	private static final int TRAFFIC_COUNT = 60;
 	private static final float TRAFFIC_BUFFER = 100;
 	private static final float HUNTER_BUFFER = 25;
+
+	private long frameCount;
 
 	private final Car hunterType;
 	private final Car[] trafficTypes;
@@ -86,6 +87,8 @@ public class DriveMainRoadGetaway extends DriveBase {
 	@Override
 	public void update(float tpf) {
 		super.update(tpf);
+
+		frameCount++;
 		
 		RayCarControl player = this.cb.get(0);
 		RayCarControl chaser = this.cb.get(1);
@@ -110,7 +113,7 @@ public class DriveMainRoadGetaway extends DriveBase {
 			return;
 
 		//spawn more if required
-		if (this.cb.getCount() < maxCount && App.getFrameCount() % 30 == 0) {
+		if (this.cb.getCount() < maxCount && frameCount % 30 == 0) {
 			final float z = nextZOff();
 			final boolean spawnPlayerDirection = spawnPlayerDirection();
 			

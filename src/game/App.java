@@ -54,10 +54,9 @@ import world.wp.WP.DynamicType;
 @SuppressWarnings("unused")
 public class App extends SimpleApplication {
 
+	public static final Vector3f GRAVITY = new Vector3f(0, -9.81f, 0); // yay its down
 	public static final Boolean IF_DEBUG = false;
 	public static App CUR;
-	private static int frameCount = 0; //global frame timer
-	public static int getFrameCount() { return frameCount; } //useful for many
 
 	private Start start;
 	private ChooseCar chooseCar;
@@ -100,6 +99,7 @@ public class App extends SimpleApplication {
 		Logger.getLogger("com.jme3.scene.plugins.blender").setLevel(Level.WARNING); //ignore blender warnings
 
 		inputManager.setCursorVisible(true);
+		inputManager.deleteMapping(INPUT_MAPPING_EXIT); //no esc close pls
 
 		//initialize Lemur (the GUI manager)
 		GuiGlobals.initialize(this);
@@ -115,7 +115,7 @@ public class App extends SimpleApplication {
 		bullet.setThreadingType(ThreadingType.PARALLEL);
 		getStateManager().attach(bullet);
 		bullet.getPhysicsSpace().setAccuracy(1f / 120f); // physics rate
-		bullet.getPhysicsSpace().setGravity(new Vector3f(0, -9.81f, 0)); // yay its down
+		bullet.getPhysicsSpace().setGravity(GRAVITY);
 
 		///////
 		//Game logic start:
@@ -131,10 +131,6 @@ public class App extends SimpleApplication {
 			Log.e("Vector3f.ZERO is not zero!!!!, considered a fatal error.");
 			System.exit(342);
 		}
-		
-		//update audio location
-		listener.setLocation(cam.getLocation());
-		listener.setRotation(cam.getRotation());
 
 		//TODO this can check if a state is active
 		BaseAppState a = getStateManager().getState(BaseAppState.class);
@@ -254,13 +250,6 @@ public class App extends SimpleApplication {
 	}
 	public PhysicsSpace getPhysicsSpace() {
 		return getStateManager().getState(BulletAppState.class).getPhysicsSpace();
-	}
-
-	@Override
-	public void simpleUpdate(float tpf) {
-		frameCount++; //global frame timer update
-
-		super.simpleUpdate(tpf);
 	}
 
 	@Override

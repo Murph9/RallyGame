@@ -9,7 +9,6 @@ import com.jme3.math.Vector3f;
 
 import car.data.Car;
 import car.ray.RayCarControl;
-import game.App;
 import helper.H;
 
 public class DriveCrash extends DriveBase {
@@ -24,6 +23,8 @@ public class DriveCrash extends DriveBase {
 	private int maxCount;
 	
 	private int totalKilled;
+	
+	private int frameCount = 0; //global frame timer
 
 	public DriveCrash (World world) {
     	super(Car.Runner, world);
@@ -34,8 +35,9 @@ public class DriveCrash extends DriveBase {
 	
 	public void update(float tpf) {
 		super.update(tpf);
+		frameCount++;
 		
-		if (this.cb.getCount() < maxCount && App.getFrameCount() % 60 == 0) {
+		if (this.cb.getCount() < maxCount && frameCount % 60 == 0) {
 			Vector3f spawn = H.randFromArray(spawns);
 			this.cb.addCar(them, spawn, world.getStartRot(), false, null);
 		}
