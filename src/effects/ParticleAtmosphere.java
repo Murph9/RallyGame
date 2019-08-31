@@ -64,11 +64,12 @@ public class ParticleAtmosphere extends BaseAppState {
 		if (prevPos == null)
 			prevPos = new Vector3f();
 		
+		Vector3f location = cam.getLocation();
 		//get vel of node
-		float speed = cam.getLocation().subtract(prevPos).length() / tpf;
+		float speed = location.subtract(prevPos).length() / tpf;
 		particles.setParticlesPerSec(PARTICLE_MULT*speed);
 		
-		prevPos = cam.getLocation().clone();
+		prevPos = location.clone();
 		particles.setLocalTranslation(prevPos);
 	}
 

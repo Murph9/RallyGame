@@ -6,12 +6,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jme3.app.BasicProfilerState;
+import com.jme3.app.DebugKeysAppState;
 import com.jme3.app.DetailedProfilerState;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.StatsAppState;
 import com.jme3.app.state.AppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.app.state.BaseAppState;
+import com.jme3.audio.AudioListenerState;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.BulletAppState.ThreadingType;
 import com.jme3.bullet.objects.PhysicsRigidBody;
@@ -79,6 +81,8 @@ public class App extends SimpleApplication {
 
 	public App() {
 		super(new ParticleAtmosphere()
+				, new AudioListenerState()
+				, new StatsAppState()
 				, new FilterManager()
 				//, new DetailedProfilerState() //profiling in jme 3.2: TODO add physics engine stuff using custom sections
 				);
@@ -93,8 +97,8 @@ public class App extends SimpleApplication {
 			Logger.getLogger("com.jme3").setLevel(Level.SEVERE); //remove warnings here
 			Log.e("!!!! IGNORING IMPORTANT WARNINGS !!!!!");
 		}
+		Logger.getLogger("com.jme3.scene.plugins.blender").setLevel(Level.WARNING); //ignore blender warnings
 
-		inputManager.deleteMapping(SimpleApplication.INPUT_MAPPING_EXIT);
 		inputManager.setCursorVisible(true);
 
 		//initialize Lemur (the GUI manager)
@@ -103,7 +107,6 @@ public class App extends SimpleApplication {
 		LemurGuiStyle.load(assetManager);
 		
 
-		///////
 		//Init the Physics space with better defaults
 		//BulletAppState needs to wait until after the app is initialised, so can't be called from the constructor
 		BulletAppState bullet = new BulletAppState();
