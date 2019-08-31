@@ -283,7 +283,7 @@ public class HighwayWorld extends World {
 		this.rootNode.detachAllChildren();
 		this.terrain.close();
 		this.tM.cleanup();
-		app.getStateManager().detach(this.terrain);
+		getStateManager().detach(this.terrain);
 
 		super.cleanup(app);
 	}

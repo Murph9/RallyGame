@@ -56,10 +56,10 @@ public class ChooseCar extends BaseAppState {
 		Matrix3f dir = new Matrix3f();
 
 		world = new StaticWorldBuilder(worldType);
-		app.getStateManager().attach(world);
+		getStateManager().attach(world);
 		
 		cb = new CarBuilder((App)app);
-		app.getStateManager().attach(cb);
+		getStateManager().attach(cb);
 		
 		cb.addCar(car, start, dir, true, null);
 
@@ -143,16 +143,16 @@ public class ChooseCar extends BaseAppState {
 
 	@Override
 	public void cleanup(Application app) {
-		app.getStateManager().detach(cb);
+		getStateManager().detach(cb);
 		cb = null;
 		
-		app.getStateManager().detach(world);
+		getStateManager().detach(world);
 		world = null;
 		
-		app.getStateManager().detach(camera);
+		getStateManager().detach(camera);
 		camera = null;
 		
-		((SimpleApplication)app).getGuiNode().detachChild(graph);
+		graph.removeFromParent();
 		graph = null;
 	}
 

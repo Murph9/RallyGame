@@ -20,8 +20,6 @@ import world.wp.WP.DynamicType;
 
 public class ChooseMap extends BaseAppState {
 
-	private SimpleApplication app;
-
 	private static WorldType worldType = WorldType.NONE;
 	private static World world = null;
 	
@@ -32,12 +30,12 @@ public class ChooseMap extends BaseAppState {
 	public void initialize(Application app) {
 		getState(BulletAppState.class).setEnabled(true);
 		
-		camera = new BasicCamera("Camera", this.app.getCamera(), new Vector3f(-70,50,0), new Vector3f(20,1,0));
-		this.app.getStateManager().attach(camera);
+		camera = new BasicCamera("Camera", app.getCamera(), new Vector3f(-70,50,0), new Vector3f(20,1,0));
+		getStateManager().attach(camera);
 		
 		//init gui
 		Container myWindow = new Container();
-		this.app.getGuiNode().attachChild(myWindow);
+		((SimpleApplication)app).getGuiNode().attachChild(myWindow);
 		myWindow.setLocalTranslation(H.screenTopLeft(app.getContext().getSettings()));
 		
 		//these values are not x and y because they are causing confusion
@@ -101,9 +99,9 @@ public class ChooseMap extends BaseAppState {
 
 	@Override
 	public void cleanup(Application app) {
-		this.app.getStateManager().detach(camera);
+		getStateManager().detach(camera);
 		camera = null;
-		this.app.getStateManager().detach(world);
+		getStateManager().detach(world);
 		world = null;
 	}
 
@@ -118,13 +116,13 @@ public class ChooseMap extends BaseAppState {
 	//UI stuff
 	public void chooseMap() {
 		if (world == null) { Log.e("no return value for ChooseMap()"); return; }
-		((App)this.app).next(this);
+		((App)getApplication()).next(this);
 	}
 	public World getWorld() {
 		World newWorld = null;
 		try {
 			newWorld = world.copy();
-			this.app.getStateManager().detach(world);
+			getStateManager().detach(world);
 		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -135,7 +133,7 @@ public class ChooseMap extends BaseAppState {
 
 	public void setWorld(String typeStr, String subType) {
 		if (world != null && world.isInitialized()) {
-			this.app.getStateManager().detach(world);
+			getStateManager().detach(world);
 			world = null;
 		}
 		worldType = WorldType.valueOf(WorldType.class, typeStr);
@@ -176,6 +174,6 @@ public class ChooseMap extends BaseAppState {
 				return;
 		}
 		
-		this.app.getStateManager().attach(world);
+		getStateManager().attach(world);
 	}
 }

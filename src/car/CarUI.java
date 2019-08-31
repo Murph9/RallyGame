@@ -120,7 +120,7 @@ public class CarUI extends BaseAppState {
 		i.addListener(actionListener, "Telemetry");
 		
 		telemetry = new CarUITelemetry(p);
-		app.getStateManager().attach(telemetry);		
+		getStateManager().attach(telemetry);		
 	}
 
 	private void makeSpeedo(AssetManager am, AppSettings settings) {
@@ -353,8 +353,8 @@ public class CarUI extends BaseAppState {
 		i.deleteMapping("Telemetry");
 		i.removeListener(actionListener);
 		
-		((SimpleApplication)app).getGuiNode().detachChild(rootNode);
-		((SimpleApplication)app).getStateManager().detach(telemetry);
+		rootNode.removeFromParent();
+		getStateManager().detach(telemetry);
 	}
 
 	@Override

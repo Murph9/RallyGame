@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.jme3.app.Application;
-import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.BulletAppState;
@@ -50,11 +49,11 @@ public class Start extends BaseAppState {
 	public void initialize(Application app) {
 		App myapp = ((App) app);
 
-		app.getStateManager().attach(world);
+		getStateManager().attach(world);
 		
 		// build player
 		this.cb = new CarBuilder(myapp);
-		app.getStateManager().attach(cb);
+		getStateManager().attach(cb);
 		RayCarControl car = cb.addCar(this.carType, world.getStartPos(), world.getStartRot(), true, null);
 
 		//attach basic ai, for the view
@@ -63,13 +62,13 @@ public class Start extends BaseAppState {
 		car.attachAI(ai, true);
 		
 		this.camera = new StartCamera("start camera", app.getCamera(), car);
-		app.getStateManager().attach(this.camera);
+		getStateManager().attach(this.camera);
 		
 		getState(BulletAppState.class).setEnabled(true);
 
 		//UI
 		myWindow = new Container();
-		((SimpleApplication)app).getGuiNode().attachChild(myWindow);
+		myapp.getGuiNode().attachChild(myWindow);
 		myWindow.setLocalTranslation(300, 300, 0);
 		
         myWindow.addChild(new Label("Main Menu"));
@@ -107,17 +106,17 @@ public class Start extends BaseAppState {
 	public void cleanup(Application app) {
 		getState(BulletAppState.class).setEnabled(false);
 
-		app.getStateManager().detach(camera);
+		getStateManager().detach(camera);
 		camera = null;
 		
-		((SimpleApplication)app).getRootNode().detachChild(myWindow);
+		myWindow.removeFromParent();
 		myWindow = null;
 		
 		cb.removeAll();
-		app.getStateManager().detach(cb);
+		getStateManager().detach(cb);
 		cb = null;
 		
-		app.getStateManager().detach(world);
+		getStateManager().detach(world);
 		world = null;
 	}
 

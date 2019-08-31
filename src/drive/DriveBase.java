@@ -102,19 +102,19 @@ public class DriveBase extends BaseAppState {
 	public void cleanup(Application app) {
 		Log.p("cleaning drive class");
 		
-		app.getStateManager().detach(cb);
+		getStateManager().detach(cb);
 		cb = null;
 		
-		app.getStateManager().detach(menu);
+		getStateManager().detach(menu);
 		menu = null;
 		
-		app.getStateManager().detach(uiNode);
+		getStateManager().detach(uiNode);
 		uiNode = null;
 		
-		app.getStateManager().detach(world);
+		getStateManager().detach(world);
 		world = null;
 		
-		app.getStateManager().detach(camera);
+		getStateManager().detach(camera);
 		app.getInputManager().removeRawInputListener(camera);
 		camera = null;
 	}

@@ -32,7 +32,7 @@ public class Main {
 			app.setShowSettings(false);
 		}
 		
-//		app.setDisplayStatView(false); //defaults to on, shows the triangle count and stuff
+		app.setDisplayStatView(true); //defaults to on, shows the triangle count and stuff
 		app.start();
 	}
 }

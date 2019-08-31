@@ -118,18 +118,18 @@ public class DriveRace extends BaseAppState {
 		//buildCars
 		this.cb = new CarBuilder((App)app);
 		RayCarControl rayCar = cb.addCar(car, worldStarts[0], worldRot, true, null);
-		app.getStateManager().attach(cb);
-		app.getStateManager().attach(menu);
+		getStateManager().attach(cb);
+		getStateManager().attach(menu);
 		
 		uiNode = new CarUI(rayCar);
-		app.getStateManager().attach(uiNode);
+		getStateManager().attach(uiNode);
 		
     	for (int i = 0; i < this.themCount; i++)
     		this.cb.addCar(themType, worldStarts[i+1], worldRot, false, (c,s) -> new RaceAI(c, s, this));
 		
 		//initCameras
 		camera = new CarCamera("Camera", app.getCamera(), rayCar);
-		app.getStateManager().attach(camera);
+		getStateManager().attach(camera);
 		app.getInputManager().addRawInputListener(camera);
 		
 		getState(BulletAppState.class).setEnabled(true);
@@ -289,16 +289,16 @@ public class DriveRace extends BaseAppState {
 		}
 		models.clear();
 		
-		app.getStateManager().detach(cb);
+		getStateManager().detach(cb);
 		cb = null;
 		
-		app.getStateManager().detach(menu);
+		getStateManager().detach(menu);
 		menu = null;
 		
-		app.getStateManager().detach(uiNode);
+		getStateManager().detach(uiNode);
 		uiNode = null;
 				
-		app.getStateManager().detach(camera);
+		getStateManager().detach(camera);
 		app.getInputManager().removeRawInputListener(camera);
 		camera = null;
 		
