@@ -129,9 +129,15 @@ public class App extends SimpleApplication {
 			System.exit(342);
 		}
 		
+		//update audio location
+		listener.setLocation(cam.getLocation());
+		listener.setRotation(cam.getRotation());
+
 		//TODO this can check if a state is active
 		BaseAppState a = getStateManager().getState(BaseAppState.class);
-		Log.p(a);
+		boolean printAppState = false;
+		if (printAppState)
+			Log.p(a);
 	}
 	
 	public void startDev(AppState state) {
