@@ -94,7 +94,7 @@ public class DriveMenu extends BaseAppState {
 	}
 
 	public void togglePause() {
-		if (drive != null)
+		if (drive == null)
 			return;
 			
 		Node guiRoot = ((SimpleApplication)getApplication()).getGuiNode();
