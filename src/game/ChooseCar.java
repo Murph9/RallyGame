@@ -2,8 +2,8 @@ package game;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
-import com.jme3.app.state.AbstractAppState;
-import com.jme3.app.state.AppStateManager;
+import com.jme3.app.state.BaseAppState;
+import com.jme3.bullet.BulletAppState;
 import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
@@ -26,9 +26,7 @@ import world.StaticWorld;
 import world.StaticWorldBuilder;
 import world.World;
 
-public class ChooseCar extends AbstractAppState {
-
-	private SimpleApplication app;
+public class ChooseCar extends BaseAppState {
 
 	private World world;
 	private StaticWorld worldType;
@@ -50,11 +48,8 @@ public class ChooseCar extends AbstractAppState {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
-		super.initialize(stateManager, app);
-		this.app = (SimpleApplication)app;
-
-		((App)app).setPhysicsSpaceEnabled(true);
+	public void initialize(Application app) {
+		getState(BulletAppState.class).setEnabled(true);
 		
 		//init player
 		Vector3f start = worldType.start;
@@ -63,25 +58,25 @@ public class ChooseCar extends AbstractAppState {
 		world = new StaticWorldBuilder(worldType);
 		app.getStateManager().attach(world);
 		
-		cb = new CarBuilder((App)this.app);
+		cb = new CarBuilder((App)app);
 		app.getStateManager().attach(cb);
 		
 		cb.addCar(car, start, dir, true, null);
 
 		//make camera
-		camera = new BasicCamera("Camera", this.app.getCamera(), new Vector3f(0,3,7), new Vector3f(0,1.2f, 0));
-		this.app.getStateManager().attach(camera);
+		camera = new BasicCamera("Camera", app.getCamera(), new Vector3f(0,3,7), new Vector3f(0,1.2f, 0));
+		getStateManager().attach(camera);
 		
 		//init gui
 		//info window first so the event listeners can delete it
 		Container infoWindow = new Container();
-        this.app.getGuiNode().attachChild(infoWindow);
+        ((SimpleApplication)app).getGuiNode().attachChild(infoWindow);
         infoWindow.setLocalTranslation(H.screenTopLeft(app.getContext().getSettings()));
 		label = new Label(getCarInfoText(car));
         infoWindow.addChild(label, 0, 0);
 		
 		Container myWindow = new Container();
-		this.app.getGuiNode().attachChild(myWindow);
+		((SimpleApplication)app).getGuiNode().attachChild(myWindow);
 		myWindow.setLocalTranslation(300, 300, 0);
 		myWindow.addChild(new Label("Choose Car"), 0, 0);
 		int i = 0;
@@ -115,9 +110,9 @@ public class ChooseCar extends AbstractAppState {
         });
         
         Vector3f size = new Vector3f(400,400,0);
-		graph = new PowerCurveGraph(this.app.getAssetManager(), this.cb.get(0), size);
+		graph = new PowerCurveGraph(app.getAssetManager(), this.cb.get(0), size);
 		graph.setLocalTranslation(H.screenBottomRight(app.getContext().getSettings()).subtract(size.add(5,-25,0)));
-		this.app.getGuiNode().attachChild(graph);
+		((SimpleApplication)app).getGuiNode().attachChild(graph);
 	}
 
 
@@ -146,30 +141,38 @@ public class ChooseCar extends AbstractAppState {
 		return out;
 	}
 
-
-	public void cleanup() {
-		this.app.getStateManager().detach(cb);
+	@Override
+	public void cleanup(Application app) {
+		app.getStateManager().detach(cb);
 		cb = null;
 		
-		this.app.getStateManager().detach(world);
+		app.getStateManager().detach(world);
 		world = null;
 		
-		this.app.getStateManager().detach(camera);
+		app.getStateManager().detach(camera);
 		camera = null;
 		
-		this.app.getGuiNode().detachChild(graph);
+		((SimpleApplication)app).getGuiNode().detachChild(graph);
 		graph = null;
-
-		this.app = null;
 	}
+
+	@Override
+	protected void onEnable() {
+	}
+
+	@Override
+	protected void onDisable() {
+	}
+
 
 	/////////////////////////////
 	//UI stuff
 	public void chooseCar() {
 		if (car == null) { Log.p("no return value for ChooseCar()"); };
-		((App)this.app).next(this);
+		((App)getApplication()).next(this);
 	}
 	public Car getCarType() {
 		return car;
 	}
+
 }

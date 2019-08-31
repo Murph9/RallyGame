@@ -4,8 +4,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.jme3.app.Application;
-import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
+import com.jme3.bullet.BulletAppState;
+import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.FaceCullMode;
@@ -16,7 +17,6 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 
-import game.App;
 import effects.LoadModelWrapper;
 import helper.H;
 import jme3tools.optimize.GeometryBatchFactory;
@@ -51,8 +51,8 @@ public class ObjectWorld extends World {
 	}
 
 	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
-		super.initialize(stateManager, app);
+	public void initialize(Application app) {
+		super.initialize(app);
 		
 		AssetManager am = app.getAssetManager();
 		
@@ -127,7 +127,9 @@ public class ObjectWorld extends World {
 		
 		addedObjects.add(f);
 		rootNode.attachChild(f);
-		((App)this.app).getPhysicsSpace().add(f);
+
+		PhysicsSpace space = getState(BulletAppState.class).getPhysicsSpace();
+		space.add(f);
 		
 		for (int i = 0; i < COUNT_A_TILE; i++) {
 			Spatial s = geomI.clone();
@@ -139,7 +141,7 @@ public class ObjectWorld extends World {
 			
 			addedObjects.add(s);
 			rootNode.attachChild(s);
-			((App)this.app).getPhysicsSpace().add(s);
+			space.add(s);
 		}
 		
 		//If you remove this line: fps = fps/n for large n
@@ -153,14 +155,16 @@ public class ObjectWorld extends World {
 
 	@Override
 	public void update(float tpf) {
-		placeTiles(((App)this.app).getCamera().getLocation());
+		placeTiles(getApplication().getCamera().getLocation());
 	}
 
 	@Override
 	public void reset() {
 		rootNode.detachAllChildren();
+
+		PhysicsSpace space = getState(BulletAppState.class).getPhysicsSpace();
 		for (Spatial g: addedObjects) {
-			((App)this.app).getPhysicsSpace().remove(g); //not really sure why removing the rootNode thing doesn't work from the loop
+			space.remove(g);
 		}
 		addedObjects.clear();
 		
@@ -172,11 +176,12 @@ public class ObjectWorld extends World {
 	}
 	
 	@Override
-	public void cleanup() {
-		super.cleanup();
+	public void cleanup(Application app) {
+		super.cleanup(app);
 		
+		PhysicsSpace space = getState(BulletAppState.class).getPhysicsSpace();
 		for (Spatial g: addedObjects) {
-			((App)this.app).getPhysicsSpace().remove(g); //not really sure why removing the rootNode thing doesn't work from the loop
+			space.remove(g);
 		}
 	}
 }

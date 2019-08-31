@@ -2,7 +2,6 @@ package game;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
-import com.jme3.app.state.AppStateManager;
 import com.jme3.math.Vector3f;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
@@ -21,8 +20,8 @@ public class RaceMenu extends DriveMenu {
 	}
 	
 	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
-		super.initialize(stateManager, app);
+	public void initialize(Application app) {
+		super.initialize(app);
 		
 		state = new Container();
 		raceLabel = new Label("Race state?");

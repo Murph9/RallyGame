@@ -2,8 +2,8 @@ package game;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
-import com.jme3.app.state.AbstractAppState;
-import com.jme3.app.state.AppStateManager;
+import com.jme3.app.state.BaseAppState;
+import com.jme3.bullet.BulletAppState;
 import com.jme3.math.Vector3f;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
@@ -18,7 +18,7 @@ import world.lsystem.LSystemWorld;
 import world.track.TrackWorld;
 import world.wp.WP.DynamicType;
 
-public class ChooseMap extends AbstractAppState {
+public class ChooseMap extends BaseAppState {
 
 	private SimpleApplication app;
 
@@ -29,11 +29,8 @@ public class ChooseMap extends AbstractAppState {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
-		super.initialize(stateManager, app);
-
-		this.app = (SimpleApplication)app;
-		((App)app).setPhysicsSpaceEnabled(true);
+	public void initialize(Application app) {
+		getState(BulletAppState.class).setEnabled(true);
 		
 		camera = new BasicCamera("Camera", this.app.getCamera(), new Vector3f(-70,50,0), new Vector3f(20,1,0));
 		this.app.getStateManager().attach(camera);
@@ -102,11 +99,19 @@ public class ChooseMap extends AbstractAppState {
 		super.update(tpf);
 	}
 
-	public void cleanup() {
+	@Override
+	public void cleanup(Application app) {
 		this.app.getStateManager().detach(camera);
 		camera = null;
 		this.app.getStateManager().detach(world);
 		world = null;
+	}
+
+	@Override
+	protected void onEnable() {
+	}
+	@Override
+	protected void onDisable() {
 	}
 
 	////////////////////////

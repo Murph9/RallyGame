@@ -2,7 +2,7 @@ package world.lsystem;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
-import com.jme3.app.state.AppStateManager;
+import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.FaceCullMode;
@@ -11,7 +11,6 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.shape.Box;
 
-import game.App;
 import world.World;
 import world.WorldType;
 
@@ -33,8 +32,8 @@ public class LSystemWorld extends World {
 	}
 	
 	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
-		super.initialize(stateManager, app);
+	public void initialize(Application app) {
+		super.initialize(app);
 
 		placeLargeFlatBox(app);
 		
@@ -54,7 +53,7 @@ public class LSystemWorld extends World {
 		startBox.addControl(new RigidBodyControl(0));
 		
 		this.rootNode.attachChild(startBox);
-		((App)this.app).getPhysicsSpace().add(startBox);
+		getState(BulletAppState.class).getPhysicsSpace().add(startBox);
 	}
 
 	@Override
@@ -73,8 +72,9 @@ public class LSystemWorld extends World {
 	public void reset() { }
 	
 	@Override
-	public void cleanup() {
-		super.cleanup();
+	public void cleanup(Application app) {
+		super.cleanup(app);
+
 		try {
 			throw new Exception("not implemented");
 		} catch (Exception e) {

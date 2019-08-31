@@ -1,23 +1,24 @@
 package world;
 
 import com.jme3.app.Application;
-import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
+import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
+import com.jme3.renderer.Camera;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 
-import game.App;
 import effects.LoadModelWrapper;
 
 public class FlatWorld extends World {
 	
-	private Spatial startGeometry; 
+	private Spatial startGeometry;
+	private Camera cam;  
 	
 	public FlatWorld() {
 		super("flatWorldRoot");
@@ -29,9 +30,10 @@ public class FlatWorld extends World {
 	}
 	
 	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
-		super.initialize(stateManager, app);
-		
+	public void initialize(Application app) {
+		super.initialize(app);
+		cam = app.getCamera();
+
 		AssetManager am = app.getAssetManager();
 		
 		Material matfloor = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -46,7 +48,7 @@ public class FlatWorld extends World {
 		startGeometry = LoadModelWrapper.create(app.getAssetManager(), startGeometry, ColorRGBA.Green);
 		
 		this.rootNode.attachChild(startGeometry);
-		((App)this.app).getPhysicsSpace().add(startGeometry);
+		getState(BulletAppState.class).getPhysicsSpace().add(startGeometry);
 	}
 	
 	@Override
@@ -59,16 +61,18 @@ public class FlatWorld extends World {
 		//Ideally we would mod 1000 the car position so the grounds bumps don't occur
 		//but doing so would require the car, and we just don't have the power for that here
 		
-		Vector3f pos = this.app.getCamera().getLocation();
+		Vector3f pos = cam.getLocation();
 		pos.y = 0;
 		startGeometry.setLocalTranslation(pos);
 		startGeometry.getControl(RigidBodyControl.class).setPhysicsLocation(pos);
 	}
 	
-	public void cleanup() {
+	@Override
+	public void cleanup(Application app) {
 		this.rootNode.detachChild(startGeometry);
-		((App)this.app).getPhysicsSpace().remove(startGeometry);
+		
+		getState(BulletAppState.class).getPhysicsSpace().remove(startGeometry);
 
-		super.cleanup();
+		super.cleanup(app);
 	}
 }

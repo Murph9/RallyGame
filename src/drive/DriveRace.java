@@ -7,9 +7,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.jme3.app.Application;
-import com.jme3.app.state.AbstractAppState;
-import com.jme3.app.state.AppStateManager;
+import com.jme3.app.SimpleApplication;
+import com.jme3.app.state.BaseAppState;
 import com.jme3.asset.AssetManager;
+import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
@@ -39,12 +40,11 @@ import game.RaceMenu;
 import helper.H;
 import helper.Log;
 
-public class DriveRace extends AbstractAppState {
+public class DriveRace extends BaseAppState {
 
 	//TODO:
 	//- better AI, otherwise this actually sucks
 	
-	private App app;
 	public RaceMenu menu;
 	
 	//things that should be in a world class
@@ -89,20 +89,19 @@ public class DriveRace extends AbstractAppState {
 	}
 	
 	@Override
-    public void initialize(AppStateManager stateManager, Application app) {
-		super.initialize(stateManager, app);
-		this.app = (App)app;
-
+    public void initialize(Application app) {
     	nextState();
-    	
-    	Collection<PhysicsRigidBody> list = this.app.getPhysicsSpace().getRigidBodyList();
+		
+		PhysicsSpace space = getState(BulletAppState.class).getPhysicsSpace();
+
+    	Collection<PhysicsRigidBody> list = space.getRigidBodyList();
     	if (list.size() > 0) {
     		Log.p("some one didn't clean up after themselves..." + list.size());
     		for (PhysicsRigidBody r: list)
-				this.app.getPhysicsSpace().remove(r);
+				space.remove(r);
     	}
     	
-		this.app.getRootNode().attachChild(rootNode);
+		((SimpleApplication)app).getRootNode().attachChild(rootNode);
 		addTrack(true);
     	
 		worldStart = checkpoints[checkpoints.length - 1];
@@ -117,7 +116,7 @@ public class DriveRace extends AbstractAppState {
 		}
     	
 		//buildCars
-		this.cb = new CarBuilder(this.app);
+		this.cb = new CarBuilder((App)app);
 		RayCarControl rayCar = cb.addCar(car, worldStarts[0], worldRot, true, null);
 		app.getStateManager().attach(cb);
 		app.getStateManager().attach(menu);
@@ -129,11 +128,11 @@ public class DriveRace extends AbstractAppState {
     		this.cb.addCar(themType, worldStarts[i+1], worldRot, false, (c,s) -> new RaceAI(c, s, this));
 		
 		//initCameras
-		camera = new CarCamera("Camera", this.app.getCamera(), rayCar);
-		stateManager.attach(camera);
+		camera = new CarCamera("Camera", app.getCamera(), rayCar);
+		app.getStateManager().attach(camera);
 		app.getInputManager().addRawInputListener(camera);
 		
-		((App)app).setPhysicsSpaceEnabled(true);
+		getState(BulletAppState.class).setEnabled(true);
 		
 		Object[] a = cb.getAll().toArray();
 		cars = Arrays.copyOf(a, a.length, RayCarControl[].class);
@@ -242,7 +241,7 @@ public class DriveRace extends AbstractAppState {
 		for (int i = 0; i < cars.length; i++) {
 			Vector3f pos = cars[i].getPhysicsLocation().add(0,3,0);
 			Vector3f dir = checkpoints[carCheckpointNext[i]].subtract(pos);
-			carArrows[i] = H.makeShapeArrow(this.app.getAssetManager(), ColorRGBA.Cyan, dir, pos);
+			carArrows[i] = H.makeShapeArrow(((SimpleApplication)getApplication()).getAssetManager(), ColorRGBA.Cyan, dir, pos);
 			debugNode.attachChild(carArrows[i]);
 		}
 		rootNode.attachChild(debugNode);
@@ -276,12 +275,13 @@ public class DriveRace extends AbstractAppState {
 		}
 	}
 	
-	public void cleanup() {
-		super.cleanup();
+	public void cleanup(Application app) {
 		Log.p("cleaning driverace class");
 		
+		PhysicsSpace space = getState(BulletAppState.class).getPhysicsSpace();
+
 		for (RigidBodyControl r: landscapes) {
-			this.app.getPhysicsSpace().remove(r);
+			space.remove(r);
 		}
 		landscapes.clear();
 		for (Spatial s: models) {
@@ -289,35 +289,39 @@ public class DriveRace extends AbstractAppState {
 		}
 		models.clear();
 		
-		this.app.getStateManager().detach(cb);
+		app.getStateManager().detach(cb);
 		cb = null;
 		
-		this.app.getStateManager().detach(menu);
+		app.getStateManager().detach(menu);
 		menu = null;
 		
-		this.app.getStateManager().detach(uiNode);
+		app.getStateManager().detach(uiNode);
 		uiNode = null;
 				
-		this.app.getStateManager().detach(camera);
-		this.app.getInputManager().removeRawInputListener(camera);
+		app.getStateManager().detach(camera);
+		app.getInputManager().removeRawInputListener(camera);
 		camera = null;
 		
-		this.app.getRootNode().detachChild(rootNode);
-
-		this.app = null;
+		((SimpleApplication)app).getRootNode().detachChild(rootNode);
 	}
 	
 	@Override
-	public void setEnabled(boolean enabled) {
-		super.setEnabled(enabled);
-		((App)app).setPhysicsSpaceEnabled(enabled);
-		this.camera.setEnabled(enabled);
-		this.cb.setEnabled(enabled);
+	protected void onEnable() {
+		getState(BulletAppState.class).setEnabled(true);
+		this.camera.setEnabled(true);
+		this.cb.setEnabled(true);
+	}
+
+	@Override
+	protected void onDisable() {
+		getState(BulletAppState.class).setEnabled(false);
+		this.camera.setEnabled(false);
+		this.cb.setEnabled(false);
 	}
 	
 	//making the world exist
 	public void addTrack(boolean ifShadow) {
-		AssetManager as = this.app.getAssetManager();
+		AssetManager as = getApplication().getAssetManager();
 		List<Vector3f> _checkpoints = new LinkedList<Vector3f>();
 		
 		Material mat = new Material(as, "Common/MatDefs/Misc/ShowNormals.j3md");
@@ -327,7 +331,7 @@ public class DriveRace extends AbstractAppState {
 		Spatial worldNode = LoadModelWrapper.create(as, "assets/staticworld/lakelooproad.blend", ColorRGBA.White);
 		if (worldNode instanceof Node) {
 			Spatial s = ((Node) worldNode).getChild(0);
-			addWorldModel(rootNode, this.app.getPhysicsSpace(), s, ifShadow);
+			addWorldModel(rootNode, getState(BulletAppState.class).getPhysicsSpace(), s, ifShadow);
 			for (Spatial points: ((Node)s).getChildren()) {
 				if (points.getName().equals("Points")) {
 					for (Spatial checkpoint: ((Node)points).getChildren()) {
@@ -337,7 +341,7 @@ public class DriveRace extends AbstractAppState {
 			}
 		} else {
 			Geometry worldModel = (Geometry) worldNode;
-			addWorldModel(rootNode, this.app.getPhysicsSpace(), worldModel, ifShadow);
+			addWorldModel(rootNode, getState(BulletAppState.class).getPhysicsSpace(), worldModel, ifShadow);
 		}
 		
 		checkpoints = _checkpoints.toArray(new Vector3f[_checkpoints.size()-1]);

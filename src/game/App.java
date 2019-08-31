@@ -62,8 +62,6 @@ public class App extends SimpleApplication {
 	
 	public DriveBase drive;
 
-	private BulletAppState bullet; //one physics space always
-	
 	private Car car;
 	private Car them;
 	private World world;
@@ -78,6 +76,13 @@ public class App extends SimpleApplication {
 		//DynamicType.Simple.getBuilder();
 	}
 
+	public App() {
+		super(new ParticleAtmosphere()
+				, new FilterManager()
+				//, new DetailedProfilerState() //profiling in jme 3.2: TODO add physics engine stuff using custom sections
+				);
+	}
+
 	@Override
 	public void simpleInitApp() {
 		CUR = this;
@@ -89,48 +94,18 @@ public class App extends SimpleApplication {
 		}
 
 		inputManager.deleteMapping(SimpleApplication.INPUT_MAPPING_EXIT);
-		
+		inputManager.setCursorVisible(true);
+
 		//initialize Lemur (the GUI manager)
 		GuiGlobals.initialize(this);
 		//Load my Lemur style
 		LemurGuiStyle.load(assetManager);
-		//Init the lemur mouse listener
-		getStateManager().attach(new MouseAppState(this));
 		
-		// no keyboard inputs after init please
-		GuiGlobals.getInstance().getInputMapper().release();
 
 		///////
-		//Processors
-		FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
-		
-		//Wireframe style
-		EdgeMaskFilter emf = new EdgeMaskFilter();
-		fpp.addFilter(emf);
-
-		// Bloom for the wireframes
-		BloomFilter bloom = new BloomFilter();
-		bloom.setBlurScale(.5f);
-		bloom.setBloomIntensity(2);
-		fpp.addFilter(bloom);
-		viewPort.addProcessor(fpp);
-		
-		//fog
-		FogFilter fog = new FogFilter();
-        fog.setFogColor(new ColorRGBA(0.8f, 0.8f, 0.8f, 1.0f));
-        fog.setFogDistance(190);
-        fog.setFogDensity(1.0f);
-        fpp.addFilter(fog);
-
-		new FilterManager(getInputManager(), new Filter[] { emf, bloom, fog });
-
-		// Particle emitter
-		ParticleAtmosphere particles = new ParticleAtmosphere(getCamera());
-		stateManager.attach(particles);
-
-		///////
-		//Init the Physics space
-		bullet = new BulletAppState();
+		//Init the Physics space with better defaults
+		//BulletAppState needs to wait until after the app is initialised, so can't be called from the constructor
+		BulletAppState bullet = new BulletAppState();
 		// bullet.setSpeed(0.1f); //physics per second rate
 		// bullet.setDebugEnabled(true); //show bullet wireframes
 		bullet.setThreadingType(ThreadingType.PARALLEL);
@@ -138,17 +113,10 @@ public class App extends SimpleApplication {
 		bullet.getPhysicsSpace().setAccuracy(1f / 120f); // physics rate
 		bullet.getPhysicsSpace().setGravity(new Vector3f(0, -9.81f, 0)); // yay its down
 
-		inputManager.setCursorVisible(true);
-		flyCam.setEnabled(false);
-
 		///////
 		//Game logic start:
 		start = new Start();
 		getStateManager().attach(start);
-		
-	
-		//profiling in jme 3.2: TODO add physics engine stuff using custom sections
-//		getStateManager().attach(new DetailedProfilerState());
 	}
 	
 	@Override
@@ -159,6 +127,9 @@ public class App extends SimpleApplication {
 			Log.e("Vector3f.ZERO is not zero!!!!, considered a fatal error.");
 			System.exit(342);
 		}
+		
+		IStart a = getStateManager().getState(IStart.class);
+		Log.p(a);
 	}
 	
 	public void startDev(AppState state) {
@@ -271,10 +242,7 @@ public class App extends SimpleApplication {
 		return settings;
 	}
 	public PhysicsSpace getPhysicsSpace() {
-		return bullet.getPhysicsSpace();
-	}
-	public void setPhysicsSpaceEnabled(boolean value) {
-		this.bullet.setEnabled(value);
+		return getStateManager().getState(BulletAppState.class).getPhysicsSpace();
 	}
 
 	@Override
@@ -290,7 +258,7 @@ public class App extends SimpleApplication {
 
 		Log.p("Closing " + this.getClass().getName());
 
-		PhysicsSpace space = bullet.getPhysicsSpace();
+		PhysicsSpace space = getPhysicsSpace();
 		Collection<PhysicsRigidBody> list = space.getRigidBodyList();
 		if (list.size() > 0) {
 			Log.e("Someone didn't clean up after themselves: " + list.size() + " physics bodies remain. (or this was called too early)");

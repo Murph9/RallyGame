@@ -3,7 +3,8 @@ package effects;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.jme3.input.InputManager;
+import com.jme3.app.Application;
+import com.jme3.app.state.BaseAppState;
 import com.jme3.input.KeyInput;
 import com.jme3.input.RawInputListener;
 import com.jme3.input.event.JoyAxisEvent;
@@ -12,18 +13,56 @@ import com.jme3.input.event.KeyInputEvent;
 import com.jme3.input.event.MouseButtonEvent;
 import com.jme3.input.event.MouseMotionEvent;
 import com.jme3.input.event.TouchEvent;
+import com.jme3.math.ColorRGBA;
 import com.jme3.post.Filter;
+import com.jme3.post.FilterPostProcessor;
+import com.jme3.post.filters.BloomFilter;
+import com.jme3.post.filters.FogFilter;
 
 //Allows management of the visual filters because sometimes they are annoying
-public class FilterManager {
+public class FilterManager extends BaseAppState {
 
     private Filter[] filters;
 
-    public FilterManager(InputManager inputManager, Filter[] filters) {
-        this.filters = filters;
+    public FilterManager() {}
+    
+    @Override
+    protected void initialize(Application app) {
+        FilterPostProcessor fpp = new FilterPostProcessor(app.getAssetManager());
 
-        inputManager.addRawInputListener(new FilterListener(this));
+        EdgeMaskFilter emf = new EdgeMaskFilter();
+        fpp.addFilter(emf);
+
+        BloomFilter bloom = new BloomFilter();
+        bloom.setBlurScale(.5f);
+        bloom.setBloomIntensity(2);
+        fpp.addFilter(bloom);
+
+        FogFilter fog = new FogFilter();
+        fog.setFogColor(new ColorRGBA(0.8f, 0.8f, 0.8f, 1.0f));
+        fog.setFogDistance(190);
+        fog.setFogDensity(1.0f);
+        fpp.addFilter(fog);
+
+        app.getInputManager().addRawInputListener(new FilterListener(this));
+        
+        this.filters = new Filter[] { emf, bloom, fog };
+        app.getViewPort().addProcessor(fpp);
     }
+
+    @Override
+    protected void onEnable() {
+    }
+
+    @Override
+    protected void onDisable() {
+    }
+
+    @Override
+    protected void cleanup(Application app) {
+        
+    }
+
 
     void onAction(Integer i, boolean value, float tpf) {
         if (!value)

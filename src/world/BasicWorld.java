@@ -1,8 +1,8 @@
 package world;
 
 import com.jme3.app.Application;
-import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
+import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.FaceCullMode;
@@ -11,7 +11,6 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 
-import game.App;
 import effects.LoadModelWrapper;
 
 public class BasicWorld extends World {
@@ -28,8 +27,8 @@ public class BasicWorld extends World {
 	}
 	
 	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
-		super.initialize(stateManager, app);
+	public void initialize(Application app) {
+		super.initialize(app);
 		
 		AssetManager am = app.getAssetManager();
 		
@@ -46,7 +45,7 @@ public class BasicWorld extends World {
 		startGeometry = LoadModelWrapper.create(app.getAssetManager(), startGeometry, ColorRGBA.Green);
 		
 		this.rootNode.attachChild(startGeometry);
-		((App)this.app).getPhysicsSpace().add(startGeometry);
+		getState(BulletAppState.class).getPhysicsSpace().add(startGeometry);
 	}
 	
 	@Override
@@ -59,10 +58,11 @@ public class BasicWorld extends World {
 		//nothing
 	}
 	
-	public void cleanup() {
+	@Override
+	public void cleanup(Application app) {
 		this.rootNode.detachChild(startGeometry);
-		((App)this.app).getPhysicsSpace().add(startGeometry);
+		getState(BulletAppState.class).getPhysicsSpace().remove(startGeometry);
 
-		super.cleanup();
+		super.cleanup(app);
 	}
 }

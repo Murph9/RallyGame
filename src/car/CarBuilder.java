@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 import com.jme3.app.Application;
-import com.jme3.app.state.AbstractAppState;
-import com.jme3.app.state.AppStateManager;
+import com.jme3.app.state.BaseAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.audio.AudioData;
 import com.jme3.audio.AudioNode;
+import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.collision.shapes.HullCollisionShape;
 import com.jme3.math.ColorRGBA;
@@ -33,7 +33,7 @@ import game.App;
 import helper.H;
 import helper.Log;
 
-public class CarBuilder extends AbstractAppState {
+public class CarBuilder extends BaseAppState {
 
 	private App app;
 	private final CarDataLoader loader;
@@ -44,15 +44,14 @@ public class CarBuilder extends AbstractAppState {
 	public CarBuilder(App app) {
 		// TODO remove app from car builder
 		this.app = app;
-		loader = new CarDataLoader(app.getPhysicsSpace());
+		loader = new CarDataLoader(app.getStateManager().getState(BulletAppState.class).getPhysicsSpace());
 
 		cars = new LinkedList<>();
 		rootNode = new Node("Car Builder Root");
 	}
 	
 	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
-		super.initialize(stateManager, app);
+	public void initialize(Application app) {
 		Log.p("CarBuilder init");
 		if (this.app != app) {
 			Log.e("!!!!!!! Car builder found a different application to run against.");
@@ -62,8 +61,15 @@ public class CarBuilder extends AbstractAppState {
 		this.app.getRootNode().attachChild(rootNode);
 	}
 	
-	public void setEnabled(boolean state) {
-		super.setEnabled(state);
+	@Override
+	protected void onEnable() {
+		_setEnabled(true);
+	}
+	@Override
+	protected void onDisable() {
+		_setEnabled(false);
+	}
+	private void _setEnabled(boolean state) {
 		for (RayCarControl r : cars) {
 			r.setEnabled(state);
 			r.enableSound(state);
@@ -81,7 +87,7 @@ public class CarBuilder extends AbstractAppState {
 		}
 		
 		Vector3f grav = new Vector3f();
-		this.app.getPhysicsSpace().getGravity(grav);
+		this.app.getStateManager().getState(BulletAppState.class).getPhysicsSpace().getGravity(grav);
 		CarDataConst carData = loader.get(this.app.getAssetManager(), car, grav);
 		
 		AssetManager am = this.app.getAssetManager();
@@ -137,13 +143,6 @@ public class CarBuilder extends AbstractAppState {
 		return carControl;
 	}
 
-	public void setCarData(int id, CarDataConst carData) {
-		RayCarControl car = this.get(0);
-		if (car == null)
-			return;
-		
-		car.setCarData(carData);
-	}
 	public int removeAll() {
 		for (RayCarControl car: cars) {
 			rootNode.detachChild(car.getRootNode());
@@ -189,8 +188,7 @@ public class CarBuilder extends AbstractAppState {
 	}
 
 	@Override
-	public void cleanup() {
-		super.cleanup();
+	public void cleanup(Application app) {
 		for (RayCarControl car : cars) {
 			car.cleanup(this.app);
 		}

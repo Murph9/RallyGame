@@ -3,7 +3,6 @@ package drive;
 import world.World;
 
 import com.jme3.app.Application;
-import com.jme3.app.state.AppStateManager;
 
 import car.data.Car;
 
@@ -19,8 +18,8 @@ public class DriveAI extends DriveBase {
     }
 	
 	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
-    	super.initialize(stateManager, app);
+	public void initialize(Application app) {
+    	super.initialize(app);
     	
     	for (int i = 0; i < this.themCount; i++)
     		this.cb.addCar(them, world.getStartPos(), world.getStartRot(), false, null);

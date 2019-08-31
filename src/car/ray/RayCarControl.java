@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.jme3.audio.AudioNode;
+import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.objects.PhysicsRigidBody;
@@ -49,7 +50,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 	public RayCarControl(App app, CollisionShape shape, CarDataConst carData, Node rootNode) {
 		super(shape, carData);
 		this.app = app;
-		this.space = app.getPhysicsSpace();
+		this.space = app.getStateManager().getState(BulletAppState.class).getPhysicsSpace();
 
 		vel = forward = up = left = right = new Vector3f();
 		

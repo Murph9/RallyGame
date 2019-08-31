@@ -57,7 +57,7 @@ dependencies {
 	compile 'org.jmonkeyengine:jme3-terrain:3.2.2-stable'
 	
 	compile 'org.yaml:snakeyaml:1.23'
-	compile 'com.simsilica:lemur:1.11.0'
+	compile 'com.simsilica:lemur:1.13.0'
 
 	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.1'
 	testImplementation 'org.junit.jupiter:junit-jupiter-params:5.5.1'

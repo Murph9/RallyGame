@@ -1,5 +1,7 @@
 package world;
 
+import com.jme3.app.Application;
+import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
@@ -69,14 +71,14 @@ public class FullCityWorld extends World {
 		grid[y][x] = decidePiece(x, y);
 		
 		Vector3f offset = new Vector3f((x-GRID_SIZE/2)*TILE_SIZE, 0, (y-GRID_SIZE/2)*TILE_SIZE);
-		Spatial spat = LoadModelWrapper.create(app.getAssetManager(), grid[y][x].p.getName(), ColorRGBA.White);
+		Spatial spat = LoadModelWrapper.create(getApplication().getAssetManager(), grid[y][x].p.getName(), ColorRGBA.White);
 		
 		spat.setLocalTranslation(offset);
 		CollisionShape coll = CollisionShapeFactory.createMeshShape(spat);
 		spat.addControl(new RigidBodyControl(coll, 0));
 		
 		rootNode.attachChild(spat);
-		((App)this.app).getPhysicsSpace().add(spat);
+		getState(BulletAppState.class).getPhysicsSpace().add(spat);
 		
 		//If you remove this line: fps = fps/n for large n
 		GeometryBatchFactory.optimize(rootNode);
@@ -92,23 +94,23 @@ public class FullCityWorld extends World {
 
 	@Override
 	public void update(float tpf) {
-		placeTiles(((App)this.app).getCamera().getLocation());
+		placeTiles(((App)getApplication()).getCamera().getLocation());
 	}
 
 	@Override
 	public void reset() {
 		try {
-			throw new Exception("TODO - Full city is not being deleted.");
+			throw new Exception("TODO - Full city hasn't been written to be deleted yet.");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	@Override
-	public void cleanup() {
-		super.cleanup();
+	public void cleanup(Application app) {
+		super.cleanup(app);
 		try {
-			throw new Exception("Full city is not being deleted.");
+			throw new Exception("TODO - Full city hasn't been written to be deleted yet.");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

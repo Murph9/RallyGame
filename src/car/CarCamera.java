@@ -1,8 +1,8 @@
 package car;
 
 import com.jme3.app.Application;
-import com.jme3.app.state.AbstractAppState;
-import com.jme3.app.state.AppStateManager;
+import com.jme3.app.SimpleApplication;
+import com.jme3.app.state.BaseAppState;
 import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
 import com.jme3.input.RawInputListener;
@@ -26,13 +26,13 @@ import car.ray.RayCarControl;
 import game.App;
 import helper.H;
 
-public class CarCamera extends AbstractAppState implements RawInputListener {
+public class CarCamera extends BaseAppState implements RawInputListener {
 
-	private App app;
 	private Camera c;
 	private RayCarControl p;
 	private Vector3f lastPos;
 	
+	private float tpf;
 	private float lastTimeout;
 	private float rotRad;
 	private float lastRad;
@@ -56,10 +56,7 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 	}
 
 	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
-		super.initialize(stateManager, app);
-
-		this.app = (App)app;
+	public void initialize(Application app) {
 	}
 
 	@Override
@@ -68,8 +65,10 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 			return;
 		}
 		this.tpf = tpf;
+
+		super.update(tpf);
 	}
-	private float tpf;
+	
 	
 	public void setCar(RayCarControl p) {
 		this.p = p;
@@ -138,7 +137,7 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 		Vector3f cam_lookAt = new Vector3f(0, data.cam_lookAtHeight, 0);
 		Vector3f dir = c.getLocation().subtract(carPos.add(cam_lookAt));
 		Ray ray = new Ray(carPos.add(cam_lookAt), dir);
-		app.getRootNode().collideWith(ray, results);
+		((SimpleApplication)getApplication()).getRootNode().collideWith(ray, results);
 		CollisionResult cr = results.getClosestCollision();
 		if (cr != null && cr.getDistance() < dir.length()) {
 			Geometry g = cr.getGeometry();
@@ -167,12 +166,24 @@ public class CarCamera extends AbstractAppState implements RawInputListener {
 	
 	public void onMouseButtonEvent(MouseButtonEvent arg0) {}
 	public void onMouseMotionEvent(MouseMotionEvent arg0) {
-		lastTimeout = 0;
-		rotRad += arg0.getDX();
+		if (isEnabled()) {
+			lastTimeout = 0;
+			rotRad += arg0.getDX();
+		}
 	}
 	public void onKeyEvent(KeyInputEvent arg0) {}
 	public void onTouchEvent(TouchEvent arg0) {}
 	public void onJoyAxisEvent(JoyAxisEvent arg0) {}
 	public void onJoyButtonEvent(JoyButtonEvent arg0) {}
 
+
+	@Override
+	protected void onEnable() {
+	}
+	@Override
+	protected void onDisable() {
+	}
+	@Override
+	protected void cleanup(Application app) {
+	}
 }

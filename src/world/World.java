@@ -2,8 +2,7 @@ package world;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
-import com.jme3.app.state.AbstractAppState;
-import com.jme3.app.state.AppStateManager;
+import com.jme3.app.state.BaseAppState;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
@@ -12,9 +11,8 @@ import helper.Log;
 
 //Controls the physical (and visual) things in the level
 
-public abstract class World extends AbstractAppState {
+public abstract class World extends BaseAppState {
 
-	protected SimpleApplication app;
 	protected Node rootNode;
 	
 	public World (String name) {
@@ -22,12 +20,16 @@ public abstract class World extends AbstractAppState {
 	}
 	
 	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
-		super.initialize(stateManager, app);
-		this.app = (SimpleApplication)app;
-		
-		this.app.getRootNode().attachChild(this.rootNode);
+	public void initialize(Application app) {
+		((SimpleApplication)app).getRootNode().attachChild(this.rootNode);
 		Log.p("initialize() world: " + rootNode.getName());
+	}
+
+	@Override
+	protected void onDisable() {
+	}
+	@Override
+	protected void onEnable() {
 	}
 
 	//'Starts again'
@@ -42,19 +44,17 @@ public abstract class World extends AbstractAppState {
 	//player rotation
 	public Matrix3f getStartRot() { return new Matrix3f(Matrix3f.IDENTITY); }
 
-	public void cleanup() {
+
+	@Override
+	protected void cleanup(Application app) {
 		//remove everything you added, you are being removed now :(
 		if (this.rootNode == null)
 			Log.e("I was probably cleaned up twice or never, please don't.");
-
-		this.initialized = false;
 		
-		this.app.getRootNode().detachChild(this.rootNode);
-		this.app = null;
+		((SimpleApplication)app).getRootNode().detachChild(this.rootNode);
 
 		Log.e("cleanup() world: " + rootNode.getName());
 		this.rootNode = null;
-		super.cleanup();
 	}
 	
 	//AI things:

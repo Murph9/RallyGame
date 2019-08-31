@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 import com.jme3.app.Application;
-import com.jme3.app.state.AppStateManager;
 import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
@@ -66,8 +65,8 @@ public class DriveMainRoadGetaway extends DriveBase {
 	}
 	
 	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
-		super.initialize(stateManager, app);
+	public void initialize(Application app) {
+		super.initialize(app);
 		
 		//add the chase car
 		hunter = this.cb.addCar(hunterType, new Vector3f(HUNTER_BUFFER - 10, 0.3f, 0), world.getStartRot(), false, null);

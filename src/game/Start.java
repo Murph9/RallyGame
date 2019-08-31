@@ -7,7 +7,7 @@ import java.util.Map.Entry;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
-import com.jme3.app.state.AppStateManager;
+import com.jme3.bullet.BulletAppState;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
@@ -23,13 +23,12 @@ import car.ray.RayCarControl;
 import world.wp.DefaultBuilder;
 import world.wp.WP.DynamicType;
 
-public class Start extends AbstractAppState {
+public class Start extends IStart {
 
 	//TODO version number on screen somewhere
 
 	//TODO maybe add some other cars to preview
 
-	private SimpleApplication app;
 	private DefaultBuilder world;
 
 	private CarBuilder cb;
@@ -47,16 +46,14 @@ public class Start extends AbstractAppState {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
-		super.initialize(stateManager, app);
-		this.app = (SimpleApplication) app;
+	public void initialize(Application app) {
 		App myapp = ((App) app);
 
-		stateManager.attach(world);
+		app.getStateManager().attach(world);
 		
 		// build player
 		this.cb = new CarBuilder(myapp);
-		stateManager.attach(cb);
+		app.getStateManager().attach(cb);
 		RayCarControl car = cb.addCar(this.carType, world.getStartPos(), world.getStartRot(), true, null);
 
 		//attach basic ai, for the view
@@ -65,9 +62,9 @@ public class Start extends AbstractAppState {
 		car.attachAI(ai, true);
 		
 		this.camera = new StartCamera("start camera", app.getCamera(), car);
-		stateManager.attach(this.camera);
+		app.getStateManager().attach(this.camera);
 		
-		myapp.setPhysicsSpaceEnabled(true);
+		getState(BulletAppState.class).setEnabled(true);
 
 		//UI
 		myWindow = new Container();
@@ -91,20 +88,28 @@ public class Start extends AbstractAppState {
         exit.addClickCommands(source -> myapp.stop());
 	}
 	
-	public void update (float tpf) {
+	public void update(float tpf) {
 		if (!isEnabled() || !isInitialized())
 			return;
 		
 		super.update(tpf);
 	}
 	
-	public void cleanup() {
-		((App) app).setPhysicsSpaceEnabled(false);
+	@Override
+	protected void onEnable() {
+	}
+	@Override
+	protected void onDisable() {
+	}
+
+	@Override
+	public void cleanup(Application app) {
+		getState(BulletAppState.class).setEnabled(false);
 
 		app.getStateManager().detach(camera);
 		camera = null;
 		
-		app.getRootNode().detachChild(myWindow);
+		((SimpleApplication)app).getRootNode().detachChild(myWindow);
 		myWindow = null;
 		
 		cb.removeAll();
@@ -113,9 +118,6 @@ public class Start extends AbstractAppState {
 		
 		app.getStateManager().detach(world);
 		world = null;
-
-		this.app = null;
-		super.cleanup();
 	}
 
 	private Map<String, Runnable> generateButtonMappings(App myapp) {

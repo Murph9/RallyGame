@@ -2,8 +2,7 @@ package effects;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
-import com.jme3.app.state.AbstractAppState;
-import com.jme3.app.state.AppStateManager;
+import com.jme3.app.state.BaseAppState;
 import com.jme3.effect.ParticleEmitter;
 import com.jme3.effect.ParticleMesh.Type;
 import com.jme3.effect.shapes.EmitterSphereShape;
@@ -12,7 +11,7 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 
-public class ParticleAtmosphere extends AbstractAppState {
+public class ParticleAtmosphere extends BaseAppState {
 
 	private final static int PARTICLE_MULT = 50;
 	private final static int PARTICLE_MAX = 5000;
@@ -21,12 +20,12 @@ public class ParticleAtmosphere extends AbstractAppState {
 	private Camera cam;
 	private ParticleEmitter particles;
 	
-	public ParticleAtmosphere(Camera cam) {
-		this.cam = cam;
-	}
+	public ParticleAtmosphere() {}
 	
 	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
+	public void initialize(Application app) {
+		cam = app.getCamera();
+
 		particles = new ParticleEmitter("particles", Type.Triangle, 0);
 		
 		particles.setGravity(0, 0, 0);
@@ -53,12 +52,15 @@ public class ParticleAtmosphere extends AbstractAppState {
 	}
 	
 	@Override
-	public void cleanup() {
+	public void cleanup(Application app) {
 		particles.removeFromParent();
 	}
 	
 	@Override
 	public void update(float tpf) {
+		if (!this.isEnabled())
+			return;
+
 		if (prevPos == null)
 			prevPos = new Vector3f();
 		
@@ -68,5 +70,12 @@ public class ParticleAtmosphere extends AbstractAppState {
 		
 		prevPos = cam.getLocation().clone();
 		particles.setLocalTranslation(prevPos);
+	}
+
+	@Override
+	protected void onEnable() {
+	}
+	@Override
+	protected void onDisable() {
 	}
 }

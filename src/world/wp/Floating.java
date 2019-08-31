@@ -1,7 +1,5 @@
 package world.wp;
 
-import com.jme3.app.Application;
-import com.jme3.app.state.AppStateManager;
 import com.jme3.math.*;
 
 public enum Floating implements WP {
@@ -47,15 +45,6 @@ public enum Floating implements WP {
 	static class Builder extends DefaultBuilder {
 		Builder() {
 			super(Floating.values());
-		}
-		
-		@Override
-		public void initialize(AppStateManager stateManager, Application app) {
-			super.initialize(stateManager, app);
-		}
-		
-		public void cleanup() {			
-			super.cleanup();
 		}
 		
 		public DefaultBuilder copy() {

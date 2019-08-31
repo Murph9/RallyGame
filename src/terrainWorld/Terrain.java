@@ -1,8 +1,9 @@
 
 package terrainWorld;
 
+import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
-import com.jme3.app.state.AbstractAppState;
+import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.HeightfieldCollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
@@ -42,7 +43,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 //TODO thinking of a second level cache
 //that 'like' the file system one but is still in memory, only save the heightmap as array or something
 
-public abstract class Terrain extends AbstractAppState implements Closeable
+public abstract class Terrain extends BaseAppState implements Closeable
 {
     protected final SimpleApplication app;
     private final PhysicsSpace physicsSpace;
@@ -96,6 +97,19 @@ public abstract class Terrain extends AbstractAppState implements Closeable
         		// nothing, we want it to just ignore it all
         	}
         });
+    }
+
+    @Override
+    protected void initialize(Application app) {
+    }
+    @Override
+    protected void onEnable() {
+    }
+    @Override
+    protected void onDisable() {
+    }
+    @Override
+    protected void cleanup(Application app) {
     }
 
     private int bitCalc(int blockSize)

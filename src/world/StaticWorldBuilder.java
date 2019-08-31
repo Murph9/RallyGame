@@ -1,8 +1,8 @@
 package world;
 
 import com.jme3.app.Application;
-import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
+import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
@@ -13,7 +13,6 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
 
 import effects.LoadModelWrapper;
-import game.App;
 
 public class StaticWorldBuilder extends World {
 
@@ -31,8 +30,8 @@ public class StaticWorldBuilder extends World {
 	}
 
 	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
-		super.initialize(stateManager, app);
+	public void initialize(Application app) {
+		super.initialize(app);
 		AssetManager am = app.getAssetManager();
 
 		// imported model
@@ -43,7 +42,7 @@ public class StaticWorldBuilder extends World {
 		landscape = new RigidBodyControl(col, 0);
 		model.addControl(landscape);
 
-		((App) this.app).getPhysicsSpace().add(landscape);
+		getState(BulletAppState.class).getPhysicsSpace().add(landscape);
 		rootNode.attachChild(model);
 	}
 
@@ -67,8 +66,8 @@ public class StaticWorldBuilder extends World {
 	}
 
 	@Override
-	public void cleanup() {
-		PhysicsSpace phys = ((App)this.app).getPhysicsSpace();
+	public void cleanup(Application app) {
+		PhysicsSpace phys = getState(BulletAppState.class).getPhysicsSpace();
 
 		phys.remove(landscape);
 		landscape = null;
@@ -76,7 +75,7 @@ public class StaticWorldBuilder extends World {
 		rootNode.detachChild(model);
 		model = null;
 
-		super.cleanup();
+		super.cleanup(app);
 	}
 	
 	//because this doesn't have an empty constructor, we define it manually

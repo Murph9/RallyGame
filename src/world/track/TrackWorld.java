@@ -8,8 +8,9 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import com.jme3.app.Application;
-import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
+import com.jme3.bullet.BulletAppState;
+import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.control.PhysicsControl;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.material.Material;
@@ -85,8 +86,8 @@ public class TrackWorld extends World {
 	}
 
 	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
-		super.initialize(stateManager, app);
+	public void initialize(Application app) {
+		super.initialize(app);
 		
 		float[] map = createHeightMap();
 		
@@ -155,10 +156,10 @@ public class TrackWorld extends World {
 		//finally add the terrain to physics engine
 	    RigidBodyControl rbc = new RigidBodyControl(0.0f);
 	    terrain.addControl(rbc);
-	    ((App)this.app).getPhysicsSpace().add(rbc);
+	    getState(BulletAppState.class).getPhysicsSpace().add(rbc);
 	    
 	    //tree world doesn't need to know the world before the scale
-	    Node treeNode = new TreeTrackHelper((App)this.app, terrain, worldSize, 2000).getTreeNode();
+	    Node treeNode = new TreeTrackHelper((App)app, terrain, worldSize, 2000).getTreeNode();
 	    rootNode.attachChild(treeNode);
 	}
 	
@@ -298,7 +299,7 @@ public class TrackWorld extends World {
 	
 	@Override
 	public void update(float tpf) {
-		App a = (App)this.app;
+		App a = (App)getApplication();
 		if (this.trackSegments != null && a.drive != null && a.drive.cb.get(0) != null && DEBUG) {
 			//hack to see if the bezier curve stuff works
 			Vector3f pos = getClosestPointTo(this.trackSegments, normalizeHeightIn(a.drive.cb.get(0).getPhysicsLocation()));
@@ -322,13 +323,15 @@ public class TrackWorld extends World {
 	@Override //player rotation
 	public Matrix3f getStartRot() { return new Matrix3f(Matrix3f.IDENTITY); }
 	
-	public void cleanup() {
+	@Override
+	public void cleanup(Application app) {
 		this.rootNode.detachChild(terrain);
-		((App)this.app).getPhysicsSpace().remove(terrain);
+		PhysicsSpace space = getState(BulletAppState.class).getPhysicsSpace();
+		space.remove(terrain);
 		for (PhysicsControl c: physicsPieces)
-			((App)this.app).getPhysicsSpace().remove(c);
+			space.remove(c);
 		
-		super.cleanup();
+		super.cleanup(app);
 	}
 	
 	@Override

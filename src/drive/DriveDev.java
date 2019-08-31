@@ -4,7 +4,6 @@ import world.World;
 import world.WorldEditor;
 
 import com.jme3.app.Application;
-import com.jme3.app.state.AppStateManager;
 import com.jme3.math.Vector3f;
 
 import car.*;
@@ -25,8 +24,8 @@ public class DriveDev extends DriveBase {
     }
 	
 	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
-    	super.initialize(stateManager, app);
+	public void initialize(Application app) {
+    	super.initialize(app);
 		
     	//init input gui
 		carEditor = new CarEditor(app.getInputManager(), this.cb.get(0), (data) -> { reloadCar(data);}, (car) -> { return resetCar(car); });
@@ -50,8 +49,9 @@ public class DriveDev extends DriveBase {
 	}
 
 	private void reloadCar(CarDataConst data) {
-		this.cb.setCarData(0, data);
-		wheelGraphs.setCar(this.cb.get(0));
+		RayCarControl car = this.cb.get(0);
+		car.setCarData(data);
+		wheelGraphs.setCar(car);
 	}
 	private RayCarControl resetCar(Car car) {
 		this.reInitPlayerCar(car);
@@ -72,8 +72,8 @@ public class DriveDev extends DriveBase {
 	}
 	
 	@Override
-	public void cleanup() {
-		super.cleanup();
+	public void cleanup(Application app) {
+		super.cleanup(app);
 		this.app.getGuiNode().detachChild(carEditor);
 		this.app.getGuiNode().detachChild(worldEditor);
 		this.app.getGuiNode().detachChild(wheelGraphs);

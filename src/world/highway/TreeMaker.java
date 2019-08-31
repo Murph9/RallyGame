@@ -96,7 +96,7 @@ public class TreeMaker implements TileListener {
 				s.setLocalTranslation(newPos);
 				s.addControl(new RigidBodyControl(0));
 				node.attachChild(s);
-				this.app.getPhysicsSpace().add(s);
+				app.getPhysicsSpace().add(s);
 			}
 			GeometryBatchFactory.optimize(node);
 		}
@@ -111,7 +111,7 @@ public class TreeMaker implements TileListener {
 			return true;
 		}
 		for (Spatial c: n.getChildren()) {
-			this.app.getPhysicsSpace().remove(c);
+			app.getPhysicsSpace().remove(c);
 		}
 		this.treeNode.detachChild(n);
 		return true; 

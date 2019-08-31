@@ -5,18 +5,18 @@ import world.WorldType;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
-import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
+import com.jme3.app.state.BaseAppState;
+import com.jme3.bullet.BulletAppState;
 import com.jme3.input.Joystick;
 
 import car.*;
 import car.data.Car;
 import car.ray.RayCarControl;
-import effects.ParticleAtmosphere;
 import game.App;
 import helper.Log;
 
-public class DriveBase extends AbstractAppState {
+public class DriveBase extends BaseAppState {
 	
 	public SimpleApplication app;
 
@@ -49,10 +49,8 @@ public class DriveBase extends AbstractAppState {
     }
     
     @Override
-    public void initialize(AppStateManager stateManager, Application app) {
-    	super.initialize(stateManager, app);
-
-		this.app = (SimpleApplication)app;
+    public void initialize(Application app) {
+		AppStateManager stateManager = getStateManager();
 		
 		stateManager.attach(world);
     	stateManager.attach(menu);
@@ -65,11 +63,6 @@ public class DriveBase extends AbstractAppState {
 		uiNode = new CarUI(rayCar);
 		stateManager.attach(uiNode);
 		
-		//Particle emitter
-		ParticleAtmosphere particles = new ParticleAtmosphere(this.app.getCamera());
-		stateManager.attach(particles);
-		
-		
 		//initCameras
 		camera = new CarCamera("Camera", app.getCamera(), rayCar);
 		stateManager.attach(camera);
@@ -81,22 +74,23 @@ public class DriveBase extends AbstractAppState {
 			Log.e("There are no joysticks :(");
 		}
 		
-		((App)app).setPhysicsSpaceEnabled(true);
+		getState(BulletAppState.class).setEnabled(true);
 	}
 
 	@Override
-	public void setEnabled(boolean enabled) {
-		super.setEnabled(enabled);
+	protected void onEnable() {
+		_setEnabled(true);
+	}
+	@Override
+	protected void onDisable() {
+		_setEnabled(false);
+	}
+
+	private void _setEnabled(boolean enabled) {
 		this.world.setEnabled(enabled); //we kinda don't want the physics running while paused
-		((App)app).setPhysicsSpaceEnabled(enabled);
+		getState(BulletAppState.class).setEnabled(enabled);
 		this.camera.setEnabled(enabled);
 		this.cb.setEnabled(enabled);
-	}
-	
-	@Override
-	public void update(float tpf) {
-		if (!isEnabled()) return;
-		super.update(tpf);
 	}
 	
 	public void next() {
@@ -107,8 +101,8 @@ public class DriveBase extends AbstractAppState {
 		world.reset();
 	}
 	
-	public void cleanup() {
-		super.cleanup();
+	@Override
+	public void cleanup(Application app) {
 		Log.p("cleaning drive class");
 		
 		app.getStateManager().detach(cb);

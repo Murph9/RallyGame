@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import com.jme3.app.Application;
-import com.jme3.app.state.AppStateManager;
+import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
@@ -23,9 +23,7 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.shape.Box;
 
-import game.App;
 import effects.LoadModelWrapper;
-import helper.Log;
 import world.World;
 import world.WorldType;
 import world.wp.WP.NodeType;
@@ -60,12 +58,8 @@ public abstract class DefaultBuilder extends World {
 	}
 	
 	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
-		if (isInitialized()) {
-			Log.e("init again, too keen");
-			return;
-		}
-		super.initialize(stateManager, app);
+	public void initialize(Application app) {
+		super.initialize(app);
 		
 		this.wpos = new ArrayList<WPObject>();
 		for (int i = 0; i < type.length; i++) {
@@ -95,7 +89,7 @@ public abstract class DefaultBuilder extends World {
 		startGeometry.addControl(new RigidBodyControl(0));
 		
 		this.rootNode.attachChild(startGeometry);
-		((App)this.app).getPhysicsSpace().add(startGeometry);
+		getState(BulletAppState.class).getPhysicsSpace().add(startGeometry);
 	}
 
 	@Override
@@ -103,7 +97,7 @@ public abstract class DefaultBuilder extends World {
 		if (!isEnabled())
 			return;
 		
-		Vector3f pos = this.app.getCamera().getLocation();
+		Vector3f pos = getApplication().getCamera().getLocation();
 		
 		try {
 			while (nextPos.subtract(pos).length() < distance)
@@ -118,7 +112,7 @@ public abstract class DefaultBuilder extends World {
 			Vector3f endSpPos = sp.getWorldTranslation();
 			if (endSpPos.subtract(pos).length() > distance/2) {
 				//2 because don't delete the ones we just placed
-				((App)this.app).getPhysicsSpace().remove(sp.getControl(0));
+				getState(BulletAppState.class).getPhysicsSpace().remove(sp.getControl(0));
 				rootNode.detachChild(sp);
 				curPieces.remove(sp);
 			} else {
@@ -190,7 +184,7 @@ public abstract class DefaultBuilder extends World {
 		landscape.setKinematic(false);
 		s.addControl(landscape);
 
-		((App)this.app).getPhysicsSpace().add(landscape);
+		getState(BulletAppState.class).getPhysicsSpace().add(landscape);
 		rootNode.attachChild(s);
 
 		curPieces.add(s);
@@ -211,7 +205,7 @@ public abstract class DefaultBuilder extends World {
 	public void reset() {
 		List<Spatial> ne = new LinkedList<Spatial>(curPieces);
 		for (Spatial s: ne) {
-			((App)this.app).getPhysicsSpace().remove(s.getControl(0));
+			getState(BulletAppState.class).getPhysicsSpace().remove(s.getControl(0));
 			rootNode.detachChild(s);
 			curPieces.remove(s);
 		}
@@ -252,15 +246,16 @@ public abstract class DefaultBuilder extends World {
 		return null;
 	}
 	
-	public void cleanup() {
+	@Override
+	public void cleanup(Application app) {
 		for (Spatial s: curPieces) {
-			((App)this.app).getPhysicsSpace().remove(s.getControl(0));
+			getState(BulletAppState.class).getPhysicsSpace().remove(s.getControl(0));
 			rootNode.detachChild(s);
 		}
 		
-		((App) this.app).getPhysicsSpace().remove(startGeometry);
+		getState(BulletAppState.class).getPhysicsSpace().remove(startGeometry);
 
-		super.cleanup();
+		super.cleanup(app);
 	}
 	
 	public WorldType getType() {

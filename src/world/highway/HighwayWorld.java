@@ -8,18 +8,18 @@ import java.util.logging.Logger;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
-import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
+import com.jme3.bullet.BulletAppState;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;
 import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
-import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Node;
 import com.jme3.terrain.noise.ShaderUtils;
 import com.jme3.terrain.noise.basis.FilteredBasis;
 import com.jme3.terrain.noise.filter.*;
@@ -57,8 +57,6 @@ Later Things:
 //Set the height in the filteredBasis
 
 public class HighwayWorld extends World {
-	private SimpleApplication app;
-
 	public NoiseBasedWorld terrain;
 	private int blockSize; //(distance between points)/tileSize
 	private int tileSize; //the grid piece size
@@ -81,23 +79,22 @@ public class HighwayWorld extends World {
 	}
 
 	@Override
-	public void initialize(AppStateManager stateManager, Application app) {
-		super.initialize(stateManager, app);
-		this.app = (SimpleApplication)app;
-
+	public void initialize(Application app) {
+		super.initialize(app);
+		
 		blockSize = 128 + 1;
 		tileSize = 128 + 1; //testing occured with these on 128 ish
 
 		AssetManager am = app.getAssetManager();
 		
-		createWorldWithNoise(am);
+		createWorldWithNoise((App)app, am);
 	}
 
 	
-	private void createWorldWithNoise(AssetManager am) {
+	private void createWorldWithNoise(App app, AssetManager am) {
 		// TODO change settings
 		// TODO remember the ./world folder with the cached terrain pieces
-		NoiseBasedWorld newWorld = new NoiseBasedWorld(this.app, ((App)this.app).getPhysicsSpace(), tileSize, blockSize, rootNode);
+		NoiseBasedWorld newWorld = new NoiseBasedWorld(app, getState(BulletAppState.class).getPhysicsSpace(), tileSize, blockSize, rootNode);
 
 		newWorld.setWorldHeight(500); //TODO change to set the height range (needs to be scaled with the texture heights)
 		newWorld.setViewDistance(2);
@@ -141,13 +138,13 @@ public class HighwayWorld extends World {
 		//which can have points individually set so that i don't have to look at the terrain heights
 
 		this.terrain = newWorld;
-		this.app.getStateManager().attach(this.terrain);
+		getStateManager().attach(this.terrain);
 		
 		//set after so the terrain exists first
-		rM = new RoadMaker((App)this.app, this);
+		rM = new RoadMaker((App)app, this);
 		newWorld.addTileListener(rM);
 		
-		tM = new TreeMaker((App)this.app, this);
+		tM = new TreeMaker((App)app, this);
 		newWorld.addTileListener(tM);
 	}
 	private Material createTerrainMaterial(AssetManager am) {
@@ -208,12 +205,13 @@ public class HighwayWorld extends World {
 
 		if (App.IF_DEBUG)
 			for (int i = 0; i < list.size(); i++)
-				this.app.getRootNode().attachChild(H.makeShapeBox(this.app.getAssetManager(), ColorRGBA.Green, list.get(i), 0.2f));
+				((SimpleApplication)getApplication()).getRootNode().attachChild(H.makeShapeBox(
+						((SimpleApplication) getApplication()).getAssetManager(), ColorRGBA.Green, list.get(i), 0.2f));
 		
 		roads.add(road);
 		
 		Geometry geo = new Geometry("highway", road);
-		Material mat = new Material(this.app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+		Material mat = new Material(getApplication().getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		mat.setColor("Color", new ColorRGBA(0,0,0,0.5f));
 		mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
@@ -233,10 +231,12 @@ public class HighwayWorld extends World {
 		
 		for (Vector3f[] quad: quads) {
 			if (App.IF_DEBUG) {
-				this.app.getRootNode().attachChild(H.makeShapeBox(this.app.getAssetManager(), ColorRGBA.Green, quad[0].add(0,0.1f,0), 0.2f));
-				this.app.getRootNode().attachChild(H.makeShapeBox(this.app.getAssetManager(), ColorRGBA.White, quad[1].add(0,0.1f,0), 0.2f));
-				this.app.getRootNode().attachChild(H.makeShapeBox(this.app.getAssetManager(), ColorRGBA.Blue, quad[2].add(0,-0.1f,0), 0.2f));
-				this.app.getRootNode().attachChild(H.makeShapeBox(this.app.getAssetManager(), ColorRGBA.Red, quad[3].add(0,-0.1f,0), 0.2f));
+				AssetManager am = ((SimpleApplication)getApplication()).getAssetManager();
+				Node rootNode = ((SimpleApplication) getApplication()).getRootNode();
+				rootNode.attachChild(H.makeShapeBox(am, ColorRGBA.Green, quad[0].add(0,0.1f,0), 0.2f));
+				rootNode.attachChild(H.makeShapeBox(am, ColorRGBA.White, quad[1].add(0,0.1f,0), 0.2f));
+				rootNode.attachChild(H.makeShapeBox(am, ColorRGBA.Blue, quad[2].add(0,-0.1f,0), 0.2f));
+				rootNode.attachChild(H.makeShapeBox(am, ColorRGBA.Red, quad[3].add(0,-0.1f,0), 0.2f));
 			}
 			
 			quad = order.apply(quad);
@@ -265,41 +265,6 @@ public class HighwayWorld extends World {
 		terrain.setHeights(heightList);
 	}
 	
-	
-	@SuppressWarnings("unused")
-	private Vector2f getClosestPointOnLine(Vector2f a, Vector2f b, Vector2f p)
-    {
-        Vector2f ap = p.subtract(a);       //Vector from A to P   
-        Vector2f ab = b.subtract(a);       //Vector from A to B  
-
-        float magnitudeAB = ab.lengthSquared();     //Magnitude of AB vector (it's length squared)     
-        float ABAPproduct = ap.dot(ab);    //The DOT product of a_to_p and a_to_b     
-        float distance = ABAPproduct / magnitudeAB; //The normalized "distance" from a to your closest point  
-
-        if (distance < 0)     //Check if P projection is over vectorAB     
-            return null;
-        else if (distance > 1)
-            return null;
-        else
-            return a.add(ab.mult(distance));
-    }
-	@SuppressWarnings("unused")
-	//point assumed to be inside
-	private float heightOfPointXZ(Vector3f p, Vector3f a, Vector3f b) {
-		Vector3f AP = p.subtract(a);       //Vector from A to P   
-        Vector3f AB = b.subtract(a);       //Vector from A to B  
-
-        float magnitudeAB = AB.lengthSquared();     //Magnitude of AB vector (it's length squared)     
-        float ABAPproduct = H.dotXZ(AP, AB);    //The DOT product of a_to_p and a_to_b     
-        float distance = ABAPproduct / magnitudeAB; //The normalized "distance" from a to your closest point  
-
-        if (distance < 0)//Check if P projection is over vectorAB     
-            return 0;
-        else if (distance > 1)
-            return 1;
-        return distance;
-	}
-	
 	// interface nodes
 	@Override
 	public Vector3f getStartPos() { 
@@ -314,13 +279,12 @@ public class HighwayWorld extends World {
 	public void reset() { }
 
 	@Override
-	public void cleanup() {
+	public void cleanup(Application app) {
 		this.rootNode.detachAllChildren();
 		this.terrain.close();
 		this.tM.cleanup();
-		this.app.getStateManager().detach(this.terrain);
-		this.app = null;
+		app.getStateManager().detach(this.terrain);
 
-		super.cleanup();
+		super.cleanup(app);
 	}
 }
