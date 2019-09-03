@@ -7,12 +7,10 @@ import com.jme3.app.Application;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.BulletAppState;
-import com.jme3.input.Joystick;
 
 import car.*;
 import car.data.Car;
 import car.ray.RayCarControl;
-import game.App;
 import game.IDriveDone;
 import helper.Log;
 
@@ -38,7 +36,6 @@ public class DriveBase extends BaseAppState {
 		this.done = done;
     	this.car = car;
     	this.world = world;
-    	this.menu = new DriveMenu(this);
     	
     	WorldType type = world.getType();
     	if (type == WorldType.NONE)
@@ -53,12 +50,18 @@ public class DriveBase extends BaseAppState {
 		AppStateManager stateManager = getStateManager();
 		
 		stateManager.attach(world);
+
+		this.menu = new DriveMenu(this);
     	stateManager.attach(menu);
     	
 		//build player
-		this.cb = new CarBuilder((App)app);
+		this.cb = getState(CarBuilder.class);
+		if (!this.cb.getAll().isEmpty()) {
+			Log.e("!Unusually there are cars still in car builder, please clean up.");
+			this.cb.removeAll();
+		}
+
 		RayCarControl rayCar = cb.addCar(car, world.getStartPos(), world.getStartRot(), true, null);
-		stateManager.attach(cb);
 		
 		uiNode = new CarUI(rayCar);
 		stateManager.attach(uiNode);
@@ -67,12 +70,6 @@ public class DriveBase extends BaseAppState {
 		camera = new CarCamera("Camera", app.getCamera(), rayCar);
 		stateManager.attach(camera);
 		app.getInputManager().addRawInputListener(camera);
-		
-		//connectJoySticks
-		Joystick[] joysticks = app.getInputManager().getJoysticks();
-		if (joysticks == null) {
-			Log.e("There are no joysticks :(");
-		}
 		
 		getState(BulletAppState.class).setEnabled(true);
 	}
@@ -104,10 +101,7 @@ public class DriveBase extends BaseAppState {
 	@Override
 	public void cleanup(Application app) {
 		Log.p("cleaning drive class");
-		
-		getStateManager().detach(cb);
-		cb = null;
-		
+				
 		getStateManager().detach(menu);
 		menu = null;
 		
@@ -120,6 +114,9 @@ public class DriveBase extends BaseAppState {
 		getStateManager().detach(camera);
 		app.getInputManager().removeRawInputListener(camera);
 		camera = null;
+
+		cb.removeAll();
+		cb = null;
 	}
 	
 	protected void reInitPlayerCar(Car car) {

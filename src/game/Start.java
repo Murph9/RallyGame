@@ -56,8 +56,7 @@ public class Start extends BaseAppState {
 		getStateManager().attach(world);
 		
 		// build player
-		this.cb = new CarBuilder(myapp);
-		getStateManager().attach(cb);
+		this.cb = getState(CarBuilder.class);
 		RayCarControl car = cb.addCar(this.carType, world.getStartPos(), world.getStartRot(), true, null);
 
 		//attach basic ai, for the view
@@ -101,9 +100,11 @@ public class Start extends BaseAppState {
 	
 	@Override
 	protected void onEnable() {
+		this.cb.setEnabled(true);
 	}
 	@Override
 	protected void onDisable() {
+		this.cb.setEnabled(false);
 	}
 
 	@Override
@@ -117,7 +118,6 @@ public class Start extends BaseAppState {
 		myWindow = null;
 		
 		cb.removeAll();
-		getStateManager().detach(cb);
 		cb = null;
 		
 		getStateManager().detach(world);

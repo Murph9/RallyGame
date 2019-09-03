@@ -18,6 +18,8 @@ import helper.Log;
 
 public class DriveMenu extends BaseAppState {
 
+	private final DriveBase drive;
+
 	//GUI objects
 	private Container pauseMenu;
 	private Container infoHint;
@@ -26,9 +28,7 @@ public class DriveMenu extends BaseAppState {
 	//random Label to print to the screen to show the user, assumed settable by 'Drive*'
 	public Label randomthing;
 	private Container random;
-	
-	DriveBase drive;
-	
+		
 	public DriveMenu(DriveBase drive) {
 		super();
 		this.drive = drive;

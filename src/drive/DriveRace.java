@@ -35,7 +35,6 @@ import car.ai.RaceAI;
 import car.data.Car;
 import car.ray.RayCarControl;
 import effects.LoadModelWrapper;
-import game.App;
 import helper.H;
 import helper.Log;
 
@@ -84,7 +83,6 @@ public class DriveRace extends BaseAppState {
 	public DriveRace() {
 		super();
 		this.car = Car.Runner;
-		this.menu = new RaceMenu(null);
 	}
 	
 	@Override
@@ -115,9 +113,10 @@ public class DriveRace extends BaseAppState {
 		}
     	
 		//buildCars
-		this.cb = new CarBuilder((App)app);
+		this.cb = getState(CarBuilder.class);
 		RayCarControl rayCar = cb.addCar(car, worldStarts[0], worldRot, true, null);
-		getStateManager().attach(cb);
+		
+		menu = new RaceMenu(null);
 		getStateManager().attach(menu);
 		
 		uiNode = new CarUI(rayCar);
@@ -288,9 +287,6 @@ public class DriveRace extends BaseAppState {
 		}
 		models.clear();
 		
-		getStateManager().detach(cb);
-		cb = null;
-		
 		getStateManager().detach(menu);
 		menu = null;
 		
@@ -302,6 +298,9 @@ public class DriveRace extends BaseAppState {
 		camera = null;
 		
 		((SimpleApplication)app).getRootNode().detachChild(rootNode);
+
+		cb.removeAll();
+		cb = null;
 	}
 	
 	@Override

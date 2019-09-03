@@ -43,7 +43,7 @@ public class LoadModelWrapper {
 		if (defColour != null)
 			color = defColour;
 		else
-			Log.e("!!Material in geom:", g.getName(), "doesn't have a colour set! Using the default given: " + color);
+			Log.e("!Material in geom:", g.getName(), "doesn't have a colour set! Using the default given: " + color);
 		
 		Material baseMat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
 		baseMat.setColor("Color", color);

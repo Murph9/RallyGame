@@ -35,17 +35,12 @@ import helper.Log;
 
 public class CarBuilder extends BaseAppState {
 
-	private App app;
-	private final CarDataLoader loader;
+	private CarDataLoader loader;
 	private final List<RayCarControl> cars;
 
 	private final Node rootNode;
 
-	public CarBuilder(App app) {
-		// TODO remove app from car builder
-		this.app = app;
-		loader = new CarDataLoader(app.getStateManager().getState(BulletAppState.class).getPhysicsSpace());
-
+	public CarBuilder() {
 		cars = new LinkedList<>();
 		rootNode = new Node("Car Builder Root");
 	}
@@ -53,12 +48,9 @@ public class CarBuilder extends BaseAppState {
 	@Override
 	public void initialize(Application app) {
 		Log.p("CarBuilder init");
-		if (this.app != app) {
-			Log.e("!!!!!!! Car builder found a different application to run against.");
-			System.exit(-6754);
-		}
 
-		this.app.getRootNode().attachChild(rootNode);
+		loader = new CarDataLoader(getState(BulletAppState.class).getPhysicsSpace());
+		((App)app).getRootNode().attachChild(rootNode);
 	}
 	
 	@Override
@@ -78,8 +70,8 @@ public class CarBuilder extends BaseAppState {
 	
 	public RayCarControl addCar(Car car, Vector3f start, Matrix3f rot, boolean aPlayer, BiFunction<RayCarControl, RayCarControl, CarAI> ai) {
 		try {
-			if (this.app == null)
-				throw new Exception("App hasn't been initialised");
+			if (!isInitialized())
+				throw new Exception(getClass().getName() + " hasn't been initialised");
 		} catch (Exception e) {
 			e.printStackTrace();
 			//this is a runtime exception that should have been fixed by the dev
@@ -87,10 +79,10 @@ public class CarBuilder extends BaseAppState {
 		}
 		
 		Vector3f grav = new Vector3f();
-		this.app.getStateManager().getState(BulletAppState.class).getPhysicsSpace().getGravity(grav);
-		CarDataConst carData = loader.get(this.app.getAssetManager(), car, grav);
+		getState(BulletAppState.class).getPhysicsSpace().getGravity(grav);
+		CarDataConst carData = loader.get(getApplication().getAssetManager(), car, grav);
 		
-		AssetManager am = this.app.getAssetManager();
+		AssetManager am = getApplication().getAssetManager();
 		
 		Node carNode = new Node("Car:" + carData);
 		Node carModel = LoadModelWrapper.create(am, carData.carModel, ColorRGBA.Magenta);
@@ -115,7 +107,7 @@ public class CarBuilder extends BaseAppState {
 		}
 
 		//init car
-		RayCarControl carControl = new RayCarControl(this.app, colShape, carData, carNode);
+		RayCarControl carControl = new RayCarControl((App)getApplication(), colShape, carData, carNode);
 		
 		carNode.attachChild(carModel);
 
@@ -124,7 +116,7 @@ public class CarBuilder extends BaseAppState {
 		carControl.setPhysicsRotation(rot);
 
 		if (aPlayer) { //players get the keyboard
-			carControl.attachControls(app.getInputManager());
+			carControl.attachControls(getApplication().getInputManager());
 		} else {
 			CarAI _ai;
 			if (ai != null)
@@ -146,7 +138,7 @@ public class CarBuilder extends BaseAppState {
 	public int removeAll() {
 		for (RayCarControl car: cars) {
 			rootNode.detachChild(car.getRootNode());
-			car.cleanup(this.app);
+			car.cleanup((App)getApplication());
 		}
 		int size = cars.size();
 		cars.clear();
@@ -163,14 +155,14 @@ public class CarBuilder extends BaseAppState {
 		}
 		
 		rootNode.detachChild(car.getRootNode());
-		car.cleanup(this.app);
+		car.cleanup((App)getApplication());
 		cars.remove(car);
 	}
 	
 	public void update(float tpf) {
 		if (!isEnabled())
 			return;
-		
+			
 		for (RayCarControl rcc: cars) {
 			if (rcc.isEnabled())
 				rcc.update(tpf);
@@ -190,12 +182,10 @@ public class CarBuilder extends BaseAppState {
 	@Override
 	public void cleanup(Application app) {
 		for (RayCarControl car : cars) {
-			car.cleanup(this.app);
+			car.cleanup((App)app);
 		}
 
-		this.app.getRootNode().detachChild(rootNode);
+		((App)app).getRootNode().detachChild(rootNode);
 		Log.p("carbuilder cleanup");
-		
-		this.app = null;
 	}
 }

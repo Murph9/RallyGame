@@ -61,9 +61,7 @@ public class ChooseCar extends BaseAppState {
 		world = new StaticWorldBuilder(worldType);
 		getStateManager().attach(world);
 		
-		cb = new CarBuilder((App)app);
-		getStateManager().attach(cb);
-		
+		cb = getState(CarBuilder.class);
 		cb.addCar(car, start, dir, true, null);
 
 		//make camera
@@ -146,9 +144,6 @@ public class ChooseCar extends BaseAppState {
 
 	@Override
 	public void cleanup(Application app) {
-		getStateManager().detach(cb);
-		cb = null;
-		
 		getStateManager().detach(world);
 		world = null;
 		
@@ -157,14 +152,19 @@ public class ChooseCar extends BaseAppState {
 		
 		graph.removeFromParent();
 		graph = null;
+
+		cb.removeAll();
+		cb = null;
 	}
 
 	@Override
 	protected void onEnable() {
+		this.cb.setEnabled(true);
 	}
 
 	@Override
 	protected void onDisable() {
+		this.cb.setEnabled(false);
 	}
 
 

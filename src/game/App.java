@@ -36,6 +36,7 @@ import com.simsilica.lemur.event.MouseAppState;
 import com.simsilica.lemur.input.InputMapper;
 import com.simsilica.lemur.style.BaseStyles;
 
+import car.CarBuilder;
 import car.data.Car;
 import car.ray.CarDataConst;
 import drive.*;
@@ -66,6 +67,7 @@ public class App extends SimpleApplication {
 				, new AudioListenerState()
 				, new StatsAppState()
 				, new FilterManager()
+				, new CarBuilder()
 				//, new DetailedProfilerState() //profiling in jme 3.2: TODO add physics engine stuff using custom sections
 				);
 	}
