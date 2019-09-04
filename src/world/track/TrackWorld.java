@@ -43,8 +43,8 @@ import com.jme3.util.BufferUtils;
 
 import drive.DriveBase;
 import game.App;
+import game.DebugAppState;
 import helper.H;
-import helper.HelperObj;
 import helper.Log;
 import world.World;
 import world.WorldType;
@@ -215,7 +215,7 @@ public class TrackWorld extends World {
 			controlPoints.add(pos);
 			
 			if (DEBUG) {
-				HelperObj.use(this.rootNode, "ControlPoint"+i, H.makeShapeBox(am, ColorRGBA.Cyan, unnormalizeHeightIn(pos), 0.5f));
+				getState(DebugAppState.class).drawBox("ControlPoint"+i, ColorRGBA.Cyan, unnormalizeHeightIn(pos), 0.5f);
 			}
 		}
 	
@@ -249,7 +249,7 @@ public class TrackWorld extends World {
 			if (DEBUG) {
 				Log.p(i);
 				Log.p(trackSegments.get(i));
-				HelperObj.use(this.rootNode, "RoadSegment"+i, H.makeShapeArrow(am, ColorRGBA.Blue, unnormalizeHeightIn(cur).subtract(unnormalizeHeightIn(pos)), unnormalizeHeightIn(pos)));
+				getState(DebugAppState.class).drawArrow("RoadSegment"+i, ColorRGBA.Blue, unnormalizeHeightIn(pos), unnormalizeHeightIn(cur).subtract(unnormalizeHeightIn(pos)));
 			}
 		}
 		
@@ -306,8 +306,8 @@ public class TrackWorld extends World {
 		if (this.trackSegments != null && drive != null && drive.cb.get(0) != null && DEBUG) {
 			//hack to see if the bezier curve stuff works
 			Vector3f pos = getClosestPointTo(this.trackSegments, normalizeHeightIn(drive.cb.get(0).getPhysicsLocation()));
-			HelperObj.use(this.rootNode, "closestpointtocurve", 
-					H.makeShapeBox(a.getAssetManager(), ColorRGBA.LightGray, unnormalizeHeightIn(pos), 1));
+			
+			getState(DebugAppState.class).drawBox("closestpointtocurve", ColorRGBA.LightGray, unnormalizeHeightIn(pos), 1);
 		}
 	}
 	@Override

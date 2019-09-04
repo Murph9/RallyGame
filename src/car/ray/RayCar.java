@@ -6,14 +6,9 @@ import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.PhysicsTickListener;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
-import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
-
-import game.App;
-import helper.H;
-import helper.HelperObj;
 
 //doesn't extend anything, but here are some reference classes
 //https://github.com/jMonkeyEngine/jmonkeyengine/blob/master/jme3-core/src/main/java/com/jme3/scene/Spatial.java
@@ -22,13 +17,14 @@ import helper.HelperObj;
 //https://github.com/jMonkeyEngine/jmonkeyengine/blob/master/jme3-jbullet/src/main/java/com/jme3/bullet/objects/PhysicsVehicle.java
 //https://github.com/bubblecloud/jbullet/blob/master/src/main/java/com/bulletphysics/dynamics/vehicle/RaycastVehicle.java
 
+
+//Extending traction model:
+//add in a quadratic normal force forumla normal(x) = NK1 + N^2*K2 + K3
+//ideally replaces E in the base formla from: https://www.edy.es/dev/docs/pacejka-94-parameters-explained-a-comprehensive-guide/
+//Example given: https://github.com/chrisoco/M120/blob/master/RaceCar/RCAS/src/rcas/model/MagicFormulaTireModel.java
+
 /** Handles suspension/traction/drag and real-time data of this car */
 public class RayCar implements PhysicsTickListener {
-
-	private static final boolean DEBUG = false;
-	private static final boolean DEBUG_SUS = DEBUG || false;
-	private static final boolean DEBUG_SUS2 = DEBUG || false;
-	private static final boolean DEBUG_DRAG = DEBUG || false;
 	
 	//handy ids to help with removing magic numbers
 	protected static int WHEEL_FL = 0, WHEEL_FR = 1, WHEEL_RL = 2, WHEEL_RR = 3;
@@ -48,7 +44,7 @@ public class RayCar implements PhysicsTickListener {
 	
 	//debug values
 	protected float rollingResistance;
-	protected float dragValue;
+	protected Vector3f dragDir;
 	protected float driftAngle;
 	public final Vector3f planarGForce;
 	
@@ -106,22 +102,10 @@ public class RayCar implements PhysicsTickListener {
 			float susTravel = sus.travelTotal();
 			
 			//cast ray from suspension min, to max + radius (radius because bottom out check might as well be the size of the wheel)
-			Vector3f startPos = vecLocalToWorld(localPos.add(localDown.mult(sus.min_travel)));
-			Vector3f dir = w_angle.mult(localDown.mult(susTravel + carData.wheelData[w_id].radius));
-			final FirstRayHitDetails col = raycaster.castRay(space, rbc, startPos, dir);
-			
-			if (DEBUG_SUS) {
-				App.CUR.enqueue(() -> {
-					HelperObj.use(App.CUR.getRootNode(), "sus_wheel_radius"+w_id,
-							H.makeShapeArrow(App.CUR.getAssetManager(), ColorRGBA.Blue, dir.normalize().mult(carData.wheelData[w_id].radius), startPos));
-					HelperObj.use(App.CUR.getRootNode(), "sus"+w_id,
-						H.makeShapeArrow(App.CUR.getAssetManager(), ColorRGBA.Cyan, dir.normalize().mult(susTravel), startPos.add(dir.normalize().mult(carData.wheelData[w_id].radius))));
-					
-					HelperObj.use(App.CUR.getRootNode(), "col_point"+w_id,
-						H.makeShapeBox(App.CUR.getAssetManager(), ColorRGBA.Red, wheels[w_id].curBasePosWorld, 0.01f));
-				});
-			}
-			
+			wheels[w_id].rayStartWorld = vecLocalToWorld(localPos.add(localDown.mult(sus.min_travel)));
+			wheels[w_id].rayDirWorld = w_angle.mult(localDown.mult(susTravel + carData.wheelData[w_id].radius));
+			FirstRayHitDetails col = raycaster.castRay(space, rbc, wheels[w_id].rayStartWorld, wheels[w_id].rayDirWorld);
+						
 			if (col == null) { //suspension ray found nothing, extend all the way and don't apply a force (set to 0)
 				wheels[w_id].inContact = false;
 				wheels[w_id].susRayLength = susTravel;
@@ -192,16 +176,6 @@ public class RayCar implements PhysicsTickListener {
 			//applyImpulse (force = world space, pos = relative to local)
 			Vector3f f = wheels[w_id].hitNormalInWorld.mult(wheels[w_id].susForce * tpf);
 			rbc.applyImpulse(f, wheels[w_id].curBasePosWorld.subtract(w_pos)); 
-			
-			if (DEBUG_SUS2) {
-				App.CUR.enqueue(() -> {
-					HelperObj.use(App.CUR.getRootNode(), "normalforcearrow" + w_id, 
-						H.makeShapeArrow(App.CUR.getAssetManager(), ColorRGBA.Black, wheels[w_id].hitNormalInWorld, wheels[w_id].curBasePosWorld));
-					
-					HelperObj.use(App.CUR.getRootNode(), "normalforcearrow inv" + w_id,
-						H.makeShapeArrow(App.CUR.getAssetManager(), ColorRGBA.White, wheels[w_id].hitNormalInWorld.mult(-denominator), wheels[w_id].curBasePosWorld));
-				});
-			}
 		});
 
 	}
@@ -310,18 +284,10 @@ public class RayCar implements PhysicsTickListener {
 		float dragz = -(1.225f * carData.areo_drag * carData.areo_crossSection * w_velocity.z * FastMath.abs(w_velocity.z));
 		//TODO change cross section for each xyz direction to make a realistic drag feeling
 		
-		Vector3f totalNeutral = new Vector3f(dragx, dragy, dragz);
-		dragValue = totalNeutral.length(); //for debug reasons
+		dragDir = new Vector3f(dragx, dragy, dragz);
 		
 		float dragDown = -0.5f * carData.areo_downforce * 1.225f * (w_velocity.z*w_velocity.z); //formula for downforce from wikipedia
-		rbc.applyCentralForce(totalNeutral.add(0, dragDown, 0)); //apply downforce after
-				
-		if (DEBUG_DRAG) {
-			App.CUR.enqueue(() -> {
-				HelperObj.use(App.CUR.getRootNode(), "dragarrow",
-					H.makeShapeArrow(App.CUR.getAssetManager(), ColorRGBA.Black, totalNeutral, w_pos));
-			});
-		}
+		rbc.applyCentralForce(dragDir.add(0, dragDown, 0)); //apply downforce after
 	}
 	
 	/////////////////

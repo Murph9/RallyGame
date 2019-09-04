@@ -9,6 +9,9 @@ public class RayWheel {
 	protected final int num;
 	protected final WheelDataConst data;
 	
+	public Vector3f rayStartWorld;
+	public Vector3f rayDirWorld;
+
 	public boolean inContact;
 	public Vector3f curBasePosWorld;
 	public Vector3f hitNormalInWorld;

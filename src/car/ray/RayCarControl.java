@@ -10,6 +10,7 @@ import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.input.InputManager;
 import com.jme3.input.RawInputListener;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
@@ -21,11 +22,18 @@ import car.MyKeyListener;
 import car.ai.CarAI;
 import drive.DriveBase;
 import game.App;
+import game.DebugAppState;
 import helper.H;
 import helper.Log;
 
 //visual/input things
 public class RayCarControl extends RayCarPowered implements ICarPowered {
+
+	private static final boolean DEBUG = false;
+	private static final boolean DEBUG_SUS = DEBUG || false;
+	private static final boolean DEBUG_SUS2 = DEBUG || false;
+	private static final boolean DEBUG_TRACTION = DEBUG || false;
+	private static final boolean DEBUG_DRAG = DEBUG || false;
 
 	private final App app;
 	private final RayWheelControl[] wheelControls;
@@ -130,6 +138,41 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 		
 		for (int i = 0; i < this.wheelControls.length; i++) {
 			this.wheelControls[i].viewUpdate(tpf, rbc.getLinearVelocity(), carData.susByWheelNum(i).min_travel);
+		}
+
+		if (DEBUG) {
+			Matrix3f w_angle = rbc.getPhysicsRotationMatrix();
+			doForEachWheel((w_id) -> {
+
+				float susTravel = carData.susByWheelNum(w_id).travelTotal();
+
+				DebugAppState debug = app.getStateManager().getState(DebugAppState.class);
+
+				if (DEBUG_SUS) {
+					debug.drawArrow("sus_wheel_radius" + w_id, ColorRGBA.Blue, wheels[w_id].rayStartWorld,
+							wheels[w_id].rayDirWorld.normalize().mult(carData.wheelData[w_id].radius));
+					debug.drawArrow("sus" + w_id, ColorRGBA.Cyan,
+							wheels[w_id].rayStartWorld
+									.add(wheels[w_id].rayDirWorld.normalize().mult(carData.wheelData[w_id].radius)),
+							wheels[w_id].rayDirWorld.normalize().mult(susTravel));
+					debug.drawBox("col_point" + w_id, ColorRGBA.Red, wheels[w_id].curBasePosWorld, 0.01f);
+				}
+
+				if (DEBUG_SUS2) {
+					debug.drawArrow("normalforcearrow" + w_id, ColorRGBA.Black, wheels[w_id].curBasePosWorld,
+							wheels[w_id].hitNormalInWorld);
+				}
+
+				if (DEBUG_TRACTION) {
+					debug.drawArrow("tractionDir"+w_id, ColorRGBA.White, wheels[w_id].curBasePosWorld, 
+							w_angle.mult(wheels[w_id].gripDir.mult(1/this.carData.mass)));
+				}
+
+				Vector3f w_pos = rbc.getPhysicsLocation();
+				if (DEBUG_DRAG) {
+					debug.drawArrow("dragarrow", ColorRGBA.Black, w_pos, dragDir);
+				}
+			});
 		}
 	}
 	
@@ -383,7 +426,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 	public String statsString() {
 		return H.round3f(this.getPhysicsLocation(), 2)
 		 + "\nspeed:"+ H.round3f(vel, 2) + "m/s\nRPM:" + curRPM
-		 + "\nengine:" + engineTorque + "\ndrag:" + dragValue +" rr("+ rollingResistance+")" + "N";
+		 + "\nengine:" + engineTorque + "\ndrag:" + dragDir.length() +" rr("+ rollingResistance+")" + "N";
 	}
 	
 	

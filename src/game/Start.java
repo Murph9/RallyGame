@@ -44,7 +44,7 @@ public class Start extends BaseAppState {
 		super();
 		this.flow = flow;
 
-		carType = Car.Runner;
+		carType = Car.Rocket;
 		world = DynamicType.Valley.getBuilder();
 	}
 
@@ -61,7 +61,8 @@ public class Start extends BaseAppState {
 
 		//attach basic ai, for the view
 		DriveAlongAI ai = new DriveAlongAI(car, (vec) -> world.getNextPieceClosestTo(vec));
-		ai.setMaxSpeed(27.7778f); // 27.7 = 100 km/h
+		//ai.setMaxSpeed(27.7778f); // 27.7 = 100 km/h
+		ai.setMaxSpeed(35);
 		car.attachAI(ai, true);
 		
 		this.camera = new StartCamera("start camera", app.getCamera(), car);

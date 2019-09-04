@@ -58,8 +58,6 @@ public class App extends SimpleApplication {
 	public static final Vector3f GRAVITY = new Vector3f(0, -9.81f, 0); // yay its down
 	public static final Boolean IF_DEBUG = false;
 	
-	public static App CUR;
-
 	private AppFlow flow;
 
 	public App() {
@@ -68,19 +66,13 @@ public class App extends SimpleApplication {
 				, new StatsAppState()
 				, new FilterManager()
 				, new CarBuilder()
+				, new DebugAppState(true)
 				//, new DetailedProfilerState() //profiling in jme 3.2: TODO add physics engine stuff using custom sections
 				);
 	}
 
 	@Override
 	public void simpleInitApp() {
-		CUR = this; //TODO remove
-
-		boolean ignoreWarnings = false;
-		if (ignoreWarnings) {
-			Logger.getLogger("com.jme3").setLevel(Level.SEVERE); //remove warnings here
-			Log.e("!!!! IGNORING IMPORTANT WARNINGS !!!!!");
-		}
 		Logger.getLogger("com.jme3.scene.plugins.blender").setLevel(Level.WARNING); //ignore blender warnings
 
 		inputManager.setCursorVisible(true);
@@ -115,12 +107,6 @@ public class App extends SimpleApplication {
 			Log.e("Vector3f.ZERO is not zero!!!!, considered a fatal error.");
 			System.exit(342);
 		}
-
-		//TODO this can check if a state is active
-		BaseAppState a = getStateManager().getState(BaseAppState.class);
-		boolean printAppState = false;
-		if (printAppState)
-			Log.p(a);
 	}
 
 	/////////////////////
