@@ -1,8 +1,5 @@
 package world.wp;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
@@ -70,36 +67,6 @@ public enum Rocks implements WP {
 	static class Builder extends DefaultBuilder {
 		Builder() {
 			super(Rocks.values());
-		}
-		
-		protected void selectNewPiece() {
-			List<WPObject> wpoList = new ArrayList<>();
-			for (WPObject w: wpos) {
-				if (nextNode == null || nextNode == w.wp.startNode()) {
-					wpoList.add(w);
-				}
-			}
-			
-			if (wpoList.isEmpty()) { 
-				try {
-					throw new Exception("No pieces with the node start " + nextNode.name() + " found.");
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-			
-			int i = (int)(Math.random()*wpoList.size());
-			WPObject wpo = wpoList.get(i);
-			
-			int count = 0;
-			while (!PlacePiece(wpo)) {
-				i = (int)(Math.random()*wpoList.size()); //so select a new one
-				wpo = wpoList.get(i);
-				count++;
-				if (count > 100) {
-					break; //please no loops huh?
-				}
-			}
 		}
 
 		public DefaultBuilder copy() {

@@ -24,6 +24,7 @@ import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.shape.Box;
 
 import effects.LoadModelWrapper;
+import helper.Log;
 import world.World;
 import world.WorldType;
 import world.wp.WP.NodeType;
@@ -96,12 +97,11 @@ public abstract class DefaultBuilder extends World {
 	public void update(float tpf) {
 		if (!isEnabled())
 			return;
-		
-		Vector3f pos = getApplication().getCamera().getLocation();
-		
+
+		Vector3f camPos = getApplication().getCamera().getLocation();
+
 		try {
-			while (nextPos.subtract(pos).length() < distance)
-				selectNewPiece();
+			placeNewPieces(camPos);
 		} catch (Exception e) {
 			//probably couldn't find something to place
 			e.printStackTrace();
@@ -110,7 +110,7 @@ public abstract class DefaultBuilder extends World {
 		List<Spatial> temp = new LinkedList<Spatial>(curPieces);
 		for (Spatial sp: temp) {
 			Vector3f endSpPos = sp.getWorldTranslation();
-			if (endSpPos.subtract(pos).length() > distance/2) {
+			if (endSpPos.subtract(camPos).length() > distance/2) {
 				//2 because don't delete the ones we just placed
 				getState(BulletAppState.class).getPhysicsSpace().remove(sp.getControl(0));
 				rootNode.detachChild(sp);
@@ -121,7 +121,8 @@ public abstract class DefaultBuilder extends World {
 		}
 	}
 
-	protected void selectNewPiece() throws Exception {
+	protected void placeNewPieces(Vector3f camPos) throws Exception {
+
 		//get list of valid pieces (i.e. pieces with the correct node type)
 		List<WPObject> wpoList = new ArrayList<>();
 		for (WPObject w: wpos) {
@@ -130,49 +131,49 @@ public abstract class DefaultBuilder extends World {
 			}
 		}
 
-		if (wpoList.isEmpty())
-			throw new Exception("No pieces with the node start " + nextNode.name() + " found.");
+		if (wpoList.isEmpty()) {
+			throw new Exception("No pieces with the node start " + nextNode.name() + " found on type " + WPObject.class.getName());
+		}
 
-		int i = (int)(rand.nextDouble()*wpoList.size());
-		WPObject wpo = wpoList.get(i);
-		boolean success = PlacePiece(wpo);
-		if (!success) {
-			// if it fails, try from the remaining list
-			// and remove items until there is nothing to select
-			List<WPObject> pieceList = new LinkedList<WPObject>(wpoList);
-			while (!success) {
-				pieceList.remove(wpo);
-				if (pieceList.isEmpty())
-					throw new Exception("DefaultBuilder ran out of pieces that fit. Type: " + WPObject.class);
+		//if there is no piece to place then this gets stuck in an infinite loop
+		//probably because there is no piece that satisfies the angle constraint
+		while (nextPos.subtract(camPos).length() < distance) {
+			int i = (int)(rand.nextDouble()*wpoList.size());
+			WPObject wpo = wpoList.get(i);
 
-				i = rand.nextInt(pieceList.size());
-				wpo = pieceList.get(i);
+			if (testConstraints(wpo))
+				PlacePiece(wpo);
+			else
+				wpoList.remove(wpo);
 
-				success = PlacePiece(wpo);
+			if (wpoList.isEmpty()) {
+				throw new Exception("No piece matched the constraints :(.");
 			}
 		}
+	}
+
+	private boolean testConstraints(WPObject wpo) {
+		Quaternion newRot = this.nextRot.mult(wpo.wp.getNewAngle());
+		
+		// Prevent it turning back onto itself - try PI*3/2 if its not interesting enough
+		Vector3f newForward = newRot.mult(Vector3f.UNIT_X);
+		if (newForward.angleBetween(Vector3f.UNIT_X) > FastMath.PI)
+			return false;
+		
+		// checking the difference from vertical helps from the weird ever increasing hill
+		Vector3f newUp = newRot.mult(Vector3f.UNIT_Y);
+		if (newUp.angleBetween(Vector3f.UNIT_Y) > 0.3f)
+			return false;
+		return true;
 	}
 	
 	// Please attempt to use the wonderful getRotation().toAngles() and fromAngles() methods
 	// which should stop the slowly getting off track if you just create the quaternion everytime
 	// there will always be floating point errors though, unless we really care about that...
-	protected boolean PlacePiece(WPObject wpo) {
+	protected void PlacePiece(WPObject wpo) {
 		WP world = wpo.wp;
 		Spatial s = wpo.sp.clone();
 		CollisionShape coll = wpo.col;
-
-		Quaternion inv = nextRot.mult(world.getNewAngle()).inverse();
-		Quaternion result = Quaternion.IDENTITY.mult(inv);
-		float angle = FastMath.acos(result.getW())*2; //believe me that this gets the angle between them
-
-		// Prevent it turning back onto itself - try PI*3/2 if its not interesting enough
-		if (!(FastMath.abs(angle) < FastMath.PI))
-			return false;
-		
-		// checking the difference from vertical helps from the weird ever increasing hill
-		Vector3f newUp = nextRot.mult(Vector3f.UNIT_Y);
-		if (newUp.angleBetween(Vector3f.UNIT_Y) > 0.5f)
-			return false;
 
 		float scale = world.getScale();
 		//translate, rotate, scale
@@ -198,8 +199,7 @@ public abstract class DefaultBuilder extends World {
 		nextRot.multLocal(rot);
 		
 		nextNode = world.endNode();
-		
-		return true;
+		count++;
 	}
 	
 	public void reset() {

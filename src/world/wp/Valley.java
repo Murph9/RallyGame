@@ -1,9 +1,5 @@
 package world.wp;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
@@ -52,52 +48,6 @@ public enum Valley implements WP {
 		Builder() {
 			super(Valley.values());
 		}
-		
-		protected void selectNewPiece() {
-			List<WPObject> wpoList = new ArrayList<>();
-			for (WPObject w: wpos) {
-				if (nextNode == null || nextNode == w.wp.startNode()) {
-					
-					if (isAngleGood(w))
-						wpoList.add(w);
-				}
-			}
-			
-			if (wpoList.isEmpty()) { 
-				try {
-					throw new Exception("No pieces with the node start " + nextNode.name() + " found.");
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-			
-			int i = (int)(Math.random()*wpoList.size());
-			WPObject wpo = wpoList.get(i);
-			
-			int count = 0;
-			while (!PlacePiece(wpo)) {
-				i = (int)(Math.random()*wpoList.size()); //so select a new one
-				wpo = wpoList.get(i);
-				count++;
-				if (count > 100) {
-					break; //please no loops huh?
-				}
-			}
-		}
-		
-		private boolean isAngleGood(WPObject wpo) {
-			float angle = angleFromHorizontal(nextRot.mult(wpo.wp.getNewAngle()));
-//			Log.p(angle);
-			return FastMath.abs(angle) < FastMath.DEG_TO_RAD*9; //they happen to angle up/down at 8'
-//			return FastMath.abs(angle) < FastMath.QUARTER_PI;
-		}
-		
-		private float angleFromHorizontal(Quaternion q) {
-			Vector3f res = q.mult(new Vector3f(0,1,0)); //still somehow gets wonky, probably not checking enough axis
-			//should probably not care about what xy direction im going along the plane, should only deal with the z changes 
-			return FastMath.tan(res.x/res.y);
-		}
-		
 
 		public DefaultBuilder copy() {
 			return new Builder();
