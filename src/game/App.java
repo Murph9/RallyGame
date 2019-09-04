@@ -5,54 +5,23 @@ import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.jme3.app.BasicProfilerState;
-import com.jme3.app.DebugKeysAppState;
-import com.jme3.app.DetailedProfilerState;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.StatsAppState;
-import com.jme3.app.state.AppState;
-import com.jme3.app.state.AppStateManager;
-import com.jme3.app.state.BaseAppState;
 import com.jme3.audio.AudioListenerState;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.BulletAppState.ThreadingType;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.bullet.PhysicsSpace;
-import com.jme3.font.BitmapFont;
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.FastMath;
-import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import com.jme3.post.Filter;
-import com.jme3.post.FilterPostProcessor;
-import com.jme3.post.filters.BloomFilter;
-import com.jme3.post.filters.FogFilter;
-import com.jme3.renderer.Camera;
-import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.system.AppSettings;
-import com.jme3.system.NanoTimer;
 import com.simsilica.lemur.GuiGlobals;
-import com.simsilica.lemur.event.MouseAppState;
-import com.simsilica.lemur.input.InputMapper;
-import com.simsilica.lemur.style.BaseStyles;
 
 import car.CarBuilder;
-import car.data.Car;
-import car.ray.CarDataConst;
-import drive.*;
-import effects.EdgeMaskFilter;
 import effects.FilterManager;
 import effects.ParticleAtmosphere;
-import game.*;
 import helper.Log;
-import settings.Configuration;
-import world.*;
-import world.highway.HighwayWorld;
-import world.lsystem.LSystemWorld;
-import world.track.TrackWorld;
-import world.wp.WP.DynamicType;
 
-@SuppressWarnings("unused")
+
 public class App extends SimpleApplication {
 
 	public static final Vector3f GRAVITY = new Vector3f(0, -9.81f, 0); // yay its down
@@ -122,6 +91,8 @@ public class App extends SimpleApplication {
 		super.destroy();
 
 		Log.p("Closing " + this.getClass().getName());
+
+		flow.cleanup();
 
 		PhysicsSpace space = getPhysicsSpace();
 		Collection<PhysicsRigidBody> list = space.getRigidBodyList();

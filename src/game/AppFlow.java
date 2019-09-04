@@ -89,4 +89,8 @@ public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
 
 		sm.attach(new DriveBase((IDriveDone)this, this.car, this.world));
 	}
+
+	public void cleanup() {
+		
+	}
 }
