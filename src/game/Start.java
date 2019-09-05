@@ -21,6 +21,7 @@ import car.ai.DriveAlongAI;
 import car.data.Car;
 import car.ray.RayCarControl;
 import drive.IFlow;
+import helper.H;
 import world.wp.DefaultBuilder;
 import world.wp.WP.DynamicType;
 
@@ -44,7 +45,7 @@ public class Start extends BaseAppState {
 		super();
 		this.flow = flow;
 
-		carType = Car.Rocket;
+		carType = Car.Runner;
 		world = DynamicType.Valley.getBuilder();
 	}
 
@@ -61,8 +62,7 @@ public class Start extends BaseAppState {
 
 		//attach basic ai, for the view
 		DriveAlongAI ai = new DriveAlongAI(car, (vec) -> world.getNextPieceClosestTo(vec));
-		//ai.setMaxSpeed(27.7778f); // 27.7 = 100 km/h
-		ai.setMaxSpeed(35);
+		ai.setMaxSpeed(27.7778f); // 27.7 = 100 km/h
 		car.attachAI(ai, true);
 		
 		this.camera = new StartCamera("start camera", app.getCamera(), car);
