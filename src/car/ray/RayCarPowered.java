@@ -70,9 +70,8 @@ public class RayCarPowered extends RayCar {
 		 * i think this evenetually means the system needs to be a matrix solver state system rather than real time timestep stuff
 		 * http://myselph.de/gamePhysics/equalityConstraints.html
  		 * but this might be too much work
-		 * 
-		 * then eventually use the w_xdiff cardata values 
 		 */
+
 		if (carData.driveFront) {
 			wheelTorque[0] = frontTorque;
 			wheelTorque[1] = frontTorque;
@@ -80,6 +79,15 @@ public class RayCarPowered extends RayCar {
 		if (carData.driveRear) {
 			wheelTorque[2] = rearTorque;
 			wheelTorque[3] = rearTorque;
+		}
+		if (carData.driveFront && carData.driveRear) {
+			float balalnce = FastMath.clamp(carData.trans_powerBalalnce, 0, 1);
+			//apply power balance
+			wheelTorque[0] = wheelTorque[0] * (1-balalnce);
+			wheelTorque[1] = wheelTorque[1] * (1-balalnce);
+			
+			wheelTorque[2] = wheelTorque[2] * balalnce;
+			wheelTorque[3] = wheelTorque[3] * balalnce;
 		}
 		
 		super.prePhysicsTick(space, tpf);

@@ -61,7 +61,9 @@ public class CarDataConst implements Serializable {
 	public float trans_effic; //apparently 0.9 is common (power is lost to rotating the transmission gears)
 	public float trans_finaldrive; //helps set the total drive ratio
 	public float[] trans_gearRatios; //reverse,gear1,gear2,g3,g4,g5,g6,...
-	
+
+	public float trans_powerBalalnce; //Only used in all drive cars, 0 fron 1 rear
+
 	public boolean nitro_on;
 	public float nitro_force;
 	public float nitro_rate;
@@ -73,12 +75,6 @@ public class CarDataConst implements Serializable {
 	////////
 	//Wheels
 	public float w_steerAngle; //in radians
-	
-	public float w_cdifflock;
-	public boolean w_fdiff;
-	public float w_fdifflock; //small=slip large=locked -> 0.0001f < x < 5 i think is a good range
-	public boolean w_rdiff;
-	public float w_rdifflock;
 	
 	//do not put wheel offset in the wheel obj, as they shouldn't know because the car determines their position
 	public Vector3f[] wheelOffset;

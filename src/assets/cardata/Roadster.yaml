@@ -42,10 +42,7 @@ susR:
 trans_effic: 1 #traction curve is from a dyno
 trans_finaldrive: 4.3
 trans_gearRatios: [-2.9, 3.136, 1.88, 1.33, 1.0, 0.814]
-w_fdiff: false
-w_fdifflock: 0
-w_rdiff: true
-w_rdifflock: 0.1
+trans_powerBalalnce: 0.5
 w_steerAngle: 0.5
 wheelData:
 - &w
