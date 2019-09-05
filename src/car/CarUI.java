@@ -119,7 +119,8 @@ public class CarUI extends BaseAppState {
 		i.addListener(actionListener, "Telemetry");
 		
 		telemetry = new CarUITelemetry(p);
-		getStateManager().attach(telemetry);		
+		getStateManager().attach(telemetry);
+		telemetry.setEnabled(false);
 	}
 
 	private void makeSpeedo(AssetManager am, AppSettings settings) {

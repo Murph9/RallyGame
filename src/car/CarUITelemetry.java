@@ -154,27 +154,20 @@ public class CarUITelemetry extends BaseAppState {
 		rootNode.attachChild(g2);
 		
 		gText = new BitmapText(guiFont, false);
-		gText.setSize(guiFont.getCharSet().getRenderedSize());	  		// font size
-		gText.setColor(ColorRGBA.Black);								// font color
-		gText.setText("...");												// the text
-		gText.setLocalTranslation(gcenter.subtract(40, 5, 0)); 			// position
+		gText.setSize(guiFont.getCharSet().getRenderedSize());
+		gText.setColor(ColorRGBA.Black);
+		gText.setText("...");
+		gText.setLocalTranslation(gcenter.subtract(40, 5, 0));
 		rootNode.attachChild(gText);
 	}
 
 	@Override
 	protected void onEnable() {
-		_setEnabled(true);
+		((SimpleApplication)getApplication()).getGuiNode().attachChild(rootNode);
 	}
 	@Override
 	protected void onDisable() {
-		_setEnabled(true);
-	}
-	private void _setEnabled(boolean enabled) {
-		if (enabled) {
-			((SimpleApplication)getApplication()).getGuiNode().attachChild(rootNode);			
-		} else {
-			((SimpleApplication)getApplication()).getGuiNode().detachChild(rootNode);			
-		}
+		((SimpleApplication)getApplication()).getGuiNode().detachChild(rootNode);
 	}
 	
 	@Override
