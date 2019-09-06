@@ -163,7 +163,7 @@ public class RayCarPowered extends RayCar {
 	}
 
 	private float calcNitro(float tpf) {
-		if (carData.nitro_on) {
+		if (!carData.nitro_on) {
 			return 0;
 		}
 		
