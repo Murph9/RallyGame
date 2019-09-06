@@ -11,7 +11,6 @@ public enum WorldType {
 	LSYSTEM,
 	HIGHWAY,
 	
-	BASIC,
 	FLAT,
 	NONE
 	;

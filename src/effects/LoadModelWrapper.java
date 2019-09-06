@@ -57,6 +57,9 @@ public class LoadModelWrapper {
 	private static Pattern GEO_NAME_REGEX = Pattern.compile(".*\\[(.+)\\].*");
 
 	public static ColorRGBA getColorFromMaterialName(Material m) {
+		if (m == null)
+			return null;
+		
 		String name = m.getName();
 		if (name == null)
 			return null;

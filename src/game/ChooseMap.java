@@ -167,9 +167,6 @@ public class ChooseMap extends BaseAppState {
 			case FLAT:
 				world = new FlatWorld();
 				break;
-			case BASIC:
-				world = new BasicWorld();
-				break;
 			case TRACK:
 				world = new TrackWorld();
 				break;
