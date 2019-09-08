@@ -131,7 +131,29 @@ public class H {
 	public static float cylinderInertia(float r, float mass) {
 		return mass*r*r/2;
 	}
+
+	public static String substringBeforeFirst(String s, char c) {
+		if (s.lastIndexOf(c) == -1)
+			return s;
+		return s.substring(0, s.indexOf(c));
+	}
+	public static String substringAfterLast(String s, char c) {
+		if (s.lastIndexOf(c) == -1)
+			return s;
+		return s.substring(s.lastIndexOf(c) + 1);
+	}
 	
+	public static String leftPad(String str, int length, char pad) {
+		StringBuilder sb = new StringBuilder();
+
+		for (int toPrepend = 10 - str.length(); toPrepend > 0; toPrepend--) {
+			sb.append(pad);
+		}
+
+		sb.append(str);
+		return sb.toString();
+	}
+
 	public static String roundDecimal(float num, int places) {
 		if (places == 0) {
 			return Integer.toString(Math.round(num));

@@ -18,7 +18,8 @@ public enum StaticWorld {
 	raleigh("raleigh.blend", 8, new Vector3f(34.441566f, 20.72906f, 27.334211f), null),
 
 	dragstrip("dragstrip.blend", 10, new Vector3f(0,0,0), null),
-	
+	multidragstrip("multidragstrip.blend", 1, new Vector3f(0,0,0), null),
+
 	//other peoples:
 	track2("track2.blend", 1, new Vector3f(0,0,0), H.FromAngleAxis(FastMath.PI, Vector3f.UNIT_Y)),
 	carpark("carpark.blend", 1, new Vector3f(0,0,0), null),

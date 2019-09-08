@@ -6,6 +6,7 @@ import com.jme3.app.state.AppStateManager;
 
 import car.data.Car;
 import drive.*;
+import helper.Log;
 import world.StaticWorld;
 import world.StaticWorldBuilder;
 import world.World;
@@ -23,6 +24,7 @@ public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
 		Crash,
 		Getaway,
 		Race,
+		Drag,
 		Dev;
     }
 
@@ -60,7 +62,12 @@ public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
 				break;
 			case Race:
 				sm.attach(new DriveRace());
-                break;
+				break;
+			case Drag:
+				sm.attach(new DriveDrag((IDriveDone)this));
+				break;
+			default:
+				Log.p("No idea which world type that was: " + type.name());
         }
     }
 
