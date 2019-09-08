@@ -192,8 +192,8 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 		
 		//TODO PLEASE FIX THIS
 		//TODO max turn angle really should just be the best angle on the lat traction curve (while going straight)
-		
-		return Math.abs(trySteerAngle);
+		return carData.wheelData[0].maxLat;
+		//return Math.abs(trySteerAngle);
 		
 		//TODO turn back value should be vel dir + maxlat instead of just full lock
 		//remember that this value is clamped after this method is called
