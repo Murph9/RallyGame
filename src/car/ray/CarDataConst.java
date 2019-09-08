@@ -62,7 +62,7 @@ public class CarDataConst implements Serializable {
 	public float trans_finaldrive; //helps set the total drive ratio
 	public float[] trans_gearRatios; //reverse,gear1,gear2,g3,g4,g5,g6,...
 
-	public float trans_powerBalalnce; //Only used in all drive cars, 0 fron 1 rear
+	public float trans_powerBalance; //Only used in all drive cars, 0 fron 1 rear
 
 	public boolean nitro_on;
 	public float nitro_force;

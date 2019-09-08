@@ -81,7 +81,7 @@ public class RayCarPowered extends RayCar {
 			wheelTorque[3] = rearTorque;
 		}
 		if (carData.driveFront && carData.driveRear) {
-			float balalnce = FastMath.clamp(carData.trans_powerBalalnce, 0, 1);
+			float balalnce = FastMath.clamp(carData.trans_powerBalance, 0, 1);
 			//apply power balance
 			wheelTorque[0] = wheelTorque[0] * (1-balalnce);
 			wheelTorque[1] = wheelTorque[1] * (1-balalnce);

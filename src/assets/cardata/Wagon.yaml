@@ -40,7 +40,7 @@ susR: *sus
 trans_effic: 0.85
 trans_finaldrive: 1
 trans_gearRatios: [-8.27, 8.27]
-trans_powerBalalnce: 0.5
+trans_powerBalance: 0.5
 w_steerAngle: 0.5
 wheelData:
 - &w
