@@ -180,14 +180,14 @@ public class DriveRace extends BaseAppState {
 	}
 	
 
-	private float StateTimeout = 0;
+	private float stateTimeout = 0;
 	@Override
 	public void update(float tpf) {
 		if (!isEnabled()) return;
 		super.update(tpf);
 
 		menu.setText("State:"+state.name()
-		+"\nStateTimeout:" + StateTimeout
+		+"\nStateTimeout:" + this.stateTimeout
 		+"\nCheckpoints:" + H.str(carCheckpointNext, ","));
 		
 		if (stateChanged) {
@@ -196,7 +196,7 @@ public class DriveRace extends BaseAppState {
 			if (state == RaceState.Init) {
 				resetAllCars();
 			} else if (state == RaceState.Ready)
-				StateTimeout = 2;
+				this.stateTimeout = 2;
 		}
 		
 		switch(state) {
@@ -223,10 +223,10 @@ public class DriveRace extends BaseAppState {
 		}
 		
 		
-		if (StateTimeout != -1.0f) {
-			StateTimeout -= tpf; //only update when not -1 as it will reset it every frame
-			if (StateTimeout < 0) {
-				StateTimeout = -1; //stop any timeout stuff unless the state says so
+		if (this.stateTimeout != -1.0f) {
+			this.stateTimeout -= tpf; //only update when not -1 as it will reset it every frame
+			if (this.stateTimeout < 0) {
+				this.stateTimeout = -1; //stop any timeout stuff unless the state says so
 				nextState();
 			}
 		}
@@ -256,8 +256,8 @@ public class DriveRace extends BaseAppState {
 			checkpointIndex = checkpoints.length - 1;
 		Vector3f newPos = checkpoints[checkpointIndex];
 		
-		cars[i].setPhysicsLocation(newPos.add(0,2,0));
-		cars[i].setPhysicsRotation(worldRot); //TODO
+		cars[i].setPhysicsLocation(newPos.add(3,0,0));
+		cars[i].setPhysicsRotation(worldRot);
 		cars[i].setAngularVelocity(new Vector3f());
 		cars[i].setLinearVelocity(new Vector3f());
 	}
@@ -318,7 +318,7 @@ public class DriveRace extends BaseAppState {
 	}
 	
 	//making the world exist
-	public void addTrack(boolean ifShadow) {
+	private void addTrack(boolean ifShadow) {
 		AssetManager as = getApplication().getAssetManager();
 		List<Vector3f> _checkpoints = new LinkedList<Vector3f>();
 		
