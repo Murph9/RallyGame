@@ -45,6 +45,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 public abstract class Terrain extends BaseAppState implements Closeable
 {
+    private static final boolean DEBUG = false;
+
     protected final SimpleApplication app;
     private final PhysicsSpace physicsSpace;
     private final Node rootNode;
@@ -652,7 +654,7 @@ public abstract class Terrain extends BaseAppState implements Closeable
             	
             	rootNode.attachChild(boxNode);
             	
-            	if (App.IF_DEBUG)
+            	if (DEBUG)
             		GeometryBatchFactory.optimize(boxNode);
             });
         });
@@ -673,7 +675,7 @@ public abstract class Terrain extends BaseAppState implements Closeable
     	Vector3f v2 = ht.v.subtract(ht.tc.getLocalTranslation().mult(1/ht.tc.getWorldScale().x));
     	ht.tc.setHeight(H.v3tov2fXZ(v2), ht.height/this.worldHeight);
 
-    	if (App.IF_DEBUG) {
+    	if (DEBUG) {
     		Log.p("Set height", ht.v, ht.tc);
     		boxNode.attachChild(H.makeShapeBox(app.getAssetManager(), ColorRGBA.Brown, ht.v, 0.1f));
     	}

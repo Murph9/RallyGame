@@ -7,7 +7,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jme3.app.Application;
-import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.material.Material;
@@ -19,7 +18,6 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
-import com.jme3.scene.Node;
 import com.jme3.terrain.noise.ShaderUtils;
 import com.jme3.terrain.noise.basis.FilteredBasis;
 import com.jme3.terrain.noise.filter.*;
@@ -29,6 +27,7 @@ import com.jme3.texture.Texture;
 import com.jme3.texture.Texture.WrapMode;
 
 import game.App;
+import game.DebugAppState;
 import helper.H;
 import helper.Log;
 import terrainWorld.NoiseBasedWorld;
@@ -203,11 +202,11 @@ public class HighwayWorld extends World {
 		List<Vector3f> list = road.getControlPoints(); //No editing this object
 		Log.e("road: ", list);
 
-		if (App.IF_DEBUG)
-			for (int i = 0; i < list.size(); i++)
-				((SimpleApplication)getApplication()).getRootNode().attachChild(H.makeShapeBox(
-						((SimpleApplication) getApplication()).getAssetManager(), ColorRGBA.Green, list.get(i), 0.2f));
-		
+		DebugAppState debug = getState(DebugAppState.class);
+		for (int i = 0; i < list.size(); i++) {
+			debug.drawBox("HighwayWorld" + road + i, ColorRGBA.Green, list.get(i), 0.2f);
+		}
+
 		roads.add(road);
 		
 		Geometry geo = new Geometry("highway", road);
@@ -230,15 +229,13 @@ public class HighwayWorld extends World {
 		List<Vector3f> heightList = new LinkedList<Vector3f>();
 		
 		for (Vector3f[] quad: quads) {
-			if (App.IF_DEBUG) {
-				AssetManager am = ((SimpleApplication)getApplication()).getAssetManager();
-				Node rootNode = ((SimpleApplication) getApplication()).getRootNode();
-				rootNode.attachChild(H.makeShapeBox(am, ColorRGBA.Green, quad[0].add(0,0.1f,0), 0.2f));
-				rootNode.attachChild(H.makeShapeBox(am, ColorRGBA.White, quad[1].add(0,0.1f,0), 0.2f));
-				rootNode.attachChild(H.makeShapeBox(am, ColorRGBA.Blue, quad[2].add(0,-0.1f,0), 0.2f));
-				rootNode.attachChild(H.makeShapeBox(am, ColorRGBA.Red, quad[3].add(0,-0.1f,0), 0.2f));
-			}
+			DebugAppState debug = getState(DebugAppState.class);
+			debug.drawBox("HighwayWorld" + quad + "0", ColorRGBA.Green, quad[0].add(0, 0.1f, 0), 0.2f);
+			debug.drawBox("HighwayWorld" + quad + "1", ColorRGBA.White, quad[1].add(0, 0.1f, 0), 0.2f);
+			debug.drawBox("HighwayWorld" + quad + "2", ColorRGBA.Blue, quad[2].add(0, -0.1f, 0), 0.2f);
+			debug.drawBox("HighwayWorld" + quad + "3", ColorRGBA.Red, quad[3].add(0, -0.1f, 0), 0.2f);
 			
+
 			quad = order.apply(quad);
 			
 			float[] box = H.boundingBoxXZ(quad);

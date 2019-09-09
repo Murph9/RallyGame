@@ -9,6 +9,7 @@ import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 
 import game.App;
+import game.DebugAppState;
 import helper.H;
 import helper.Log;
 import terrainWorld.NoiseBasedWorld;
@@ -90,8 +91,8 @@ public class RoadMaker implements TileListener {
 	public boolean tileLoaded(TerrainChunk chunk) {
 		totalLoaded++;
 		
-		if (App.IF_DEBUG)
-			app.getRootNode().attachChild(H.makeShapeBox(app.getAssetManager(), ColorRGBA.Green, chunk.getLocalTranslation().add(0,110,0), 2));
+		DebugAppState state = app.getStateManager().getState(DebugAppState.class);
+		state.drawBox("", ColorRGBA.Green, chunk.getLocalTranslation().add(0,110,0), 2);
 		
 		//terrain needs to load all of its tiles before we will use the grow method
 		//this prevents the order of the tiles screwing with placements

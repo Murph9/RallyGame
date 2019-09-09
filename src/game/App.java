@@ -25,7 +25,6 @@ import helper.Log;
 public class App extends SimpleApplication {
 
 	public static final Vector3f GRAVITY = new Vector3f(0, -9.81f, 0); // yay its down
-	public static final Boolean IF_DEBUG = false;
 	
 	private AppFlow flow;
 
@@ -35,8 +34,8 @@ public class App extends SimpleApplication {
 				, new StatsAppState()
 				, new FilterManager()
 				, new CarBuilder()
-				, new DebugAppState(true)
-				//, new DetailedProfilerState() //profiling in jme 3.2: TODO add physics engine stuff using custom sections
+				, new DebugAppState(false)
+				//, new DetailedProfilerState() //profiles in jme 3.2: TODO add physics engine stuff using custom sections
 				);
 	}
 

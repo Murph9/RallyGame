@@ -3,12 +3,21 @@ package game;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
+import com.jme3.input.KeyInput;
+import com.jme3.input.RawInputListener;
+import com.jme3.input.event.JoyAxisEvent;
+import com.jme3.input.event.JoyButtonEvent;
+import com.jme3.input.event.KeyInputEvent;
+import com.jme3.input.event.MouseButtonEvent;
+import com.jme3.input.event.MouseMotionEvent;
+import com.jme3.input.event.TouchEvent;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import helper.H;
 
@@ -16,7 +25,7 @@ public class DebugAppState extends BaseAppState {
 
     private boolean debug;
     private Node node;
-    private HashMap<String, Geometry> thingSet;
+    private Map<String, Geometry> thingSet;
 
     public DebugAppState(boolean debug) {
         this.debug = debug;
@@ -41,6 +50,10 @@ public class DebugAppState extends BaseAppState {
 
     @Override
     protected void onDisable() {
+    }
+
+    public boolean DEBUG() {
+        return this.debug;
     }
 
     public void drawArrow(String key, ColorRGBA colour, Vector3f pos, Vector3f dir) {
@@ -74,5 +87,31 @@ public class DebugAppState extends BaseAppState {
             this.node.attachChild(thing);
             thingSet.put(key, thing);
         });
+    }
+
+    void toggleDebug() {
+        this.debug = !this.debug;
+    }
+
+    class DebugListener implements RawInputListener {
+        
+        private DebugAppState state;
+        public DebugListener(DebugAppState state) {
+            this.state = state;
+        }
+
+        public void beginInput() {}
+        public void endInput() {}
+
+        public void onKeyEvent(KeyInputEvent arg0) {
+            if (arg0.isPressed() && arg0.getKeyCode() == KeyInput.KEY_GRAVE)
+                state.toggleDebug();
+        }
+
+        public void onMouseButtonEvent(MouseButtonEvent arg0) {}
+        public void onMouseMotionEvent(MouseMotionEvent arg0) {}
+        public void onTouchEvent(TouchEvent arg0) {}
+        public void onJoyAxisEvent(JoyAxisEvent arg0) {}
+        public void onJoyButtonEvent(JoyButtonEvent arg0) {}
     }
 }
