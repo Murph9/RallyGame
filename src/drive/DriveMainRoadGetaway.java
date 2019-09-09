@@ -56,6 +56,7 @@ public class DriveMainRoadGetaway extends DriveBase {
 	private Container display;
 	private Label scoreLabel;
 	private Label lifeLabel;
+	private Label gameOverLabel;
 	
 	public DriveMainRoadGetaway(IDriveDone done) {
 		super(done, Car.Runner, DynamicType.MainRoad.getBuilder());
@@ -79,6 +80,7 @@ public class DriveMainRoadGetaway extends DriveBase {
 		scoreLabel = display.addChild(new Label("0"), 1);
 		display.addChild(new Label("Life: "));
 		lifeLabel = display.addChild(new Label("0"), 1);
+		gameOverLabel = display.addChild(new Label(""), 1);
 		
 		AppSettings set = app.getContext().getSettings();
 		display.setLocalTranslation(new Vector3f(set.getWidth() / 2, set.getHeight(), 0));
@@ -96,6 +98,16 @@ public class DriveMainRoadGetaway extends DriveBase {
 
 		float distanceFromStart = getPlayerDistanceFromStart(player);
 		float playerSpeed = player.getCurrentVehicleSpeedKmHour();
+
+		if (life < 0) {
+			gameOverLabel.setText("GameOver");
+			for (int i = 2; i < this.cb.getAll().size(); i++) {
+				this.cb.removeCar(this.cb.get(i));
+			}
+			player.setLinearVelocity(new Vector3f());
+			player.setAngularVelocity(new Vector3f());
+			return;
+		}
 
 		this.scoreLabel.setText(((int) distanceFromStart)+"");
 		this.lifeLabel.setText(((int) (life*100))+"");
@@ -166,10 +178,6 @@ public class DriveMainRoadGetaway extends DriveBase {
 		if (readyToSpawnTraffic && playerSpeed < 10) {
 			// loaded and ready to lose score
 			life -= tpf;
-		}
-
-		if (life < 0) {
-			//TODO something..
 		}
 	}
 	
