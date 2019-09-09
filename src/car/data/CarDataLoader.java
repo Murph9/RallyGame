@@ -138,6 +138,19 @@ public class CarDataLoader { //CarDataFactory
             System.exit(-1022);
         }
 
+        try {
+            // Checking that there is gear over lap between up and down:
+            // [2>----[3>-<2]---<3] not [2>----<2]--[3>---<3]
+            for (int i = 1; i < data.trans_gearRatios.length - 1; i++) {
+                if (data.getGearUpSpeed(i) < data.getGearDownSpeed(i + 1)) {
+                    throw new Exception("Gear overlap test failed for up: " + i + " down: " + (i + 1));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(-7555);
+        }
+        
         Log.p("Loaded data for car type: " + carName);
         return data;
     }

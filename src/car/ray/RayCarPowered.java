@@ -26,14 +26,15 @@ public class RayCarPowered extends RayCar {
 	private static final float NITRO_COOLDOWN = 5;
 	
 	protected static final int REVERSE_GEAR_INDEX = 0;
-	protected int curGear = 1;
+	protected int curGear;
 	protected int curRPM;
 	protected int gearChangeTo;
 	protected float gearChangeTime;
 	
 	public RayCarPowered(CollisionShape shape, CarDataConst carData) {
 		super(shape, carData);
-		this.nitroRemaining = carData.nitro_max;
+		this.nitroRemaining = carData.nitro_on ? carData.nitro_max : 0;
+		this.curGear = 1;
 	}
 
 	
@@ -147,16 +148,10 @@ public class RayCarPowered extends RayCar {
 		if (helper.H.allTrue((w) -> { return !w.inContact; }, wheels))
 			return; //if no contact, no changing of gear
 		
-		float driveSpeed = (carData.trans_gearRatios[curGear]*carData.trans_finaldrive*(60/FastMath.TWO_PI))/carData.wheelData[0].radius;
-		float gearUpSpeed = carData.auto_gearUp/driveSpeed; //TODO pre compute, as it doesn't change (you can also find the optimal gear change point based on the torque curve)
-		float gearDownSpeed = carData.auto_gearDown/driveSpeed;
-		
-		//TODO: error checking that there is over lap  [2-----[3--2]----3] not [2------2]--[3-----3]
-		
-		if (vz > gearUpSpeed && curGear < carData.trans_gearRatios.length-1) {
+		if (vz > carData.getGearUpSpeed(curGear) && curGear < carData.trans_gearRatios.length-1) {
 			gearChangeTime = carData.auto_changeTime;
 			gearChangeTo = curGear + 1;
-		} else if (vz < gearDownSpeed && curGear > 1) {
+		} else if (vz < carData.getGearDownSpeed(curGear) && curGear > 1) {
 			gearChangeTime = carData.auto_changeTime;
 			gearChangeTo = curGear - 1;
 		}

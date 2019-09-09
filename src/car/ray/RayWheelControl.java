@@ -163,8 +163,8 @@ public class RayWheelControl {
 		Vector3f curL = cur.add(rot.mult(wheel.data.width / 2));
 		Vector3f curR = cur.add(rot.negate().mult(wheel.data.width / 2));
 
-		// TODO better scaling for grip value
-		float clampSkid = FastMath.clamp((this.wheel.skidFraction - 0.85f) / 2, 0, 1);
+		// scaling the grip value
+		float clampSkid = FastMath.clamp(this.wheel.skidFraction - 0.9f, 0, 1);
 		ColorRGBA c = BASE_HIGHLIGHT_COLOUR.clone().mult(clampSkid);
 
 		if (!wheel.inContact || velDir.length() < 1 || clampSkid < 0.1f) { //no contact or slow speed = no visible skid marks
