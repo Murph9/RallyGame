@@ -51,7 +51,7 @@ wheelData:
   pjk_long: {B: 12.0, C: 1.9, D: 0.9, E: 0.95}
   pjk_long_sat: *w_sat
   radius: 0.3
-  width: 0.15
+  width: 0.3
 - *w
 - *w
 - *w
