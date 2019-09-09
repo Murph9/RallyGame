@@ -27,6 +27,9 @@ import helper.H;
 
 public class CarCamera extends BaseAppState implements RawInputListener {
 
+	private static final float ROT_SPEED = 0.008f;
+	private static final float CAM_TIMEOUT = 3;
+
 	private Camera c;
 	private RayCarControl p;
 	private Vector3f lastPos;
@@ -35,7 +38,6 @@ public class CarCamera extends BaseAppState implements RawInputListener {
 	private float lastTimeout;
 	private float rotRad;
 	private float lastRad;
-	private static final float ROT_SPEED = 0.008f;
 	
 	private Vector3f lastShake = new Vector3f();
 	
@@ -88,7 +90,7 @@ public class CarCamera extends BaseAppState implements RawInputListener {
 	
 		if (!FastMath.approximateEquals(rotRad, 0)) {
 			lastTimeout += tpf;
-			if (lastTimeout > 2) { //TODO static number
+			if (lastTimeout > CAM_TIMEOUT) {
 				rotRad *= tpf; //reset to back of car slowly
 			}
 			
