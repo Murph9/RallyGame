@@ -1,7 +1,6 @@
 package car.ai;
 
 import com.jme3.bullet.objects.PhysicsRigidBody;
-import com.jme3.math.Vector3f;
 
 import car.ray.RayCarControl;
 
@@ -48,11 +47,8 @@ public class DriveAtAI extends CarAI {
 				reversing = false;
 			return;
 		}
-		
-		Vector3f pos = car.getPhysicsLocation();
-		Vector3f atPos = driveAtThis.getPhysicsLocation();
 
-		driveAt(pos, atPos);
+		driveAt(driveAtThis.getPhysicsLocation());
 
 		//if going to slow speed up
 		if (velocity < 10) {

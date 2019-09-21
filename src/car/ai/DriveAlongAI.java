@@ -39,8 +39,7 @@ public class DriveAlongAI extends CarAI {
 		}
 		
 		//drive at target
-		driveAt(pos, target);
-
+		driveAt(target);
 
 		//if going too slow at all speed up
 		float velocity = car.getLinearVelocity().length();

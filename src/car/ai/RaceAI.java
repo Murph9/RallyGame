@@ -23,9 +23,9 @@ public class RaceAI extends CarAI {
 			return;
 		}
 		
-		driveAt(pos, atPos);
+		driveAt(atPos);
 		
-		//if going to slow speed up
+		//if going too slow speed up
 		if (car.getLinearVelocity().length() < 10) {
 			onEvent("Accel", true, 1);
 			onEvent("Brake", false, 0);
