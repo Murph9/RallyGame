@@ -104,6 +104,13 @@ public class HTest {
         assertEquals(4.1f, H.v2tov3fXZ(a).z);
     }
 
+    @Test
+    public void v3tov2fXZ_v2tov3fXZ() {
+        Vector3f a = new Vector3f(1, 2, 3);
+        assertEquals(a.x, H.v2tov3fXZ(H.v3tov2fXZ(a)).x);
+        assertEquals(0, H.v2tov3fXZ(H.v3tov2fXZ(a)).y);
+        assertEquals(a.z, H.v2tov3fXZ(H.v3tov2fXZ(a)).z);
+    }
 
     @RepeatedTest(100)
     public void randV3f() {
