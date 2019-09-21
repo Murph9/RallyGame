@@ -27,8 +27,7 @@ public class DebugAppState extends BaseAppState {
     private Node node;
     private Map<String, Geometry> thingSet;
 
-    public DebugAppState(boolean debug) {
-        this.debug = debug;
+    public DebugAppState() {
         this.thingSet = new HashMap<String, Geometry>();
     }
 
@@ -36,6 +35,8 @@ public class DebugAppState extends BaseAppState {
     protected void initialize(Application app) {
         this.node = new Node("DebugState");
         ((SimpleApplication)app).getRootNode().attachChild(node);
+
+        app.getInputManager().addRawInputListener(new DebugListener(this));
     }
 
     @Override
@@ -70,9 +71,16 @@ public class DebugAppState extends BaseAppState {
         addThing(key, H.makeShapeBox(getApplication().getAssetManager(), colour, pos, size));
     }
 
+    public void drawSphere(String key, ColorRGBA colour, Vector3f pos, float size) {
+        if (!debug)
+            return;
+        
+        addThing(key, H.makeShapeSphere(getApplication().getAssetManager(), colour, pos, size));
+    }
+
     private void addThing(String key, Geometry thing) {
         if (thing == null)
-            return; //not a valid objet, then not a vaild thing
+            return; //not a valid object, then not a vaild thing
 
         Application app = getApplication();
         app.enqueue(() -> {
@@ -89,7 +97,7 @@ public class DebugAppState extends BaseAppState {
         });
     }
 
-    void toggleDebug() {
+    public void toggleDebug() {
         this.debug = !this.debug;
     }
 
@@ -104,7 +112,7 @@ public class DebugAppState extends BaseAppState {
         public void endInput() {}
 
         public void onKeyEvent(KeyInputEvent arg0) {
-            if (arg0.isPressed() && arg0.getKeyCode() == KeyInput.KEY_GRAVE)
+            if (arg0.isPressed() && arg0.getKeyCode() == KeyInput.KEY_GRAVE) 
                 state.toggleDebug();
         }
 
