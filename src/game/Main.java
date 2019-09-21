@@ -10,6 +10,9 @@ public class Main {
 	private static boolean USE_CONFIG = false;
 
 	public static void main(String[] args) {
+		boolean isDebug = java.lang.management.ManagementFactory.getRuntimeMXBean(). getInputArguments().toString().contains("-agentlib:jdwp");
+		System.out.println("Program isdebug: " + isDebug);
+		
 		App app = new App();
 
 		if (USE_CONFIG) {
