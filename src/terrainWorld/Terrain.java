@@ -16,7 +16,6 @@ import com.jme3.scene.Node;
 import com.jme3.scene.control.Control;
 import com.jme3.terrain.geomipmap.TerrainLodControl;
 
-import game.App;
 import helper.H;
 import helper.Log;
 import jme3tools.optimize.GeometryBatchFactory;

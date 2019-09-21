@@ -23,6 +23,7 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Line;
+import com.jme3.scene.shape.Sphere;
 import com.jme3.system.AppSettings;
 
 //Its short for help, name length was a concern
@@ -208,7 +209,6 @@ public class H {
 		}
 		Arrow arrow = new Arrow(dir);
 		Geometry arrowG = createShape(am, arrow, color, pos, "an arrow");
-		arrowG.setShadowMode(ShadowMode.Off);
 		return arrowG;
 	}
 	public static Geometry makeShapeBox(AssetManager am, ColorRGBA color, Vector3f pos, float size) {
@@ -219,7 +219,6 @@ public class H {
 		
 		Box box = new Box(size, size, size);
 		Geometry boxG = createShape(am, box, color, pos, "a box");
-		boxG.setShadowMode(ShadowMode.Off);
 		return boxG;
 	}
 	public static Geometry makeShapeLine(AssetManager am, ColorRGBA color, Vector3f start, Vector3f end) {
@@ -229,17 +228,28 @@ public class H {
 		}
 		Line l = new Line(start, end);
 		Geometry lineG = createShape(am, l, color, Vector3f.ZERO, "a line");
-		lineG.setShadowMode(ShadowMode.Off);
 		return lineG;
+	}
+	public static Geometry makeShapeSphere(AssetManager am, ColorRGBA color, Vector3f pos, float size) {
+		if (!Vector3f.isValidVector(pos)) {
+			Log.e("not valid position");
+			return null;
+		}
+		
+		Sphere sphere = new Sphere(16, 16, size);
+		Geometry sphereG = createShape(am, sphere, color, pos, "a sphere");
+		return sphereG;
 	}
 	
 	public static Geometry createShape(AssetManager am, Mesh shape, ColorRGBA color, Vector3f pos, String name) {
 		Material mat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
 		mat.setColor("Color", color);
+		mat.getAdditionalRenderState().setWireframe(true);
 		
 		Geometry g = new Geometry(name, shape);
 		g.setMaterial(mat);
 		g.setLocalTranslation(pos);
+		g.setShadowMode(ShadowMode.Off);
 		return g;
 	}
 	
