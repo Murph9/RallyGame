@@ -1,7 +1,5 @@
 apply plugin: 'java'
 
-def mainClassName = 'game.Main'
-
 repositories {
 	jcenter()
 	maven { 
