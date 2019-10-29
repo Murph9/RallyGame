@@ -46,10 +46,8 @@ wheelData:
 - &w
   mass: 7.0
   modelName: assets/models/wheel.obj
-  pjk_lat: {B: 20, C: 1.39, D: 1.1, E: 0.05} #TODO much harsher
-  pjk_lat_sat: {B: 18, C: 2.24, D: 00, E: -2.73}
-  pjk_long: {B: 21, C: 1.8, D: 2, E: 0.98}
-  pjk_long_sat: {B: 18, C: 2.24, D: 00, E: -2.73}
+  pjk_lat: {B: 20, C: 1.39, D1: 1.1, D2: 0.000055, E: 0.05} #TODO much harsher
+  pjk_long: {B: 21, C: 1.8, D1: 2, D2: 0.000055, E: 0.98}
   radius: 0.355
   width: 0.3
 - *w

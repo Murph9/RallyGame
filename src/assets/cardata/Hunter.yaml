@@ -46,10 +46,8 @@ wheelData:
 - &w
   mass: 10.0
   modelName: assets/models/sa_hummer_wheel.blend
-  pjk_lat: {B: 6, C: 2, D: 1, E: 1}
-  pjk_lat_sat: &w_sat {B: 0.85, C: 2.3, D: 0.51, E: -2.75}
-  pjk_long: {B: 6, C: 2, D: 1, E: 1}
-  pjk_long_sat: *w_sat
+  pjk_lat: {B: 6, C: 2, D1: 1.2, D2: 0.000055, E: 1}
+  pjk_long: {B: 6, C: 2, D1: 1.2, D2: 0.000055, E: 1}
   radius: 0.3
   width: 0.15
 - *w

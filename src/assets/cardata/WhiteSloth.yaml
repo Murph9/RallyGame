@@ -47,9 +47,8 @@ wheelData:
 - &w
   mass: 10.0
   modelName: assets/models/Mazda_121_Metro_wheel.blend
-  pjk_lat: {B: 10, C: 1.9, D: 1.0, E: 0.97}
-  pjk_lat_sat: &w_sat {B: 0.85, C: 2.3, D: 0.51, E: -2.75}
-  pjk_long: {B: 10, C: 1.9, D: 1.0, E: 0.97}
+  pjk_lat: {B: 10, C: 1.9, D: 1.1, D2: 0.000055, E: 0.97}
+  pjk_long: {B: 10, C: 1.9, D: 1.1, D2: 0.000055, E: 0.97}
   pjk_long_sat: *w_sat
   radius: 0.2875
   width: 0.15

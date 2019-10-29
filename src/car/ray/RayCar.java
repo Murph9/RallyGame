@@ -234,9 +234,9 @@ public class RayCar implements PhysicsTickListener {
 			wheels[w_id].skidFraction = p;
 			
 			//calc the longitudinal force from the slip ratio
-			wheel_force.z = (ratiofract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_long, p*carData.wheelData[w_id].maxLong) * this.wheels[w_id].susForce;
+			wheel_force.z = (ratiofract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_long, p*carData.wheelData[w_id].maxLong) * GripHelper.loadFormula(carData.wheelData[w_id].pjk_long, this.wheels[w_id].susForce);
 			//calc the latitudinal force from the slip angle
-			wheel_force.x = -(anglefract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_lat, p*carData.wheelData[w_id].maxLat) * this.wheels[w_id].susForce;
+			wheel_force.x = -(anglefract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_lat, p*carData.wheelData[w_id].maxLat) * GripHelper.loadFormula(carData.wheelData[w_id].pjk_lat, this.wheels[w_id].susForce);
 			
 			// braking and abs
 			float brakeCurrent2 = brakingCur;
@@ -365,7 +365,16 @@ public class RayCar implements PhysicsTickListener {
 		 * @return The force expected
 		 */
 		public static float tractionFormula(WheelDataTractionConst w, float slip) {
-			return w.D * FastMath.sin(w.C * FastMath.atan(w.B*slip - w.E * (w.B*slip - FastMath.atan(w.B*slip))));
+			return FastMath.sin(w.C * FastMath.atan(w.B*slip - w.E * (w.B*slip - FastMath.atan(w.B*slip))));
+		}
+		public static float loadFormula(WheelDataTractionConst w, float load) {
+			return w.D1 * (1 - w.D2 * load) * load;
+		}
+		public static float calcMaxLoad(WheelDataTractionConst w) {
+			return loadFormula(w, dloadFormula(w));
+		}
+		private static float dloadFormula(WheelDataTractionConst w) {
+			return 1 / (2f * w.D2);
 		}
 
 		//returns the slip value that gives the closest to 1 from the magic formula (should be called twice, lat and long)
@@ -398,7 +407,7 @@ public class RayCar implements PhysicsTickListener {
 			return pos;
 		}
 		private static double iterate(WheelDataTractionConst w, double x, double error) {
-			return x - ((tractionFormula(w, (float)x)-w.D) / dtractionFormula(w, (float)x, error)); 
+			return x - ((tractionFormula(w, (float)x)-1) / dtractionFormula(w, (float)x, error)); 
 			//-1 because we are trying to find a max (which happens to be 1)
 		}
 		private static double dtractionFormula(WheelDataTractionConst w, double slip, double error) {

@@ -7,20 +7,20 @@ import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 
 import car.ray.RayCarControl;
+import car.ray.RayCar.GripHelper;
 import game.DebugAppState;
 import helper.H;
 
 public abstract class CarAI {
 	
-	protected RayCarControl car;
+	protected final RayCarControl car;
 	private final float BEST_LAT_FORCE;
 	private DebugAppState debug;
 
 	public CarAI(RayCarControl car) {
 		this.car = car;
 		
-		float gravity = this.car.getPhysicsObject().getGravity().length();
-		BEST_LAT_FORCE = this.car.getCarData().mass * gravity * this.car.getCarData().wheelData[0].pjk_lat.D;
+		BEST_LAT_FORCE = GripHelper.calcMaxLoad(this.car.getCarData().wheelData[0].pjk_lat);
 
 		//ignore all turning speed factor code for AIs
 		car.onAction("IgnoreSteeringSpeedFactor", true, 1);

@@ -30,13 +30,15 @@ public class RayCarTest {
         curveConstLong = new WheelDataTractionConst();
         curveConstLong.B = 17;
         curveConstLong.C = 1.9f;
-        curveConstLong.D = 1;
+        curveConstLong.D1 = 2;
+        curveConstLong.D2 = 0.000055f;
         curveConstLong.E = 0.1f;
 
         curveConstLat = new WheelDataTractionConst();
         curveConstLat.B = 40;
         curveConstLat.C = 1.9f;
-        curveConstLat.D = 1;
+        curveConstLat.D1 = 2;
+        curveConstLong.D2 = 0.000055f;
         curveConstLat.E = 0.1f;
 
         maxLong = CalcSlipMax(curveConstLong);
@@ -49,8 +51,8 @@ public class RayCarTest {
     @Test
 	public void TestSlipFormula()
     {
-        assertEquals(curveConstLong.D, TractionFormula(curveConstLong, maxLong), 0.001f);
-        assertEquals(curveConstLat.D, TractionFormula(curveConstLat, maxLat), 0.01f);
+        assertEquals(1, TractionFormula(curveConstLong, maxLong), 0.001f);
+        assertEquals(1, TractionFormula(curveConstLat, maxLat), 0.01f);
     }
 
     @Test

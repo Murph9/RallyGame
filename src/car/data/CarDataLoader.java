@@ -86,19 +86,12 @@ public class CarDataLoader { //CarDataFactory
             wheel.maxLat = RayCar.GripHelper.calcSlipMax(wheel.pjk_lat);
             wheel.maxLong = RayCar.GripHelper.calcSlipMax(wheel.pjk_long);
 
-            wheel.maxLatSat = RayCar.GripHelper.calcSlipMax(wheel.pjk_lat_sat);
-            wheel.maxLongSat = RayCar.GripHelper.calcSlipMax(wheel.pjk_long_sat);
-
             try {
                 if (Float.isNaN(wheel.maxLat))
                     throw new Exception("maxLat was: '" + wheel.maxLat + "'.");
                 if (Float.isNaN(wheel.maxLong))
                     throw new Exception("maxLong was: '" + wheel.maxLong + "'.");
 
-                if (Float.isNaN(wheel.maxLatSat))
-                    throw new Exception("maxLatSat was: '" + wheel.maxLatSat + "'.");
-                if (Float.isNaN(wheel.maxLongSat))
-                    throw new Exception("maxLongSat was: '" + wheel.maxLongSat + "'.");
             } catch (Exception e) {
                 e.printStackTrace();
                 Log.p("error in calculating max(lat|long) values of wheel #" + i);
