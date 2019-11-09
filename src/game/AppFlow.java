@@ -7,9 +7,8 @@ import com.jme3.app.state.AppStateManager;
 import car.data.Car;
 import drive.*;
 import helper.Log;
-import world.StaticWorld;
-import world.StaticWorldBuilder;
 import world.World;
+import world.osm.OsmWorld;
 
 public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
 
@@ -49,7 +48,7 @@ public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
                 sm.attach(new DriveAI((IDriveDone)this));
                 break;
             case Fast:
-                sm.attach(new DriveBase((IDriveDone)this, Car.Runner, new StaticWorldBuilder(StaticWorld.track2)));
+                sm.attach(new DriveBase((IDriveDone)this, Car.Runner, new OsmWorld()));
                 break;
 			case Getaway:
 				sm.attach(new DriveMainRoadGetaway((IDriveDone)this));

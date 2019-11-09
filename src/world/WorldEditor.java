@@ -10,6 +10,7 @@ import com.simsilica.lemur.RollupPanel;
 
 import world.highway.HighwayWorld;
 import world.lsystem.LSystemWorld;
+import world.osm.OsmWorld;
 import world.wp.WP.DynamicType;
 
 public class WorldEditor extends Container {
@@ -112,6 +113,9 @@ public class WorldEditor extends Container {
 				break;
 			case FLAT:
 				currentSelection = new FlatWorld();
+				break;
+			case OSM:
+				currentSelection = new OsmWorld();
 				break;
 				
 			default:

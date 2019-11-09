@@ -10,7 +10,8 @@ public enum WorldType {
 	TRACK,
 	LSYSTEM,
 	HIGHWAY,
-	
+	OSM,
+
 	FLAT,
 	NONE
 	;

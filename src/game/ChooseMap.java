@@ -15,6 +15,7 @@ import helper.Log;
 import world.*;
 import world.highway.HighwayWorld;
 import world.lsystem.LSystemWorld;
+import world.osm.OsmWorld;
 import world.track.TrackWorld;
 import world.wp.WP.DynamicType;
 
@@ -169,6 +170,9 @@ public class ChooseMap extends BaseAppState {
 				break;
 			case TRACK:
 				world = new TrackWorld();
+				break;
+			case OSM:
+				world = new OsmWorld();
 				break;
 				
 			default:
