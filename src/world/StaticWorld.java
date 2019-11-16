@@ -20,6 +20,8 @@ public enum StaticWorld {
 	dragstrip("dragstrip.blend", 10, new Vector3f(0,0,0), null),
 	multidragstrip("multidragstrip.blend", 1, new Vector3f(0,0,0), null),
 
+	realroad("real_road.blend", 1, new Vector3f(225, -19, 708), H.FromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y)),
+
 	//other peoples:
 	track2("track2.blend", 1, new Vector3f(0,0,0), H.FromAngleAxis(FastMath.PI, Vector3f.UNIT_Y)),
 	carpark("carpark.blend", 1, new Vector3f(0,0,0), null),
