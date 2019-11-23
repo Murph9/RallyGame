@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.audio.AudioData;
@@ -29,7 +30,6 @@ import car.data.Car;
 import car.ray.CarDataConst;
 import car.ray.RayCarControl;
 import effects.LoadModelWrapper;
-import game.App;
 import helper.H;
 import helper.Log;
 
@@ -50,7 +50,7 @@ public class CarBuilder extends BaseAppState {
 		Log.p("CarBuilder init");
 
 		loader = new CarDataLoader(getState(BulletAppState.class).getPhysicsSpace());
-		((App)app).getRootNode().attachChild(rootNode);
+		((SimpleApplication)app).getRootNode().attachChild(rootNode);
 	}
 	
 	@Override
@@ -107,7 +107,7 @@ public class CarBuilder extends BaseAppState {
 		}
 
 		//init car
-		RayCarControl carControl = new RayCarControl((App)getApplication(), colShape, carData, carNode);
+		RayCarControl carControl = new RayCarControl((SimpleApplication)getApplication(), colShape, carData, carNode);
 		
 		carNode.attachChild(carModel);
 
@@ -138,7 +138,7 @@ public class CarBuilder extends BaseAppState {
 	public int removeAll() {
 		for (RayCarControl car: cars) {
 			rootNode.detachChild(car.getRootNode());
-			car.cleanup((App)getApplication());
+			car.cleanup((SimpleApplication)getApplication());
 		}
 		int size = cars.size();
 		cars.clear();
@@ -155,7 +155,7 @@ public class CarBuilder extends BaseAppState {
 		}
 		
 		rootNode.detachChild(car.getRootNode());
-		car.cleanup((App)getApplication());
+		car.cleanup((SimpleApplication)getApplication());
 		cars.remove(car);
 	}
 	
@@ -182,10 +182,10 @@ public class CarBuilder extends BaseAppState {
 	@Override
 	public void cleanup(Application app) {
 		for (RayCarControl car : cars) {
-			car.cleanup((App)app);
+			car.cleanup((SimpleApplication)app);
 		}
 
-		((App)app).getRootNode().detachChild(rootNode);
+		((SimpleApplication)app).getRootNode().detachChild(rootNode);
 		Log.p("carbuilder cleanup");
 	}
 }

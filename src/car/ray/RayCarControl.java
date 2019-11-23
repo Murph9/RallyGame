@@ -3,6 +3,8 @@ package car.ray;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 import com.jme3.audio.AudioNode;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
@@ -21,7 +23,6 @@ import car.JoystickEventListener;
 import car.MyKeyListener;
 import car.ai.CarAI;
 import drive.DriveBase;
-import game.App;
 import game.DebugAppState;
 import helper.H;
 import helper.Log;
@@ -35,7 +36,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 	private static final boolean DEBUG_TRACTION = DEBUG || false;
 	private static final boolean DEBUG_DRAG = DEBUG || false;
 
-	private final App app;
+	private final Application app;
 	private final RayWheelControl[] wheelControls;
 	
 	//sound stuff
@@ -56,7 +57,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
     //some directional world vectors for ease of direction/ai computation
     public Vector3f vel, forward, up, left, right;
 	
-	public RayCarControl(App app, CollisionShape shape, CarDataConst carData, Node rootNode) {
+	public RayCarControl(SimpleApplication app, CollisionShape shape, CarDataConst carData, Node rootNode) {
 		super(shape, carData);
 		this.app = app;
 		this.space = app.getStateManager().getState(BulletAppState.class).getPhysicsSpace();
@@ -316,7 +317,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 	
 	
 	//Please only call this from the car manager
-	public void cleanup(App app) {
+	public void cleanup(Application app) {
 		if (this.controls != null && !this.controls.isEmpty()) {
 			for (RawInputListener ril: this.controls)
 				app.getInputManager().removeRawInputListener(ril);

@@ -5,6 +5,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Debug (Launch)-DuelApp<RallyGame>",
+            "request": "launch",
+            "mainClass": "duel.DuelApp",
+            "projectName": "RallyGame"
+        },
+        {
+            "type": "java",
             "name": "Debug (Launch)-Main<RallyGame>",
             "request": "launch",
             "mainClass": "game.Main",
