@@ -19,11 +19,19 @@ public class DuelMainMenu extends BaseAppState {
     protected void initialize(Application app) {
         window = new Container();
         
-        window.setLocalTranslation(300, 300, 0);
+        window.setLocalTranslation(300, 300, 0); //TODO centre
         window.addChild(new Label("Main Menu"));
+
         Button b = window.addChild(new Button("Start"));
         b.addClickCommands((source) -> {
-            flow.nextState(this, false);
+            DuelResultData d = new DuelResultData();
+            flow.nextState(this, d);
+        });
+        b = window.addChild(new Button("Quit"));
+        b.addClickCommands((source) -> {
+            DuelResultData d = new DuelResultData();
+            d.quitGame = true;
+            flow.nextState(this, d);
         });
         
         ((DuelApp) app).getGuiNode().attachChild(window);

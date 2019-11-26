@@ -86,5 +86,6 @@ public class DuelApp extends SimpleApplication {
         super.destroy();
 
         //cleanup Duelflow
+        flow.cleanup();
     }
 }

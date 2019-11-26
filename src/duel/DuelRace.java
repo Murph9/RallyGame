@@ -31,10 +31,10 @@ public class DuelRace extends BaseAppState {
         getStateManager().attach(world);
 
         this.cb = getState(CarBuilder.class);
-        RayCarControl rayCar = cb.addCar(flow.getData().car, world.getStartPos(), world.getStartRot(), true, null);
+        RayCarControl rayCar = cb.addCar(flow.getData().yourCar, world.getStartPos(), world.getStartRot(), true, null);
         //TODO car ui
 
-        RayCarControl car = this.cb.addCar(flow.getData().car, world.getStartPos(), world.getStartRot(), false, null);
+        RayCarControl car = this.cb.addCar(flow.getData().theirCar, world.getStartPos(), world.getStartRot(), false, null);
         car.attachAI(new DriveAlongAI(car, (vec) -> {
             return new Vector3f(0, 0, vec.z + 20); // next pos math
         }), true);
@@ -70,7 +70,10 @@ public class DuelRace extends BaseAppState {
 
         for (RayCarControl car: this.cb.getAll()) {
             if (car.getPhysicsLocation().z > 300) {
-                flow.nextState(this, car == this.cb.get(0));
+                DuelResultData d = new DuelResultData();
+                d.raceResult = new DuelRaceResult();
+                d.raceResult.playerWon = car == this.cb.get(0);
+                flow.nextState(this, d);
                 Log.p("Winner: " + car.getCarData().carModel);
                 return;
             }
