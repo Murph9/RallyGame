@@ -35,21 +35,20 @@ import helper.Log;
 
 public class CarBuilder extends BaseAppState {
 
-	private CarDataLoader loader;
+	private final CarDataLoader loader;
 	private final List<RayCarControl> cars;
-
 	private final Node rootNode;
 
 	public CarBuilder() {
 		cars = new LinkedList<>();
 		rootNode = new Node("Car Builder Root");
+		loader = new CarDataLoader();
 	}
 	
 	@Override
 	public void initialize(Application app) {
 		Log.p("CarBuilder init");
 
-		loader = new CarDataLoader(getState(BulletAppState.class).getPhysicsSpace());
 		((SimpleApplication)app).getRootNode().attachChild(rootNode);
 	}
 	

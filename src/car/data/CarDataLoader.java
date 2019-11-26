@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.io.InputStream;
 
 import com.jme3.asset.AssetManager;
-import com.jme3.bullet.PhysicsSpace;
 import com.jme3.math.Vector3f;
 
 import org.yaml.snakeyaml.Yaml;
@@ -26,7 +25,7 @@ public class CarDataLoader { //CarDataFactory
     private static final String YAML_CAR_DATA = "/assets/cardata/";
     private final HashMap<Car, CarDataConst> dataMap;
 
-    public CarDataLoader(PhysicsSpace space) {
+    public CarDataLoader() {
         dataMap = new HashMap<>();
     }
 
