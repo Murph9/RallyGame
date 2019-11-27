@@ -43,7 +43,7 @@ public class DuelRace extends BaseAppState {
 
         RayCarControl car = this.cb.addCar(flow.getData().theirCar, worldSpawn.add(-5, 0, 0), world.getStartRot(), false, null);
         car.attachAI(new DriveAlongAI(car, (vec) -> {
-            return new Vector3f(5, 0, vec.z + 20); // next pos math
+            return new Vector3f(-5, 0, vec.z + 20); // next pos math
         }), true);
 
         // initCamera
