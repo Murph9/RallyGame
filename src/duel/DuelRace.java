@@ -6,6 +6,7 @@ import com.jme3.math.Vector3f;
 
 import car.CarBuilder;
 import car.CarCamera;
+import car.CarUI;
 import car.ai.DriveAlongAI;
 import car.ray.RayCarControl;
 import helper.Log;
@@ -20,6 +21,7 @@ public class DuelRace extends BaseAppState {
 
     private World world;
     private CarCamera camera;
+    private CarUI uiNode;
 
     public DuelRace(IDuelFlow flow) {
         this.flow = flow;
@@ -31,12 +33,17 @@ public class DuelRace extends BaseAppState {
         getStateManager().attach(world);
 
         this.cb = getState(CarBuilder.class);
-        RayCarControl rayCar = cb.addCar(flow.getData().yourCar, world.getStartPos(), world.getStartRot(), true, null);
-        //TODO car ui
 
-        RayCarControl car = this.cb.addCar(flow.getData().theirCar, world.getStartPos(), world.getStartRot(), false, null);
+        Vector3f worldSpawn = world.getStartPos();
+
+        RayCarControl rayCar = cb.addCar(flow.getData().yourCar, worldSpawn.add(5, 0, 0), world.getStartRot(), true, null);
+
+        uiNode = new CarUI(rayCar);
+        getStateManager().attach(uiNode);
+
+        RayCarControl car = this.cb.addCar(flow.getData().theirCar, worldSpawn.add(-5, 0, 0), world.getStartRot(), false, null);
         car.attachAI(new DriveAlongAI(car, (vec) -> {
-            return new Vector3f(0, 0, vec.z + 20); // next pos math
+            return new Vector3f(5, 0, vec.z + 20); // next pos math
         }), true);
 
         // initCamera
@@ -47,11 +54,18 @@ public class DuelRace extends BaseAppState {
 
     @Override
     protected void cleanup(Application app) {
+        getStateManager().detach(world);
+        world = null;
+
+        getStateManager().detach(uiNode);
+        uiNode = null;
+
         this.cb.removeAll();
         this.cb = null;
 
-        getStateManager().detach(world);
-        world = null;
+        getStateManager().detach(camera);
+        app.getInputManager().removeRawInputListener(camera);
+        camera = null;
     }
 
     @Override

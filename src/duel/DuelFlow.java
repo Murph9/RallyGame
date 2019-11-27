@@ -41,7 +41,7 @@ public class DuelFlow implements IDuelFlow {
         AppStateManager sm = app.getStateManager();
 
         if (state == null) {
-            curState = new DuelMainMenu(this);
+            curState = new DuelMainMenu(this, null);
             sm.attach(curState);
             return;
         }
@@ -69,18 +69,17 @@ public class DuelFlow implements IDuelFlow {
             if (result.raceResult != null && result.raceResult.playerWon) {
                 this.data.wins++;
                 this.data.yourCar = this.data.theirCar; //basically just stolen
-                this.data.theirCar = H.randFromArray(Car.values()); // TODO actually do something with this to make progression
-                curState = new DuelRaceEnd(this);
+
+                // TODO actually do something with this to make progression
+                this.data.theirCar = H.randFromArray(Car.values());
+                curState = new DuelRaceStart(this);
             } else {
-                curState = new DuelMainMenu(this);
+                curState = new DuelMainMenu(this, this.data);
                 
                 this.data = new DuelData();
                 this.data.yourCar = Car.Runner;
                 this.data.theirCar = Car.Rally;
-                //TODO but with data from the previous run?
             }
-        } else if (state instanceof DuelRaceEnd) {
-            curState = new DuelRaceStart(this);
         } else {
             throw new IllegalArgumentException();
         }

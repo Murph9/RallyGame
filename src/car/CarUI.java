@@ -1,6 +1,7 @@
 package car;
 
 import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.font.BitmapFont;
@@ -23,7 +24,6 @@ import com.jme3.system.AppSettings;
 
 import car.ray.RayCarControl;
 import car.ray.ICarPowered;
-import game.App;
 import helper.H;
 
 public class CarUI extends BaseAppState {
@@ -86,7 +86,7 @@ public class CarUI extends BaseAppState {
 	}
 	@Override
 	protected void initialize(Application app) {
-		App r = (App)app;
+		SimpleApplication r = (SimpleApplication)app;
 
 		BitmapFont guiFont = app.getAssetManager().loadFont("Interface/Fonts/Default.fnt");
 		AppSettings settings = app.getContext().getSettings();

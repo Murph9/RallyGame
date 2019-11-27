@@ -30,9 +30,8 @@ public class DuelRaceStart extends BaseAppState {
             flow.nextState(this, new DuelResultData());
         });
         
-        Vector3f grav = new Vector3f(0, -9.81f, 0);
         DuelData data = flow.getData();
-        window.addChild(new DuelCarStatsUI(app.getAssetManager(), data.yourCar, data.theirCar, grav), 1, 0);
+        window.addChild(new DuelCarStatsUI(app.getAssetManager(), data.yourCar, data.theirCar), 1, 0);
 
         Vector3f middle = H.screenCenterMe(app.getContext().getSettings(), window.getPreferredSize());
         window.setLocalTranslation(middle);
