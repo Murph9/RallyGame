@@ -413,7 +413,6 @@ public class H {
 		return array[FastMath.nextRandomInt(0, array.length-1)];
 	}
 	
-	//TODO these need to take in Application
 	public static Vector3f screenTopLeft(AppSettings set) {
 		return new Vector3f(0, set.getHeight(), 0);
 	}
@@ -425,6 +424,12 @@ public class H {
 	}
 	public static Vector3f screenMiddle(AppSettings set) {
 		return new Vector3f(set.getWidth()/2, set.getHeight()/2, 0);
+	}
+	public static Vector3f screenCenterMe(AppSettings set, Vector3f size) {
+		Vector3f middle = H.screenMiddle(set);
+		middle.x -= size.x / 2f;
+		middle.y += size.y / 2f;
+		return middle;
 	}
 	
 	//http://stackoverflow.com/a/677248

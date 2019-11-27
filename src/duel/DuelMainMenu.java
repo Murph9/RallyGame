@@ -2,9 +2,12 @@ package duel;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
+import com.jme3.math.Vector3f;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
+
+import helper.H;
 
 public class DuelMainMenu extends BaseAppState {
 
@@ -19,7 +22,7 @@ public class DuelMainMenu extends BaseAppState {
     protected void initialize(Application app) {
         window = new Container();
         
-        window.setLocalTranslation(300, 300, 0); //TODO centre
+        
         window.addChild(new Label("Main Menu"));
 
         Button b = window.addChild(new Button("Start"));
@@ -35,6 +38,9 @@ public class DuelMainMenu extends BaseAppState {
         });
         
         ((DuelApp) app).getGuiNode().attachChild(window);
+
+        Vector3f middle = H.screenCenterMe(app.getContext().getSettings(), window.getPreferredSize());
+        window.setLocalTranslation(middle);
     }
 
     @Override
