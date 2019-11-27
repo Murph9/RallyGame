@@ -4,9 +4,7 @@ import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.BulletAppState;
-import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
-import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
 import com.simsilica.lemur.Button;
@@ -37,7 +35,8 @@ public class ChooseCar extends BaseAppState {
 	private Car car;
 	private Label label;
 	
-	private float rotation; 
+	private static final float RESET_IMPULSE = 1/60f;
+	private float posReset;
 	
 	private BasicCamera camera;
 	
@@ -121,14 +120,15 @@ public class ChooseCar extends BaseAppState {
 		if (!isEnabled()) return; //appstate stuff
 		super.update(tpf);
 
-		RayCarControl car = cb.get(0);
-		Vector3f pos = car.getPhysicsLocation();
-		car.setPhysicsLocation(new Vector3f(0, pos.y, 0));
-		
-		//code to rotate slowly
-		rotation += FastMath.DEG_TO_RAD*tpf;
-		Quaternion q = new Quaternion();
-		q.fromAngleAxis(rotation, Vector3f.UNIT_Y);
+		// keep the car still enough, and also prevent high frame rates from breaking it
+		posReset += tpf;
+		if (posReset > RESET_IMPULSE) {
+			posReset = 0;
+
+			RayCarControl car = cb.get(0);
+			Vector3f pos = car.getPhysicsLocation();
+			car.setPhysicsLocation(new Vector3f(0, pos.y, 0));
+		}
 	}
 
 	private String getCarInfoText(Car car) {
