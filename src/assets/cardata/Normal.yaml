@@ -34,7 +34,7 @@ susF: &sus {
   min_travel: 0.0,
   preload_force: 2.0,
   relax: 0.5,
-  stiffness: 8.0
+  stiffness: 12.0
 }
 susR: *sus
 trans_effic: 0.85

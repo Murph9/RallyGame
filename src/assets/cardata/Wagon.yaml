@@ -28,26 +28,26 @@ nitro_on: true
 nitro_rate: 1.0
 susF: &sus {
   antiroll: 0.0, 
-  comp: 0.13,
+  comp: 0.5,
   max_force: 50000.0, 
   max_travel: 0.1,
   min_travel: -0.1,
   preload_force: 0.6,
   relax: 0.16,
-  stiffness: 17
+  stiffness: 50
 }
 susR: *sus
 trans_effic: 0.85
 trans_finaldrive: 1
 trans_gearRatios: [-8.27, 8.27]
-trans_powerBalance: 0.5
+trans_powerBalance: 0.75
 w_steerAngle: 0.5
 wheelData:
 - &w
   mass: 10.0
   modelName: assets/models/Wagon_Wheel.blend
-  pjk_lat: {B: 10.0, C: 1.9, D1: 0.62, D2: 0.000055, E: 0.97}
-  pjk_long: {B: 10.0, C: 1.9, D1: 0.62, D2: 0.000055, E: 0.95}
+  pjk_lat: {B: 10.0, C: 1.32, D1: 0.8, D2: 0.000055, E: 0.97}
+  pjk_long: {B: 10.0, C: 1.9, D1: 0.8, D2: 0.000055, E: 0.95}
   radius: 0.5
   width: 0.15
 - *w

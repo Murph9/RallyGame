@@ -8,9 +8,9 @@ auto_changeTime: 0.2
 auto_gearDown: 2900
 auto_gearUp: 5700
 brakeMaxTorque: 4000.0
-cam_lookAtHeight: 1.3
-cam_offsetLength: -6.0
-cam_offsetHeight: 2.1
+cam_lookAtHeight: 1.5
+cam_offsetLength: -9.0
+cam_offsetHeight: 2.7
 cam_shake: 2.0E-6
 carModel: assets/models/sa_hummer.blend
 driveFront: true
@@ -46,8 +46,8 @@ wheelData:
 - &w
   mass: 10.0
   modelName: assets/models/sa_hummer_wheel.blend
-  pjk_lat: {B: 6, C: 2, D1: 1.2, D2: 0.000055, E: 1}
-  pjk_long: {B: 6, C: 2, D1: 1.2, D2: 0.000055, E: 1}
+  pjk_lat: {B: 20, C: 1.39, D1: 1.3, D2: 0.000055, E: 0.05}
+  pjk_long: {B: 21, C: 1.8, D1: 2, D2: 0.000055, E: 0.98}
   radius: 0.3
   width: 0.15
 - *w

@@ -368,7 +368,7 @@ public class RayCar implements PhysicsTickListener {
 			return FastMath.sin(w.C * FastMath.atan(w.B*slip - w.E * (w.B*slip - FastMath.atan(w.B*slip))));
 		}
 		public static float loadFormula(WheelDataTractionConst w, float load) {
-			return w.D1 * (1 - w.D2 * load) * load;
+			return Math.max(0, w.D1 * (1 - w.D2 * load) * load);
 		}
 		public static float calcMaxLoad(WheelDataTractionConst w) {
 			return loadFormula(w, dloadFormula(w));

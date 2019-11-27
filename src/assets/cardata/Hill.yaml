@@ -32,7 +32,7 @@ susF: &sus {
   max_force: 83600, 
   max_travel: 0.1,
   min_travel: -0.1,
-  preload_force: 2.3,
+  preload_force: 1.4,
   relax: 0.5, 
   stiffness: 24.0
 }
@@ -46,7 +46,7 @@ wheelData:
 - &w
   mass: 10.0
   modelName: assets/models/wheel.obj
-  pjk_lat: {B: 20, C: 1.39, D1: 1.1, D2: 0.000055, E: 0.05}
+  pjk_lat: {B: 20, C: 1.39, D1: 1.3, D2: 0.000055, E: 0.05}
   pjk_long: {B: 21, C: 1.8, D1: 2, D2: 0.000055, E: 0.98}
   radius: 0.316
   width: 0.225
