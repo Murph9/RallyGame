@@ -3,7 +3,6 @@ package car;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.BiFunction;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -24,8 +23,6 @@ import com.jme3.scene.Spatial;
 
 import car.data.CarDataLoader;
 import car.data.CarModelData.CarPart;
-import car.ai.CarAI;
-import car.ai.DriveAtAI;
 import car.data.Car;
 import car.ray.CarDataConst;
 import car.ray.RayCarControl;
@@ -66,19 +63,7 @@ public class CarBuilder extends BaseAppState {
 			r.enableSound(state);
 		}
 	}
-	
-	/**Helper method to add ai to the RayCarControl, please use the normal method
-	 * {@link car.ray.RayCarControl#attachAI}
-	 */
-	public void addAI(RayCarControl car, BiFunction<RayCarControl, CarBuilder, CarAI> aiFunc) {
-		CarAI ai;
-		if (aiFunc == null)
-			ai = new DriveAtAI(car, get(0).getPhysicsObject());	
-		else
-			ai = aiFunc.apply(car, this);	
-		car.attachAI(ai, true);
-	}
-	
+		
 	public RayCarControl addCar(Car car, Vector3f start, Matrix3f rot, boolean aPlayer) {
 		try {
 			if (!isInitialized())

@@ -14,6 +14,7 @@ import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
 import car.ai.DriveAlongAI;
+import car.ai.DriveAtAI;
 import car.data.Car;
 import car.ray.RayCarControl;
 import game.IDriveDone;
@@ -72,7 +73,7 @@ public class DriveMainRoadGetaway extends DriveBase {
 		
 		//add the chase car
 		hunter = this.cb.addCar(hunterType, new Vector3f(HUNTER_BUFFER - 10, 0.3f, 0), world.getStartRot(), false);
-		this.cb.addAI(hunter, null);
+		hunter.attachAI(new DriveAtAI(hunter, this.cb.get(0).getPhysicsObject()), true);
 
 		display = new Container();
 		display.addChild(new Label("Score: "));

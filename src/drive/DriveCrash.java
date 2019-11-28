@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.jme3.math.Vector3f;
 
+import car.ai.DriveAtAI;
 import car.data.Car;
 import car.ray.RayCarControl;
 import game.IDriveDone;
@@ -42,7 +43,7 @@ public class DriveCrash extends DriveBase {
 		if (this.cb.getCount() < maxCount && frameCount % 60 == 0) {
 			Vector3f spawn = H.randFromArray(spawns);
 			RayCarControl c = this.cb.addCar(them, spawn, world.getStartRot(), false);
-			this.cb.addAI(c, null);
+			c.attachAI(new DriveAtAI(c, this.cb.get(0).getPhysicsObject()), true);
 		}
 		
 		//check if any are upside down, if so kill them

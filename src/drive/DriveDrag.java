@@ -4,6 +4,7 @@ import com.jme3.app.Application;
 import com.jme3.math.Vector3f;
 
 import car.ai.DriveAlongAI;
+import car.ai.DriveAtAI;
 import car.data.Car;
 import car.ray.RayCarControl;
 import game.IDriveDone;
@@ -36,7 +37,7 @@ public class DriveDrag extends DriveBase {
         Car[] types = Car.values();
     	for (int i = 0; i < this.themCount; i++) {
             RayCarControl c = this.cb.addCar(types[i], world.getStartPos(), world.getStartRot(), false);
-            this.cb.addAI(c, null);
+            c.attachAI(new DriveAtAI(c, this.cb.get(0).getPhysicsObject()), true);
         }
 
         setSpawns();
