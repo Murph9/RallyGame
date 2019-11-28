@@ -9,7 +9,7 @@ public class RaceAI extends CarAI {
 
 	private DriveRace race;
 	
-	public RaceAI(RayCarControl car, RayCarControl notused, DriveRace race) {
+	public RaceAI(RayCarControl car, DriveRace race) {
 		super(car);
 		this.race = race;
 	}

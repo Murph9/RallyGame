@@ -2,7 +2,6 @@ package drive;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiFunction;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -14,7 +13,6 @@ import com.jme3.system.AppSettings;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
-import car.ai.CarAI;
 import car.ai.DriveAlongAI;
 import car.data.Car;
 import car.ray.RayCarControl;
@@ -73,7 +71,8 @@ public class DriveMainRoadGetaway extends DriveBase {
 		super.initialize(app);
 		
 		//add the chase car
-		hunter = this.cb.addCar(hunterType, new Vector3f(HUNTER_BUFFER - 10, 0.3f, 0), world.getStartRot(), false, null);
+		hunter = this.cb.addCar(hunterType, new Vector3f(HUNTER_BUFFER - 10, 0.3f, 0), world.getStartRot(), false);
+		this.cb.addAI(hunter, null);
 
 		display = new Container();
 		display.addChild(new Label("Score: "));
@@ -130,14 +129,6 @@ public class DriveMainRoadGetaway extends DriveBase {
 			final float z = nextZOff();
 			final boolean spawnPlayerDirection = spawnPlayerDirection();
 			
-			BiFunction<RayCarControl, RayCarControl, CarAI> ai = (me, target) -> { 
-				DriveAlongAI daai = new DriveAlongAI(me, (vec) -> {
-					return new Vector3f(vec.x+20*(spawnPlayerDirection ? 1: -1), 0, z); // next pos math
-				});
-				daai.setMaxSpeed(27.777f); //100km/h
-				return daai;
-			};
-			
 			//closest piece from the start of the end of the world (as its always increasing in a straight line down positive x)
 			//and then subtract a bit so that it doesn't fall off
 			Vector3f spawnPos = ((DefaultBuilder) this.world).getNextPieceClosestTo(new Vector3f(100000, 0, 0))
@@ -146,7 +137,14 @@ public class DriveMainRoadGetaway extends DriveBase {
 				? world.getStartRot()
 				: new Quaternion().fromAngleAxis(FastMath.PI, Vector3f.UNIT_Y).toRotationMatrix().mult(world.getStartRot());
 
-			RayCarControl c = this.cb.addCar(H.randFromArray(this.trafficTypes), spawnPos, spawnDir, false, ai);
+			RayCarControl c = this.cb.addCar(H.randFromArray(this.trafficTypes), spawnPos, spawnDir, false);
+
+			DriveAlongAI daai = new DriveAlongAI(c, (vec) -> {
+				return new Vector3f(vec.x + 20 * (spawnPlayerDirection ? 1 : -1), 0, z); // next pos math
+			});
+			daai.setMaxSpeed(27.777f); // 100km/h
+			c.attachAI(daai, true);
+
 			c.setLinearVelocity(new Vector3f(20*(spawnPlayerDirection ? 1: -1), 0, 0));
 		}
 		

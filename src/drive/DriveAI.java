@@ -7,6 +7,7 @@ import world.World;
 import com.jme3.app.Application;
 
 import car.data.Car;
+import car.ray.RayCarControl;
 import game.IDriveDone;
 
 public class DriveAI extends DriveBase {
@@ -24,8 +25,10 @@ public class DriveAI extends DriveBase {
 	public void initialize(Application app) {
     	super.initialize(app);
     	
-    	for (int i = 0; i < this.themCount; i++)
-    		this.cb.addCar(them, world.getStartPos(), world.getStartRot(), false, null);
+    	for (int i = 0; i < this.themCount; i++) {
+			RayCarControl c = this.cb.addCar(them, world.getStartPos(), world.getStartRot(), false);
+			this.cb.addAI(c, null);
+		}
 	}
 	
 	public void update(float tpf) {

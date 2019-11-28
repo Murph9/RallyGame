@@ -61,7 +61,7 @@ public class ChooseCar extends BaseAppState {
 		getStateManager().attach(world);
 		
 		cb = getState(CarBuilder.class);
-		cb.addCar(car, start, dir, true, null);
+		cb.addCar(car, start, dir, true);
 
 		//make camera
 		camera = new BasicCamera("Camera", app.getCamera(), new Vector3f(0,3,7), new Vector3f(0,1.2f, 0));
@@ -88,7 +88,7 @@ public class ChooseCar extends BaseAppState {
                     car = c;
 
                     cb.removeCar(cb.get(0));
-    				cb.addCar(car, worldType.start, new Matrix3f(), true, null);
+    				cb.addCar(car, worldType.start, new Matrix3f(), true);
     				
     				String carinfotext = getCarInfoText(car);
     				label.setText(carinfotext);

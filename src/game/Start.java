@@ -57,7 +57,7 @@ public class Start extends BaseAppState {
 		
 		// build player
 		this.cb = getState(CarBuilder.class);
-		RayCarControl car = cb.addCar(this.carType, world.getStartPos(), world.getStartRot(), true, null);
+		RayCarControl car = cb.addCar(this.carType, world.getStartPos(), world.getStartRot(), true);
 
 		//attach basic ai, for the view
 		DriveAlongAI ai = new DriveAlongAI(car, (vec) -> world.getNextPieceClosestTo(vec));

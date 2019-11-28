@@ -114,7 +114,7 @@ public class DriveRace extends BaseAppState {
     	
 		//buildCars
 		this.cb = getState(CarBuilder.class);
-		RayCarControl rayCar = cb.addCar(car, worldStarts[0], worldRot, true, null);
+		RayCarControl rayCar = cb.addCar(car, worldStarts[0], worldRot, true);
 		
 		menu = new RaceMenu(null);
 		getStateManager().attach(menu);
@@ -122,8 +122,11 @@ public class DriveRace extends BaseAppState {
 		uiNode = new CarUI(rayCar);
 		getStateManager().attach(uiNode);
 		
-    	for (int i = 0; i < this.themCount; i++)
-    		this.cb.addCar(themType, worldStarts[i+1], worldRot, false, (c,s) -> new RaceAI(c, s, this));
+    	for (int i = 0; i < this.themCount; i++) {
+			RayCarControl c = this.cb.addCar(themType, worldStarts[i+1], worldRot, false);
+			RaceAI rAi = new RaceAI(c, this);
+			c.attachAI(rAi, true);
+		}
 		
 		//initCameras
 		camera = new CarCamera("Camera", app.getCamera(), rayCar);

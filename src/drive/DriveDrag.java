@@ -35,7 +35,8 @@ public class DriveDrag extends DriveBase {
         
         Car[] types = Car.values();
     	for (int i = 0; i < this.themCount; i++) {
-            this.cb.addCar(types[i], world.getStartPos(), world.getStartRot(), false, null);
+            RayCarControl c = this.cb.addCar(types[i], world.getStartPos(), world.getStartRot(), false);
+            this.cb.addAI(c, null);
         }
 
         setSpawns();

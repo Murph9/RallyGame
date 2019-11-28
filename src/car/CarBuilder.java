@@ -67,7 +67,19 @@ public class CarBuilder extends BaseAppState {
 		}
 	}
 	
-	public RayCarControl addCar(Car car, Vector3f start, Matrix3f rot, boolean aPlayer, BiFunction<RayCarControl, RayCarControl, CarAI> ai) {
+	/**Helper method to add ai to the RayCarControl, please use the normal method
+	 * {@link car.ray.RayCarControl#attachAI}
+	 */
+	public void addAI(RayCarControl car, BiFunction<RayCarControl, CarBuilder, CarAI> aiFunc) {
+		CarAI ai;
+		if (aiFunc == null)
+			ai = new DriveAtAI(car, get(0).getPhysicsObject());	
+		else
+			ai = aiFunc.apply(car, this);	
+		car.attachAI(ai, true);
+	}
+	
+	public RayCarControl addCar(Car car, Vector3f start, Matrix3f rot, boolean aPlayer) {
 		try {
 			if (!isInitialized())
 				throw new Exception(getClass().getName() + " hasn't been initialised");
@@ -114,23 +126,13 @@ public class CarBuilder extends BaseAppState {
 		carControl.setPhysicsLocation(start);
 		carControl.setPhysicsRotation(rot);
 
-		if (aPlayer) { //players get the keyboard
+		if (aPlayer) {
+			//players get the keyboard and sound
 			carControl.attachControls(getApplication().getInputManager());
-		} else {
-			CarAI _ai;
-			if (ai != null)
-				_ai = ai.apply(carControl, get(0));
-			else
-				_ai = new DriveAtAI(carControl, get(0).getPhysicsObject());
-			carControl.attachAI(_ai, true);
-		}
-		
-		if (aPlayer) { //players get sound
 			carControl.giveSound(new AudioNode(am, "assets/sound/engine.wav", AudioData.DataType.Buffer));
 		}
-		
+				
 		cars.add(carControl);
-		
 		return carControl;
 	}
 

@@ -61,7 +61,7 @@ public class DriveBase extends BaseAppState {
 			this.cb.removeAll();
 		}
 
-		RayCarControl rayCar = cb.addCar(car, world.getStartPos(), world.getStartRot(), true, null);
+		RayCarControl rayCar = cb.addCar(car, world.getStartPos(), world.getStartRot(), true);
 		
 		uiNode = new CarUI(rayCar);
 		stateManager.attach(uiNode);
@@ -129,7 +129,7 @@ public class DriveBase extends BaseAppState {
 		
 		this.cb.removeCar(cb.get(0));
 
-		RayCarControl c = this.cb.addCar(car, world.getStartPos(), world.getStartRot(), true, null); 
+		RayCarControl c = this.cb.addCar(car, world.getStartPos(), world.getStartRot(), true);
 		
 		//initCamera and ui again
 		camera = new CarCamera("Camera", getApplication().getCamera(), c);

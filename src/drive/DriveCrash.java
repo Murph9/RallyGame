@@ -41,7 +41,8 @@ public class DriveCrash extends DriveBase {
 		
 		if (this.cb.getCount() < maxCount && frameCount % 60 == 0) {
 			Vector3f spawn = H.randFromArray(spawns);
-			this.cb.addCar(them, spawn, world.getStartRot(), false, null);
+			RayCarControl c = this.cb.addCar(them, spawn, world.getStartRot(), false);
+			this.cb.addAI(c, null);
 		}
 		
 		//check if any are upside down, if so kill them
