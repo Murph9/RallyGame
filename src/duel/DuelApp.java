@@ -49,8 +49,8 @@ public class DuelApp extends SimpleApplication {
 
         // initialize Lemur (the GUI manager)
         GuiGlobals.initialize(this);
-        // Load my Lemur style
-        LemurGuiStyle.load(assetManager);
+        // Load my duel Lemur style
+        DuelUiStyle.load(assetManager);
 
         // Init the Physics space with better defaults
         // BulletAppState needs to wait until after the app is initialised, so can't be
