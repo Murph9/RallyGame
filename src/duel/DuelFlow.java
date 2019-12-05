@@ -7,7 +7,8 @@ import com.jme3.app.state.AppState;
 import com.jme3.app.state.AppStateManager;
 
 import car.data.Car;
-import helper.H;
+import car.data.CarDataAdjuster;
+import car.data.CarDataAdjustment;
 import helper.Log;
 
 interface IDuelFlow {
@@ -25,7 +26,9 @@ public class DuelFlow implements IDuelFlow {
         this.app = app;
         this.data = new DuelData();
         this.data.yourCar = Car.Runner;
-        this.data.theirCar = Car.Rally;
+        this.data.yourAdjuster = generateNextAdjuster();
+        this.data.theirCar = Car.Runner;
+        this.data.theirAdjuster = generateNextAdjuster();
         
         nextState(null, null);
     }
@@ -69,16 +72,20 @@ public class DuelFlow implements IDuelFlow {
             if (result.raceResult != null && result.raceResult.playerWon) {
                 this.data.wins++;
                 this.data.yourCar = this.data.theirCar; //basically just stolen
+                this.data.yourAdjuster = this.data.theirAdjuster;
 
                 // TODO actually do something with this to make progression
-                this.data.theirCar = H.randFromArray(Car.values());
+                this.data.theirCar = Car.Runner;
+                this.data.theirAdjuster = generateNextAdjuster();
                 curState = new DuelRaceStart(this);
             } else {
                 curState = new DuelMainMenu(this, this.data);
                 
                 this.data = new DuelData();
                 this.data.yourCar = Car.Runner;
-                this.data.theirCar = Car.Rally;
+                this.data.yourAdjuster = null;
+                this.data.theirCar = Car.Runner;
+                this.data.theirAdjuster = null;
             }
         } else {
             throw new IllegalArgumentException();
@@ -89,5 +96,11 @@ public class DuelFlow implements IDuelFlow {
 
 	public void cleanup() {
         app.getStateManager().detach(curState);
-	}
+    }
+    
+    public CarDataAdjuster generateNextAdjuster() {
+        return new CarDataAdjuster(CarDataAdjustment.asFunc((data) -> {
+            data.mass *= 0.9f;
+        }));
+    }
 }

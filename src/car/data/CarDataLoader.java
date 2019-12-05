@@ -59,6 +59,7 @@ public class CarDataLoader { //CarDataFactory
         CarDataConst data = null;
         try {
             data = loadFromFile(carName);
+            data.name = carName;
         } catch (Exception e) {
             e.printStackTrace();
             Log.e("!!! car data load failed");

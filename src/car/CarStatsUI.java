@@ -1,26 +1,16 @@
 package car;
 
 import com.jme3.asset.AssetManager;
-import com.jme3.math.Vector3f;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
-import car.data.Car;
-import car.data.CarDataLoader;
 import car.data.CarDataConst;
 import car.ray.RayCar.GripHelper;
 
 public class CarStatsUI extends Container {
 
-    public CarStatsUI(AssetManager am, Car car) {
-        this(am, car, new Vector3f(0, -9.81f, 0)); //TODO: hardcoded gravity
-    }
-
-    public CarStatsUI(AssetManager am, Car car, Vector3f gravity) {
-        addChild(new Label("Stats for car: " + car.getCarName()));
-
-        CarDataLoader loader = new CarDataLoader();
-        CarDataConst carData = loader.get(am, car, gravity);
+    public CarStatsUI(AssetManager am, CarDataConst carData) {
+        addChild(new Label("Stats for car: " + carData.name));
 
         //TODO add more logical things
         addChild(new Label("MaxPower: " + carData.getMaxPower()));

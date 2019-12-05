@@ -9,6 +9,7 @@ import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
 import car.CarBuilder;
+import car.data.CarDataConst;
 import game.BasicCamera;
 import helper.H;
 import world.StaticWorld;
@@ -43,7 +44,10 @@ public class DuelRaceStart extends BaseAppState {
         });
         
         DuelData data = flow.getData();
-        window.addChild(new DuelCarStatsUI(app.getAssetManager(), data.yourCar, data.theirCar), 1, 0);
+        CarBuilder cb = getState(CarBuilder.class);
+        CarDataConst data1 = cb.loadData(data.yourCar, data.yourAdjuster);
+        CarDataConst data2 = cb.loadData(data.theirCar, data.theirAdjuster);
+        window.addChild(new DuelCarStatsUI(app.getAssetManager(), data1, data2), 1, 0);
 
         Vector3f middle = H.screenCenterMe(app.getContext().getSettings(), window.getPreferredSize());
         window.setLocalTranslation(middle);

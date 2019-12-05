@@ -8,7 +8,9 @@ import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
+import car.CarBuilder;
 import car.CarStatsUI;
+import car.data.CarDataConst;
 import helper.H;
 
 public class DuelMainMenu extends BaseAppState {
@@ -42,7 +44,9 @@ public class DuelMainMenu extends BaseAppState {
         });
         
         if (duelData != null) {
-            window.addChild(new CarStatsUI(app.getAssetManager(), duelData.yourCar), 2, 0);
+            CarBuilder cb = getState(CarBuilder.class);
+            CarDataConst data = cb.loadData(duelData.yourCar, duelData.yourAdjuster);
+            window.addChild(new CarStatsUI(app.getAssetManager(), data), 2, 0);
         }
 
         ((SimpleApplication) app).getGuiNode().attachChild(window);

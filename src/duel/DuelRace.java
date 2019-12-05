@@ -8,6 +8,7 @@ import car.CarBuilder;
 import car.CarCamera;
 import car.CarUI;
 import car.ai.DriveAlongAI;
+import car.data.CarDataConst;
 import car.ray.RayCarControl;
 import helper.Log;
 import world.StaticWorld;
@@ -36,12 +37,16 @@ public class DuelRace extends BaseAppState {
 
         Vector3f worldSpawn = world.getStartPos();
 
-        RayCarControl rayCar = cb.addCar(flow.getData().yourCar, worldSpawn.add(5, 0, 0), world.getStartRot(), true);
+        DuelData data = flow.getData();
+
+        CarDataConst yourCarData = cb.loadData(data.yourCar, data.yourAdjuster);
+        RayCarControl rayCar = cb.addCar(yourCarData, worldSpawn.add(5, 0, 0), world.getStartRot(), true);
 
         uiNode = new CarUI(rayCar);
         getStateManager().attach(uiNode);
 
-        RayCarControl car = this.cb.addCar(flow.getData().theirCar, worldSpawn.add(-5, 0, 0), world.getStartRot(), false);
+        CarDataConst theirCarData = cb.loadData(data.theirCar, data.theirAdjuster);
+        RayCarControl car = this.cb.addCar(theirCarData, worldSpawn.add(-5, 0, 0), world.getStartRot(), false);
         car.attachAI(new DriveAlongAI(car, (vec) -> {
             return new Vector3f(-5, 0, vec.z + 20); // next pos math
         }), true);

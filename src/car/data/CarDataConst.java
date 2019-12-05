@@ -16,6 +16,8 @@ public class CarDataConst implements Serializable {
 
 	private static final long serialVersionUID = 2121279530710074151L;
 
+	public String name;
+
 	// model strings (can be xx.obj or xx.blend)
 	public String carModel;
 	public String wheelModel;

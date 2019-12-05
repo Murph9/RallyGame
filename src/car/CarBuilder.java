@@ -24,6 +24,7 @@ import com.jme3.scene.Spatial;
 import car.data.CarDataLoader;
 import car.data.CarModelData.CarPart;
 import car.data.Car;
+import car.data.CarDataAdjuster;
 import car.data.CarDataConst;
 import car.ray.RayCarControl;
 import effects.LoadModelWrapper;
@@ -63,8 +64,31 @@ public class CarBuilder extends BaseAppState {
 			r.enableSound(state);
 		}
 	}
-		
+	
+	/** Load car data from yaml file */
+	public CarDataConst loadData(Car car) {
+		return loadData(car, null);
+	}
+	/** Load car data from yaml file, with a value adjuster */
+	public CarDataConst loadData(Car car, CarDataAdjuster adjuster) {
+		Vector3f grav = new Vector3f();
+		getState(BulletAppState.class).getPhysicsSpace().getGravity(grav);
+
+		CarDataConst data = loader.get(getApplication().getAssetManager(), car, grav);
+		if (adjuster != null) {
+			adjuster.applyAll(data);
+		}
+		return data;
+	}
+
+	/**Creates the vehicle and loads it into the world. 
+	 * Please use the CarDataConst version.
+	*/
 	public RayCarControl addCar(Car car, Vector3f start, Matrix3f rot, boolean aPlayer) {
+		return addCar(loadData(car), start, rot, aPlayer);
+	}
+	/** Creates the vehicle and loads it into the world. */
+	public RayCarControl addCar(CarDataConst carData, Vector3f start, Matrix3f rot, boolean aPlayer) {
 		try {
 			if (!isInitialized())
 				throw new Exception(getClass().getName() + " hasn't been initialised");
@@ -73,11 +97,7 @@ public class CarBuilder extends BaseAppState {
 			//this is a runtime exception that should have been fixed by the dev
 			return null;
 		}
-		
-		Vector3f grav = new Vector3f();
-		getState(BulletAppState.class).getPhysicsSpace().getGravity(grav);
-		CarDataConst carData = loader.get(getApplication().getAssetManager(), car, grav);
-		
+				
 		AssetManager am = getApplication().getAssetManager();
 		
 		Node carNode = new Node("Car:" + carData);
@@ -90,8 +110,7 @@ public class CarBuilder extends BaseAppState {
 			Geometry collisionGeometry = null;
 			if (collisionGeometry instanceof Geometry) {
 				collisionGeometry = (Geometry)collisionShape;
-			} else {
-				//Node
+			} else { // Node
 				collisionGeometry = H.getGeomList(collisionShape).get(0); //lets hope its the only one too
 			}
 			Mesh collisionMesh = collisionGeometry.getMesh();
@@ -110,13 +129,13 @@ public class CarBuilder extends BaseAppState {
 		rootNode.attachChild(carNode);
 		carControl.setPhysicsLocation(start);
 		carControl.setPhysicsRotation(rot);
-
+		
 		if (aPlayer) {
 			//players get the keyboard and sound
 			carControl.attachControls(getApplication().getInputManager());
 			carControl.giveSound(new AudioNode(am, "assets/sound/engine.wav", AudioData.DataType.Buffer));
 		}
-				
+		
 		cars.add(carControl);
 		return carControl;
 	}
