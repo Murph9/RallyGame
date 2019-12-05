@@ -1,4 +1,4 @@
-package car.ray;
+package car.data;
 
 public class WheelDataConst {
 	

@@ -20,7 +20,7 @@ import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Line;
 import com.jme3.scene.shape.Quad;
 
-import car.ray.CarDataConst;
+import car.data.CarDataConst;
 import car.ray.RayCarControl;
 import car.ray.RayWheel;
 import helper.AverageV3f;

@@ -22,6 +22,7 @@ import com.jme3.scene.Node;
 import car.JoystickEventListener;
 import car.MyKeyListener;
 import car.ai.CarAI;
+import car.data.CarDataConst;
 import drive.DriveBase;
 import game.DebugAppState;
 import helper.H;

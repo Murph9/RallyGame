@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import car.ray.RayCar;
-import car.ray.WheelDataTractionConst;
+import car.data.WheelDataTractionConst;
 import helper.Log;
 
 public class RayCarTest {

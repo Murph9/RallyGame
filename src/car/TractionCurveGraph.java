@@ -7,7 +7,7 @@ import com.jme3.math.Vector3f;
 import com.simsilica.lemur.Container;
 
 import car.ray.RayCarControl;
-import car.ray.WheelDataTractionConst;
+import car.data.WheelDataTractionConst;
 import helper.H;
 
 import car.ray.RayCar;

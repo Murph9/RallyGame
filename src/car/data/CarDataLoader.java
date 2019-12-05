@@ -13,10 +13,10 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import car.data.CarModelData;
 import car.data.CarModelData.CarPart;
 import car.data.Car;
-import car.ray.CarDataConst;
-import car.ray.CarSusDataConst;
+import car.data.CarDataConst;
+import car.data.CarSusDataConst;
+import car.data.WheelDataConst;
 import car.ray.RayCar;
-import car.ray.WheelDataConst;
 import helper.Log;
 
 /** Private class for CarBuilder, manages the CarDataConst file */

@@ -21,7 +21,7 @@ import com.jme3.renderer.Camera;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
 
-import car.ray.CarDataConst;
+import car.data.CarDataConst;
 import car.ray.RayCarControl;
 import helper.H;
 

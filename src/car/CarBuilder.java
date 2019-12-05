@@ -24,7 +24,7 @@ import com.jme3.scene.Spatial;
 import car.data.CarDataLoader;
 import car.data.CarModelData.CarPart;
 import car.data.Car;
-import car.ray.CarDataConst;
+import car.data.CarDataConst;
 import car.ray.RayCarControl;
 import effects.LoadModelWrapper;
 import helper.H;

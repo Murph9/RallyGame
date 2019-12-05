@@ -1,4 +1,4 @@
-!!car.ray.CarDataConst
+!!car.data.CarDataConst
 #trying my best from: http://www.cars-data.com/en/nissan-200-sx-turbo-specs/26930
 #TODO tune in general
 JUMP_FORCE: {x: 0.0, y: 1100.0, z: 0.0}

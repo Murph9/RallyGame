@@ -3,6 +3,8 @@ package car.ray;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Vector3f;
 
+import car.data.WheelDataConst;
+
 /** Class to store real-time data of this wheel */
 public class RayWheel {
 

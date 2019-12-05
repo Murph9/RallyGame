@@ -7,7 +7,7 @@ import com.simsilica.lemur.Label;
 
 import car.data.Car;
 import car.data.CarDataLoader;
-import car.ray.CarDataConst;
+import car.data.CarDataConst;
 import car.ray.RayCar.GripHelper;
 
 public class CarStatsUI extends Container {

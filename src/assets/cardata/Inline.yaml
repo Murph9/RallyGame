@@ -1,4 +1,4 @@
-!!car.ray.CarDataConst
+!!car.data.CarDataConst
 JUMP_FORCE: {x: 0.0, y: 920, z: 0.0}
 areo_crossSection: 0.42
 areo_downforce: 0.0

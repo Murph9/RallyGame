@@ -12,7 +12,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Container;
 
-import car.ray.CarDataConst;
+import car.data.CarDataConst;
 import car.ray.RayCarControl;
 import helper.H;
 

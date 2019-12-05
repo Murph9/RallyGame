@@ -15,7 +15,7 @@ import com.simsilica.lemur.Label;
 import car.CarBuilder;
 import car.PowerCurveGraph;
 import car.data.Car;
-import car.ray.CarDataConst;
+import car.data.CarDataConst;
 import car.ray.RayCarControl;
 import helper.H;
 import helper.H.Duo;

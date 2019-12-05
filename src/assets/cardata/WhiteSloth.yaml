@@ -1,4 +1,4 @@
-!!car.ray.CarDataConst
+!!car.data.CarDataConst
 #http://www.automobile-catalog.com/auta_details1.php
 JUMP_FORCE: {x: 0.0, y: 1100.0, z: 0.0}
 areo_crossSection: 0.47

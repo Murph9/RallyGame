@@ -10,6 +10,10 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
 
+import car.data.CarDataConst;
+import car.data.CarSusDataConst;
+import car.data.WheelDataTractionConst;
+
 //doesn't extend anything, but here are some reference classes
 //https://github.com/jMonkeyEngine/jmonkeyengine/blob/master/jme3-core/src/main/java/com/jme3/scene/Spatial.java
 //https://github.com/jMonkeyEngine/jmonkeyengine/blob/master/jme3-core/src/main/java/com/jme3/math/Transform.java

@@ -1,4 +1,4 @@
-package car.ray;
+package car.data;
 
 import com.jme3.math.FastMath;
 

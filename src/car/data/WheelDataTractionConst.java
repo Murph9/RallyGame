@@ -1,4 +1,4 @@
-package car.ray;
+package car.data;
 
 public class WheelDataTractionConst {
 	//http://www.edy.es/dev/docs/pacejka-94-parameters-explained-a-comprehensive-guide/

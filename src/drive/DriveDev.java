@@ -11,7 +11,7 @@ import com.jme3.math.Vector3f;
 
 import car.*;
 import car.data.Car;
-import car.ray.CarDataConst;
+import car.data.CarDataConst;
 import car.ray.RayCarControl;
 import game.IDriveDone;
 import helper.H;

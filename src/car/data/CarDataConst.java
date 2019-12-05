@@ -1,4 +1,4 @@
-package car.ray;
+package car.data;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -96,7 +96,7 @@ public class CarDataConst implements Serializable {
 	}
 
 	//linear drag component (https://en.wikipedia.org/wiki/Rolling_resistance)
-	protected float rollingResistance(int w_id, float susForce) {
+	public float rollingResistance(int w_id, float susForce) {
 		return susForce*areo_lineardrag/wheelData[w_id].radius;
 	}
 	
