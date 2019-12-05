@@ -15,7 +15,6 @@ import car.CarBuilder;
 import effects.FilterManager;
 import effects.ParticleAtmosphere;
 import game.DebugAppState;
-import game.LemurGuiStyle;
 import helper.Log;
 
 public class DuelApp extends SimpleApplication {
@@ -65,7 +64,7 @@ public class DuelApp extends SimpleApplication {
         bullet.getPhysicsSpace().setAccuracy(1f / 120f); // physics rate
         bullet.getPhysicsSpace().setGravity(GRAVITY);
 
-        
+
         flow = new DuelFlow(this);
     }
     

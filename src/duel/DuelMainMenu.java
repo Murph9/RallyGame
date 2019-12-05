@@ -1,6 +1,7 @@
 package duel;
 
 import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.math.Vector3f;
 import com.simsilica.lemur.Button;
@@ -44,7 +45,7 @@ public class DuelMainMenu extends BaseAppState {
             window.addChild(new CarStatsUI(app.getAssetManager(), duelData.yourCar), 2, 0);
         }
 
-        ((DuelApp) app).getGuiNode().attachChild(window);
+        ((SimpleApplication) app).getGuiNode().attachChild(window);
 
         Vector3f middle = H.screenCenterMe(app.getContext().getSettings(), window.getPreferredSize());
         window.setLocalTranslation(middle);
@@ -52,7 +53,7 @@ public class DuelMainMenu extends BaseAppState {
 
     @Override
     protected void cleanup(Application app) {
-        ((DuelApp) app).getGuiNode().detachChild(window);
+        ((SimpleApplication) app).getGuiNode().detachChild(window);
     }
 
     @Override

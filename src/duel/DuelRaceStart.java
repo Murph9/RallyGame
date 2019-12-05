@@ -1,6 +1,7 @@
 package duel;
 
 import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.math.Vector3f;
 import com.simsilica.lemur.Button;
@@ -33,7 +34,7 @@ public class DuelRaceStart extends BaseAppState {
         cb = getState(CarBuilder.class);
 
         window = new Container();
-        ((DuelApp) app).getGuiNode().attachChild(window);
+        ((SimpleApplication) app).getGuiNode().attachChild(window);
 
         window.addChild(new Label("Race Start"), 0, 0);
         Button b = window.addChild(new Button("Go"), 1);
@@ -61,7 +62,7 @@ public class DuelRaceStart extends BaseAppState {
 
     @Override
     protected void cleanup(Application app) {
-        ((DuelApp) app).getGuiNode().detachChild(window);
+        ((SimpleApplication) app).getGuiNode().detachChild(window);
 
         getStateManager().detach(camera);
         camera = null;
