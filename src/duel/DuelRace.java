@@ -28,6 +28,8 @@ public class DuelRace extends BaseAppState {
         this.flow = flow;
     }
 
+    private static final float distanceApart = 2;
+
     @Override
     protected void initialize(Application app) {
         world = new StaticWorldBuilder(StaticWorld.dragstrip);
@@ -40,15 +42,15 @@ public class DuelRace extends BaseAppState {
         DuelData data = flow.getData();
 
         CarDataConst yourCarData = cb.loadData(data.yourCar, data.yourAdjuster);
-        RayCarControl rayCar = cb.addCar(yourCarData, worldSpawn.add(5, 0, 0), world.getStartRot(), true);
+        RayCarControl rayCar = cb.addCar(yourCarData, worldSpawn.add(distanceApart, 0, 0), world.getStartRot(), true);
 
         uiNode = new CarUI(rayCar);
         getStateManager().attach(uiNode);
 
         CarDataConst theirCarData = cb.loadData(data.theirCar, data.theirAdjuster);
-        RayCarControl car = this.cb.addCar(theirCarData, worldSpawn.add(-5, 0, 0), world.getStartRot(), false);
+        RayCarControl car = this.cb.addCar(theirCarData, worldSpawn.add(-distanceApart, 0, 0), world.getStartRot(), false);
         car.attachAI(new DriveAlongAI(car, (vec) -> {
-            return new Vector3f(-5, 0, vec.z + 20); // next pos math
+            return new Vector3f(-distanceApart, 0, vec.z + 20); // next pos math
         }), true);
 
         // initCamera

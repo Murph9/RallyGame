@@ -25,6 +25,9 @@ public class DuelRaceStart extends BaseAppState {
     private Container window;
     private BasicCamera camera;
 
+    private static final Vector3f LookAt = new Vector3f(0, 3f, 0);
+    private static final Vector3f PosOffset = new Vector3f(4, 3, 10);
+
     public DuelRaceStart(IDuelFlow flow) {
         this.flow = flow;
     }
@@ -44,12 +47,11 @@ public class DuelRaceStart extends BaseAppState {
         });
         
         DuelData data = flow.getData();
-        CarBuilder cb = getState(CarBuilder.class);
         CarDataConst data1 = cb.loadData(data.yourCar, data.yourAdjuster);
         CarDataConst data2 = cb.loadData(data.theirCar, data.theirAdjuster);
         window.addChild(new DuelCarStatsUI(app.getAssetManager(), data1, data2), 1, 0);
 
-        Vector3f middle = H.screenCenterMe(app.getContext().getSettings(), window.getPreferredSize());
+        Vector3f middle = H.screenTopCenterMe(app.getContext().getSettings(), window.getPreferredSize());
         window.setLocalTranslation(middle);
 
         //show the cars
@@ -57,11 +59,11 @@ public class DuelRaceStart extends BaseAppState {
         getStateManager().attach(world);
         Vector3f worldStart = world.getStartPos();
 
-        camera = new BasicCamera("Camera", app.getCamera(), worldStart.add(0, 5, 12), worldStart);
+        camera = new BasicCamera("Camera", app.getCamera(), worldStart.add(LookAt), worldStart.add(PosOffset));
         getStateManager().attach(camera);
 
-        cb.addCar(data.yourCar, worldStart.add(-3, 0, 0), world.getStartRot(), false);
-        cb.addCar(data.theirCar, worldStart.add(3, 0, 0), world.getStartRot(), false);
+        cb.addCar(data1, worldStart.add(-1.8f, 0, 0), world.getStartRot(), false);
+        cb.addCar(data2, worldStart.add(1.8f, 0, 0), world.getStartRot(), false);
     }
 
     @Override
@@ -85,4 +87,11 @@ public class DuelRaceStart extends BaseAppState {
     protected void onDisable() {
     }
 
+    @Override
+    public void update(float tpf) {
+        super.update(tpf);
+
+        Vector3f pos = cb.get(0).getPhysicsLocation().add(cb.get(1).getPhysicsLocation()).mult(1/2f);
+        camera.updatePosition(pos.add(PosOffset), pos.add(LookAt));
+    }
 }

@@ -420,7 +420,7 @@ public class H {
 		return new Vector3f(set.getWidth(), set.getHeight(), 0);
 	}
 	public static Vector3f screenBottomRight(AppSettings set) {
-		return new Vector3f(set.getWidth(), set.getHeight(), 0);
+		return new Vector3f(set.getWidth(), 0, 0);
 	}
 	public static Vector3f screenMiddle(AppSettings set) {
 		return new Vector3f(set.getWidth()/2, set.getHeight()/2, 0);
@@ -430,6 +430,9 @@ public class H {
 		middle.x -= size.x / 2f;
 		middle.y += size.y / 2f;
 		return middle;
+	}
+	public static Vector3f screenTopCenterMe(AppSettings set, Vector3f size) {
+		return new Vector3f(set.getWidth()/2 - size.x / 2f, set.getHeight(), 0);
 	}
 	
 	//http://stackoverflow.com/a/677248
