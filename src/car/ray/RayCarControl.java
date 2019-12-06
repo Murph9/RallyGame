@@ -99,6 +99,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 			rootNode.detachChild(engineSound); //in case we have 2 sounds running
 
 		engineSound = audio;
+		engineSound.setVelocityFromTranslation(true); //prevent camera based doppler?
 		engineSound.setLooping(true);
 		engineSound.play();
 		rootNode.attachChild(engineSound);
