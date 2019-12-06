@@ -5,11 +5,11 @@ import java.util.InputMismatchException;
 import com.jme3.app.Application;
 import com.jme3.app.state.AppState;
 import com.jme3.app.state.AppStateManager;
+import com.jme3.math.ColorRGBA;
 
 import car.data.Car;
 import car.data.CarDataAdjuster;
 import car.data.CarDataAdjustment;
-import helper.Log;
 
 interface IDuelFlow {
     void nextState(AppState state, DuelResultData result);
@@ -19,16 +19,12 @@ interface IDuelFlow {
 public class DuelFlow implements IDuelFlow {
     
     private final Application app;
-    private DuelData data; //so i can keep track of the cars and stuff
+    private DuelData data;
     private AppState curState;
 
     public DuelFlow(Application app) {
         this.app = app;
-        this.data = new DuelData();
-        this.data.yourCar = Car.Runner;
-        this.data.yourAdjuster = generateNextAdjuster();
-        this.data.theirCar = Car.Runner;
-        this.data.theirAdjuster = generateNextAdjuster();
+        this.data = getStartDataState();
         
         nextState(null, null);
     }
@@ -57,7 +53,6 @@ public class DuelFlow implements IDuelFlow {
         }
 
         sm.detach(state);
-        Log.p("State", state.getClass(), "returned");
         
         if (result.quitGame) {
             app.stop(); //then just quit the game
@@ -74,18 +69,14 @@ public class DuelFlow implements IDuelFlow {
                 this.data.yourCar = this.data.theirCar; //basically just stolen
                 this.data.yourAdjuster = this.data.theirAdjuster;
 
-                // TODO actually do something with this to make progression
-                this.data.theirCar = Car.Runner;
-                this.data.theirAdjuster = generateNextAdjuster();
+                Racer rival = generateNextRival(this.data.wins);
+                this.data.theirCar = rival.car;
+                this.data.theirAdjuster = rival.adj;
                 curState = new DuelRaceStart(this);
             } else {
+                this.data = getStartDataState();
+
                 curState = new DuelMainMenu(this, this.data);
-                
-                this.data = new DuelData();
-                this.data.yourCar = Car.Runner;
-                this.data.yourAdjuster = null;
-                this.data.theirCar = Car.Runner;
-                this.data.theirAdjuster = null;
             }
         } else {
             throw new IllegalArgumentException();
@@ -98,9 +89,32 @@ public class DuelFlow implements IDuelFlow {
         app.getStateManager().detach(curState);
     }
     
-    public CarDataAdjuster generateNextAdjuster() {
-        return new CarDataAdjuster(CarDataAdjustment.asFunc((data) -> {
-            data.mass *= 0.9f;
-        }));
+    public DuelData getStartDataState() {
+        DuelData data = new DuelData();
+        data.yourCar = Car.Runner;
+        Racer rival = generateNextRival(data.wins);
+        data.theirCar = rival.car;
+        data.theirAdjuster = rival.adj;
+        return data;
+    }
+    public Racer generateNextRival(int wins) {
+        Racer r = new Racer(Car.Runner,
+            new CarDataAdjuster(CarDataAdjustment.asFunc((data) -> {
+                data.baseColor = ColorRGBA.randomColor();
+                for (int i = 0; i < data.e_torque.length; i++) {
+                    data.e_torque[i] *= Math.pow(1.1, wins);
+                }
+            }))
+        );
+        return r;
+    }
+
+    class Racer {
+        final Car car;
+        final CarDataAdjuster adj;
+        public Racer(Car car, CarDataAdjuster adj) {
+            this.car = car;
+            this.adj = adj;
+        }
     }
 }
