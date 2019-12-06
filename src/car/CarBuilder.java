@@ -13,7 +13,6 @@ import com.jme3.audio.AudioNode;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.collision.shapes.HullCollisionShape;
-import com.jme3.math.ColorRGBA;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
@@ -94,16 +93,14 @@ public class CarBuilder extends BaseAppState {
 				throw new Exception(getClass().getName() + " hasn't been initialised");
 		} catch (Exception e) {
 			e.printStackTrace();
-			//this is a runtime exception that should have been fixed by the dev
+			//this is a runtime exception that should have been fixed by the only dev
 			return null;
 		}
-				
+		
 		AssetManager am = getApplication().getAssetManager();
+		Node carModel = LoadModelWrapper.create(am, carData.carModel, carData.baseColor);
 		
-		Node carNode = new Node("Car:" + carData);
-		Node carModel = LoadModelWrapper.create(am, carData.carModel, ColorRGBA.Magenta);
-		
-		//fetch the collision shape (if there is one in car model file)
+		//fetch the single collision shape
 		Spatial collisionShape = H.removeNamedSpatial(carModel, CarPart.Collision.getPartName());
 		CollisionShape colShape = null;
 		try {
@@ -122,6 +119,7 @@ public class CarBuilder extends BaseAppState {
 		}
 
 		//init car
+		Node carNode = new Node("Car:" + carData);
 		RayCarControl carControl = new RayCarControl((SimpleApplication)getApplication(), colShape, carData, carNode);
 		
 		carNode.attachChild(carModel);

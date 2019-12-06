@@ -7,7 +7,6 @@ import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
-import com.jme3.math.ColorRGBA;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
@@ -35,7 +34,7 @@ public class StaticWorldBuilder extends World {
 		AssetManager am = app.getAssetManager();
 
 		// imported model
-		model = LoadModelWrapper.create(am, world.name, ColorRGBA.White);
+		model = LoadModelWrapper.create(am, world.name, null);
 		model.scale(world.scale);
 
 		CollisionShape col = CollisionShapeFactory.createMeshShape(model);

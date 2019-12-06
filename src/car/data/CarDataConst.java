@@ -7,6 +7,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 
@@ -17,6 +18,7 @@ public class CarDataConst implements Serializable {
 	private static final long serialVersionUID = 2121279530710074151L;
 
 	public String name;
+	public ColorRGBA baseColor;
 
 	// model strings (can be xx.obj or xx.blend)
 	public String carModel;

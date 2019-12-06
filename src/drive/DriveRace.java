@@ -329,7 +329,7 @@ public class DriveRace extends BaseAppState {
 		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 		
 	    //imported model
-		Spatial worldNode = LoadModelWrapper.create(as, "assets/staticworld/lakelooproad.blend", ColorRGBA.White);
+		Spatial worldNode = LoadModelWrapper.create(as, "assets/staticworld/lakelooproad.blend", null);
 		if (worldNode instanceof Node) {
 			Spatial s = ((Node) worldNode).getChild(0);
 			addWorldModel(rootNode, getState(BulletAppState.class).getPhysicsSpace(), s, ifShadow);
