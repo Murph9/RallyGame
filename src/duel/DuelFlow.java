@@ -74,9 +74,8 @@ public class DuelFlow implements IDuelFlow {
                 this.data.theirAdjuster = rival.adj;
                 curState = new DuelRaceStart(this);
             } else {
-                this.data = getStartDataState();
-
                 curState = new DuelMainMenu(this, this.data);
+                this.data = getStartDataState();
             }
         } else {
             throw new IllegalArgumentException();
