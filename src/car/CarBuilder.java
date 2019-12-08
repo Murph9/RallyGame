@@ -123,8 +123,11 @@ public class CarBuilder extends BaseAppState {
 		RayCarControl carControl = new RayCarControl((SimpleApplication)getApplication(), colShape, carData, carNode);
 		
 		carNode.attachChild(carModel);
+		carNode.setLocalTranslation(start);
+		carNode.setLocalRotation(rot);
 
 		rootNode.attachChild(carNode);
+		
 		carControl.setPhysicsLocation(start);
 		carControl.setPhysicsRotation(rot);
 		

@@ -8,5 +8,6 @@ public class DuelResultData {
 class DuelRaceResult {
     public boolean playerWon;
 
+    public long mills;
     //any other details?
 }

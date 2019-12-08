@@ -60,8 +60,6 @@ public class DuelFlow implements IDuelFlow {
         }
 
         if (state instanceof DuelMainMenu) {
-            curState = new DuelRaceStart(this);
-        } else if (state instanceof DuelRaceStart) {
             curState = new DuelRace(this);
         } else if (state instanceof DuelRace) {
             if (result.raceResult != null && result.raceResult.playerWon) {
@@ -72,7 +70,7 @@ public class DuelFlow implements IDuelFlow {
                 Racer rival = generateNextRival(this.data.wins);
                 this.data.theirCar = rival.car;
                 this.data.theirAdjuster = rival.adj;
-                curState = new DuelRaceStart(this);
+                curState = new DuelRace(this);
             } else {
                 curState = new DuelMainMenu(this, this.data);
                 this.data = getStartDataState();
