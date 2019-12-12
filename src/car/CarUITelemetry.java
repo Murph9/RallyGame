@@ -24,6 +24,7 @@ import car.data.CarDataConst;
 import car.ray.RayCarControl;
 import car.ray.RayWheel;
 import helper.AverageV3f;
+import helper.Colours;
 import helper.H;
 import helper.IAverager;
 import helper.IAverager.Type;
@@ -215,18 +216,9 @@ public class CarUITelemetry extends BaseAppState {
 		g2.setLocalTranslation(gcenter.add(gs.mult(25))); //because screen pixels
 		gText.setText("x: " + H.roundDecimal(gs.x, 2) +", y: " + H.roundDecimal(gs.y, 2));
 	}
-	
+
 	private ColorRGBA getGripBoxColour(float value) {
-		//0 is white, 1 is green, 2 is red, 5 is blue
-		value = Math.abs(value);
-		if (value < 1)
-			return H.lerpColor(value, ColorRGBA.White, ColorRGBA.Green);
-		else if (value < 2)
-			return H.lerpColor((value - 1f), ColorRGBA.Green, ColorRGBA.Red);
-		else if (value < 5.0)
-			return H.lerpColor((value - 2f)/(3f), ColorRGBA.Red, ColorRGBA.Blue);
-		
-		return ColorRGBA.Blue;
+		return Colours.getOnRGBScale(value/3f);
 	}
 
 	@Override

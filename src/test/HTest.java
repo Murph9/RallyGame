@@ -15,6 +15,7 @@ import com.jme3.math.Vector3f;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
+import helper.Colours;
 import helper.H;
 
 public class HTest {
@@ -55,11 +56,11 @@ public class HTest {
     @Test
     public void lerpColor() {
         assertEquals(new ColorRGBA(0.5f, 0.5f, 0.5f, 0.5f), 
-                H.lerpColor(0.5f, new ColorRGBA(0, 0, 0, 0), new ColorRGBA(1, 1, 1, 1)));
+                Colours.lerpColor(0.5f, new ColorRGBA(0, 0, 0, 0), new ColorRGBA(1, 1, 1, 1)));
         assertEquals(new ColorRGBA(1, 1, 1, 1), 
-                H.lerpColor(1, new ColorRGBA(0, 0, 0, 0), new ColorRGBA(1, 1, 1, 1)));
+                Colours.lerpColor(1, new ColorRGBA(0, 0, 0, 0), new ColorRGBA(1, 1, 1, 1)));
         assertEquals(new ColorRGBA(0, 0, 0, 0), 
-                H.lerpColor(0, new ColorRGBA(0, 0, 0, 0), new ColorRGBA(1, 1, 1, 1)));
+                Colours.lerpColor(0, new ColorRGBA(0, 0, 0, 0), new ColorRGBA(1, 1, 1, 1)));
     }
 
     @Test

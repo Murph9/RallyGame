@@ -115,16 +115,7 @@ public class H {
 		float after = array[clamp(intrpm+1, 0, array.length-1)];
 		return FastMath.interpolateLinear(remrpm, before, after);
 	}
-	
-	public static ColorRGBA lerpColor(float value, ColorRGBA a, ColorRGBA b) {
-		return new ColorRGBA(
-				FastMath.interpolateLinear(value, a.r, b.r),
-				FastMath.interpolateLinear(value, a.g, b.g),
-				FastMath.interpolateLinear(value, a.b, b.b),
-				FastMath.interpolateLinear(value, a.a, b.a)
-			);
-	}
-	
+		
 	public static int clamp(int input, int low, int high) {
 		return Math.max(low, Math.min(input, high)); //low <= input <= high
 	}
