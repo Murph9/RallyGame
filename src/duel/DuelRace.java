@@ -82,10 +82,8 @@ public class DuelRace extends BaseAppState {
 
     private void loadRaceUI() {
         currentStateWindow = new Container();
-        ((SimpleApplication) getApplication()).getGuiNode().attachChild(currentStateWindow);
-
         currentStateWindow.addChild(new Label("Times"));
-        currentTime = currentStateWindow.addChild(new Label("0"), 1);
+        currentTime = currentStateWindow.addChild(new Label("0.00sec"), 1);
 
         Vector3f middle = H.screenTopCenterMe(getApplication().getContext().getSettings(),
                 currentStateWindow.getPreferredSize());
@@ -103,9 +101,10 @@ public class DuelRace extends BaseAppState {
             cb.setEnabled(true);
             raceTimer = 0;
             ((SimpleApplication) getApplication()).getGuiNode().detachChild(startWindow);
+            ((SimpleApplication) getApplication()).getGuiNode().attachChild(currentStateWindow);
         });
 
-        CarDataConst data1 = cb.loadData(data.theirCar, data.theirAdjuster);
+        CarDataConst data1 = cb.loadData(data.yourCar, data.yourAdjuster);
         CarDataConst data2 = cb.loadData(data.theirCar, data.theirAdjuster);
         startWindow.addChild(new DuelCarStatsUI(getApplication().getAssetManager(), data1, data2), 1, 0);
 
@@ -118,8 +117,9 @@ public class DuelRace extends BaseAppState {
         endWindow = new Container();
         ((SimpleApplication) getApplication()).getGuiNode().attachChild(endWindow);
 
-        endWindow.addChild(new Label("Race end"), 0, 0);
-        Button b = endWindow.addChild(new Button("Close"), 1);
+        endWindow.addChild(new Label("Race end"));
+        endWindow.addChild(new Label(winner == this.cb.get(0) ? "Winner" : "Loser"), 1);
+        Button b = endWindow.addChild(new Button("Close"));
         b.addClickCommands((source) -> {
             cb.setEnabled(false);
             ((SimpleApplication) getApplication()).getGuiNode().detachChild(endWindow);
@@ -133,9 +133,9 @@ public class DuelRace extends BaseAppState {
             flow.nextState(this, d);
         });
 
-        CarDataConst data1 = cb.loadData(data.theirCar, data.theirAdjuster);
+        CarDataConst data1 = cb.loadData(data.yourCar, data.yourAdjuster);
         CarDataConst data2 = cb.loadData(data.theirCar, data.theirAdjuster);
-        endWindow.addChild(new DuelCarStatsUI(getApplication().getAssetManager(), data1, data2), 1, 0);
+        endWindow.addChild(new DuelCarStatsUI(getApplication().getAssetManager(), data1, data2));
 
         Vector3f middle = H.screenTopCenterMe(getApplication().getContext().getSettings(),
                 startWindow.getPreferredSize());
