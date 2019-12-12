@@ -85,7 +85,7 @@ public class CarDataConst implements Serializable {
 	public float minDriftAngle;
 	public Vector3f JUMP_FORCE;
 	
-	//empty constructor required for yaml loading	
+	//empty constructor required for yaml loading
 	public CarDataConst() {}
 
 	////////////////////////////////////////////////////////
