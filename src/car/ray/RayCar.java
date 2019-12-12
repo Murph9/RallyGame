@@ -144,9 +144,6 @@ public class RayCar implements PhysicsTickListener {
 			Vector3f relpos = wheels[w_id].curBasePosWorld.subtract(rbc.getPhysicsLocation()); //pos of sus contact point relative to car origin
 			Vector3f velAtContactPoint = getVelocityInLocalPoint(relpos); //get sus vel at point on ground
 			
-			//a hack to include gravity in the calulation, this 'should not' be required
-			//denominator *= w_angle.mult(localDown).dot(this.rbc.getGravity().normalize());
-						
 			float projVel = wheels[w_id].hitNormalInWorld.dot(velAtContactPoint); //percentage of normal force that applies to the current motion
 			float projected_rel_vel = 0;
 			float clippedInvContactDotSuspension = 0;
@@ -172,10 +169,9 @@ public class RayCar implements PhysicsTickListener {
 			//Sway bars https://forum.miata.net/vb/showthread.php?t=25716
 			int w_id_other = w_id == 0 ? 1 : w_id == 1 ? 0 : w_id == 2 ? 3 : 2; //fetch the id or the other side
 			float swayDiff = wheels[w_id_other].susRayLength - wheels[w_id].susRayLength;
-			wheels[w_id].susForce += swayDiff*sus.antiroll;
-
-			// Limit: no negative forces or stupid high numbers pls
-			wheels[w_id].susForce = FastMath.clamp(wheels[w_id].susForce * 1000, 0, sus.max_force);
+			wheels[w_id].susForce += swayDiff * sus.antiroll;
+			
+			wheels[w_id].susForce *= 1000; //kN
 			
 			//applyImpulse (force = world space, pos = relative to local)
 			Vector3f f = wheels[w_id].hitNormalInWorld.mult(wheels[w_id].susForce * tpf);
