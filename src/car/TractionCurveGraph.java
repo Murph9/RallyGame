@@ -6,7 +6,7 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.simsilica.lemur.Container;
 
-import car.ray.RayCarControl;
+import car.data.CarDataConst;
 import car.data.WheelDataTractionConst;
 import helper.H;
 
@@ -20,17 +20,17 @@ public class TractionCurveGraph extends Container {
 	private WheelDataTractionConst longData;
 	private AssetManager am;
 
-	public TractionCurveGraph(AssetManager am, RayCarControl p, Vector3f size) {
+	public TractionCurveGraph(AssetManager am, CarDataConst data, Vector3f size) {
 		super();
 		
 		this.am = am;
 		this.setPreferredSize(size);
-		setCar(p);
+		setCarDataConst(data);
 	}
 	
-	public void setCar(RayCarControl p) {
-		this.latData = p.getCarData().wheelData[0].pjk_lat;
-		this.longData = p.getCarData().wheelData[0].pjk_long;
+	public void setCarDataConst(CarDataConst data) {
+		this.latData = data.wheelData[0].pjk_lat;
+		this.longData = data.wheelData[0].pjk_long;
 		drawGraphs();
 	}
 

@@ -13,7 +13,6 @@ import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Container;
 
 import car.data.CarDataConst;
-import car.ray.RayCarControl;
 import helper.H;
 
 public class PowerCurveGraph extends Container {
@@ -22,17 +21,17 @@ public class PowerCurveGraph extends Container {
 	private CarDataConst car;
 	private List<Spatial> things;
 
-	public PowerCurveGraph(AssetManager am, RayCarControl p, Vector3f size) {
+	public PowerCurveGraph(AssetManager am, CarDataConst data, Vector3f size) {
 		super();
 
 		this.am = am;
 		
 		this.setPreferredSize(size);
-		updateMyPhysicsVehicle(p);
+		updateMyPhysicsVehicle(data);
 	}
 	
-	public void updateMyPhysicsVehicle(RayCarControl p) {
-		this.car = p.getCarData();
+	public void updateMyPhysicsVehicle(CarDataConst data) {
+		this.car = data;
 		drawGraphs();
 	}
 	

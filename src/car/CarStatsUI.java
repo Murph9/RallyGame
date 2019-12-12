@@ -62,11 +62,12 @@ class CarStats {
         stats = new LinkedList<>();
 
         helper.H.Duo<Float, Float> power = data.getMaxPower();
-        stats.add(new Stat("Power", power.first + "@"+power.second));
+        stats.add(new Stat("Power", power.first + "kW? @"+power.second+ "rpm"));
         stats.add(new Stat("Mass", data.mass));
         stats.add(new Stat("Drive", data.driveFront ? data.driveRear ? "AWD" : "Front" : data.driveRear ? "Rear" : "Unknown"));
         stats.add(new Stat("Max Rpm", data.e_redline));
         stats.add(new Stat("Braking", data.brakeMaxTorque/data.mass));
+        stats.add(new Stat("Drag: ", data.areo_drag + "(" + data.areo_lineardrag + ")"));
         stats.add(new Stat("Nitro", data.nitro_on ? data.nitro_force : 0));
         stats.add(new Stat("Downforce", data.areo_downforce));
         float bestLatForce = GripHelper.calcMaxLoad(data.wheelData[0].pjk_lat);
@@ -108,7 +109,7 @@ class NormalisedStats {
     
     public NormalisedStats(CarDataConst data) {
         accel = skewLog(data.getMaxPower().first, 0, 1600, 0, 1);
-        speed = skewLog(1+(data.getMaxPower().first / Math.abs(data.quadraticDrag(new Vector3f(27, 0, 0)).x)), 0, 10, 0, 1);
+        speed = skewLog(0.2f+(data.getMaxPower().first / Math.abs(data.quadraticDrag(new Vector3f(27, 0, 0)).x)), 0, 10, 0, 1);
         handling = data.mass / GripHelper.calcMaxLoad(data.wheelData[0].pjk_lat);
         braking = skewLog(Math.min(data.brakeMaxTorque, GripHelper.calcMaxLoad(data.wheelData[0].pjk_long)) / data.mass, 0, 10, 0, 1);
     }

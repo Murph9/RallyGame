@@ -173,8 +173,3 @@ public class CarDataConst implements Serializable {
 		return 1;
 	}
 }
-
-
-//Some helpful notes
-//you can fix the oversteer at high speeds with a proper diff and different downforce scaling at higher speeds
-//and some stiffer front suspension?

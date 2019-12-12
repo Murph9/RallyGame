@@ -13,12 +13,11 @@ import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
 import car.CarBuilder;
+import car.CarStatsUI;
 import car.PowerCurveGraph;
 import car.data.Car;
-import car.data.CarDataConst;
 import car.ray.RayCarControl;
 import helper.H;
-import helper.H.Duo;
 import helper.Log;
 import world.StaticWorld;
 import world.StaticWorldBuilder;
@@ -33,7 +32,7 @@ public class ChooseCar extends BaseAppState {
 
 	private CarBuilder cb;
 	private Car car;
-	private Label label;
+	private Container infoWindow;
 	
 	private static final float RESET_IMPULSE = 1/60f;
 	private float posReset;
@@ -63,18 +62,17 @@ public class ChooseCar extends BaseAppState {
 		cb = getState(CarBuilder.class);
 		cb.addCar(car, start, dir, true);
 
-		//make camera
+		//init camera
 		camera = new BasicCamera("Camera", app.getCamera(), new Vector3f(0,3,7), new Vector3f(0,1.2f, 0));
 		getStateManager().attach(camera);
 		
-		//init gui
+		//init guis
+
 		//info window first so the event listeners can delete it
-		Container infoWindow = new Container();
-        ((SimpleApplication)app).getGuiNode().attachChild(infoWindow);
-        infoWindow.setLocalTranslation(H.screenTopLeft(app.getContext().getSettings()));
-		label = new Label(getCarInfoText(car));
-        infoWindow.addChild(label, 0, 0);
-		
+		infoWindow = new CarStatsUI(app.getAssetManager(), this.cb.get(0).getCarData());
+		infoWindow.setLocalTranslation(H.screenTopLeft(app.getContext().getSettings()));
+		((SimpleApplication) app).getGuiNode().attachChild(infoWindow);
+
 		Container myWindow = new Container();
 		((SimpleApplication)app).getGuiNode().attachChild(myWindow);
 		myWindow.setLocalTranslation(300, 300, 0);
@@ -89,11 +87,13 @@ public class ChooseCar extends BaseAppState {
 
                     cb.removeCar(cb.get(0));
     				cb.addCar(car, worldType.start, new Matrix3f(), true);
-    				
-    				String carinfotext = getCarInfoText(car);
-    				label.setText(carinfotext);
-    				
-    				graph.updateMyPhysicsVehicle(cb.get(0));
+					
+					((SimpleApplication) app).getGuiNode().detachChild(infoWindow);
+					infoWindow = new CarStatsUI(app.getAssetManager(), cb.get(0).getCarData());
+					infoWindow.setLocalTranslation(H.screenTopLeft(app.getContext().getSettings()));
+					((SimpleApplication) app).getGuiNode().attachChild(infoWindow);
+
+    				graph.updateMyPhysicsVehicle(cb.get(0).getCarData());
                 }
             });
         	i++;
@@ -110,7 +110,7 @@ public class ChooseCar extends BaseAppState {
         });
         
         Vector3f size = new Vector3f(400,400,0);
-		graph = new PowerCurveGraph(app.getAssetManager(), this.cb.get(0), size);
+		graph = new PowerCurveGraph(app.getAssetManager(), this.cb.get(0).getCarData(), size);
 		graph.setLocalTranslation(H.screenBottomRight(app.getContext().getSettings()).subtract(size.add(5,-25,0)));
 		((SimpleApplication)app).getGuiNode().attachChild(graph);
 	}
@@ -129,17 +129,6 @@ public class ChooseCar extends BaseAppState {
 			Vector3f pos = car.getPhysicsLocation();
 			car.setPhysicsLocation(new Vector3f(0, pos.y, 0));
 		}
-	}
-
-	private String getCarInfoText(Car car) {
-		CarDataConst cd = this.cb.get(0).getCarData();
-		String out = "Name: "+ car.name() + "\n";
-		Duo<Float, Float> data = cd.getMaxPower();
-		out += "Max Power: " + data.first + "kW? @ " + data.second + " rpm \n";
-		out += "Weight: "+ cd.mass + "kg\n";
-		out += "Drag(linear): " + cd.areo_drag + "(" + cd.areo_lineardrag + ")\n";
-		out += "Redline: "+ cd.e_redline +"\n";
-		return out;
 	}
 
 	@Override

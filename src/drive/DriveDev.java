@@ -41,7 +41,7 @@ public class DriveDev extends DriveBase {
 		((SimpleApplication)app).getGuiNode().attachChild(worldEditor);
 		
 		Vector3f size = new Vector3f(400,400,0);
-		wheelGraphs = new TractionCurveGraph(app.getAssetManager(), this.cb.get(0), size);
+		wheelGraphs = new TractionCurveGraph(app.getAssetManager(), this.cb.get(0).getCarData(), size);
 		wheelGraphs.setLocalTranslation(H.screenBottomRight(app.getContext().getSettings()).subtract(size.add(-5,-25,0)));
 		((SimpleApplication)app).getGuiNode().attachChild(wheelGraphs);
 	}
@@ -55,7 +55,7 @@ public class DriveDev extends DriveBase {
 	private void reloadCar(CarDataConst data) {
 		RayCarControl car = this.cb.get(0);
 		car.setCarData(data);
-		wheelGraphs.setCar(car);
+		wheelGraphs.setCarDataConst(data);
 	}
 	private RayCarControl resetCar(Car car) {
 		this.reInitPlayerCar(car);

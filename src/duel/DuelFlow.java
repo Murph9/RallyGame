@@ -95,7 +95,8 @@ public class DuelFlow implements IDuelFlow {
         return data;
     }
     public Racer generateNextRival(int wins) {
-        ColorRGBA col = ColorRGBA.randomColor(); //lol random colour call needs to stay the same
+        // random calls need to stay the same if this is called again
+        ColorRGBA col = ColorRGBA.randomColor();
         Car c = helper.H.randFromArray(Car.values());
         // Car c = Car.Runner;
         Racer r = new Racer(c,
