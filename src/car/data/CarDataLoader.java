@@ -1,7 +1,5 @@
 package car.data;
 
-import java.util.HashMap;
-
 import java.io.InputStream;
 
 import com.jme3.asset.AssetManager;
@@ -24,11 +22,6 @@ import helper.Log;
 public class CarDataLoader { //CarDataFactory
     
     private static final String YAML_CAR_DATA = "/assets/cardata/";
-    private final HashMap<Car, CarDataConst> dataMap;
-
-    public CarDataLoader() {
-        dataMap = new HashMap<>();
-    }
 
     private CarDataConst loadFromFile(String carName) throws Exception {
         InputStream in = getClass().getResourceAsStream(YAML_CAR_DATA + carName + ".yaml");
@@ -50,10 +43,6 @@ public class CarDataLoader { //CarDataFactory
     public CarDataConst get(AssetManager am, Car car, Vector3f gravity) {
         String carName = car.getCarName();
         
-        if (dataMap.containsKey(car)) {
-            return dataMap.get(car);
-        }
-
         Log.p("Loading file data for car type: " + carName);
 
         CarDataConst data = null;
@@ -157,7 +146,6 @@ public class CarDataLoader { //CarDataFactory
             System.exit(-521);
         }
 
-        dataMap.put(car, data);
         return data;
     }
 }
