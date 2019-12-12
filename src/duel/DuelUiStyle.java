@@ -23,11 +23,11 @@ public class DuelUiStyle {
     private static ColorRGBA color_4 = new ColorRGBA(0.961f, 0.827f, 0.0f, 1);
 
     private static float TEXT_TO_BUFFER_RATIO = 0.2f;
-    private static int TEXT_SIZE = 24;
-    private static Insets3f INSETS_BASE_2 = new Insets3f(TEXT_SIZE * TEXT_TO_BUFFER_RATIO * 2, 
-            TEXT_SIZE * TEXT_TO_BUFFER_RATIO * 2, TEXT_SIZE * TEXT_TO_BUFFER_RATIO * 2, TEXT_SIZE * TEXT_TO_BUFFER_RATIO * 2);
-    private static Insets3f INSETS_BASE = new Insets3f(TEXT_SIZE * TEXT_TO_BUFFER_RATIO,
-            TEXT_SIZE * TEXT_TO_BUFFER_RATIO, TEXT_SIZE * TEXT_TO_BUFFER_RATIO, TEXT_SIZE * TEXT_TO_BUFFER_RATIO);
+    private static int TEXT_SIZE = 20;
+    private static Insets3f INSETS_BASE_2 = new Insets3f(TEXT_SIZE * TEXT_TO_BUFFER_RATIO,
+            TEXT_SIZE * TEXT_TO_BUFFER_RATIO * 2, TEXT_SIZE * TEXT_TO_BUFFER_RATIO, TEXT_SIZE * TEXT_TO_BUFFER_RATIO * 2);
+    private static Insets3f INSETS_BASE = new Insets3f(TEXT_SIZE * TEXT_TO_BUFFER_RATIO / 2,
+            TEXT_SIZE * TEXT_TO_BUFFER_RATIO, TEXT_SIZE * TEXT_TO_BUFFER_RATIO / 2, TEXT_SIZE * TEXT_TO_BUFFER_RATIO);
 
     public static void load(AssetManager assetManager) {
         Styles styles = GuiGlobals.getInstance().getStyles();

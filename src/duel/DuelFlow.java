@@ -96,7 +96,9 @@ public class DuelFlow implements IDuelFlow {
     }
     public Racer generateNextRival(int wins) {
         ColorRGBA col = ColorRGBA.randomColor(); //lol random colour call needs to stay the same
-        Racer r = new Racer(Car.Runner,
+        Car c = helper.H.randFromArray(Car.values());
+        // Car c = Car.Runner;
+        Racer r = new Racer(c,
             new CarDataAdjuster(CarDataAdjustment.asFunc((data) -> {
                 data.baseColor = col;
                 for (int i = 0; i < data.e_torque.length; i++) {
