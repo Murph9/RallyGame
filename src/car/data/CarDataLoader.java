@@ -17,6 +17,7 @@ import car.data.CarDataConst;
 import car.data.CarSusDataConst;
 import car.data.WheelDataConst;
 import car.ray.RayCar;
+import car.ray.RayCar.GripHelper;
 import helper.Log;
 
 /** Private class for CarBuilder, manages the CarDataConst file */
@@ -50,7 +51,6 @@ public class CarDataLoader { //CarDataFactory
         String carName = car.getCarName();
         
         if (dataMap.containsKey(car)) {
-            Log.p("Car data from cache for " + carName);
             return dataMap.get(car);
         }
 
@@ -144,7 +144,20 @@ public class CarDataLoader { //CarDataFactory
             System.exit(-7555);
         }
         
-        Log.p("Loaded data for car type: " + carName);
+        //validate that the D1 and D2 pjk const values actually are useful for the weight of the car
+        try {
+            for (int i = 0; i < data.wheelData.length; i++) {
+                if (GripHelper.loadFormula(data.wheelData[i].pjk_lat, quarterMassForce) <= 0)
+                    throw new Exception("Wheel load lat formula not in range: " + data.wheelData[i].pjk_lat + " " + quarterMassForce);
+                if (GripHelper.loadFormula(data.wheelData[i].pjk_long, quarterMassForce) <= 0)
+                    throw new Exception("Wheel load long formula not in range: " + data.wheelData[i].pjk_lat + " " + quarterMassForce);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(-521);
+        }
+
+        dataMap.put(car, data);
         return data;
     }
 }
