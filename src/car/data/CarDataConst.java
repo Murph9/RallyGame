@@ -99,6 +99,14 @@ public class CarDataConst implements Serializable {
 		return (down ? auto_gearDown : auto_gearUp) / driveSpeed;
 	}
 
+	// https://en.wikipedia.org/wiki/Automobile_drag_coefficient#Drag_area
+	public Vector3f quadraticDrag(Vector3f velocity) {
+		float dragx = -1.225f * areo_drag * areo_crossSection * velocity.x * FastMath.abs(velocity.x);
+		float dragy = -1.225f * areo_drag * areo_crossSection * velocity.y * FastMath.abs(velocity.y);
+		float dragz = -1.225f * areo_drag * areo_crossSection * velocity.z * FastMath.abs(velocity.z);
+		// TODO change cross section for each xyz direction to make a realistic drag feeling
+		return new Vector3f(dragx, dragy, dragz);
+	}
 	//linear drag component (https://en.wikipedia.org/wiki/Rolling_resistance)
 	public float rollingResistance(int w_id, float susForce) {
 		return susForce*areo_lineardrag/wheelData[w_id].radius;

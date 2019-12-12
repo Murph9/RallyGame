@@ -278,13 +278,8 @@ public class RayCar implements PhysicsTickListener {
 			rbc.applyImpulse(w_angle.mult(wheel_force).mult(tpf), wheels[w_id].curBasePosWorld.subtract(w_pos));
 		});
 
-		//quadratic drag (https://en.wikipedia.org/wiki/Automobile_drag_coefficient#Drag_area)
-		float dragx = -(1.225f * carData.areo_drag * carData.areo_crossSection * w_velocity.x * FastMath.abs(w_velocity.x));
-		float dragy = -(1.225f * carData.areo_drag * carData.areo_crossSection * w_velocity.y * FastMath.abs(w_velocity.y));
-		float dragz = -(1.225f * carData.areo_drag * carData.areo_crossSection * w_velocity.z * FastMath.abs(w_velocity.z));
-		//TODO change cross section for each xyz direction to make a realistic drag feeling
-		
-		dragDir = new Vector3f(dragx, dragy, dragz);
+		//quadratic drag
+		dragDir = carData.quadraticDrag(w_velocity);
 		
 		float dragDown = -0.5f * carData.areo_downforce * 1.225f * (w_velocity.z*w_velocity.z); //formula for downforce from wikipedia
 		rbc.applyCentralForce(dragDir.add(0, dragDown, 0)); //apply downforce after
