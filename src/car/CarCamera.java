@@ -45,19 +45,17 @@ public class CarCamera extends BaseAppState implements RawInputListener {
 		super();
 		
 		this.c = c;
-		
-		if (p != null) {
-			this.p = p;
-			Vector3f pPos = p.getPhysicsLocation();
-			Vector3f cam_offset = new Vector3f(0, p.getCarData().cam_offsetHeight, p.getCarData().cam_offsetLength);
-			c.setLocation(cam_offset); //starting position of the camera
-			Vector3f cam_lookAt = new Vector3f(0, p.getCarData().cam_lookAtHeight, 0);
-			c.lookAt(pPos.add(cam_lookAt), new Vector3f(0,1,0)); //look at car
-		}
 	}
 
 	@Override
 	public void initialize(Application app) {
+        if (p != null) {
+            Vector3f pPos = p.getPhysicsLocation();
+            Vector3f cam_offset = new Vector3f(0, p.getCarData().cam_offsetHeight, p.getCarData().cam_offsetLength);
+            c.setLocation(cam_offset); // starting position of the camera
+            Vector3f cam_lookAt = new Vector3f(0, p.getCarData().cam_lookAtHeight, 0);
+            c.lookAt(pPos.add(cam_lookAt), new Vector3f(0, 1, 0)); // look at car
+        }
 	}
 
 	@Override
@@ -158,7 +156,7 @@ public class CarCamera extends BaseAppState implements RawInputListener {
 		
 		lookAt.addLocal(lastShake);
 		
-		c.lookAt(lookAt, new Vector3f(0,data.cam_lookAtHeight,0));
+		c.lookAt(lookAt, new Vector3f(0, 1, 0));
 	}
 	
 	
