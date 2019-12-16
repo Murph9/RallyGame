@@ -38,10 +38,12 @@ public class RayCarPowered extends RayCar {
 		this.nitroRemaining = carData.nitro_on ? carData.nitro_max : 0;
 		this.curGear = 1;
 	}
-
 	
 	@Override
 	public void prePhysicsTick(PhysicsSpace space, float tpf) {
+        if (!rbEnabled())
+            return;
+
 		Matrix3f w_angle = rbc.getPhysicsRotationMatrix();
 		Vector3f w_velocity = rbc.getLinearVelocity();
 		
@@ -69,10 +71,11 @@ public class RayCarPowered extends RayCar {
 		 * https://github.com/VDrift/vdrift/blob/89e78a55a3cd0f5babac74ab7440f457a8848f25/src/physics/cardynamics.cpp
 		 * 
 		 * The previous code was actually very wrong, not just a little.
-		 *  
-		 * i think this evenetually means the system needs to be a matrix solver state system rather than real time timestep stuff
+		 * 
+		 * i think this eventually means the system needs to be a matrix solver state system rather than real time timestep stuff
 		 * http://myselph.de/gamePhysics/equalityConstraints.html
- 		 * but this might be too much work
+         * 
+         * but this is too much work
 		 */
 
 		if (carData.driveFront) {

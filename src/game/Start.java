@@ -26,10 +26,6 @@ import world.wp.WP.DynamicType;
 
 public class Start extends BaseAppState {
 
-	//TODO version number on screen somewhere
-
-	//TODO maybe add some other cars to preview
-
 	private final IFlow flow;
 
 	private DefaultBuilder world;

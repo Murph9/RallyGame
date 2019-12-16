@@ -157,12 +157,6 @@ public class RayWheelControl {
 		// TODO change to just be thinner with a larger drift angle
 		// i have tested this is real life, width is lower when sliding sideways
 
-		Vector3f cur = wheel.curBasePosWorld;
-		cur.y += 0.015f; // hacky z-buffering (i.e. to stop it "fighting" with the ground texture)
-		Vector3f rot = new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y).mult(velDir.normalize());
-		Vector3f curL = cur.add(rot.mult(wheel.data.width / 2));
-		Vector3f curR = cur.add(rot.negate().mult(wheel.data.width / 2));
-
 		// scaling the grip value
 		float clampSkid = FastMath.clamp(this.wheel.skidFraction - 0.9f, 0, 1);
 		ColorRGBA c = BASE_HIGHLIGHT_COLOUR.clone().mult(clampSkid);
@@ -174,6 +168,12 @@ public class RayWheelControl {
 			}
 			lastColor = c = new ColorRGBA(0, 0, 0, 0);
 		}
+
+        Vector3f cur = wheel.curBasePosWorld;
+        cur.y += 0.015f; // hacky z-buffering (i.e. to stop it "fighting" with the ground texture)
+        Vector3f rot = new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y).mult(velDir.normalize());
+        Vector3f curL = cur.add(rot.mult(wheel.data.width / 2));
+        Vector3f curR = cur.add(rot.negate().mult(wheel.data.width / 2));
 
 		if (lastColor != null && lastColor.equals(new ColorRGBA(0, 0, 0, 0))) {
 			lastl = curL;

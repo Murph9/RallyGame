@@ -76,7 +76,8 @@ public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
 	}
 	
 
-	//TODO overhaul how this works with passing through values
+    // To overhaul how this works use a AppFlowData class which is the current state
+    // each app gets a view onto it, allowing certain things like selecting a map
 	@Override
 	public void chooseCar(Car car) {
 		this.car = car;

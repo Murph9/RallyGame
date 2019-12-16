@@ -115,30 +115,32 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 	
 	@Override
 	public void prePhysicsTick(PhysicsSpace space, float tpf) {
-		Matrix3f playerRot = rbc.getPhysicsRotationMatrix();
-		vel = rbc.getLinearVelocity();
-		forward = playerRot.mult(new Vector3f(0,0,1));
-		up = playerRot.mult(new Vector3f(0,1,0));
-		left = playerRot.mult(new Vector3f(1,0,0));
-		right = playerRot.mult(new Vector3f(-1,0,0));
-		
-		travelledDistance += rbc.getLinearVelocity().length()*tpf;
-		
-		//wheel turning logic
-		steeringCurrent = 0;
-		if (steerLeft != 0) //left
-			steeringCurrent += getMaxSteerAngle(steerLeft, 1);
-		if (steerRight != 0) //right
-			steeringCurrent -= getMaxSteerAngle(steerRight, -1);
-		//TODO 0.3 - 0.4 seconds from lock to lock seems okay from what ive seen
-		steeringCurrent = FastMath.clamp(steeringCurrent, -carData.w_steerAngle, carData.w_steerAngle);
-		setSteering(steeringCurrent);
-		
-		setBraking(brakeCurrent);
-		setHandbrake(handbrakeCurrent);
-		
-		super.prePhysicsTick(space, tpf);
-		
+        if (rbEnabled()) {
+            Matrix3f playerRot = rbc.getPhysicsRotationMatrix();
+            vel = rbc.getLinearVelocity();
+            forward = playerRot.mult(new Vector3f(0,0,1));
+            up = playerRot.mult(new Vector3f(0,1,0));
+            left = playerRot.mult(new Vector3f(1,0,0));
+            right = playerRot.mult(new Vector3f(-1,0,0));
+            
+            travelledDistance += rbc.getLinearVelocity().length()*tpf;
+            
+            //wheel turning logic
+            steeringCurrent = 0;
+            if (steerLeft != 0) //left
+                steeringCurrent += getMaxSteerAngle(steerLeft, 1);
+            if (steerRight != 0) //right
+                steeringCurrent -= getMaxSteerAngle(steerRight, -1);
+            //TODO 0.3 - 0.4 seconds from lock to lock seems okay from what ive seen
+            steeringCurrent = FastMath.clamp(steeringCurrent, -carData.w_steerAngle, carData.w_steerAngle);
+            setSteering(steeringCurrent);
+            
+            setBraking(brakeCurrent);
+            setHandbrake(handbrakeCurrent);
+        }
+        
+        super.prePhysicsTick(space, tpf);
+
 		for (int i = 0; i < this.wheelControls.length; i++) {
 			this.wheelControls[i].viewUpdate(tpf, rbc.getLinearVelocity(), carData.susByWheelNum(i).min_travel);
 		}
@@ -296,7 +298,8 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 		
 		this.curRPM = 1000;
 		for (RayWheel w: this.wheels) {
-			w.radSec = 0; //stop rotation of the wheels
+            w.radSec = 0; //stop rotation of the wheels
+            w.inContact = false; //stop any forces for at least one physics frame
 		}
 		
 		DriveBase drive = this.app.getStateManager().getState(DriveBase.class);

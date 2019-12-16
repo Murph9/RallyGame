@@ -37,7 +37,8 @@ public class RayCar implements PhysicsTickListener {
 	
 	protected CarDataConst carData;
 	private final CarRaycaster raycaster;
-	protected final RigidBodyControl rbc;
+    protected final RigidBodyControl rbc;
+    protected boolean rbEnabled() { return rbc.isEnabled() && rbc.isInWorld() && rbc.isActive(); }
 	
 	//simulation variables
 	protected final RayWheel[] wheels;
@@ -79,6 +80,9 @@ public class RayCar implements PhysicsTickListener {
 	
 	@Override
 	public void prePhysicsTick(PhysicsSpace space, float tpf) {
+        if (!rbEnabled())
+            return;
+
 		applySuspension(space, tpf);
 		
 		//TODO apply the midpoint formula or any kind of actual physics stepped simulation method
