@@ -3,6 +3,7 @@ package duel;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
+import com.jme3.bullet.BulletAppState;
 import com.jme3.math.Vector3f;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
@@ -26,6 +27,8 @@ public class DuelRace extends BaseAppState {
 
     private CarBuilder cb;
     private IDuelFlow flow;
+
+    private DuelRaceMenu menu;
 
     private World world;
     private CarCamera camera;
@@ -52,6 +55,13 @@ public class DuelRace extends BaseAppState {
 
         this.cb = getState(CarBuilder.class);
 
+        this.menu = new DuelRaceMenu(this, () -> {
+            DuelResultData drd = new DuelResultData();
+            drd.quitGame = true;
+            flow.nextState(this, drd);
+        });
+        getStateManager().attach(menu);
+
         Vector3f worldSpawn = world.getStartPos();
 
         DuelData data = flow.getData();
@@ -69,7 +79,7 @@ public class DuelRace extends BaseAppState {
         }), true);
 
         loadRaceUI();
-        loadStartUi(flow.getData());
+        loadStartUi(data);
 
         // initCamera
         camera = new CarCamera("Camera", app.getCamera(), rayCar);
@@ -106,7 +116,7 @@ public class DuelRace extends BaseAppState {
 
         CarDataConst data1 = cb.loadData(data.yourCar, data.yourAdjuster);
         CarDataConst data2 = cb.loadData(data.theirCar, data.theirAdjuster);
-        startWindow.addChild(new DuelCarStatsUI(getApplication().getAssetManager(), data1, data2), 1, 0);
+        startWindow.addChild(DuelUiElements.DuelCarStats(getApplication().getAssetManager(), data1, data2), 1, 0);
 
         Vector3f middle = H.screenTopCenterMe(getApplication().getContext().getSettings(), startWindow.getPreferredSize());
         startWindow.setLocalTranslation(middle);
@@ -135,7 +145,7 @@ public class DuelRace extends BaseAppState {
 
         CarDataConst data1 = cb.loadData(data.yourCar, data.yourAdjuster);
         CarDataConst data2 = cb.loadData(data.theirCar, data.theirAdjuster);
-        endWindow.addChild(new DuelCarStatsUI(getApplication().getAssetManager(), data1, data2));
+        endWindow.addChild(DuelUiElements.DuelCarStats(getApplication().getAssetManager(), data1, data2));
 
         Vector3f middle = H.screenTopCenterMe(getApplication().getContext().getSettings(),
                 startWindow.getPreferredSize());
@@ -166,9 +176,11 @@ public class DuelRace extends BaseAppState {
 
     @Override
     protected void onEnable() {
+        getState(BulletAppState.class).setEnabled(true);
     }
     @Override
     protected void onDisable() {
+        getState(BulletAppState.class).setEnabled(false);
     }
     
     @Override
