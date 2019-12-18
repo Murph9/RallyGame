@@ -7,6 +7,7 @@ import com.jme3.bullet.BulletAppState;
 import com.jme3.math.Vector3f;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
+import com.simsilica.lemur.HAlignment;
 import com.simsilica.lemur.Label;
 
 import car.CarBuilder;
@@ -105,8 +106,11 @@ public class DuelRace extends BaseAppState {
         startWindow = new Container();
         ((SimpleApplication) getApplication()).getGuiNode().attachChild(startWindow);
 
-        startWindow.addChild(new Label("Race Start"), 0, 0);
-        Button b = startWindow.addChild(new Button("Go"), 1);
+        Label l = startWindow.addChild(new Label("Race Start", "heading"));
+        l.setTextHAlignment(HAlignment.Center);
+
+        Button b = startWindow.addChild(new Button("Go"));
+        b.setTextHAlignment(HAlignment.Center);
         b.addClickCommands((source) -> {
             cb.setEnabled(true);
             raceTimer = 0;
@@ -116,7 +120,7 @@ public class DuelRace extends BaseAppState {
 
         CarDataConst data1 = cb.loadData(data.yourCar, data.yourAdjuster);
         CarDataConst data2 = cb.loadData(data.theirCar, data.theirAdjuster);
-        startWindow.addChild(DuelUiElements.DuelCarStats(getApplication().getAssetManager(), data1, data2), 1, 0);
+        startWindow.addChild(DuelUiElements.DuelCarStats(getApplication().getAssetManager(), data1, data2));
 
         Vector3f middle = H.screenTopCenterMe(getApplication().getContext().getSettings(), startWindow.getPreferredSize());
         startWindow.setLocalTranslation(middle);
@@ -127,9 +131,11 @@ public class DuelRace extends BaseAppState {
         endWindow = new Container();
         ((SimpleApplication) getApplication()).getGuiNode().attachChild(endWindow);
 
-        endWindow.addChild(new Label("Race end"));
-        endWindow.addChild(new Label(winner == this.cb.get(0) ? "Winner" : "Loser"), 1);
+        Label l = endWindow.addChild(new Label(winner == this.cb.get(0) ? "Winner" : "Loser", "heading"));
+        l.setTextHAlignment(HAlignment.Center);
+
         Button b = endWindow.addChild(new Button("Close"));
+        b.setTextHAlignment(HAlignment.Center);
         b.addClickCommands((source) -> {
             cb.setEnabled(false);
             ((SimpleApplication) getApplication()).getGuiNode().detachChild(endWindow);
