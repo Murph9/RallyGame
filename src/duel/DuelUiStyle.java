@@ -4,9 +4,11 @@ import com.jme3.asset.AssetManager;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.simsilica.lemur.GuiGlobals;
+import com.simsilica.lemur.HAlignment;
 import com.simsilica.lemur.Insets3f;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
 import com.simsilica.lemur.component.TbtQuadBackgroundComponent;
+import com.simsilica.lemur.core.GuiComponent;
 import com.simsilica.lemur.style.Attributes;
 import com.simsilica.lemur.style.Styles;
 
@@ -41,9 +43,6 @@ public class DuelUiStyle {
         TbtQuadBackgroundComponent flat = TbtQuadBackgroundComponent.create("assets/image/solid-white.png", 1, 1, 1,
                 2, 2, 1f, false);
         flat.setColor(dialogBackground);
-        TbtQuadBackgroundComponent flat_none = TbtQuadBackgroundComponent.create("assets/image/solid-white.png", 1, 1,
-                1, 2, 2, 1f, false);
-        flat.setColor(new ColorRGBA(1, 1, 1, 0));
 
         TbtQuadBackgroundComponent double_gradient = TbtQuadBackgroundComponent
                 .create("assets/image/double-gradient-128.png", 1, 1, 1, 126, 126, 1f, false);
@@ -62,6 +61,7 @@ public class DuelUiStyle {
         attrs.set("fontSize", 32);
         attrs.set("color", color_1);
         attrs.set("highlightColor", color_3);
+        attrs.set("textHAlignment", HAlignment.Center);
         attrs.set("shadowColor", altBackground);
         attrs.set("shadowOffset", new Vector3f(1, -1, -1));
         attrs.set("background", double_gradient.clone());
@@ -71,6 +71,7 @@ public class DuelUiStyle {
         attrs = styles.getSelector("button", STYLE_NAME);
         attrs.set("color", color_1);
         attrs.set("background", flat.clone());
+        attrs.set("textHAlignment", HAlignment.Center);
         ((TbtQuadBackgroundComponent) attrs.get("background")).setColor(altBackground);
         attrs.set("insets", INSETS_BASE);
 
@@ -84,9 +85,6 @@ public class DuelUiStyle {
         attrs = styles.getSelector("container", STYLE_NAME);
         attrs.set("background", flat.clone());
         attrs.set("insets", INSETS_BASE_2);
-
-        attrs = styles.getSelector("container", "container.none", STYLE_NAME);
-        attrs.set("background", flat_none.clone());
 
         // slider
         attrs = styles.getSelector("slider", STYLE_NAME);
@@ -135,4 +133,15 @@ public class DuelUiStyle {
         GuiGlobals.getInstance().getStyles().setDefaultStyle(STYLE_NAME);
     }
 
+
+    //#region special styles
+    //These only exist because i have no idea how to add id selectors
+    public static GuiComponent getBorderedNoBackground() {
+        TbtQuadBackgroundComponent d = TbtQuadBackgroundComponent.create("assets/image/lemur_border.png", 1, 5, 5, 32-5, 32-5, 1f, false);
+        d.setColor(new ColorRGBA(1, 1, 1, 1));
+        return d;
+    }
+
+
+    //#endregion
 }

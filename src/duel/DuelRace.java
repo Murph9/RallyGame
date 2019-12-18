@@ -9,6 +9,7 @@ import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.HAlignment;
 import com.simsilica.lemur.Label;
+import com.simsilica.lemur.style.ElementId;
 
 import car.CarBuilder;
 import car.CarCamera;
@@ -106,7 +107,7 @@ public class DuelRace extends BaseAppState {
         startWindow = new Container();
         ((SimpleApplication) getApplication()).getGuiNode().attachChild(startWindow);
 
-        Label l = startWindow.addChild(new Label("Race Start", "heading"));
+        Label l = startWindow.addChild(new Label("Race Start", new ElementId("title")));
         l.setTextHAlignment(HAlignment.Center);
 
         Button b = startWindow.addChild(new Button("Go"));
@@ -131,7 +132,7 @@ public class DuelRace extends BaseAppState {
         endWindow = new Container();
         ((SimpleApplication) getApplication()).getGuiNode().attachChild(endWindow);
 
-        Label l = endWindow.addChild(new Label(winner == this.cb.get(0) ? "Winner" : "Loser", "heading"));
+        Label l = endWindow.addChild(new Label(winner == this.cb.get(0) ? "Winner" : "Loser", new ElementId("title")));
         l.setTextHAlignment(HAlignment.Center);
 
         Button b = endWindow.addChild(new Button("Close"));

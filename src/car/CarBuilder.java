@@ -194,6 +194,6 @@ public class CarBuilder extends BaseAppState {
 		}
 
 		((SimpleApplication)app).getRootNode().detachChild(rootNode);
-		Log.p("carbuilder cleanup");
+		Log.p("CarBuilder cleanup");
 	}
 }

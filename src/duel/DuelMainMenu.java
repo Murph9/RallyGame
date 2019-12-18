@@ -15,6 +15,7 @@ import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.HAlignment;
 import com.simsilica.lemur.Label;
+import com.simsilica.lemur.style.ElementId;
 
 import car.CarBuilder;
 import car.CarStatsUI;
@@ -35,14 +36,14 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
     @SuppressWarnings("unchecked") // button checked vargs
     @Override
     protected void initialize(Application app) {
-        window = new Container("none");
+        window = new Container();
+        window.setBackground(DuelUiStyle.getBorderedNoBackground());
 
-        Label l = window.addChild(new Label("Main Menu", "heading"));
-        l.setTextHAlignment(HAlignment.Center);
+        Label l = window.addChild(new Label("Duel", new ElementId("title")));
         l = window.addChild(new Label("Press any key to start"));
         l.setTextHAlignment(HAlignment.Center);
 
-        Button b = window.addChild(new Button("Quit"), 1);
+        Button b = window.addChild(new Button("Quit"));
         b.addClickCommands((source) -> {
             DuelResultData d = new DuelResultData();
             d.quitGame = true;
@@ -56,6 +57,7 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
         }
 
         ((SimpleApplication) app).getGuiNode().attachChild(window);
+        app.getInputManager().addRawInputListener(this);
 
         Vector3f middle = H.screenCenterMe(app.getContext().getSettings(), window.getPreferredSize());
         window.setLocalTranslation(middle);
@@ -64,6 +66,7 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
     @Override
     protected void cleanup(Application app) {
         ((SimpleApplication) app).getGuiNode().detachChild(window);
+        app.getInputManager().removeRawInputListener(this);
     }
 
     @Override
