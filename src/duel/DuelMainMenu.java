@@ -3,9 +3,17 @@ package duel;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
+import com.jme3.input.RawInputListener;
+import com.jme3.input.event.JoyAxisEvent;
+import com.jme3.input.event.JoyButtonEvent;
+import com.jme3.input.event.KeyInputEvent;
+import com.jme3.input.event.MouseButtonEvent;
+import com.jme3.input.event.MouseMotionEvent;
+import com.jme3.input.event.TouchEvent;
 import com.jme3.math.Vector3f;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
+import com.simsilica.lemur.HAlignment;
 import com.simsilica.lemur.Label;
 
 import car.CarBuilder;
@@ -13,7 +21,7 @@ import car.CarStatsUI;
 import car.data.CarDataConst;
 import helper.H;
 
-public class DuelMainMenu extends BaseAppState {
+public class DuelMainMenu extends BaseAppState implements RawInputListener {
 
     private final IDuelFlow flow;
     private final DuelData duelData;
@@ -24,25 +32,23 @@ public class DuelMainMenu extends BaseAppState {
         this.duelData = gameOverData;
     }
 
-    @SuppressWarnings("unchecked") //button checked vargs
+    @SuppressWarnings("unchecked") // button checked vargs
     @Override
     protected void initialize(Application app) {
-        window = new Container();
-        
-        window.addChild(new Label("Main Menu"), 0);
+        window = new Container("none");
 
-        Button b = window.addChild(new Button("Start"), 1, 0);
-        b.addClickCommands((source) -> {
-            DuelResultData d = new DuelResultData();
-            flow.nextState(this, d);
-        });
-        b = window.addChild(new Button("Quit"), 1);
+        Label l = window.addChild(new Label("Main Menu", "heading"));
+        l.setTextHAlignment(HAlignment.Center);
+        l = window.addChild(new Label("Press any key to start"));
+        l.setTextHAlignment(HAlignment.Center);
+
+        Button b = window.addChild(new Button("Quit"), 1);
         b.addClickCommands((source) -> {
             DuelResultData d = new DuelResultData();
             d.quitGame = true;
             flow.nextState(this, d);
         });
-        
+
         if (duelData != null) {
             CarBuilder cb = getState(CarBuilder.class);
             CarDataConst data = cb.loadData(duelData.yourCar, duelData.yourAdjuster);
@@ -61,7 +67,45 @@ public class DuelMainMenu extends BaseAppState {
     }
 
     @Override
-    protected void onEnable() {}
+    protected void onEnable() {
+    }
+
     @Override
-    protected void onDisable() {}
+    protected void onDisable() {
+    }
+
+    //#region input events
+    @Override
+    public void beginInput() {}
+    @Override
+    public void endInput() {}
+    @Override
+    public void onJoyAxisEvent(JoyAxisEvent evt) {}
+    @Override
+    public void onJoyButtonEvent(JoyButtonEvent evt) {
+        if (evt.isPressed())
+            start();
+    }
+    @Override
+    public void onMouseMotionEvent(MouseMotionEvent evt) {}
+    @Override
+    public void onMouseButtonEvent(MouseButtonEvent evt) {
+        if (evt.isReleased())
+            start();
+    }
+    @Override
+    public void onKeyEvent(KeyInputEvent evt) {
+        if (!evt.isRepeating() && evt.isReleased()) 
+            start();
+    }
+    @Override
+    public void onTouchEvent(TouchEvent evt) {}
+    
+    private void start() {
+        if (isEnabled()) {
+            DuelResultData d = new DuelResultData();
+            flow.nextState(this, d);
+        }
+    }
+    //#endregion
 }

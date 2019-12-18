@@ -41,6 +41,9 @@ public class DuelUiStyle {
         TbtQuadBackgroundComponent flat = TbtQuadBackgroundComponent.create("assets/image/solid-white.png", 1, 1, 1,
                 2, 2, 1f, false);
         flat.setColor(dialogBackground);
+        TbtQuadBackgroundComponent flat_none = TbtQuadBackgroundComponent.create("assets/image/solid-white.png", 1, 1,
+                1, 2, 2, 1f, false);
+        flat.setColor(new ColorRGBA(1, 1, 1, 0));
 
         TbtQuadBackgroundComponent double_gradient = TbtQuadBackgroundComponent
                 .create("assets/image/double-gradient-128.png", 1, 1, 1, 126, 126, 1f, false);
@@ -81,6 +84,9 @@ public class DuelUiStyle {
         attrs = styles.getSelector("container", STYLE_NAME);
         attrs.set("background", flat.clone());
         attrs.set("insets", INSETS_BASE_2);
+
+        attrs = styles.getSelector("container", "container.none", STYLE_NAME);
+        attrs.set("background", flat_none.clone());
 
         // slider
         attrs = styles.getSelector("slider", STYLE_NAME);
