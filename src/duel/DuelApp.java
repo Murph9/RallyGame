@@ -34,7 +34,7 @@ public class DuelApp extends SimpleApplication {
                 , new AudioListenerState()
                 , new StatsAppState()
                 , new FilterManager()
-                , new CarBuilder()
+                , new CarBuilder(0.4f)
                 , new DebugAppState()
         );
     }

@@ -68,9 +68,6 @@ public class RayCar implements PhysicsTickListener {
 		}
 		this.wheelTorque = new float[4];
 		this.rbc = new RigidBodyControl(shape, carData.mass);
-
-		//a fake angular rotational, very important for driving feel
-		this.rbc.setAngularDamping(0.4f);
 	}
 
 	@Override

@@ -34,12 +34,14 @@ public class CarBuilder extends BaseAppState {
 
 	private final CarDataLoader loader;
 	private final List<RayCarControl> cars;
-	private final Node rootNode;
+    private final Node rootNode;
+    private final float angularDampening;
 
-	public CarBuilder() {
+	public CarBuilder(float angularDampening) {
 		cars = new LinkedList<>();
 		rootNode = new Node("Car Builder Root");
-		loader = new CarDataLoader();
+        loader = new CarDataLoader();
+        this.angularDampening = angularDampening;
 	}
 	
 	@Override
@@ -80,7 +82,7 @@ public class CarBuilder extends BaseAppState {
 	}
 
 	/**Creates the vehicle and loads it into the world. 
-	 * Please use the CarDataConst version.
+	 * TODO: Please use the CarDataConst version
 	*/
 	public RayCarControl addCar(Car car, Vector3f start, Matrix3f rot, boolean aPlayer) {
 		return addCar(loadData(car), start, rot, aPlayer);
@@ -128,7 +130,9 @@ public class CarBuilder extends BaseAppState {
 		rootNode.attachChild(carNode);
 		
 		carControl.setPhysicsLocation(start);
-		carControl.setPhysicsRotation(rot);
+        carControl.setPhysicsRotation(rot);
+        // a fake angular rotational reducer, very important for driving feel
+        carControl.setAngularDamping(angularDampening);
 		
 		if (aPlayer) {
 			//players get the keyboard and sound

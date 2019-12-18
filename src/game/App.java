@@ -33,7 +33,7 @@ public class App extends SimpleApplication {
 				, new AudioListenerState()
 				, new StatsAppState()
 				, new FilterManager()
-				, new CarBuilder()
+				, new CarBuilder(0.4f)
 				, new DebugAppState()
 				//, new DetailedProfilerState() //profiles in jme 3.2: TODO add physics engine stuff using custom sections
 				);

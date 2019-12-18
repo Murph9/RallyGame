@@ -397,7 +397,10 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 	public Vector3f getAngularVelocity() {
 		return rbc.getAngularVelocity();
 	}
-	
+    public float getAngularDamping() {
+        return rbc.getAngularDamping();
+    }
+    
 	public void setPhysicsLocation(Vector3f pos) {
 		rbc.setPhysicsLocation(pos);
 	}
@@ -412,7 +415,10 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 	}
 	public void setAngularVelocity(Vector3f vel) {
 		rbc.setAngularVelocity(vel);
-	}
+    }
+    public void setAngularDamping(float value) {
+        rbc.setAngularDamping(value);
+    }
 	
 	public float getCurrentVehicleSpeedKmHour() {
 		if (vel == null)
