@@ -69,10 +69,7 @@ public class CarCamera extends BaseAppState implements RawInputListener {
 		
 		Vector3f carPos = p.getRootNode().getLocalTranslation();
 		Quaternion pRot = p.getRootNode().getLocalRotation();
-		
-		CarDataConst data = p.getCarData();
-
-	
+			
 		if (!FastMath.approximateEquals(rotRad, 0)) {
 			lastTimeout += tpf;
 			if (lastTimeout > CAM_TIMEOUT) {
@@ -109,7 +106,8 @@ public class CarCamera extends BaseAppState implements RawInputListener {
 		//force it to be the same distance away at all times
 		Vector3f next = new Vector3f();
 		Vector2f vec_2 = H.v3tov2fXZ(lastPos).normalize();
-		
+        
+        CarDataConst data = p.getCarData();
 		next.x = vec_2.x * data.cam_offsetLength;
 		next.y = data.cam_offsetHeight; //ignore y last
 		next.z = vec_2.y * data.cam_offsetLength;
@@ -119,11 +117,11 @@ public class CarCamera extends BaseAppState implements RawInputListener {
 		c.setLocation(next);
 
 		//do a ray cast to make sure that you can still see the car
-		CollisionResults results = new CollisionResults();
 		Vector3f cam_lookAt = new Vector3f(0, data.cam_lookAtHeight, 0);
 		Vector3f dir = c.getLocation().subtract(carPos.add(cam_lookAt));
 		Ray ray = new Ray(carPos.add(cam_lookAt), dir);
-		((SimpleApplication)getApplication()).getRootNode().collideWith(ray, results);
+        CollisionResults results = new CollisionResults();
+        ((SimpleApplication)getApplication()).getRootNode().collideWith(ray, results);
 		CollisionResult cr = results.getClosestCollision();
 		if (cr != null && cr.getDistance() < dir.length()) {
 			Geometry g = cr.getGeometry();
