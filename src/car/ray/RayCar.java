@@ -258,7 +258,7 @@ public class RayCar implements PhysicsTickListener {
 			wheels[w_id].gripDir = wheel_force;
 			rbc.applyImpulse(w_angle.mult(wheel_force).mult(tpf), wheels[w_id].curBasePosWorld.subtract(w_pos));
 			
-			planarGForce.addLocal(wheel_force);
+			planarGForce.addLocal(wheel_force.mult(tpf));
 		});
 		
 		planarGForce.multLocal(1/carData.mass); //F=m*a => a=F/m
@@ -278,7 +278,7 @@ public class RayCar implements PhysicsTickListener {
 			
 			//apply rolling resistance in the negative direction
 			Vector3f wheel_force = new Vector3f(0, 0, FastMath.sign(velocity.z)* - carData.rollingResistance(w_id, wheels[w_id].susForce));
-			rollingResistance += Math.abs(wheel_force.z); //for debug reasons
+			rollingResistance += Math.abs(wheel_force.z)*tpf; //for debug reasons
 			rbc.applyImpulse(w_angle.mult(wheel_force).mult(tpf), wheels[w_id].curBasePosWorld.subtract(w_pos));
 		});
 

@@ -30,7 +30,9 @@ public class RayWheel {
 	public RayWheel(int num, WheelDataConst data, Vector3f offset) {
 		this.num = num;
 		this.data = data;
-		this.gripDir = new Vector3f();
+        this.gripDir = new Vector3f();
+        this.curBasePosWorld = new Vector3f();
+        this.hitNormalInWorld = new Vector3f();
 	}
 	
 	//[softly] should this class do anything

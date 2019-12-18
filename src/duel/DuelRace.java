@@ -82,7 +82,7 @@ public class DuelRace extends BaseAppState {
         loadStartUi(data);
 
         // initCamera
-        camera = new CarCamera("Camera", app.getCamera(), rayCar);
+        camera = new CarCamera(app.getCamera(), rayCar);
         getStateManager().attach(camera);
         app.getInputManager().addRawInputListener(camera);
 

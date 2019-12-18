@@ -30,8 +30,8 @@ public class CarCamera extends BaseAppState implements RawInputListener {
 	private static final float ROT_SPEED = 0.008f;
 	private static final float CAM_TIMEOUT = 3;
 
-	private Camera c;
-	private RayCarControl p;
+	private final Camera c;
+	private final RayCarControl p;
 	private Vector3f lastPos;
 	
 	private float tpf;
@@ -41,43 +41,30 @@ public class CarCamera extends BaseAppState implements RawInputListener {
 	
 	private Vector3f lastShake = new Vector3f();
 	
-	public CarCamera(String name, Camera c, RayCarControl p) {
+	public CarCamera(Camera c, RayCarControl p) {
 		super();
-		
-		this.c = c;
+        this.c = c;
+        this.p = p;
 	}
 
 	@Override
 	public void initialize(Application app) {
-        if (p != null) {
-            Vector3f pPos = p.getPhysicsLocation();
-            Vector3f cam_offset = new Vector3f(0, p.getCarData().cam_offsetHeight, p.getCarData().cam_offsetLength);
-            c.setLocation(cam_offset); // starting position of the camera
-            Vector3f cam_lookAt = new Vector3f(0, p.getCarData().cam_lookAtHeight, 0);
-            c.lookAt(pPos.add(cam_lookAt), new Vector3f(0, 1, 0)); // look at car
-        }
+        Vector3f pPos = p.getPhysicsLocation();
+        Vector3f cam_offset = new Vector3f(0, p.getCarData().cam_offsetHeight, p.getCarData().cam_offsetLength);
+        c.setLocation(cam_offset); // starting position of the camera
+        Vector3f cam_lookAt = new Vector3f(0, p.getCarData().cam_lookAtHeight, 0);
+        c.lookAt(pPos.add(cam_lookAt), new Vector3f(0, 1, 0)); // look at car
 	}
 
 	@Override
 	public void update(float tpf) {
-		if (p == null) {
-			return;
-		}
 		this.tpf = tpf;
 
 		super.update(tpf);
 	}
-	
-	
-	public void setCar(RayCarControl p) {
-		this.p = p;
-	}
-	
+		
 	@Override
 	public void render(RenderManager rm) {
-		if (p == null)
-			return;
-
 		//TODO: react to g forces
 		
 		Vector3f carPos = p.getRootNode().getLocalTranslation();

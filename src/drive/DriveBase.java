@@ -67,7 +67,7 @@ public class DriveBase extends BaseAppState {
 		stateManager.attach(uiNode);
 		
 		//initCameras
-		camera = new CarCamera("Camera", app.getCamera(), rayCar);
+		camera = new CarCamera(app.getCamera(), rayCar);
 		stateManager.attach(camera);
 		app.getInputManager().addRawInputListener(camera);
 		
@@ -132,7 +132,7 @@ public class DriveBase extends BaseAppState {
 		RayCarControl c = this.cb.addCar(car, world.getStartPos(), world.getStartRot(), true);
 		
 		//initCamera and ui again
-		camera = new CarCamera("Camera", getApplication().getCamera(), c);
+		camera = new CarCamera(getApplication().getCamera(), c);
 		sm.attach(camera);
 		getApplication().getInputManager().addRawInputListener(camera);
 		

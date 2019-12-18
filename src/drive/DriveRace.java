@@ -129,7 +129,7 @@ public class DriveRace extends BaseAppState {
 		}
 		
 		//initCameras
-		camera = new CarCamera("Camera", app.getCamera(), rayCar);
+		camera = new CarCamera(app.getCamera(), rayCar);
 		getStateManager().attach(camera);
 		app.getInputManager().addRawInputListener(camera);
 		
