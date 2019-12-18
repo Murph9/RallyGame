@@ -6,6 +6,7 @@ import java.util.List;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.audio.AudioNode;
+import com.jme3.audio.AudioSource.Status;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CollisionShape;
@@ -52,7 +53,6 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 	private final Node rootNode;
 	private final PhysicsSpace space;
 	
-    private boolean enabled = false;
     private boolean added = false;
     
     //some directional world vectors for ease of direction/ai computation
@@ -81,11 +81,14 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 	}
 	
 	public void update(float tpf) {
+        if (!this.rbEnabled())
+            return; //don't update if the rigid body isn't
+
 		if (ai != null) {
 			ai.update(tpf);
 		}
 		
-		if (engineSound != null) {
+		if (engineSound != null && engineSound.getStatus() == Status.Playing) {
 			//if sound exists
 			float pitch = FastMath.clamp(0.5f+1.5f*((float)curRPM/(float)carData.e_redline), 0.5f, 2);
 			engineSound.setPitch(pitch);
@@ -103,14 +106,6 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 		engineSound.setLooping(true);
 		engineSound.play();
 		rootNode.attachChild(engineSound);
-	}
-	public void enableSound(boolean value) {
-		if (engineSound == null)
-			return;
-		if (value)
-			engineSound.play();
-		else
-			engineSound.pause();
 	}
 	
 	@Override
@@ -438,13 +433,12 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 	
 	//enabled functions
 	public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
         if (this.space != null) {
-        	this.rbc.setEnabled(enabled);
-        	
+            this.rbc.setEnabled(enabled);
+            this.enableSound(enabled);
+            
             if (enabled && !added) {
                 space.add(this.rootNode);
-                
                 added = true;
             } else if (!enabled && added) {
                 space.remove(this.rootNode);
@@ -452,10 +446,18 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
             }
         }
     }
-	public boolean isEnabled() {
-        return enabled;
-	}
-	
+	//public boolean isEnabled() {
+        //return enabled;
+    //}
+    
+	private void enableSound(boolean enabled) {
+        if (engineSound == null)
+                return;
+        if (enabled)
+            engineSound.play();
+        else
+            engineSound.pause();
+    }
 
 		
 	public ICarPowered getPoweredState() { return (ICarPowered)this; }

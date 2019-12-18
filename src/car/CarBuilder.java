@@ -60,7 +60,6 @@ public class CarBuilder extends BaseAppState {
 	private void _setEnabled(boolean state) {
 		for (RayCarControl r : cars) {
 			r.setEnabled(state);
-			r.enableSound(state);
 		}
 	}
 	
@@ -170,8 +169,7 @@ public class CarBuilder extends BaseAppState {
 			return;
 			
 		for (RayCarControl rcc: cars) {
-			if (rcc.isEnabled())
-				rcc.update(tpf);
+			rcc.update(tpf);
 		}
 	}
 
