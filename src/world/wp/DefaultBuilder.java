@@ -7,6 +7,7 @@ import java.util.Random;
 
 import com.jme3.app.Application;
 import com.jme3.bullet.BulletAppState;
+import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
@@ -247,12 +248,13 @@ public abstract class DefaultBuilder extends World {
 	
 	@Override
 	public void cleanup(Application app) {
+        // TODO this removes things that are already not in the physics space
+        PhysicsSpace space = getState(BulletAppState.class).getPhysicsSpace();
 		for (Spatial s: curPieces) {
-			getState(BulletAppState.class).getPhysicsSpace().remove(s.getControl(0));
+			space.remove(s.getControl(0));
 			rootNode.detachChild(s);
-		}
-		
-		getState(BulletAppState.class).getPhysicsSpace().remove(startGeometry);
+        }
+        space.remove(startGeometry);
 
 		super.cleanup(app);
 	}
