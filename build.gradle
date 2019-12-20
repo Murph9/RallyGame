@@ -39,6 +39,19 @@ task createFatJar(type: Jar) {
 	dependsOn 'build'
 }
 
+task createDuelFatJar(type: Jar) {
+    baseName = 'duel'
+	manifest {
+		attributes 'Main-Class': 'duel.DuelApp'
+	}
+
+	from  {
+		sourceSets.main.output + sourceSets.main.resources.includes + configurations.compileClasspath.filter{ it.exists() }.collect { it.isDirectory() ? it : zipTree(it) }
+	}
+
+	dependsOn 'build'
+}
+
 test {
     useJUnitPlatform()
 }
