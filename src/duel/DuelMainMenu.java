@@ -40,20 +40,26 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
         mainWindow = new Container();
         mainWindow.setBackground(DuelUiStyle.getBorderedNoBackground());
 
-        Label l = mainWindow.addChild(new Label("Duel", new ElementId("title")));
-        l = mainWindow.addChild(new Label("Press any key to start"));
-        l.setTextHAlignment(HAlignment.Center);
-
+        mainWindow.addChild(new Label("Duel", new ElementId("title")));
+        
         if (duelData != null) {
+            Button b = mainWindow.addChild(new Button("Retry"));
+            b.addClickCommands((source) -> {
+                start();
+            });
+
             mainWindow.addChild(new Label("Wins: " + duelData.wins));
             CarBuilder cb = getState(CarBuilder.class);
             CarDataConst data = cb.loadData(duelData.yourCar, duelData.yourAdjuster);
             mainWindow.addChild(new CarStatsUI(app.getAssetManager(), data), 2, 0);
+        } else {
+            Label l = mainWindow.addChild(new Label("Press any key to start"));
+            l.setTextHAlignment(HAlignment.Center);
+
+            app.getInputManager().addRawInputListener(this);
         }
 
         ((SimpleApplication) app).getGuiNode().attachChild(mainWindow);
-        app.getInputManager().addRawInputListener(this);
-
         
         quitWindow = new Container();
         Button b = quitWindow.addChild(new Button("Quit"));
