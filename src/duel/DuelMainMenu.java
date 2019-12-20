@@ -10,6 +10,7 @@ import com.jme3.input.event.KeyInputEvent;
 import com.jme3.input.event.MouseButtonEvent;
 import com.jme3.input.event.MouseMotionEvent;
 import com.jme3.input.event.TouchEvent;
+import com.jme3.scene.Node;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.HAlignment;
@@ -53,9 +54,7 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
         ((SimpleApplication) app).getGuiNode().attachChild(mainWindow);
         app.getInputManager().addRawInputListener(this);
 
-        Screen screen = new Screen(app.getContext().getSettings());
-        screen.centerMe(mainWindow);
-
+        
         quitWindow = new Container();
         Button b = quitWindow.addChild(new Button("Quit"));
         b.addClickCommands((source) -> {
@@ -64,21 +63,28 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
             flow.nextState(this, d);
         });
         ((SimpleApplication) app).getGuiNode().attachChild(quitWindow);
-        screen.topCenterMe(quitWindow);
     }
 
     @Override
     protected void cleanup(Application app) {
-        ((SimpleApplication) app).getGuiNode().detachChild(mainWindow);
+        Node n = ((SimpleApplication) app).getGuiNode();
+        n.detachChild(mainWindow);
+        n.detachChild(quitWindow);
         app.getInputManager().removeRawInputListener(this);
     }
 
     @Override
-    protected void onEnable() {
-    }
+    protected void onEnable() { }
+    @Override
+    protected void onDisable() { }
 
     @Override
-    protected void onDisable() {
+    public void update(float tpf) {
+        super.update(tpf);
+
+        Screen screen = new Screen(getApplication().getContext().getSettings());
+        screen.centerMe(mainWindow);
+        screen.topCenterMe(quitWindow);
     }
 
     //#region input events
