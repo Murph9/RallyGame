@@ -109,7 +109,7 @@ class NormalisedStats {
     
     //TODO idea for speed: calc max speed for gearing and compare drag
     public NormalisedStats(CarDataConst data) {
-        accel = skewLog(data.getMaxPower().first, 0, 1600, 0, 1);
+        accel = skewLog(data.getMaxPower().first / data.mass, -1, 0.75f, 0, 1);
         speed = skewLog(data.getMaxPower().first / Math.abs(data.quadraticDrag(new Vector3f(27, 0, 0)).x), -2, 10, 0, 1);
         handling = skewLog(data.mass / GripHelper.calcMaxLoad(data.wheelData[0].pjk_lat), -1, 1, 0, 1);
         braking = skewLog(Math.min(data.brakeMaxTorque, GripHelper.calcMaxLoad(data.wheelData[0].pjk_long)) / data.mass, 0, 10, 0, 1);
