@@ -6,6 +6,7 @@ import com.simsilica.lemur.Label;
 
 import car.ray.RayCarControl;
 import helper.H;
+import helper.Screen;
 
 public class SprintMenu extends DriveMenu {
 
@@ -24,17 +25,19 @@ public class SprintMenu extends DriveMenu {
 	@Override
 	public void initialize(Application app) {
 		super.initialize(app);
-		
+        
+        Screen screen = new Screen(app.getContext().getSettings());
+
 		countDown = new Container();
 		countDownLabel = new Label("Sprint state?");
 		countDown.attachChild(countDownLabel);
-		countDown.setLocalTranslation(H.screenMiddle(app.getContext().getSettings()));
+		countDown.setLocalTranslation(screen.center());
 		rootNode.attachChild(countDown);
 
 		scores = new Container();
 		scoresLabel = new Label("scoresLabel");
 		scores.attachChild(scoresLabel);
-		scores.setLocalTranslation(H.screenTopLeft(app.getContext().getSettings()));
+		scores.setLocalTranslation(screen.topLeft());
 		rootNode.attachChild(scores);
 	}
 

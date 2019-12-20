@@ -13,8 +13,8 @@ import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
-import helper.H;
 import helper.Log;
+import helper.Screen;
 
 public class DriveMenu extends BaseAppState {
 
@@ -79,21 +79,22 @@ public class DriveMenu extends BaseAppState {
             	rootNode.detachChild(pauseMenu);
             }
         });
-		pauseMenu.setLocalTranslation(H.screenMiddle(app.getContext().getSettings()).add(pauseMenu.getPreferredSize().mult(-0.5f)));
+        Screen screen = new Screen(app.getContext().getSettings());
+		pauseMenu.setLocalTranslation(screen.center().add(pauseMenu.getPreferredSize().mult(-0.5f)));
 		
 		infoHint = new Container();
 		infoHint.attachChild(new Label("TAB for info"));
-		infoHint.setLocalTranslation(H.screenTopLeft(app.getContext().getSettings()));
+		infoHint.setLocalTranslation(screen.topLeft());
 		rootNode.attachChild(infoHint);
 		
 		info = new Container();
 		info.attachChild(new Label("Controls: move: wasd and arrows , flip: f, handbrake: space, reverse: leftshift, camera: e,z, tab: this, pause: esc, reset: enter, jump: q, nitro: leftcontrol, telemetry: home"));
-		info.setLocalTranslation(H.screenTopLeft(app.getContext().getSettings()));
+		info.setLocalTranslation(screen.topLeft());
 		
 		random = new Container();
 		randomthing = new Label("");
 		random.attachChild(randomthing);
-		random.setLocalTranslation(H.screenTopRight(app.getContext().getSettings()).add(-100, 0, 0));
+		random.setLocalTranslation(screen.topRight().add(-100, 0, 0));
 		rootNode.attachChild(random);
 	}
 

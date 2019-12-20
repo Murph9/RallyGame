@@ -11,7 +11,7 @@ import com.jme3.input.controls.KeyTrigger;
 import com.jme3.scene.Node;
 import com.simsilica.lemur.Container;
 
-import helper.H;
+import helper.Screen;
 
 public class DuelRaceMenu extends BaseAppState {
     
@@ -37,7 +37,7 @@ public class DuelRaceMenu extends BaseAppState {
 
         pauseMenu = DuelUiElements.pauseMenu(() -> { togglePause(); }, () -> { quit.run(); });
         pauseMenu.setLocalTranslation(
-                H.screenMiddle(app.getContext().getSettings()).add(pauseMenu.getPreferredSize().mult(-0.5f)));
+                new Screen(app.getContext().getSettings()).center().add(pauseMenu.getPreferredSize().mult(-0.5f)));
     }
 
     @Override

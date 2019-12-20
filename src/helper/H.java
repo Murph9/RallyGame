@@ -24,7 +24,6 @@ import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Line;
 import com.jme3.scene.shape.Sphere;
-import com.jme3.system.AppSettings;
 
 //Its short for help, name length was a concern
 public class H {
@@ -402,28 +401,6 @@ public class H {
 	}
 	public static <T> T randFromArray(T[] array) {
 		return array[FastMath.nextRandomInt(0, array.length-1)];
-	}
-	
-	public static Vector3f screenTopLeft(AppSettings set) {
-		return new Vector3f(0, set.getHeight(), 0);
-	}
-	public static Vector3f screenTopRight(AppSettings set) {
-		return new Vector3f(set.getWidth(), set.getHeight(), 0);
-	}
-	public static Vector3f screenBottomRight(AppSettings set) {
-		return new Vector3f(set.getWidth(), 0, 0);
-	}
-	public static Vector3f screenMiddle(AppSettings set) {
-		return new Vector3f(set.getWidth()/2, set.getHeight()/2, 0);
-	}
-	public static Vector3f screenCenterMe(AppSettings set, Vector3f size) {
-		Vector3f middle = H.screenMiddle(set);
-		middle.x -= size.x / 2f;
-		middle.y += size.y / 2f;
-		return middle;
-	}
-	public static Vector3f screenTopCenterMe(AppSettings set, Vector3f size) {
-		return new Vector3f(set.getWidth()/2 - size.x / 2f, set.getHeight(), 0);
 	}
 	
 	//http://stackoverflow.com/a/677248

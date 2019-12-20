@@ -8,7 +8,7 @@ import com.simsilica.lemur.Label;
 
 import drive.DriveBase;
 import drive.DriveMenu;
-import helper.H;
+import helper.Screen;
 
 public class RaceMenu extends DriveMenu {
 
@@ -26,7 +26,7 @@ public class RaceMenu extends DriveMenu {
 		state = new Container();
 		raceLabel = new Label("Race state?");
 		state.attachChild(raceLabel);
-		state.setLocalTranslation(H.screenTopLeft(app.getContext().getSettings()).subtract(new Vector3f(0,300,0)));
+		state.setLocalTranslation(new Screen(app.getContext().getSettings()).topLeft().subtract(new Vector3f(0,300,0)));
 		((SimpleApplication)app).getGuiNode().attachChild(state);
 	}
 

@@ -10,8 +10,8 @@ import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
-import helper.H;
 import helper.Log;
+import helper.Screen;
 import world.*;
 import world.highway.HighwayWorld;
 import world.lsystem.LSystemWorld;
@@ -42,8 +42,10 @@ public class ChooseMap extends BaseAppState {
 		
 		//init gui
 		Container myWindow = new Container();
-		((SimpleApplication)app).getGuiNode().attachChild(myWindow);
-		myWindow.setLocalTranslation(H.screenTopLeft(app.getContext().getSettings()));
+        ((SimpleApplication)app).getGuiNode().attachChild(myWindow);
+        
+        Screen screen = new Screen(app.getContext().getSettings());
+		myWindow.setLocalTranslation(screen.topLeft());
 		
 		//these values are not x and y because they are causing confusion
 		int i = 0;

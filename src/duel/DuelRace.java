@@ -19,6 +19,7 @@ import car.data.CarDataConst;
 import car.ray.RayCarControl;
 import helper.H;
 import helper.Log;
+import helper.Screen;
 import world.StaticWorld;
 import world.StaticWorldBuilder;
 import world.World;
@@ -96,10 +97,8 @@ public class DuelRace extends BaseAppState {
         currentStateWindow = new Container();
         currentStateWindow.addChild(new Label("Times"));
         currentTime = currentStateWindow.addChild(new Label("0.00sec"), 1);
-
-        Vector3f middle = H.screenTopCenterMe(getApplication().getContext().getSettings(),
-                currentStateWindow.getPreferredSize());
-        currentStateWindow.setLocalTranslation(middle);
+        
+        new Screen(getApplication().getContext().getSettings()).topCenterMe(currentStateWindow);
     }
 
     @SuppressWarnings("unchecked") // button checked vargs
@@ -123,8 +122,7 @@ public class DuelRace extends BaseAppState {
         CarDataConst data2 = cb.loadData(data.theirCar, data.theirAdjuster);
         startWindow.addChild(DuelUiElements.DuelCarStats(getApplication().getAssetManager(), data1, data2));
 
-        Vector3f middle = H.screenTopCenterMe(getApplication().getContext().getSettings(), startWindow.getPreferredSize());
-        startWindow.setLocalTranslation(middle);
+        new Screen(getApplication().getContext().getSettings()).topCenterMe(startWindow);
     }
 
     @SuppressWarnings("unchecked") // button checked vargs
@@ -154,9 +152,7 @@ public class DuelRace extends BaseAppState {
         CarDataConst data2 = cb.loadData(data.theirCar, data.theirAdjuster);
         endWindow.addChild(DuelUiElements.DuelCarStats(getApplication().getAssetManager(), data1, data2));
 
-        Vector3f middle = H.screenTopCenterMe(getApplication().getContext().getSettings(),
-                startWindow.getPreferredSize());
-        endWindow.setLocalTranslation(middle);
+        new Screen(getApplication().getContext().getSettings()).topCenterMe(startWindow);
     }
 
     @Override

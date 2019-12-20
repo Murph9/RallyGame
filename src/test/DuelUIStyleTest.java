@@ -6,7 +6,6 @@ import java.util.List;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
-import com.jme3.math.Vector3f;
 import com.simsilica.lemur.Axis;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
@@ -24,8 +23,8 @@ import com.simsilica.lemur.text.DocumentModelFilter;
 import com.simsilica.lemur.text.TextFilters;
 
 import duel.DuelUiStyle;
-import helper.H;
 import helper.Log;
+import helper.Screen;
 
 class DuelUiTestApp extends SimpleApplication {
 
@@ -139,10 +138,10 @@ public class DuelUIStyleTest extends BaseAppState {
 
         windows.add(window);
 
+        Screen screen = new Screen(app.getContext().getSettings());
         for (Container w: windows) {
             ((SimpleApplication) app).getGuiNode().attachChild(w);
-            Vector3f middle = H.screenCenterMe(app.getContext().getSettings(), w.getPreferredSize());
-            w.setLocalTranslation(middle);
+            screen.centerMe(w);
         }
 
         Log.p("DuelUIStyleTest start");
