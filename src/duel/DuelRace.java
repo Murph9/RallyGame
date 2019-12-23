@@ -1,9 +1,20 @@
 package duel;
 
+import java.util.Collection;
+import java.util.List;
+
 import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.BulletAppState;
+import com.jme3.bullet.collision.PhysicsCollisionObject;
+import com.jme3.bullet.control.GhostControl;
+import com.jme3.bullet.util.CollisionShapeFactory;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.Spatial;
+import com.jme3.scene.shape.Box;
 
 import car.CarBuilder;
 import car.CarCamera;
@@ -11,6 +22,7 @@ import car.CarUI;
 import car.ai.DriveAlongAI;
 import car.data.CarDataConst;
 import car.ray.RayCarControl;
+import effects.LoadModelWrapper;
 import helper.Log;
 import world.StaticWorld;
 import world.StaticWorldBuilder;
@@ -20,9 +32,9 @@ public class DuelRace extends BaseAppState {
 
     private static final float distanceApart = 2;
 
-    private CarBuilder cb;
-    private IDuelFlow flow;
+    private final IDuelFlow flow;
 
+    private CarBuilder cb;
     private DuelRaceMenu menu;
 
     private World world;
@@ -30,8 +42,9 @@ public class DuelRace extends BaseAppState {
     private CarUI uiNode;
 
     private float raceTimer;
-
     private RayCarControl winner;
+
+    private GhostControl finishLine;
 
     public DuelRace(IDuelFlow flow) {
         this.flow = flow;
@@ -75,6 +88,17 @@ public class DuelRace extends BaseAppState {
             flow.nextState(this, drd);
         });
         getStateManager().attach(menu);
+
+
+        //test finish line collision (also maybe checkpoint collision)
+        Spatial box = new Geometry("Finish line box", new Box(10, 10, 1));
+        box = LoadModelWrapper.create(app.getAssetManager(), box, new ColorRGBA(0, 1, 0, 0.5f));
+
+        finishLine = new GhostControl(CollisionShapeFactory.createBoxShape(box));
+        box.setLocalTranslation(new Vector3f(0, 0, 300));
+        box.addControl(finishLine);
+        ((SimpleApplication)app).getRootNode().attachChild(box);
+        getState(BulletAppState.class).getPhysicsSpace().add(finishLine);
     }
 
     @Override
@@ -115,14 +139,28 @@ public class DuelRace extends BaseAppState {
         raceTimer += tpf;
         menu.setState(raceTimer);
 
-        for (RayCarControl car: this.cb.getAll()) {
-            if (car.getPhysicsLocation().z > 300) {
-                winner = car;
-                this.cb.setEnabled(false);
-                menu.raceStopped(winner == this.cb.get(0));
-                break;
+        RayCarControl maybeWinner = DuelRace.detectWinner(finishLine, this.cb);
+        if (maybeWinner != null) {
+            this.winner = maybeWinner;
+            this.cb.setEnabled(false);
+            this.menu.raceStopped(this.winner == this.cb.get(0));
+        }
+    }
+
+    private static RayCarControl detectWinner(GhostControl finishLine, CarBuilder cb) {
+        List<PhysicsCollisionObject> objects = finishLine.getOverlappingObjects();
+        // detect collider of finish line box
+        if (objects.size() > 0) {
+            Collection<RayCarControl> cars = cb.getAll();
+            for (RayCarControl car : cars) {
+                for (PhysicsCollisionObject pco : objects) {
+                    if (pco == car.getPhysicsObject()) {
+                        return car;
+                    }
+                }
             }
         }
+        return null;
     }
 
     void startRace() {
