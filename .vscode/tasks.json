@@ -4,8 +4,17 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Create Fat jar",
-            "command": "${config:java.import.gradle.home}/gradle createFatJar", //--info
+            "label": "Create Duel Fat jar",
+            "command": ".\\gradlew.bat createDuelFatJar",
+            "type": "shell",
+            "options": {
+                "shell": {}
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Create Base Fat jar",
+            "command": ".\\gradlew.bat createFatJar", //--info
             "type": "shell",
             "options": {
                 "shell": {}
