@@ -19,11 +19,13 @@ interface IDuelFlow {
 public class DuelFlow implements IDuelFlow {
     
     private final Application app;
+    private final String version;
     private DuelData data;
     private AppState curState;
 
-    public DuelFlow(Application app) {
+    public DuelFlow(Application app, String version) {
         this.app = app;
+        this.version = version;
         this.data = getStartDataState();
         
         nextState(null, null);
@@ -35,21 +37,18 @@ public class DuelFlow implements IDuelFlow {
 
     public void nextState(AppState state, DuelResultData result) {
         if (this.data == null)
-            throw new IllegalStateException();
+            throw new IllegalArgumentException("Recived no data from the previous state: " + state.getClass());
 
         AppStateManager sm = app.getStateManager();
 
         if (state == null) {
-            curState = new DuelMainMenu(this, null);
+            curState = new DuelMainMenu(this, null, version);
             sm.attach(curState);
             return;
         }
+        
         if (state != curState) {
-            throw new InputMismatchException(
-                    "Recieved state '" + curState.getClass() + "' but was expecting  '" + state.getClass() + "'");
-        }
-        if (data == null) {
-            throw new IllegalArgumentException("Recived no data from the previous state: "+state.getClass());
+            throw new InputMismatchException("Recieved state '" + curState.getClass() + "' but was expecting  '" + state.getClass() + "'");
         }
 
         sm.detach(state);
@@ -72,7 +71,7 @@ public class DuelFlow implements IDuelFlow {
                 this.data.theirAdjuster = rival.adj;
                 curState = new DuelRace(this);
             } else {
-                curState = new DuelMainMenu(this, this.data);
+                curState = new DuelMainMenu(this, this.data, version);
                 this.data = getStartDataState();
             }
         } else {
@@ -86,7 +85,7 @@ public class DuelFlow implements IDuelFlow {
         app.getStateManager().detach(curState);
     }
     
-    public DuelData getStartDataState() {
+    private DuelData getStartDataState() {
         DuelData data = new DuelData();
         data.yourCar = Car.Runner;
         Racer rival = generateNextRival(data.wins);
@@ -94,11 +93,12 @@ public class DuelFlow implements IDuelFlow {
         data.theirAdjuster = rival.adj;
         return data;
     }
-    public Racer generateNextRival(int wins) {
+    
+    private Racer generateNextRival(int wins) {
         // random calls need to stay the same if this is called again
         ColorRGBA col = ColorRGBA.randomColor();
-        Car c = helper.H.randFromArray(Car.values());
-        // Car c = Car.Runner;
+        // Car c = helper.H.randFromArray(Car.values());
+        Car c = Car.Runner;
         Racer r = new Racer(c,
             new CarDataAdjuster(CarDataAdjustment.asFunc((data) -> {
                 data.baseColor = col;

@@ -26,12 +26,15 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
 
     private final IDuelFlow flow;
     private final DuelData duelData;
-    private Container mainWindow;
-    private Container quitWindow;
+    private final String version;
 
-    public DuelMainMenu(IDuelFlow flow, DuelData gameOverData) {
+    private Container mainWindow;
+    private Container altWindow;
+
+    public DuelMainMenu(IDuelFlow flow, DuelData gameOverData, String version) {
         this.flow = flow;
         this.duelData = gameOverData;
+        this.version = version;
     }
 
     @SuppressWarnings("unchecked") // button checked vargs
@@ -61,21 +64,32 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
 
         ((SimpleApplication) app).getGuiNode().attachChild(mainWindow);
         
-        quitWindow = new Container();
-        Button b = quitWindow.addChild(new Button("Quit"));
+        altWindow = new Container();
+        Button b = altWindow.addChild(new Button("Controls"), 0, 0);
+        Label l = new Label("move: wasd and arrows\nflip: f\nhandbrake: space\nreverse: leftshift (hold)\npause: esc\nnitro: either control\ntelemetry: home");
+        b.addClickCommands((source) -> {
+            if (l.getParent() == null)
+                altWindow.addChild(l, 1, 0);
+            else 
+                altWindow.removeChild(l);
+        });
+        
+        b = altWindow.addChild(new Button("Quit"), 0, 1);
         b.addClickCommands((source) -> {
             DuelResultData d = new DuelResultData();
             d.quitGame = true;
             flow.nextState(this, d);
         });
-        ((SimpleApplication) app).getGuiNode().attachChild(quitWindow);
+
+        altWindow.addChild(new Label(this.version), 0, 2);
+        ((SimpleApplication) app).getGuiNode().attachChild(altWindow);
     }
 
     @Override
     protected void cleanup(Application app) {
         Node n = ((SimpleApplication) app).getGuiNode();
         n.detachChild(mainWindow);
-        n.detachChild(quitWindow);
+        n.detachChild(altWindow);
         app.getInputManager().removeRawInputListener(this);
     }
 
@@ -90,7 +104,7 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
 
         Screen screen = new Screen(getApplication().getContext().getSettings());
         screen.centerMe(mainWindow);
-        screen.topCenterMe(quitWindow);
+        screen.topCenterMe(altWindow);
     }
 
     //#region input events

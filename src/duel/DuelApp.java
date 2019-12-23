@@ -26,6 +26,7 @@ public class DuelApp extends SimpleApplication {
     }
 
     public static final Vector3f GRAVITY = new Vector3f(0, -9.81f, 0); // yay its down
+    public static final String PROJECT_VERSION = "v0.1.0";
 
     private DuelFlow flow;
 
@@ -65,7 +66,7 @@ public class DuelApp extends SimpleApplication {
         bullet.getPhysicsSpace().setGravity(GRAVITY);
 
 
-        flow = new DuelFlow(this);
+        flow = new DuelFlow(this, PROJECT_VERSION);
     }
     
 
