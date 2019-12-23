@@ -37,7 +37,7 @@ public class DuelFlow implements IDuelFlow {
 
     public void nextState(AppState state, DuelResultData result) {
         if (this.data == null)
-            throw new IllegalArgumentException("Recived no data from the previous state: " + state.getClass());
+            throw new IllegalArgumentException("Received no data from the previous state: " + state.getClass());
 
         AppStateManager sm = app.getStateManager();
         if (state == null) {
@@ -74,7 +74,7 @@ public class DuelFlow implements IDuelFlow {
                 this.data = getStartDataState();
             }
         } else {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Unknown state type: " + state.getClass());
         }
         
         sm.attach(curState);
