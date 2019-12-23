@@ -40,7 +40,6 @@ public class DuelFlow implements IDuelFlow {
             throw new IllegalArgumentException("Recived no data from the previous state: " + state.getClass());
 
         AppStateManager sm = app.getStateManager();
-
         if (state == null) {
             curState = new DuelMainMenu(this, null, version);
             sm.attach(curState);
@@ -97,8 +96,8 @@ public class DuelFlow implements IDuelFlow {
     private Racer generateNextRival(int wins) {
         // random calls need to stay the same if this is called again
         ColorRGBA col = ColorRGBA.randomColor();
-        // Car c = helper.H.randFromArray(Car.values());
-        Car c = Car.Runner;
+        Car c = helper.H.randFromArray(Car.values());
+        // Car c = Car.Runner;
         Racer r = new Racer(c,
             new CarDataAdjuster(CarDataAdjustment.asFunc((data) -> {
                 data.baseColor = col;

@@ -203,12 +203,11 @@ public abstract class DefaultBuilder extends World {
 	}
 	
 	public void reset() {
-		List<Spatial> ne = new LinkedList<Spatial>(curPieces);
-		for (Spatial s: ne) {
+		for (Spatial s: curPieces) {
 			getState(BulletAppState.class).getPhysicsSpace().remove(s.getControl(0));
 			rootNode.detachChild(s);
-			curPieces.remove(s);
-		}
+        }
+        curPieces.clear();
 
 		start = new Vector3f(0,0,0);
 		nextPos = new Vector3f(0,0,0);

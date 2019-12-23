@@ -180,7 +180,7 @@ public class CarBuilder extends BaseAppState {
 	public RayCarControl get(int a) {
 		return cars.get(a);
 	}
-	public Collection<? extends RayCarControl> getAll() {
+	public Collection<RayCarControl> getAll() {
 		return new LinkedList<>(cars);
 	}
 	public int getCount() {
