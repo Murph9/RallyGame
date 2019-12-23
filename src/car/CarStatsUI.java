@@ -20,7 +20,7 @@ import helper.H;
 
 public class CarStatsUI extends Container {
 
-    private CarStats stats;
+    private final CarStats stats;
 
     public CarStatsUI(AssetManager am, CarDataConst carData) {
 
@@ -30,8 +30,8 @@ public class CarStatsUI extends Container {
         NormalisedStats nStats = stats.getNormalisedStats();
         addChild(new Label("Acceleration " + H.roundDecimal(nStats.getAccel(), 3)));
         addChild(createBar(nStats.getAccel()));
-        addChild(new Label("Top Speed " + H.roundDecimal(nStats.getSpeed(), 3)));
-        addChild(createBar(nStats.getSpeed()));
+        addChild(new Label("Top Speed " + H.roundDecimal(nStats.getTopSpeed(), 3)));
+        addChild(createBar(nStats.getTopSpeed()));
         addChild(new Label("Handling " + H.roundDecimal(nStats.getHandling(), 3)));
         addChild(createBar(nStats.getHandling()));
         addChild(new Label("Braking " + H.roundDecimal(nStats.getBraking(), 3)));
@@ -103,14 +103,14 @@ class Stat {
 class NormalisedStats {
 
     private float accel;
-    private float speed;
+    private float topSpeed;
     private float handling;
     private float braking;
     
     //TODO idea for speed: calc max speed for gearing and compare drag
     public NormalisedStats(CarDataConst data) {
         accel = skewLog(data.getMaxPower().first / data.mass, -1, 0.75f, 0, 1);
-        speed = skewLog(data.getMaxPower().first / Math.abs(data.quadraticDrag(new Vector3f(27, 0, 0)).x), -2, 10, 0, 1);
+        topSpeed = skewLog(data.getMaxPower().first / Math.abs(data.quadraticDrag(new Vector3f(27, 0, 0)).x), -2, 10, 0, 1);
         handling = skewLog(data.mass / GripHelper.calcMaxLoad(data.wheelData[0].pjk_lat), -1, 1, 0, 1);
         braking = skewLog(Math.min(data.brakeMaxTorque, GripHelper.calcMaxLoad(data.wheelData[0].pjk_long)) / data.mass, 0, 10, 0, 1);
     }
@@ -130,12 +130,12 @@ class NormalisedStats {
     public float getHandling() {
         return handling;
     }
-    public float getSpeed() {
-        return speed;
+    public float getTopSpeed() {
+        return topSpeed;
     }
 
     @Override
     public String toString() {
-        return "A: " + accel + " S:" + speed + " H:" + handling + " B:" + braking;
+        return "A: " + accel + " S:" + topSpeed + " H:" + handling + " B:" + braking;
     }
 }

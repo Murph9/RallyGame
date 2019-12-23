@@ -86,7 +86,7 @@ public abstract class CarAI {
 
 		boolean accel = IfTooSlowForPoint(targetPos, curPos, this.car.getLinearVelocity());
 		boolean targetInFront = curPos.subtract(targetPos).length() > curPos.add(car.forward).subtract(targetPos).length();
-		if (accel && targetInFront) {
+		if (accel && targetInFront && ifLowDriftAngle()) {
             //drive at point
             this.onEvent("Accel", true);
             this.onEvent("Brake", false);
@@ -97,10 +97,12 @@ public abstract class CarAI {
 		}
 	}
 
-	private boolean IfTooSlowForPoint(Vector3f target, Vector3f pos, Vector3f speed) {
+    /** Calculates based on the ideal situation whether the car can make the point at the current speed */
+	protected boolean IfTooSlowForPoint(Vector3f target, Vector3f pos, Vector3f speed) {
 		return IfTooSlowForPoint(H.v3tov2fXZ(target), H.v3tov2fXZ(pos), H.v3tov2fXZ(speed));
 	}
-	private boolean IfTooSlowForPoint(Vector2f target, Vector2f pos, Vector2f speed) {
+	/** Calculates based on the ideal situation whether the car can make the point at the current speed */
+    protected boolean IfTooSlowForPoint(Vector2f target, Vector2f pos, Vector2f speed) {
 
         // r = (m*v*v)/f
         float bestRadius = this.car.getCarData().mass * speed.lengthSquared() / BEST_LAT_FORCE;
@@ -125,7 +127,11 @@ public abstract class CarAI {
 
         return distance1 > bestRadius && distance2 > bestRadius;
 	}
-	
+    
+    /** Detect a high drift angle, which might mean stop accelerating */
+    protected boolean ifLowDriftAngle() {
+        return this.car.driftAngle() < (10 * FastMath.RAD_TO_DEG);
+    }
 
 	//TODO helper ray cast method, to find out what to avoid
 }
