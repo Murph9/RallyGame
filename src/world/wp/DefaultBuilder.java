@@ -19,9 +19,7 @@ import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
-import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.shape.Box;
 
 import effects.LoadModelWrapper;
@@ -32,21 +30,21 @@ import world.wp.WP.NodeType;
 /** Generates the world infront of the player dynamically from static set pieces */
 public abstract class DefaultBuilder extends World {
 
-	private Geometry startGeometry;
-	protected WP[] type;
+    protected static final float SPAWN_DISTANCE = 500;
+
+	protected final WP[] type;
+	protected final List<Spatial> curPieces = new ArrayList<Spatial>();
+    
+    private Geometry startGeometry;
+    protected List<WPObject> wpos;
 	
-	protected List<Spatial> curPieces = new ArrayList<Spatial>();
-	protected List<WPObject> wpos;
-	
-	protected Vector3f start = new Vector3f();
-	protected Vector3f nextPos = new Vector3f();
-	protected Quaternion nextRot = new Quaternion();
-	protected NodeType nextNode = null;
+	protected Vector3f nextPos;
+	protected Quaternion nextRot;
+	protected NodeType nextNode;
 	
 	protected Random rand;
 	
 	protected int count = 0;
-	protected float distance = 500;
 	
 	DefaultBuilder(WP[] type) {
 		this(type, (long)(Math.random()*Long.MAX_VALUE));
@@ -55,9 +53,11 @@ public abstract class DefaultBuilder extends World {
 		super("builder root node");
 		this.type = type;
 		
-		this.rand = new Random(seed);
-	}
-	
+        this.rand = new Random(seed);
+        
+        reset();
+    }
+    
 	@Override
 	public void initialize(Application app) {
 		super.initialize(app);
@@ -66,16 +66,13 @@ public abstract class DefaultBuilder extends World {
 		for (int i = 0; i < type.length; i++) {
 			WPObject wpo = new WPObject();
 			wpo.wp = type[i];
-			
-			Spatial piece = LoadModelWrapper.create(app.getAssetManager(), type[i].getName(), null);
-			piece.setCullHint(CullHint.Never);
-			wpo.sp = ((Node)piece).getChild(0); //there is only one object in there (hopefully)
+			wpo.sp = LoadModelWrapper.create(app.getAssetManager(), wpo.wp.getName(), null);
 
 			//scale and unscale spatials so that the collision shape size is correct
-			wpo.sp.scale(type[i].getScale());
+			wpo.sp.scale(wpo.wp.getScale());
 			wpo.col = CollisionShapeFactory.createMeshShape(wpo.sp);
-			wpo.sp.scale(1/type[i].getScale());
-
+			wpo.sp.scale(1 / wpo.wp.getScale());
+            
 			this.wpos.add(wpo);
 		}
 		
@@ -110,7 +107,7 @@ public abstract class DefaultBuilder extends World {
 		List<Spatial> temp = new LinkedList<Spatial>(curPieces);
 		for (Spatial sp: temp) {
 			Vector3f endSpPos = sp.getWorldTranslation();
-			if (endSpPos.subtract(camPos).length() > distance/2) {
+			if (endSpPos.subtract(camPos).length() > SPAWN_DISTANCE/2) {
 				//2 because don't delete the ones we just placed
 				getState(BulletAppState.class).getPhysicsSpace().remove(sp.getControl(0));
 				rootNode.detachChild(sp);
@@ -137,22 +134,21 @@ public abstract class DefaultBuilder extends World {
 
 		//if there is no piece to place then this gets stuck in an infinite loop
 		//probably because there is no piece that satisfies the angle constraint
-		while (nextPos.subtract(camPos).length() < distance) {
-			int i = (int)(rand.nextDouble()*wpoList.size());
+		while (nextPos.subtract(camPos).length() < SPAWN_DISTANCE) {
+            int i = rand.nextInt(wpoList.size());
 			WPObject wpo = wpoList.get(i);
 
 			if (testConstraints(wpo))
-				PlacePiece(wpo);
+				placePiece(wpo);
 			else
 				wpoList.remove(wpo);
 
-			if (wpoList.isEmpty()) {
-				throw new Exception("No piece matched the constraints :(.");
-			}
+			if (wpoList.isEmpty())
+                throw new Exception("No piece matched the constraints :(. Type: " + WPObject.class.getName());
 		}
 	}
 
-	private boolean testConstraints(WPObject wpo) {
+	protected boolean testConstraints(WPObject wpo) {
 		Quaternion newRot = this.nextRot.mult(wpo.wp.getNewAngle());
 		
 		// Prevent it turning back onto itself - try PI*3/2 if its not interesting enough
@@ -170,12 +166,12 @@ public abstract class DefaultBuilder extends World {
 	// Please attempt to use the wonderful getRotation().toAngles() and fromAngles() methods
 	// which should stop the slowly getting off track if you just create the quaternion everytime
 	// there will always be floating point errors though, unless we really care about that...
-	protected void PlacePiece(WPObject wpo) {
-		WP world = wpo.wp;
+	protected void placePiece(WPObject wpo) {
+		WP worldPiece = wpo.wp;
 		Spatial s = wpo.sp.clone();
 		CollisionShape coll = wpo.col;
 
-		float scale = world.getScale();
+		float scale = worldPiece.getScale();
 		//translate, rotate, scale
 		s.setLocalTranslation(nextPos);
 		s.rotate(nextRot);
@@ -191,14 +187,12 @@ public abstract class DefaultBuilder extends World {
 		curPieces.add(s);
 
 		//setup the start for the next piece
-		Vector3f cur = world.getNewPos().mult(scale);
+		Vector3f cur = worldPiece.getNewPos().mult(scale);
 		nextPos.addLocal(nextRot.mult(cur));
+
+        nextRot.multLocal(worldPiece.getNewAngle());
 		
-		Quaternion rot = world.getNewAngle();
-		rot.set(rot);
-		nextRot.multLocal(rot);
-		
-		nextNode = world.endNode();
+		nextNode = worldPiece.endNode();
 		count++;
 	}
 	
@@ -209,9 +203,9 @@ public abstract class DefaultBuilder extends World {
         }
         curPieces.clear();
 
-		start = new Vector3f(0,0,0);
-		nextPos = new Vector3f(0,0,0);
-		nextRot = new Quaternion();
+        nextPos = new Vector3f();
+        nextRot = new Quaternion();
+        nextNode = null;
 	}
 
 	@Override
