@@ -103,9 +103,4 @@ public class App extends SimpleApplication {
 				space.remove(r);
 		}
 	}
-
-	/////////////// menu
-	public com.jme3.system.Timer getTimer() {
-		return timer;
-	}
 }

@@ -20,7 +20,7 @@ public class StaticWorldBuilder extends World {
     private Spatial model;
 	
 	public StaticWorldBuilder(StaticWorld world) {
-		super("staticworld" + world.name);
+		super("staticworld-" + world.name);
 		this.world = world;
 	}
 	
@@ -60,11 +60,6 @@ public class StaticWorldBuilder extends World {
 	}
 
 	@Override
-	public void update(float tpf) {
-		//doesn't ever need to update
-	}
-
-	@Override
 	public void cleanup(Application app) {
 		PhysicsSpace phys = getState(BulletAppState.class).getPhysicsSpace();
 
@@ -77,7 +72,7 @@ public class StaticWorldBuilder extends World {
 		super.cleanup(app);
 	}
 	
-	//because this doesn't have an empty constructor, we define it manually
+	// this doesn't have an empty constructor so we define it manually
 	public World copy() {
 		return new StaticWorldBuilder(world);
 	}

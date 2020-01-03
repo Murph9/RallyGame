@@ -130,7 +130,8 @@ public class ChooseMap extends BaseAppState {
 	private World getWorld() {
 		World newWorld = null;
 		try {
-			newWorld = world.copy();
+            Class<? extends World> clazz = world.getClass();
+            newWorld = clazz.newInstance();
 			getStateManager().detach(world);
 		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();

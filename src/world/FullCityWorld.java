@@ -19,12 +19,11 @@ public class FullCityWorld extends World {
 			GRID_SIZE = 40,
 			SPAWN_RANGE = 40,
 			TILE_SIZE = 10;
-	private CityPiece[][] grid;
+	private final CityPiece[][] grid;
 	
 	public FullCityWorld() {
 		super("full city world rootNode");
-		
-		grid = new CityPiece[40][40];
+		this.grid = new CityPiece[40][40];
 	}
 	
 	@Override
