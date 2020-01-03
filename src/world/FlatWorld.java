@@ -9,10 +9,13 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 
+import car.CarBuilder;
+import car.ray.RayCarControl;
 import effects.LoadModelWrapper;
 
 public class FlatWorld extends World {
-	
+    
+    private static final float RESET_DISTANCE = 1000;
 	private Spatial startGeometry;
 	
 	public FlatWorld() {
@@ -45,13 +48,21 @@ public class FlatWorld extends World {
 
 	@Override
 	public void update(float tpf) {
-		//Ideally we would mod 1000 the car position so the grounds bumps don't occur
-		//but doing so would require the car, and we just don't have the power for that here
-		
-		Vector3f pos = getApplication().getCamera().getLocation();
-		pos.y = 0;
-		startGeometry.setLocalTranslation(pos);
-		startGeometry.getControl(RigidBodyControl.class).setPhysicsLocation(pos);
+        RayCarControl car = getState(CarBuilder.class).get(0);
+        if (car != null) {
+            Vector3f pos = car.getPhysicsLocation();
+
+            // We reset the cars position so the large floating point errors don't occur
+            if (pos.length() > RESET_DISTANCE) {
+                pos.x = 0;
+                pos.z = 0;
+                car.setPhysicsLocation(pos);
+            }
+
+            pos.y = 0;
+            startGeometry.setLocalTranslation(pos.clone());
+            startGeometry.getControl(RigidBodyControl.class).setPhysicsLocation(pos.clone());
+        }
 	}
 	
 	@Override
