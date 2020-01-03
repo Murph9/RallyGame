@@ -81,9 +81,7 @@ public class CarBuilder extends BaseAppState {
 		return data;
 	}
 
-	/**Creates the vehicle and loads it into the world. 
-	 * TODO: Please use the CarDataConst version
-	*/
+	/** Creates the vehicle and loads it into the world. */
 	public RayCarControl addCar(Car car, Vector3f start, Matrix3f rot, boolean aPlayer) {
 		return addCar(loadData(car), start, rot, aPlayer);
 	}
@@ -178,6 +176,7 @@ public class CarBuilder extends BaseAppState {
 	}
 
 	public RayCarControl get(int a) {
+        if (cars.size() <= a) return null;
 		return cars.get(a);
 	}
 	public Collection<RayCarControl> getAll() {
