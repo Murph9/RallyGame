@@ -48,4 +48,10 @@ public abstract class World extends BaseAppState implements IWorld, IWorldPath {
 	public Vector3f getNextPieceClosestTo(Vector3f pos) {
 		return null;
 	}
+
+	// Create another of myself, to use somewhere else
+	public World copy() throws InstantiationException, IllegalAccessException {
+		Class<? extends World> clazz = this.getClass();
+		return clazz.newInstance();
+	}
 }
