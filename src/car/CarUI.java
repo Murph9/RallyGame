@@ -14,13 +14,16 @@ import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
+import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial.CullHint;
-import com.jme3.scene.shape.Line;
+import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.scene.shape.Quad;
 import com.jme3.system.AppSettings;
+import com.jme3.util.BufferUtils;
 
 import car.ray.RayCarControl;
 import car.ray.ICarPowered;
@@ -29,40 +32,47 @@ import helper.H;
 public class CarUI extends BaseAppState {
 
 	//TODO scale it with monitor size (forza doesn't deal with this)
-	
+    
+    private static final Vector2f[] TEX_COORD = new Vector2f[] { 
+        new Vector2f(0, 0), new Vector2f(1, 0),
+        new Vector2f(0, 1), new Vector2f(1, 1)
+    };
+    private static final int[] INDEXES = { 2, 0, 1, 1, 3, 2 };
+
 	private final RayCarControl p;
 	private Node rootNode;
 	
 	//hud stuff
-	Geometry background;
-	BitmapText angle;
+	private Geometry background;
+	private BitmapText angle;
 	
 	//rpm
-	Geometry rpmQuad;
-	Material rpmMat;
+	private Geometry rpmQuad;
+	private Material rpmMat;
 
 	//other meters
-	Geometry nitro, nitroOff; //quads that display nitro
-	Geometry throttle, throttleOff; //quads that display throttle 
-	Geometry brake, brakeOff; //quads that display braking
-	Geometry steer, steerOff; //quads that display turn value
+	private Geometry nitro, nitroOff; //quads that display nitro
+	private Geometry throttle, throttleOff; //quads that display throttle 
+	private Geometry brake, brakeOff; //quads that display braking
+	private Geometry steer, steerOff; //quads that display turn value
 	
 	//texture
-	static final String numDir = "assets/number/"; //texture location
-	Material[] numMats = new Material[10]; //texture set
+	private static final String numDir = "assets/number/"; //texture location
+    private Material[] numMats = new Material[11]; //texture set
+    private Material numMatBlank;
 	
-	Geometry[] speedo = new Geometry[3]; //speed squares
-	Geometry gear = new Geometry(); //gear label
+	private Geometry[] speedo = new Geometry[5]; //speed squares
+	private Geometry gear = new Geometry(); //gear label
 	
 	//speedo numbers
-	float startAng = FastMath.PI*5/4;
-	int startRPM = 0; //because sometimes it might not be
+	private static final float startAng = FastMath.PI*5/4;
 
-	float finalAng = 0;
-	int finalRPM; //should be more than redline
-	float redline;
+	private float finalAng = 0;
+	private int finalRPM; //should be more than redline
+	private float redline;
 	
-	private int centerx, centery = 86, radius = 100;
+    private int centerx;
+    private int centery = 86, radius = 100;
 	
 
 	/////telemetry
@@ -107,8 +117,13 @@ public class CarUI extends BaseAppState {
 			numMats[i] = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
 			numMats[i].setTexture("ColorMap", am.loadTexture(numDir + i + ".png"));
 			numMats[i].getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
-		}
-		
+        }
+        //a blank one
+        numMatBlank = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+        numMatBlank.setTexture("ColorMap", am.loadTexture(numDir + "blank.png"));
+        numMatBlank.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
+        
+        
 		makeSpeedo(am, settings);
 
 		/////////////
@@ -163,24 +178,36 @@ public class CarUI extends BaseAppState {
 		Quad quad = new Quad(20, 20);
 		
 		centerx = settings.getWidth() - 127;
-		
-		for (int i = 0; i < finalRPM+1; i += 1000) {
+        
+        final int increment = 100;
+		for (int i = 0; i < finalRPM+1; i += increment) {
 			float angle = FastMath.interpolateLinear(i/(float)finalRPM, startAng, finalAng);
 			
-			if (i >= redline) { //TODO actually show red..
-				//Log.p(new Vector3f(FastMath.cos(angle)*radius, FastMath.sin(angle)*radius, 1));
-				Line l = new Line(new Vector3f(FastMath.cos(angle)*radius, FastMath.sin(angle)*radius, 1)
-						, new Vector3f(FastMath.cos(angle)*radius*0.9f, FastMath.sin(angle)*radius*0.9f, -1));
-				Geometry redLine = new Geometry("redline", l);
-				Material mat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-				mat.setColor("Color", new ColorRGBA(ColorRGBA.Red));
-				mat.getAdditionalRenderState().setLineWidth(4);
-				redLine.setMaterial(mat);
-	            redLine.setLocalTranslation(centerx, centery, -1);//behind other things
-				speedoNode.attachChild(redLine);
-			}
-			Node g = addRPMNumber(angle, (int)i/1000, quad, centerx-10, centery-10);
-			speedoNode.attachChild(g);
+			if (i >= redline) {
+                float angle2 = FastMath.interpolateLinear((i + increment) / (float) finalRPM, startAng, finalAng);
+                Mesh mq = new Mesh();
+                Vector3f[] corners = new Vector3f[] {
+                        new Vector3f(FastMath.cos(angle) * radius, FastMath.sin(angle) * radius, 0),
+                        new Vector3f(FastMath.cos(angle) * radius * 0.89f, FastMath.sin(angle) * radius * 0.89f, 0),
+                        new Vector3f(FastMath.cos(angle2) * radius, FastMath.sin(angle2) * radius, 0),
+                        new Vector3f(FastMath.cos(angle2) * radius * 0.89f, FastMath.sin(angle2) * radius * 0.89f, 0),
+                    };
+                mq.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(corners));
+                mq.setBuffer(Type.TexCoord, 2, BufferUtils.createFloatBuffer(TEX_COORD));
+                mq.setBuffer(Type.Index, 3, BufferUtils.createIntBuffer(INDEXES));
+                mq.updateBound();
+                Material mat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+                mat.setColor("Color", new ColorRGBA(ColorRGBA.Red));
+                Geometry redLine2 = new Geometry("redline2", mq);
+                redLine2.setMaterial(mat);
+                redLine2.setLocalTranslation(centerx, centery, 0);
+                speedoNode.attachChild(redLine2);
+            } 
+            
+            if (i % 1000 == 0) {
+                Node g = addRPMNumber(angle, (int)i/1000, quad, centerx-10, centery-10);
+                speedoNode.attachChild(g);
+            }
 		}
 		
 		
@@ -254,22 +281,14 @@ public class CarUI extends BaseAppState {
 		//speed scores
 		Quad quad = new Quad(30,50);
 		int width = settings.getWidth()-70;
-		
-		speedo[0] = new Geometry("ones", quad);
-		speedo[0].setLocalTranslation(width, 8, -1);
-		speedo[0].setMaterial(numMats[0]);
-		rootNode.attachChild(speedo[0]);
-		
-		speedo[1] = new Geometry("tens", quad);
-		speedo[1].setLocalTranslation(width-32, 8, -1);
-		speedo[1].setMaterial(numMats[0]);
-		rootNode.attachChild(speedo[1]);
-		
-		speedo[2] = new Geometry("hundereds", quad);
-		speedo[2].setLocalTranslation(width-64, 8, -1);
-		speedo[2].setMaterial(numMats[0]);
-		rootNode.attachChild(speedo[2]);
-		
+        
+        for (int i = 0; i < speedo.length; i++) {
+            speedo[i] = new Geometry("speedo:"+FastMath.pow(10, i), quad);
+            speedo[i].setLocalTranslation(width - (32 * i), 8, -1);
+            speedo[i].setMaterial(numMats[0]);
+            rootNode.attachChild(speedo[i]);
+        }
+
 		quad = new Quad(35,55);
 		gear = new Geometry("gear", quad);
 		gear.setLocalTranslation(width-50, 68, -1);
@@ -307,7 +326,7 @@ public class CarUI extends BaseAppState {
 		telemetry.setEnabled(showTelemetry);
 	}
 	
-	//main update method
+	@Override
 	public void update(float tpf) {
 		ICarPowered powerState = p.getPoweredState();
 		
@@ -327,19 +346,19 @@ public class CarUI extends BaseAppState {
 	}
 
 	private void setSpeedDigits(int speedKMH) {
-		int count = 0;
-		while (count < 3) {
-			speedo[count].setMaterial(numMats[0]);
-			count++;
-		}
-		
-		count = 0;
-		speedKMH %= 1000; //not more than 999
-		while (speedKMH > 0) {
-			speedo[count].setMaterial(numMats[speedKMH % 10]);
-			speedKMH /= 10;
-			count++;
-		}
+        for (int i = 0; i < speedo.length; i++) {
+            speedo[i].setMaterial(numMats[0]);
+            if (i > 2) {
+                speedo[i].setMaterial(numMatBlank);
+            }
+        }
+        
+        for (int i = 0; i < speedo.length; i++) {
+            speedo[i].setMaterial(numMats[speedKMH % 10]);
+            speedKMH /= 10;
+            if (speedKMH < 1)
+                break;
+        }
 	}
 	
 	private void setGearDigit(int gearIn) {
