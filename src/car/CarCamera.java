@@ -23,7 +23,10 @@ import com.jme3.scene.Geometry;
 
 import car.data.CarDataConst;
 import car.ray.RayCarControl;
+import helper.AverageV3f;
 import helper.H;
+import helper.IAverager;
+import helper.IAverager.Type;
 
 public class CarCamera extends BaseAppState implements RawInputListener {
 
@@ -31,7 +34,8 @@ public class CarCamera extends BaseAppState implements RawInputListener {
 	private static final float CAM_TIMEOUT = 3;
 
 	private final Camera c;
-	private final RayCarControl p;
+    private final RayCarControl p;
+    private final IAverager<Vector3f> gAverage;
 	private Vector3f lastPos;
 	
 	private float tpf;
@@ -45,6 +49,7 @@ public class CarCamera extends BaseAppState implements RawInputListener {
 		super();
         this.c = c;
         this.p = p;
+        this.gAverage = new AverageV3f(25, Type.Simple);
 	}
 
 	@Override
@@ -65,10 +70,8 @@ public class CarCamera extends BaseAppState implements RawInputListener {
 		
 	@Override
 	public void render(RenderManager rm) {
-		//TODO: react to g forces
-		
 		Vector3f carPos = p.getRootNode().getLocalTranslation();
-		Quaternion pRot = p.getRootNode().getLocalRotation();
+		Quaternion carRot = p.getRootNode().getLocalRotation();
 			
 		if (!FastMath.approximateEquals(rotRad, 0)) {
 			lastTimeout += tpf;
@@ -89,10 +92,10 @@ public class CarCamera extends BaseAppState implements RawInputListener {
 			Vector3f vec = new Vector3f();
 			float smoothing = tpf*10;
 			if (p.vel.length() > 4f)
-				vec.interpolateLocal(pRot.mult(Vector3f.UNIT_Z).normalize(), p.vel.normalize(), 0.5f);
+				vec.interpolateLocal(carRot.mult(Vector3f.UNIT_Z).normalize(), p.vel.normalize(), 0.5f);
 			else {
 				//at slow speeds use just the rotation
-				vec = pRot.mult(Vector3f.UNIT_Z).normalize();
+				vec = carRot.mult(Vector3f.UNIT_Z).normalize();
 				//reduce interpolation to much slower
 				smoothing /= 3;
 			}
@@ -139,22 +142,31 @@ public class CarCamera extends BaseAppState implements RawInputListener {
 		else
 			lastShake = new Vector3f();
 		
-		lookAt.addLocal(lastShake);
+        lookAt.addLocal(lastShake);
+        
+        //and g force reactions by moving it up/down, left or right
+        Vector3f gs = p.planarGForce.mult(1 / p.getPhysicsObject().getGravity().length());
+        gs.y = gs.z; // z is front back, convert to up/down
+        gs.z = 0;
+        gs.multLocal(tpf);
+        gs = gAverage.get(gs);
+        // lookAt.addLocal(gs); //TODO: react to g forces better (its really jumpy)
 		
 		c.lookAt(lookAt, new Vector3f(0, 1, 0));
 	}
-	
-	
+    
+    public void onMouseMotionEvent(MouseMotionEvent arg0) {
+        if (isEnabled()) {
+            lastTimeout = 0;
+            rotRad += arg0.getDX();
+        }
+    }
+
+	//#region unused methods
 	public void beginInput() {}
 	public void endInput() {}
 	
 	public void onMouseButtonEvent(MouseButtonEvent arg0) {}
-	public void onMouseMotionEvent(MouseMotionEvent arg0) {
-		if (isEnabled()) {
-			lastTimeout = 0;
-			rotRad += arg0.getDX();
-		}
-	}
 	public void onKeyEvent(KeyInputEvent arg0) {}
 	public void onTouchEvent(TouchEvent arg0) {}
 	public void onJoyAxisEvent(JoyAxisEvent arg0) {}
@@ -169,5 +181,6 @@ public class CarCamera extends BaseAppState implements RawInputListener {
 	}
 	@Override
 	protected void cleanup(Application app) {
-	}
+    }
+    //#endregion
 }
