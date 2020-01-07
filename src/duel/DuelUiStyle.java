@@ -67,6 +67,17 @@ public class DuelUiStyle {
         attrs.set("background", double_gradient.clone());
         attrs.set("insets", INSETS_BASE);
 
+        // title alt
+        attrs = styles.getSelector("titleAlt", STYLE_NAME);
+        attrs.set("fontSize", 32);
+        attrs.set("color", color_3);
+        attrs.set("highlightColor", color_1);
+        attrs.set("textHAlignment", HAlignment.Center);
+        attrs.set("shadowColor", altBackground);
+        attrs.set("shadowOffset", new Vector3f(1, -1, -1));
+        attrs.set("background", double_gradient.clone());
+        attrs.set("insets", INSETS_BASE);
+
         // button
         attrs = styles.getSelector("button", STYLE_NAME);
         attrs.set("color", color_1);

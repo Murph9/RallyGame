@@ -130,8 +130,13 @@ public class DuelRaceMenu extends BaseAppState {
         endWindow = new Container();
         ((SimpleApplication) getApplication()).getGuiNode().attachChild(endWindow);
 
-        Label l = endWindow.addChild(new Label(playerWon ? "Winner" : "Loser", new ElementId("title")));
-        l.setTextHAlignment(HAlignment.Center);
+        if (playerWon) {
+            Label l = endWindow.addChild(new Label("Winner", new ElementId("title")));
+            l.setTextHAlignment(HAlignment.Center);
+        } else {
+            Label l = endWindow.addChild(new Label("Loser", new ElementId("titleAlt")));
+            l.setTextHAlignment(HAlignment.Center);
+        }
 
         Button b = endWindow.addChild(new Button("Close"));
         b.setTextHAlignment(HAlignment.Center);
@@ -145,7 +150,7 @@ public class DuelRaceMenu extends BaseAppState {
     }
 
 	public void setState(float raceTimer) {
-        if (currentTime != null) //this is initialised one frame after the race object
+        if (currentTime != null) //if statement required because this is initialised one frame after the race object
             currentTime.setText(H.roundDecimal(raceTimer, 2) + "sec");
 	}
 }
