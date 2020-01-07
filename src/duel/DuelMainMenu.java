@@ -27,7 +27,6 @@ import car.data.Car;
 import car.data.CarDataConst;
 import car.ray.RayCarControl;
 import helper.Screen;
-import service.LoadingScreen;
 import world.wp.DefaultBuilder;
 import world.wp.WP.DynamicType;
 
@@ -64,8 +63,6 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
     @SuppressWarnings("unchecked") // button checked vargs
     private void initMenu(SimpleApplication app) {
         
-        getState(LoadingScreen.class).setEnabled(true);
-
         mainWindow = new Container();
         mainWindow.setBackground(DuelUiStyle.getBorderedNoBackground());
 

@@ -4,7 +4,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jme3.app.SimpleApplication;
-import com.jme3.app.StatsAppState;
 import com.jme3.audio.AudioListenerState;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.BulletAppState.ThreadingType;
@@ -12,10 +11,11 @@ import com.jme3.math.Vector3f;
 import com.simsilica.lemur.GuiGlobals;
 
 import car.CarBuilder;
+import car.data.CarDataLoader;
 import effects.FilterManager;
 import effects.ParticleAtmosphere;
 import game.DebugAppState;
-import helper.Log;
+import service.ConstantChecker;
 
 public class DuelApp extends SimpleApplication {
 
@@ -26,23 +26,24 @@ public class DuelApp extends SimpleApplication {
     }
 
     public static final Vector3f GRAVITY = new Vector3f(0, -9.81f, 0); // yay its down
-    public static final String PROJECT_VERSION = "v0.1.0";
+    public static final String PROJECT_VERSION = "v0.1.1";
 
     private DuelFlow flow;
 
     public DuelApp() {
         super(new ParticleAtmosphere()
                 , new AudioListenerState()
-                , new StatsAppState()
                 , new FilterManager()
-                , new CarBuilder(0.4f)
+                , new CarBuilder(0.4f, new CarDataLoader())
                 , new DebugAppState()
+                , new ConstantChecker()
         );
     }
 
     @Override
     public void simpleInitApp() {
-        Logger.getLogger("com.jme3.scene.plugins.blender").setLevel(Level.WARNING); // ignore blender warnings
+        Logger.getLogger("com.jme3.scene.plugins.blender").setLevel(Level.SEVERE); // ignore blender warnings
+        Logger.getLogger("com.jme3.scene.plugins.OBJLoader").setLevel(Level.SEVERE);
 
         inputManager.setCursorVisible(true);
         inputManager.deleteMapping(INPUT_MAPPING_EXIT); // no esc close pls
@@ -73,12 +74,6 @@ public class DuelApp extends SimpleApplication {
     @Override
     public void update() {
         super.update();
-
-        //prevent any really dumb stuff with Vector3f
-        if (Vector3f.ZERO.length() != 0) {
-            Log.e("Vector3f.ZERO is not zero!!!!, considered a fatal error.");
-            System.exit(342);
-        }
     }
 
     @Override

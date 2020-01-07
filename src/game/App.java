@@ -17,9 +17,11 @@ import com.jme3.system.AppSettings;
 import com.simsilica.lemur.GuiGlobals;
 
 import car.CarBuilder;
+import car.data.CarDataLoader;
 import effects.FilterManager;
 import effects.ParticleAtmosphere;
 import helper.Log;
+import service.ConstantChecker;
 
 
 public class App extends SimpleApplication {
@@ -33,10 +35,11 @@ public class App extends SimpleApplication {
 				, new AudioListenerState()
 				, new StatsAppState()
 				, new FilterManager()
-				, new CarBuilder(0.4f)
+                , new CarBuilder(0.4f, new CarDataLoader())
+                , new ConstantChecker()
 				, new DebugAppState()
 				//, new DetailedProfilerState() //profiles in jme 3.2: TODO add physics engine stuff using custom sections
-				);
+            );
 	}
 
 	@Override
@@ -70,11 +73,6 @@ public class App extends SimpleApplication {
 	@Override
 	public void update() {
 		super.update();
-		
-		if (Vector3f.ZERO.length() != 0) {
-			Log.e("Vector3f.ZERO is not zero!!!!, considered a fatal error.");
-			System.exit(342);
-		}
 	}
 
 	/////////////////////

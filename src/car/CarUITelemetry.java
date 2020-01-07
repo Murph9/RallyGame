@@ -186,8 +186,8 @@ public class CarUITelemetry extends BaseAppState {
 			RayWheel wheel = p.getWheel(i).getRayWheel();
 			
 			Material m = new Material(getApplication().getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-			w.gripValue.setText(String.format("%.2f", wheel.skidFraction));
-			w.wheelRot.setText(String.format("%.2f", wheel.radSec));
+			w.gripValue.setText(String.format("%.2f slip", wheel.skidFraction));
+			w.wheelRot.setText(String.format("%.2f rad/s", wheel.radSec));
 			w.engineTorque.setText(Force_Format.format(Math.abs(p.getWheelTorque(i))));
 			m.setColor("Color", getGripBoxColour(wheel.skidFraction));
 			w.gripBox.setMaterial(m);

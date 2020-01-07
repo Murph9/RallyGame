@@ -1,42 +1,28 @@
 package drive;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map.Entry;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
-import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
-import com.jme3.bullet.PhysicsSpace;
-import com.jme3.bullet.collision.shapes.CollisionShape;
-import com.jme3.bullet.control.RigidBodyControl;
-import com.jme3.bullet.objects.PhysicsRigidBody;
-import com.jme3.bullet.util.CollisionShapeFactory;
-import com.jme3.material.Material;
-import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
 
 import car.CarBuilder;
 import car.CarCamera;
 import car.CarUI;
-import car.ai.CarAI;
 import car.ai.RaceAI;
 import car.data.Car;
 import car.ray.RayCarControl;
-import effects.LoadModelWrapper;
 import helper.H;
 import helper.Log;
+import world.World;
 
 public class DriveRace extends BaseAppState {
 
@@ -46,67 +32,51 @@ public class DriveRace extends BaseAppState {
 	public RaceMenu menu;
 	
 	//things that should be in a world class
-	private static List<RigidBodyControl> landscapes = new ArrayList<RigidBodyControl>(5);
-    private static List<Spatial> models = new ArrayList<Spatial>(5); //at least 5
-	private Vector3f worldStart;
-	private Matrix3f worldRot = new Matrix3f();
 	private Node rootNode = new Node("root");
 	
-	//car stuff
-	public CarBuilder cb;
-	protected Car car;
+    private final Car car;
+    private final World world;
+    
+    // ai things
+    private final int themCount = 4;
+    private final Car themType = Car.Runner;
+
+    public CarBuilder cb;
 
 	//gui and camera stuff
 	private CarCamera camera;
 	private CarUI uiNode;
 	
-	//ai things
-	private int themCount = 4;
-	private Car themType = Car.Runner;
 	
-	//race start things
-	private Vector3f[] worldStarts;
-	private RayCarControl[] cars; 
-	private Integer[] carCheckpointNext;
-	
+	//racing things
+    private Vector3f[] worldStarts;
+    private HashMap<RayCarControl, RacerState> racers;
+
 	private Vector3f[] checkpoints;
-	
-	//hacky things
-	float globalScaleX = 1;
-	float globalScaleY = 0.25f;
-	float globalScaleZ = 1;
 	
 	//debug things
 	Node debugNode;
-	Geometry[] carArrows;
 	
-	public DriveRace() {
+	public DriveRace(World world) {
 		super();
-		this.car = Car.Runner;
+        this.car = Car.Runner;
+        this.world = world;
 	}
 	
 	@Override
     public void initialize(Application app) {
-    	nextState();
-		
-		PhysicsSpace space = getState(BulletAppState.class).getPhysicsSpace();
+        nextState();
+        this.checkpoints = world.getPath();
 
-    	Collection<PhysicsRigidBody> list = space.getRigidBodyList();
-    	if (list.size() > 0) {
-    		Log.p("some one didn't clean up after themselves..." + list.size());
-    		for (PhysicsRigidBody r: list)
-				space.remove(r);
-    	}
-    	
 		((SimpleApplication)app).getRootNode().attachChild(rootNode);
-		addTrack(true);
-    	
-		worldStart = checkpoints[checkpoints.length - 1];
-		Quaternion q = new Quaternion();
-		q.lookAt(checkpoints[0].subtract(checkpoints[checkpoints.length - 1]), Vector3f.UNIT_Y); 
-		worldRot = q.toRotationMatrix();
-		
-    	//TODO put this in the 3d world model
+        getStateManager().attach(world);
+        
+        Vector3f worldStart = checkpoints[checkpoints.length - 1];
+        Quaternion q = new Quaternion();
+        q.lookAt(checkpoints[0].subtract(checkpoints[checkpoints.length - 1]), Vector3f.UNIT_Y);
+        Matrix3f worldRot = q.toRotationMatrix();
+
+    	//TODO put this in the world class
 		this.worldStarts = new Vector3f[themCount+1];
 		for (int i = 0; i < worldStarts.length; i++) {
 			this.worldStarts[i] = worldStart.add(worldRot.mult(new Vector3f(3,0,0).mult(i % 2 == 0 ? (i+1)/2 : -((i+1)/2))));
@@ -134,13 +104,11 @@ public class DriveRace extends BaseAppState {
 		app.getInputManager().addRawInputListener(camera);
 		
 		getState(BulletAppState.class).setEnabled(true);
-		
-		Object[] a = cb.getAll().toArray();
-		cars = Arrays.copyOf(a, a.length, RayCarControl[].class);
-		carCheckpointNext = new Integer[cars.length];
-		Arrays.fill(carCheckpointNext, 0);
-		
-		carArrows = new Geometry[cars.length];
+        
+        racers = new HashMap<>();
+        for (RayCarControl car: cb.getAll()) {
+            racers.put(car, new RacerState());
+        }
 		
 		nextState();
 	}
@@ -191,7 +159,7 @@ public class DriveRace extends BaseAppState {
 
 		menu.setText("State:"+state.name()
 		+"\nStateTimeout:" + this.stateTimeout
-		+"\nCheckpoints:" + H.str(carCheckpointNext, ","));
+		+"\nCheckpoints:" + H.str(racers.values().stream().map(c -> c.nextCheckpoint).toArray(), ","));
 		
 		if (stateChanged) {
 			stateChanged = false;
@@ -212,7 +180,16 @@ public class DriveRace extends BaseAppState {
 			resetAllCars();
 			break;
 		case Racing:
-			normalUpdate(tpf);
+            // get every car's pos, and check if its close to its current checkpoint
+            if(checkpoints == null || checkpoints.length > 1)
+                break;
+            for (Entry<RayCarControl, RacerState> entry: racers.entrySet()) {
+                Vector3f nextCheckPoint = checkpoints[entry.getValue().nextCheckpoint];
+                if (nextCheckPoint.distance(entry.getKey().getPhysicsLocation()) < 3) {
+                    entry.getValue().nextCheckpoint++;
+                    entry.getValue().nextCheckpoint = entry.getValue().nextCheckpoint % checkpoints.length;
+                }
+            }
 			break;
 		case Win:
 			//delay and stuff maybe
@@ -234,61 +211,35 @@ public class DriveRace extends BaseAppState {
 			}
 		}
 		
-		
 		//update the checkpoint arrows
 		if (debugNode != null)
 			rootNode.detachChild(debugNode);
-		debugNode = new Node("debugnode");
-		for (int i = 0; i < cars.length; i++) {
-			Vector3f pos = cars[i].getPhysicsLocation().add(0,3,0);
-			Vector3f dir = checkpoints[carCheckpointNext[i]].subtract(pos);
-			carArrows[i] = H.makeShapeArrow(((SimpleApplication)getApplication()).getAssetManager(), ColorRGBA.Cyan, dir, pos);
-			debugNode.attachChild(carArrows[i]);
-		}
-		rootNode.attachChild(debugNode);
+        debugNode = new Node("debugnode");
+        for (Entry<RayCarControl, RacerState> entry: racers.entrySet()) {
+            Vector3f pos = entry.getKey().getPhysicsLocation().add(0, 3, 0);
+            Vector3f dir = checkpoints[entry.getValue().nextCheckpoint].subtract(pos);
+            entry.getValue().arrow = H.makeShapeArrow(((SimpleApplication) getApplication()).getAssetManager(), ColorRGBA.Cyan, dir, pos);
+            debugNode.attachChild(entry.getValue().arrow);
+        }
+        rootNode.attachChild(debugNode);
 	}
 	
 	private void resetAllCars() {
-		for (int i = 0; i < cars.length; i++) {
-			resetSingleCar(i);
-		}
+        for (RayCarControl car: racers.keySet()) {
+            RacerState state = racers.get(car);
+            int checkpointIndex = state.nextCheckpoint - 1;
+            if (checkpointIndex < 0)
+                checkpointIndex = checkpoints.length - 1;
+            car.setPhysicsLocation(checkpoints[checkpointIndex].add(3,0,0));
+            car.setPhysicsRotation(world.getStartRot());
+            car.setAngularVelocity(new Vector3f());
+            car.setLinearVelocity(new Vector3f());
+        }
 	}
-	private void resetSingleCar(int i) {
-		int checkpointIndex = carCheckpointNext[i] - 1;
-		if (checkpointIndex < 0)
-			checkpointIndex = checkpoints.length - 1;
-		Vector3f newPos = checkpoints[checkpointIndex];
-		
-		cars[i].setPhysicsLocation(newPos.add(3,0,0));
-		cars[i].setPhysicsRotation(worldRot);
-		cars[i].setAngularVelocity(new Vector3f());
-		cars[i].setLinearVelocity(new Vector3f());
-	}
-	
-	private void normalUpdate(float tpf) {
-		//get every car's pos, and check if its close to its current checkpoint
-		for (int i = 0; i < cars.length; i++) {
-			Vector3f nextCheckPoint = checkpoints[carCheckpointNext[i]];
-			if (nextCheckPoint.distance(cars[i].getPhysicsLocation()) < 3) {
-				carCheckpointNext[i]++;
-				carCheckpointNext[i] = carCheckpointNext[i] % checkpoints.length;
-			}
-		}
-	}
-	
+    
+    @Override
 	public void cleanup(Application app) {
 		Log.p("cleaning driverace class");
-		
-		PhysicsSpace space = getState(BulletAppState.class).getPhysicsSpace();
-
-		for (RigidBodyControl r: landscapes) {
-			space.remove(r);
-		}
-		landscapes.clear();
-		for (Spatial s: models) {
-			rootNode.detachChild(s);
-		}
-		models.clear();
 		
 		getStateManager().detach(menu);
 		menu = null;
@@ -320,66 +271,14 @@ public class DriveRace extends BaseAppState {
 		this.cb.setEnabled(false);
 	}
 	
-	//making the world exist
-	private void addTrack(boolean ifShadow) {
-		AssetManager as = getApplication().getAssetManager();
-		List<Vector3f> _checkpoints = new LinkedList<Vector3f>();
-		
-		Material mat = new Material(as, "Common/MatDefs/Misc/ShowNormals.j3md");
-		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
-		
-	    //imported model
-		Spatial worldNode = LoadModelWrapper.create(as, "assets/staticworld/lakelooproad.blend", null);
-		if (worldNode instanceof Node) {
-			Spatial s = ((Node) worldNode).getChild(0);
-			addWorldModel(rootNode, getState(BulletAppState.class).getPhysicsSpace(), s, ifShadow);
-			for (Spatial points: ((Node)s).getChildren()) {
-				if (points.getName().equals("Points")) {
-					for (Spatial checkpoint: ((Node)points).getChildren()) {
-						_checkpoints.add(checkpoint.getLocalTranslation());
-					}
-				}
-			}
-		} else {
-			Geometry worldModel = (Geometry) worldNode;
-			addWorldModel(rootNode, getState(BulletAppState.class).getPhysicsSpace(), worldModel, ifShadow);
-		}
-		
-		checkpoints = _checkpoints.toArray(new Vector3f[_checkpoints.size()-1]);
-		for (Vector3f checkpoint: checkpoints) {
-			checkpoint.multLocal(globalScaleX, globalScaleY, globalScaleZ);
-			rootNode.attachChild(H.makeShapeBox(as, ColorRGBA.Brown, checkpoint, 1));
-		}
+	public Vector3f getNextCheckpoint(RayCarControl car, Vector3f pos) {
+        if (checkpoints.length < 1)
+            return null;
+		return checkpoints[racers.get(car).nextCheckpoint];
 	}
-
-	private void addWorldModel(Node node, PhysicsSpace phys, Spatial s, boolean ifShadow) {
-		s.scale(globalScaleX, globalScaleY, globalScaleZ); //world.scale
-		
-		CollisionShape col = CollisionShapeFactory.createMeshShape(s);
-		RigidBodyControl landscape = new RigidBodyControl(col, 0);
-		s.addControl(landscape);
-		if (ifShadow) {
-			s.setShadowMode(ShadowMode.Receive);
-		}
-
-		landscapes.add(landscape);
-		models.add(s);
-		
-		phys.add(landscape);
-		node.attachChild(s);
-	}
-	
-	
-	public void ResetMe(CarAI ai) {
-		resetSingleCar(getCarIndexFromAI(ai));
-	}
-	public Vector3f getNextCheckpoint(CarAI ai, Vector3f pos) {
-		return checkpoints[carCheckpointNext[getCarIndexFromAI(ai)]];
-	} 
-	private int getCarIndexFromAI(CarAI ai) {
-		for (int i = 0; i < cars.length; i++)
-			if (cars[i].getAI() == ai)
-				return i;
-		return -1;
-	}
+    
+    class RacerState {
+        public int nextCheckpoint;
+        public Geometry arrow;
+    }
 }

@@ -7,6 +7,8 @@ import com.jme3.app.state.AppStateManager;
 import car.data.Car;
 import drive.*;
 import helper.Log;
+import world.StaticWorld;
+import world.StaticWorldBuilder;
 import world.World;
 import world.osm.OsmWorld;
 
@@ -59,8 +61,10 @@ public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
 			case Crash:
 				sm.attach(new DriveCrash((IDriveDone)this));
 				break;
-			case Race:
-				sm.attach(new DriveRace());
+            case Race:
+                World world = new StaticWorldBuilder(StaticWorld.lakelooproad);
+                sm.attach(world);
+				sm.attach(new DriveRace(world));
 				break;
 			case Drag:
 				sm.attach(new DriveDrag((IDriveDone)this));

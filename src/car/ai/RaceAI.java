@@ -17,7 +17,7 @@ public class RaceAI extends CarAI {
 	@Override
 	public void update(float tpf) {
 		Vector3f pos = car.getPhysicsLocation();
-		Vector3f atPos = race.getNextCheckpoint(this, pos);
+		Vector3f atPos = race.getNextCheckpoint(car, pos);
 		if (atPos == null) {
 			justBrake();
 			return;

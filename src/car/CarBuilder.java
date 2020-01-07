@@ -37,10 +37,10 @@ public class CarBuilder extends BaseAppState {
     private final Node rootNode;
     private final float angularDampening;
 
-	public CarBuilder(float angularDampening) {
-		cars = new LinkedList<>();
-		rootNode = new Node("Car Builder Root");
-        loader = new CarDataLoader();
+	public CarBuilder(float angularDampening, CarDataLoader loader) {
+		this.cars = new LinkedList<>();
+		this.rootNode = new Node("Car Builder Root");
+        this.loader = loader;
         this.angularDampening = angularDampening;
 	}
 	
