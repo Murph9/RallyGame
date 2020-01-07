@@ -52,7 +52,7 @@ public class DuelRace extends BaseAppState {
 
     @Override
     protected void initialize(Application app) {
-        world = new StaticWorldBuilder(StaticWorld.dragstrip);
+        world = new StaticWorldBuilder(StaticWorld.dragstrip); //TODO use DuelWorld
         getStateManager().attach(world);
 
         this.cb = getState(CarBuilder.class);

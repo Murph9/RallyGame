@@ -1,6 +1,8 @@
 package drive;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map.Entry;
 
 import com.jme3.app.Application;
@@ -13,6 +15,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 
 import car.CarBuilder;
 import car.CarCamera;
@@ -22,6 +25,7 @@ import car.data.Car;
 import car.ray.RayCarControl;
 import helper.H;
 import helper.Log;
+import world.StaticWorldBuilder;
 import world.World;
 
 //TODO DriveRace can't be converted to DriveBase as the world must be initialised before this
@@ -65,11 +69,23 @@ public class DriveRace extends BaseAppState {
 	
 	@Override
     public void initialize(Application app) {
-        nextState();
-        this.checkpoints = world.getPath();
+		nextState();
+		List<Vector3f> _checkpoints = new LinkedList<Vector3f>();
+		Spatial model = ((StaticWorldBuilder)world).getModelForDriveRace();
+		Spatial s = ((Node) model).getChild(0);
+		for (Spatial points : ((Node) s).getChildren()) {
+			if (points.getName().equals("Points")) {
+				for (Spatial checkpoint : ((Node) points).getChildren()) {
+					_checkpoints.add(checkpoint.getLocalTranslation());
+				}
+			}
+		}
+		if (!_checkpoints.isEmpty()) {
+			this.checkpoints = new Vector3f[_checkpoints.size()];
+			_checkpoints.toArray(this.checkpoints);
+		}
 
 		((SimpleApplication)app).getRootNode().attachChild(rootNode);
-        getStateManager().attach(world);
         
         Vector3f worldStart = checkpoints[checkpoints.length - 1];
         Quaternion q = new Quaternion();
