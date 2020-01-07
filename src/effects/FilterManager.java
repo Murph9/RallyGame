@@ -22,13 +22,14 @@ import com.jme3.post.filters.FogFilter;
 //Allows management of the visual filters because sometimes they are annoying
 public class FilterManager extends BaseAppState {
 
+    private FilterPostProcessor fpp;
     private Filter[] filters;
 
     public FilterManager() {}
     
     @Override
     protected void initialize(Application app) {
-        FilterPostProcessor fpp = new FilterPostProcessor(app.getAssetManager());
+        fpp = new FilterPostProcessor(app.getAssetManager());
 
         EdgeMaskFilter emf = new EdgeMaskFilter();
         fpp.addFilter(emf);
@@ -51,20 +52,18 @@ public class FilterManager extends BaseAppState {
     }
 
     @Override
-    protected void onEnable() {
-    }
+    protected void onEnable() {}
 
     @Override
-    protected void onDisable() {
-    }
+    protected void onDisable() {}
 
     @Override
     protected void cleanup(Application app) {
-        
+        app.getViewPort().removeProcessor(fpp);
     }
 
 
-    void onAction(Integer i, boolean value, float tpf) {
+    protected void onAction(Integer i, boolean value, float tpf) {
         if (!value)
             return;
         
@@ -96,19 +95,21 @@ public class FilterManager extends BaseAppState {
             layout.put(KeyInput.KEY_F12, 11);
         }
         
-        public void beginInput() {}
-        public void endInput() {}
-        
         public void onKeyEvent(KeyInputEvent arg0) {
             if (layout.containsKey(arg0.getKeyCode())) {
                 fm.onAction(layout.get(arg0.getKeyCode()), arg0.isPressed(), arg0.isPressed() ? 1 : 0);
             }
         }
         
+        //#region unused interface methods
+        public void beginInput() {}
+        public void endInput() {}
+        
         public void onMouseButtonEvent(MouseButtonEvent arg0) {}
         public void onMouseMotionEvent(MouseMotionEvent arg0) {}
         public void onTouchEvent(TouchEvent arg0) {}
         public void onJoyAxisEvent(JoyAxisEvent arg0) {}
         public void onJoyButtonEvent(JoyButtonEvent arg0) {}
+        //#endregion
     }
 }
