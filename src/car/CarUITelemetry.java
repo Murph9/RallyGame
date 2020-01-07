@@ -23,11 +23,11 @@ import com.jme3.scene.shape.Quad;
 import car.data.CarDataConst;
 import car.ray.RayCarControl;
 import car.ray.RayWheel;
-import helper.AverageV3f;
 import helper.Colours;
 import helper.H;
-import helper.IAverager;
-import helper.IAverager.Type;
+import service.averager.AverageV3f;
+import service.averager.IAverager;
+import service.averager.IAverager.Type;
 
 public class CarUITelemetry extends BaseAppState {
 

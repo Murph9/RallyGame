@@ -1,4 +1,4 @@
-package helper;
+package service.averager;
 
 public class AverageFloat extends AveragerBase<Float> {
 

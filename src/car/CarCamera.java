@@ -23,10 +23,10 @@ import com.jme3.scene.Geometry;
 
 import car.data.CarDataConst;
 import car.ray.RayCarControl;
-import helper.AverageV3f;
 import helper.H;
-import helper.IAverager;
-import helper.IAverager.Type;
+import service.averager.AverageV3f;
+import service.averager.IAverager;
+import service.averager.IAverager.Type;
 
 public class CarCamera extends BaseAppState implements RawInputListener {
 

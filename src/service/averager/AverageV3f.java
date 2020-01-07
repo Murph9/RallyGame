@@ -1,4 +1,4 @@
-package helper;
+package service.averager;
 
 import com.jme3.math.Vector3f;
 

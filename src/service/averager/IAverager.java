@@ -1,4 +1,4 @@
-package helper;
+package service.averager;
 
 public interface IAverager<T> {
     T get(T value);

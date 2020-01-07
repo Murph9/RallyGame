@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import helper.AverageFloat;
-import helper.AverageV3f;
-import helper.IAverager;
-import helper.IAverager.Type;
+import service.averager.AverageFloat;
+import service.averager.AverageV3f;
+import service.averager.IAverager;
+import service.averager.IAverager.Type;
 
 public class AveragerTest {
 

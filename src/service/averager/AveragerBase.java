@@ -1,4 +1,4 @@
-package helper;
+package service.averager;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
