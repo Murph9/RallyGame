@@ -31,6 +31,7 @@ public abstract class World extends BaseAppState implements IWorld, IWorldPath {
 	public Vector3f getStartPos() { return new Vector3f(); }
 	public Matrix3f getStartRot() { return new Matrix3f(Matrix3f.IDENTITY); }
     public Vector3f[] getPath() { return new Vector3f[0]; }
+    //TODO how do we handle dynamic world paths?
 
 	@Override
 	protected void cleanup(Application app) {
