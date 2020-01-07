@@ -4,8 +4,10 @@ import java.util.List;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
+import com.jme3.material.RenderState.BlendMode;
 import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
+import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -52,9 +54,14 @@ public class LoadModelWrapper {
         
         Material baseMat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
         baseMat.setColor("Color", color);
-        baseMat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
+        if (color.a < 1) {
+            //needs alpha stuff
+            baseMat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
+            g.setQueueBucket(Bucket.Transparent);
+        } else {
+            baseMat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
+        }
         g.setMaterial(baseMat);
-        
         return g;
     }
 }
