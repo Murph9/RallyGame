@@ -2,7 +2,6 @@ package drive;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
-import com.jme3.math.Vector3f;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
@@ -26,7 +25,7 @@ public class RaceMenu extends DriveMenu {
 		state = new Container();
 		raceLabel = new Label("Race state?");
 		state.attachChild(raceLabel);
-		state.setLocalTranslation(new Screen(app.getContext().getSettings()).topLeft().subtract(new Vector3f(0,300,0)));
+		state.setLocalTranslation(new Screen(app.getContext().getSettings()).topLeft().add(0, -50, 0));
 		((SimpleApplication)app).getGuiNode().attachChild(state);
 	}
 

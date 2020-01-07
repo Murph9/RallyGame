@@ -47,7 +47,7 @@ public class CarUITelemetry extends BaseAppState {
 	
 	//some debug text
 	private BitmapText statsText;
-		
+	
 	public CarUITelemetry(RayCarControl p) {
 		this.rootNode = new Node("telemetry");
 		this.p = p;
@@ -208,7 +208,6 @@ public class CarUITelemetry extends BaseAppState {
 		
 		//g forces
 		//needs to be translated from local into screen axis
-
 		Vector3f gs = p.planarGForce.mult(1/p.getPhysicsObject().getGravity().length());
 		gs.y = gs.z; //z is front back
 		gs.z = 0; //screen has no depth

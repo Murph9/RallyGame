@@ -24,10 +24,10 @@ import helper.H;
 import helper.Log;
 import world.World;
 
+//TODO DriveRace can't be converted to DriveBase as the world must be initialised before this
 public class DriveRace extends BaseAppState {
 
-	//TODO:
-	//- better AI, otherwise this actually sucks
+	//TODO better AI, otherwise this actually sucks
 	
 	public RaceMenu menu;
 	
@@ -181,7 +181,7 @@ public class DriveRace extends BaseAppState {
 			break;
 		case Racing:
             // get every car's pos, and check if its close to its current checkpoint
-            if(checkpoints == null || checkpoints.length > 1)
+            if (checkpoints == null || checkpoints.length < 1)
                 break;
             for (Entry<RayCarControl, RacerState> entry: racers.entrySet()) {
                 Vector3f nextCheckPoint = checkpoints[entry.getValue().nextCheckpoint];
