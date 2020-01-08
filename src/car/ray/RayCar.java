@@ -67,7 +67,7 @@ public class RayCar implements PhysicsTickListener {
 			wheels[i] = new RayWheel(i, carData.wheelData[i], carData.wheelOffset[i]);
 		}
 		this.wheelTorque = new float[4];
-		this.rbc = new RigidBodyControl(shape, carData.mass);
+        this.rbc = new RigidBodyControl(shape, carData.mass);
 	}
 
 	@Override

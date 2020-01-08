@@ -298,8 +298,11 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 		}
 		
 		DriveBase drive = this.app.getStateManager().getState(DriveBase.class);
-		if (drive == null)
-			return;
+		if (drive == null) {
+            Log.p("Drive state not found, please stop doing this.");
+            // TODO this is a hack, the world state should be listening to the reset event instead
+            return;
+        }
 		
 		Vector3f pos = drive.world.getStartPos();
 		Matrix3f rot = drive.world.getStartRot();
@@ -308,8 +311,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 			setPhysicsRotation(rot);
 			setAngularVelocity(new Vector3f());
 		}
-		
-		drive.reset(); //TODO this is a hack, the world state should be listening to the event instead
+		drive.reset();
 	}
 	private void rotate180() {
 		rbc.setPhysicsRotation(new Quaternion().fromAngleAxis(FastMath.PI, new Vector3f(0,1,0)));
