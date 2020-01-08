@@ -2,6 +2,8 @@ package drive;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map.Entry;
 
 import com.jme3.app.Application;
@@ -106,7 +108,11 @@ public class DriveRaceProgress {
     }
 
     public String getCheckpointAsStr() {
-        return H.str(racers.values().stream().map(c -> c.nextCheckpoint).toArray(), ",");
+        List<String> result = new LinkedList<String>();
+        for (Entry<RayCarControl, RacerState> a: racers.entrySet()) {
+            result.add(a.getKey().getCarData().name + " " + a.getValue().nextCheckpoint);
+        }
+        return H.str(result.toArray(), "\n");
     }
 
     class RacerState {

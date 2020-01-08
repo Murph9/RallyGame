@@ -130,7 +130,7 @@ public abstract class CarAI {
     
     /** Detect a high drift angle, which might mean stop accelerating */
     protected boolean ifLowDriftAngle() {
-        return this.car.driftAngle() < (10 * FastMath.RAD_TO_DEG);
+        return this.car.driftAngle() < 5;
     }
 
 	//TODO helper ray cast method, to find out what to avoid

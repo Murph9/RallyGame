@@ -19,6 +19,7 @@ import car.CarUI;
 import car.ai.RaceAI;
 import car.data.Car;
 import car.ray.RayCarControl;
+import helper.H;
 import helper.Log;
 import world.StaticWorldBuilder;
 import world.World;
@@ -38,7 +39,6 @@ public class DriveRace extends BaseAppState {
     
     // ai things
     private final int themCount = 4;
-    private final Car themType = Car.Runner;
 
     public CarBuilder cb;
     public DriveRaceProgress progress;
@@ -103,7 +103,7 @@ public class DriveRace extends BaseAppState {
 		getStateManager().attach(uiNode);
 		
     	for (int i = 0; i < this.themCount; i++) {
-			RayCarControl c = this.cb.addCar(themType, worldStarts[i+1], worldRot, false);
+			RayCarControl c = this.cb.addCar(H.randFromArray(Car.values()), worldStarts[i+1], worldRot, false);
 			RaceAI rAi = new RaceAI(c, this);
 			c.attachAI(rAi, true);
 		}
@@ -167,7 +167,7 @@ public class DriveRace extends BaseAppState {
 
 		menu.setText("State:"+state.name()
 		+"\nStateTimeout:" + this.stateTimeout
-		+"\nCheckpoints:" + progress.getCheckpointAsStr());
+		+"\n" + progress.getCheckpointAsStr());
 		
 		if (stateChanged) {
 			stateChanged = false;

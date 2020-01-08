@@ -131,6 +131,7 @@ public class CarCamera extends BaseAppState implements RawInputListener {
 			if (!H.hasParentNode(g, p.getRootNode())) { //don't collide with the car TODO doesn't work
 				c.setLocation(cr.getContactPoint());
 			}
+			//TODO ignore GhostObjects like checkpoints
 		}
 		
 		//at high speeds shake the camera a little TODO not the motion sickness type
