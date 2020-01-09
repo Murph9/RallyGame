@@ -7,6 +7,7 @@ import drive.DriveRace;
 
 public class RaceAI extends CarAI {
 
+    private float stuckTimer;
 	private DriveRace race;
 	
 	public RaceAI(RayCarControl car, DriveRace race) {
@@ -24,17 +25,29 @@ public class RaceAI extends CarAI {
 		}
 		
 		driveAt(atPos);
-        
-        //TODO check if the below can be removed
 
-		//if going too slow speed up
-		if (car.getLinearVelocity().length() < 10) {
-			onEvent("Accel", true, 1);
-			onEvent("Brake", false, 0);
-			
-			if (car.getLinearVelocity().length() < 1 && car.up.y < 0) { //very still
-				onEvent("Flip", true, 1);
-			}
-		}
+        float velocity = car.getLinearVelocity().length();
+
+        // if going too slow speed up
+        if (velocity < 10) {
+            onEvent("Accel", true, 1);
+            onEvent("Brake", false, 0);
+        }
+
+        // very still, flip
+        if (velocity < 0.05f && car.up.y < 0) {
+            onEvent("Flip", true, 1);
+        }
+
+        // very still for a while, reset
+        if (velocity < 0.1f) {
+            stuckTimer += tpf;
+            if (stuckTimer > 3) {
+                onEvent("Reset", true, 1);
+                stuckTimer = 0;
+            }
+        } else {
+            stuckTimer = 0;
+        }
 	}
 }
