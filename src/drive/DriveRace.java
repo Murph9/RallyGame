@@ -28,7 +28,7 @@ import world.World;
 public class DriveRace extends BaseAppState {
 
 	//TODO better AI, otherwise this actually sucks
-	
+	private static boolean PROGRESS_DEBUG = false;
 	public RaceMenu menu;
 	
 	//things that should be in a world class
@@ -49,6 +49,7 @@ public class DriveRace extends BaseAppState {
 	
 	//racing things
     private Vector3f[] worldStarts;
+    private Matrix3f worldRot;
 	
 	public DriveRace(World world) {
 		super();
@@ -80,17 +81,18 @@ public class DriveRace extends BaseAppState {
 		}
         //end get checkpoints
 		
-        
+
+        // TODO put world start/rot stuff in the world class better
         Vector3f worldStart = checkpoints[checkpoints.length - 1];
         Quaternion q = new Quaternion();
         q.lookAt(checkpoints[0].subtract(checkpoints[checkpoints.length - 1]), Vector3f.UNIT_Y);
-        Matrix3f worldRot = q.toRotationMatrix();
+        this.worldRot = q.toRotationMatrix();
 
-    	//TODO put this in the world class
 		this.worldStarts = new Vector3f[themCount+1];
 		for (int i = 0; i < worldStarts.length; i++) {
-			this.worldStarts[i] = worldStart.add(worldRot.mult(new Vector3f(3,0,0).mult(i % 2 == 0 ? (i+1)/2 : -((i+1)/2))));
-		}
+			this.worldStarts[i] = worldStart.add(worldRot.mult(new Vector3f(2,0,0).mult(i % 2 == 0 ? (i+1)/2 : -((i+1)/2))));
+        }
+        
     	
 		//buildCars
 		this.cb = getState(CarBuilder.class);
@@ -101,7 +103,8 @@ public class DriveRace extends BaseAppState {
 		
 		uiNode = new CarUI(rayCar);
 		getStateManager().attach(uiNode);
-		
+        
+        //load ai
     	for (int i = 0; i < this.themCount; i++) {
 			RayCarControl c = this.cb.addCar(H.randFromArray(Car.values()), worldStarts[i+1], worldRot, false);
 			RaceAI rAi = new RaceAI(c, this);
@@ -114,9 +117,8 @@ public class DriveRace extends BaseAppState {
 		app.getInputManager().addRawInputListener(camera);
 		
 		getState(BulletAppState.class).setEnabled(true);
-        
 
-        progress = new DriveRaceProgress(getApplication(), checkpoints, cb.getAll());
+        progress = new DriveRaceProgress(getApplication(), checkpoints, cb.getAll(), PROGRESS_DEBUG);
         
 		nextState();
 	}
@@ -162,8 +164,8 @@ public class DriveRace extends BaseAppState {
 	private float stateTimeout = 0;
 	@Override
 	public void update(float tpf) {
-		if (!isEnabled()) return;
-		super.update(tpf);
+        if (!isEnabled() || !isInitialized())
+            return;
 
 		menu.setText("State:"+state.name()
 		+"\nStateTimeout:" + this.stateTimeout
@@ -201,21 +203,21 @@ public class DriveRace extends BaseAppState {
 			}
 		}
 		
-		
 		if (this.stateTimeout != -1.0f) {
-			this.stateTimeout -= tpf; //only update when not -1 as it will reset it every frame
+            // only update when not -1 as it will reset it every frame
+			this.stateTimeout -= Math.min(tpf, 1/30f); // prevent load spike cutting this short
 			if (this.stateTimeout < 0) {
-				this.stateTimeout = -1; //stop any timeout stuff unless the state says so
+				this.stateTimeout = -1.0f; //stop any timeout stuff unless the state says so
 				nextState();
 			}
-		}		
+		}
 	}
 	
 	private void setAllCarsToStart() {
         int count = 0;
         for (RayCarControl car: cb.getAll()) {
             car.setPhysicsLocation(worldStarts[count]);
-            car.setPhysicsRotation(world.getStartRot());
+            car.setPhysicsRotation(worldRot);
             car.setAngularVelocity(new Vector3f());
             car.setLinearVelocity(new Vector3f());
             count++;

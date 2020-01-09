@@ -30,41 +30,44 @@ import helper.H;
 public class DriveRaceProgress {
 
     private final Application app;
-    private final CheckpointClass[] checkpoints;
+    private final Checkpoint[] checkpoints;
     private final Node rootNode;
     private final HashMap<RayCarControl, RacerState> racers;
+    private final boolean ifDebug;
+
+    private final GhostObjectCollisionListener checkpointCollisionListener;
 
     // debug things
     private Node debugNode;
 
-    protected DriveRaceProgress(Application app, Vector3f[] checkpoints, Collection<RayCarControl> cars) {
-        this.checkpoints = new CheckpointClass[checkpoints.length];
+    protected DriveRaceProgress(Application app, Vector3f[] checkpointPositions, Collection<RayCarControl> cars, boolean ifDebug) {
+        this.checkpoints = new Checkpoint[checkpointPositions.length];
         this.app = app;
         this.rootNode = new Node("progress root node");
         ((SimpleApplication) app).getRootNode().attachChild(rootNode);
-
-        racers = new HashMap<>();
-        for (RayCarControl car : cars) {
-            racers.put(car, new RacerState());
-        }
+        this.ifDebug = ifDebug;
 
         PhysicsSpace physicsSpace = app.getStateManager().getState(BulletAppState.class).getPhysicsSpace();
 
-        for (int i = 0; i < checkpoints.length; i++) {
-            this.checkpoints[i] = new CheckpointClass(i, checkpoints[i]);
-
-            Spatial box = new Geometry("checkpoint box" + i, new Box(3, 3, 3));
+        for (int i = 0; i < checkpointPositions.length; i++) {
+            Spatial box = new Geometry("checkpoint box " + i, new Box(3, 3, 3));
             box = LoadModelWrapper.create(app.getAssetManager(), box, new ColorRGBA(0, 1, 0, 0.5f));
 
-            this.checkpoints[i].ghost = new GhostControl(CollisionShapeFactory.createBoxShape(box));
-            this.checkpoints[i].ghost.setUserObject("DriveRace checkpoint");
-            box.setLocalTranslation(this.checkpoints[i].checkpoint);
-            box.addControl(this.checkpoints[i].ghost);
+            GhostControl ghost = new GhostControl(CollisionShapeFactory.createBoxShape(box));
+            box.setLocalTranslation(checkpointPositions[i]);
+            box.addControl(ghost);
             rootNode.attachChild(box);
-            physicsSpace.add(this.checkpoints[i].ghost);
+            physicsSpace.add(ghost);
+
+            this.checkpoints[i] = new Checkpoint(i, checkpointPositions[i], ghost);
         }
 
-        CheckpointCollisionListener checkpointCollisionListener = new CheckpointCollisionListener();
+        this.racers = new HashMap<>();
+        for (RayCarControl car : cars) {
+            this.racers.put(car, new RacerState(this.checkpoints[0]));
+        }
+
+        checkpointCollisionListener = new GhostObjectCollisionListener(this);
         physicsSpace.addCollisionListener((PhysicsCollisionListener) checkpointCollisionListener);
     }
 
@@ -72,69 +75,105 @@ public class DriveRaceProgress {
         if (checkpoints == null || checkpoints.length < 1)
             return;
 
-        // update the checkpoint arrows
-        if (debugNode != null)
-            rootNode.detachChild(debugNode);
-        debugNode = new Node("debugnode");
-        for (Entry<RayCarControl, RacerState> entry : racers.entrySet()) {
-            Vector3f pos = entry.getKey().getPhysicsLocation().add(0, 3, 0);
-            Vector3f dir = checkpoints[entry.getValue().nextCheckpoint].checkpoint.subtract(pos);
-            entry.getValue().arrow = H.makeShapeArrow(((SimpleApplication) app).getAssetManager(), ColorRGBA.Cyan, dir,
-                    pos);
-            debugNode.attachChild(entry.getValue().arrow);
+        if (ifDebug) {
+            // update the checkpoint arrows
+            if (debugNode != null)
+                rootNode.detachChild(debugNode);
+            debugNode = new Node("debugnode");
+            for (Entry<RayCarControl, RacerState> entry : racers.entrySet()) {
+                Vector3f pos = entry.getKey().getPhysicsLocation().add(0, 2, 0);
+                Vector3f dir = entry.getValue().nextCheckpoint.position.subtract(pos);
+                entry.getValue().arrow = H.makeShapeArrow(((SimpleApplication) app).getAssetManager(), ColorRGBA.Cyan, dir, pos);
+                debugNode.attachChild(entry.getValue().arrow);
+            }
+            rootNode.attachChild(debugNode);
         }
-        rootNode.attachChild(debugNode);
     }
 
     public void cleanup() {
         ((SimpleApplication) app).getRootNode().detachChild(rootNode);
 
-        for (CheckpointClass checkpoint : checkpoints) {
-            app.getStateManager().getState(BulletAppState.class).getPhysicsSpace().remove(checkpoint.ghost);
+        PhysicsSpace physicsSpace = app.getStateManager().getState(BulletAppState.class).getPhysicsSpace();
+        for (Checkpoint checkpoint : checkpoints) {
+            physicsSpace.remove(checkpoint.ghost);
         }
+        physicsSpace.removeCollisionListener((PhysicsCollisionListener) checkpointCollisionListener);
     }
 
     public Vector3f getNextCheckpoint(RayCarControl car, Vector3f pos) {
-        if (checkpoints.length < 1)
-            return null;
-        return checkpoints[racers.get(car).nextCheckpoint].checkpoint;
+        return racers.get(car).nextCheckpoint.position;
     }
 
-    public Vector3f getLastCheckpoint(RayCarControl car) {
-        int index = this.racers.get(car).nextCheckpoint - 1;
+    public Vector3f getCurrentCheckpoint(RayCarControl car) {
+        int index = this.racers.get(car).nextCheckpoint.num - 1;
         if (index < 0)
             index = this.checkpoints.length - 1;
-        return this.checkpoints[index].checkpoint;
+        return this.checkpoints[index].position;
     }
 
     public String getCheckpointAsStr() {
         List<String> result = new LinkedList<String>();
         for (Entry<RayCarControl, RacerState> a: racers.entrySet()) {
-            result.add(a.getKey().getCarData().name + " " + a.getValue().nextCheckpoint);
+            result.add(a.getKey().getCarData().name + " " + a.getValue().nextCheckpoint.num);
         }
         return H.str(result.toArray(), "\n");
     }
 
-    class RacerState {
-        public int nextCheckpoint;
-        public Geometry arrow;
-    }
+    protected void ghostCollision(GhostControl ghost, RigidBodyControl obj) {
+        Checkpoint checkpoint = getIfCheckpoint(ghost);
+        RacerState racer = getIfCar(obj);
+        if (checkpoint == null || racer == null)
+            return;
 
-    class CheckpointClass { // better name please
-        public final int num;
-        public final Vector3f checkpoint;
-        public GhostControl ghost;
-
-        CheckpointClass(int num, Vector3f pos) {
-            this.num = num;
-            this.checkpoint = pos;
+        if (racer.nextCheckpoint.num == checkpoint.num) {
+            // then finally, update checkpoint
+            int nextNum = (racer.nextCheckpoint.num + 1) % checkpoints.length;
+            racer.nextCheckpoint = checkpoints[nextNum];
         }
     }
 
-    class CheckpointCollisionListener implements PhysicsCollisionListener {
+    private RacerState getIfCar(RigidBodyControl pObject) {
+        for (Entry<RayCarControl, RacerState> racer : racers.entrySet())
+            if (pObject == racer.getKey().getPhysicsObject())
+                return racer.getValue();
+        return null;
+    }
 
-        public CheckpointCollisionListener() {
-            //TODO take in list of ghost checkpoints and carnodes to decouple from progress class
+    private Checkpoint getIfCheckpoint(GhostControl ghost) {
+        for (Checkpoint checkpoint : checkpoints)
+            if (checkpoint.ghost == ghost)
+                return checkpoint;
+        return null;
+    }
+
+
+    class RacerState {
+        public int lap;
+        public Checkpoint nextCheckpoint;
+        public Geometry arrow;
+
+        public RacerState(Checkpoint check) {
+            this.nextCheckpoint = check;
+        }
+    }
+
+    class Checkpoint {
+        public final int num;
+        public final Vector3f position;
+        public final GhostControl ghost;
+
+        Checkpoint(int num, Vector3f pos, GhostControl ghost) {
+            this.num = num;
+            this.position = pos;
+            this.ghost = ghost;
+        }
+    }
+
+    class GhostObjectCollisionListener implements PhysicsCollisionListener {
+
+        private final DriveRaceProgress progress;
+        public GhostObjectCollisionListener(DriveRaceProgress progress) {
+            this.progress = progress;
         }
 
 		@Override
@@ -150,50 +189,25 @@ public class DriveRaceProgress {
                 return; // ignore and non-ghost, non-ghost collisions
             }
             
-            CheckpointClass checkpoint;
-            RayCarControl aRayCar;
-            if (a.getControl(GhostControl.class) != null) {
-                checkpoint = getCheckPoint((GhostControl) event.getObjectA(), a);
-                aRayCar = detectCar(event.getObjectB(), b);
-            } else if (b.getControl(GhostControl.class) != null) {
-                checkpoint = getCheckPoint((GhostControl) event.getObjectB(), b);
-                aRayCar = detectCar(event.getObjectA(), a);
-            } else {
-                return;
+            if (a.getControl(GhostControl.class) != null && isMovingBody(event.getObjectB())) {
+                progress.ghostCollision((GhostControl) event.getObjectA(), (RigidBodyControl)event.getObjectB());
             }
-
-            if (checkpoint == null || aRayCar == null)
-                return;
-
-            RacerState racer = racers.get(aRayCar);
-            if (racer.nextCheckpoint == checkpoint.num) {
-                // then finally, update checkpoint
-                racer.nextCheckpoint++;
-                racer.nextCheckpoint = racer.nextCheckpoint % checkpoints.length;
-            }
-        }
-        
-        private RayCarControl detectCar(PhysicsCollisionObject pObject, Spatial spatial) {
-            if (!(pObject instanceof RigidBodyControl)) {
-                return null; //if its not a rigid body, no idea what to do
-            }
-            RigidBodyControl control = (RigidBodyControl)pObject;
-
-            if (control.isKinematic() || control.getMass() == 0)
-                return null; //only concerned about 'moving' collisions
             
-            Collection<RayCarControl> cars = racers.keySet();
-            for (RayCarControl car : cars)
-                if (pObject == car.getPhysicsObject())
-                    return car;
-            return null;
+            if (b.getControl(GhostControl.class) != null && isMovingBody(event.getObjectA())) {
+                progress.ghostCollision((GhostControl) event.getObjectB(), (RigidBodyControl)event.getObjectA());
+            }
         }
 
-        private CheckpointClass getCheckPoint(GhostControl ghost, Spatial spatial) {
-            for (CheckpointClass checkpoint : checkpoints)
-                if (checkpoint.ghost == ghost)
-                    return checkpoint;
-            return null;
+        private boolean isMovingBody(PhysicsCollisionObject obj) {
+            if (!(obj instanceof RigidBodyControl)) {
+                return false; // if its not a rigid body, no idea what to do
+            }
+
+            RigidBodyControl control = (RigidBodyControl) obj;
+            if (control.isKinematic() || control.getMass() == 0)
+                return false; // only concerned about 'moving' collisions
+
+            return true;
         }
     }
 }
