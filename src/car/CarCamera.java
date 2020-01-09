@@ -3,6 +3,7 @@ package car;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
+import com.jme3.bullet.control.GhostControl;
 import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
 import com.jme3.input.RawInputListener;
@@ -20,6 +21,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Spatial;
 
 import car.data.CarDataConst;
 import car.ray.RayCarControl;
@@ -60,6 +62,10 @@ public class CarCamera extends BaseAppState implements RawInputListener {
         Vector3f cam_lookAt = new Vector3f(0, p.getCarData().cam_lookAtHeight, 0);
         c.lookAt(pPos.add(cam_lookAt), new Vector3f(0, 1, 0)); // look at car
 	}
+
+    public void resetMouseView() {
+        rotRad = 0;
+    }
 
 	@Override
 	public void update(float tpf) {
@@ -119,20 +125,13 @@ public class CarCamera extends BaseAppState implements RawInputListener {
 		
 		c.setLocation(next);
 
-		//do a ray cast to make sure that you can still see the car
-		Vector3f cam_lookAt = new Vector3f(0, data.cam_lookAtHeight, 0);
-		Vector3f dir = c.getLocation().subtract(carPos.add(cam_lookAt));
-		Ray ray = new Ray(carPos.add(cam_lookAt), dir);
-        CollisionResults results = new CollisionResults();
-        ((SimpleApplication)getApplication()).getRootNode().collideWith(ray, results);
-		CollisionResult cr = results.getClosestCollision();
-		if (cr != null && cr.getDistance() < dir.length()) {
-			Geometry g = cr.getGeometry();
-			if (!H.hasParentNode(g, p.getRootNode())) { //don't collide with the car TODO doesn't work
-				c.setLocation(cr.getContactPoint());
-			}
-			//TODO ignore GhostObjects like checkpoints
-		}
+        Vector3f cam_lookAt = new Vector3f(0, data.cam_lookAtHeight, 0);
+
+        // move camera closer if there is an object in the way
+        Vector3f newPos = posOfThingInWay(cam_lookAt, carPos);
+        if (newPos != null) {
+            c.setLocation(newPos);
+        }
 		
 		//at high speeds shake the camera a little TODO not the motion sickness type
 		float shakeFactor = p.vel.length() * p.vel.length() * p.getCarData().cam_shake;
@@ -161,6 +160,38 @@ public class CarCamera extends BaseAppState implements RawInputListener {
             lastTimeout = 0;
             rotRad += arg0.getDX();
         }
+    }
+
+    private Vector3f posOfThingInWay(Vector3f cam_lookAt, Vector3f carPos) {
+        // do a ray cast to make sure that you can still see the car
+        Vector3f dir = c.getLocation().subtract(carPos.add(cam_lookAt));
+        Ray ray = new Ray(carPos.add(cam_lookAt), dir);
+        CollisionResults results = new CollisionResults();
+        ((SimpleApplication) getApplication()).getRootNode().collideWith(ray, results);
+        
+        for (CollisionResult result: results) {
+            if (result != null && result.getDistance() < dir.length()) {
+                Geometry g = result.getGeometry();
+                // ignore GhostObjects like checkpoints
+                if (!hasGhostControl(g)) {
+                    // attempt to not collide with the car TODO doesn't work
+                    if (!H.hasParentNode(g, p.getRootNode())) {
+                        return result.getContactPoint();
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private boolean hasGhostControl(Spatial s) {
+        while (s != null) {
+            if (s.getControl(GhostControl.class) != null)
+                return true;
+            s = s.getParent();
+        }
+        return false;
     }
 
 	//#region unused methods
