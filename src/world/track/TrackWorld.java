@@ -41,6 +41,7 @@ import com.jme3.texture.Texture;
 import com.jme3.texture.Texture.WrapMode;
 import com.jme3.util.BufferUtils;
 
+import car.ray.RayCarControl;
 import drive.DriveBase;
 import game.App;
 import game.DebugAppState;
@@ -302,10 +303,12 @@ public class TrackWorld extends World {
 	public void update(float tpf) {
 		App a = (App)getApplication();
 		DriveBase drive = a.getStateManager().getState(DriveBase.class);
-		
-		if (this.trackSegments != null && drive != null && drive.cb.get(0) != null && DEBUG) {
+		boolean noCars = drive.getAllCars().isEmpty();
+
+		if (this.trackSegments != null && drive != null && !noCars && DEBUG) {
 			//hack to see if the bezier curve stuff works
-			Vector3f pos = getClosestPointTo(this.trackSegments, normalizeHeightIn(drive.cb.get(0).getPhysicsLocation()));
+			RayCarControl car = drive.getAllCars().stream().findFirst().get();
+			Vector3f pos = getClosestPointTo(this.trackSegments, normalizeHeightIn(car.getPhysicsLocation()));
 			
 			getState(DebugAppState.class).drawBox("closestpointtocurve", ColorRGBA.LightGray, unnormalizeHeightIn(pos), 1);
 		}
