@@ -24,7 +24,9 @@ public class RaceAI extends CarAI {
 		}
 		
 		driveAt(atPos);
-		
+        
+        //TODO check if the below can be removed
+
 		//if going too slow speed up
 		if (car.getLinearVelocity().length() < 10) {
 			onEvent("Accel", true, 1);
@@ -33,10 +35,6 @@ public class RaceAI extends CarAI {
 			if (car.getLinearVelocity().length() < 1 && car.up.y < 0) { //very still
 				onEvent("Flip", true, 1);
 			}
-		}
-		if (car.getLinearVelocity().length() > 20) {
-			onEvent("Accel", false, 0); //don't go too fast
-			onEvent("Brake", false, 0);
 		}
 	}
 }
