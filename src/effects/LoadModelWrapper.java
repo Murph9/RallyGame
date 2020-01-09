@@ -48,7 +48,7 @@ public class LoadModelWrapper {
             color = MaterialColourer.getColorFromMaterialName(g.getMaterial());
             if (color == null) {
                 Log.e("!Material for geom:", g.getName(), "doesn't have a colour set, but was requested!");
-                color = new ColorRGBA(0, 0.354f, 1, 0.3f); //orange but transparent, hopefully i will remember this
+                color = new ColorRGBA(0, 0.354f, 1, 0.7f); //orange but transparent, hopefully i will remember this
             }
         }
         
@@ -56,6 +56,7 @@ public class LoadModelWrapper {
         baseMat.setColor("Color", color);
         if (color.a < 1) {
             //needs alpha stuff
+            baseMat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Back);
             baseMat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
             g.setQueueBucket(Bucket.Transparent);
         } else {

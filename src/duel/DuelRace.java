@@ -136,7 +136,7 @@ public class DuelRace extends BaseAppState {
         if (winner != null)
             return;
 
-        raceTimer += tpf;
+        raceTimer += Math.min(tpf, 1/30f); //limit time step being large due to loading
         menu.setState(raceTimer);
 
         RayCarControl maybeWinner = DuelRace.detectWinner(finishLine, this.cb);

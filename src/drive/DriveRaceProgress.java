@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
+import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.PhysicsCollisionEvent;
@@ -29,7 +30,10 @@ import helper.H;
 
 public class DriveRaceProgress {
 
-    private final Application app;
+    private static final ColorRGBA CHECKPOINT_COLOUR = new ColorRGBA(0, 1, 0, 0.2f);
+    private static final Vector3f CHECKPOINT_SIZE = new Vector3f(1.5f, 1.5f, 1.5f);
+
+    private final AssetManager am;
     private final Checkpoint[] checkpoints;
     private final Node rootNode;
     private final HashMap<RayCarControl, RacerState> racers;
@@ -42,7 +46,7 @@ public class DriveRaceProgress {
 
     protected DriveRaceProgress(Application app, Vector3f[] checkpointPositions, Collection<RayCarControl> cars, boolean ifDebug) {
         this.checkpoints = new Checkpoint[checkpointPositions.length];
-        this.app = app;
+        this.am = app.getAssetManager();
         this.rootNode = new Node("progress root node");
         ((SimpleApplication) app).getRootNode().attachChild(rootNode);
         this.ifDebug = ifDebug;
@@ -50,8 +54,8 @@ public class DriveRaceProgress {
         PhysicsSpace physicsSpace = app.getStateManager().getState(BulletAppState.class).getPhysicsSpace();
 
         for (int i = 0; i < checkpointPositions.length; i++) {
-            Spatial box = new Geometry("checkpoint box " + i, new Box(3, 3, 3));
-            box = LoadModelWrapper.create(app.getAssetManager(), box, new ColorRGBA(0, 1, 0, 0.5f));
+            Spatial box = new Geometry("checkpoint box " + i, new Box(CHECKPOINT_SIZE.negate(), CHECKPOINT_SIZE));
+            box = LoadModelWrapper.create(app.getAssetManager(), box, CHECKPOINT_COLOUR);
 
             GhostControl ghost = new GhostControl(CollisionShapeFactory.createBoxShape(box));
             box.setLocalTranslation(checkpointPositions[i]);
@@ -83,14 +87,14 @@ public class DriveRaceProgress {
             for (Entry<RayCarControl, RacerState> entry : racers.entrySet()) {
                 Vector3f pos = entry.getKey().getPhysicsLocation().add(0, 2, 0);
                 Vector3f dir = entry.getValue().nextCheckpoint.position.subtract(pos);
-                entry.getValue().arrow = H.makeShapeArrow(((SimpleApplication) app).getAssetManager(), ColorRGBA.Cyan, dir, pos);
+                entry.getValue().arrow = H.makeShapeArrow(am, ColorRGBA.Cyan, dir, pos);
                 debugNode.attachChild(entry.getValue().arrow);
             }
             rootNode.attachChild(debugNode);
         }
     }
 
-    public void cleanup() {
+    public void cleanup(Application app) {
         ((SimpleApplication) app).getRootNode().detachChild(rootNode);
 
         PhysicsSpace physicsSpace = app.getStateManager().getState(BulletAppState.class).getPhysicsSpace();
@@ -176,8 +180,8 @@ public class DriveRaceProgress {
             this.progress = progress;
         }
 
-		@Override
-		public void collision(PhysicsCollisionEvent event) {
+        @Override
+        public void collision(PhysicsCollisionEvent event) {
             Spatial a = event.getNodeA();
             Spatial b = event.getNodeB();
 
