@@ -3,6 +3,8 @@ package drive;
 import world.World;
 import world.WorldType;
 
+import java.util.Collection;
+
 import com.jme3.app.Application;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.app.state.BaseAppState;
@@ -21,7 +23,7 @@ public class DriveBase extends BaseAppState {
 	public World world;
 
 	//car stuff
-	public CarBuilder cb;
+	protected CarBuilder cb;
 	protected Car car;
 	
 	//gui and camera stuff
@@ -96,7 +98,11 @@ public class DriveBase extends BaseAppState {
 	
 	public void reset() {
 		world.reset();
-	}
+    }
+    
+    public Collection<RayCarControl> getAllCars() {
+        return this.cb.getAll();
+    }
 	
 	@Override
 	public void cleanup(Application app) {

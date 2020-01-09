@@ -43,10 +43,10 @@ public class StaticWorldBuilder extends World {
         rootNode.attachChild(model);
 	}
 
-	@Override
-	public void reset() {
-		//reset is a play action, so its usually resets dynamic stuff which this doesn't have
-	}
+    @Override
+    public void reset() {
+        // reset is a play action, so its usually resets dynamic stuff which this doesn't have
+    }
 
 	@Override
 	public Vector3f getStartPos() {
