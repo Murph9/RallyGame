@@ -17,6 +17,7 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
+import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 
@@ -25,6 +26,7 @@ import car.MyKeyListener;
 import car.ai.CarAI;
 import car.data.CarDataConst;
 import drive.DriveBase;
+import drive.DriveRace;
 import game.DebugAppState;
 import helper.H;
 import helper.Log;
@@ -257,10 +259,6 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 				if (value) this.reset();
 				break;
 
-			case "Rotate180":
-				if (value) this.rotate180();
-				break;
-	
 			case "Reverse":
 				if (value) curGear = REVERSE_GEAR_INDEX;
 				else curGear = 1;
@@ -298,27 +296,21 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 		}
 		
 		DriveBase drive = this.app.getStateManager().getState(DriveBase.class);
-		if (drive == null) {
-            Log.p("Drive state not found, please stop doing this.");
-            // TODO this is a hack, the world state should be listening to the reset event instead
-            return;
-        }
-		
-		Vector3f pos = drive.world.getStartPos();
-		Matrix3f rot = drive.world.getStartRot();
-		if (pos != null && rot != null) {
-			setPhysicsLocation(pos);
-			setPhysicsRotation(rot);
-			setAngularVelocity(new Vector3f());
+		Transform transform = null;
+		if (drive != null) {
+			transform = drive.resetTransform(this);
+			drive.resetWorld();
+		} else {
+			//TODO DriveRace hack, just happens to be the same as the interface
+			DriveRace race = this.app.getStateManager().getState(DriveRace.class);
+			transform = race.resetTransform(this);
 		}
-		drive.reset();
-	}
-	private void rotate180() {
-		rbc.setPhysicsRotation(new Quaternion().fromAngleAxis(FastMath.PI, new Vector3f(0,1,0)));
+
+		setPhysicsLocation(transform.getTranslation());
+		setPhysicsRotation(transform.getRotation());
 	}
 	
-	
-	//Please only call this from the car manager
+	/** Please only call this from CarManager */
 	public void cleanup(Application app) {
 		if (this.controls != null && !this.controls.isEmpty()) {
 			for (RawInputListener ril: this.controls)
