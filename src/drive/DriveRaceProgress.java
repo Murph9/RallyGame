@@ -104,7 +104,7 @@ public class DriveRaceProgress {
         physicsSpace.removeCollisionListener((PhysicsCollisionListener) checkpointCollisionListener);
     }
 
-    public Vector3f getNextCheckpoint(RayCarControl car, Vector3f pos) {
+    public Vector3f getNextCheckpoint(RayCarControl car) {
         return racers.get(car).nextCheckpoint.position;
     }
 

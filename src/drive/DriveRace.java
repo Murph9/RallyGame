@@ -9,6 +9,7 @@ import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
+import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -22,7 +23,6 @@ import car.ray.RayCarControl;
 import helper.H;
 import helper.Log;
 import world.StaticWorldBuilder;
-import world.World;
 
 //TODO DriveRace can't be converted to DriveBase as the world must be initialised before this
 public class DriveRace extends BaseAppState {
@@ -35,7 +35,7 @@ public class DriveRace extends BaseAppState {
     private Node rootNode = new Node("root");
     
     private final Car car;
-    private final World world;
+    private final StaticWorldBuilder world;
     
     // ai things
     private final int themCount = 4;
@@ -51,7 +51,7 @@ public class DriveRace extends BaseAppState {
     private Vector3f[] worldStarts;
     private Matrix3f worldRot;
     
-    public DriveRace(World world) {
+    public DriveRace(StaticWorldBuilder world) {
         super();
         this.car = Car.Runner;
         this.world = world;
@@ -66,7 +66,7 @@ public class DriveRace extends BaseAppState {
         //get the list of checkpoints
         //TODO use whatever duel does, when its finished
         List<Vector3f> _checkpoints = new LinkedList<Vector3f>();
-        Spatial model = ((StaticWorldBuilder)world).getModelForDriveRace();
+        Spatial model = world.getModelForDriveRace();
         Spatial s = ((Node) model).getChild(0);
         for (Spatial points : ((Node) s).getChildren()) {
             if (points.getName().equals("Points")) {
@@ -75,24 +75,33 @@ public class DriveRace extends BaseAppState {
                 }
             }
         }
+        //end get checkpoints
+        
         Vector3f[] checkpoints = new Vector3f[_checkpoints.size()];
         if (!_checkpoints.isEmpty()) {
             _checkpoints.toArray(checkpoints);
+
+        } else {
+            // TODO hard coded checkpoints for blockfort
+            checkpoints = new Vector3f[4];
+            checkpoints[0] = new Vector3f(-74, 0, -8);
+            checkpoints[1] = new Vector3f(56, 0, -8);
+            checkpoints[2] = new Vector3f(56, 0, -134);
+            checkpoints[3] = new Vector3f(-74, 0, -134);
         }
-        //end get checkpoints
-        
+
         // TODO put world start/rot stuff in the world class better
         Vector3f worldStart = checkpoints[checkpoints.length - 1];
         Quaternion q = new Quaternion();
         q.lookAt(checkpoints[0].subtract(checkpoints[checkpoints.length - 1]), Vector3f.UNIT_Y);
         this.worldRot = q.toRotationMatrix();
 
-        this.worldStarts = new Vector3f[themCount+1];
+        this.worldStarts = new Vector3f[themCount + 1];
         for (int i = 0; i < worldStarts.length; i++) {
-            this.worldStarts[i] = worldStart.add(worldRot.mult(new Vector3f(2,0,0).mult(i % 2 == 0 ? (i+1)/2 : -((i+1)/2))));
+            this.worldStarts[i] = worldStart
+                    .add(worldRot.mult(new Vector3f(2, 0, 0).mult(i % 2 == 0 ? (i + 1) / 2 : -((i + 1) / 2))));
         }
-        
-        
+
         //buildCars
         this.cb = getState(CarBuilder.class);
         RayCarControl rayCar = cb.addCar(car, worldStarts[0], worldRot, true);
@@ -212,6 +221,15 @@ public class DriveRace extends BaseAppState {
         }
     }
     
+    public Transform resetTransform(RayCarControl car) {
+        Vector3f pos = progress.getCurrentCheckpoint(car);
+        Vector3f next = progress.getNextCheckpoint(car);
+
+        Quaternion q = new Quaternion();
+        q.lookAt(next.subtract(pos), Vector3f.UNIT_Y);
+        return new Transform(pos, q);
+    }
+
     private void setAllCarsToStart() {
         int count = 0;
         for (RayCarControl car: cb.getAll()) {
@@ -261,7 +279,6 @@ public class DriveRace extends BaseAppState {
     }
     
     public Vector3f getNextCheckpoint(RayCarControl car, Vector3f pos) {
-        return progress.getNextCheckpoint(car, pos);
+        return progress.getNextCheckpoint(car);
     }
-
 }

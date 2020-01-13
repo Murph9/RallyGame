@@ -62,7 +62,7 @@ public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
 				sm.attach(new DriveCrash((IDriveDone)this));
 				break;
             case Race:
-                World world = new StaticWorldBuilder(StaticWorld.lakelooproad);
+                StaticWorldBuilder world = new StaticWorldBuilder(StaticWorld.block_fort);
                 sm.attach(world);
 				sm.attach(new DriveRace(world));
 				break;
