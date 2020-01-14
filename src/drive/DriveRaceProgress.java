@@ -49,7 +49,6 @@ public class DriveRaceProgress {
 
     protected DriveRaceProgress(Application app, Vector3f[] checkpointPositions, Collection<RayCarControl> cars, boolean ifDebug) {
         this.checkpoints = new Checkpoint[checkpointPositions.length];
-        this.firstCheckpoint = checkpoints[0];
 
         this.am = app.getAssetManager();
         this.rootNode = new Node("progress root node");
@@ -70,6 +69,7 @@ public class DriveRaceProgress {
 
             this.checkpoints[i] = new Checkpoint(i, checkpointPositions[i], ghost);
         }
+        this.firstCheckpoint = this.checkpoints[0];
 
         this.racers = new HashMap<>();
         for (RayCarControl car : cars) {
@@ -120,7 +120,8 @@ public class DriveRaceProgress {
         return this.checkpoints[index].position;
     }
 
-    public String getCheckpointAsStr() {
+    @Override
+    public String toString() {
         List<String> result = new LinkedList<String>();
         int count = 1;
         List<Entry<RayCarControl, RacerState>> list = racers.entrySet().stream()

@@ -83,20 +83,21 @@ public class DriveRace extends BaseAppState {
 
         } else {
             // TODO hard coded checkpoints for duct2
-            checkpoints = new Vector3f[13];
-            checkpoints[0] = new Vector3f(-91, 0, 77);
-            checkpoints[1] = new Vector3f(-237, 0, 68);
-            checkpoints[2] = new Vector3f(-321, 0, -43);
-            checkpoints[3] = new Vector3f(-255, 0, -198);
-            checkpoints[4] = new Vector3f(-91, 0, -189);
-            checkpoints[5] = new Vector3f(-19, 0, -75);
-            checkpoints[6] = new Vector3f(-1, 0, -67);
-            checkpoints[7] = new Vector3f(19, 0, -75);
-            checkpoints[8] = new Vector3f(91, 0, -189);
-            checkpoints[9] = new Vector3f(255, 0, -198);
-            checkpoints[10] = new Vector3f(321, 0, -43);
-            checkpoints[11] = new Vector3f(237, 0, 68);
-            checkpoints[12] = new Vector3f(91, 0, 77);
+            checkpoints = new Vector3f[] {
+                new Vector3f(-237, 0, 68),
+                new Vector3f(-321, 0, -43),
+                new Vector3f(-255, 0, -198),
+                new Vector3f(-91, 0, -189),
+                new Vector3f(-19, 0, -75),
+                new Vector3f(-1, 0, -67),
+                new Vector3f(19, 0, -75),
+                new Vector3f(91, 0, -189),
+                new Vector3f(255, 0, -198),
+                new Vector3f(321, 0, -43),
+                new Vector3f(237, 0, 68),
+                new Vector3f(91, 0, 77),
+                new Vector3f(-91, 0, 77)
+            };
         }
 
         // TODO put world start/rot stuff in the world class better
@@ -186,7 +187,7 @@ public class DriveRace extends BaseAppState {
 
         menu.setText("State:" + state.name()
             + "\nStateTimeout:" + this.stateTimeout
-            + "\n" + progress.getCheckpointAsStr());
+            + "\n" + progress.toString());
         
         if (stateChanged) {
             stateChanged = false;
