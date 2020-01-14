@@ -43,7 +43,7 @@ public class RaceAI extends CarAI {
         }
 
         // very still for a while, reset
-        if (velocity < 0.1f) {
+        if (velocity < 0.5f) {
             stuckTimer += tpf;
             if (stuckTimer > 3) {
                 onEvent("Reset", true);

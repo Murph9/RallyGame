@@ -38,7 +38,7 @@ public class DriveRace extends BaseAppState {
     private final StaticWorldBuilder world;
     
     // ai things
-    private final int themCount = 4;
+    private final int themCount = 14;
 
     public CarBuilder cb;
     public DriveRaceProgress progress;
@@ -88,9 +88,9 @@ public class DriveRace extends BaseAppState {
                 new Vector3f(-321, 0, -43),
                 new Vector3f(-255, 0, -198),
                 new Vector3f(-91, 0, -189),
-                new Vector3f(-19, 0, -75),
+                new Vector3f(-17, 0, -105),
                 new Vector3f(-1, 0, -67),
-                new Vector3f(19, 0, -75),
+                new Vector3f(17, 0, -105),
                 new Vector3f(91, 0, -189),
                 new Vector3f(255, 0, -198),
                 new Vector3f(321, 0, -43),
