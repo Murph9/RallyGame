@@ -13,7 +13,6 @@ import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.input.InputManager;
 import com.jme3.input.RawInputListener;
-import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
@@ -27,21 +26,15 @@ import car.ai.CarAI;
 import car.data.CarDataConst;
 import drive.DriveBase;
 import drive.DriveRace;
-import game.DebugAppState;
 import helper.H;
 import helper.Log;
 
 //visual/input things
 public class RayCarControl extends RayCarPowered implements ICarPowered {
 
-	private static final boolean DEBUG = false;
-	private static final boolean DEBUG_SUS = DEBUG || false;
-	private static final boolean DEBUG_SUS2 = DEBUG || false;
-	private static final boolean DEBUG_TRACTION = DEBUG || false;
-	private static final boolean DEBUG_DRAG = DEBUG || false;
-
 	private final Application app;
-	private final RayWheelControl[] wheelControls;
+    private final RayWheelControl[] wheelControls;
+    private final RayCarControlDebug debug;
 	
 	//sound stuff
 	public AudioNode engineSound;
@@ -64,6 +57,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 		super(shape, carData);
 		this.app = app;
 		this.space = app.getStateManager().getState(BulletAppState.class).getPhysicsSpace();
+        this.debug = new RayCarControlDebug(this, false);
 
 		vel = forward = up = left = right = new Vector3f();
 		
@@ -142,40 +136,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 			this.wheelControls[i].viewUpdate(tpf, rbc.getLinearVelocity(), carData.susByWheelNum(i).min_travel);
 		}
 
-		if (DEBUG) {
-			Matrix3f w_angle = rbc.getPhysicsRotationMatrix();
-			doForEachWheel((w_id) -> {
-
-				float susTravel = carData.susByWheelNum(w_id).travelTotal();
-
-				DebugAppState debug = app.getStateManager().getState(DebugAppState.class);
-
-				if (DEBUG_SUS) {
-					debug.drawArrow("sus_wheel_radius" + w_id, ColorRGBA.Blue, wheels[w_id].rayStartWorld,
-							wheels[w_id].rayDirWorld.normalize().mult(carData.wheelData[w_id].radius));
-					debug.drawArrow("sus" + w_id, ColorRGBA.Cyan,
-							wheels[w_id].rayStartWorld
-									.add(wheels[w_id].rayDirWorld.normalize().mult(carData.wheelData[w_id].radius)),
-							wheels[w_id].rayDirWorld.normalize().mult(susTravel));
-					debug.drawBox("col_point" + w_id, ColorRGBA.Red, wheels[w_id].curBasePosWorld, 0.01f);
-				}
-
-				if (DEBUG_SUS2) {
-					debug.drawArrow("normalforcearrow" + w_id, ColorRGBA.Black, wheels[w_id].curBasePosWorld,
-							wheels[w_id].hitNormalInWorld);
-				}
-
-				if (DEBUG_TRACTION) {
-					debug.drawArrow("tractionDir"+w_id, ColorRGBA.White, wheels[w_id].curBasePosWorld, 
-							w_angle.mult(wheels[w_id].gripDir.mult(1/this.carData.mass)));
-				}
-
-				Vector3f w_pos = rbc.getPhysicsLocation();
-				if (DEBUG_DRAG) {
-					debug.drawArrow("dragarrow", ColorRGBA.Black, w_pos, dragDir);
-				}
-			});
-		}
+        debug.update(app);
 	}
 	
 	private float getMaxSteerAngle(float trySteerAngle, float sign) {
@@ -389,7 +350,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
         return results;
     }
 	
-	//physics ones, thinking this looks bad
+	//#region physics ones, thinking this looks bad
 	public Vector3f getPhysicsLocation() {
 		return rbc.getPhysicsLocation();
 	}
@@ -427,6 +388,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
     public void setAngularDamping(float value) {
         rbc.setAngularDamping(value);
     }
+    //#endregion
 	
 	public float getCurrentVehicleSpeedKmHour() {
 		if (vel == null)
@@ -460,9 +422,6 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
             }
         }
     }
-	//public boolean isEnabled() {
-        //return enabled;
-    //}
     
 	private void enableSound(boolean enabled) {
         if (engineSound == null)
@@ -473,7 +432,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
             engineSound.pause();
     }
 
-		
+	// #region ICarPowered
 	public ICarPowered getPoweredState() { return (ICarPowered)this; }
 	public float accelCurrent() { return accelCurrent; }
 	public float brakeCurrent() { return brakeCurrent; }
@@ -482,5 +441,6 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 	public float steeringCurrent() { return this.steeringCurrent; }
 	public int curRPM() { return this.curRPM; }
 	public boolean ifHandbrake() { return this.handbrakeCurrent; }
-	public float driftAngle() { return this.driftAngle; }
+    public float driftAngle() { return this.driftAngle; }
+    // #endregion
 }
