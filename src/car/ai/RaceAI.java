@@ -1,8 +1,11 @@
 package car.ai;
 
+import java.util.List;
+
 import com.jme3.math.Vector3f;
 
 import car.ray.RayCarControl;
+import car.ray.RayWheelControl;
 import drive.DriveRace;
 
 public class RaceAI extends CarAI {
@@ -29,25 +32,35 @@ public class RaceAI extends CarAI {
         float velocity = car.getLinearVelocity().length();
 
         // if going too slow speed up
-        if (velocity < 10) {
-            onEvent("Accel", true, 1);
-            onEvent("Brake", false, 0);
+        if (velocity < 2) {
+            onEvent("Accel", true);
+            onEvent("Brake", false);
         }
 
         // very still, flip
         if (velocity < 0.05f && car.up.y < 0) {
-            onEvent("Flip", true, 1);
+            onEvent("Flip", true);
         }
 
         // very still for a while, reset
         if (velocity < 0.1f) {
             stuckTimer += tpf;
             if (stuckTimer > 3) {
-                onEvent("Reset", true, 1);
+                onEvent("Reset", true);
                 stuckTimer = 0;
             }
         } else {
             stuckTimer = 0;
+        }
+
+        //reduce excess wheel slipping
+        List<RayWheelControl> wheels = car.getDriveWheels();
+        float gripSum = 0;
+        for (RayWheelControl wheel: wheels) {
+            gripSum += wheel.getRayWheel().skidFraction;
+        }
+        if (velocity > 10 && gripSum > wheels.size()) {
+            onEvent("Accel", false);
         }
 	}
 }
