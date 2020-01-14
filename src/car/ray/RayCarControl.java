@@ -373,7 +373,21 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 	
 	public RayWheelControl getWheel(int w_id) {
 		return this.wheelControls[w_id];
-	}
+    }
+    public List<RayWheelControl> getDriveWheels() {
+        List<RayWheelControl> results = new LinkedList<>();
+
+        if (this.carData.driveFront) {
+            results.add(getWheel(0));
+            results.add(getWheel(1));
+        }
+        if (this.carData.driveRear) {
+            results.add(getWheel(2));
+            results.add(getWheel(3));
+        }
+
+        return results;
+    }
 	
 	//physics ones, thinking this looks bad
 	public Vector3f getPhysicsLocation() {
