@@ -1,10 +1,12 @@
 package drive;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -34,6 +36,7 @@ public class DriveRaceProgress {
     private static final Vector3f CHECKPOINT_SIZE = new Vector3f(1.5f, 1.5f, 1.5f);
 
     private final AssetManager am;
+    private final Checkpoint firstCheckpoint;
     private final Checkpoint[] checkpoints;
     private final Node rootNode;
     private final HashMap<RayCarControl, RacerState> racers;
@@ -46,6 +49,8 @@ public class DriveRaceProgress {
 
     protected DriveRaceProgress(Application app, Vector3f[] checkpointPositions, Collection<RayCarControl> cars, boolean ifDebug) {
         this.checkpoints = new Checkpoint[checkpointPositions.length];
+        this.firstCheckpoint = checkpoints[0];
+
         this.am = app.getAssetManager();
         this.rootNode = new Node("progress root node");
         ((SimpleApplication) app).getRootNode().attachChild(rootNode);
@@ -117,8 +122,15 @@ public class DriveRaceProgress {
 
     public String getCheckpointAsStr() {
         List<String> result = new LinkedList<String>();
-        for (Entry<RayCarControl, RacerState> a: racers.entrySet()) {
-            result.add(a.getKey().getCarData().name + " " + a.getValue().nextCheckpoint.num);
+        int count = 1;
+        List<Entry<RayCarControl, RacerState>> list = racers.entrySet().stream()
+            .sorted(new RacerSort())
+            .collect(Collectors.toList());
+        for (Entry<RayCarControl, RacerState> a: list) {
+            result.add(count + " | " + a.getKey().getCarData().name 
+                + " l:" + a.getValue().lap 
+                + " ch:" + a.getValue().nextCheckpoint.num);
+            count++;
         }
         return H.str(result.toArray(), "\n");
     }
@@ -133,6 +145,10 @@ public class DriveRaceProgress {
             // then finally, update checkpoint
             int nextNum = (racer.nextCheckpoint.num + 1) % checkpoints.length;
             racer.nextCheckpoint = checkpoints[nextNum];
+
+            if (racer.nextCheckpoint == firstCheckpoint) {
+                racer.lap++;
+            }
         }
     }
 
@@ -150,6 +166,13 @@ public class DriveRaceProgress {
         return null;
     }
 
+    class RacerSort implements Comparator<Entry<RayCarControl, RacerState>> {
+        @Override
+        public int compare(Entry<RayCarControl, RacerState> o1, Entry<RayCarControl, RacerState> o2) {
+            return (o2.getValue().lap * 100000 + o2.getValue().nextCheckpoint.num) 
+                - (o1.getValue().lap * 100000 + o1.getValue().nextCheckpoint.num);
+        }
+    }
 
     class RacerState {
         public int lap;
