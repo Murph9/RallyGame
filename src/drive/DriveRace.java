@@ -82,12 +82,21 @@ public class DriveRace extends BaseAppState {
             _checkpoints.toArray(checkpoints);
 
         } else {
-            // TODO hard coded checkpoints for blockfort
-            checkpoints = new Vector3f[4];
-            checkpoints[0] = new Vector3f(-74, 0, -8);
-            checkpoints[1] = new Vector3f(56, 0, -8);
-            checkpoints[2] = new Vector3f(56, 0, -134);
-            checkpoints[3] = new Vector3f(-74, 0, -134);
+            // TODO hard coded checkpoints for duct2
+            checkpoints = new Vector3f[13];
+            checkpoints[0] = new Vector3f(-91, 0, 77);
+            checkpoints[1] = new Vector3f(-237, 0, 68);
+            checkpoints[2] = new Vector3f(-321, 0, -43);
+            checkpoints[3] = new Vector3f(-255, 0, -198);
+            checkpoints[4] = new Vector3f(-91, 0, -189);
+            checkpoints[5] = new Vector3f(-19, 0, -75);
+            checkpoints[6] = new Vector3f(-1, 0, -67);
+            checkpoints[7] = new Vector3f(19, 0, -75);
+            checkpoints[8] = new Vector3f(91, 0, -189);
+            checkpoints[9] = new Vector3f(255, 0, -198);
+            checkpoints[10] = new Vector3f(321, 0, -43);
+            checkpoints[11] = new Vector3f(237, 0, 68);
+            checkpoints[12] = new Vector3f(91, 0, 77);
         }
 
         // TODO put world start/rot stuff in the world class better

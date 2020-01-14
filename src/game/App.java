@@ -38,7 +38,9 @@ public class App extends SimpleApplication {
                 , new CarBuilder(0.4f, new CarDataLoader())
                 , new ConstantChecker()
 				, new DebugAppState()
-				//, new DetailedProfilerState() //profiles in jme 3.2: TODO add physics engine stuff using custom sections
+                
+                // profiles in jme 3.2: possibly add physics engine stuff using custom sections
+                //, new DetailedProfilerState() 
             );
 	}
 
