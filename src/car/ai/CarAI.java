@@ -10,17 +10,30 @@ import car.ray.RayCarControl;
 import car.ray.RayCar.GripHelper;
 import game.DebugAppState;
 import helper.H;
+import helper.Log;
+import service.ray.IPhysicsRaycaster;
+import service.ray.RaycasterResult;
 
 public abstract class CarAI {
 	
 	protected final RayCarControl car;
-	private final float BEST_LAT_FORCE;
-	private DebugAppState debug;
+    protected final float BEST_LAT_FORCE;
+    protected final float BEST_LONG_FORCE;
+    
+    protected IPhysicsRaycaster raycaster;
+    private DebugAppState debug;
+
+    private int reverseAttempts;
+    private float reverseTimer;
+    private float stuckTimer;
+
+    private float fallTimer;
 
 	public CarAI(RayCarControl car) {
-		this.car = car;
+        this.car = car;
 		
-		BEST_LAT_FORCE = GripHelper.calcMaxLoad(this.car.getCarData().wheelData[0].pjk_lat);
+        BEST_LAT_FORCE = GripHelper.calcMaxLoad(car.getCarData().wheelData[0].pjk_lat);
+        BEST_LONG_FORCE = GripHelper.calcMaxLoad(car.getCarData().wheelData[0].pjk_long);
 
 		//ignore all turning speed factor code for AIs
 		car.onAction("IgnoreSteeringSpeedFactor", true, 1);
@@ -28,7 +41,10 @@ public abstract class CarAI {
 	
 	public void setDebugAppState(DebugAppState debug) {
 		this.debug = debug;
-	}
+    }
+    public void setPhysicsRaycaster(IPhysicsRaycaster raycaster) {
+        this.raycaster = raycaster;
+    }
 
 	public abstract void update(float tpf);
 	
@@ -133,5 +149,78 @@ public abstract class CarAI {
         return this.car.driftAngle() < 5;
     }
 
-	//TODO helper ray cast method, to find out what to avoid
+    //TODO better helper ray cast method, to find out what to avoid
+    
+    /**Gets (in seconds) time till a collision */
+    protected float forwardRayCollideTime() {
+        RaycasterResult result = forwardRay();
+        if (result == null)
+            return Float.MAX_VALUE;
+
+        // calculate relative distance when moving for , so we don't randomly brake behind something
+        Vector3f selfVel = car.getLinearVelocity();
+        Vector3f otherVel = result.obj.getLinearVelocity();
+        Vector3f diffVel = otherVel.project(selfVel); // TODO order?
+
+        return diffVel.length();
+    }
+
+    private RaycasterResult forwardRay() {
+        if (raycaster == null) {
+            Log.e("CarAI needs the raycaster set :(");
+            return null;
+        }
+
+        RaycasterResult result = raycaster.castRay(car.getPhysicsLocation(),
+                car.getLinearVelocity().normalize().mult(100), this.car.getPhysicsObject());
+        if (result != null) {
+            return result;
+        }
+        
+        return null;
+    }
+
+    //TODO change these methods below to be CarAi 'behaviours' in their own class?
+
+    protected void detectVeryLongFall(float tpf) {
+        if (car.noWheelsInContact()) {
+            //no wheels in contact for a while, then reset
+            fallTimer += tpf;
+
+            if (fallTimer > 7) {
+                onEvent("Reset", true);
+                fallTimer = 0;
+            }
+        } else {
+            fallTimer = 0;
+        }
+    }
+
+    protected void tryStuffIfStuck(float tpf) {
+        if (reverseTimer > 0) {
+            //reverse for a bit
+            onEvent("Reverse", true);
+            reverseTimer -= tpf;
+            if (reverseTimer < 0) {
+                onEvent("Reverse", false);
+                reverseAttempts = 0;
+            }
+        }
+        
+        if (car.getLinearVelocity().length() < 0.5f) {
+            stuckTimer += tpf;
+            if (stuckTimer > 2 && reverseAttempts > 2) {
+                reverseTimer = 3; //for 3 seconds
+            }
+
+            if (stuckTimer > 3) {
+                // very still for a while, reset
+                onEvent("Reset", true);
+                stuckTimer = 0;
+                reverseAttempts = 0; //TODO better spot please
+            }
+        } else {
+            stuckTimer = 0;
+        }
+    }
 }

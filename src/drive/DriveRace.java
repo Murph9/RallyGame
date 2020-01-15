@@ -38,7 +38,7 @@ public class DriveRace extends BaseAppState {
     private final StaticWorldBuilder world;
     
     // ai things
-    private final int themCount = 14;
+    private final int themCount = 11;
 
     public CarBuilder cb;
     public DriveRaceProgress progress;

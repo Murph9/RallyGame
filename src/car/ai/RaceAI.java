@@ -10,7 +10,6 @@ import drive.DriveRace;
 
 public class RaceAI extends CarAI {
 
-    private float stuckTimer;
 	private DriveRace race;
 	
 	public RaceAI(RayCarControl car, DriveRace race) {
@@ -26,31 +25,19 @@ public class RaceAI extends CarAI {
 			justBrake();
 			return;
 		}
-		
-		driveAt(atPos);
-
+        
         float velocity = car.getLinearVelocity().length();
 
-        // if going too slow speed up
-        if (velocity < 2) {
-            onEvent("Accel", true);
-            onEvent("Brake", false);
-        }
+		driveAt(atPos);
+        tryStuffIfStuck(tpf);
+        detectVeryLongFall(tpf);
+
+        //TODO attempt reverse driving
+        
 
         // very still, flip
         if (velocity < 0.05f && car.up.y < 0) {
             onEvent("Flip", true);
-        }
-
-        // very still for a while, reset
-        if (velocity < 0.5f) {
-            stuckTimer += tpf;
-            if (stuckTimer > 3) {
-                onEvent("Reset", true);
-                stuckTimer = 0;
-            }
-        } else {
-            stuckTimer = 0;
         }
 
         //reduce excess wheel slipping
@@ -62,5 +49,17 @@ public class RaceAI extends CarAI {
         if (velocity > 10 && gripSum > wheels.size()) {
             onEvent("Accel", false);
         }
-	}
+
+        //prevent hitting straight into walls
+        float result = forwardRayCollideTime();
+        if (result < 4) {
+            onEvent("Brake", true);
+        }
+        
+        // if going too slow speed up
+        if (velocity < 2) {
+            onEvent("Accel", true);
+            onEvent("Brake", false);
+        }
+    }
 }
