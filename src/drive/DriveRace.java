@@ -38,7 +38,7 @@ public class DriveRace extends BaseAppState {
     private final StaticWorldBuilder world;
     
     // ai things
-    private final int themCount = 11;
+    private final int themCount = 15;
 
     public CarBuilder cb;
     public DriveRaceProgress progress;
@@ -84,19 +84,19 @@ public class DriveRace extends BaseAppState {
         } else {
             // TODO hard coded checkpoints for duct2
             checkpoints = new Vector3f[] {
-                new Vector3f(-237, 0, 68),
-                new Vector3f(-321, 0, -43),
-                new Vector3f(-255, 0, -198),
-                new Vector3f(-91, 0, -189),
-                new Vector3f(-17, 0, -105),
-                new Vector3f(-1, 0, -67),
-                new Vector3f(17, 0, -105),
-                new Vector3f(91, 0, -189),
-                new Vector3f(255, 0, -198),
-                new Vector3f(321, 0, -43),
-                new Vector3f(237, 0, 68),
-                new Vector3f(91, 0, 77),
-                new Vector3f(-91, 0, 77)
+                new Vector3f(-237, -2, 68),
+                new Vector3f(-321, -2, -43),
+                new Vector3f(-255, -2, -198),
+                new Vector3f(-91, -2, -189),
+                new Vector3f(-17, -2, -105),
+                new Vector3f(-1, -2, -67),
+                new Vector3f(17, -2, -105),
+                new Vector3f(91, -2, -189),
+                new Vector3f(255, -2, -198),
+                new Vector3f(321, -2, -43),
+                new Vector3f(237, -2, 68),
+                new Vector3f(91, -2, 77),
+                new Vector3f(-91, -2, 77)
             };
         }
 
@@ -115,7 +115,7 @@ public class DriveRace extends BaseAppState {
         //buildCars
         this.cb = getState(CarBuilder.class);
         RayCarControl rayCar = cb.addCar(car, worldStarts[0], worldRot, true);
-        
+
         menu = new RaceMenu(null);
         getStateManager().attach(menu);
         
@@ -230,7 +230,7 @@ public class DriveRace extends BaseAppState {
             }
         }
     }
-    
+
     public Transform resetTransform(RayCarControl car) {
         Vector3f pos = progress.getCurrentCheckpoint(car);
         Vector3f next = progress.getNextCheckpoint(car);

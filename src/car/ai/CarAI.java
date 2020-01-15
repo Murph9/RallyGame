@@ -23,7 +23,6 @@ public abstract class CarAI {
     protected IPhysicsRaycaster raycaster;
     private DebugAppState debug;
 
-    private int reverseAttempts;
     private float reverseTimer;
     private float stuckTimer;
 
@@ -157,12 +156,29 @@ public abstract class CarAI {
         if (result == null)
             return Float.MAX_VALUE;
 
-        // calculate relative distance when moving for , so we don't randomly brake behind something
         Vector3f selfVel = car.getLinearVelocity();
         Vector3f otherVel = result.obj.getLinearVelocity();
-        Vector3f diffVel = otherVel.project(selfVel); // TODO order?
 
-        return diffVel.length();
+        //if its not moving, calculate time to hit
+        if (otherVel.length() < 0.01f) {
+            return result.dist/selfVel.length();
+        }
+
+        return Float.MAX_VALUE;
+        
+        /*
+        //TODO calcuate relative velocity correctly:
+        // calculate relative velocity, so we don't randomly brake behind something
+        Vector3f diffVel = otherVel.project(selfVel);
+
+        //if the vector is away, then ignore this (detecting colinear but negative vectors)
+        if (diffVel.normalize() != selfVel.normalize()) {
+            return 9999999; //TODO don't use != please
+        }
+        
+        float distanceBetween = car.getPhysicsLocation().distance(result.obj.getPhysicsLocation());
+        return distanceBetween/diffVel.length();
+        */
     }
 
     private RaycasterResult forwardRay() {
@@ -203,21 +219,13 @@ public abstract class CarAI {
             reverseTimer -= tpf;
             if (reverseTimer < 0) {
                 onEvent("Reverse", false);
-                reverseAttempts = 0;
+                onEvent("Right", false);
+                onEvent("Left", false);
             }
-        }
-        
-        if (car.getLinearVelocity().length() < 0.5f) {
+        } else if (car.getLinearVelocity().length() < 0.5f) {
             stuckTimer += tpf;
-            if (stuckTimer > 2 && reverseAttempts > 2) {
+            if (stuckTimer > 2) {
                 reverseTimer = 3; //for 3 seconds
-            }
-
-            if (stuckTimer > 3) {
-                // very still for a while, reset
-                onEvent("Reset", true);
-                stuckTimer = 0;
-                reverseAttempts = 0; //TODO better spot please
             }
         } else {
             stuckTimer = 0;
