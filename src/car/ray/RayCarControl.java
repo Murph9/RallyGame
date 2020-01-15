@@ -28,6 +28,7 @@ import drive.DriveBase;
 import drive.DriveRace;
 import helper.H;
 import helper.Log;
+import service.ray.PhysicsRaycaster;
 
 //visual/input things
 public class RayCarControl extends RayCarPowered implements ICarPowered {
@@ -306,6 +307,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 	
 	public void attachAI(CarAI ai, boolean setNotPlayer) {
 		this.ai = ai;
+        this.ai.setPhysicsRaycaster(new PhysicsRaycaster(space));
 
 		if (setNotPlayer) {
 			//remove any controls on the car
@@ -331,7 +333,10 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 		for (RawInputListener ril: this.controls)
 			im.addRawInputListener(ril);
 	}
-	
+    
+    public boolean noWheelsInContact() {
+        return !wheels[0].inContact && !wheels[1].inContact && !wheels[2].inContact && !wheels[3].inContact;
+    }
 	public RayWheelControl getWheel(int w_id) {
 		return this.wheelControls[w_id];
     }

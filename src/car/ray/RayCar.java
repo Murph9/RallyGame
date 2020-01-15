@@ -13,6 +13,9 @@ import com.jme3.math.Vector3f;
 import car.data.CarDataConst;
 import car.data.CarSusDataConst;
 import car.data.WheelDataTractionConst;
+import service.ray.IPhysicsRaycaster;
+import service.ray.PhysicsRaycaster;
+import service.ray.RaycasterResult;
 
 //doesn't extend anything, but here are some reference classes
 //https://github.com/jMonkeyEngine/jmonkeyengine/blob/master/jme3-core/src/main/java/com/jme3/scene/Spatial.java
@@ -36,7 +39,7 @@ public class RayCar implements PhysicsTickListener {
 	private static final Vector3f localDown = new Vector3f(0, -1, 0);
 	
 	protected CarDataConst carData;
-	private final CarRaycaster raycaster;
+	private IPhysicsRaycaster raycaster;
     protected final RigidBodyControl rbc;
     protected boolean rbEnabled() { return rbc.isEnabled() && rbc.isInWorld() && rbc.isActive(); }
 	
@@ -60,7 +63,6 @@ public class RayCar implements PhysicsTickListener {
 		this.carData = carData;
 		
 		this.planarGForce = new Vector3f();
-		this.raycaster = new CarRaycaster();
 		
 		this.wheels = new RayWheel[carData.wheelData.length];
 		for (int i  = 0; i < wheels.length; i++) {
@@ -77,6 +79,9 @@ public class RayCar implements PhysicsTickListener {
 	
 	@Override
 	public void prePhysicsTick(PhysicsSpace space, float tpf) {
+        if (this.raycaster == null || raycaster.getPhysicsSpace() != space)
+            this.raycaster = new PhysicsRaycaster(space);
+        
         if (!rbEnabled())
             return;
 
@@ -109,7 +114,7 @@ public class RayCar implements PhysicsTickListener {
 			//cast ray from suspension min, to max + radius (radius because bottom out check might as well be the size of the wheel)
 			wheels[w_id].rayStartWorld = vecLocalToWorld(localPos.add(localDown.mult(sus.min_travel)));
 			wheels[w_id].rayDirWorld = w_angle.mult(localDown.mult(susTravel + carData.wheelData[w_id].radius));
-			FirstRayHitDetails col = raycaster.castRay(space, rbc, wheels[w_id].rayStartWorld, wheels[w_id].rayDirWorld);
+			RaycasterResult col = raycaster.castRay(wheels[w_id].rayStartWorld, wheels[w_id].rayDirWorld, rbc);
 						
 			if (col == null) { //suspension ray found nothing, extend all the way and don't apply a force (set to 0)
 				wheels[w_id].inContact = false;

@@ -24,8 +24,8 @@ public class DriveAI extends DriveBase {
 	
 	@Override
 	public void initialize(Application app) {
-    	super.initialize(app);
-    	
+        super.initialize(app);
+        
     	for (int i = 0; i < this.themCount; i++) {
 			RayCarControl c = this.cb.addCar(them, world.getStartPos(), world.getStartRot(), false);
 			c.attachAI(new DriveAtAI(c, this.cb.get(0).getPhysicsObject()), true);
