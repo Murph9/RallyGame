@@ -107,15 +107,19 @@ class NormalisedStats {
     private float handling;
     private float braking;
     
-    //TODO idea for speed: calc max speed for gearing and compare drag
+    //idea for top speed: calc max speed for gearing and compare drag
     public NormalisedStats(CarDataConst data) {
-        accel = skewLog(data.getMaxPower().first / data.mass, -1, 0.75f, 0, 1);
-        topSpeed = skewLog(data.getMaxPower().first / Math.abs(data.quadraticDrag(new Vector3f(27, 0, 0)).x), -2, 10, 0, 1);
-        handling = skewLog(data.mass / GripHelper.calcMaxLoad(data.wheelData[0].pjk_lat), -1, 1, 0, 1);
-        braking = skewLog(Math.min(data.brakeMaxTorque, GripHelper.calcMaxLoad(data.wheelData[0].pjk_long)) / data.mass, 0, 10, 0, 1);
+        accel = skewLog(data.getMaxPower().first / data.mass, -1, 0.75f);
+        topSpeed = skewLog(data.getMaxPower().first / Math.abs(data.quadraticDrag(new Vector3f(27, 0, 0)).x), -2, 10);
+        handling = skewLog(data.mass / GripHelper.calcMaxLoad(data.wheelData[0].pjk_lat), -1, 1);
+        braking = skewLog(Math.min(data.brakeMaxTorque, GripHelper.calcMaxLoad(data.wheelData[0].pjk_long)) / data.mass, 0, 10);
     }
 
     // attempting to scale all values onto 0-1 so that we can display them like any game
+    private static float skewLog(float value, float preMin, float preMax) {
+        return skewLog(value, preMin, preMax, 0, 1);
+    }
+
     private static float skewLog(float value, float preMin, float preMax, float min, float max) {
         float mx = FastMath.log(value - preMin) / FastMath.log(preMax - preMin);
         return mx * (max - min) + min;
