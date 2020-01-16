@@ -52,7 +52,7 @@ public class RaceAI extends CarAI {
 
         //prevent hitting straight into walls
         float result = forwardRayCollideTime();
-        if (result < 4) {
+        if (result < 1.5f) {
             onEvent("Brake", true);
         }
         

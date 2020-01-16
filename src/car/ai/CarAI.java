@@ -148,8 +148,6 @@ public abstract class CarAI {
         return this.car.driftAngle() < 5;
     }
 
-    //TODO better helper ray cast method, to find out what to avoid
-    
     /**Gets (in seconds) time till a collision */
     protected float forwardRayCollideTime() {
         RaycasterResult result = forwardRay();
@@ -163,22 +161,16 @@ public abstract class CarAI {
         if (otherVel.length() < 0.01f) {
             return result.dist/selfVel.length();
         }
-
-        return Float.MAX_VALUE;
         
-        /*
-        //TODO calcuate relative velocity correctly:
-        // calculate relative velocity, so we don't randomly brake behind something
-        Vector3f diffVel = otherVel.project(selfVel);
-
-        //if the vector is away, then ignore this (detecting colinear but negative vectors)
-        if (diffVel.normalize() != selfVel.normalize()) {
-            return 9999999; //TODO don't use != please
-        }
+        // calculate difference in relative velocity, so we don't randomly brake behind something
+        Vector3f otherRelVel = otherVel.project(selfVel);
+        if (otherRelVel.length() > selfVel.length())
+            return Float.MAX_VALUE; //if their projected velocity is larger, no collision
         
+        Vector3f selfDiffWithRel = selfVel.subtract(otherRelVel);
+
         float distanceBetween = car.getPhysicsLocation().distance(result.obj.getPhysicsLocation());
-        return distanceBetween/diffVel.length();
-        */
+        return distanceBetween/selfDiffWithRel.length();
     }
 
     private RaycasterResult forwardRay() {
