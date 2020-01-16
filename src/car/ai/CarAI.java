@@ -14,7 +14,7 @@ import helper.Log;
 import service.ray.IPhysicsRaycaster;
 import service.ray.RaycasterResult;
 
-public abstract class CarAI {
+public abstract class CarAI implements ICarAI {
 	
 	protected final RayCarControl car;
     protected final float BEST_LAT_FORCE;
@@ -188,7 +188,7 @@ public abstract class CarAI {
         return null;
     }
 
-    //TODO change these methods below to be CarAi 'behaviours' in their own class?
+    //TODO change these methods below to be CarAi 'behaviours' in their own classes? Or some kind of composition?
 
     protected void detectVeryLongFall(float tpf) {
         if (car.noWheelsInContact()) {

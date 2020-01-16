@@ -22,7 +22,7 @@ import com.jme3.scene.Node;
 
 import car.JoystickEventListener;
 import car.MyKeyListener;
-import car.ai.CarAI;
+import car.ai.ICarAI;
 import car.data.CarDataConst;
 import drive.DriveBase;
 import drive.DriveRace;
@@ -42,7 +42,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 	
 	// Car controlling things
 	private final List<RawInputListener> controls;
-	private CarAI ai;
+	private ICarAI ai;
 	
 	public float travelledDistance;
 	
@@ -305,7 +305,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 		this.carData = data;
 	}
 	
-	public void attachAI(CarAI ai, boolean setNotPlayer) {
+	public void attachAI(ICarAI ai, boolean setNotPlayer) {
 		this.ai = ai;
         this.ai.setPhysicsRaycaster(new PhysicsRaycaster(space));
 
@@ -318,7 +318,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 			}
 		}
 	}
-	public CarAI getAI() {
+	public ICarAI getAI() {
 		return this.ai;
 	}
 	public void attachControls(InputManager im) {

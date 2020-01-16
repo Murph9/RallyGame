@@ -19,21 +19,19 @@ public class RaceAI extends CarAI {
 
 	@Override
 	public void update(float tpf) {
-		Vector3f pos = car.getPhysicsLocation();
-		Vector3f atPos = race.getNextCheckpoint(car, pos);
+		Vector3f atPos = race.getNextCheckpoint(car);
 		if (atPos == null) {
 			justBrake();
 			return;
 		}
         
-        float velocity = car.getLinearVelocity().length();
+        driveAt(atPos);
+        
 
-		driveAt(atPos);
         tryStuffIfStuck(tpf);
         detectVeryLongFall(tpf);
 
-        //TODO attempt reverse driving
-        
+        float velocity = car.getLinearVelocity().length();
 
         // very still, flip
         if (velocity < 0.05f && car.up.y < 0) {

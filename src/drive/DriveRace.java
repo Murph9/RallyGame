@@ -27,7 +27,6 @@ import world.StaticWorldBuilder;
 //TODO DriveRace can't be converted to DriveBase as the world must be initialised before this
 public class DriveRace extends BaseAppState {
 
-    //TODO better AI, otherwise this actually sucks
     private static boolean PROGRESS_DEBUG = true;
     public RaceMenu menu;
     
@@ -80,7 +79,6 @@ public class DriveRace extends BaseAppState {
         Vector3f[] checkpoints = new Vector3f[_checkpoints.size()];
         if (!_checkpoints.isEmpty()) {
             _checkpoints.toArray(checkpoints);
-
         } else {
             // TODO hard coded checkpoints for duct2
             checkpoints = new Vector3f[] {
@@ -288,7 +286,7 @@ public class DriveRace extends BaseAppState {
         this.cb.setEnabled(false);
     }
     
-    public Vector3f getNextCheckpoint(RayCarControl car, Vector3f pos) {
+    public Vector3f getNextCheckpoint(RayCarControl car) {
         return progress.getNextCheckpoint(car);
     }
 }
