@@ -70,9 +70,9 @@ public class StaticWorldBuilder extends World {
 		super.cleanup(app);
 	}
 
-	public Spatial getModelForDriveRace() {
-		return this.model;
-	}
+    public StaticWorld getTypeForDriveRace() {
+        return this.world;
+    }
 	
 	// this doesn't have an empty constructor so we define it manually
 	public World copy() {

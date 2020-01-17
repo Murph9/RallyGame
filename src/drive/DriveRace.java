@@ -1,6 +1,5 @@
 package drive;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import com.jme3.app.Application;
@@ -12,7 +11,6 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
 
 import car.CarBuilder;
 import car.CarCamera;
@@ -22,6 +20,8 @@ import car.data.Car;
 import car.ray.RayCarControl;
 import helper.H;
 import helper.Log;
+import service.GridPositions;
+import world.StaticWorld;
 import world.StaticWorldBuilder;
 
 //TODO DriveRace can't be converted to DriveBase as the world must be initialised before this
@@ -47,6 +47,7 @@ public class DriveRace extends BaseAppState {
     private CarUI uiNode;
     
     //racing things
+    private final GridPositions gridPositions;
     private Vector3f[] worldStarts;
     private Matrix3f worldRot;
     
@@ -54,6 +55,11 @@ public class DriveRace extends BaseAppState {
         super();
         this.car = Car.Runner;
         this.world = world;
+
+        if (this.world.getTypeForDriveRace() != StaticWorld.duct2)
+            throw new IllegalArgumentException();
+        
+        this.gridPositions = new GridPositions(3, 10);
     }
     
     @Override
@@ -62,59 +68,48 @@ public class DriveRace extends BaseAppState {
         
         nextState();
         
-        //get the list of checkpoints
-        //TODO use whatever duel does, when its finished
-        List<Vector3f> _checkpoints = new LinkedList<Vector3f>();
-        Spatial model = world.getModelForDriveRace();
-        Spatial s = ((Node) model).getChild(0);
-        for (Spatial points : ((Node) s).getChildren()) {
-            if (points.getName().equals("Points")) {
-                for (Spatial checkpoint : ((Node) points).getChildren()) {
-                    _checkpoints.add(checkpoint.getLocalTranslation());
-                }
-            }
-        }
-        //end get checkpoints
-        
-        Vector3f[] checkpoints = new Vector3f[_checkpoints.size()];
-        if (!_checkpoints.isEmpty()) {
-            _checkpoints.toArray(checkpoints);
-        } else {
-            // TODO hard coded checkpoints for duct2
-            checkpoints = new Vector3f[] {
+        //hard coded checkpoints for duct2 (small)
+        Vector3f[] checkpoints = new Vector3f[] {
+                new Vector3f(-167, -2, 81),
                 new Vector3f(-237, -2, 68),
+                new Vector3f(-290, -2, 29),
                 new Vector3f(-321, -2, -43),
+                new Vector3f(-311, -2, -130),
                 new Vector3f(-255, -2, -198),
+                new Vector3f(-170, -2, -215),
                 new Vector3f(-91, -2, -189),
                 new Vector3f(-17, -2, -105),
                 new Vector3f(-1, -2, -67),
+
                 new Vector3f(17, -2, -105),
                 new Vector3f(91, -2, -189),
+                new Vector3f(170, -2, -215),
                 new Vector3f(255, -2, -198),
+                new Vector3f(311, -2, -130),
                 new Vector3f(321, -2, -43),
+                new Vector3f(290, -2, 29),
                 new Vector3f(237, -2, 68),
+                new Vector3f(167, -2, 81),
                 new Vector3f(91, -2, 77),
                 new Vector3f(-91, -2, 77)
             };
-        }
+        
 
-        // TODO put world start/rot stuff in the world class better
-        Vector3f worldStart = checkpoints[checkpoints.length - 1];
+        // generate starting positions and rotations
         Quaternion q = new Quaternion();
         q.lookAt(checkpoints[0].subtract(checkpoints[checkpoints.length - 1]), Vector3f.UNIT_Y);
         this.worldRot = q.toRotationMatrix();
 
-        this.worldStarts = new Vector3f[themCount + 1];
-        for (int i = 0; i < worldStarts.length; i++) {
-            this.worldStarts[i] = worldStart
-                    .add(worldRot.mult(new Vector3f(2, 0, 0).mult(i % 2 == 0 ? (i + 1) / 2 : -((i + 1) / 2))));
-        }
+        List<Vector3f> startPositions = gridPositions.generate(themCount+1, checkpoints[0], 
+                checkpoints[0].subtract(checkpoints[checkpoints.length - 1]));
+
+        this.worldStarts = startPositions.toArray(new Vector3f[0]);
 
         //buildCars
         this.cb = getState(CarBuilder.class);
         RayCarControl rayCar = cb.addCar(car, worldStarts[0], worldRot, true);
 
-        menu = new RaceMenu(null);
+        menu = new RaceMenu(null); 
         getStateManager().attach(menu);
         
         uiNode = new CarUI(rayCar);
@@ -134,8 +129,11 @@ public class DriveRace extends BaseAppState {
         
         getState(BulletAppState.class).setEnabled(true);
 
-        progress = new DriveRaceProgress(getApplication(), checkpoints, cb.getAll(), PROGRESS_DEBUG);
+        progress = new DriveRaceProgress(getApplication(), checkpoints, cb.getAll());
+        progress.setDebug(PROGRESS_DEBUG);
+        progress.setPlayer(rayCar);
         
+        //actually init
         nextState();
     }
     
@@ -150,29 +148,29 @@ public class DriveRace extends BaseAppState {
     }
     private void nextState() {
         stateChanged = true;
-        switch(state) {
-            case NA:
-                state = RaceState.Init;
-                break;
-            case Init:
-                state = RaceState.Ready;
-                break;
-            case Ready:
-                state = RaceState.Racing;
-                break;
-            case Racing:
-                state = RaceState.Win;
-                break;
-            case Win:
-                state = RaceState.Init;
-                break;
-            default:
-                try {
-                    throw new Exception("Huh?" + state);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                return;
+        switch (state) {
+        case NA:
+            state = RaceState.Init;
+            break;
+        case Init:
+            state = RaceState.Ready;
+            break;
+        case Ready:
+            state = RaceState.Racing;
+            break;
+        case Racing:
+            state = RaceState.Win;
+            break;
+        case Win:
+            state = RaceState.Init;
+            break;
+        default:
+            try {
+                throw new Exception("Huh?" + state);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return;
         }
     }
     
@@ -189,14 +187,11 @@ public class DriveRace extends BaseAppState {
         
         if (stateChanged) {
             stateChanged = false;
-            
-            if (state == RaceState.Init) {
-                setAllCarsToStart();
-            } else if (state == RaceState.Ready)
-                this.stateTimeout = 2;
+            if (state == RaceState.Ready)
+                this.stateTimeout = 4;
         }
         
-        switch(state) {
+        switch (state) {
         case NA:
             return;
         case Init:
@@ -209,7 +204,7 @@ public class DriveRace extends BaseAppState {
             progress.update(tpf);
             break;
         case Win:
-            //delay and stuff maybe
+            // delay and stuff maybe
             break;
         default:
             try {

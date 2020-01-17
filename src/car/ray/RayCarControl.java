@@ -263,7 +263,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 			transform = drive.resetTransform(this);
 			drive.resetWorld();
 		} else {
-			//TODO DriveRace hack, just happens to be the same as the interface
+			//TODO DriveRace hack, just happens to be the same as the abstract class method
 			DriveRace race = this.app.getStateManager().getState(DriveRace.class);
 			transform = race.resetTransform(this);
 		}

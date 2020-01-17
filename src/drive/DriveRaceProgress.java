@@ -1,12 +1,12 @@
 package drive;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -32,34 +32,37 @@ import helper.H;
 
 public class DriveRaceProgress {
 
-    private static final ColorRGBA CHECKPOINT_COLOUR = new ColorRGBA(0, 1, 0, 0.2f);
-    private static final Vector3f CHECKPOINT_SIZE = new Vector3f(1.5f, 1.5f, 1.5f);
-
     private final AssetManager am;
     private final Checkpoint firstCheckpoint;
     private final Checkpoint[] checkpoints;
     private final Node rootNode;
     private final HashMap<RayCarControl, RacerState> racers;
-    private final boolean ifDebug;
 
     private final GhostObjectCollisionListener checkpointCollisionListener;
 
+    private RayCarControl player;
+
     // debug things
+    private boolean ifDebug;
     private Node debugNode;
 
-    protected DriveRaceProgress(Application app, Vector3f[] checkpointPositions, Collection<RayCarControl> cars, boolean ifDebug) {
+    protected DriveRaceProgress(Application app, Vector3f[] checkpointPositions, Collection<RayCarControl> cars) {
+        this(app, checkpointPositions, cars, 8, new ColorRGBA(0, 1, 0, 0.4f));
+    }
+
+    protected DriveRaceProgress(Application app, Vector3f[] checkpointPositions, Collection<RayCarControl> cars, float checkpointScale, ColorRGBA checkpointColour) {
         this.checkpoints = new Checkpoint[checkpointPositions.length];
 
         this.am = app.getAssetManager();
         this.rootNode = new Node("progress root node");
         ((SimpleApplication) app).getRootNode().attachChild(rootNode);
-        this.ifDebug = ifDebug;
 
         PhysicsSpace physicsSpace = app.getStateManager().getState(BulletAppState.class).getPhysicsSpace();
 
+        Vector3f checkpointSize = Vector3f.UNIT_XYZ.mult(checkpointScale);
         for (int i = 0; i < checkpointPositions.length; i++) {
-            Spatial box = new Geometry("checkpoint box " + i, new Box(CHECKPOINT_SIZE.negate(), CHECKPOINT_SIZE));
-            box = LoadModelWrapper.create(app.getAssetManager(), box, CHECKPOINT_COLOUR);
+            Spatial box = new Geometry("checkpoint box " + i, new Box(checkpointSize.negate(), checkpointSize));
+            box = LoadModelWrapper.create(app.getAssetManager(), box, checkpointColour);
 
             GhostControl ghost = new GhostControl(CollisionShapeFactory.createBoxShape(box));
             box.setLocalTranslation(checkpointPositions[i]);
@@ -80,9 +83,27 @@ public class DriveRaceProgress {
         physicsSpace.addCollisionListener((PhysicsCollisionListener) checkpointCollisionListener);
     }
 
+    protected void setDebug(boolean ifDebug) {
+        this.ifDebug = ifDebug;
+        
+        //when turning off remove debug node
+        if (!ifDebug && debugNode != null) {
+            rootNode.detachChild(debugNode);
+        }
+    }
+    protected void setPlayer(RayCarControl player) {
+        this.player = player;
+    }
+
     protected void update(float tpf) {
         if (checkpoints == null || checkpoints.length < 1)
             return;
+
+        //calc distance to nextCheckpoint
+        for (Entry<RayCarControl, RacerState> entry: this.racers.entrySet()) {
+            Vector3f carPos = entry.getKey().getPhysicsLocation();
+            entry.getValue().calcCheckpointDistance(carPos);
+        }
 
         if (ifDebug) {
             // update the checkpoint arrows
@@ -122,18 +143,27 @@ public class DriveRaceProgress {
 
     @Override
     public String toString() {
-        List<String> result = new LinkedList<String>();
+        List<Entry<RayCarControl, RacerState>> list = new ArrayList<Entry<RayCarControl, RacerState>>(racers.entrySet());
+        Collections.sort(list, new Comparator<Entry<RayCarControl, RacerState>>() {
+            @Override
+            public int compare(Entry<RayCarControl, RacerState> o1, Entry<RayCarControl, RacerState> o2) {
+                return o1.getValue().compareTo(o2.getValue());
+            }
+        });
+
+        StringBuilder sb = new StringBuilder();
         int count = 1;
-        List<Entry<RayCarControl, RacerState>> list = racers.entrySet().stream()
-            .sorted(new RacerSort())
-            .collect(Collectors.toList());
+        int checkpointCount = this.checkpoints.length;
         for (Entry<RayCarControl, RacerState> a: list) {
-            result.add(count + " | " + a.getKey().getCarData().name 
-                + " l:" + a.getValue().lap 
-                + " ch:" + a.getValue().nextCheckpoint.num);
+            RacerState state = a.getValue();
+            sb.append(count + " | " + a.getKey().getCarData().name
+                    + " l:" + state.lap
+                    + " ch:" + state.nextCheckpoint.num + "/" + checkpointCount
+                    + " | " + H.roundDecimal(state.distanceToNextCheckpoint, 1) + "m"
+                    + (player == a.getKey() ? "---" : "") + "\n");
             count++;
         }
-        return H.str(result.toArray(), "\n");
+        return sb.toString();
     }
 
     protected void ghostCollision(GhostControl ghost, RigidBodyControl obj) {
@@ -167,21 +197,29 @@ public class DriveRaceProgress {
         return null;
     }
 
-    class RacerSort implements Comparator<Entry<RayCarControl, RacerState>> {
-        @Override
-        public int compare(Entry<RayCarControl, RacerState> o1, Entry<RayCarControl, RacerState> o2) {
-            return (o2.getValue().lap * 100000 + o2.getValue().nextCheckpoint.num) 
-                - (o1.getValue().lap * 100000 + o1.getValue().nextCheckpoint.num);
-        }
-    }
-
-    class RacerState {
+    class RacerState implements Comparable<RacerState> {
         public int lap;
         public Checkpoint nextCheckpoint;
+        public float distanceToNextCheckpoint;
         public Geometry arrow;
 
         public RacerState(Checkpoint check) {
             this.nextCheckpoint = check;
+        }
+
+        public void calcCheckpointDistance(Vector3f pos) {
+            this.distanceToNextCheckpoint = pos.subtract(nextCheckpoint.position).length();
+        }
+
+        @Override
+        public int compareTo(RacerState o) {
+            if (this.lap != o.lap)
+                return o.lap - this.lap;
+            if (this.nextCheckpoint.num != o.nextCheckpoint.num)
+                return o.nextCheckpoint.num - this.nextCheckpoint.num;
+
+            // note this is backwards because closer is better
+            return (int) ((this.distanceToNextCheckpoint - o.distanceToNextCheckpoint) * 1000);
         }
     }
 
