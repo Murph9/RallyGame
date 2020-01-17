@@ -1,11 +1,8 @@
 package car.ai;
 
-import java.util.List;
-
 import com.jme3.math.Vector3f;
 
 import car.ray.RayCarControl;
-import car.ray.RayWheelControl;
 import drive.DriveRace;
 
 public class RaceAI extends CarAI {
@@ -38,15 +35,7 @@ public class RaceAI extends CarAI {
             onEvent("Flip", true);
         }
 
-        //reduce excess wheel slipping
-        List<RayWheelControl> wheels = car.getDriveWheels();
-        float gripSum = 0;
-        for (RayWheelControl wheel: wheels) {
-            gripSum += wheel.getRayWheel().skidFraction;
-        }
-        if (velocity > 10 && gripSum > wheels.size()) {
-            onEvent("Accel", false);
-        }
+        applySelfTractionControl(tpf);
 
         //prevent hitting straight into walls
         float result = forwardRayCollideTime();

@@ -1,5 +1,7 @@
 package car.ai;
 
+import java.util.List;
+
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
@@ -7,6 +9,7 @@ import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 
 import car.ray.RayCarControl;
+import car.ray.RayWheelControl;
 import car.ray.RayCar.GripHelper;
 import game.DebugAppState;
 import helper.H;
@@ -221,6 +224,18 @@ public abstract class CarAI implements ICarAI {
             }
         } else {
             stuckTimer = 0;
+        }
+    }
+
+    protected void applySelfTractionControl(float tpf) {
+        // reduce excess wheel slipping
+        List<RayWheelControl> wheels = car.getDriveWheels();
+        float gripSum = 0;
+        for (RayWheelControl wheel : wheels) {
+            gripSum += wheel.getRayWheel().skidFraction;
+        }
+        if (car.getLinearVelocity().length() > 3 && gripSum > wheels.size()) {
+            onEvent("Accel", false);
         }
     }
 }
