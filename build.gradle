@@ -56,19 +56,21 @@ test {
     useJUnitPlatform()
 }
 
+def jme3Version = '3.2.4-stable'
+
 dependencies {
-	compile 'org.jmonkeyengine:jme3-blender:3.2.2-stable'
-	compile 'org.jmonkeyengine:jme3-bullet:3.2.2-stable'
-	compile 'org.jmonkeyengine:jme3-bullet-native:3.2.2-stable'
-	compile 'org.jmonkeyengine:jme3-core:3.2.2-stable'
-	compile 'org.jmonkeyengine:jme3-desktop:3.2.2-stable'
-	compile 'org.jmonkeyengine:jme3-effects:3.2.2-stable'
-	compile 'org.jmonkeyengine:jme3-lwjgl:3.2.2-stable'
-	compile 'org.jmonkeyengine:jme3-plugins:3.2.2-stable'
-	compile 'org.jmonkeyengine:jme3-terrain:3.2.2-stable'
-	compile 'org.jmonkeyengine:jme3-jogg:3.2.2-stable'
+	compile "org.jmonkeyengine:jme3-blender:${jme3Version}"
+	compile "org.jmonkeyengine:jme3-bullet:${jme3Version}"
+	compile "org.jmonkeyengine:jme3-bullet-native:${jme3Version}"
+	compile "org.jmonkeyengine:jme3-core:${jme3Version}"
+	compile "org.jmonkeyengine:jme3-desktop:${jme3Version}"
+	compile "org.jmonkeyengine:jme3-effects:${jme3Version}"
+	compile "org.jmonkeyengine:jme3-lwjgl:${jme3Version}"
+	compile "org.jmonkeyengine:jme3-plugins:${jme3Version}"
+	compile "org.jmonkeyengine:jme3-terrain:${jme3Version}"
+	compile "org.jmonkeyengine:jme3-jogg:${jme3Version}"
 	
-	compile 'org.yaml:snakeyaml:1.23'
+	compile 'org.yaml:snakeyaml:1.25'
 	compile 'com.simsilica:lemur:1.13.0'
 
 	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.1'
