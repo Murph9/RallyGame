@@ -66,6 +66,7 @@ dependencies {
 	compile 'org.jmonkeyengine:jme3-lwjgl:3.2.2-stable'
 	compile 'org.jmonkeyengine:jme3-plugins:3.2.2-stable'
 	compile 'org.jmonkeyengine:jme3-terrain:3.2.2-stable'
+	compile 'org.jmonkeyengine:jme3-jogg:3.2.2-stable'
 	
 	compile 'org.yaml:snakeyaml:1.23'
 	compile 'com.simsilica:lemur:1.13.0'

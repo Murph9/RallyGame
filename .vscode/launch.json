@@ -5,6 +5,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - MusicTestApp",
+            "request": "launch",
+            "mainClass": "test.MusicTestApp",
+            "projectName": "RallyGame"
+        },
+        {
+            "type": "java",
             "name": "Debug (Launch)-DuelApp<RallyGame>",
             "request": "launch",
             "mainClass": "duel.DuelApp",
