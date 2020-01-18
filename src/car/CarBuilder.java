@@ -135,7 +135,7 @@ public class CarBuilder extends BaseAppState {
 		if (aPlayer) {
 			//players get the keyboard and sound
 			carControl.attachControls(getApplication().getInputManager());
-			carControl.giveSound(new AudioNode(am, "assets/sound/engine.wav", AudioData.DataType.Buffer));
+			carControl.giveSound(new AudioNode(am, "assets/sounds/engine.wav", AudioData.DataType.Buffer));
 		}
 		
 		cars.add(carControl);
