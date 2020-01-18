@@ -47,7 +47,7 @@ public class DriveRaceProgress {
     private Node debugNode;
 
     protected DriveRaceProgress(Application app, Vector3f[] checkpointPositions, Collection<RayCarControl> cars) {
-        this(app, checkpointPositions, cars, 8, new ColorRGBA(0, 1, 0, 0.4f));
+        this(app, checkpointPositions, cars, 2, new ColorRGBA(0, 1, 0, 0.4f));
     }
 
     protected DriveRaceProgress(Application app, Vector3f[] checkpointPositions, Collection<RayCarControl> cars, float checkpointScale, ColorRGBA checkpointColour) {
