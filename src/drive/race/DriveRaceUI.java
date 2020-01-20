@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
@@ -56,50 +57,29 @@ public class DriveRaceUI {
 
         main.detachAllChildren();
 
+        int x = 0;
+        for (Spatial element: headerRow.getChildren()) {
+            main.addChild((Node)element, 0, x);
+            x++;
+        }
+
+        int count = 1;
         for (Entry<RayCarControl, RacerState> racer: racers) {
             RaceUIRow row = rows.get(racer.getKey());
-            row.update(racer.getKey().getCarData().name, racer.getValue(), player == racer.getKey());
-            main.addChild(row);
-        }
-    }
-
-	public void updateState(float tpf, List<Entry<RayCarControl, RacerState>> racers, Checkpoint[] checkpoints) {
-        main.detachAllChildren();
-        //TODO slow
-
-        Collections.sort(racers, new Comparator<Entry<RayCarControl, RacerState>>() {
-            @Override
-            public int compare(Entry<RayCarControl, RacerState> o1, Entry<RayCarControl, RacerState> o2) {
-                return o1.getValue().compareTo(o2.getValue());
+            Label[] elements = row.update(racer.getKey().getCarData().name, racer.getValue(), player == racer.getKey());
+            for (int i = 0; i < elements.length; i++) {
+                main.addChild(elements[i], count, i);
             }
-        });
-
-        int count = 0;
-        main.addChild(new Label("name"), count, 0);
-        main.addChild(new Label("lap"), count, 1);
-        main.addChild(new Label("ch /" + checkpoints.length), count, 2);
-        main.addChild(new Label("dist"), count, 3);
-        main.addChild(new Label(""), count, 4);
-        count++;
-
-        
-        for (Entry<RayCarControl, RacerState> racer: racers) {
-            RacerState state = racer.getValue();
-            main.addChild(new Label(racer.getKey().getCarData().name), count, 0);
-            main.addChild(new Label(state.lap+""), count, 1);
-            main.addChild(new Label(state.nextCheckpoint.num+""), count, 2);
-            main.addChild(new Label(H.roundDecimal(state.distanceToNextCheckpoint, 1)), count, 3);
-            main.addChild(new Label(player == racer.getKey() ? "---" : ""), count, 4);
             count++;
         }
-	}
+    }
 
 	public void setPlayer(RayCarControl player) {
         this.player = player;
 	}
 }
 
-class RaceUIRow extends Container {
+class RaceUIRow {
 
     private final Label name;
     private final Label lap;
@@ -108,18 +88,22 @@ class RaceUIRow extends Container {
     private final Label playerTag;
 
     public RaceUIRow() {
-        this.name = this.addChild(new Label(""), 0, 0);
-        this.lap = this.addChild(new Label(""), 0, 1);
-        this.checkpoint = this.addChild(new Label(""), 0, 2);
-        this.distance = this.addChild(new Label(""), 0, 3);
-        this.playerTag = this.addChild(new Label(""), 0, 4);
+        this.name = new Label("");
+        this.lap = new Label("");
+        this.checkpoint = new Label("");
+        this.distance = new Label("");
+        this.playerTag = new Label("");
     }
 
-    public void update(String name, RacerState state, boolean isPlayer) {
+    public Label[] update(String name, RacerState state, boolean isPlayer) {
         this.name.setText(name);
         this.lap.setText(state.lap+"");
         this.checkpoint.setText(state.nextCheckpoint.num+"");
         this.distance.setText(H.roundDecimal(state.distanceToNextCheckpoint, 1));
         this.playerTag.setText(isPlayer ? "---" : "");
+
+        return new Label[] {
+            this.name, lap, checkpoint, distance, playerTag
+        };
     }
 }
