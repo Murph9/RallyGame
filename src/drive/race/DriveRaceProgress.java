@@ -2,10 +2,7 @@ package drive.race;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map.Entry;
 
 import com.jme3.app.Application;
@@ -39,8 +36,7 @@ public class DriveRaceProgress {
     private final HashMap<RayCarControl, RacerState> racers;
 
     private final GhostObjectCollisionListener checkpointCollisionListener;
-
-    private RayCarControl player;
+    private final DriveRaceUI ui;
 
     // debug things
     private boolean ifDebug;
@@ -81,6 +77,9 @@ public class DriveRaceProgress {
 
         checkpointCollisionListener = new GhostObjectCollisionListener(this);
         physicsSpace.addCollisionListener((PhysicsCollisionListener) checkpointCollisionListener);
+
+
+        this.ui = new DriveRaceUI(this, ((SimpleApplication)app).getGuiNode());
     }
 
     protected void setDebug(boolean ifDebug) {
@@ -92,7 +91,7 @@ public class DriveRaceProgress {
         }
     }
     protected void setPlayer(RayCarControl player) {
-        this.player = player;
+        ui.setPlayer(player);
     }
 
     protected void update(float tpf) {
@@ -104,6 +103,8 @@ public class DriveRaceProgress {
             Vector3f carPos = entry.getKey().getPhysicsLocation();
             entry.getValue().calcCheckpointDistance(carPos);
         }
+
+        ui.updateState(tpf, new ArrayList<>(this.racers.entrySet()), checkpoints.length);
 
         if (ifDebug) {
             // update the checkpoint arrows
@@ -138,31 +139,6 @@ public class DriveRaceProgress {
         if (index < 0)
             index = this.checkpoints.length - 1;
         return this.checkpoints[index].position;
-    }
-
-    @Override
-    public String toString() {
-        List<Entry<RayCarControl, RacerState>> list = new ArrayList<Entry<RayCarControl, RacerState>>(racers.entrySet());
-        Collections.sort(list, new Comparator<Entry<RayCarControl, RacerState>>() {
-            @Override
-            public int compare(Entry<RayCarControl, RacerState> o1, Entry<RayCarControl, RacerState> o2) {
-                return o1.getValue().compareTo(o2.getValue());
-            }
-        });
-
-        StringBuilder sb = new StringBuilder();
-        int count = 1;
-        int checkpointCount = this.checkpoints.length;
-        for (Entry<RayCarControl, RacerState> a: list) {
-            RacerState state = a.getValue();
-            sb.append(count + " | " + a.getKey().getCarData().name
-                    + " l:" + state.lap
-                    + " ch:" + state.nextCheckpoint.num + "/" + checkpointCount
-                    + " | " + H.roundDecimal(state.distanceToNextCheckpoint, 1) + "m"
-                    + (player == a.getKey() ? "---" : "") + "\n");
-            count++;
-        }
-        return sb.toString();
     }
 
     protected void ghostCollision(GhostControl ghost, RigidBodyControl obj) {
