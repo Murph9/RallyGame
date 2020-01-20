@@ -3,7 +3,7 @@ package car.ai;
 import com.jme3.math.Vector3f;
 
 import car.ray.RayCarControl;
-import drive.DriveRace;
+import drive.race.DriveRace;
 
 public class RaceAI extends CarAI {
 

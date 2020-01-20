@@ -1,4 +1,4 @@
-package drive;
+package drive.race;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -194,44 +194,6 @@ public class DriveRaceProgress {
             if (checkpoint.ghost == ghost)
                 return checkpoint;
         return null;
-    }
-
-    class RacerState implements Comparable<RacerState> {
-        public int lap;
-        public Checkpoint nextCheckpoint;
-        public float distanceToNextCheckpoint;
-        public Geometry arrow;
-
-        public RacerState(Checkpoint check) {
-            this.nextCheckpoint = check;
-        }
-
-        public void calcCheckpointDistance(Vector3f pos) {
-            this.distanceToNextCheckpoint = pos.subtract(nextCheckpoint.position).length();
-        }
-
-        @Override
-        public int compareTo(RacerState o) {
-            if (this.lap != o.lap)
-                return o.lap - this.lap;
-            if (this.nextCheckpoint.num != o.nextCheckpoint.num)
-                return o.nextCheckpoint.num - this.nextCheckpoint.num;
-
-            // note this is backwards because closer is better
-            return (int) ((this.distanceToNextCheckpoint - o.distanceToNextCheckpoint) * 1000);
-        }
-    }
-
-    class Checkpoint {
-        public final int num;
-        public final Vector3f position;
-        public final GhostControl ghost;
-
-        Checkpoint(int num, Vector3f pos, GhostControl ghost) {
-            this.num = num;
-            this.position = pos;
-            this.ghost = ghost;
-        }
     }
 
     class GhostObjectCollisionListener implements PhysicsCollisionListener {

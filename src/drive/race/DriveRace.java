@@ -1,4 +1,4 @@
-package drive;
+package drive.race;
 
 import java.util.List;
 
@@ -18,6 +18,7 @@ import car.CarUI;
 import car.ai.RaceAI;
 import car.data.Car;
 import car.ray.RayCarControl;
+import drive.RaceMenu;
 import helper.H;
 import helper.Log;
 import service.GridPositions;
@@ -33,7 +34,7 @@ public class DriveRace extends BaseAppState {
     //things that should be in a world class
     private Node rootNode = new Node("root");
     
-    private final Car car;
+    private final Car playerCarType;
     private final StaticWorldBuilder world;
     
     // ai things
@@ -47,19 +48,16 @@ public class DriveRace extends BaseAppState {
     private CarUI uiNode;
     
     //racing things
-    private final GridPositions gridPositions;
     private Vector3f[] worldStarts;
     private Matrix3f worldRot;
     
     public DriveRace(StaticWorldBuilder world) {
         super();
-        this.car = Car.Runner;
+        this.playerCarType = Car.Runner;
         this.world = world;
 
         if (this.world.getTypeForDriveRace() != StaticWorld.duct2)
             throw new IllegalArgumentException();
-        
-        this.gridPositions = new GridPositions(3, 10);
     }
     
     @Override
@@ -100,6 +98,7 @@ public class DriveRace extends BaseAppState {
         q.lookAt(checkpoints[0].subtract(checkpoints[checkpoints.length - 1]), Vector3f.UNIT_Y);
         this.worldRot = q.toRotationMatrix();
 
+        GridPositions gridPositions = new GridPositions(3, 10);
         List<Vector3f> startPositions = gridPositions.generate(themCount+1, checkpoints[0], 
                 checkpoints[0].subtract(checkpoints[checkpoints.length - 1]));
 
@@ -107,7 +106,7 @@ public class DriveRace extends BaseAppState {
 
         //buildCars
         this.cb = getState(CarBuilder.class);
-        RayCarControl rayCar = cb.addCar(car, worldStarts[0], worldRot, true);
+        RayCarControl rayCar = cb.addCar(playerCarType, worldStarts[0], worldRot, true);
 
         menu = new RaceMenu(null); 
         getStateManager().attach(menu);
@@ -165,12 +164,7 @@ public class DriveRace extends BaseAppState {
             state = RaceState.Init;
             break;
         default:
-            try {
-                throw new Exception("Huh?" + state);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return;
+            throw new IllegalStateException();
         }
     }
     
