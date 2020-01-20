@@ -210,15 +210,19 @@ public class H {
 		Box box = new Box(size, size, size);
 		Geometry boxG = createShape(am, box, color, pos, "a box");
 		return boxG;
-	}
+    }
+    public static Geometry makeShapeLine(AssetManager am, ColorRGBA color, Vector3f start, Vector3f end, int lineWidth) {
+        if (!Vector3f.isValidVector(start) || !Vector3f.isValidVector(end)) {
+            Log.e("not valid start or end", start, end);
+            return null;
+        }
+        Line l = new Line(start, end);
+        Geometry lineG = createShape(am, l, color, Vector3f.ZERO, "a line");
+        lineG.getMaterial().getAdditionalRenderState().setLineWidth(lineWidth);
+        return lineG;
+    }
 	public static Geometry makeShapeLine(AssetManager am, ColorRGBA color, Vector3f start, Vector3f end) {
-		if (!Vector3f.isValidVector(start) || !Vector3f.isValidVector(end)) {
-			Log.e("not valid start or end", start, end);
-			return null;
-		}
-		Line l = new Line(start, end);
-		Geometry lineG = createShape(am, l, color, Vector3f.ZERO, "a line");
-		return lineG;
+        return makeShapeLine(am, color, start, end, 1);
 	}
 	public static Geometry makeShapeSphere(AssetManager am, ColorRGBA color, Vector3f pos, float size) {
 		if (!Vector3f.isValidVector(pos)) {

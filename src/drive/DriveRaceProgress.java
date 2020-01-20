@@ -111,9 +111,8 @@ public class DriveRaceProgress {
                 rootNode.detachChild(debugNode);
             debugNode = new Node("debugnode");
             for (Entry<RayCarControl, RacerState> entry : racers.entrySet()) {
-                Vector3f pos = entry.getKey().getPhysicsLocation().add(0, 2, 0);
-                Vector3f dir = entry.getValue().nextCheckpoint.position.subtract(pos);
-                entry.getValue().arrow = H.makeShapeArrow(am, ColorRGBA.Cyan, dir, pos);
+                entry.getValue().arrow = H.makeShapeLine(am, ColorRGBA.Cyan, 
+                        entry.getKey().getPhysicsLocation(), entry.getValue().nextCheckpoint.position, 3);
                 debugNode.attachChild(entry.getValue().arrow);
             }
             rootNode.attachChild(debugNode);
