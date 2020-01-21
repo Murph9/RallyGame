@@ -10,6 +10,8 @@ uniform float m_DepthThreshold;
 uniform float m_NormalSensitivity;
 uniform float m_DepthSensitivity;
 
+uniform float m_DarkenFraction;
+
 varying vec2 texCoord;
 
 uniform COLORTEXTURE m_Texture;
@@ -21,7 +23,7 @@ uniform vec2 g_ResolutionInverse;
 vec4 fetchNormalDepth(vec2 tc){
     vec4 nd;
     nd.xyz = texture2D(m_NormalsTexture, tc).rgb;
-    nd.w   = fetchTextureSample(m_DepthTexture,   tc, 0).r;
+    nd.w   = fetchTextureSample(m_DepthTexture, tc, 0).r;
     return nd;
 }
 
@@ -49,10 +51,10 @@ void main(){
     depthDelta  = clamp((depthDelta - m_DepthThreshold) * m_DepthSensitivity,    0.0, 1.0);
 
     // Does this pixel lie on an edge?
-    float edgeAmount = clamp(normalDelta + depthDelta, 0.0, 1.0) * m_EdgeIntensity;
+    float edgeAmount = clamp((normalDelta + depthDelta) * m_EdgeIntensity, 0.0, 1.0);
 
     // Apply the edge detection result to the main scene color.
-    color = mix(color*vec3(0.4), color, edgeAmount); //TODO adjust
+    color = mix(m_DarkenFraction * color, color, edgeAmount);
     
     gl_FragColor = vec4(color, 1.0);
 }

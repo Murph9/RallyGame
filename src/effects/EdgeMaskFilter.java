@@ -18,6 +18,7 @@ public class EdgeMaskFilter extends Filter {
     private float depthThreshold = 0.01f;
     private float normalSensitivity = 1.0f;
     private float depthSensitivity = 70.0f;
+    private float darkenFraction = 0.45f;
     private RenderManager renderManager;
     private ViewPort viewPort;
 
@@ -50,6 +51,7 @@ public class EdgeMaskFilter extends Filter {
         material.setFloat("DepthThreshold", depthThreshold);
         material.setFloat("NormalSensitivity", normalSensitivity);
         material.setFloat("DepthSensitivity", depthSensitivity);
+        material.setFloat("DarkenFraction", darkenFraction);
     }
 
     @Override

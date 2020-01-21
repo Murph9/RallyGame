@@ -13,6 +13,7 @@ MaterialDef Cartoon Edge {
         Float DepthThreshold
         Float NormalSensitivity
         Float DepthSensitivity
+        Float DarkenFraction
     }
 
      Technique {
