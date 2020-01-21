@@ -18,6 +18,7 @@ import car.CarUI;
 import car.ai.RaceAI;
 import car.data.Car;
 import car.ray.RayCarControl;
+import game.IDriveDone;
 import helper.H;
 import helper.Log;
 import service.GridPositions;
@@ -35,6 +36,7 @@ public class DriveRace extends BaseAppState {
     
     private final Car playerCarType;
     private final StaticWorldBuilder world;
+    private final IDriveDone done;
     
     // ai things
     private final int themCount = 15;
@@ -50,10 +52,11 @@ public class DriveRace extends BaseAppState {
     private Vector3f[] worldStarts;
     private Matrix3f worldRot;
     
-    public DriveRace(StaticWorldBuilder world) {
+    public DriveRace(StaticWorldBuilder world, IDriveDone done) {
         super();
         this.playerCarType = Car.Runner;
         this.world = world;
+        this.done = done;
 
         if (this.world.getTypeForDriveRace() != StaticWorld.duct2)
             throw new IllegalArgumentException();
@@ -159,7 +162,7 @@ public class DriveRace extends BaseAppState {
             state = RaceState.Win;
             break;
         case Win:
-            state = RaceState.Init;
+            done.done(this);
             break;
         default:
             throw new IllegalStateException();

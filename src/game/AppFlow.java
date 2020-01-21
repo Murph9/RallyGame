@@ -22,7 +22,6 @@ public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
     public enum StartType {
         Fast,
 		Start,
-		AI,
 		Crash,
 		Getaway,
 		Race,
@@ -47,9 +46,6 @@ public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
             case Start:
                 sm.attach(new ChooseCar((IChooseStuff)this));
                 break;
-            case AI:
-                sm.attach(new DriveAI((IDriveDone)this));
-                break;
             case Fast:
                 sm.attach(new DriveBase((IDriveDone)this, Car.Runner, new OsmWorld()));
                 break;
@@ -65,7 +61,7 @@ public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
             case Race:
                 StaticWorldBuilder world = new StaticWorldBuilder(StaticWorld.duct2);
                 sm.attach(world);
-				sm.attach(new DriveRace(world));
+				sm.attach(new DriveRace(world, (IDriveDone) this));
 				break;
 			case Drag:
 				sm.attach(new DriveDrag((IDriveDone)this));
