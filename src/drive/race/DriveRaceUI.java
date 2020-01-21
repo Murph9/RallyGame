@@ -9,7 +9,6 @@ import com.jme3.app.state.BaseAppState;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
-import helper.H;
 import helper.Screen;
 
 public class DriveRaceUI extends BaseAppState {
@@ -18,6 +17,7 @@ public class DriveRaceUI extends BaseAppState {
 
     private Container main;
     private RacerStateTableView progressTable;
+    private Screen screen;
 
     private Container basicPanel;
     private Label basicLabel;
@@ -28,7 +28,7 @@ public class DriveRaceUI extends BaseAppState {
     
     @Override
     protected void initialize(Application app) {
-        Screen screen = new Screen(app.getContext().getSettings());
+        screen = new Screen(app.getContext().getSettings());
 
         basicPanel = new Container();
         basicLabel = new Label("Race state?");
@@ -70,10 +70,14 @@ public class DriveRaceUI extends BaseAppState {
 
         RacerState st = progress.getPlayerRacerState();
         progressTable.update(racers, st);
+
+        screen.topRightMe(main);
     }
 }
 
 class RacerStateTableView extends Container {
+
+    private final static RacerState HEADER = new RacerState("Player");
 
     private final int rowLength;
     
@@ -103,22 +107,18 @@ class RacerStateTableView extends Container {
         for (RacerState racer: states) {
             String[] values = convertToValueRows(racer, racer == playerState); 
             for (int i = 0; i < values.length; i++) {
-                //this is kind of a hack to prevent recreating labels too often
+                //this is kind of a hack to prevent recreating labels
                 ((Label)this.getChild((rowLength+1)*count + i+1)).setText(values[i]);
             }
             count++;
         }
     }
 
-    private static RacerState HEADER = new RacerState("Player");
-
     private String[] convertToValueRows(RacerState state, boolean isPlayer) {
         if (state == HEADER) {
             return new String[] {
                     state.name,
                     "lap",
-                    "check",
-                    "distance",
                     ""
                 };
         }
@@ -126,9 +126,7 @@ class RacerStateTableView extends Container {
         return new String[] {
                 state.name,
                 state.lap + "",
-                state.nextCheckpoint.num + "",
-                H.roundDecimal(state.distanceToNextCheckpoint, 1),
-                isPlayer ? "You" : ""
+                isPlayer ? "-" : ""
             };
     }
 }

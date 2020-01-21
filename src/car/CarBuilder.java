@@ -74,10 +74,10 @@ public class CarBuilder extends BaseAppState {
 		Vector3f grav = new Vector3f();
 		getState(BulletAppState.class).getPhysicsSpace().getGravity(grav);
 
-		CarDataConst data = loader.get(getApplication().getAssetManager(), car, grav);
-		if (adjuster != null) {
-			adjuster.applyAll(data);
-		}
+        CarDataConst data = loader.get(getApplication().getAssetManager(), car, grav);
+        if (adjuster != null) {
+            adjuster.applyAll(data);
+        }
 		return data;
 	}
 
