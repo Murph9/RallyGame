@@ -31,7 +31,7 @@ import helper.H;
 
 public class CarUI extends BaseAppState {
 
-	//TODO scale it with monitor size (forza doesn't deal with this)
+	//TODO scale it with monitor size and pixel density (forza doesn't deal with this)
     
     private static final Vector2f[] TEX_COORD = new Vector2f[] { 
         new Vector2f(0, 0), new Vector2f(1, 0),

@@ -122,7 +122,10 @@ public class RayCar implements PhysicsTickListener {
 				wheels[w_id].curBasePosWorld = localDown.mult(susTravel + carData.wheelData[w_id].radius);
 				return; //no force
 			}
-			
+            
+            //TODO calculate rebound using wheel mass and suspension properties
+            //this should allow you to get air off of very small ramps (for a very short time)
+
 			wheels[w_id].hitNormalInWorld = col.hitNormalInWorld;
 			wheels[w_id].collisionObject = col.obj;
 			wheels[w_id].susRayLength = col.dist - carData.wheelData[w_id].radius; //remove the wheel radius

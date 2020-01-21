@@ -11,7 +11,7 @@ public class DriveAtAI extends CarAI {
 	private float reversingTimer;
 	private boolean reversing;
 	
-	public DriveAtAI (RayCarControl car, PhysicsRigidBody node) {
+	public DriveAtAI(RayCarControl car, PhysicsRigidBody node) {
 		super(car);
 		
 		this.driveAtThis = node;
