@@ -15,8 +15,7 @@ public class TrackSegmentCurve implements TrackSegment {
 	
 	public TrackSegmentCurve(Vector3f[] nodes, BiFunction<Vector3f, Vector3f, TrackSlice> funct) {
 		if (nodes == null || nodes.length != 4) {
-			Log.e("Incorrect starting points given " + (nodes == null ? 0 : nodes.length) + ", need 4 exactly");
-			System.exit(-9456074);
+			Log.exit(-9456074, "Incorrect starting points given " + (nodes == null ? 0 : nodes.length) + ", need 4 exactly");
 		}
 		
 		this.curve = new CubicBezierCurve(nodes[0], nodes[1], nodes[2], nodes[3]);

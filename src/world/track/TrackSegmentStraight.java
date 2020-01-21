@@ -16,8 +16,7 @@ public class TrackSegmentStraight implements TrackSegment {
 	public TrackSegmentStraight(Vector3f[] nodes, BiFunction<Vector3f, Vector3f, TrackSlice> funct) {
 		this.points = nodes;
 		if (points == null || points.length < 2) {
-			Log.e("Incorrect starting points given " + (nodes == null ? 0 : nodes.length) + ", need 2");
-			System.exit(-9456074);
+			Log.e(-9456074, "Incorrect starting points given " + (nodes == null ? 0 : nodes.length) + ", need 2");
 		}
 		this.funct = funct;
 	}

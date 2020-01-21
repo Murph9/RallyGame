@@ -88,7 +88,7 @@ public class ConstantChecker extends BaseAppState {
         }
 
         if (error) {
-            System.exit(342);
+            Log.exit(342, "ConstantChecker error, see above");
         }
     }
 }

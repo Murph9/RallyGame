@@ -43,8 +43,7 @@ public class DriveBase extends BaseAppState {
 
         WorldType type = world.getType();
         if (type == WorldType.NONE) {
-            Log.e("not sure what world type you want");
-            System.exit(-15);
+            Log.exit(-15, "not sure what world type you want");
         }
     }
 

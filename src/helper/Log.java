@@ -74,5 +74,11 @@ public class Log {
 
 	public static void e(Exception e) {
 		e.printStackTrace(System.err);
-	}
+    }
+    
+    /**Quit with message and number */
+    public static void exit(int num, Object o) {
+        Log.e(o);
+        System.exit(num);
+    }
 }

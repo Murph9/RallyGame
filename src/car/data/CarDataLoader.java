@@ -40,7 +40,7 @@ public class CarDataLoader { //CarDataFactory
         return (CarDataConst) yamlData;
     }
 
-    public CarDataConst get(AssetManager am, Car car, Vector3f gravity) {
+    public CarDataConst get(AssetManager am, Car car, Vector3f gravity) throws IllegalStateException {
         String carName = car.getCarName();
         
         Log.p("Loading file data for car type: " + carName);
@@ -51,8 +51,7 @@ public class CarDataLoader { //CarDataFactory
             data.name = carName;
         } catch (Exception e) {
             e.printStackTrace();
-            Log.e("!!! car data load failed");
-            System.exit(-343);
+            Log.exit(-343, "!!! car data load failed");
         }
 
         // Wheel validation
@@ -83,67 +82,52 @@ public class CarDataLoader { //CarDataFactory
 
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.p("error in calculating max(lat|long) values of wheel #" + i);
-                System.exit(-1021);
+                Log.exit(-1021, "error in calculating max(lat|long) values of wheel #" + i);
             }
         }
 
-        try {
-            // init car static data based on the 3d model
-            CarModelData modelData = new CarModelData(am, data.carModel, data.wheelModel);
-            if (modelData.foundSomething() && modelData.foundAllWheels()) {
-                data.wheelOffset = new Vector3f[4];
-                data.wheelOffset[0] = modelData.getPosOf(CarPart.Wheel_FL);
-                data.wheelOffset[1] = modelData.getPosOf(CarPart.Wheel_FR);
-                data.wheelOffset[2] = modelData.getPosOf(CarPart.Wheel_RL);
-                data.wheelOffset[3] = modelData.getPosOf(CarPart.Wheel_RR);
-            } else {
-                throw new Exception("!!! Missing car model wheel position data for: " + data.carModel);
-            }
-
-            // validate that the wheels are in the correct quadrant for a car
-            if (data.wheelOffset[0].x < 0 || data.wheelOffset[0].z < 0)
-                throw new Exception(CarPart.Wheel_FL.name() + " should be in pos x and pos z");
-            if (data.wheelOffset[1].x > 0 || data.wheelOffset[1].z < 0)
-                throw new Exception(CarPart.Wheel_FR.name() + " should be in neg x and pos z");
-
-            if (data.wheelOffset[2].x < 0 || data.wheelOffset[2].z > 0)
-                throw new Exception(CarPart.Wheel_RL.name() + " should be in pos x and neg z");
-            if (data.wheelOffset[3].x > 0 || data.wheelOffset[3].z > 0)
-                throw new Exception(CarPart.Wheel_RR.name() + " should be in neg x and neg z");
-
-            if (!modelData.hasCollision())
-                throw new Exception(CarPart.Collision.name() + " should exist.");
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(-1022);
+        
+        // init car static data based on the 3d model
+        CarModelData modelData = new CarModelData(am, data.carModel, data.wheelModel);
+        if (modelData.foundSomething() && modelData.foundAllWheels()) {
+            data.wheelOffset = new Vector3f[4];
+            data.wheelOffset[0] = modelData.getPosOf(CarPart.Wheel_FL);
+            data.wheelOffset[1] = modelData.getPosOf(CarPart.Wheel_FR);
+            data.wheelOffset[2] = modelData.getPosOf(CarPart.Wheel_RL);
+            data.wheelOffset[3] = modelData.getPosOf(CarPart.Wheel_RR);
+        } else {
+            throw new IllegalStateException("!!! Missing car model wheel position data for: " + data.carModel);
         }
 
-        try {
-            // Checking that there is gear over lap between up and down:
-            // [2>----[3>-<2]---<3] not [2>----<2]--[3>---<3]
-            for (int i = 1; i < data.trans_gearRatios.length - 1; i++) {
-                if (data.getGearUpSpeed(i) < data.getGearDownSpeed(i + 1)) {
-                    throw new Exception("Gear overlap test failed for up: " + i + " down: " + (i + 1));
-                }
+        // validate that the wheels are in the correct quadrant for a car
+        if (data.wheelOffset[0].x < 0 || data.wheelOffset[0].z < 0)
+            throw new IllegalStateException(CarPart.Wheel_FL.name() + " should be in pos x and pos z");
+        if (data.wheelOffset[1].x > 0 || data.wheelOffset[1].z < 0)
+            throw new IllegalStateException(CarPart.Wheel_FR.name() + " should be in neg x and pos z");
+
+        if (data.wheelOffset[2].x < 0 || data.wheelOffset[2].z > 0)
+            throw new IllegalStateException(CarPart.Wheel_RL.name() + " should be in pos x and neg z");
+        if (data.wheelOffset[3].x > 0 || data.wheelOffset[3].z > 0)
+            throw new IllegalStateException(CarPart.Wheel_RR.name() + " should be in neg x and neg z");
+
+        if (!modelData.hasCollision())
+            throw new IllegalStateException(CarPart.Collision.name() + " should exist.");
+
+        
+        // Checking that there is gear overlap between up and down:
+        // [2>----[3>-<2]---<3] not [2>----<2]--[3>---<3]
+        for (int i = 1; i < data.trans_gearRatios.length - 1; i++) {
+            if (data.getGearUpSpeed(i) < data.getGearDownSpeed(i + 1)) {
+                throw new IllegalStateException("Gear overlap test failed for up: " + i + " down: " + (i + 1));
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(-7555);
         }
         
         //validate that the D1 and D2 pjk const values actually are useful for the weight of the car
-        try {
-            for (int i = 0; i < data.wheelData.length; i++) {
-                if (GripHelper.loadFormula(data.wheelData[i].pjk_lat, quarterMassForce) <= 0)
-                    throw new Exception("Wheel load lat formula not in range: " + data.wheelData[i].pjk_lat + " " + quarterMassForce);
-                if (GripHelper.loadFormula(data.wheelData[i].pjk_long, quarterMassForce) <= 0)
-                    throw new Exception("Wheel load long formula not in range: " + data.wheelData[i].pjk_lat + " " + quarterMassForce);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(-521);
+        for (int i = 0; i < data.wheelData.length; i++) {
+            if (GripHelper.loadFormula(data.wheelData[i].pjk_lat, quarterMassForce) <= 0)
+                throw new IllegalStateException("Wheel load lat formula not in range: " + data.wheelData[i].pjk_lat + " " + quarterMassForce);
+            if (GripHelper.loadFormula(data.wheelData[i].pjk_long, quarterMassForce) <= 0)
+                throw new IllegalStateException("Wheel load long formula not in range: " + data.wheelData[i].pjk_lat + " " + quarterMassForce);
         }
 
         return data;
