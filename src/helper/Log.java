@@ -76,7 +76,7 @@ public class Log {
 		e.printStackTrace(System.err);
     }
     
-    /**Quit with message and number */
+    /** System.exit() with number and message */
     public static void exit(int num, Object o) {
         Log.e(o);
         System.exit(num);
