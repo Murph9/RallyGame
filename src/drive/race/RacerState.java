@@ -6,13 +6,14 @@ import com.jme3.scene.Geometry;
 import drive.race.RacerState;
 
 class RacerState implements Comparable<RacerState> {
+    public final String name;
     public int lap;
     public Checkpoint nextCheckpoint;
     public float distanceToNextCheckpoint;
     public Geometry arrow;
 
-    public RacerState(Checkpoint check) {
-        this.nextCheckpoint = check;
+    public RacerState(String name) {
+        this.name = name;
     }
 
     public void calcCheckpointDistance(Vector3f pos) {
@@ -28,5 +29,9 @@ class RacerState implements Comparable<RacerState> {
 
         // note this is backwards because closer is better
         return (int) ((this.distanceToNextCheckpoint - o.distanceToNextCheckpoint) * 1000);
+    }
+
+    public float calcLapProgress(int checkpointCount) {
+        return nextCheckpoint.num/((float)checkpointCount);
     }
 }

@@ -3,11 +3,12 @@ package drive.race;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
-import com.jme3.asset.AssetManager;
+import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.PhysicsCollisionEvent;
@@ -27,33 +28,46 @@ import car.ray.RayCarControl;
 import effects.LoadModelWrapper;
 import helper.H;
 
-public class DriveRaceProgress {
+public class DriveRaceProgress extends BaseAppState {
 
-    private final AssetManager am;
-    private final Checkpoint firstCheckpoint;
-    private final Checkpoint[] checkpoints;
-    private final Node rootNode;
-    private final HashMap<RayCarControl, RacerState> racers;
-
+    private final float checkpointScale;
+    private final ColorRGBA checkpointColour;
+    private final Vector3f[] checkpointPositions;
+    private final RayCarControl player;
     private final GhostObjectCollisionListener checkpointCollisionListener;
-    private final DriveRaceUI ui;
+
+    private Checkpoint firstCheckpoint;
+    private final Checkpoint[] checkpoints;
+    private Node rootNode;
+    private HashMap<RayCarControl, RacerState> racers;
 
     // debug things
-    private boolean ifDebug;
+    private final boolean ifDebug;
     private Node debugNode;
 
-    protected DriveRaceProgress(Application app, Vector3f[] checkpointPositions, Collection<RayCarControl> cars) {
-        this(app, checkpointPositions, cars, 2, new ColorRGBA(0, 1, 0, 0.4f));
+    protected DriveRaceProgress(Vector3f[] checkpoints, Collection<RayCarControl> cars, RayCarControl player, boolean debug) {
+        this.checkpointPositions = checkpoints;
+        this.checkpoints = new Checkpoint[checkpoints.length];
+        this.checkpointScale = 2;
+        this.checkpointColour = new ColorRGBA(0, 1, 0, 0.4f);
+
+        this.racers = new HashMap<>();
+        for (RayCarControl car : cars) {
+            this.racers.put(car, new RacerState(car.getCarData().name));
+        }
+
+        this.checkpointCollisionListener = new GhostObjectCollisionListener(this);
+
+        this.player = player;
+        this.ifDebug = debug;
     }
 
-    protected DriveRaceProgress(Application app, Vector3f[] checkpointPositions, Collection<RayCarControl> cars, float checkpointScale, ColorRGBA checkpointColour) {
-        this.checkpoints = new Checkpoint[checkpointPositions.length];
-
-        this.am = app.getAssetManager();
+    @Override
+    protected void initialize(Application app) {
         this.rootNode = new Node("progress root node");
         ((SimpleApplication) app).getRootNode().attachChild(rootNode);
 
-        PhysicsSpace physicsSpace = app.getStateManager().getState(BulletAppState.class).getPhysicsSpace();
+        PhysicsSpace physicsSpace = getState(BulletAppState.class).getPhysicsSpace();
 
         Vector3f checkpointSize = Vector3f.UNIT_XYZ.mult(checkpointScale);
         for (int i = 0; i < checkpointPositions.length; i++) {
@@ -70,41 +84,32 @@ public class DriveRaceProgress {
         }
         this.firstCheckpoint = this.checkpoints[0];
 
-        this.racers = new HashMap<>();
-        for (RayCarControl car : cars) {
-            this.racers.put(car, new RacerState(this.checkpoints[0]));
+        for (RacerState racer: this.racers.values()) {
+            racer.nextCheckpoint = this.firstCheckpoint;
         }
 
-        checkpointCollisionListener = new GhostObjectCollisionListener(this);
         physicsSpace.addCollisionListener((PhysicsCollisionListener) checkpointCollisionListener);
-
-
-        this.ui = new DriveRaceUI(this, ((SimpleApplication)app).getGuiNode());
     }
 
-    protected void setDebug(boolean ifDebug) {
-        this.ifDebug = ifDebug;
-        
-        //when turning off remove debug node
-        if (!ifDebug && debugNode != null) {
-            rootNode.detachChild(debugNode);
-        }
+    @Override
+    protected void onDisable() {}
+    @Override
+    protected void onEnable() {}
+
+    public RacerState getPlayerRacerState() {
+        return this.racers.get(player);
     }
-    protected void setPlayer(RayCarControl player) {
-        ui.setPlayer(player);
+    protected List<RacerState> getRaceState() {
+        return new ArrayList<>(this.racers.values());
     }
 
-    protected void update(float tpf) {
-        if (checkpoints == null || checkpoints.length < 1)
-            return;
-
+    @Override
+    public void update(float tpf) {
         //calc distance to nextCheckpoint
         for (Entry<RayCarControl, RacerState> entry: this.racers.entrySet()) {
             Vector3f carPos = entry.getKey().getPhysicsLocation();
             entry.getValue().calcCheckpointDistance(carPos);
         }
-
-        ui.updateState(tpf, new ArrayList<>(this.racers.entrySet()), checkpoints.length);
 
         if (ifDebug) {
             // update the checkpoint arrows
@@ -112,7 +117,7 @@ public class DriveRaceProgress {
                 rootNode.detachChild(debugNode);
             debugNode = new Node("debugnode");
             for (Entry<RayCarControl, RacerState> entry : racers.entrySet()) {
-                entry.getValue().arrow = H.makeShapeLine(am, ColorRGBA.Cyan, 
+                entry.getValue().arrow = H.makeShapeLine(getApplication().getAssetManager(), ColorRGBA.Cyan, 
                         entry.getKey().getPhysicsLocation(), entry.getValue().nextCheckpoint.position, 3);
                 debugNode.attachChild(entry.getValue().arrow);
             }
@@ -120,6 +125,7 @@ public class DriveRaceProgress {
         }
     }
 
+    @Override
     public void cleanup(Application app) {
         ((SimpleApplication) app).getRootNode().detachChild(rootNode);
 
@@ -131,11 +137,18 @@ public class DriveRaceProgress {
     }
 
     public Vector3f getNextCheckpoint(RayCarControl car) {
-        return racers.get(car).nextCheckpoint.position;
+        Checkpoint check = racers.get(car).nextCheckpoint;
+        if (check == null)
+            return null;
+        return check.position;
     }
 
     public Vector3f getCurrentCheckpoint(RayCarControl car) {
-        int index = this.racers.get(car).nextCheckpoint.num - 1;
+        Checkpoint check = racers.get(car).nextCheckpoint;
+        if (check == null)
+            return null;
+
+        int index = check.num - 1;
         if (index < 0)
             index = this.checkpoints.length - 1;
         return this.checkpoints[index].position;

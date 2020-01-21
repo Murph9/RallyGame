@@ -1,109 +1,130 @@
 package drive.race;
 
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
-import com.jme3.math.Vector3f;
-import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
+import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
+import com.jme3.app.state.BaseAppState;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
-import car.ray.RayCarControl;
 import helper.H;
+import helper.Screen;
 
-public class DriveRaceUI {
+public class DriveRaceUI extends BaseAppState {
 
-    private final Map<RayCarControl, RaceUIRow> rows;
-    private final Container main;
-    
-    private RayCarControl player;
-    private Container headerRow;
+    private final DriveRaceProgress progress;
 
-    public DriveRaceUI (DriveRaceProgress progress, Node uiRoot) {
-        rows = new HashMap<>();
-        
-        this.main = new Container();
-        main.addChild(new Label("Yo"));
-        main.setLocalTranslation(new Vector3f(100, 400, 0));
-        uiRoot.attachChild(main);
+    private Container main;
+    private RaceProgressTable progressTable;
 
+    private Container basicPanel;
+    private Label basicLabel;
+
+    public DriveRaceUI(DriveRaceProgress progress) {
+        this.progress = progress;
     }
     
-    public void updateState(float tpf, List<Entry<RayCarControl, RacerState>> racers, int checkpointCount) {
-        if (headerRow == null && rows.isEmpty()) {
-            headerRow = new Container();
-            headerRow.addChild(new Label("name"), 0, 0);
-            headerRow.addChild(new Label("lap"), 0, 1);
-            headerRow.addChild(new Label("ch /" + checkpointCount), 0, 2);
-            headerRow.addChild(new Label("dist"), 0, 3);
-            headerRow.addChild(new Label(""), 0, 4);
+    @Override
+    protected void initialize(Application app) {
+        Screen screen = new Screen(app.getContext().getSettings());
 
-            for (Entry<RayCarControl, RacerState> racer : racers) {
-                rows.put(racer.getKey(), new RaceUIRow());
-            }
+        basicPanel = new Container();
+        basicLabel = new Label("Race state?");
+        basicPanel.attachChild(basicLabel);
+        basicPanel.setLocalTranslation(screen.topLeft().add(0, -25, 0));
+        ((SimpleApplication) app).getGuiNode().attachChild(basicPanel);
+
+        this.main = new Container();
+        main.setLocalTranslation(screen.topLeft().add(0, -100, 0));
+        ((SimpleApplication) app).getGuiNode().attachChild(main);
+
+        progressTable = new RaceProgressTable(progress.getRaceState());
+        this.main.addChild(progressTable);
+    }
+
+    @Override
+    protected void cleanup(Application app) {
+        ((SimpleApplication) app).getGuiNode().detachChild(basicPanel);
+        ((SimpleApplication) app).getGuiNode().detachChild(main);
+    }
+
+    @Override
+    protected void onEnable() {}
+    @Override
+    protected void onDisable() {}
+
+    public void setBasicText(String text) {
+        if (basicLabel != null)
+            basicLabel.setText(text);
+    }
+    
+    @Override
+    public void update(float tpf) {
+        super.update(tpf);
+
+        List<RacerState> racers = progress.getRaceState();
+
+        Collections.sort(racers);
+
+        RacerState st = progress.getPlayerRacerState();
+        progressTable.update(racers, st);
+    }
+}
+
+class RaceProgressTable extends Container {
+
+    private final int rowLength;
+    
+    public RaceProgressTable(List<RacerState> initialState) {
+        int count = 0;
+        String[] values = convertToValueRows(HEADER, false);
+        for (int i = 0; i < values.length; i++) {
+            this.addChild(new Label(values[i]), count, i);
         }
-        
-        Collections.sort(racers, new Comparator<Entry<RayCarControl, RacerState>>() {
-            @Override
-            public int compare(Entry<RayCarControl, RacerState> o1, Entry<RayCarControl, RacerState> o2) {
-                return o1.getValue().compareTo(o2.getValue());
-            }
-        });
+        count++;
+        rowLength = values.length;
 
-        main.detachAllChildren();
-
-        int x = 0;
-        for (Spatial element: headerRow.getChildren()) {
-            main.addChild((Node)element, 0, x);
-            x++;
-        }
-
-        int count = 1;
-        for (Entry<RayCarControl, RacerState> racer: racers) {
-            RaceUIRow row = rows.get(racer.getKey());
-            Label[] elements = row.update(racer.getKey().getCarData().name, racer.getValue(), player == racer.getKey());
-            for (int i = 0; i < elements.length; i++) {
-                main.addChild(elements[i], count, i);
+        for (RacerState state: initialState) {
+            values = convertToValueRows(state, false);
+            for (int i = 0; i < values.length; i++) {
+                this.addChild(new Label(values[i]), count, i);
             }
             count++;
         }
     }
 
-	public void setPlayer(RayCarControl player) {
-        this.player = player;
-	}
-}
-
-class RaceUIRow {
-
-    private final Label name;
-    private final Label lap;
-    private final Label checkpoint;
-    private final Label distance;
-    private final Label playerTag;
-
-    public RaceUIRow() {
-        this.name = new Label("");
-        this.lap = new Label("");
-        this.checkpoint = new Label("");
-        this.distance = new Label("");
-        this.playerTag = new Label("");
+    public void update(List<RacerState> states, RacerState playerState) {
+        int count = 1;
+        for (RacerState racer: states) {
+            String[] values = convertToValueRows(racer, racer == playerState); 
+            for (int i = 0; i < values.length; i++) {
+                ((Label)this.getChild(rowLength*count + i)).setText(values[i]);
+            }
+            count++;
+        }
     }
 
-    public Label[] update(String name, RacerState state, boolean isPlayer) {
-        this.name.setText(name);
-        this.lap.setText(state.lap+"");
-        this.checkpoint.setText(state.nextCheckpoint.num+"");
-        this.distance.setText(H.roundDecimal(state.distanceToNextCheckpoint, 1));
-        this.playerTag.setText(isPlayer ? "---" : "");
+    private static RacerState HEADER = new RacerState("Player");
 
-        return new Label[] {
-            this.name, lap, checkpoint, distance, playerTag
+    private String[] convertToValueRows(RacerState state, boolean isPlayer) {
+        if (state == HEADER) {
+            return new String[] {
+                state.name,
+                "lap",
+                "checkpoint",
+                "distance",
+                "playerTag"
+            };
+        }
+
+        return new String[] {
+            state.name,
+            state.lap+"",
+            state.nextCheckpoint.num+"",
+            H.roundDecimal(state.distanceToNextCheckpoint, 1),
+            isPlayer ? "---" : ""
         };
     }
 }

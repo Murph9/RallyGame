@@ -18,7 +18,6 @@ import car.CarUI;
 import car.ai.RaceAI;
 import car.data.Car;
 import car.ray.RayCarControl;
-import drive.RaceMenu;
 import helper.H;
 import helper.Log;
 import service.GridPositions;
@@ -29,7 +28,7 @@ import world.StaticWorldBuilder;
 public class DriveRace extends BaseAppState {
 
     private static boolean PROGRESS_DEBUG = true;
-    public RaceMenu menu;
+    public DriveRaceUI menu;
     
     //things that should be in a world class
     private Node rootNode = new Node("root");
@@ -108,9 +107,6 @@ public class DriveRace extends BaseAppState {
         this.cb = getState(CarBuilder.class);
         RayCarControl rayCar = cb.addCar(playerCarType, worldStarts[0], worldRot, true);
 
-        menu = new RaceMenu(null); 
-        getStateManager().attach(menu);
-        
         uiNode = new CarUI(rayCar);
         getStateManager().attach(uiNode);
         
@@ -128,9 +124,11 @@ public class DriveRace extends BaseAppState {
         
         getState(BulletAppState.class).setEnabled(true);
 
-        progress = new DriveRaceProgress(getApplication(), checkpoints, cb.getAll());
-        progress.setDebug(PROGRESS_DEBUG);
-        progress.setPlayer(rayCar);
+        progress = new DriveRaceProgress(checkpoints, cb.getAll(), rayCar, PROGRESS_DEBUG);
+        getStateManager().attach(progress);
+
+        menu = new DriveRaceUI(progress);
+        getStateManager().attach(menu);
         
         //actually init
         nextState();
@@ -175,9 +173,7 @@ public class DriveRace extends BaseAppState {
         if (!isEnabled())
             return;
 
-        menu.setText("State:" + state.name()
-            + "\nStateTimeout:" + this.stateTimeout
-            + "\n" + progress.toString());
+        menu.setBasicText("State:" + state.name() + "\nStateTimeout:" + this.stateTimeout);
         
         if (stateChanged) {
             stateChanged = false;
@@ -247,6 +243,8 @@ public class DriveRace extends BaseAppState {
         
         getStateManager().detach(menu);
         menu = null;
+        getStateManager().attach(progress);
+        progress = null;
         
         getStateManager().detach(uiNode);
         uiNode = null;
