@@ -17,7 +17,7 @@ public class DriveRaceUI extends BaseAppState {
     private final DriveRaceProgress progress;
 
     private Container main;
-    private RaceProgressTable progressTable;
+    private RacerStateTableView progressTable;
 
     private Container basicPanel;
     private Label basicLabel;
@@ -40,7 +40,7 @@ public class DriveRaceUI extends BaseAppState {
         main.setLocalTranslation(screen.topLeft().add(0, -100, 0));
         ((SimpleApplication) app).getGuiNode().attachChild(main);
 
-        progressTable = new RaceProgressTable(progress.getRaceState());
+        progressTable = new RacerStateTableView(progress.getRaceState());
         this.main.addChild(progressTable);
     }
 
@@ -73,23 +73,26 @@ public class DriveRaceUI extends BaseAppState {
     }
 }
 
-class RaceProgressTable extends Container {
+class RacerStateTableView extends Container {
 
     private final int rowLength;
     
-    public RaceProgressTable(List<RacerState> initialState) {
+    public RacerStateTableView(List<RacerState> initialState) {
         int count = 0;
         String[] values = convertToValueRows(HEADER, false);
+        this.addChild(new Label(""), count, 0);
         for (int i = 0; i < values.length; i++) {
-            this.addChild(new Label(values[i]), count, i);
+            this.addChild(new Label(values[i]), count, i+1);
         }
         count++;
         rowLength = values.length;
 
         for (RacerState state: initialState) {
             values = convertToValueRows(state, false);
+            
+            this.addChild(new Label(count+""), count, 0);
             for (int i = 0; i < values.length; i++) {
-                this.addChild(new Label(values[i]), count, i);
+                this.addChild(new Label(values[i]), count, i+1);
             }
             count++;
         }
@@ -100,7 +103,8 @@ class RaceProgressTable extends Container {
         for (RacerState racer: states) {
             String[] values = convertToValueRows(racer, racer == playerState); 
             for (int i = 0; i < values.length; i++) {
-                ((Label)this.getChild(rowLength*count + i)).setText(values[i]);
+                //this is kind of a hack to prevent recreating labels too often
+                ((Label)this.getChild((rowLength+1)*count + i+1)).setText(values[i]);
             }
             count++;
         }
@@ -111,20 +115,20 @@ class RaceProgressTable extends Container {
     private String[] convertToValueRows(RacerState state, boolean isPlayer) {
         if (state == HEADER) {
             return new String[] {
-                state.name,
-                "lap",
-                "checkpoint",
-                "distance",
-                "playerTag"
-            };
+                    state.name,
+                    "lap",
+                    "check",
+                    "distance",
+                    ""
+                };
         }
 
         return new String[] {
-            state.name,
-            state.lap+"",
-            state.nextCheckpoint.num+"",
-            H.roundDecimal(state.distanceToNextCheckpoint, 1),
-            isPlayer ? "---" : ""
-        };
+                state.name,
+                state.lap + "",
+                state.nextCheckpoint.num + "",
+                H.roundDecimal(state.distanceToNextCheckpoint, 1),
+                isPlayer ? "You" : ""
+            };
     }
 }
