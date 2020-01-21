@@ -18,7 +18,9 @@ import service.ray.IPhysicsRaycaster;
 import service.ray.RaycasterResult;
 
 public abstract class CarAI implements ICarAI {
-	
+    
+    private static final float SLOW_SPEED_LIMIT = 4;
+
 	protected final RayCarControl car;
     protected final float BEST_LAT_FORCE;
     protected final float BEST_LONG_FORCE;
@@ -104,7 +106,7 @@ public abstract class CarAI implements ICarAI {
 
 		boolean accel = IfTooSlowForPoint(targetPos, curPos, this.car.getLinearVelocity());
 		boolean targetInFront = curPos.subtract(targetPos).length() > curPos.add(car.forward).subtract(targetPos).length();
-		if (accel && targetInFront && ifLowDriftAngle()) {
+		if (accel && targetInFront && !ifDrifting()) {
             //drive at point
             this.onEvent("Accel", true);
             this.onEvent("Brake", false);
@@ -147,8 +149,15 @@ public abstract class CarAI implements ICarAI {
 	}
     
     /** Detect a high drift angle, which might mean stop accelerating */
-    protected boolean ifLowDriftAngle() {
-        return this.car.driftAngle() < 5;
+    protected boolean ifDrifting() {
+        if (this.car.getLinearVelocity().length() < SLOW_SPEED_LIMIT)
+            return false; //can't drift slowly
+
+        if (this.car.getAngularVelocity().length() > 0.7f) {
+            return true; //predict starting a drift (should really be compared with size)
+        }
+
+        return this.car.driftAngle() >= 5;
     }
 
     /**Gets (in seconds) time till a collision */
@@ -234,7 +243,7 @@ public abstract class CarAI implements ICarAI {
         for (RayWheelControl wheel : wheels) {
             gripSum += wheel.getRayWheel().skidFraction;
         }
-        if (car.getLinearVelocity().length() > 3 && gripSum > wheels.size()) {
+        if (car.getLinearVelocity().length() > SLOW_SPEED_LIMIT && gripSum > wheels.size()) {
             onEvent("Accel", false);
         }
     }
