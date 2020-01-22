@@ -32,7 +32,7 @@ public class ParticleAtmosphere extends BaseAppState {
 		particles.setLowLife(7);
 		particles.setHighLife(2);
 		
-		particles.setStartSize(0.01f);
+		particles.setStartSize(0.015f);
 		particles.setEndSize(0.01f);
 		
 		//spread out the initial spawn positions
