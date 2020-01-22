@@ -6,6 +6,7 @@ import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.PhysicsTickListener;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
@@ -94,14 +95,10 @@ public class RayCar implements PhysicsTickListener {
 		
 		applyDrag(space, tpf);
 		
-		//TODO give any forces back to the collision object the wheel hits
-		//should use wheels[i].collisionObject
-		
 		//TODO use the velocity of the object in calculations (suspension and traction)
 	}
 	
 	private void applySuspension(PhysicsSpace space, float tpf) {
-		Vector3f w_pos = rbc.getPhysicsLocation();
 		Matrix3f w_angle = rbc.getPhysicsRotationMatrix();
 		
 		//Do suspension ray cast
@@ -145,15 +142,18 @@ public class RayCar implements PhysicsTickListener {
 				//TODO do some proper large sus/damp force to stop vehicle motion/rotation down
 				wheels[w_id].susForce = (sus.preload_force+sus.travelTotal())*sus.stiffness*1000;
 				Vector3f f = w_angle.invert().mult(wheels[w_id].hitNormalInWorld.mult(wheels[w_id].susForce * tpf));
-				rbc.applyImpulse(f, wheels[w_id].curBasePosWorld.subtract(w_pos));
+                applyWheelForce(f, wheels[w_id]);
 				return;
 			}
 			
 			float denominator = wheels[w_id].hitNormalInWorld.dot(w_angle.mult(localDown)); //loss due to difference between collision and localdown (cos ish)
-			Vector3f relpos = wheels[w_id].curBasePosWorld.subtract(rbc.getPhysicsLocation()); //pos of sus contact point relative to car origin
-			Vector3f velAtContactPoint = getVelocityInLocalPoint(relpos); //get sus vel at point on ground
+			Vector3f velAtContactPoint = getVelocityInWorldPoint(rbc, wheels[w_id].curBasePosWorld); //get sus vel at point on ground
+			Vector3f otherVelAtContactPoint = new Vector3f();
+			if (wheels[w_id].collisionObject != null)
+				otherVelAtContactPoint = getVelocityInWorldPoint(wheels[w_id].collisionObject, wheels[w_id].curBasePosWorld);
 			
-			float projVel = wheels[w_id].hitNormalInWorld.dot(velAtContactPoint); //percentage of normal force that applies to the current motion
+			// percentage of normal force that applies to the current motion
+			float projVel = wheels[w_id].hitNormalInWorld.dot(velAtContactPoint.subtract(otherVelAtContactPoint));
 			float projected_rel_vel = 0;
 			float clippedInvContactDotSuspension = 0;
 			if (denominator >= -0.1f) {
@@ -176,7 +176,7 @@ public class RayCar implements PhysicsTickListener {
 			wheels[w_id].susForce -= susp_damping * projected_rel_vel;
 			
 			//Sway bars https://forum.miata.net/vb/showthread.php?t=25716
-			int w_id_other = w_id == 0 ? 1 : w_id == 1 ? 0 : w_id == 2 ? 3 : 2; //fetch the id or the other side
+			int w_id_other = w_id == 0 ? 1 : w_id == 1 ? 0 : w_id == 2 ? 3 : 2; //fetch the index of the other side
 			float swayDiff = wheels[w_id_other].susRayLength - wheels[w_id].susRayLength;
 			wheels[w_id].susForce += swayDiff * sus.antiroll;
 			
@@ -184,13 +184,11 @@ public class RayCar implements PhysicsTickListener {
 			
 			//applyImpulse (force = world space, pos = relative to local)
 			Vector3f f = wheels[w_id].hitNormalInWorld.mult(wheels[w_id].susForce * tpf);
-			rbc.applyImpulse(f, wheels[w_id].curBasePosWorld.subtract(w_pos)); 
+            applyWheelForce(f, wheels[w_id]);
 		});
-
 	}
 	
 	private void applyTraction(PhysicsSpace space, float tpf) {
-		Vector3f w_pos = rbc.getPhysicsLocation();
 		Matrix3f w_angle = rbc.getPhysicsRotationMatrix();
 		Vector3f w_velocity = rbc.getLinearVelocity();
 		Vector3f w_angVel = rbc.getAngularVelocity();
@@ -216,7 +214,11 @@ public class RayCar implements PhysicsTickListener {
 			if (!Float.isNaN(w_angVel.y))
 				angVel = w_angVel.y;
 			
-			float slipr = wheels[w_id].radSec * carData.wheelData[w_id].radius - velocity.z;
+			Vector3f objectRelVelocity = new Vector3f();
+			if (wheels[w_id].collisionObject != null) //convert contact object to local co-ords
+				objectRelVelocity = w_angle.invert().mult(wheels[w_id].collisionObject.getLinearVelocity());
+
+			float slipr = wheels[w_id].radSec * carData.wheelData[w_id].radius - (velocity.z - objectRelVelocity.z);
 			float slipratio = slipr/slip_div;
 			
 			if (handbrakeCur && !isFrontWheel(w_id)) //rearwheels only
@@ -224,10 +226,10 @@ public class RayCar implements PhysicsTickListener {
 			
 			float slipangle = 0;
 			if (isFrontWheel(w_id)) {
-				float slipa_front = velocity.x + carData.wheelOffset[w_id].z * angVel;
+				float slipa_front = (velocity.x - objectRelVelocity.x) + carData.wheelOffset[w_id].z * angVel;
 				slipangle = (float)(FastMath.atan2(slipa_front, slip_div) - steeringFake);
 			} else { //so rear
-				float slipa_rear = velocity.x + carData.wheelOffset[w_id].z * angVel;
+				float slipa_rear = (velocity.x - objectRelVelocity.x) + carData.wheelOffset[w_id].z * angVel;
 				driftAngle = slipa_rear; //set drift angle as the rear amount
 				slipangle = (float)(FastMath.atan2(slipa_rear, slip_div)); //slip_div is questionable here
 			}
@@ -261,8 +263,8 @@ public class RayCar implements PhysicsTickListener {
 				wheels[w_id].radSec += totalLongForceTorque; //so the radSec can be used next frame, to calculate slip ratio
 			
 			wheels[w_id].gripDir = wheel_force;
-			rbc.applyImpulse(w_angle.mult(wheel_force).mult(tpf), wheels[w_id].curBasePosWorld.subtract(w_pos));
-			
+            applyWheelForce(w_angle.mult(wheel_force).mult(tpf), wheels[w_id]);
+            
 			planarGForce.addLocal(wheel_force);
 		});
 		
@@ -292,7 +294,17 @@ public class RayCar implements PhysicsTickListener {
 		
 		float dragDown = -0.5f * carData.areo_downforce * 1.225f * (w_velocity.z*w_velocity.z); //formula for downforce from wikipedia
 		rbc.applyCentralForce(dragDir.add(0, dragDown, 0)); //apply downforce after
-	}
+    }
+    
+    /**Apply wheel for in the correct world space and back to the object you are touching */
+    private void applyWheelForce(Vector3f force, RayWheel wheel) {
+        rbc.applyImpulse(force, wheel.curBasePosWorld.subtract(rbc.getPhysicsLocation()));
+
+        //only apply if its something that we can 'work' with
+        if (wheel.collisionObject != null) {
+            wheel.collisionObject.applyImpulse(force.negate(), wheel.curBasePosWorld.subtract(wheel.collisionObject.getPhysicsLocation()));
+        }
+    }
 	
 	/////////////////
 	//control methods
@@ -342,11 +354,12 @@ public class RayCar implements PhysicsTickListener {
 		return rbc.getPhysicsRotationMatrix().mult(out.set(in), out).add(rbc.getPhysicsLocation());
 	}
 
-	private Vector3f getVelocityInLocalPoint(Vector3f rel_pos) {
-		//http://www.letworyinteractive.com/blendercode/dd/d16/btRigidBody_8h_source.html#l00366
-		Vector3f vel = rbc.getLinearVelocity();
-		Vector3f ang = rbc.getAngularVelocity();
-		return vel.add(ang.cross(rel_pos));
+	private Vector3f getVelocityInWorldPoint(PhysicsRigidBody control, Vector3f worldPos) {
+		Vector3f relPos = worldPos.subtract(control.getPhysicsLocation());
+		// http://www.letworyinteractive.com/blendercode/dd/d16/btRigidBody_8h_source.html#l00366
+		Vector3f vel = control.getLinearVelocity();
+		Vector3f ang = control.getAngularVelocity();
+		return vel.add(ang.cross(relPos));
 	}
 
 	private boolean isFrontWheel(int w_id) {

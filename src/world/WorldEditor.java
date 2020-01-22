@@ -89,7 +89,7 @@ public class WorldEditor extends Container {
 	}
 	private void setWorld(String typeStr, String subType) {
 		WorldType worldType = WorldType.valueOf(WorldType.class, typeStr);
-		
+		//TODO remove duplicate with ChooseMap somehow
 		switch (worldType) {
 			case STATIC:
 				StaticWorld sworld = StaticWorld.valueOf(StaticWorld.class, subType);
@@ -113,6 +113,9 @@ public class WorldEditor extends Container {
 				break;
 			case FLAT:
 				currentSelection = new FlatWorld();
+				break;
+			case MOVING:
+				currentSelection = new MovingWorld();
 				break;
 			case OSM:
 				currentSelection = new OsmWorld();

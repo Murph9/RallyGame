@@ -13,6 +13,7 @@ public enum WorldType {
 	OSM,
 
 	FLAT,
+	MOVING,
 	NONE
 	;
 }
