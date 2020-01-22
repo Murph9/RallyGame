@@ -30,8 +30,8 @@ public class RayWheelControl {
 	private static final Vector2f[] texCoord = new Vector2f[] { //texture of quad with order
 		new Vector2f(0, 0), new Vector2f(0, 1), new Vector2f(1, 0), new Vector2f(1, 1),
 	};
-	
-	private static final ColorRGBA BASE_HIGHLIGHT_COLOUR = ColorRGBA.DarkGray; //TODO remove, as the model should define it
+    
+	private static final ColorRGBA BASE_SKID_COLOUR = ColorRGBA.Black;
 	
 	private Geometry skidLine;
 	private Vector3f[] vertices;
@@ -61,7 +61,7 @@ public class RayWheelControl {
 		
 		//rotate and translate the wheel rootNode
 		rootNode = new Node("wheel " + wheel.num);
-		spat = LoadModelWrapper.create(app.getAssetManager(), wheel.data.modelName, BASE_HIGHLIGHT_COLOUR);
+		spat = LoadModelWrapper.create(app.getAssetManager(), wheel.data.modelName, ColorRGBA.DarkGray);
 		spat.center();
 		rootNode.attachChild(spat);
 		
@@ -155,13 +155,14 @@ public class RayWheelControl {
 		sinceLastPos = skidMarkTimeout;
 
 		// TODO change to just be thinner with a larger drift angle
-		// i have tested this is real life, width is lower when sliding sideways
+		// i have tested this is real life, width is lower when sliding sideways but not that much lower
 
 		// scaling the grip value
 		float clampSkid = FastMath.clamp(this.wheel.skidFraction - 0.9f, 0, 1);
-		ColorRGBA c = BASE_HIGHLIGHT_COLOUR.clone().mult(clampSkid);
+		ColorRGBA c = BASE_SKID_COLOUR.clone().mult(clampSkid);
 
-		if (!wheel.inContact || velDir.length() < 1 || clampSkid < 0.1f) { //no contact or slow speed = no visible skid marks
+        // no contact or slow speed => no visible skid marks
+		if (!wheel.inContact || velDir.length() < 1 || clampSkid < 0.1f) {
 			if (lastColor != null && lastColor.equals(new ColorRGBA(0, 0, 0, 0))) {
 				//the last one was null, ignore
 				return;
