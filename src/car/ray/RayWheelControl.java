@@ -159,10 +159,13 @@ public class RayWheelControl {
 
 		// scaling the grip value
 		float clampSkid = FastMath.clamp(this.wheel.skidFraction - 0.9f, 0, 1);
-		ColorRGBA c = BASE_SKID_COLOUR.clone().mult(clampSkid);
+        ColorRGBA c = BASE_SKID_COLOUR.clone().mult(clampSkid);
+        
+        //ignore moving objects because we can't 'track' it and it looks weird
+        boolean contactObjectIsMoving = wheel.collisionObject != null && wheel.collisionObject.getMass() > 0;
 
         // no contact or slow speed => no visible skid marks
-		if (!wheel.inContact || velDir.length() < 1 || clampSkid < 0.1f) {
+		if (!wheel.inContact || velDir.length() < 1 || clampSkid < 0.1f || contactObjectIsMoving) {
 			if (lastColor != null && lastColor.equals(new ColorRGBA(0, 0, 0, 0))) {
 				//the last one was null, ignore
 				return;
