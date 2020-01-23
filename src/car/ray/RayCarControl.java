@@ -110,19 +110,19 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
         if (rbEnabled()) {
             Matrix3f playerRot = rbc.getPhysicsRotationMatrix();
             vel = rbc.getLinearVelocity();
-            forward = playerRot.mult(new Vector3f(0,0,1));
-            up = playerRot.mult(new Vector3f(0,1,0));
-            left = playerRot.mult(new Vector3f(1,0,0));
-            right = playerRot.mult(new Vector3f(-1,0,0));
+            forward = playerRot.mult(Vector3f.UNIT_Z);
+            up = playerRot.mult(Vector3f.UNIT_Y);
+            left = playerRot.mult(Vector3f.UNIT_X);
+            right = playerRot.mult(Vector3f.UNIT_X.negate());
             
             travelledDistance += rbc.getLinearVelocity().length()*tpf;
             
             //wheel turning logic
             steeringCurrent = 0;
             if (steerLeft != 0) //left
-                steeringCurrent += getMaxSteerAngle(steerLeft, 1);
+                steeringCurrent += getBestSteerAngle(steerLeft, 1);
             if (steerRight != 0) //right
-                steeringCurrent -= getMaxSteerAngle(steerRight, -1);
+                steeringCurrent -= getBestSteerAngle(steerRight, -1);
             //TODO 0.3 - 0.4 seconds from lock to lock seems okay from what ive seen
             steeringCurrent = FastMath.clamp(steeringCurrent, -carData.w_steerAngle, carData.w_steerAngle);
             setSteering(steeringCurrent);
@@ -140,26 +140,28 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
         debug.update(app);
 	}
 	
-	private float getMaxSteerAngle(float trySteerAngle, float sign) {
+	private float getBestSteerAngle(float trySteerAngle, float sign) {
 		if (ignoreSpeedFactor)
 			return trySteerAngle;
 		
 		Vector3f local_vel = rbc.getPhysicsRotation().inverse().mult(rbc.getLinearVelocity());
-		if (local_vel.z < 0 || ((-sign * this.driftAngle) < 0 && Math.abs(this.driftAngle) > carData.minDriftAngle * FastMath.DEG_TO_RAD)) 
-			return trySteerAngle; //when going backwards, slow or needing to turning against drift, you get no speed factor
-		//eg: car is pointing more left than velocity, and is also turning left
-		//and drift angle needs to be large enough to matter
+		if (local_vel.z < 0 || ((-sign * this.driftAngle) < 0 && Math.abs(this.driftAngle) > carData.minDriftAngle * FastMath.DEG_TO_RAD)) {
+            return trySteerAngle;
+            //when going backwards, slow or needing to turning against drift, you get no speed factor
+            //eg: car is pointing more left than velocity, and is also turning left
+            //and drift angle needs to be large enough to matter
+        }
 		
 		//steering factor = atan(0.08 * vel - 1) + maxAngle*PI/2 + maxLat
-//		return Math.min(-maxAngle*FastMath.atan(0.3f*(rbc.getLinearVelocity().length() - 1))
+//		return Math.min(-maxAngle*FastMath.atan(0.3f*(local_vel - 1))
 //				+ maxAngle*FastMath.PI/2 + this.wheels[0].maxLat*2, Math.abs(trySteerAngle));
 		
-		//TODO PLEASE FIX THIS
-		//TODO max turn angle really should just be the best angle on the lat traction curve (while going straight)
-		//return carData.wheelData[0].maxLat;
-		return Math.abs(trySteerAngle);
+        //TODO PLEASE FIX THIS
+        //TODO max turn angle really should just be the best angle on the lat traction curve (while going straight)
+        // return FastMath.atan2(Math.abs(local_vel.z), carData.wheelData[0].maxLat);
+        // return carData.wheelData[0].maxLat;
+		return trySteerAngle;
 		
-		//TODO turn back value should be vel dir + maxlat instead of just full lock
 		//remember that this value is clamped after this method is called
 	}
 

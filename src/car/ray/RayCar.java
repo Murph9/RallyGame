@@ -14,6 +14,7 @@ import com.jme3.math.Vector3f;
 import car.data.CarDataConst;
 import car.data.CarSusDataConst;
 import car.data.WheelDataTractionConst;
+import helper.Log;
 import service.ray.IPhysicsRaycaster;
 import service.ray.PhysicsRaycaster;
 import service.ray.RaycasterResult;
@@ -94,8 +95,6 @@ public class RayCar implements PhysicsTickListener {
 			applyTraction(space, tpf);
 		
 		applyDrag(space, tpf);
-		
-		//TODO use the velocity of the object in calculations (suspension and traction)
 	}
 	
 	private void applySuspension(PhysicsSpace space, float tpf) {
@@ -138,13 +137,12 @@ public class RayCar implements PhysicsTickListener {
 				return;
 			}
 			
-			if (wheels[w_id].susRayLength < 0) { //suspension bottomed out 
-				//TODO do some proper large sus/damp force to stop vehicle motion/rotation down
-				wheels[w_id].susForce = (sus.preload_force+sus.travelTotal())*sus.stiffness*1000;
-				Vector3f f = w_angle.invert().mult(wheels[w_id].hitNormalInWorld.mult(wheels[w_id].susForce * tpf));
+			if (wheels[w_id].susRayLength < 0) { // suspension bottomed out, apply max
+                wheels[w_id].susForce = (sus.preload_force + sus.travelTotal()) * sus.stiffness * 1000;
+                Vector3f f = w_angle.invert().mult(wheels[w_id].hitNormalInWorld.mult(wheels[w_id].susForce * tpf));
                 applyWheelForce(f, wheels[w_id]);
-				return;
-			}
+                return;
+            }
 			
 			float denominator = wheels[w_id].hitNormalInWorld.dot(w_angle.mult(localDown)); //loss due to difference between collision and localdown (cos ish)
 			Vector3f velAtContactPoint = getVelocityInWorldPoint(rbc, wheels[w_id].curBasePosWorld); //get sus vel at point on ground
@@ -204,7 +202,7 @@ public class RayCar implements PhysicsTickListener {
 			steeringCur *= -1;
 		}
 		
-		final float slip_div = Math.abs(velocity.length());
+		final float slip_div = velocity.length();
 		final float steeringFake = steeringCur;
 		doForEachWheel((w_id) -> {
 			Vector3f wheel_force = new Vector3f();
@@ -227,11 +225,11 @@ public class RayCar implements PhysicsTickListener {
 			float slipangle = 0;
 			if (isFrontWheel(w_id)) {
 				float slipa_front = (velocity.x - objectRelVelocity.x) + carData.wheelOffset[w_id].z * angVel;
-				slipangle = (float)(FastMath.atan2(slipa_front, slip_div) - steeringFake);
+				slipangle = FastMath.atan2(slipa_front, slip_div) - steeringFake;
 			} else { //so rear
 				float slipa_rear = (velocity.x - objectRelVelocity.x) + carData.wheelOffset[w_id].z * angVel;
 				driftAngle = slipa_rear; //set drift angle as the rear amount
-				slipangle = (float)(FastMath.atan2(slipa_rear, slip_div)); //slip_div is questionable here
+				slipangle = FastMath.atan2(slipa_rear, slip_div); //slip_div is questionable here
 			}
 			
 			//merging the forces into a traction circle
@@ -242,8 +240,8 @@ public class RayCar implements PhysicsTickListener {
 			if (p == 0)
 				p = 0.001f;
 			
-			wheels[w_id].skidFraction = p;
-			
+            wheels[w_id].skidFraction = p;
+            			
 			//calc the longitudinal force from the slip ratio
 			wheel_force.z = (ratiofract/p)*GripHelper.tractionFormula(carData.wheelData[w_id].pjk_long, p*carData.wheelData[w_id].maxLong) * GripHelper.loadFormula(carData.wheelData[w_id].pjk_long, this.wheels[w_id].susForce);
 			//calc the latitudinal force from the slip angle
