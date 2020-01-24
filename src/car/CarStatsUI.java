@@ -61,7 +61,7 @@ class CarStats {
     public CarStats(CarDataConst data) {
         stats = new LinkedList<>();
 
-        helper.H.Duo<Float, Float> power = data.getMaxPower();
+        helper.Duo<Float, Float> power = data.getMaxPower();
         stats.add(new Stat("Power", power.first + "kW? @"+power.second+ "rpm"));
         stats.add(new Stat("Mass", data.mass));
         stats.add(new Stat("Drive", data.driveFront ? data.driveRear ? "AWD" : "Front" : data.driveRear ? "Rear" : "Unknown"));

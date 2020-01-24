@@ -11,7 +11,7 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 
-import helper.H.Duo;
+import helper.Duo;
 
 public class CarDataConst implements Serializable {
 
