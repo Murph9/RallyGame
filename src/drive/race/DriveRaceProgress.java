@@ -26,6 +26,7 @@ import com.jme3.scene.shape.Box;
 
 import car.ray.RayCarControl;
 import effects.LoadModelWrapper;
+import helper.Duo;
 import helper.H;
 
 public class DriveRaceProgress extends BaseAppState {
@@ -161,13 +162,10 @@ public class DriveRaceProgress extends BaseAppState {
             return;
 
         if (racer.nextCheckpoint.num == checkpoint.num) {
-            // then finally, update checkpoint
-            int nextNum = (racer.nextCheckpoint.num + 1) % checkpoints.length;
-            racer.nextCheckpoint = checkpoints[nextNum];
-
-            if (racer.nextCheckpoint == firstCheckpoint) {
-                racer.lap++;
-            }
+            // update checkpoints
+            Duo<Integer, Integer> nextCheckpoint = calcNextCheckpoint(racer, checkpoints.length);
+            racer.nextCheckpoint = checkpoints[nextCheckpoint.second];
+            racer.lap = nextCheckpoint.first;
         }
     }
 
@@ -225,5 +223,27 @@ public class DriveRaceProgress extends BaseAppState {
 
             return true;
         }
+    }
+    
+    /** Lap,checkpoint */
+    public static Duo<Integer, Integer> calcNextCheckpoint(RacerState racer, int checkpointCount) {
+        int nextNum = racer.nextCheckpoint.num + 1;
+        int lap = racer.lap;
+        if (nextNum >= checkpointCount) {
+            nextNum = 0;
+            lap++;
+        }
+        return new Duo<>(lap, nextNum);
+    }
+    
+    /** Lap,checkpoint */
+    public static Duo<Integer, Integer> calcLastCheckpoint(RacerState racer, int checkpointCount) {
+        int lap = racer.lap;
+        int nextNum = racer.nextCheckpoint.num - 1;
+        if (racer.nextCheckpoint.num == 0) {
+            nextNum = checkpointCount - 1;
+            lap--;
+        }
+        return new Duo<>(lap, nextNum);
     }
 }

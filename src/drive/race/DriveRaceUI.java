@@ -122,7 +122,7 @@ class RacerStateTableView extends Container {
                     ""
                 };
         }
-
+        //TODO time diff
         return new String[] {
                 state.name,
                 state.lap + "",
