@@ -87,13 +87,6 @@ public class Configuration implements UserSettings {
 	private int frameRate; //setFrameRate(60);
 	private int samples; //setSamples(0);
 	
-	private int aiCount; //2
-	
-	//TODO more
-	//default car, ai car
-	//default map, dynamic map
-	//shadow
-	
 	private Configuration(Properties prop) {
 		if (prop == null) {
 			height = 720;
@@ -102,7 +95,6 @@ public class Configuration implements UserSettings {
 			setVsync = false;
 			frameRate = 60;
 			samples = 0;
-			aiCount = 0;
 			return;
 		}
 		
@@ -112,7 +104,6 @@ public class Configuration implements UserSettings {
 		setVsync = Boolean.parseBoolean(Prop.Vsync.GetOrDefault(prop));
 		frameRate = Integer.parseInt(Prop.FrameRate.GetOrDefault(prop));
 		samples = Integer.parseInt(Prop.Samples.GetOrDefault(prop));
-		aiCount = Integer.parseInt(Prop.AICount.GetOrDefault(prop));
 	}
 	
 	private Properties getProperties() {
@@ -124,7 +115,6 @@ public class Configuration implements UserSettings {
 		prop.setProperty(Prop.Vsync.value, String.valueOf(setVsync));
 		prop.setProperty(Prop.FrameRate.value, String.valueOf(frameRate));
 		prop.setProperty(Prop.Samples.value, String.valueOf(samples));
-		prop.setProperty(Prop.AICount.value, String.valueOf(aiCount));
 		
 		return prop;
 	}

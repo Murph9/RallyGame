@@ -1,5 +1,7 @@
 package game;
 
+import java.lang.reflect.InvocationTargetException;
+
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
@@ -132,7 +134,8 @@ public class ChooseMap extends BaseAppState {
 		try {
             newWorld = world.copy();
 			getStateManager().detach(world);
-		} catch (InstantiationException | IllegalAccessException e) {
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+			 | NoSuchMethodException | SecurityException | InvocationTargetException e) {
 			e.printStackTrace();
 		}
 		world = null;

@@ -1,5 +1,7 @@
 package world;
 
+import java.lang.reflect.InvocationTargetException;
+
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
@@ -12,14 +14,14 @@ import helper.Log;
 public abstract class World extends BaseAppState implements IWorld {
 
 	protected Node rootNode;
-	
+
 	public World(String name) {
-        this.rootNode = new Node(name);
-    }
-	
+		this.rootNode = new Node(name);
+	}
+
 	@Override
 	public void initialize(Application app) {
-		((SimpleApplication)app).getRootNode().attachChild(this.rootNode);
+		((SimpleApplication) app).getRootNode().attachChild(this.rootNode);
 		Log.p("initialize() world: " + rootNode.getName());
 	}
 
@@ -33,24 +35,25 @@ public abstract class World extends BaseAppState implements IWorld {
 
 	@Override
 	protected void cleanup(Application app) {
-		//remove everything you added, you are being removed now :(
+		// remove everything you added, you are being removed now :(
 		if (this.rootNode == null)
 			Log.e(rootNode.getName() + " was cleaned up twice or never initialised, please don't do that.");
-		
-		((SimpleApplication)app).getRootNode().detachChild(this.rootNode);
+
+		((SimpleApplication) app).getRootNode().detachChild(this.rootNode);
 
 		Log.e("cleanup() world: " + rootNode.getName());
 		this.rootNode = null;
 	}
-	
+
 	// Simpler AI call
 	public Vector3f getNextPieceClosestTo(Vector3f pos) {
 		return null;
 	}
 
 	// Create another of myself, to use somewhere else
-	public World copy() throws InstantiationException, IllegalAccessException {
+	public World copy() throws InstantiationException, IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException, NoSuchMethodException, SecurityException {
 		Class<? extends World> clazz = this.getClass();
-		return clazz.newInstance();
+		return clazz.getDeclaredConstructor().newInstance();
 	}
 }

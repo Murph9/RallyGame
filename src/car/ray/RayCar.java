@@ -14,7 +14,6 @@ import com.jme3.math.Vector3f;
 import car.data.CarDataConst;
 import car.data.CarSusDataConst;
 import car.data.WheelDataTractionConst;
-import helper.Log;
 import service.ray.IPhysicsRaycaster;
 import service.ray.PhysicsRaycaster;
 import service.ray.RaycasterResult;
@@ -43,7 +42,7 @@ public class RayCar implements PhysicsTickListener {
 	protected CarDataConst carData;
 	private IPhysicsRaycaster raycaster;
     protected final RigidBodyControl rbc;
-    protected boolean rbEnabled() { return rbc.isEnabled() && rbc.isInWorld() && rbc.isActive(); }
+    protected boolean rbEnabled() { return rbc.isEnabled() && rbc.isInWorld(); }
 	
 	//simulation variables
 	protected final RayWheel[] wheels;
