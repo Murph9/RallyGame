@@ -218,7 +218,7 @@ public class DriveRace extends BaseAppState {
     }
 
     public Transform resetTransform(RayCarControl car) {
-        Vector3f pos = progress.getCurrentCheckpoint(car);
+        Vector3f pos = progress.getLastCheckpoint(car);
         Vector3f next = progress.getNextCheckpoint(car);
 
         Quaternion q = new Quaternion();

@@ -8,6 +8,7 @@ import drive.race.RacerState;
 class RacerState implements Comparable<RacerState> {
     public final String name;
     public int lap;
+    public Checkpoint lastCheckpoint;
     public Checkpoint nextCheckpoint;
     public float distanceToNextCheckpoint;
     public Geometry arrow;
@@ -16,7 +17,7 @@ class RacerState implements Comparable<RacerState> {
         this.name = name;
     }
 
-    public void calcCheckpointDistance(Vector3f pos) {
+    public void setCheckpointDistance(Vector3f pos) {
         this.distanceToNextCheckpoint = pos.subtract(nextCheckpoint.position).length();
     }
 

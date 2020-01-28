@@ -11,9 +11,6 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
-import com.jme3.bullet.collision.PhysicsCollisionEvent;
-import com.jme3.bullet.collision.PhysicsCollisionListener;
-import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.control.GhostControl;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
@@ -28,8 +25,10 @@ import car.ray.RayCarControl;
 import effects.LoadModelWrapper;
 import helper.Duo;
 import helper.H;
+import service.GhostObjectCollisionListener;
+import service.IGhostObjectCollisionApply;
 
-public class DriveRaceProgress extends BaseAppState {
+public class DriveRaceProgress extends BaseAppState implements IGhostObjectCollisionApply {
 
     private final float checkpointScale;
     private final ColorRGBA checkpointColour;
@@ -39,8 +38,8 @@ public class DriveRaceProgress extends BaseAppState {
 
     private Checkpoint firstCheckpoint;
     private final Checkpoint[] checkpoints;
-    private Node rootNode;
-    private HashMap<RayCarControl, RacerState> racers;
+    private final Node rootNode;
+    private final HashMap<RayCarControl, RacerState> racers;
 
     // debug things
     private final boolean ifDebug;
@@ -51,6 +50,7 @@ public class DriveRaceProgress extends BaseAppState {
         this.checkpoints = new Checkpoint[checkpoints.length];
         this.checkpointScale = 2;
         this.checkpointColour = new ColorRGBA(0, 1, 0, 0.4f);
+        this.rootNode = new Node("progress root node");
 
         this.racers = new HashMap<>();
         for (RayCarControl car : cars) {
@@ -65,7 +65,6 @@ public class DriveRaceProgress extends BaseAppState {
 
     @Override
     protected void initialize(Application app) {
-        this.rootNode = new Node("progress root node");
         ((SimpleApplication) app).getRootNode().attachChild(rootNode);
 
         PhysicsSpace physicsSpace = getState(BulletAppState.class).getPhysicsSpace();
@@ -86,10 +85,11 @@ public class DriveRaceProgress extends BaseAppState {
         this.firstCheckpoint = this.checkpoints[0];
 
         for (RacerState racer: this.racers.values()) {
+            racer.lastCheckpoint = this.firstCheckpoint;
             racer.nextCheckpoint = this.firstCheckpoint;
         }
 
-        physicsSpace.addCollisionListener((PhysicsCollisionListener) checkpointCollisionListener);
+        physicsSpace.addCollisionListener(checkpointCollisionListener);
     }
 
     @Override
@@ -109,7 +109,7 @@ public class DriveRaceProgress extends BaseAppState {
         //calc distance to nextCheckpoint
         for (Entry<RayCarControl, RacerState> entry: this.racers.entrySet()) {
             Vector3f carPos = entry.getKey().getPhysicsLocation();
-            entry.getValue().calcCheckpointDistance(carPos);
+            entry.getValue().setCheckpointDistance(carPos);
         }
 
         if (ifDebug) {
@@ -134,7 +134,7 @@ public class DriveRaceProgress extends BaseAppState {
         for (Checkpoint checkpoint : checkpoints) {
             physicsSpace.remove(checkpoint.ghost);
         }
-        physicsSpace.removeCollisionListener((PhysicsCollisionListener) checkpointCollisionListener);
+        physicsSpace.removeCollisionListener(checkpointCollisionListener);
     }
 
     public Vector3f getNextCheckpoint(RayCarControl car) {
@@ -144,18 +144,15 @@ public class DriveRaceProgress extends BaseAppState {
         return check.position;
     }
 
-    public Vector3f getCurrentCheckpoint(RayCarControl car) {
-        Checkpoint check = racers.get(car).nextCheckpoint;
+    public Vector3f getLastCheckpoint(RayCarControl car) {
+        Checkpoint check = racers.get(car).lastCheckpoint;
         if (check == null)
             return null;
-
-        int index = check.num - 1;
-        if (index < 0)
-            index = this.checkpoints.length - 1;
-        return this.checkpoints[index].position;
+        return check.position;
     }
 
-    protected void ghostCollision(GhostControl ghost, RigidBodyControl obj) {
+    @Override
+    public void ghostCollision(GhostControl ghost, RigidBodyControl obj) {
         Checkpoint checkpoint = getIfCheckpoint(ghost);
         RacerState racer = getIfCar(obj);
         if (checkpoint == null || racer == null)
@@ -164,6 +161,7 @@ public class DriveRaceProgress extends BaseAppState {
         if (racer.nextCheckpoint.num == checkpoint.num) {
             // update checkpoints
             Duo<Integer, Integer> nextCheckpoint = calcNextCheckpoint(racer, checkpoints.length);
+            racer.lastCheckpoint = racer.nextCheckpoint;
             racer.nextCheckpoint = checkpoints[nextCheckpoint.second];
             racer.lap = nextCheckpoint.first;
         }
@@ -182,48 +180,6 @@ public class DriveRaceProgress extends BaseAppState {
                 return checkpoint;
         return null;
     }
-
-    class GhostObjectCollisionListener implements PhysicsCollisionListener {
-
-        private final DriveRaceProgress progress;
-        public GhostObjectCollisionListener(DriveRaceProgress progress) {
-            this.progress = progress;
-        }
-
-        @Override
-        public void collision(PhysicsCollisionEvent event) {
-            Spatial a = event.getNodeA();
-            Spatial b = event.getNodeB();
-
-            if (a.getControl(GhostControl.class) != null && b.getControl(GhostControl.class) != null) {
-                return; // ignore and ghost,ghost collisions
-            }
-            
-            if (a.getControl(GhostControl.class) == null && b.getControl(GhostControl.class) == null) {
-                return; // ignore and non-ghost, non-ghost collisions
-            }
-            
-            if (a.getControl(GhostControl.class) != null && isMovingBody(event.getObjectB())) {
-                progress.ghostCollision((GhostControl) event.getObjectA(), (RigidBodyControl)event.getObjectB());
-            }
-            
-            if (b.getControl(GhostControl.class) != null && isMovingBody(event.getObjectA())) {
-                progress.ghostCollision((GhostControl) event.getObjectB(), (RigidBodyControl)event.getObjectA());
-            }
-        }
-
-        private boolean isMovingBody(PhysicsCollisionObject obj) {
-            if (!(obj instanceof RigidBodyControl)) {
-                return false; // if its not a rigid body, no idea what to do
-            }
-
-            RigidBodyControl control = (RigidBodyControl) obj;
-            if (control.isKinematic() || control.getMass() == 0)
-                return false; // only concerned about 'moving' collisions
-
-            return true;
-        }
-    }
     
     /** Lap,checkpoint */
     public static Duo<Integer, Integer> calcNextCheckpoint(RacerState racer, int checkpointCount) {
@@ -232,17 +188,6 @@ public class DriveRaceProgress extends BaseAppState {
         if (nextNum >= checkpointCount) {
             nextNum = 0;
             lap++;
-        }
-        return new Duo<>(lap, nextNum);
-    }
-    
-    /** Lap,checkpoint */
-    public static Duo<Integer, Integer> calcLastCheckpoint(RacerState racer, int checkpointCount) {
-        int lap = racer.lap;
-        int nextNum = racer.nextCheckpoint.num - 1;
-        if (racer.nextCheckpoint.num == 0) {
-            nextNum = checkpointCount - 1;
-            lap--;
         }
         return new Duo<>(lap, nextNum);
     }
