@@ -71,7 +71,6 @@ public class DriveRaceUI extends BaseAppState {
         super.update(tpf);
 
         List<RacerState> racers = progress.getRaceState();
-
         Collections.sort(racers);
 
         RacerState st = progress.getPlayerRacerState();
@@ -79,11 +78,10 @@ public class DriveRaceUI extends BaseAppState {
 
         screen.topRightMe(main);
 
-        
+        // update the debug checkpoint lines
+        if (debugNode != null)
+            ((SimpleApplication) getApplication()).getRootNode().detachChild(debugNode);
         if (getState(DebugAppState.class).DEBUG()) {
-            // update the checkpoint arrows
-            if (debugNode != null)
-                ((SimpleApplication)getApplication()).getRootNode().detachChild(debugNode);
             debugNode = new Node("debugnode");
             for (RacerState entry : racers) {
                 entry.arrow = helper.H.makeShapeLine(getApplication().getAssetManager(), ColorRGBA.Cyan,

@@ -66,8 +66,7 @@ public class CarEditor extends Container {
 		//and scroll listener
 		im.addMapping("scroll", new MouseAxisTrigger(MouseInput.AXIS_WHEEL, true));
 		im.addMapping("scroll_neg", new MouseAxisTrigger(MouseInput.AXIS_WHEEL, false));
-		im.addListener(actionListener, "scroll");
-		im.addListener(actionListener, "scroll_neg");
+		im.addListener(actionListener, "scroll", "scroll_neg");
 		
 		MouseEventControl.addListenersToSpatial(this, new DefaultMouseListener() {
 			@Override

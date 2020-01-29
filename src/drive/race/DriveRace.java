@@ -18,6 +18,7 @@ import car.CarUI;
 import car.ai.RaceAI;
 import car.data.Car;
 import car.ray.RayCarControl;
+import drive.PauseState;
 import game.IDriveDone;
 import helper.H;
 import helper.Log;
@@ -26,7 +27,7 @@ import world.StaticWorld;
 import world.StaticWorldBuilder;
 
 //TODO DriveRace can't be converted to DriveBase as the world must be initialised before this
-public class DriveRace extends BaseAppState {
+public class DriveRace extends BaseAppState implements PauseState.ICallback {
 
     public DriveRaceUI menu;
     
@@ -40,8 +41,9 @@ public class DriveRace extends BaseAppState {
     // ai things
     private final int themCount = 15;
 
-    public CarBuilder cb;
-    public DriveRaceProgress progress;
+    private CarBuilder cb;
+    private DriveRaceProgress progress;
+    private PauseState pauseState;
 
     //gui and camera stuff
     private CarCamera camera;
@@ -125,6 +127,9 @@ public class DriveRace extends BaseAppState {
         app.getInputManager().addRawInputListener(camera);
         
         getState(BulletAppState.class).setEnabled(true);
+
+        pauseState = new PauseState(this);
+        getStateManager().attach(pauseState);
 
         progress = new DriveRaceProgress(checkpoints, cb.getAll(), rayCar);
         getStateManager().attach(progress);
@@ -245,8 +250,10 @@ public class DriveRace extends BaseAppState {
         
         getStateManager().detach(menu);
         menu = null;
-        getStateManager().attach(progress);
+        getStateManager().detach(progress);
         progress = null;
+        getStateManager().detach(pauseState);
+        pauseState = null;
         
         getStateManager().detach(uiNode);
         uiNode = null;
@@ -277,5 +284,15 @@ public class DriveRace extends BaseAppState {
     
     public Vector3f getNextCheckpoint(RayCarControl car) {
         return progress.getNextCheckpoint(car);
+    }
+
+    @Override
+    public void pauseState(boolean value) {
+        this.setEnabled(value);
+    }
+
+    @Override
+    public void quit() {
+        System.exit(-111);
     }
 }

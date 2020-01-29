@@ -3,11 +3,6 @@ package duel;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
-import com.jme3.input.InputManager;
-import com.jme3.input.KeyInput;
-import com.jme3.input.controls.ActionListener;
-import com.jme3.input.controls.KeyTrigger;
-import com.jme3.scene.Node;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.HAlignment;
@@ -15,19 +10,20 @@ import com.simsilica.lemur.Label;
 import com.simsilica.lemur.style.ElementId;
 
 import car.data.CarDataConst;
+import drive.PauseState;
 import helper.H;
 import helper.Screen;
 
-public class DuelRaceMenu extends BaseAppState {
+public class DuelRaceMenu extends BaseAppState implements PauseState.ICallback {
     
-    protected final Node rootNode;
     protected final DuelRace raceState;
     protected final Runnable quit;
 
     private final CarDataConst your;
     private final CarDataConst their;
 
-    private Container pauseMenu;
+    private PauseState pauseState;
+
     private Container startWindow;
     private Container endWindow;
 
@@ -38,20 +34,13 @@ public class DuelRaceMenu extends BaseAppState {
         this.raceState = raceState;
         this.your = your;
         this.their = their;
-        this.rootNode = new Node("Root Duel node");
         this.quit = quit;
     }
 
     @Override
     protected void initialize(Application app) {
-        SimpleApplication sm = (SimpleApplication) app;
-        sm.getGuiNode().attachChild(rootNode);
-        
-        app.getInputManager().addMapping("Pause", new KeyTrigger(KeyInput.KEY_ESCAPE));
-        app.getInputManager().addListener(actionListener, "Pause");
-
-        pauseMenu = DuelUiElements.pauseMenu(() -> { togglePause(); }, () -> { quit.run(); });
-        new Screen(app.getContext().getSettings()).centerMe(pauseMenu);
+        pauseState = new PauseState(this);
+        getStateManager().attach(pauseState);
         
         //init the timer at the top
         currentStateWindow = new Container();
@@ -66,38 +55,16 @@ public class DuelRaceMenu extends BaseAppState {
 
     @Override
     protected void cleanup(Application app) {
-        InputManager i = app.getInputManager();
-        i.deleteMapping("Pause");
-        i.removeListener(actionListener);
+        getStateManager().detach(pauseState);
+        pauseState = null;
 
         ((SimpleApplication) app).getGuiNode().detachChild(currentStateWindow);
-        ((SimpleApplication) app).getGuiNode().detachChild(rootNode);
     }
 
     @Override
     protected void onDisable() { }
     @Override
     protected void onEnable() { }
-
-    private ActionListener actionListener = new ActionListener() {
-        public void onAction(String name, boolean keyPressed, float tpf) {
-            if (keyPressed)
-                return;
-            if (name.equals("Pause")) {
-                togglePause();
-            }
-        }
-    };
-
-    private void togglePause() {
-        if (rootNode.hasChild(pauseMenu)) {
-            rootNode.detachChild(pauseMenu);
-            raceState.setEnabled(true);
-        } else {
-            rootNode.attachChild(pauseMenu);
-            raceState.setEnabled(false);
-        }
-    }
 
     @SuppressWarnings("unchecked") // button checked vargs
     private void loadStartUi() {
@@ -153,4 +120,14 @@ public class DuelRaceMenu extends BaseAppState {
         if (currentTime != null) //if statement required because this is initialised one frame after the race object
             currentTime.setText(H.roundDecimal(raceTimer, 2) + "sec");
 	}
+
+    @Override
+    public void pauseState(boolean value) {
+        raceState.setEnabled(value);
+    }
+
+    @Override
+    public void quit() {
+        quit.run();
+    }
 }

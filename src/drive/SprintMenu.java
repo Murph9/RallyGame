@@ -1,6 +1,8 @@
 package drive;
 
 import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
+import com.jme3.scene.Node;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
@@ -9,6 +11,8 @@ import helper.H;
 import helper.Screen;
 
 public class SprintMenu extends DriveMenu {
+
+    private Node rootNode;
 
 	private Container countDown;
 	private Label countDownLabel;
@@ -26,6 +30,10 @@ public class SprintMenu extends DriveMenu {
 	public void initialize(Application app) {
 		super.initialize(app);
         
+        this.rootNode = new Node("root SprintMenu node");
+        SimpleApplication sm = (SimpleApplication) app;
+        sm.getGuiNode().attachChild(rootNode);
+
         Screen screen = new Screen(app.getContext().getSettings());
 
 		countDown = new Container();
@@ -40,6 +48,13 @@ public class SprintMenu extends DriveMenu {
 		scores.setLocalTranslation(screen.topLeft());
 		rootNode.attachChild(scores);
 	}
+
+    @Override
+    public void cleanup(Application app) {
+        super.cleanup(app);
+
+        ((SimpleApplication) app).getGuiNode().detachChild(rootNode);
+    }
 
 	public void setText(String text) {
 		if (countDownLabel != null)
