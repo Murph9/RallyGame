@@ -30,7 +30,30 @@ public class RayWheelControl {
 	private static final int[] indexes = { 2, 0, 1, 1, 3, 2 }; // tyre marks vertex order
 	private static final Vector2f[] texCoord = new Vector2f[] { // texture of quad with order
 		    new Vector2f(0, 0), new Vector2f(0, 1), new Vector2f(1, 0), new Vector2f(1, 1),
-	};
+    };
+    private static final int[] i_s = new int[6 * QUAD_COUNT];
+    private static final Vector2f[] coord = new Vector2f[4 * QUAD_COUNT];
+    static {
+        //init some more complex static fields
+        int j = 0;
+        for (int i = 0; i < i_s.length; i += 6) {
+            i_s[i + 0] = j * 4 + indexes[0];
+            i_s[i + 1] = j * 4 + indexes[1];
+            i_s[i + 2] = j * 4 + indexes[2];
+            i_s[i + 3] = j * 4 + indexes[3];
+            i_s[i + 4] = j * 4 + indexes[4];
+            i_s[i + 5] = j * 4 + indexes[5];
+            j++;
+        }
+        j = 0;
+        for (int i = 0; i < coord.length; i += 4) {
+            coord[i + 0] = texCoord[0].add(new Vector2f(0, j));
+            coord[i + 1] = texCoord[0].add(new Vector2f(0, j));
+            coord[i + 2] = texCoord[0].add(new Vector2f(0, j));
+            coord[i + 3] = texCoord[0].add(new Vector2f(0, j));
+            j++;
+        }
+    }
     
 	private static final ColorRGBA BASE_SKID_COLOUR = ColorRGBA.Black;
 	
@@ -68,66 +91,36 @@ public class RayWheelControl {
 		carRootNode.attachChild(rootNode);
 		
         //skid mark stuff
+        this.lastColor = new ColorRGBA(0, 0, 0, 0);
         colors = new ColorRGBA[VERTEX_BUFFER_SIZE];
         vertices = new Vector3f[VERTEX_BUFFER_SIZE];
 
-		this.skidLine = new Geometry();
-		this.skidLine.setMesh(createSkidMesh());
+        this.skidLine = new Geometry();
+        // create skid mesh
+        Mesh mesh = new Mesh();
+        mesh.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(vertices));
+        mesh.setBuffer(Type.Color, 4, BufferUtils.createFloatBuffer(colors));
+        mesh.setBuffer(Type.Index, 3, BufferUtils.createIntBuffer(i_s));
+        mesh.setBuffer(Type.TexCoord, 2, BufferUtils.createFloatBuffer(coord));
+        // this is the default, but i have to come looking for this again...
+        mesh.setMode(Mode.Triangles);
+		this.skidLine.setMesh(mesh);
 		
 		//material uses vertex colours
 		Material mat = new Material(app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
-		mat.getAdditionalRenderState().setLineWidth(3);
 		mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
 		mat.setBoolean("VertexColor", true);
 		this.skidLine.setMaterial(mat);
-		this.skidLine.setQueueBucket(Bucket.Transparent);
+        this.skidLine.setQueueBucket(Bucket.Transparent);
 		
 		app.getRootNode().attachChild(this.skidLine);
 		
 		//Smoke can be found from source control
 	}
 
-    private Mesh createSkidMesh() {
-        
-        Mesh mesh = new Mesh(); // making a quad positions
-        mesh.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(vertices));
-        mesh.setBuffer(Type.Color, 4, BufferUtils.createFloatBuffer(colors));
-
-        int[] i_s = new int[6 * QUAD_COUNT];
-        int j = 0;
-        for (int i = 0; i < i_s.length; i += 6) {
-            i_s[i + 0] = j * 4 + indexes[0];
-            i_s[i + 1] = j * 4 + indexes[1];
-            i_s[i + 2] = j * 4 + indexes[2];
-            i_s[i + 3] = j * 4 + indexes[3];
-            i_s[i + 4] = j * 4 + indexes[4];
-            i_s[i + 5] = j * 4 + indexes[5];
-            j++;
-        }
-
-        mesh.setBuffer(Type.Index, 3, BufferUtils.createIntBuffer(i_s));
-
-        Vector2f[] coord = new Vector2f[4 * QUAD_COUNT];
-        j = 0;
-        for (int i = 0; i < coord.length; i += 4) {
-            coord[i + 0] = texCoord[0].add(new Vector2f(0, j));
-            coord[i + 1] = texCoord[0].add(new Vector2f(0, j));
-            coord[i + 2] = texCoord[0].add(new Vector2f(0, j));
-            coord[i + 3] = texCoord[0].add(new Vector2f(0, j));
-            j++;
-        }
-
-        mesh.setBuffer(Type.TexCoord, 2, BufferUtils.createFloatBuffer(coord));
-
-        // this is the default, but i have to come looking for this again...
-        mesh.setMode(Mode.Triangles);
-
-        return mesh;
-    }
-
 	//hopefully called by the RayCarControl in physics step
-	public void viewUpdate(float tpf, Vector3f velDir, float sus_min_travel) { 
+	protected void viewUpdate(float tpf, Vector3f velDir, float sus_min_travel) { 
 		//NOTE: sus_min_travel is just poor design, but how else will the wheel object know a car const?
 		app.enqueue(() -> {
 			Vector3f posInLocal = new Vector3f(0, -wheel.susRayLength - sus_min_travel, 0);
@@ -135,7 +128,8 @@ public class RayWheelControl {
 			
 			//rotate for wheel rotation
 			Quaternion q = new Quaternion();
-			q.fromAngleNormalAxis(-wheel.radSec*tpf*FastMath.sign(wheel.num % 2 == 1? 1 : -1), new Vector3f(1,0,0));
+			q.fromAngleNormalAxis(-wheel.radSec * tpf * FastMath.sign(wheel.num % 2 == 1 ? 1 : -1),
+                    new Vector3f(1, 0, 0));
 			spat.setLocalRotation(spat.getLocalRotation().mult(q));
 			
 			//rotate for wheel steering
@@ -147,29 +141,30 @@ public class RayWheelControl {
 			
 			updateSkidLine(tpf, velDir);
 		});
-	}
+    }
 	
 	private void updateSkidLine(float tpf, Vector3f velDir) {
-		sinceLastPos -= tpf;
-		if (sinceLastPos > 0) {
-			//then just update the current position
-			return;
+        boolean lastingSkid = false;
+        // continually update the current skid mark position and 'lock it in' to persist
+        sinceLastPos -= tpf;
+		if (sinceLastPos < 0) {
+            lastingSkid = true;
+            sinceLastPos = SKID_MARK_TIMEOUT;
 		}
-		sinceLastPos = SKID_MARK_TIMEOUT;
 
 		// TODO change to just be thinner with a larger drift angle
 		// i have tested this is real life, width is lower when sliding sideways but not that much lower
 
 		// scaling the grip value
-		float clampSkid = FastMath.clamp(this.wheel.skidFraction - 0.9f, 0, 1);
+		float clampSkid = calcSkidSkew(this.wheel.skidFraction);
         ColorRGBA curColor = BASE_SKID_COLOUR.clone().mult(clampSkid);
         
         //ignore moving objects because we can't 'track' it and it looks weird
         boolean contactObjectIsMoving = wheel.collisionObject != null && wheel.collisionObject.getMass() > 0;
 
         // no contact or slow speed => no visible skid marks
-		if (!wheel.inContact || velDir.length() < 1 || clampSkid < 0.1f || contactObjectIsMoving) {
-			if (lastColor != null && lastColor.equals(new ColorRGBA(0, 0, 0, 0))) {
+		if (!wheel.inContact || velDir.length() < 0.5f || clampSkid < 0.05f || contactObjectIsMoving) {
+			if (lastColor.equals(new ColorRGBA(0, 0, 0, 0))) {
 				//the last one was null, ignore
 				return;
             }
@@ -183,43 +178,48 @@ public class RayWheelControl {
         Vector3f posL = pos.add(rot.mult(wheel.data.width / 2));
         Vector3f posR = pos.add(rot.negate().mult(wheel.data.width / 2));
 
-		if (lastColor != null && lastColor.equals(new ColorRGBA(0, 0, 0, 0))) {
-            // update previous and next to nothing
-            addSkidSegment(curColor, curColor, posL, posR, posL, posR);
+		if (lastColor.equals(new ColorRGBA(0, 0, 0, 0))) {
+            // update with nothing
+            updateSegment(lastingSkid, curColor, curColor, posL, posR, posL, posR);
 		} else {
-            addSkidSegment(lastColor, curColor, lastl, lastr, posL, posR);
+            updateSegment(lastingSkid, lastColor, curColor, lastl, lastr, posL, posR);
         }
 
-        this.lastl = posL;
-        this.lastr = posR;
-        this.lastColor = curColor;
+        if (lastingSkid) {
+            this.lastl = posL;
+            this.lastr = posR;
+            this.lastColor = curColor;
+        }
     }
     
-    private void addSkidSegment(ColorRGBA lastColor, ColorRGBA curColor, Vector3f lastL, Vector3f lastR, Vector3f curL, Vector3f curR) {
+    private void updateSegment(boolean forGood, ColorRGBA lastColor, ColorRGBA curColor, Vector3f lastL, Vector3f lastR, Vector3f curL, Vector3f curR) {
         this.colors[verticesPos] = lastColor;
         this.vertices[verticesPos] = lastL;
-        verticesPos++;
 
-        this.colors[verticesPos] = curColor;
-        this.vertices[verticesPos] = curL;
-        verticesPos++;
+        this.colors[verticesPos + 1] = curColor;
+        this.vertices[verticesPos + 1] = curL;
 
-        this.colors[verticesPos] = lastColor;
-        this.vertices[verticesPos] = lastR;
-        verticesPos++;
+        this.colors[verticesPos + 2] = lastColor;
+        this.vertices[verticesPos + 2] = lastR;
 
-        this.colors[verticesPos] = curColor;
-        this.vertices[verticesPos] = curR;
-        verticesPos++;
-
-        // wrap around vertex pos
-        verticesPos = verticesPos % VERTEX_BUFFER_SIZE;
+        this.colors[verticesPos + 3] = curColor;
+        this.vertices[verticesPos + 3] = curR;
 
         Mesh mesh = this.skidLine.getMesh();
         mesh.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(vertices));
         mesh.setBuffer(Type.Color, 4, BufferUtils.createFloatBuffer(colors));
 
         this.skidLine.updateModelBound();
+
+        if (forGood) {
+            verticesPos += 4;
+            // wrap around vertex pos
+            verticesPos = verticesPos % VERTEX_BUFFER_SIZE;
+        }
+    }
+
+    private float calcSkidSkew(float skidFraction) {
+        return FastMath.clamp(this.wheel.skidFraction - 0.9f, 0, 1);
     }
 	
 	public RayWheel getRayWheel() {
