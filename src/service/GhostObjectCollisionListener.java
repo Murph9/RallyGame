@@ -9,10 +9,14 @@ import com.jme3.scene.Spatial;
 
 public class GhostObjectCollisionListener implements PhysicsCollisionListener {
 
-    private final IGhostObjectCollisionApply applier;
+    public interface IGhostListener {
+        void ghostCollision(GhostControl control, RigidBodyControl control2);
+    }
 
-    public GhostObjectCollisionListener(IGhostObjectCollisionApply applier) {
-        this.applier = applier;
+    private final IGhostListener listener;
+
+    public GhostObjectCollisionListener(IGhostListener listener) {
+        this.listener = listener;
     }
 
     @Override
@@ -31,11 +35,11 @@ public class GhostObjectCollisionListener implements PhysicsCollisionListener {
         }
 
         if (a.getControl(GhostControl.class) != null && isMovingBody(bc)) {
-            applier.ghostCollision((GhostControl) ac, (RigidBodyControl) bc);
+            listener.ghostCollision((GhostControl) ac, (RigidBodyControl) bc);
         }
 
         if (b.getControl(GhostControl.class) != null && isMovingBody(ac)) {
-            applier.ghostCollision((GhostControl) bc, (RigidBodyControl) ac);
+            listener.ghostCollision((GhostControl) bc, (RigidBodyControl) ac);
         }
     }
 

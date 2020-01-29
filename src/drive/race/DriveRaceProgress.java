@@ -25,9 +25,8 @@ import car.ray.RayCarControl;
 import effects.LoadModelWrapper;
 import helper.Duo;
 import service.GhostObjectCollisionListener;
-import service.IGhostObjectCollisionApply;
 
-public class DriveRaceProgress extends BaseAppState implements IGhostObjectCollisionApply {
+public class DriveRaceProgress extends BaseAppState implements GhostObjectCollisionListener.IGhostListener {
 
     private final float checkpointScale;
     private final ColorRGBA checkpointColour;
