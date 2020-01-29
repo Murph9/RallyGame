@@ -60,33 +60,33 @@ public class RayCarTest {
     public void generateCurveImage() {
         StringBuilder sb = new StringBuilder();
         int scale = 100;
-        for (int i = -scale; i <= scale; i++)
-        {
-            for (int j = -scale; j <= scale; j++)
-            {
+        for (int i = -scale; i <= scale; i++) {
+            for (int j = -scale; j <= scale; j++) {
             	float slipRatio = i / ((float) scale * 2);
             	float slipAngle = j / ((float) scale * 2);
             	float result = GetFromSlips(curveConstLong, curveConstLat, maxLong, maxLat, slipRatio, slipAngle);
                 sb.append(slipRatio + " " + slipAngle +  " " + result + "\n");
             }
         }
-
-        File file = new File("S:\\murph\\Desktop\\tractionCurveResults.txt");
+        writeToFile(sb.toString(), "S:\\murph\\Desktop\\tractionCurveResults.txt");
+    }
+    private void writeToFile(String data, String filePath) {
+        File file = new File(filePath);
         if (!file.exists())
-			try {
-				file.createNewFile();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-				return;
-			}
-        
+            try {
+                file.createNewFile();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+                return;
+            }
+
         try (PrintWriter out = new PrintWriter(file)) {
-            out.println(sb.toString());
+            out.println(data);
         } catch (FileNotFoundException e) {
-			e.printStackTrace();
-			return;
-		}
-        
+            e.printStackTrace();
+            return;
+        }
+
         Log.p("Done, see file in: " + file.getAbsolutePath());
     }
 
