@@ -3,22 +3,19 @@ package drive.race;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 
+import car.ray.RayCarControl;
 import drive.race.RacerState;
 
 class RacerState implements Comparable<RacerState> {
-    public final String name;
+    public final RayCarControl car;
+
     public int lap;
     public Checkpoint lastCheckpoint;
     public Checkpoint nextCheckpoint;
-    public float distanceToNextCheckpoint;
     public Geometry arrow;
 
-    public RacerState(String name) {
-        this.name = name;
-    }
-
-    public void setCheckpointDistance(Vector3f pos) {
-        this.distanceToNextCheckpoint = pos.subtract(nextCheckpoint.position).length();
+    public RacerState(RayCarControl car) {
+        this.car = car;
     }
 
     @Override
@@ -29,10 +26,22 @@ class RacerState implements Comparable<RacerState> {
             return o.nextCheckpoint.num - this.nextCheckpoint.num;
 
         // note this is backwards because closer is better
-        return (int) ((this.distanceToNextCheckpoint - o.distanceToNextCheckpoint) * 1000);
+        return (int) ((this.distanceToNextCheckpoint() - o.distanceToNextCheckpoint()) * 1000);
+    }
+
+    private float distanceToNextCheckpoint() {
+        if (car == null)
+            return Float.MAX_VALUE;
+
+        Vector3f pos = car.getPhysicsLocation();
+        return pos.subtract(nextCheckpoint.position).length();
+    }
+
+    public final String getName() {
+        return car.getCarData().name;
     }
 
     public float calcLapProgress(int checkpointCount) {
-        return nextCheckpoint.num/((float)checkpointCount);
+        return nextCheckpoint.num / ((float) checkpointCount);
     }
 }

@@ -28,7 +28,6 @@ import world.StaticWorldBuilder;
 //TODO DriveRace can't be converted to DriveBase as the world must be initialised before this
 public class DriveRace extends BaseAppState {
 
-    private static boolean PROGRESS_DEBUG = true;
     public DriveRaceUI menu;
     
     //things that should be in a world class
@@ -127,7 +126,7 @@ public class DriveRace extends BaseAppState {
         
         getState(BulletAppState.class).setEnabled(true);
 
-        progress = new DriveRaceProgress(checkpoints, cb.getAll(), rayCar, PROGRESS_DEBUG);
+        progress = new DriveRaceProgress(checkpoints, cb.getAll(), rayCar);
         getStateManager().attach(progress);
 
         menu = new DriveRaceUI(progress);

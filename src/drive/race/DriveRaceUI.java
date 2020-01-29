@@ -6,9 +6,12 @@ import java.util.List;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
+import com.jme3.math.ColorRGBA;
+import com.jme3.scene.Node;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
+import game.DebugAppState;
 import helper.Screen;
 
 public class DriveRaceUI extends BaseAppState {
@@ -21,6 +24,9 @@ public class DriveRaceUI extends BaseAppState {
 
     private Container basicPanel;
     private Label basicLabel;
+
+    // debug things
+    private Node debugNode;
 
     public DriveRaceUI(DriveRaceProgress progress) {
         this.progress = progress;
@@ -72,12 +78,26 @@ public class DriveRaceUI extends BaseAppState {
         progressTable.update(racers, st);
 
         screen.topRightMe(main);
+
+        
+        if (getState(DebugAppState.class).DEBUG()) {
+            // update the checkpoint arrows
+            if (debugNode != null)
+                ((SimpleApplication)getApplication()).getRootNode().detachChild(debugNode);
+            debugNode = new Node("debugnode");
+            for (RacerState entry : racers) {
+                entry.arrow = helper.H.makeShapeLine(getApplication().getAssetManager(), ColorRGBA.Cyan,
+                        entry.car.getPhysicsLocation(), entry.nextCheckpoint.position, 3);
+                debugNode.attachChild(entry.arrow);
+            }
+            ((SimpleApplication) getApplication()).getRootNode().attachChild(debugNode);
+        }
     }
 }
 
 class RacerStateTableView extends Container {
 
-    private final static RacerState HEADER = new RacerState("Player");
+    private final static RacerState HEADER = new RacerState(null);
 
     private final int rowLength;
     
@@ -117,14 +137,14 @@ class RacerStateTableView extends Container {
     private String[] convertToValueRows(RacerState state, boolean isPlayer) {
         if (state == HEADER) {
             return new String[] {
-                    state.name,
+                    "Player",
                     "lap",
                     ""
                 };
         }
         //TODO time diff
         return new String[] {
-                state.name,
+                state.getName(),
                 state.lap + "",
                 isPlayer ? "-" : ""
             };

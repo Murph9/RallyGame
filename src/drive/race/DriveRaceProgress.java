@@ -24,7 +24,6 @@ import com.jme3.scene.shape.Box;
 import car.ray.RayCarControl;
 import effects.LoadModelWrapper;
 import helper.Duo;
-import helper.H;
 import service.GhostObjectCollisionListener;
 import service.IGhostObjectCollisionApply;
 
@@ -41,11 +40,7 @@ public class DriveRaceProgress extends BaseAppState implements IGhostObjectColli
     private final Node rootNode;
     private final HashMap<RayCarControl, RacerState> racers;
 
-    // debug things
-    private final boolean ifDebug;
-    private Node debugNode;
-
-    protected DriveRaceProgress(Vector3f[] checkpoints, Collection<RayCarControl> cars, RayCarControl player, boolean debug) {
+    protected DriveRaceProgress(Vector3f[] checkpoints, Collection<RayCarControl> cars, RayCarControl player) {
         this.checkpointPositions = checkpoints;
         this.checkpoints = new Checkpoint[checkpoints.length];
         this.checkpointScale = 2;
@@ -54,13 +49,12 @@ public class DriveRaceProgress extends BaseAppState implements IGhostObjectColli
 
         this.racers = new HashMap<>();
         for (RayCarControl car : cars) {
-            this.racers.put(car, new RacerState(car.getCarData().name));
+            this.racers.put(car, new RacerState(car));
         }
 
         this.checkpointCollisionListener = new GhostObjectCollisionListener(this);
 
         this.player = player;
-        this.ifDebug = debug;
     }
 
     @Override
@@ -106,24 +100,7 @@ public class DriveRaceProgress extends BaseAppState implements IGhostObjectColli
 
     @Override
     public void update(float tpf) {
-        //calc distance to nextCheckpoint
-        for (Entry<RayCarControl, RacerState> entry: this.racers.entrySet()) {
-            Vector3f carPos = entry.getKey().getPhysicsLocation();
-            entry.getValue().setCheckpointDistance(carPos);
-        }
-
-        if (ifDebug) {
-            // update the checkpoint arrows
-            if (debugNode != null)
-                rootNode.detachChild(debugNode);
-            debugNode = new Node("debugnode");
-            for (Entry<RayCarControl, RacerState> entry : racers.entrySet()) {
-                entry.getValue().arrow = H.makeShapeLine(getApplication().getAssetManager(), ColorRGBA.Cyan, 
-                        entry.getKey().getPhysicsLocation(), entry.getValue().nextCheckpoint.position, 3);
-                debugNode.attachChild(entry.getValue().arrow);
-            }
-            rootNode.attachChild(debugNode);
-        }
+        // this is intentionally blank
     }
 
     @Override
@@ -158,7 +135,7 @@ public class DriveRaceProgress extends BaseAppState implements IGhostObjectColli
         if (checkpoint == null || racer == null)
             return;
 
-        if (racer.nextCheckpoint.num == checkpoint.num) {
+        if (racer.nextCheckpoint == checkpoint) {
             // update checkpoints
             Duo<Integer, Integer> nextCheckpoint = calcNextCheckpoint(racer, checkpoints.length);
             racer.lastCheckpoint = racer.nextCheckpoint;
