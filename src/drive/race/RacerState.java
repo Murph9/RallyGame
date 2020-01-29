@@ -1,5 +1,7 @@
 package drive.race;
 
+import java.time.Duration;
+
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 
@@ -12,6 +14,8 @@ class RacerState implements Comparable<RacerState> {
     public int lap;
     public Checkpoint lastCheckpoint;
     public Checkpoint nextCheckpoint;
+    public Duration duration;
+
     public Geometry arrow;
 
     public RacerState(RayCarControl car) {
@@ -37,7 +41,7 @@ class RacerState implements Comparable<RacerState> {
         return pos.subtract(nextCheckpoint.position).length();
     }
 
-    public final String getName() {
+    public String getName() {
         return car.getCarData().name;
     }
 

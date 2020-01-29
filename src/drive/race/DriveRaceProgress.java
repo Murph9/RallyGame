@@ -1,9 +1,12 @@
 package drive.race;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import com.jme3.app.Application;
@@ -37,7 +40,8 @@ public class DriveRaceProgress extends BaseAppState implements GhostObjectCollis
     private Checkpoint firstCheckpoint;
     private final Checkpoint[] checkpoints;
     private final Node rootNode;
-    private final HashMap<RayCarControl, RacerState> racers;
+    private final Map<RayCarControl, RacerState> racers;
+    private final Map<Integer, Instant> timeAtCheckpoints;
 
     protected DriveRaceProgress(Vector3f[] checkpoints, Collection<RayCarControl> cars, RayCarControl player) {
         this.checkpointPositions = checkpoints;
@@ -50,6 +54,7 @@ public class DriveRaceProgress extends BaseAppState implements GhostObjectCollis
         for (RayCarControl car : cars) {
             this.racers.put(car, new RacerState(car));
         }
+        this.timeAtCheckpoints = new HashMap<>();
 
         this.checkpointCollisionListener = new GhostObjectCollisionListener(this);
 
@@ -140,6 +145,15 @@ public class DriveRaceProgress extends BaseAppState implements GhostObjectCollis
             racer.lastCheckpoint = racer.nextCheckpoint;
             racer.nextCheckpoint = checkpoints[nextCheckpoint.second];
             racer.lap = nextCheckpoint.first;
+
+            //update last time
+            int fakeCheckpointHash = racer.lap*10000 + checkpoint.num;
+            if (!timeAtCheckpoints.containsKey(fakeCheckpointHash)) {
+                timeAtCheckpoints.put(fakeCheckpointHash, Instant.now());
+                racer.duration = Duration.ZERO;
+            } else {
+                racer.duration = Duration.between(timeAtCheckpoints.get(fakeCheckpointHash), Instant.now());
+            }
         }
     }
 

@@ -1,5 +1,6 @@
 package drive.race;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 
@@ -95,16 +96,14 @@ public class DriveRaceUI extends BaseAppState {
 
 class RacerStateTableView extends Container {
 
-    private final static RacerState HEADER = new RacerState(null);
-
     private final int rowLength;
     
     public RacerStateTableView(List<RacerState> initialState) {
         int count = 0;
-        String[] values = convertToValueRows(HEADER, false);
+        String[] values = headerValueRows();
         this.addChild(new Label(""), count, 0);
         for (int i = 0; i < values.length; i++) {
-            this.addChild(new Label(values[i]), count, i+1);
+            this.addChild(new Label(values[i]), count, i + 1);
         }
         count++;
         rowLength = values.length;
@@ -112,15 +111,15 @@ class RacerStateTableView extends Container {
         for (RacerState state: initialState) {
             values = convertToValueRows(state, false);
             
-            this.addChild(new Label(count+""), count, 0);
+            this.addChild(new Label(count + ""), count, 0);
             for (int i = 0; i < values.length; i++) {
-                this.addChild(new Label(values[i]), count, i+1);
+                this.addChild(new Label(values[i]), count, i + 1);
             }
             count++;
         }
     }
 
-    public void update(List<RacerState> states, RacerState playerState) {
+    public void update(List<RacerState> states, RacerState playerState) {        
         int count = 1;
         for (RacerState racer: states) {
             String[] values = convertToValueRows(racer, racer == playerState); 
@@ -132,18 +131,24 @@ class RacerStateTableView extends Container {
         }
     }
 
+    private String[] headerValueRows() {
+        return new String[] { "player", "lap", "diff", "" };
+    }
+
     private String[] convertToValueRows(RacerState state, boolean isPlayer) {
-        if (state == HEADER) {
-            return new String[] {
-                    "Player",
-                    "lap",
-                    ""
-                };
+        Duration d = state.duration;
+        String durationStr = "";
+        if (d != null) {
+            if (d.toHoursPart() > 0)
+                durationStr = "+59:99";
+            else
+                durationStr = String.format("%02d:%02d", d.toMinutesPart(), d.toSecondsPart());
         }
-        //TODO time diff
+        
         return new String[] {
                 state.getName(),
                 state.lap + "",
+                durationStr,
                 isPlayer ? "-" : ""
             };
     }
