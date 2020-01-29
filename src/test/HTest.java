@@ -156,4 +156,23 @@ public class HTest {
         assertEquals(0, result[2]);
         assertEquals(0, result[3]);
     }
+
+
+    @Test
+    public void skew() {
+        assertEquals(5, H.skew(5, 0, 10, 0, 10));
+        assertEquals(0, H.skew(0, 0, 10, 0, 10));
+        assertEquals(1, H.skew(0, 0, 1, 1, 2));
+        
+        assertEquals(1, H.skew(5, 4, 5, 0, 1));
+
+        assertEquals(0.5f, H.skew(4.5f, 4, 5, 0, 1));
+        assertEquals(1.5f, H.skew(5.5f, 4, 5, 0, 1));
+
+        assertEquals(-0.5f, H.skew(1, 0, 2, -1, 0));
+        assertEquals(0.5f, H.skew(0, -2, 2, 0, 1));
+        assertEquals(0.75f, H.skew(1, -2, 2, 0, 1));
+
+        assertEquals(-1, H.skew(0.25f, 0.75f, 1.25f, 0, 1));
+    }
 }

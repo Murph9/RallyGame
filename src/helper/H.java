@@ -58,7 +58,12 @@ public class H {
 				return false;
 		return true;
 	}
-	
+    
+    public static float skew(float input, float min, float max, float outMin, float outMax) {
+        float v = (input - min) / (max - min);
+        return (v + outMin) * (outMax - outMin);
+    }
+
 	public static Vector3f clamp(Vector3f v, float value) {
 		float length = v.length();
 		Vector3f newV = new Vector3f(v);

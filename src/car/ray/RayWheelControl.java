@@ -19,6 +19,7 @@ import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.util.BufferUtils;
 
 import effects.LoadModelWrapper;
+import helper.H;
 
 public class RayWheelControl {
 	
@@ -91,7 +92,7 @@ public class RayWheelControl {
 		carRootNode.attachChild(rootNode);
 		
         //skid mark stuff
-        this.lastColor = new ColorRGBA(0, 0, 0, 0);
+        this.lastColor = ColorRGBA.BlackNoAlpha;
         colors = new ColorRGBA[VERTEX_BUFFER_SIZE];
         vertices = new Vector3f[VERTEX_BUFFER_SIZE];
 
@@ -152,7 +153,7 @@ public class RayWheelControl {
             sinceLastPos = SKID_MARK_TIMEOUT;
 		}
 
-		// TODO change to just be thinner with a larger drift angle
+		// Possible: change this be thinner with a larger drift angle (which we don't have here)
 		// i have tested this is real life, width is lower when sliding sideways but not that much lower
 
 		// scaling the grip value
@@ -164,12 +165,12 @@ public class RayWheelControl {
 
         // no contact or slow speed => no visible skid marks
 		if (!wheel.inContact || velDir.length() < 0.5f || clampSkid < 0.05f || contactObjectIsMoving) {
-			if (lastColor.equals(new ColorRGBA(0, 0, 0, 0))) {
+			if (lastColor.equals(ColorRGBA.BlackNoAlpha)) {
 				//the last one was null, ignore
 				return;
             }
             //we reset the current quad to nothing
-			this.lastColor = curColor = new ColorRGBA(0, 0, 0, 0);
+			this.lastColor = curColor = ColorRGBA.BlackNoAlpha;
 		}
 
         Vector3f pos = wheel.curBasePosWorld;
@@ -178,21 +179,25 @@ public class RayWheelControl {
         Vector3f posL = pos.add(rot.mult(wheel.data.width / 2));
         Vector3f posR = pos.add(rot.negate().mult(wheel.data.width / 2));
 
-		if (lastColor.equals(new ColorRGBA(0, 0, 0, 0))) {
+		if (lastColor.equals(ColorRGBA.BlackNoAlpha)) {
             // update with nothing
-            updateSegment(lastingSkid, curColor, curColor, posL, posR, posL, posR);
+            updateSegment(curColor, curColor, posL, posR, posL, posR);
 		} else {
-            updateSegment(lastingSkid, lastColor, curColor, lastl, lastr, posL, posR);
+            updateSegment(lastColor, curColor, lastl, lastr, posL, posR);
         }
 
         if (lastingSkid) {
+            this.verticesPos += 4;
+            // wrap around vertex pos
+            this.verticesPos = this.verticesPos % VERTEX_BUFFER_SIZE;
+
             this.lastl = posL;
             this.lastr = posR;
             this.lastColor = curColor;
         }
     }
     
-    private void updateSegment(boolean forGood, ColorRGBA lastColor, ColorRGBA curColor, Vector3f lastL, Vector3f lastR, Vector3f curL, Vector3f curR) {
+    private void updateSegment(ColorRGBA lastColor, ColorRGBA curColor, Vector3f lastL, Vector3f lastR, Vector3f curL, Vector3f curR) {
         this.colors[verticesPos] = lastColor;
         this.vertices[verticesPos] = lastL;
 
@@ -210,16 +215,10 @@ public class RayWheelControl {
         mesh.setBuffer(Type.Color, 4, BufferUtils.createFloatBuffer(colors));
 
         this.skidLine.updateModelBound();
-
-        if (forGood) {
-            verticesPos += 4;
-            // wrap around vertex pos
-            verticesPos = verticesPos % VERTEX_BUFFER_SIZE;
-        }
     }
 
-    private float calcSkidSkew(float skidFraction) {
-        return FastMath.clamp(this.wheel.skidFraction - 0.9f, 0, 1);
+    private static float calcSkidSkew(float skidFraction) {
+        return H.skew(skidFraction, 0.75f, 1.3f, 0, 1);
     }
 	
 	public RayWheel getRayWheel() {
