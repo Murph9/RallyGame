@@ -13,6 +13,7 @@ import com.jme3.renderer.Camera;
 
 public class ParticleAtmosphere extends BaseAppState {
 
+    private final static float FORWARD_FACTOR = 0.5f;
 	private final static int PARTICLE_MULT = 50;
 	private final static int PARTICLE_MAX = 5000;
 
@@ -64,13 +65,16 @@ public class ParticleAtmosphere extends BaseAppState {
 		if (prevPos == null)
 			prevPos = new Vector3f();
 		
-		Vector3f location = cam.getLocation();
-		//get vel of node
-		float speed = location.subtract(prevPos).length() / tpf;
+		Vector3f location = cam.getLocation().clone();
+        
+        Vector3f direction = location.subtract(prevPos);
+        // get vel of node
+		float speed = direction.length() / tpf;
 		particles.setParticlesPerSec(PARTICLE_MULT*speed);
-		
-		prevPos = location.clone();
-		particles.setLocalTranslation(prevPos);
+        
+		//move the particle emitter based on the velocity of the camera
+        particles.setLocalTranslation(location.add(direction.normalize().mult(speed*FORWARD_FACTOR)));
+        prevPos = location;
 	}
 
 	@Override
