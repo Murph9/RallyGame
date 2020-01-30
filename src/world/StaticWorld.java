@@ -13,7 +13,7 @@ public enum StaticWorld {
 	garage2("garage_2.blend", 1, new Vector3f(0,1,0), null),
 
 	//normal
-	duct("duct.blend", 50 * 3.223f, new Vector3f(0,-6,0), null),
+	duct("duct.blend", 50 * 3.223f, new Vector3f(0,-34,0), null),
 	duct2("duct.blend", 5 * 3.223f, null, null),
 	raleigh("raleigh.blend", 8, new Vector3f(34.441566f, 20.72906f, 27.334211f), null),
 

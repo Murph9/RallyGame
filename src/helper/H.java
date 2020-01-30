@@ -151,14 +151,14 @@ public class H {
 	}
 
 	public static String roundDecimal(float num, int places) {
-		if (places == 0) {
+		if (places <= 0) {
 			return Integer.toString(Math.round(num));
 		}
 		return String.format("%."+places+"f", num);
 	}
 	public static String roundDecimal(double num, int places) { //...
 		return roundDecimal((float)num,places);
-	}
+    }
 	public static String round3f(Vector3f vec, int places) {
 		if (vec == null)
 			return "x:?, y:?, z:?";
