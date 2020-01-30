@@ -31,7 +31,7 @@ public class PhysicsRaycaster implements IPhysicsRaycaster {
 
             RaycasterResult rd = new RaycasterResult(from.add(dir.mult(result.getHitFraction())),
                 result.getHitFraction() * dir.length(),
-                result.getHitNormalLocal(), // this may look wrong: TODO check if its relative to the object the ray hit
+                result.getHitNormalLocal(), // this may look wrong: TODO check if its relative to an object
                 (PhysicsRigidBody) result.getCollisionObject());
             return rd;
         }

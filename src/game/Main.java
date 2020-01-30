@@ -20,7 +20,7 @@ public class Main {
 			AppSettings settings = new AppSettings(true);
 			if (config.ifFullscreen()) {
 				settings.setFullscreen(true);
-				//TODO untested and will probably cause some resolution issues if it doesn't match up nice
+				//untested and will probably cause some resolution issues if it doesn't match up nice
 			} else {
 				settings.setResolution(config.getWidth(),config.getHeight());
 			}

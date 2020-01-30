@@ -29,7 +29,7 @@ public class NoiseBasedWorld extends Terrain
 
     public NoiseBasedWorld(SimpleApplication app, PhysicsSpace physicsSpace, int tileSize, int blockSize, Node rootNode) {
         super(app, physicsSpace, tileSize, blockSize, rootNode, 1);
-        //TODO the 1 defines the save file name, useful for seeding
+        // NOTE: the 1 defines the save file name, useful for seeding
         
         cache = new HashMap<Vector2f, float[]>();
     }
