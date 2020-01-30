@@ -11,27 +11,22 @@ import car.data.CarDataConst;
 //handles engine/drivetrain stuff
 public class RayCarPowered extends RayCar {
 	
-	protected float engineTorque;
+	protected static final int REVERSE_GEAR_INDEX = 0;
+	private static final float NITRO_COOLDOWN = 5;
+
+	private float engineTorque;
 	
 	protected float accelCurrent;
-	protected float steeringCurrent;
-	protected float brakeCurrent;
-	protected boolean handbrakeCurrent;
-	protected boolean ignoreSpeedFactor;
 	
-	protected float steerLeft;
-	protected float steerRight;
-
-	protected float nitroTimeout;
 	protected boolean ifNitro;
-	protected float nitroRemaining;
-	private static final float NITRO_COOLDOWN = 5;
+	private float nitroTimeout;
+	private float nitroRemaining;
+	protected float getNitroRemaining() { return nitroRemaining; }
 	
-	protected static final int REVERSE_GEAR_INDEX = 0;
 	protected int curGear;
 	protected int curRPM;
-	protected int gearChangeTo;
-	protected float gearChangeTime;
+	private int gearChangeTo;
+	private float gearChangeTime;
 	
 	public RayCarPowered(CollisionShape shape, CarDataConst carData) {
 		super(shape, carData);
@@ -187,6 +182,12 @@ public class RayCarPowered extends RayCar {
 		}
 
 		return result;
+	}
+
+	public String statsString() {
+		return helper.H.round3f(rbc.getPhysicsLocation(), 2)
+		 + "\nspeed:"+ helper.H.round3f(rbc.getLinearVelocity(), 2) + "m/s\nRPM:" + curRPM
+		 + "\nengine:" + engineTorque + "\ndrag:" + dragDir.length() +" rr("+ rollingResistance+")" + "N";
 	}
 }
  

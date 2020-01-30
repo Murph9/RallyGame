@@ -33,10 +33,7 @@ import service.ray.RaycasterResult;
 
 /** Handles suspension/traction/drag and real-time data of this car */
 public class RayCar implements PhysicsTickListener {
-	
-	//handy ids to help with removing magic numbers
-	protected static int WHEEL_FL = 0, WHEEL_FR = 1, WHEEL_RL = 2, WHEEL_RR = 3;
-	
+		
 	private static final Vector3f localDown = new Vector3f(0, -1, 0);
 	
 	protected CarDataConst carData;
@@ -45,10 +42,10 @@ public class RayCar implements PhysicsTickListener {
     protected boolean rbEnabled() { return rbc.isEnabled() && rbc.isInWorld(); }
 	
 	//simulation variables
-	protected final RayWheel[] wheels;
 	private float steeringCur;
 	private float brakingCur;
 	private boolean handbrakeCur;
+	protected final RayWheel[] wheels;
 	protected final float[] wheelTorque;
 	
 	//debug values
@@ -305,29 +302,15 @@ public class RayCar implements PhysicsTickListener {
 	
 	/////////////////
 	//control methods
-	public float getSteering() {
-		return this.steeringCur; 
-	}
-	public void setSteering(float value) {
-		this.steeringCur = value;
-		
-		this.wheels[0].steering = value;
-		this.wheels[1].steering = value;
-	}
-	public float getBraking() {
-		return this.brakingCur;
-	}
-	public void setBraking(float value) {
-		this.brakingCur = value;
-	}
-	public boolean getHandbrake() {
-		return this.handbrakeCur;
-	}
-	public void setHandbrake(boolean value) {
-		this.handbrakeCur = value;
+	protected void updateControlInputs(float steering, float braking, boolean handbrake) {
+		this.steeringCur = steering;
+		this.wheels[0].steering = steering;
+		this.wheels[1].steering = steering;
+		this.brakingCur = braking;
+		this.handbrakeCur = handbrake;
 	}
 	
-	public void setWheelTorque(int w_id, float torque) {
+	protected void setWheelTorque(int w_id, float torque) {
 		wheelTorque[w_id] = torque;
 	}
 	public float getWheelTorque(int w_id) {
