@@ -8,7 +8,6 @@ import car.data.Car;
 import drive.*;
 import drive.race.DriveRace;
 import helper.Log;
-import world.MovingWorld;
 import world.StaticWorld;
 import world.StaticWorldBuilder;
 import world.World;
@@ -47,7 +46,7 @@ public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
                 sm.attach(new ChooseCar((IChooseStuff)this));
                 break;
             case Fast:
-                sm.attach(new DriveBase((IDriveDone)this, Car.Rally, new MovingWorld()));
+                sm.attach(new DriveBase((IDriveDone)this, Car.Runner, new StaticWorldBuilder(StaticWorld.duct)));
                 break;
 			case Getaway:
 				sm.attach(new DriveMainRoadGetaway((IDriveDone)this));

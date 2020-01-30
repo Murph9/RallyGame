@@ -120,9 +120,9 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
             //wheel turning logic
             steeringCurrent = 0;
             if (steerLeft != 0) //left
-                steeringCurrent += getBestSteerAngle(steerLeft, 1);
+                steeringCurrent += getBestTurnAngle(steerLeft, 1);
             if (steerRight != 0) //right
-                steeringCurrent -= getBestSteerAngle(steerRight, -1);
+                steeringCurrent -= getBestTurnAngle(steerRight, -1);
             //TODO 0.3 - 0.4 seconds from lock to lock seems okay from what ive seen
             steeringCurrent = FastMath.clamp(steeringCurrent, -carData.w_steerAngle, carData.w_steerAngle);
             setSteering(steeringCurrent);
@@ -140,7 +140,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
         debug.update(app);
 	}
 	
-	private float getBestSteerAngle(float trySteerAngle, float sign) {
+	private float getBestTurnAngle(float trySteerAngle, float sign) {
 		if (ignoreSpeedFactor)
 			return trySteerAngle;
 		
@@ -152,17 +152,17 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
             //and drift angle needs to be large enough to matter
         }
 		
-		//steering factor = atan(0.08 * vel - 1) + maxAngle*PI/2 + maxLat
+		// steering factor = atan(0.08 * vel - 1) + maxAngle*PI/2 + maxLat
 //		return Math.min(-maxAngle*FastMath.atan(0.3f*(local_vel - 1))
 //				+ maxAngle*FastMath.PI/2 + this.wheels[0].maxLat*2, Math.abs(trySteerAngle));
 		
         //TODO PLEASE FIX THIS
         //TODO max turn angle really should just be the best angle on the lat traction curve (while going straight)
         // return FastMath.atan2(Math.abs(local_vel.z), carData.wheelData[0].maxLat);
-        // return carData.wheelData[0].maxLat;
-		return trySteerAngle;
+        return carData.wheelData[0].maxLat - FastMath.DEG_TO_RAD * driftAngle;
+		// return trySteerAngle;
 		
-		//remember that this value is clamped after this method is called
+		// remember that this value is clamped after this method is called
 	}
 
 	public void onAction(String binding, boolean value, float tpf) {
@@ -357,7 +357,11 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
         return results;
     }
 	
-	//#region physics ones, thinking this looks bad
+    //#region physics ones, thinking this looks bad
+    public PhysicsRigidBody getPhysicsObject() {
+        return rbc;
+    }
+
 	public Vector3f getPhysicsLocation() {
 		return rbc.getPhysicsLocation();
 	}
@@ -403,9 +407,6 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
 		return vel.length() * 3.6f;
 	}
 
-	public PhysicsRigidBody getPhysicsObject() {
-		return rbc;
-	}
 	
 	public String statsString() {
 		return H.round3f(this.getPhysicsLocation(), 2)
@@ -432,7 +433,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered {
     
 	private void enableSound(boolean enabled) {
         if (engineSound == null)
-                return;
+            return;
         if (enabled)
             engineSound.play();
         else
