@@ -104,7 +104,7 @@ public class CarUI extends BaseAppState {
 		r.getGuiNode().attachChild(rootNode);
 		AssetManager am = r.getAssetManager();
 
-		angle = new BitmapText(guiFont, false);		  
+		angle = new BitmapText(guiFont, false);
 		angle.setSize(guiFont.getCharSet().getRenderedSize());
 		angle.setColor(ColorRGBA.White);
 		angle.setText("blaj");

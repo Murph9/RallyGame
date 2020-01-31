@@ -22,18 +22,15 @@ public class DriveBase extends BaseAppState {
 
     private final IDriveDone done;
     public DriveMenu menu;
-    public World world;
+    protected World world;
 
     // car stuff
+    private final Car car;
     protected CarBuilder cb;
-    protected Car car;
 
     // gui and camera stuff
-    CarCamera camera;
-    CarUI uiNode;
-
-    // debug stuff
-    public boolean ifDebug = false;
+    private CarCamera camera;
+    private CarUI uiNode;
 
     public DriveBase(IDriveDone done, Car car, World world) {
         super();
@@ -101,7 +98,7 @@ public class DriveBase extends BaseAppState {
         world.reset();
     }
 
-    public Collection<RayCarControl> getAllCars() {
+    public final Collection<RayCarControl> getAllCars() {
         return this.cb.getAll();
     }
 
@@ -126,7 +123,7 @@ public class DriveBase extends BaseAppState {
         cb = null;
     }
 
-    protected void reInitPlayerCar(Car car) {
+    protected final void reInitPlayerCar(Car car) {
         // remove camera and ui
         AppStateManager sm = getStateManager();
         sm.detach(camera);
@@ -147,7 +144,7 @@ public class DriveBase extends BaseAppState {
         sm.attach(uiNode);
     }
 
-    public Transform resetTransform(RayCarControl car) {
+    public final Transform resetTransform(RayCarControl car) {
         return new Transform(world.getStartPos(), new Quaternion().fromRotationMatrix(world.getStartRot()));
     }
 }

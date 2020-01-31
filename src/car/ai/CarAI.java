@@ -46,24 +46,25 @@ public abstract class CarAI implements ICarAI {
 		onEvent("IgnoreSteeringSpeedFactor", true);
 	}
 	
-	public void setDebugAppState(DebugAppState debug) {
+	public final void setDebugAppState(DebugAppState debug) {
 		this.debug = debug;
     }
-    public void setPhysicsRaycaster(IPhysicsRaycaster raycaster) {
+    public final void setPhysicsRaycaster(IPhysicsRaycaster raycaster) {
         this.raycaster = raycaster;
     }
 
 	public abstract void update(float tpf);
 	
-	protected void onEvent(String act, boolean ifdown) {
+	protected final void onEvent(String act, boolean ifdown) {
 		onEvent(act, ifdown, ifdown ? 1 : 0);
 	}
-	protected void onEvent(String act, boolean ifdown, float amnt) {
+	protected final void onEvent(String act, boolean ifdown, float amnt) {
 		input.handleInput(act, ifdown, amnt);
-	}
+    }
+
 
 	/** Only brake, no accel and no steering */
-	protected void justBrake() {
+	protected final void justBrake() {
 		onEvent("Left", false);
 		onEvent("Right", false);
 		
@@ -76,7 +77,7 @@ public abstract class CarAI implements ICarAI {
 	 * @param curPos Current AI car position
 	 * @param targetPos Target location
 	 */
-	protected void driveAt(Vector3f targetPos) {
+	protected final void driveAt(Vector3f targetPos) {
 		Vector3f curPos = this.car.location;
 		Matrix3f w_angle = car.getPhysicsObject().getPhysicsRotationMatrix();
 		Vector3f velocity = w_angle.invert().mult(car.vel);
@@ -121,11 +122,11 @@ public abstract class CarAI implements ICarAI {
 	}
 
     /** Calculates based on the ideal situation whether the car can make the point at the current speed */
-	protected boolean IfTooSlowForPoint(Vector3f target, Vector3f pos, Vector3f speed) {
+	protected final boolean IfTooSlowForPoint(Vector3f target, Vector3f pos, Vector3f speed) {
 		return IfTooSlowForPoint(H.v3tov2fXZ(target), H.v3tov2fXZ(pos), H.v3tov2fXZ(speed));
 	}
 	/** Calculates based on the ideal situation whether the car can make the point at the current speed */
-    protected boolean IfTooSlowForPoint(Vector2f target, Vector2f pos, Vector2f speed) {
+    protected final boolean IfTooSlowForPoint(Vector2f target, Vector2f pos, Vector2f speed) {
 
         // r = (m*v*v)/f
         float bestRadius = this.car.getCarData().mass * speed.lengthSquared() / BEST_LAT_FORCE;
@@ -152,7 +153,7 @@ public abstract class CarAI implements ICarAI {
 	}
     
     /** Detect a high drift angle, which might mean stop accelerating */
-    protected boolean ifDrifting() {
+    protected final boolean ifDrifting() {
         if (this.car.vel.length() < SLOW_SPEED_LIMIT)
             return false; //can't drift slowly
 
@@ -164,7 +165,7 @@ public abstract class CarAI implements ICarAI {
     }
 
     /**Gets (in seconds) time till a collision */
-    protected float forwardRayCollideTime() {
+    protected final float forwardRayCollideTime() {
         RaycasterResult result = forwardRay();
         if (result == null)
             return Float.MAX_VALUE;
@@ -205,7 +206,7 @@ public abstract class CarAI implements ICarAI {
 
     //TODO change these methods below to be CarAi 'behaviours' in their own classes? Or some kind of composition?
 
-    protected void detectVeryLongFall(float tpf) {
+    protected final void detectVeryLongFall(float tpf) {
         if (car.noWheelsInContact()) {
             //no wheels in contact for a while, then reset
             fallTimer += tpf;
@@ -219,7 +220,7 @@ public abstract class CarAI implements ICarAI {
         }
     }
 
-    protected void tryStuffIfStuck(float tpf) {
+    protected final void tryStuffIfStuck(float tpf) {
         if (reverseTimer > 0) {
             //reverse for a bit
             onEvent("Reverse", true);
@@ -239,7 +240,7 @@ public abstract class CarAI implements ICarAI {
         }
     }
 
-    protected void applySelfTractionControl(float tpf) {
+    protected final void applySelfTractionControl(float tpf) {
         // reduce excess wheel slipping
         List<RayWheelControl> wheels = car.getDriveWheels();
         float gripSum = 0;

@@ -184,7 +184,7 @@ public class RayCarPowered extends RayCar {
 		return result;
 	}
 
-	public String statsString() {
+	public final String statsString() {
 		return helper.H.round3f(rbc.getPhysicsLocation(), 2)
 		 + "\nspeed:"+ helper.H.round3f(rbc.getLinearVelocity(), 2) + "m/s\nRPM:" + curRPM
 		 + "\nengine:" + engineTorque + "\ndrag:" + dragDir.length() +" rr("+ rollingResistance+")" + "N";

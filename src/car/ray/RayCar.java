@@ -301,7 +301,7 @@ public class RayCar implements PhysicsTickListener {
 	
 	/////////////////
 	//control methods
-	protected void updateControlInputs(float steering, float braking, boolean handbrake) {
+	protected final void updateControlInputs(float steering, float braking, boolean handbrake) {
 		this.steeringCur = steering;
 		this.wheels[0].steering = steering;
 		this.wheels[1].steering = steering;
@@ -309,10 +309,10 @@ public class RayCar implements PhysicsTickListener {
 		this.handbrakeCur = handbrake;
 	}
 	
-	protected void setWheelTorque(int w_id, float torque) {
+	protected final void setWheelTorque(int w_id, float torque) {
 		wheelTorque[w_id] = torque;
 	}
-	public float getWheelTorque(int w_id) {
+	public final float getWheelTorque(int w_id) {
 		if (w_id < 0 || w_id > 4)
 			return 0;
 		return wheelTorque[w_id];
@@ -320,7 +320,7 @@ public class RayCar implements PhysicsTickListener {
 	
 	/////////////////
 	//helper functions
-	protected void doForEachWheel(Consumer<Integer> func) {
+	protected final void doForEachWheel(Consumer<Integer> func) {
 		if (func == null)
 			throw new NullPointerException("func is null");
 		
