@@ -31,7 +31,8 @@ public abstract class World extends BaseAppState implements IWorld {
 	protected void onEnable() { }
 
 	public Vector3f getStartPos() { return new Vector3f(); }
-	public Matrix3f getStartRot() { return new Matrix3f(Matrix3f.IDENTITY); }
+    public Matrix3f getStartRot() { return new Matrix3f(Matrix3f.IDENTITY); }
+    // TODO convert Matrix3f to Quaternion
 
 	@Override
 	protected void cleanup(Application app) {

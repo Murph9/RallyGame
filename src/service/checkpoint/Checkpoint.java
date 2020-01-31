@@ -1,4 +1,4 @@
-package drive.race;
+package service.checkpoint;
 
 import com.jme3.bullet.control.GhostControl;
 import com.jme3.math.Vector3f;

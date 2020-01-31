@@ -1,4 +1,4 @@
-package drive.race;
+package service.checkpoint;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -15,9 +15,9 @@ import com.simsilica.lemur.Label;
 import game.DebugAppState;
 import service.Screen;
 
-public class DriveRaceUI extends BaseAppState {
+public class CheckpointProgressUI extends BaseAppState {
 
-    private final DriveRaceProgress progress;
+    private final CheckpointProgress progress;
 
     private Container main;
     private RacerStateTableView progressTable;
@@ -29,10 +29,10 @@ public class DriveRaceUI extends BaseAppState {
     // debug things
     private Node debugNode;
 
-    public DriveRaceUI(DriveRaceProgress progress) {
+    public CheckpointProgressUI(CheckpointProgress progress) {
         this.progress = progress;
     }
-    
+
     @Override
     protected void initialize(Application app) {
         screen = new Screen(app.getContext().getSettings());
@@ -58,15 +58,18 @@ public class DriveRaceUI extends BaseAppState {
     }
 
     @Override
-    protected void onEnable() {}
+    protected void onEnable() {
+    }
+
     @Override
-    protected void onDisable() {}
+    protected void onDisable() {
+    }
 
     public void setBasicText(String text) {
         if (basicLabel != null)
             basicLabel.setText(text);
     }
-    
+
     @Override
     public void update(float tpf) {
         super.update(tpf);
@@ -97,7 +100,7 @@ public class DriveRaceUI extends BaseAppState {
 class RacerStateTableView extends Container {
 
     private final int rowLength;
-    
+
     public RacerStateTableView(List<RacerState> initialState) {
         int count = 0;
         String[] values = headerValueRows();
@@ -108,9 +111,9 @@ class RacerStateTableView extends Container {
         count++;
         rowLength = values.length;
 
-        for (RacerState state: initialState) {
+        for (RacerState state : initialState) {
             values = convertToValueRows(state, false);
-            
+
             this.addChild(new Label(count + ""), count, 0);
             for (int i = 0; i < values.length; i++) {
                 this.addChild(new Label(values[i]), count, i + 1);
@@ -119,13 +122,13 @@ class RacerStateTableView extends Container {
         }
     }
 
-    public void update(List<RacerState> states, RacerState playerState) {        
+    public void update(List<RacerState> states, RacerState playerState) {
         int count = 1;
-        for (RacerState racer: states) {
-            String[] values = convertToValueRows(racer, racer == playerState); 
+        for (RacerState racer : states) {
+            String[] values = convertToValueRows(racer, racer == playerState);
             for (int i = 0; i < values.length; i++) {
-                //this is kind of a hack to prevent recreating labels
-                ((Label)this.getChild((rowLength+1)*count + i+1)).setText(values[i]);
+                // this is kind of a hack to prevent recreating labels
+                ((Label) this.getChild((rowLength + 1) * count + i + 1)).setText(values[i]);
             }
             count++;
         }
@@ -144,12 +147,7 @@ class RacerStateTableView extends Container {
             else
                 durationStr = String.format("%02d:%02d", d.toMinutesPart(), d.toSecondsPart());
         }
-        
-        return new String[] {
-                state.getName(),
-                state.lap + "",
-                durationStr,
-                isPlayer ? "-" : ""
-            };
+
+        return new String[] { state.getName(), state.lap + "", durationStr, isPlayer ? "-" : "" };
     }
 }

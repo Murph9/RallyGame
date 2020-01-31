@@ -1,9 +1,10 @@
-package drive.race;
+package service.checkpoint;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,7 @@ import effects.LoadModelWrapper;
 import helper.Duo;
 import service.GhostObjectCollisionListener;
 
-public class DriveRaceProgress extends BaseAppState implements GhostObjectCollisionListener.IGhostListener {
+public class CheckpointProgress extends BaseAppState implements GhostObjectCollisionListener.IGhostListener {
 
     private final float checkpointScale;
     private final ColorRGBA checkpointColour;
@@ -43,7 +44,7 @@ public class DriveRaceProgress extends BaseAppState implements GhostObjectCollis
     private final Map<RayCarControl, RacerState> racers;
     private final Map<Integer, Instant> timeAtCheckpoints;
 
-    protected DriveRaceProgress(Vector3f[] checkpoints, Collection<RayCarControl> cars, RayCarControl player) {
+    public CheckpointProgress(Vector3f[] checkpoints, Collection<RayCarControl> cars, RayCarControl player) {
         this.checkpointPositions = checkpoints;
         this.checkpoints = new Checkpoint[checkpoints.length];
         this.checkpointScale = 2;
@@ -82,7 +83,7 @@ public class DriveRaceProgress extends BaseAppState implements GhostObjectCollis
         }
         this.firstCheckpoint = this.checkpoints[0];
 
-        for (RacerState racer: this.racers.values()) {
+        for (RacerState racer : this.racers.values()) {
             racer.lastCheckpoint = this.firstCheckpoint;
             racer.nextCheckpoint = this.firstCheckpoint;
         }
@@ -90,14 +91,29 @@ public class DriveRaceProgress extends BaseAppState implements GhostObjectCollis
         physicsSpace.addCollisionListener(checkpointCollisionListener);
     }
 
+    public RayCarControl isThereAWinner(int laps, int checkpoints) {
+        List<RacerState> racers = getRaceState();
+        Collections.sort(racers);
+
+        RacerState racer = racers.get(0);
+        if (racer.lap >= laps && racer.lastCheckpoint != null && racer.lastCheckpoint.num >= checkpoints)
+            return racer.car;
+
+        return null;
+    }
+
     @Override
-    protected void onDisable() {}
+    protected void onDisable() {
+    }
+
     @Override
-    protected void onEnable() {}
+    protected void onEnable() {
+    }
 
     public RacerState getPlayerRacerState() {
         return this.racers.get(player);
     }
+
     protected List<RacerState> getRaceState() {
         return new ArrayList<>(this.racers.values());
     }
@@ -146,8 +162,8 @@ public class DriveRaceProgress extends BaseAppState implements GhostObjectCollis
             racer.nextCheckpoint = checkpoints[nextCheckpoint.second];
             racer.lap = nextCheckpoint.first;
 
-            //update last time
-            int fakeCheckpointHash = racer.lap*10000 + checkpoint.num;
+            // update last time
+            int fakeCheckpointHash = racer.lap * 10000 + checkpoint.num;
             if (!timeAtCheckpoints.containsKey(fakeCheckpointHash)) {
                 timeAtCheckpoints.put(fakeCheckpointHash, Instant.now());
                 racer.duration = Duration.ZERO;
@@ -170,7 +186,7 @@ public class DriveRaceProgress extends BaseAppState implements GhostObjectCollis
                 return checkpoint;
         return null;
     }
-    
+
     /** Lap,checkpoint */
     public static Duo<Integer, Integer> calcNextCheckpoint(RacerState racer, int checkpointCount) {
         int nextNum = racer.nextCheckpoint.num + 1;

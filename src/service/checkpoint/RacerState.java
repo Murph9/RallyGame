@@ -1,4 +1,4 @@
-package drive.race;
+package service.checkpoint;
 
 import java.time.Duration;
 
@@ -6,7 +6,6 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 
 import car.ray.RayCarControl;
-import drive.race.RacerState;
 
 class RacerState implements Comparable<RacerState> {
     public final RayCarControl car;
@@ -26,6 +25,8 @@ class RacerState implements Comparable<RacerState> {
     public int compareTo(RacerState o) {
         if (this.lap != o.lap)
             return o.lap - this.lap;
+        if (this.nextCheckpoint == null || o.nextCheckpoint == null)
+            return 0;
         if (this.nextCheckpoint.num != o.nextCheckpoint.num)
             return o.nextCheckpoint.num - this.nextCheckpoint.num;
 

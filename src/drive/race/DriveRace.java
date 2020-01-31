@@ -23,13 +23,15 @@ import game.IDriveDone;
 import helper.H;
 import helper.Log;
 import service.GridPositions;
+import service.checkpoint.CheckpointProgress;
+import service.checkpoint.CheckpointProgressUI;
 import world.StaticWorld;
 import world.StaticWorldBuilder;
 
 //TODO DriveRace can't be converted to DriveBase as the world must be initialised before this
 public class DriveRace extends BaseAppState implements PauseState.ICallback {
 
-    public DriveRaceUI menu;
+    public CheckpointProgressUI menu;
     
     //things that should be in a world class
     private Node rootNode = new Node("root");
@@ -42,7 +44,7 @@ public class DriveRace extends BaseAppState implements PauseState.ICallback {
     private final int themCount = 15;
 
     private CarBuilder cb;
-    private DriveRaceProgress progress;
+    private CheckpointProgress progress;
     private PauseState pauseState;
 
     //gui and camera stuff
@@ -131,10 +133,10 @@ public class DriveRace extends BaseAppState implements PauseState.ICallback {
         pauseState = new PauseState(this);
         getStateManager().attach(pauseState);
 
-        progress = new DriveRaceProgress(checkpoints, cb.getAll(), rayCar);
+        progress = new CheckpointProgress(checkpoints, cb.getAll(), rayCar);
         getStateManager().attach(progress);
 
-        menu = new DriveRaceUI(progress);
+        menu = new CheckpointProgressUI(progress);
         getStateManager().attach(menu);
         
         //actually init
