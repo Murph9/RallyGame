@@ -14,6 +14,7 @@ import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.collision.shapes.HullCollisionShape;
 import com.jme3.math.Matrix3f;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
@@ -126,11 +127,10 @@ public class CarBuilder extends BaseAppState {
 		carNode.setLocalRotation(rot);
 
 		rootNode.attachChild(carNode);
-		
-		carControl.setPhysicsLocation(start);
-        carControl.setPhysicsRotation(rot);
+        
+        carControl.setPhysicsProperties(start, null, new Quaternion().fromRotationMatrix(rot), null);
         // a fake angular rotational reducer, very important for driving feel
-        carControl.setAngularDamping(angularDampening);
+        carControl.getPhysicsObject().setAngularDamping(angularDampening);
 		
 		if (aPlayer) {
 			//players get the keyboard and sound

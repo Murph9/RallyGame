@@ -67,7 +67,7 @@ public class SprintMenu extends DriveMenu {
 
 		StringBuilder sb = new StringBuilder();
 		for (RayCarControl car: this.drive.getAllCars()) {
-			sb.append(H.leftPad(H.roundDecimal(car.getPhysicsLocation().z, 0), 5, ' '));
+			sb.append(H.leftPad(H.roundDecimal(car.location.z, 0), 5, ' '));
 			sb.append("m @ ");
 			sb.append(H.leftPad(H.roundDecimal(car.getCurrentVehicleSpeedKmHour(), 0), 4, ' '));
 			sb.append("km/h ");

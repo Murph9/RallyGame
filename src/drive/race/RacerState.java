@@ -37,7 +37,7 @@ class RacerState implements Comparable<RacerState> {
         if (car == null)
             return Float.MAX_VALUE;
 
-        Vector3f pos = car.getPhysicsLocation();
+        Vector3f pos = car.location;
         return pos.subtract(nextCheckpoint.position).length();
     }
 

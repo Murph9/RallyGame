@@ -86,7 +86,7 @@ public class DriveRaceUI extends BaseAppState {
             debugNode = new Node("debugnode");
             for (RacerState entry : racers) {
                 entry.arrow = helper.H.makeShapeLine(getApplication().getAssetManager(), ColorRGBA.Cyan,
-                        entry.car.getPhysicsLocation(), entry.nextCheckpoint.position, 3);
+                        entry.car.location, entry.nextCheckpoint.position, 3);
                 debugNode.attachChild(entry.arrow);
             }
             ((SimpleApplication) getApplication()).getRootNode().attachChild(debugNode);

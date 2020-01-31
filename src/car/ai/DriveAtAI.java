@@ -20,7 +20,7 @@ public class DriveAtAI extends CarAI {
 	}
 
 	public void update(float tpf) {
-		float velocity = car.getLinearVelocity().length();
+		float velocity = car.vel.length();
 		
 		//try and fix a stuck situation
 		if (!reversing) {

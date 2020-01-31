@@ -233,10 +233,7 @@ public class DriveRace extends BaseAppState implements PauseState.ICallback {
     private void setAllCarsToStart() {
         int count = 0;
         for (RayCarControl car: cb.getAll()) {
-            car.setPhysicsLocation(worldStarts[count]);
-            car.setPhysicsRotation(worldRot);
-            car.setAngularVelocity(new Vector3f());
-            car.setLinearVelocity(new Vector3f());
+            car.setPhysicsProperties(worldStarts[count], new Vector3f(), new Quaternion().fromRotationMatrix(worldRot), new Vector3f());
             count++;
         }
 

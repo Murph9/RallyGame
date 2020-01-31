@@ -77,8 +77,8 @@ public abstract class CarAI implements ICarAI {
 	 * @param targetPos Target location
 	 */
 	protected void driveAt(Vector3f targetPos) {
-		Vector3f curPos = this.car.getPhysicsLocation();
-		Matrix3f w_angle = car.getPhysicsRotationMatrix();
+		Vector3f curPos = this.car.location;
+		Matrix3f w_angle = car.getPhysicsObject().getPhysicsRotationMatrix();
 		Vector3f velocity = w_angle.invert().mult(car.vel);
 		int reverse = (velocity.z < 0 ? -1 : 1);
 
@@ -107,7 +107,7 @@ public abstract class CarAI implements ICarAI {
 			onEvent("Right", false);
 		}
 
-		boolean accel = IfTooSlowForPoint(targetPos, curPos, this.car.getLinearVelocity());
+		boolean accel = IfTooSlowForPoint(targetPos, curPos, this.car.vel);
 		boolean targetInFront = curPos.subtract(targetPos).length() > curPos.add(car.forward).subtract(targetPos).length();
 		if (accel && targetInFront && !ifDrifting()) {
             //drive at point
@@ -153,10 +153,10 @@ public abstract class CarAI implements ICarAI {
     
     /** Detect a high drift angle, which might mean stop accelerating */
     protected boolean ifDrifting() {
-        if (this.car.getLinearVelocity().length() < SLOW_SPEED_LIMIT)
+        if (this.car.vel.length() < SLOW_SPEED_LIMIT)
             return false; //can't drift slowly
 
-        if (this.car.getAngularVelocity().length() > 0.7f) {
+        if (this.car.angularVel.length() > 0.7f) {
             return true; //predict starting a drift (should really be compared with size)
         }
 
@@ -169,7 +169,7 @@ public abstract class CarAI implements ICarAI {
         if (result == null)
             return Float.MAX_VALUE;
 
-        Vector3f selfVel = car.getLinearVelocity();
+        Vector3f selfVel = car.vel;
         Vector3f otherVel = result.obj.getLinearVelocity();
 
         //if its not moving, calculate time to hit
@@ -184,7 +184,7 @@ public abstract class CarAI implements ICarAI {
         
         Vector3f selfDiffWithRel = selfVel.subtract(otherRelVel);
 
-        float distanceBetween = car.getPhysicsLocation().distance(result.obj.getPhysicsLocation());
+        float distanceBetween = car.location.distance(result.obj.getPhysicsLocation());
         return distanceBetween/selfDiffWithRel.length();
     }
 
@@ -194,8 +194,8 @@ public abstract class CarAI implements ICarAI {
             return null;
         }
 
-        RaycasterResult result = raycaster.castRay(car.getPhysicsLocation(),
-                car.getLinearVelocity().normalize().mult(100), this.car.getPhysicsObject());
+        RaycasterResult result = raycaster.castRay(car.location,
+                car.vel.normalize().mult(100), this.car.getPhysicsObject());
         if (result != null) {
             return result;
         }
@@ -229,7 +229,7 @@ public abstract class CarAI implements ICarAI {
                 onEvent("Right", false);
                 onEvent("Left", false);
             }
-        } else if (car.getLinearVelocity().length() < 0.5f) {
+        } else if (car.vel.length() < 0.5f) {
             stuckTimer += tpf;
             if (stuckTimer > 2) {
                 reverseTimer = 3; //for 3 seconds
@@ -246,7 +246,7 @@ public abstract class CarAI implements ICarAI {
         for (RayWheelControl wheel : wheels) {
             gripSum += wheel.getRayWheel().skidFraction;
         }
-        if (car.getLinearVelocity().length() > SLOW_SPEED_LIMIT && gripSum > wheels.size()) {
+        if (car.vel.length() > SLOW_SPEED_LIMIT && gripSum > wheels.size()) {
             onEvent("Accel", false);
         }
     }

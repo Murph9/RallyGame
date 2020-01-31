@@ -56,7 +56,7 @@ public class CarCamera extends BaseAppState implements RawInputListener {
 
 	@Override
 	public void initialize(Application app) {
-        Vector3f pPos = p.getPhysicsLocation();
+        Vector3f pPos = p.location;
         Vector3f cam_offset = new Vector3f(0, p.getCarData().cam_offsetHeight, p.getCarData().cam_offsetLength);
         c.setLocation(cam_offset); // starting position of the camera
         Vector3f cam_lookAt = new Vector3f(0, p.getCarData().cam_lookAtHeight, 0);

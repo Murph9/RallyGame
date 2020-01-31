@@ -50,13 +50,13 @@ public class FlatWorld extends World {
 	public void update(float tpf) {
         RayCarControl car = getState(CarBuilder.class).get(0);
         if (car != null) {
-            Vector3f pos = car.getPhysicsLocation();
+            Vector3f pos = car.location.clone();
 
             // We reset the cars position so the large floating point errors don't occur
             if (pos.length() > RESET_DISTANCE) {
                 pos.x = 0;
                 pos.z = 0;
-                car.setPhysicsLocation(pos);
+                car.setPhysicsProperties(pos, null, null, null);
             }
 
             pos.y = 0;

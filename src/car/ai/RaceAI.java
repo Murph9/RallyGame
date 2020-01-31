@@ -28,7 +28,7 @@ public class RaceAI extends CarAI {
         tryStuffIfStuck(tpf);
         detectVeryLongFall(tpf);
 
-        float velocity = car.getLinearVelocity().length();
+        float velocity = car.vel.length();
 
         // very still, flip
         if (velocity < 0.05f && car.up.y < 0) {

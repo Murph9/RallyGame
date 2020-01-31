@@ -308,7 +308,7 @@ public class TrackWorld extends World {
 		if (this.trackSegments != null && drive != null && !noCars && DEBUG) {
 			//hack to see if the bezier curve stuff works
 			RayCarControl car = drive.getAllCars().stream().findFirst().get();
-			Vector3f pos = getClosestPointTo(this.trackSegments, normalizeHeightIn(car.getPhysicsLocation()));
+			Vector3f pos = getClosestPointTo(this.trackSegments, normalizeHeightIn(car.location));
 			
 			getState(DebugAppState.class).drawBox("closestpointtocurve", ColorRGBA.LightGray, unnormalizeHeightIn(pos), 1);
 		}

@@ -103,9 +103,8 @@ public class DriveMainRoadGetaway extends DriveBase {
 			gameOverLabel.setText("GameOver");
 			for (int i = 2; i < this.cb.getAll().size(); i++) {
 				this.cb.removeCar(this.cb.get(i));
-			}
-			player.setLinearVelocity(new Vector3f());
-			player.setAngularVelocity(new Vector3f());
+            }
+            player.setPhysicsProperties(null, new Vector3f(), (Quaternion) null, new Vector3f());
 			return;
 		}
 
@@ -115,9 +114,8 @@ public class DriveMainRoadGetaway extends DriveBase {
 		//environment:
 		readyForHunter = distanceFromStart > HUNTER_BUFFER;
 		if (!readyForHunter) {
-			// the chase car must stay still, for now
-			hunter.setPhysicsLocation(new Vector3f(HUNTER_BUFFER-10, 0.3f, 0));
-			hunter.setPhysicsRotation(this.world.getStartRot());
+            // the chase car must stay still, for now
+            hunter.setPhysicsProperties(new Vector3f(HUNTER_BUFFER-10, 0.3f, 0), null, new Quaternion().fromRotationMatrix(this.world.getStartRot()), null);
 			return;
 		}
 
@@ -146,7 +144,7 @@ public class DriveMainRoadGetaway extends DriveBase {
 			daai.setMaxSpeed(27.777f); // 100km/h
 			c.attachAI(daai, true);
 
-			c.setLinearVelocity(new Vector3f(20*(spawnPlayerDirection ? 1: -1), 0, 0));
+            c.setPhysicsProperties(null, new Vector3f(20*(spawnPlayerDirection ? 1: -1), 0, 0), (Quaternion) null, null);
 		}
 		
 		//check if any traffic is falling and remove them
@@ -154,13 +152,10 @@ public class DriveMainRoadGetaway extends DriveBase {
 		for (RayCarControl c: this.cb.getAll()) {
 			if (c == player) continue; 
 			
-			if (c.getPhysicsLocation().y < -10) {
+			if (c.location.y < -10) {
 				if (c == chaser) {
 					//we only reset their position behind the player at the same speed, please don't delete them
-					c.setPhysicsLocation(player.getPhysicsLocation().add(-15, 0, 0));
-					c.setPhysicsRotation(player.getPhysicsRotation());
-					c.setLinearVelocity(player.getLinearVelocity());
-					c.setAngularVelocity(player.getAngularVelocity());
+                    c.setPhysicsProperties(player.location.add(-15, 0, 0), player.vel, player.rotation, player.angularVel);
 					continue;
 				}
 			
@@ -203,6 +198,6 @@ public class DriveMainRoadGetaway extends DriveBase {
 	}
 
 	private float getPlayerDistanceFromStart(RayCarControl car) {
-		return FastMath.abs(this.world.getStartPos().x - car.getPhysicsLocation().x);
+		return FastMath.abs(this.world.getStartPos().x - car.location.x);
 	}
 }

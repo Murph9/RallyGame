@@ -5,6 +5,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.math.Matrix3f;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
 import com.simsilica.lemur.Button;
@@ -129,8 +130,8 @@ public class ChooseCar extends BaseAppState {
 			posReset = 0;
 
 			RayCarControl car = cb.get(0);
-			Vector3f pos = car.getPhysicsLocation();
-			car.setPhysicsLocation(new Vector3f(0, pos.y, 0));
+            Vector3f pos = car.location;
+            car.setPhysicsProperties(new Vector3f(0, pos.y, 0), null, (Quaternion) null, null);
 		}
 	}
 

@@ -70,11 +70,8 @@ public class DriveDev extends DriveBase {
 		this.world = world;
 		getStateManager().attach(this.world);
 		
-		//reset car
-		this.cb.get(0).setPhysicsLocation(world.getStartPos());
-		this.cb.get(0).setPhysicsRotation(world.getStartRot());
-		this.cb.get(0).setLinearVelocity(new Vector3f(0, 0, 0));
-		this.cb.get(0).setAngularVelocity(new Vector3f(0, 0, 0));
+        //reset car
+        this.cb.get(0).reset();
 	}
 	
 	@Override

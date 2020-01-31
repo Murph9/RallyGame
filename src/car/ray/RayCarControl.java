@@ -60,8 +60,11 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
 	
     private boolean added = false;
     
-    //some directional world vectors for ease of direction/ai computation
+    //some fields to prevent needing to call GetPhysicsObject a lot
     public Vector3f vel, forward, up, left, right;
+    public Vector3f angularVel;
+    public Quaternion rotation;
+    public Vector3f location;
 	
 	public RayCarControl(SimpleApplication app, CollisionShape shape, CarDataConst carData, Node rootNode) {
 		super(shape, carData);
@@ -70,7 +73,8 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
         this.debug = new RayCarControlDebug(this, false);
         this.input = new RayCarControlInput(this);
 
-		vel = forward = up = left = right = new Vector3f();
+        vel = forward = up = left = right = location = angularVel = new Vector3f();
+        rotation = new Quaternion();
 		
 		//init visual wheels
 		this.wheelControls = new RayWheelControl[4];
@@ -118,12 +122,14 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
 	@Override
 	public void prePhysicsTick(PhysicsSpace space, float tpf) {
         if (rbEnabled()) {
-            Matrix3f playerRot = rbc.getPhysicsRotationMatrix();
+            rotation = rbc.getPhysicsRotation();
             vel = rbc.getLinearVelocity();
-            forward = playerRot.mult(Vector3f.UNIT_Z);
-            up = playerRot.mult(Vector3f.UNIT_Y);
-            left = playerRot.mult(Vector3f.UNIT_X);
-            right = playerRot.mult(Vector3f.UNIT_X.negate());
+            forward = rotation.mult(Vector3f.UNIT_Z);
+            up = rotation.mult(Vector3f.UNIT_Y);
+            left = rotation.mult(Vector3f.UNIT_X);
+            right = rotation.mult(Vector3f.UNIT_X.negate());
+            angularVel = rbc.getAngularVelocity();
+            location = rbc.getPhysicsLocation();
             
             travelledDistance += rbc.getLinearVelocity().length()*tpf;
             
@@ -260,49 +266,27 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
         return results;
     }
 	
-    //#region physics ones, thinking this looks bad
     public PhysicsRigidBody getPhysicsObject() {
         return rbc;
     }
-
-	public Vector3f getPhysicsLocation() {
-		return rbc.getPhysicsLocation();
-	}
-	public Quaternion getPhysicsRotation() {
-		return rbc.getPhysicsRotation();
-	}
-	public Matrix3f getPhysicsRotationMatrix() {
-		return rbc.getPhysicsRotationMatrix();
-	}
-	public Vector3f getLinearVelocity() {
-		return rbc.getLinearVelocity();
-	}
-	public Vector3f getAngularVelocity() {
-		return rbc.getAngularVelocity();
-	}
-    public float getAngularDamping() {
-        return rbc.getAngularDamping();
-    }
     
-	public void setPhysicsLocation(Vector3f pos) {
-		rbc.setPhysicsLocation(pos);
-	}
-	public void setLinearVelocity(Vector3f vel) {
-		rbc.setLinearVelocity(vel);
-	}
-	public void setPhysicsRotation(Matrix3f rot) {
-		rbc.setPhysicsRotation(rot);
-	}
-	public void setPhysicsRotation(Quaternion rot) {
-		rbc.setPhysicsRotation(rot);
-	}
-	public void setAngularVelocity(Vector3f vel) {
-		rbc.setAngularVelocity(vel);
+    /**
+     * Set Physics state for the RayCar, basically a helper method for:
+     * PhysicsRigidBody.setPhysicsLocation(position)
+     * PhysicsRigidBody.setLinearVelocity(velocity)
+     * PhysicsRigidBody.setPhysicsRotation(rotation)
+     * PhysicsRigidBody.setAngularVelocity(angularVel)
+     */
+    public void setPhysicsProperties(Vector3f position, Vector3f velocity, Quaternion rotation, Vector3f angularVel) {
+        if (position != null)
+            rbc.setPhysicsLocation(position);
+        if (velocity != null)
+            rbc.setLinearVelocity(velocity);
+        if (rotation != null)
+            rbc.setPhysicsRotation(rotation);
+        if (angularVel != null)
+            rbc.setAngularVelocity(angularVel);
     }
-    public void setAngularDamping(float value) {
-        rbc.setAngularDamping(value);
-    }
-    //#endregion
 	
 	public float getCurrentVehicleSpeedKmHour() {
 		if (vel == null)
@@ -358,9 +342,9 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
         rbc.setPhysicsLocation(rbc.getPhysicsLocation().add(new Vector3f(0, 1, 0)));
     }
     public void reset() {
-        setPhysicsRotation(new Matrix3f());
-        setLinearVelocity(new Vector3f());
-        setAngularVelocity(new Vector3f());
+        rbc.setPhysicsRotation(new Matrix3f());
+        rbc.setLinearVelocity(new Vector3f());
+        rbc.setAngularVelocity(new Vector3f());
 
         this.curRPM = 1000;
         for (RayWheel w : this.wheels) {
@@ -379,8 +363,8 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
             transform = race.resetTransform(this);
         }
 
-        setPhysicsLocation(transform.getTranslation());
-        setPhysicsRotation(transform.getRotation());
+        rbc.setPhysicsLocation(transform.getTranslation());
+        rbc.setPhysicsRotation(transform.getRotation());
     }
     public void reverse(boolean value) {
         if (value)

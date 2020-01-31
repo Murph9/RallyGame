@@ -1,7 +1,5 @@
 package car.ray;
 
-//TODO change CarUI to use this
-
 public class RayCarControlInput {
 
     private final ICarControlled control;
