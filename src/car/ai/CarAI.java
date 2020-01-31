@@ -8,10 +8,10 @@ import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 
+import car.ray.GripHelper;
 import car.ray.RayCarControl;
 import car.ray.RayCarControlInput;
 import car.ray.RayWheelControl;
-import car.ray.RayCar.GripHelper;
 import game.DebugAppState;
 import helper.H;
 import helper.Log;
@@ -43,7 +43,7 @@ public abstract class CarAI implements ICarAI {
         BEST_LONG_FORCE = GripHelper.calcMaxLoad(car.getCarData().wheelData[0].pjk_long);
 
 		//ignore all turning speed factor code for AIs
-		input.handleInput("IgnoreSteeringSpeedFactor", true, 1);
+		onEvent("IgnoreSteeringSpeedFactor", true);
 	}
 	
 	public void setDebugAppState(DebugAppState debug) {
