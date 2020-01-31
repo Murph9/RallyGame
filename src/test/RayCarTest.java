@@ -14,8 +14,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import car.ray.RayCar;
 import car.data.WheelDataTractionConst;
+import car.ray.GripHelper;
 import helper.Log;
 
 public class RayCarTest {
@@ -104,10 +104,10 @@ public class RayCarTest {
 
     private static float TractionFormula(WheelDataTractionConst w, float slip)
     {
-        return RayCar.GripHelper.tractionFormula(w, slip);
+        return GripHelper.tractionFormula(w, slip);
     }
     
     private static float CalcSlipMax(WheelDataTractionConst w) {
-        return RayCar.GripHelper.calcSlipMax(w);
+        return GripHelper.calcSlipMax(w);
     }
 }

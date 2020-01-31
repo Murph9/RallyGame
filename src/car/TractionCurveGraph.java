@@ -8,9 +8,8 @@ import com.simsilica.lemur.Container;
 
 import car.data.CarDataConst;
 import car.data.WheelDataTractionConst;
+import car.ray.GripHelper;
 import helper.H;
-
-import car.ray.RayCar;
 
 public class TractionCurveGraph extends Container {
 
@@ -38,14 +37,14 @@ public class TractionCurveGraph extends Container {
 		this.detachAllChildren();
 		
 		Vector3f size = getPreferredSize();
-		maxLat = RayCar.GripHelper.tractionFormula(latData, RayCar.GripHelper.calcSlipMax(latData));
+		maxLat = GripHelper.tractionFormula(latData, GripHelper.calcSlipMax(latData));
 		Float[] points = simulateGraphPoints(size, latData);
 		for (int i = 0; i < points.length; i++) {
 			Vector3f pos = new Vector3f(i*(size.x/points.length), -(size.y/2)+(size.y/2)*(points[i]/ maxLat), 0);
 			this.attachChild(H.makeShapeBox(am, ColorRGBA.Blue, pos, 1));
 		}
 		
-		maxLong = RayCar.GripHelper.tractionFormula(longData, RayCar.GripHelper.calcSlipMax(longData));
+		maxLong = GripHelper.tractionFormula(longData, GripHelper.calcSlipMax(longData));
 		points = simulateGraphPoints(size, longData);
 		for (int i = 0; i < points.length; i++) {
 			Vector3f pos = new Vector3f(i*(size.x/points.length), -(size.y)+(size.y/2)*(points[i]/maxLong), 0);
@@ -55,7 +54,7 @@ public class TractionCurveGraph extends Container {
 	private Float[] simulateGraphPoints(Vector3f screenSize, WheelDataTractionConst d) {
 		Float[] list = new Float[(int)screenSize.x/2];
 		for (int i = 0; i < list.length; i++)
-			list[i] = RayCar.GripHelper.tractionFormula(d, (float)i*FastMath.PI/screenSize.x);
+			list[i] = GripHelper.tractionFormula(d, (float)i*FastMath.PI/screenSize.x);
 		return list;
 	}
 	

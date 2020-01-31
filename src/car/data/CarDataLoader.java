@@ -14,8 +14,7 @@ import car.data.Car;
 import car.data.CarDataConst;
 import car.data.CarSusDataConst;
 import car.data.WheelDataConst;
-import car.ray.RayCar;
-import car.ray.RayCar.GripHelper;
+import car.ray.GripHelper;
 import helper.Log;
 
 /** Private class for CarBuilder, manages the CarDataConst file */
@@ -71,8 +70,8 @@ public class CarDataLoader { //CarDataFactory
 
             WheelDataConst wheel = data.wheelData[i];
             // generate the slip* max force from the car wheel data, and validate they are 'real'
-            wheel.maxLat = RayCar.GripHelper.calcSlipMax(wheel.pjk_lat);
-            wheel.maxLong = RayCar.GripHelper.calcSlipMax(wheel.pjk_long);
+            wheel.maxLat = GripHelper.calcSlipMax(wheel.pjk_lat);
+            wheel.maxLong = GripHelper.calcSlipMax(wheel.pjk_long);
 
             try {
                 if (Float.isNaN(wheel.maxLat))

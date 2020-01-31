@@ -14,7 +14,7 @@ import com.simsilica.lemur.RollupPanel;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
 
 import car.data.CarDataConst;
-import car.ray.RayCar.GripHelper;
+import car.ray.GripHelper;
 import helper.Colours;
 import helper.H;
 
