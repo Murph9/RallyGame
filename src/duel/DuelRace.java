@@ -84,6 +84,7 @@ public class DuelRace extends BaseAppState {
             new Vector3f(0, 0, 200),
             new Vector3f(0, 0, 300)
         }, cb.getAll(), rayCar);
+        progress.attachVisualModel(false);
         getStateManager().attach(progress);
     }
 

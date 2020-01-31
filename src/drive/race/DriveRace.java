@@ -6,6 +6,7 @@ import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.BulletAppState;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
@@ -134,6 +135,9 @@ public class DriveRace extends BaseAppState implements PauseState.ICallback {
         getStateManager().attach(pauseState);
 
         progress = new CheckpointProgress(checkpoints, cb.getAll(), rayCar);
+        progress.setCheckpointColour(ColorRGBA.BlackNoAlpha);
+        progress.setCheckpointSize(10);
+        
         getStateManager().attach(progress);
 
         menu = new CheckpointProgressUI(progress);

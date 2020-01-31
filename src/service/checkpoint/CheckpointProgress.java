@@ -32,8 +32,6 @@ import service.GhostObjectCollisionListener;
 
 public class CheckpointProgress extends BaseAppState implements GhostObjectCollisionListener.IGhostListener {
 
-    private final float checkpointScale;
-    private final ColorRGBA checkpointColour;
     private final Vector3f[] checkpointPositions;
     private final RayCarControl player;
     private final GhostObjectCollisionListener checkpointCollisionListener;
@@ -44,11 +42,18 @@ public class CheckpointProgress extends BaseAppState implements GhostObjectColli
     private final Map<RayCarControl, RacerState> racers;
     private final Map<Integer, Instant> timeAtCheckpoints;
 
+    private float checkpointScale;
+    private ColorRGBA checkpointColour;
+    private boolean attachModels;
+
     public CheckpointProgress(Vector3f[] checkpoints, Collection<RayCarControl> cars, RayCarControl player) {
         this.checkpointPositions = checkpoints;
         this.checkpoints = new Checkpoint[checkpoints.length];
+        
         this.checkpointScale = 2;
         this.checkpointColour = new ColorRGBA(0, 1, 0, 0.4f);
+        this.attachModels = true;
+
         this.rootNode = new Node("progress root node");
 
         this.racers = new HashMap<>();
@@ -61,6 +66,23 @@ public class CheckpointProgress extends BaseAppState implements GhostObjectColli
 
         this.player = player;
     }
+    public void setCheckpointSize(float size) {
+        if (this.isInitialized())
+            throw new IllegalStateException("This must be called before initialization.");
+        this.checkpointScale = size;
+    }
+    
+    public void setCheckpointColour(ColorRGBA colour) {
+        if (this.isInitialized())
+            throw new IllegalStateException("This must be called before initialization.");
+        this.checkpointColour = colour;
+    }
+
+    public void attachVisualModel(boolean attach) {
+        if (this.isInitialized())
+            throw new IllegalStateException("This must be called before initialization.");
+        this.attachModels = attach;
+    }
 
     @Override
     protected void initialize(Application app) {
@@ -72,11 +94,12 @@ public class CheckpointProgress extends BaseAppState implements GhostObjectColli
         for (int i = 0; i < checkpointPositions.length; i++) {
             Spatial box = new Geometry("checkpoint box " + i, new Box(checkpointSize.negate(), checkpointSize));
             box = LoadModelWrapper.create(app.getAssetManager(), box, checkpointColour);
-
+            
             GhostControl ghost = new GhostControl(CollisionShapeFactory.createBoxShape(box));
             box.setLocalTranslation(checkpointPositions[i]);
             box.addControl(ghost);
-            rootNode.attachChild(box);
+            if (attachModels)
+                rootNode.attachChild(box);
             physicsSpace.add(ghost);
 
             this.checkpoints[i] = new Checkpoint(i, checkpointPositions[i], ghost);
