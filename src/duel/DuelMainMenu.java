@@ -26,7 +26,7 @@ import car.ai.DriveAlongAI;
 import car.data.Car;
 import car.data.CarDataConst;
 import car.ray.RayCarControl;
-import helper.Screen;
+import service.Screen;
 import world.wp.DefaultBuilder;
 import world.wp.WP.DynamicType;
 

@@ -1,4 +1,4 @@
-package helper;
+package service;
 
 import com.jme3.math.Vector3f;
 import com.jme3.system.AppSettings;

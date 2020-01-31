@@ -19,7 +19,7 @@ import car.PowerCurveGraph;
 import car.data.Car;
 import car.ray.RayCarControl;
 import helper.Log;
-import helper.Screen;
+import service.Screen;
 import world.StaticWorld;
 import world.StaticWorldBuilder;
 import world.World;

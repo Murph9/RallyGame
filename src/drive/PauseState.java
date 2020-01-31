@@ -12,7 +12,7 @@ import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
 
-import helper.Screen;
+import service.Screen;
 
 public class PauseState extends BaseAppState {
     

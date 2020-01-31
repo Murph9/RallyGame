@@ -13,7 +13,7 @@ import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
 import game.DebugAppState;
-import helper.Screen;
+import service.Screen;
 
 public class DriveRaceUI extends BaseAppState {
 

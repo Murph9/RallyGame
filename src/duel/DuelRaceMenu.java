@@ -12,7 +12,7 @@ import com.simsilica.lemur.style.ElementId;
 import car.data.CarDataConst;
 import drive.PauseState;
 import helper.H;
-import helper.Screen;
+import service.Screen;
 
 public class DuelRaceMenu extends BaseAppState implements PauseState.ICallback {
     

@@ -24,7 +24,7 @@ import com.simsilica.lemur.text.TextFilters;
 
 import duel.DuelUiStyle;
 import helper.Log;
-import helper.Screen;
+import service.Screen;
 
 class DuelUiTestApp extends SimpleApplication {
 

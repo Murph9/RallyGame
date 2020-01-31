@@ -8,7 +8,7 @@ import com.simsilica.lemur.Label;
 
 import car.ray.RayCarControl;
 import helper.H;
-import helper.Screen;
+import service.Screen;
 
 public class SprintMenu extends DriveMenu {
 

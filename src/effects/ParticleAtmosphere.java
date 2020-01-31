@@ -29,7 +29,7 @@ public class ParticleAtmosphere extends BaseAppState {
 
 		particles = new ParticleEmitter("particles", Type.Triangle, 0);
 		
-		particles.setGravity(0, 0, 0);
+        particles.setGravity(0, 0, 0);
 		particles.setLowLife(7);
 		particles.setHighLife(2);
 		
