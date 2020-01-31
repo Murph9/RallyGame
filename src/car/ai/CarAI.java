@@ -9,6 +9,7 @@ import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 
 import car.ray.RayCarControl;
+import car.ray.RayCarControlInput;
 import car.ray.RayWheelControl;
 import car.ray.RayCar.GripHelper;
 import game.DebugAppState;
@@ -21,7 +22,8 @@ public abstract class CarAI implements ICarAI {
     
     private static final float SLOW_SPEED_LIMIT = 4;
 
-	protected final RayCarControl car;
+    protected final RayCarControl car;
+    protected final RayCarControlInput input;
     protected final float BEST_LAT_FORCE;
     protected final float BEST_LONG_FORCE;
     
@@ -35,12 +37,13 @@ public abstract class CarAI implements ICarAI {
 
 	public CarAI(RayCarControl car) {
         this.car = car;
+        this.input = car.getInput();
 		
         BEST_LAT_FORCE = GripHelper.calcMaxLoad(car.getCarData().wheelData[0].pjk_lat);
         BEST_LONG_FORCE = GripHelper.calcMaxLoad(car.getCarData().wheelData[0].pjk_long);
 
 		//ignore all turning speed factor code for AIs
-		car.onAction("IgnoreSteeringSpeedFactor", true, 1);
+		input.handleInput("IgnoreSteeringSpeedFactor", true, 1);
 	}
 	
 	public void setDebugAppState(DebugAppState debug) {
@@ -56,7 +59,7 @@ public abstract class CarAI implements ICarAI {
 		onEvent(act, ifdown, ifdown ? 1 : 0);
 	}
 	protected void onEvent(String act, boolean ifdown, float amnt) {
-		car.onAction(act, ifdown, amnt);
+		input.handleInput(act, ifdown, amnt);
 	}
 
 	/** Only brake, no accel and no steering */

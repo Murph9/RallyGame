@@ -173,13 +173,13 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
 		// remember that this value is clamped after this method is called
 	}
 
-	public void onAction(String binding, boolean value, float tpf) {
-        input.handleInput(binding, value, tpf);
-	}
+    public RayCarControlInput getInput() {
+        return this.input;
+    }
 	
 	/** Please only call this from CarManager */
 	public void cleanup(Application app) {
-		if (this.controls != null && !this.controls.isEmpty()) {
+		if (!this.controls.isEmpty()) {
 			for (RawInputListener ril: this.controls)
 				app.getInputManager().removeRawInputListener(ril);
 			this.controls.clear();
@@ -232,8 +232,8 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
 			return;
 		}
 		
-		this.controls.add(new MyKeyListener(this));
-		this.controls.add(new JoystickEventListener(this));
+		this.controls.add(new MyKeyListener(this.getInput()));
+		this.controls.add(new JoystickEventListener(this.getInput()));
 		
 		for (RawInputListener ril: this.controls)
 			im.addRawInputListener(ril);

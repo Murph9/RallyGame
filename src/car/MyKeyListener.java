@@ -12,16 +12,15 @@ import com.jme3.input.event.MouseButtonEvent;
 import com.jme3.input.event.MouseMotionEvent;
 import com.jme3.input.event.TouchEvent;
 
-import car.ray.RayCarControl;
-
+import car.ray.RayCarControlInput;
 
 public class MyKeyListener implements RawInputListener {
 
-	RayCarControl a;
+	private final RayCarControlInput input;
 	Map<Integer, String> layout = new HashMap<Integer, String>();
 	
-	public MyKeyListener(RayCarControl a) {
-		this.a = a;
+	public MyKeyListener(RayCarControlInput a) {
+		this.input = a;
 		
 		layout.put(KeyInput.KEY_LEFT, "Left");
 		layout.put(KeyInput.KEY_A, "Left");
@@ -56,7 +55,7 @@ public class MyKeyListener implements RawInputListener {
 	
 	public void onKeyEvent(KeyInputEvent arg0) {
 		if (layout.containsKey(arg0.getKeyCode())) {
-			a.onAction(layout.get(arg0.getKeyCode()), arg0.isPressed(), arg0.isPressed() ? 1 : 0);
+			input.handleInput(layout.get(arg0.getKeyCode()), arg0.isPressed(), arg0.isPressed() ? 1 : 0);
 		}
 	}
 	

@@ -14,18 +14,18 @@ import com.jme3.input.event.MouseMotionEvent;
 import com.jme3.input.event.TouchEvent;
 import com.jme3.math.FastMath;
 
-import car.ray.RayCarControl;
+import car.ray.RayCarControlInput;
 
 public class JoystickEventListener implements RawInputListener {
 
 	private Map<String, String> intToButton = new HashMap<String, String>();
 	private Map<String, String> buttonToAction = new HashMap<String, String>();
 	
-	private RayCarControl a;
+	private RayCarControlInput input;
 	private float stickdeadzone = 0.2f;
 	
-	public JoystickEventListener (RayCarControl a) {
-		this.a = a;
+	public JoystickEventListener (RayCarControlInput a) {
+		this.input = a;
 		
 		intToButton.put(JoystickButton.BUTTON_0, "A");
 		intToButton.put(JoystickButton.BUTTON_1, "B");
@@ -60,22 +60,22 @@ public class JoystickEventListener implements RawInputListener {
 		
 		if (axis == axis.getJoystick().getXAxis()) { // left/right normal stick
 			if (value > 0) {
-				a.onAction("Left", false, 0);
-				a.onAction("Right", true, nonLinearInput(valueAbs, stickdeadzone));
+				input.handleInput("Left", false, 0);
+				input.handleInput("Right", true, nonLinearInput(valueAbs, stickdeadzone));
 			} else {
-				a.onAction("Right", false, 0);
-				a.onAction("Left", true, nonLinearInput(valueAbs, stickdeadzone));
+				input.handleInput("Right", false, 0);
+				input.handleInput("Left", true, nonLinearInput(valueAbs, stickdeadzone));
 			}
 		} else if (axis == axis.getJoystick().getYAxis()) { //up/down normal stick
 			//not mapped yet			
 			
 		} else if (axis == axis.getJoystick().getAxis(JoystickAxis.Z_AXIS)) { //triggers?
 			if (value > 0) { //brake
-				a.onAction("Accel", false, 0);
-				a.onAction("Brake", true, nonLinearInput(valueAbs, stickdeadzone));
+				input.handleInput("Accel", false, 0);
+				input.handleInput("Brake", true, nonLinearInput(valueAbs, stickdeadzone));
 			} else {
-				a.onAction("Brake", false, 0);
-				a.onAction("Accel", true, nonLinearInput(valueAbs, stickdeadzone));
+				input.handleInput("Brake", false, 0);
+				input.handleInput("Accel", true, nonLinearInput(valueAbs, stickdeadzone));
 			}
 			
 		} else if (axis == axis.getJoystick().getAxis(JoystickAxis.Z_ROTATION)) {
@@ -100,7 +100,7 @@ public class JoystickEventListener implements RawInputListener {
 	@Override
 	public void onJoyButtonEvent(JoyButtonEvent arg0) {
 		String button = this.intToButton.get(Integer.toString(arg0.getButtonIndex())); 
-		a.onAction(this.buttonToAction.get(button), arg0.isPressed(), arg0.isPressed() ? 1 : 0);
+		input.handleInput(this.buttonToAction.get(button), arg0.isPressed(), arg0.isPressed() ? 1 : 0);
 		
 		arg0.isConsumed();
 	}
