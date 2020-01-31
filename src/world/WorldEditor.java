@@ -8,9 +8,6 @@ import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.RollupPanel;
 
-import world.highway.HighwayWorld;
-import world.lsystem.LSystemWorld;
-import world.osm.OsmWorld;
 import world.wp.WP.DynamicType;
 
 public class WorldEditor extends Container {
@@ -88,45 +85,6 @@ public class WorldEditor extends Container {
         });
 	}
 	private void setWorld(String typeStr, String subType) {
-		WorldType worldType = WorldType.valueOf(WorldType.class, typeStr);
-		//TODO remove duplicate with ChooseMap somehow
-		switch (worldType) {
-			case STATIC:
-				StaticWorld sworld = StaticWorld.valueOf(StaticWorld.class, subType);
-				currentSelection = new StaticWorldBuilder(sworld);
-				break;
-			case DYNAMIC:
-				DynamicType dworld = DynamicType.valueOf(DynamicType.class, subType);
-				currentSelection = dworld.getBuilder();
-				break;
-			case OBJECT:
-				currentSelection = new ObjectWorld();
-				break;
-			case FULLCITY:
-				currentSelection = new FullCityWorld();
-				break;
-			case LSYSTEM:
-				currentSelection = new LSystemWorld();
-				break;
-			case HIGHWAY:
-				currentSelection = new HighwayWorld();
-				break;
-			case FLAT:
-				currentSelection = new FlatWorld();
-				break;
-			case MOVING:
-				currentSelection = new MovingWorld();
-				break;
-			case OSM:
-				currentSelection = new OsmWorld();
-				break;
-				
-			default:
-				try {
-					throw new Exception("Non valid world type in ChooseMap.setWorld() method");
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-		}
+        currentSelection = WorldType.getWorld(typeStr, subType);
 	}
 }

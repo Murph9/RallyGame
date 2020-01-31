@@ -13,12 +13,8 @@ import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
 import helper.Log;
-import helper.Screen;
+import service.Screen;
 import world.*;
-import world.highway.HighwayWorld;
-import world.lsystem.LSystemWorld;
-import world.osm.OsmWorld;
-import world.track.TrackWorld;
 import world.wp.WP.DynamicType;
 
 public class ChooseMap extends BaseAppState {
@@ -146,48 +142,8 @@ public class ChooseMap extends BaseAppState {
 		if (world != null && world.isInitialized()) {
 			getStateManager().detach(world);
 			world = null;
-		}
-		worldType = WorldType.valueOf(WorldType.class, typeStr);
-		
-		switch (worldType) {
-			case STATIC:
-				StaticWorld sworld = StaticWorld.valueOf(StaticWorld.class, subType);
-				world = new StaticWorldBuilder(sworld);
-				break;
-			case DYNAMIC:
-				DynamicType dworld = DynamicType.valueOf(DynamicType.class, subType);
-				world = dworld.getBuilder();
-				break;
-			case OBJECT:
-				world = new ObjectWorld();
-				break;
-			case FULLCITY:
-				world = new FullCityWorld();
-				break;
-			case LSYSTEM:
-				world = new LSystemWorld();
-				break;
-			case HIGHWAY:
-				world = new HighwayWorld();
-				break;
-			case FLAT:
-				world = new FlatWorld();
-				break;
-			case MOVING:
-				world = new MovingWorld();
-				break;
-			case TRACK:
-				world = new TrackWorld();
-				break;
-			case OSM:
-				world = new OsmWorld();
-				break;
-				
-			default:
-				Log.p("Non valid world type in ChooseMap.setWorld() method: " + worldType.name());
-				return;
-		}
-		
+        }
+        world = WorldType.getWorld(typeStr, subType);
 		getStateManager().attach(world);
 	}
 }
