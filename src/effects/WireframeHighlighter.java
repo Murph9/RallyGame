@@ -32,10 +32,12 @@ public class WireframeHighlighter {
 	
 	//NOTE:
 	// this file is currently unused as of 2019-08-07, but is kept because its cool.
-	
+	@Deprecated
 	public static Spatial create(AssetManager am, String model, ColorRGBA highlight) {
 		return create(am, am.loadModel(model), highlight);
-	}
+    }
+    
+    @Deprecated
 	public static Spatial create(AssetManager am, Spatial s, ColorRGBA highlight) {
 		if (s == null)
 			return s;
@@ -60,6 +62,7 @@ public class WireframeHighlighter {
 		return n;
 	}
 	
+    @Deprecated
 	public static void addWireframeMat(AssetManager am, Geometry g, ColorRGBA highlight) {
 		Material mat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
 		mat.setColor("Color", highlight);
