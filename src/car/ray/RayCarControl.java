@@ -26,6 +26,7 @@ import car.ai.ICarAI;
 import car.data.CarDataConst;
 import drive.DriveBase;
 import drive.race.DriveRace;
+import duel.DuelRace;
 import helper.Log;
 import service.ray.PhysicsRaycaster;
 
@@ -355,12 +356,16 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
         DriveBase drive = this.app.getStateManager().getState(DriveBase.class);
         Transform transform = null;
         if (drive != null) {
-            transform = drive.resetTransform(this);
+            transform = drive.resetPosition(this);
             drive.resetWorld();
-        } else {
+        } else if (this.app.getStateManager().getState(DriveRace.class) != null) {
             // TODO DriveRace hack, just happens to be the same as the abstract class method
             DriveRace race = this.app.getStateManager().getState(DriveRace.class);
-            transform = race.resetTransform(this);
+            transform = race.resetPosition(this);
+        } else if (this.app.getStateManager().getState(DuelRace.class) != null) {
+            //TODO DuelRace hack, please fix
+            DuelRace race = this.app.getStateManager().getState(DuelRace.class);
+            transform = race.resetPosition(this);
         }
 
         rbc.setPhysicsLocation(transform.getTranslation());

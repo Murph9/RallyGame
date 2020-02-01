@@ -3,13 +3,13 @@ package car.ai;
 import com.jme3.math.Vector3f;
 
 import car.ray.RayCarControl;
-import drive.race.DriveRace;
+import drive.ICheckpointDrive;
 
 public class RaceAI extends CarAI {
 
-	private DriveRace race;
+	private ICheckpointDrive race;
 	
-	public RaceAI(RayCarControl car, DriveRace race) {
+	public RaceAI(RayCarControl car, ICheckpointDrive race) {
 		super(car);
 		this.race = race;
 	}

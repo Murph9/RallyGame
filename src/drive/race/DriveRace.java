@@ -19,6 +19,7 @@ import car.CarUI;
 import car.ai.RaceAI;
 import car.data.Car;
 import car.ray.RayCarControl;
+import drive.ICheckpointDrive;
 import drive.PauseState;
 import game.IDriveDone;
 import helper.H;
@@ -30,7 +31,7 @@ import world.StaticWorld;
 import world.StaticWorldBuilder;
 
 //TODO DriveRace can't be converted to DriveBase as the world must be initialised before this
-public class DriveRace extends BaseAppState implements PauseState.ICallback {
+public class DriveRace extends BaseAppState implements PauseState.ICallback, ICheckpointDrive {
 
     public CheckpointProgressUI menu;
     
@@ -124,7 +125,7 @@ public class DriveRace extends BaseAppState implements PauseState.ICallback {
             c.attachAI(rAi, true);
         }
         
-        //initCameras
+        // init camera
         camera = new CarCamera(app.getCamera(), rayCar);
         getStateManager().attach(camera);
         app.getInputManager().addRawInputListener(camera);
@@ -135,9 +136,8 @@ public class DriveRace extends BaseAppState implements PauseState.ICallback {
         getStateManager().attach(pauseState);
 
         progress = new CheckpointProgress(checkpoints, cb.getAll(), rayCar);
-        progress.setCheckpointColour(ColorRGBA.BlackNoAlpha);
-        progress.setCheckpointSize(10);
-        
+        progress.setCheckpointColour(new ColorRGBA(0, 1, 0, 0.4f));
+        progress.setCheckpointSize(2);
         getStateManager().attach(progress);
 
         menu = new CheckpointProgressUI(progress);
@@ -227,7 +227,7 @@ public class DriveRace extends BaseAppState implements PauseState.ICallback {
         }
     }
 
-    public Transform resetTransform(RayCarControl car) {
+    public Transform resetPosition(RayCarControl car) {
         Vector3f pos = progress.getLastCheckpoint(car);
         Vector3f next = progress.getNextCheckpoint(car);
 

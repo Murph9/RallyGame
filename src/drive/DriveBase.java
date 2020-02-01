@@ -144,7 +144,7 @@ public class DriveBase extends BaseAppState {
         sm.attach(uiNode);
     }
 
-    public final Transform resetTransform(RayCarControl car) {
+    public final Transform resetPosition(RayCarControl car) {
         return new Transform(world.getStartPos(), new Quaternion().fromRotationMatrix(world.getStartRot()));
     }
 }
