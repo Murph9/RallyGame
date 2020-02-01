@@ -4,32 +4,36 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.jme3.app.Application;
+import com.jme3.asset.AssetManager;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
-import world.IWorldTrack;
+import effects.LoadModelWrapper;
+import service.GridPositions;
+import world.ICheckpointWorld;
 import world.StaticWorld;
 import world.StaticWorldBuilder;
 
-public class DuelWorld extends StaticWorldBuilder implements IWorldTrack {
+public class DuelWorld extends StaticWorldBuilder implements ICheckpointWorld {
 
     private Vector3f[] path;
+    private Vector3f[] worldStarts;
+    private Quaternion worldRot;
 
     public DuelWorld() {
-        super(StaticWorld.lakelooproad);
+        super(StaticWorld.dragstrip);
     }
 
-    @Override
-    public void initialize(Application app) {
-        super.initialize(app);
+    public void loadCheckpoints(AssetManager am) {
+        Spatial spat = LoadModelWrapper.create(am, world.name, null);
 
         // attempt to read checkpoints from model
-        if (model instanceof Node) {
+        if (spat instanceof Node) {
             List<Vector3f> _checkpoints = new LinkedList<Vector3f>();
-            Spatial s = ((Node) model).getChild(0);
+            Spatial s = ((Node) spat).getChild(0);
             for (Spatial points : ((Node) s).getChildren()) {
                 if (points.getName().equals("Points")) {
                     for (Spatial checkpoint : ((Node) points).getChildren()) {
@@ -37,16 +41,30 @@ public class DuelWorld extends StaticWorldBuilder implements IWorldTrack {
                     }
                 }
             }
+            this.path = new Vector3f[_checkpoints.size()];
             if (!_checkpoints.isEmpty()) {
-                this.path = new Vector3f[_checkpoints.size()];
                 _checkpoints.toArray(this.path);
             }
         }
+
+        // generate starting positions and rotations
+        this.worldRot = new Quaternion();
+        this.worldRot.lookAt(path[1].subtract(path[0]), Vector3f.UNIT_Y);
+
+        List<Vector3f> startPositions = new GridPositions(2, 4).generate(2, path[0],
+                path[1].subtract(path[0]));
+
+        this.worldStarts = startPositions.toArray(new Vector3f[0]);
+    }
+
+    @Override
+    public void initialize(Application app) {
+        super.initialize(app);
     }
 
     @Override
     public Transform start(int i) {
-        return new Transform(super.getStartPos(), new Quaternion().fromRotationMatrix(super.getStartRot()));
+        return new Transform(worldStarts[i], worldRot);
     }
 
     @Override

@@ -16,7 +16,7 @@ public class StaticWorldBuilder extends World {
 
 	protected StaticWorld world;
     protected RigidBodyControl landscape;
-    protected Spatial model;
+    private Spatial model;
 	
 	public StaticWorldBuilder(StaticWorld world) {
 		super("staticworld-" + world.name);

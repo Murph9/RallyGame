@@ -3,23 +3,21 @@ package duel;
 import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.BulletAppState;
+import com.jme3.math.Quaternion;
+import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 
 import car.CarBuilder;
 import car.CarCamera;
 import car.CarUI;
-import car.ai.DriveAlongAI;
+import car.ai.RaceAI;
 import car.data.CarDataConst;
 import car.ray.RayCarControl;
+import drive.ICheckpointDrive;
 import helper.Log;
 import service.checkpoint.CheckpointProgress;
-import world.StaticWorld;
-import world.StaticWorldBuilder;
-import world.World;
 
-public class DuelRace extends BaseAppState {
-
-    private static final float distanceApart = 2;
+public class DuelRace extends BaseAppState implements ICheckpointDrive {
 
     private final IDuelFlow flow;
 
@@ -27,7 +25,7 @@ public class DuelRace extends BaseAppState {
     private DuelRaceMenu menu;
     private CheckpointProgress progress;
 
-    private World world;
+    private DuelWorld world;
     private CarCamera camera;
     private CarUI uiNode;
 
@@ -40,27 +38,24 @@ public class DuelRace extends BaseAppState {
 
     @Override
     protected void initialize(Application app) {
-        world = new StaticWorldBuilder(StaticWorld.dragstrip); //TODO use DuelWorld
+        world = new DuelWorld();
+        world.loadCheckpoints(app.getAssetManager());
         getStateManager().attach(world);
+        Vector3f[] checkpoints = world.checkpoints();
 
         this.cb = getState(CarBuilder.class);
-
-        Vector3f worldSpawn = world.getStartPos();
 
         DuelData data = flow.getData();
 
         CarDataConst yourCarData = cb.loadData(data.yourCar, data.yourAdjuster);
-        RayCarControl rayCar = cb.addCar(yourCarData, worldSpawn.add(distanceApart, 0, 0), world.getStartRot(), true);
+        RayCarControl rayCar = cb.addCar(yourCarData, world.start(0), true);
 
         uiNode = new CarUI(rayCar);
         getStateManager().attach(uiNode);
 
         CarDataConst theirCarData = cb.loadData(data.theirCar, data.theirAdjuster);
-        RayCarControl car = this.cb.addCar(theirCarData, worldSpawn.add(-distanceApart, 0, 0), world.getStartRot(), false);
-        car.attachAI(new DriveAlongAI(car, (vec) -> {
-            return new Vector3f(-distanceApart, 0, vec.z + 20); // next pos math
-        }), true);
-        //TODO this isn't using the checkpoints
+        RayCarControl car = this.cb.addCar(theirCarData, world.start(1), false);
+        car.attachAI(new RaceAI(car, this), true);
 
         // initCamera
         camera = new CarCamera(app.getCamera(), rayCar);
@@ -80,11 +75,8 @@ public class DuelRace extends BaseAppState {
 
 
         //Checkpoint detection and stuff
-        progress = new CheckpointProgress(new Vector3f[] {
-            new Vector3f(0, 0, 200),
-            new Vector3f(0, 0, 300)
-        }, cb.getAll(), rayCar);
-        progress.attachVisualModel(false);
+        progress = new CheckpointProgress(checkpoints, cb.getAll(), rayCar);
+        // progress.attachVisualModel(false);
         getStateManager().attach(progress);
     }
 
@@ -152,5 +144,19 @@ public class DuelRace extends BaseAppState {
         
         cb.setEnabled(false);
         flow.nextState(this, d);
+    }
+
+    @Override
+    public Vector3f getNextCheckpoint(RayCarControl car) {
+        return progress.getNextCheckpoint(car);
+    }
+
+    public Transform resetPosition(RayCarControl car) {
+        Vector3f pos = progress.getLastCheckpoint(car);
+        Vector3f next = progress.getNextCheckpoint(car);
+
+        Quaternion q = new Quaternion();
+        q.lookAt(next.subtract(pos), Vector3f.UNIT_Y);
+        return new Transform(pos, q);
     }
 }
