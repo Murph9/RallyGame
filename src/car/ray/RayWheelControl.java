@@ -116,7 +116,10 @@ public class RayWheelControl {
         this.skidLine.setQueueBucket(Bucket.Transparent);
 		
 		app.getRootNode().attachChild(this.skidLine);
-		
+        
+        //trigger one view update so the cars wheels are in 'position' on load incase the car isn't loaded enabled
+        viewUpdate(1/60f, new Vector3f(), 0);
+
 		//Smoke can be found from source control
 	}
 

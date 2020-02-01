@@ -121,7 +121,7 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
         raceTimer += Math.min(tpf, 1/30f); //limit time step being large due to loading
         menu.setState(raceTimer);
 
-        RayCarControl maybeWinner = progress.isThereAWinner(0, 1);
+        RayCarControl maybeWinner = progress.isThereAWinner(0, 2);
         if (maybeWinner != null) {
             this.winner = maybeWinner;
             this.cb.setEnabled(false);
