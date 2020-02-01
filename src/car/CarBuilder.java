@@ -15,6 +15,7 @@ import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.collision.shapes.HullCollisionShape;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
+import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
@@ -85,6 +86,10 @@ public class CarBuilder extends BaseAppState {
 	/** Creates the vehicle and loads it into the world. */
 	public RayCarControl addCar(Car car, Vector3f start, Matrix3f rot, boolean aPlayer) {
 		return addCar(loadData(car), start, rot, aPlayer);
+	}
+	/** Creates the vehicle and loads it into the world. */
+	public RayCarControl addCar(CarDataConst carData, Transform trans, boolean aPlayer) {
+		return addCar(carData, trans.getTranslation(), trans.getRotation().toRotationMatrix(), aPlayer);
 	}
 	/** Creates the vehicle and loads it into the world. */
 	public RayCarControl addCar(CarDataConst carData, Vector3f start, Matrix3f rot, boolean aPlayer) {
