@@ -56,6 +56,8 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
 
     @Override
     protected void initialize(Application app) {
+        this.cb = getState(CarBuilder.class);
+
         initMenu((SimpleApplication) app);
         initBackground((SimpleApplication) app);
     }
@@ -75,7 +77,6 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
             });
 
             mainWindow.addChild(new Label("Wins: " + duelData.wins));
-            CarBuilder cb = getState(CarBuilder.class);
             CarDataConst data = cb.loadData(duelData.yourCar, duelData.yourAdjuster);
             mainWindow.addChild(new CarStatsUI(app.getAssetManager(), data), 2, 0);
         } else {
@@ -113,7 +114,6 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
         getStateManager().attach(world);
 
         // build player
-        this.cb = getState(CarBuilder.class);
         RayCarControl car = cb.addCar(this.carType, world.getStartPos(), world.getStartRot(), true);
 
         // attach basic ai, for the view

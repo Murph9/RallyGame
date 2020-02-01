@@ -148,9 +148,9 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
         
         super.prePhysicsTick(space, tpf);
 
-		for (int i = 0; i < this.wheelControls.length; i++) {
-			this.wheelControls[i].viewUpdate(tpf, rbc.getLinearVelocity(), carData.susByWheelNum(i).min_travel);
-		}
+        if (rbEnabled())
+            for (int i = 0; i < this.wheelControls.length; i++)
+                this.wheelControls[i].viewUpdate(tpf, rbc.getLinearVelocity(), carData.susByWheelNum(i).min_travel);
 
         debug.update(app);
 	}

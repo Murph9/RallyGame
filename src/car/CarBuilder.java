@@ -144,6 +144,7 @@ public class CarBuilder extends BaseAppState {
 		}
 		
 		cars.add(carControl);
+		carControl.setEnabled(this.isEnabled()); //copy carbuilder enabled-ness
 		return carControl;
 	}
 
