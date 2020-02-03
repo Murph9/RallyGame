@@ -30,7 +30,7 @@ import effects.LoadModelWrapper;
 import helper.Duo;
 import service.GhostObjectCollisionListener;
 
-public class CheckpointProgress extends BaseAppState implements GhostObjectCollisionListener.IGhostListener {
+public class CheckpointProgress extends BaseAppState implements GhostObjectCollisionListener.IListener {
 
     private final Vector3f[] checkpointPositions;
     private final RayCarControl player;

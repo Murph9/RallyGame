@@ -9,13 +9,13 @@ import com.jme3.scene.Spatial;
 
 public class GhostObjectCollisionListener implements PhysicsCollisionListener {
 
-    public interface IGhostListener {
+    public interface IListener {
         void ghostCollision(GhostControl control, RigidBodyControl control2);
     }
 
-    private final IGhostListener listener;
+    private final IListener listener;
 
-    public GhostObjectCollisionListener(IGhostListener listener) {
+    public GhostObjectCollisionListener(IListener listener) {
         this.listener = listener;
     }
 
