@@ -9,7 +9,7 @@ import car.data.WheelDataConst;
 public class RayWheel {
 
 	protected final int num;
-	protected final WheelDataConst data;
+    protected final WheelDataConst data;
 	
 	public Vector3f rayStartWorld;
 	public Vector3f rayDirWorld;
@@ -24,8 +24,11 @@ public class RayWheel {
 	
 	public float steering;
 	public float radSec;
-	public float skidFraction; //was 'skid'
-	public Vector3f gripDir;
+    
+    public float skidFraction; //was 'skid'
+    public Vector3f gripDir;
+    public float slipAngle;
+    public float slipRatio;
 	
 	public RayWheel(int num, WheelDataConst data, Vector3f offset) {
 		this.num = num;
@@ -35,5 +38,7 @@ public class RayWheel {
         this.hitNormalInWorld = new Vector3f();
 	}
 	
-	//[softly] should this class do anything
+    //[softly] should this class do anything
+    
+    //TODO consider an inteface to give to CarUITelemetry
 }

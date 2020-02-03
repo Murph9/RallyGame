@@ -85,11 +85,11 @@ public class RayCar implements PhysicsTickListener {
 		applySuspension(space, tpf);
 		
 		//TODO apply the midpoint formula or any kind of actual physics stepped simulation method
-		//https://en.wikipedia.org/wiki/Midpoint_method
+        //https://en.wikipedia.org/wiki/Midpoint_method
 		if (tractionEnabled)
-			applyTraction(space, tpf);
-		
-		applyDrag(space, tpf);
+            applyTraction(space, tpf);
+        
+        applyDrag(space, tpf);
 	}
 	
 	private void applySuspension(PhysicsSpace space, float tpf) {
@@ -200,8 +200,10 @@ public class RayCar implements PhysicsTickListener {
 		final float slip_div = velocity.length();
 		final float steeringFake = steeringCur;
 		doForEachWheel((w_id) -> {
+            float lastSlipAngle = wheels[w_id].slipAngle;
+            float lastSlipRatio = wheels[w_id].slipRatio;
 			Vector3f wheel_force = new Vector3f();
-			
+            
 			// Linear Accelerations: = player.car.length * player.car.yawrate (in rad/sec)
 			float angVel = 0;
 			if (!Float.isNaN(w_angVel.y))
@@ -212,25 +214,40 @@ public class RayCar implements PhysicsTickListener {
 				objectRelVelocity = w_angle.inverse().mult(wheels[w_id].collisionObject.getLinearVelocity());
 
 			float slipr = wheels[w_id].radSec * carData.wheelData[w_id].radius - (velocity.z - objectRelVelocity.z);
-			float slipratio = slipr/slip_div;
-			
-			if (handbrakeCur && !isFrontWheel(w_id)) //rearwheels only
-				wheels[w_id].radSec = 0;
-			
-			float slipangle = 0;
-			if (isFrontWheel(w_id)) {
-				float slipa_front = (velocity.x - objectRelVelocity.x) + carData.wheelOffset[w_id].z * angVel;
-				slipangle = FastMath.atan2(slipa_front, slip_div) - steeringFake;
-			} else { //so rear
-				float slipa_rear = (velocity.x - objectRelVelocity.x) + carData.wheelOffset[w_id].z * angVel;
-				driftAngle = slipa_rear; //set drift angle as the rear amount
-				slipangle = FastMath.atan2(slipa_rear, slip_div); //slip_div is questionable here
-			}
-			
-			//merging the forces into a traction circle
-			//normalise based on their independant max values 
-			float ratiofract = slipratio/carData.wheelData[w_id].maxLong;
-			float anglefract = slipangle/carData.wheelData[w_id].maxLat;
+			wheels[w_id].slipRatio = slipr / slip_div;
+
+            if (handbrakeCur && !isFrontWheel(w_id)) // rearwheels only
+                wheels[w_id].radSec = 0;
+
+            wheels[w_id].slipAngle = 0;
+            if (isFrontWheel(w_id)) {
+                float slipa_front = (velocity.x - objectRelVelocity.x) + carData.wheelOffset[w_id].z * angVel;
+                wheels[w_id].slipAngle = FastMath.atan2(slipa_front, slip_div) - steeringFake;
+            } else { // so rear
+                float slipa_rear = (velocity.x - objectRelVelocity.x) + carData.wheelOffset[w_id].z * angVel;
+                driftAngle = slipa_rear; // set drift angle as the rear amount
+                wheels[w_id].slipAngle = FastMath.atan2(slipa_rear, slip_div); // slip_div is questionable here
+            }
+
+			// Mild hack: prevent 'losing' traction through a large integration step, by detecting jumps past the max
+			// TO THINK ABOUT: If we just set the traction curve to be 'good' does this affect anything else?
+            if (lastSlipAngle < carData.wheelData[w_id].maxLat && wheels[w_id].slipAngle > carData.wheelData[w_id].maxLat) {
+                wheels[w_id].slipAngle = carData.wheelData[w_id].maxLat;
+            }
+            if (lastSlipAngle > carData.wheelData[w_id].maxLat && wheels[w_id].slipAngle < carData.wheelData[w_id].maxLat) {
+                wheels[w_id].slipAngle = carData.wheelData[w_id].maxLat;
+            }
+            if (lastSlipRatio < carData.wheelData[w_id].maxLong && wheels[w_id].slipRatio > carData.wheelData[w_id].maxLong) {
+                wheels[w_id].slipRatio = carData.wheelData[w_id].maxLong;
+            }
+            if (lastSlipRatio > carData.wheelData[w_id].maxLong && wheels[w_id].slipRatio < carData.wheelData[w_id].maxLong) {
+                wheels[w_id].slipRatio = carData.wheelData[w_id].maxLong;
+            }
+
+            // merging the forces into a traction circle
+            // normalise based on their independant max values
+            float ratiofract = wheels[w_id].slipRatio / carData.wheelData[w_id].maxLong;
+			float anglefract = wheels[w_id].slipAngle / carData.wheelData[w_id].maxLat;
 			float p = FastMath.sqrt(ratiofract*ratiofract + anglefract*anglefract);
 			if (p == 0)
 				p = 0.001f;
