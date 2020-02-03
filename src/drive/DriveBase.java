@@ -14,6 +14,7 @@ import com.jme3.math.Transform;
 import car.*;
 import car.data.Car;
 import car.ray.RayCarControl;
+import effects.ParticleAtmosphere;
 import game.IDriveDone;
 import helper.Log;
 
@@ -87,6 +88,8 @@ public class DriveBase extends BaseAppState {
         getState(BulletAppState.class).setEnabled(enabled);
         this.camera.setEnabled(enabled);
         this.cb.setEnabled(enabled);
+
+        getState(ParticleAtmosphere.class).setEnabled(enabled);
     }
 
     public void next() {

@@ -17,11 +17,23 @@ public class ParticleAtmosphere extends BaseAppState {
 	private final static int PARTICLE_MULT = 50;
 	private final static int PARTICLE_MAX = 5000;
 
+    private final float velocityFactor;
+    private final int particleMaximum;
+    private final float particleMult;
+
 	private Vector3f prevPos;
 	private Camera cam;
 	private ParticleEmitter particles;
 	
-	public ParticleAtmosphere() {}
+    public ParticleAtmosphere() {
+        this(FORWARD_FACTOR, PARTICLE_MAX, PARTICLE_MULT);
+    }
+    
+    public ParticleAtmosphere(float velocityFactor, int particleMaximum, float particleMult) {
+        this.velocityFactor = velocityFactor;
+        this.particleMaximum = particleMaximum;
+        this.particleMult = particleMult;
+    }
 	
 	@Override
 	public void initialize(Application app) {
@@ -33,7 +45,7 @@ public class ParticleAtmosphere extends BaseAppState {
 		particles.setLowLife(7);
 		particles.setHighLife(2);
 		
-		particles.setStartSize(0.015f);
+		particles.setStartSize(0.02f);
 		particles.setEndSize(0.01f);
 		
 		//spread out the initial spawn positions
@@ -47,21 +59,19 @@ public class ParticleAtmosphere extends BaseAppState {
 		mat.setTexture("Texture", app.getAssetManager().loadTexture("assets/image/solid-white.png"));
 		particles.setMaterial(mat);
 		
-		particles.setNumParticles(PARTICLE_MAX);
+		particles.setNumParticles(particleMaximum);
 
 		((SimpleApplication)app).getRootNode().attachChild(particles);
 	}
 	
 	@Override
 	public void cleanup(Application app) {
-		particles.removeFromParent();
+        particles.removeFromParent();
+        particles = null;
 	}
 	
 	@Override
 	public void update(float tpf) {
-		if (!this.isEnabled())
-			return;
-
 		if (prevPos == null)
 			prevPos = new Vector3f();
 		
@@ -70,17 +80,19 @@ public class ParticleAtmosphere extends BaseAppState {
         Vector3f direction = location.subtract(prevPos);
         // get vel of node
 		float speed = direction.length() / tpf;
-		particles.setParticlesPerSec(PARTICLE_MULT*speed);
+		particles.setParticlesPerSec(particleMult * speed);
         
 		//move the particle emitter based on the velocity of the camera
-        particles.setLocalTranslation(location.add(direction.normalize().mult(speed*FORWARD_FACTOR)));
+        particles.setLocalTranslation(location.add(direction.normalize().mult(speed * velocityFactor)));
         prevPos = location;
 	}
 
 	@Override
 	protected void onEnable() {
+        particles.setEnabled(true);
 	}
 	@Override
 	protected void onDisable() {
+        particles.setEnabled(false);
 	}
 }

@@ -15,6 +15,7 @@ import car.ray.RayCarControl;
 import drive.DriveBase;
 import drive.ICheckpointDrive;
 import drive.PauseState;
+import effects.ParticleAtmosphere;
 import game.IDriveDone;
 import helper.H;
 import helper.Log;
@@ -223,6 +224,8 @@ public class DriveRace extends DriveBase implements PauseState.ICallback, ICheck
     @Override
     protected void onEnable() {
         getState(BulletAppState.class).setEnabled(true);
+        getState(ParticleAtmosphere.class).setEnabled(true);
+
         this.camera.setEnabled(true);
         this.cb.setEnabled(true);
     }
@@ -230,6 +233,8 @@ public class DriveRace extends DriveBase implements PauseState.ICallback, ICheck
     @Override
     protected void onDisable() {
         getState(BulletAppState.class).setEnabled(false);
+        getState(ParticleAtmosphere.class).setEnabled(false);
+
         this.camera.setEnabled(false);
         this.cb.setEnabled(false);
     }
