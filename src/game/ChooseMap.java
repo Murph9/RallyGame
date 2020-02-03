@@ -19,11 +19,8 @@ import world.wp.WP.DynamicType;
 
 public class ChooseMap extends BaseAppState {
 
-	private static WorldType worldType = WorldType.NONE;
 	private static World world = null;
-	
 	private final IChooseStuff choose;
-
 	private BasicCamera camera;
 
 	public ChooseMap(IChooseStuff choose) {
@@ -80,8 +77,8 @@ public class ChooseMap extends BaseAppState {
 		button.addClickCommands(new Command<Button>() {
             @Override
             public void execute( Button source ) {
-            	if (worldType == WorldType.NONE)
-            		return; //do not select it
+            	if (world == null)
+            		return; //do not select nothing
 				((SimpleApplication)app).getGuiNode().detachChild(myWindow);
             	chooseMap();
             }
@@ -123,9 +120,9 @@ public class ChooseMap extends BaseAppState {
 	//UI stuff
 	public void chooseMap() {
 		if (world == null) { Log.e("no return value for ChooseMap()"); return; }
-		choose.chooseMap(getWorld());
+		choose.chooseMap(getNewWorld());
 	}
-	private World getWorld() {
+	private World getNewWorld() {
 		World newWorld = null;
 		try {
             newWorld = world.copy();

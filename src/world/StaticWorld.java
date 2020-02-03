@@ -25,7 +25,7 @@ public enum StaticWorld {
 	//other peoples:
 	track2("track2.blend", 1, null, H.FromAngleAxis(FastMath.PI, Vector3f.UNIT_Y)),
 	carpark("carpark.blend", 1, null, null),
-	unbenannt("unbenannt_track.blend", 1, null, null), //TODO needs fixing
+	unbenannt("unbenannt_track.blend", 1, null, null),
 	
 	block_fort("block_fort.blend", 10, new Vector3f(-20,0,-12), null),
 	rainbow_road("rainbow_road.blend", 1, null, null),
