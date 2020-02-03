@@ -19,7 +19,7 @@ public class StaticWorldBuilder extends World {
     private Spatial model;
 	
 	public StaticWorldBuilder(StaticWorld world) {
-		super("staticworld-" + world.name);
+		super("staticworld type: " + world.name);
 		this.world = world;
 	}
 	

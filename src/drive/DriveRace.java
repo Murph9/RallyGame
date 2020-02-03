@@ -1,23 +1,18 @@
-package drive.race;
+package drive;
 
 import java.util.List;
 
 import com.jme3.app.Application;
-import com.jme3.app.SimpleApplication;
-import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Node;
 
-import car.CarBuilder;
-import car.CarCamera;
-import car.CarUI;
 import car.ai.RaceAI;
 import car.data.Car;
 import car.ray.RayCarControl;
+import drive.DriveBase;
 import drive.ICheckpointDrive;
 import drive.PauseState;
 import game.IDriveDone;
@@ -29,46 +24,28 @@ import service.checkpoint.CheckpointProgressUI;
 import world.StaticWorld;
 import world.StaticWorldBuilder;
 
-//TODO DriveRace can't be converted to DriveBase as the world must be initialised before this
-public class DriveRace extends BaseAppState implements PauseState.ICallback, ICheckpointDrive {
+public class DriveRace extends DriveBase implements PauseState.ICallback, ICheckpointDrive {
 
-    public CheckpointProgressUI menu;
-    
-    //things that should be in a world class
-    private Node rootNode = new Node("root");
-    
-    private final Car playerCarType;
-    private final StaticWorldBuilder world;
-    private final IDriveDone done;
-    
     // ai things
     private final int themCount = 15;
 
-    private CarBuilder cb;
+    private CheckpointProgressUI progressMenu;
     private CheckpointProgress progress;
-    private PauseState pauseState;
 
-    //gui and camera stuff
-    private CarCamera camera;
-    private CarUI uiNode;
-    
     //racing things
     private Vector3f[] worldStarts;
     private Quaternion worldRot;
     
     public DriveRace(StaticWorldBuilder world, IDriveDone done) {
-        super();
-        this.playerCarType = Car.Runner;
-        this.world = world;
-        this.done = done;
-
-        if (this.world.getTypeForDriveRace() != StaticWorld.duct2)
+        super(done, Car.Runner, world);
+        
+        if (world.getTypeForDriveRace() != StaticWorld.duct2)
             throw new IllegalArgumentException();
     }
     
     @Override
     public void initialize(Application app) {
-        ((SimpleApplication) app).getRootNode().attachChild(rootNode);
+        super.initialize(app);
         
         nextState();
         
@@ -109,37 +86,20 @@ public class DriveRace extends BaseAppState implements PauseState.ICallback, ICh
 
         this.worldStarts = startPositions.toArray(new Vector3f[0]);
 
-        //buildCars
-        this.cb = getState(CarBuilder.class);
-        RayCarControl rayCar = cb.addCar(playerCarType, worldStarts[0], worldRot, true);
-
-        uiNode = new CarUI(rayCar);
-        getStateManager().attach(uiNode);
-        
-        //load ai
+        //buildCars and load ai
         for (int i = 0; i < this.themCount; i++) {
             RayCarControl c = this.cb.addCar(H.randFromArray(Car.values()), worldStarts[i+1], worldRot, false);
             RaceAI rAi = new RaceAI(c, this);
             c.attachAI(rAi, true);
         }
         
-        // init camera
-        camera = new CarCamera(app.getCamera(), rayCar);
-        getStateManager().attach(camera);
-        app.getInputManager().addRawInputListener(camera);
-        
-        getState(BulletAppState.class).setEnabled(true);
-
-        pauseState = new PauseState(this);
-        getStateManager().attach(pauseState);
-
-        progress = new CheckpointProgress(checkpoints, cb.getAll(), rayCar);
+        progress = new CheckpointProgress(checkpoints, cb.getAll(), cb.get(0));
         progress.setCheckpointColour(new ColorRGBA(0, 1, 0, 0.4f));
         progress.setCheckpointSize(2);
         getStateManager().attach(progress);
 
-        menu = new CheckpointProgressUI(progress);
-        getStateManager().attach(menu);
+        progressMenu = new CheckpointProgressUI(progress);
+        getStateManager().attach(progressMenu);
         
         //actually init
         nextState();
@@ -170,7 +130,7 @@ public class DriveRace extends BaseAppState implements PauseState.ICallback, ICh
             state = RaceState.Win;
             break;
         case Win:
-            done.done(this);
+            next();
             break;
         default:
             throw new IllegalStateException();
@@ -183,8 +143,10 @@ public class DriveRace extends BaseAppState implements PauseState.ICallback, ICh
     public void update(float tpf) {
         if (!isEnabled())
             return;
+        
+        super.update(tpf);
 
-        menu.setBasicText("State:" + state.name() + "\nStateTimeout:" + this.stateTimeout);
+        progressMenu.setBasicText("State:" + state.name() + "\nStateTimeout:" + this.stateTimeout);
         
         if (stateChanged) {
             stateChanged = false;
@@ -225,6 +187,7 @@ public class DriveRace extends BaseAppState implements PauseState.ICallback, ICh
         }
     }
 
+    @Override
     public Transform resetPosition(RayCarControl car) {
         Vector3f pos = progress.getLastCheckpoint(car);
         Vector3f next = progress.getNextCheckpoint(car);
@@ -249,24 +212,12 @@ public class DriveRace extends BaseAppState implements PauseState.ICallback, ICh
         Log.p("cleaning driverace class");
         progress.cleanup(app);
         
-        getStateManager().detach(menu);
-        menu = null;
+        getStateManager().detach(progressMenu);
+        progressMenu = null;
         getStateManager().detach(progress);
         progress = null;
-        getStateManager().detach(pauseState);
-        pauseState = null;
-        
-        getStateManager().detach(uiNode);
-        uiNode = null;
-                
-        getStateManager().detach(camera);
-        app.getInputManager().removeRawInputListener(camera);
-        camera = null;
-        
-        ((SimpleApplication)app).getRootNode().detachChild(rootNode);
 
-        cb.removeAll();
-        cb = null;
+        super.cleanup(app);
     }
     
     @Override
@@ -294,6 +245,6 @@ public class DriveRace extends BaseAppState implements PauseState.ICallback, ICh
 
     @Override
     public void quit() {
-        System.exit(-111);
+        next();
     }
 }

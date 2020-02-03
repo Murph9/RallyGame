@@ -28,7 +28,7 @@ public class DriveBase extends BaseAppState {
     protected CarBuilder cb;
 
     // gui and camera stuff
-    private CarCamera camera;
+    protected CarCamera camera;
     private CarUI uiNode;
 
     public DriveBase(IDriveDone done, Car car, World world) {
@@ -143,7 +143,7 @@ public class DriveBase extends BaseAppState {
         sm.attach(uiNode);
     }
 
-    public final Transform resetPosition(RayCarControl car) {
+    public Transform resetPosition(RayCarControl car) {
         return new Transform(world.getStartPos(), world.getStartRot());
     }
 }

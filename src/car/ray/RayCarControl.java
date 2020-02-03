@@ -25,7 +25,6 @@ import car.MyKeyListener;
 import car.ai.ICarAI;
 import car.data.CarDataConst;
 import drive.DriveBase;
-import drive.race.DriveRace;
 import duel.DuelRace;
 import helper.Log;
 import service.ray.PhysicsRaycaster;
@@ -398,10 +397,6 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
         if (drive != null) {
             transform = drive.resetPosition(car);
             drive.resetWorld();
-        } else if (stateManager.getState(DriveRace.class) != null) {
-            // NOTE: just happens to be the same as the abstract class method
-            DriveRace race = stateManager.getState(DriveRace.class);
-            transform = race.resetPosition(car);
         } else if (stateManager.getState(DuelRace.class) != null) {
             DuelRace race = stateManager.getState(DuelRace.class);
             transform = race.resetPosition(car);
