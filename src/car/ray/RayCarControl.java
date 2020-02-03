@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
+import com.jme3.app.state.AppStateManager;
 import com.jme3.audio.AudioNode;
 import com.jme3.audio.AudioSource.Status;
 import com.jme3.bullet.BulletAppState;
@@ -14,7 +15,6 @@ import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.input.InputManager;
 import com.jme3.input.RawInputListener;
 import com.jme3.math.FastMath;
-import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
@@ -343,7 +343,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
         rbc.setPhysicsLocation(rbc.getPhysicsLocation().add(new Vector3f(0, 1, 0)));
     }
     public void reset() {
-        rbc.setPhysicsRotation(new Matrix3f());
+        rbc.setPhysicsRotation(new Quaternion());
         rbc.setLinearVelocity(new Vector3f());
         rbc.setAngularVelocity(new Vector3f());
 
@@ -353,21 +353,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
             w.inContact = false; // stop any forces for at least one physics frame
         }
 
-        DriveBase drive = this.app.getStateManager().getState(DriveBase.class);
-        Transform transform = null;
-        if (drive != null) {
-            transform = drive.resetPosition(this);
-            drive.resetWorld();
-        } else if (this.app.getStateManager().getState(DriveRace.class) != null) {
-            // TODO DriveRace hack, just happens to be the same as the abstract class method
-            DriveRace race = this.app.getStateManager().getState(DriveRace.class);
-            transform = race.resetPosition(this);
-        } else if (this.app.getStateManager().getState(DuelRace.class) != null) {
-            //TODO DuelRace hack, please fix
-            DuelRace race = this.app.getStateManager().getState(DuelRace.class);
-            transform = race.resetPosition(this);
-        }
-
+        Transform transform = getResetPosition(this.app.getStateManager(), this);
         rbc.setPhysicsLocation(transform.getTranslation());
         rbc.setPhysicsRotation(transform.getRotation());
     }
@@ -395,4 +381,32 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
 	public boolean ifHandbrake() { return this.handbrakeCurrent; }
     public float driftAngle() { return this.driftAngle; }
     // #endregion
+    
+
+    
+    private static Transform getResetPosition(AppStateManager stateManager, RayCarControl car) {
+        //TODO this checks out of scope
+        //Attempts:
+        //- A shared interface doesn't work because we can't fetch it from the statemanger
+        //  this is because it needs to extend AppState
+        //- A much more simple DriveBase would work, but its not great design
+        //- Any Drive class might need to register a 'reset callback class' which we just assume is global scope
+        //  Although whats inthe class could get very large, and we run into the App.CUR problem again
+
+        DriveBase drive = stateManager.getState(DriveBase.class);
+        Transform transform = null;
+        if (drive != null) {
+            transform = drive.resetPosition(car);
+            drive.resetWorld();
+        } else if (stateManager.getState(DriveRace.class) != null) {
+            // NOTE: just happens to be the same as the abstract class method
+            DriveRace race = stateManager.getState(DriveRace.class);
+            transform = race.resetPosition(car);
+        } else if (stateManager.getState(DuelRace.class) != null) {
+            DuelRace race = stateManager.getState(DuelRace.class);
+            transform = race.resetPosition(car);
+        }
+
+        return transform;
+    }
 }

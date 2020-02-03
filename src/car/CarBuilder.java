@@ -13,7 +13,6 @@ import com.jme3.audio.AudioNode;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.collision.shapes.HullCollisionShape;
-import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
@@ -84,15 +83,15 @@ public class CarBuilder extends BaseAppState {
 	}
 
 	/** Creates the vehicle and loads it into the world. */
-	public RayCarControl addCar(Car car, Vector3f start, Matrix3f rot, boolean aPlayer) {
+	public RayCarControl addCar(Car car, Vector3f start, Quaternion rot, boolean aPlayer) {
 		return addCar(loadData(car), start, rot, aPlayer);
 	}
 	/** Creates the vehicle and loads it into the world. */
 	public RayCarControl addCar(CarDataConst carData, Transform trans, boolean aPlayer) {
-		return addCar(carData, trans.getTranslation(), trans.getRotation().toRotationMatrix(), aPlayer);
+		return addCar(carData, trans.getTranslation(), trans.getRotation(), aPlayer);
 	}
 	/** Creates the vehicle and loads it into the world. */
-	public RayCarControl addCar(CarDataConst carData, Vector3f start, Matrix3f rot, boolean aPlayer) {
+	public RayCarControl addCar(CarDataConst carData, Vector3f start, Quaternion rot, boolean aPlayer) {
 		try {
 			if (!isInitialized())
 				throw new Exception(getClass().getName() + " hasn't been initialised");
@@ -133,7 +132,7 @@ public class CarBuilder extends BaseAppState {
 
 		rootNode.attachChild(carNode);
         
-        carControl.setPhysicsProperties(start, null, new Quaternion().fromRotationMatrix(rot), null);
+        carControl.setPhysicsProperties(start, null, rot, null);
         // a fake angular rotational reducer, very important for driving feel
         carControl.getPhysicsObject().setAngularDamping(angularDampening);
 		

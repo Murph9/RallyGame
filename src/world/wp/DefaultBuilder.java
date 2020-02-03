@@ -15,7 +15,6 @@ import com.jme3.material.Material;
 import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
-import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
@@ -214,8 +213,8 @@ public abstract class DefaultBuilder extends World {
 	}
 	
 	@Override
-	public Matrix3f getStartRot() {
-		Matrix3f rot = new Matrix3f();
+	public Quaternion getStartRot() {
+		Quaternion rot = new Quaternion();
 		rot.fromAngleAxis(FastMath.DEG_TO_RAD*90, new Vector3f(0,1,0));
 		return rot;
 	}

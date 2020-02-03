@@ -6,7 +6,6 @@ import java.util.List;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.math.FastMath;
-import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.system.AppSettings;
@@ -115,7 +114,7 @@ public class DriveMainRoadGetaway extends DriveBase {
 		readyForHunter = distanceFromStart > HUNTER_BUFFER;
 		if (!readyForHunter) {
             // the chase car must stay still, for now
-            hunter.setPhysicsProperties(new Vector3f(HUNTER_BUFFER-10, 0.3f, 0), null, new Quaternion().fromRotationMatrix(this.world.getStartRot()), null);
+            hunter.setPhysicsProperties(new Vector3f(HUNTER_BUFFER-10, 0.3f, 0), null, this.world.getStartRot(), null);
 			return;
 		}
 
@@ -132,9 +131,9 @@ public class DriveMainRoadGetaway extends DriveBase {
 			//and then subtract a bit so that it doesn't fall off
 			Vector3f spawnPos = ((DefaultBuilder) this.world).getNextPieceClosestTo(new Vector3f(100000, 0, 0))
 					.add(-20, 0, z); //offset
-			Matrix3f spawnDir = spawnPlayerDirection
+			Quaternion spawnDir = spawnPlayerDirection
 				? world.getStartRot()
-				: new Quaternion().fromAngleAxis(FastMath.PI, Vector3f.UNIT_Y).toRotationMatrix().mult(world.getStartRot());
+				: new Quaternion().fromAngleAxis(FastMath.PI, Vector3f.UNIT_Y).mult(world.getStartRot());
 
 			RayCarControl c = this.cb.addCar(H.randFromArray(this.trafficTypes), spawnPos, spawnDir, false);
 

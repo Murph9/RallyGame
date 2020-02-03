@@ -9,7 +9,6 @@ import com.jme3.app.Application;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.BulletAppState;
-import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 
 import car.*;
@@ -145,6 +144,6 @@ public class DriveBase extends BaseAppState {
     }
 
     public final Transform resetPosition(RayCarControl car) {
-        return new Transform(world.getStartPos(), new Quaternion().fromRotationMatrix(world.getStartRot()));
+        return new Transform(world.getStartPos(), world.getStartRot());
     }
 }

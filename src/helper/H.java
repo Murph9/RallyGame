@@ -12,7 +12,7 @@ import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
-import com.jme3.math.Matrix3f;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
@@ -394,8 +394,8 @@ public class H {
 		return new Vector3f(v.x, 0, v.y);
 	}
 	
-	public static Matrix3f FromAngleAxis(float angle, Vector3f axis) {
-		Matrix3f m = new Matrix3f();
+	public static Quaternion FromAngleAxis(float angle, Vector3f axis) {
+		Quaternion m = new Quaternion();
 		m.fromAngleAxis(angle, axis);
 		return m;
 	}

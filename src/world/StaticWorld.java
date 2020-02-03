@@ -1,7 +1,7 @@
 package world;
 
 import com.jme3.math.FastMath;
-import com.jme3.math.Matrix3f;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
 import helper.H;
@@ -49,9 +49,9 @@ public enum StaticWorld {
 	public String name;
 	public float scale;
 	public Vector3f start;
-	public Matrix3f rot;
+	public Quaternion rot;
 
-	StaticWorld(String a, float size, Vector3f pos, Matrix3f rot) {
+	StaticWorld(String a, float size, Vector3f pos, Quaternion rot) {
 		this.name = dir + a;
         this.scale = size;
         this.start = pos;
@@ -59,6 +59,6 @@ public enum StaticWorld {
             this.start = new Vector3f();
 		this.rot = rot;
 		if (this.rot == null)
-			this.rot = new Matrix3f(Matrix3f.IDENTITY);
+			this.rot = Quaternion.IDENTITY.clone();
 	}
 }

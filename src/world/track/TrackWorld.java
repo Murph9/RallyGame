@@ -17,7 +17,6 @@ import com.jme3.material.Material;
 import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
-import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
@@ -327,7 +326,7 @@ public class TrackWorld extends World {
 		return unnormalizeHeightIn(segment.getControlPoints()[0]).add(0, 2, 0);
 	}
 	@Override //player rotation
-	public Matrix3f getStartRot() { return new Matrix3f(Matrix3f.IDENTITY); }
+	public Quaternion getStartRot() { return new Quaternion(); }
 	
 	@Override
 	public void cleanup(Application app) {

@@ -7,7 +7,6 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
@@ -55,7 +54,7 @@ public class DriveRace extends BaseAppState implements PauseState.ICallback, ICh
     
     //racing things
     private Vector3f[] worldStarts;
-    private Matrix3f worldRot;
+    private Quaternion worldRot;
     
     public DriveRace(StaticWorldBuilder world, IDriveDone done) {
         super();
@@ -101,9 +100,8 @@ public class DriveRace extends BaseAppState implements PauseState.ICallback, ICh
         
 
         // generate starting positions and rotations
-        Quaternion q = new Quaternion();
-        q.lookAt(checkpoints[0].subtract(checkpoints[checkpoints.length - 1]), Vector3f.UNIT_Y);
-        this.worldRot = q.toRotationMatrix();
+        this.worldRot = new Quaternion();
+        this.worldRot.lookAt(checkpoints[0].subtract(checkpoints[checkpoints.length - 1]), Vector3f.UNIT_Y);
 
         GridPositions gridPositions = new GridPositions(3, 10);
         List<Vector3f> startPositions = gridPositions.generate(themCount+1, checkpoints[0], 
@@ -239,7 +237,7 @@ public class DriveRace extends BaseAppState implements PauseState.ICallback, ICh
     private void setAllCarsToStart() {
         int count = 0;
         for (RayCarControl car: cb.getAll()) {
-            car.setPhysicsProperties(worldStarts[count], new Vector3f(), new Quaternion().fromRotationMatrix(worldRot), new Vector3f());
+            car.setPhysicsProperties(worldStarts[count], new Vector3f(), worldRot, new Vector3f());
             count++;
         }
 

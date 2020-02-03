@@ -3,7 +3,7 @@ package car.ray;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.math.FastMath;
-import com.jme3.math.Matrix3f;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
 import car.data.CarDataConst;
@@ -39,10 +39,10 @@ public class RayCarPowered extends RayCar {
         if (!rbEnabled())
             return;
 
-		Matrix3f w_angle = rbc.getPhysicsRotationMatrix();
+		Quaternion w_angle = rbc.getPhysicsRotation();
 		Vector3f w_velocity = rbc.getLinearVelocity();
 		
-		Vector3f velocity = w_angle.invert().mult(w_velocity);
+		Vector3f velocity = w_angle.inverse().mult(w_velocity);
 		
 		engineTorque = getEngineWheelTorque(tpf);
 		

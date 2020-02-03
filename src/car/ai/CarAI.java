@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
-import com.jme3.math.Matrix3f;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 
@@ -79,8 +79,8 @@ public abstract class CarAI implements ICarAI {
 	 */
 	protected final void driveAt(Vector3f targetPos) {
 		Vector3f curPos = this.car.location;
-		Matrix3f w_angle = car.getPhysicsObject().getPhysicsRotationMatrix();
-		Vector3f velocity = w_angle.invert().mult(car.vel);
+		Quaternion w_angle = car.getPhysicsObject().getPhysicsRotation();
+		Vector3f velocity = w_angle.inverse().mult(car.vel);
 		int reverse = (velocity.z < 0 ? -1 : 1);
 
 		Vector3f w_forward = new Vector3f(car.forward); // this is already in world space

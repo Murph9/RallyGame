@@ -2,7 +2,7 @@ package car.ray;
 
 import com.jme3.app.Application;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.Matrix3f;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
 import game.DebugAppState;
@@ -29,7 +29,7 @@ public class RayCarControlDebug {
     public void update(Application app) {
         
         if (DEBUG) {
-            Matrix3f w_angle = car.rbc.getPhysicsRotationMatrix();
+            Quaternion w_angle = car.rbc.getPhysicsRotation();
             car.doForEachWheel((w_id) -> {
 
                 float susTravel = car.carData.susByWheelNum(w_id).travelTotal();

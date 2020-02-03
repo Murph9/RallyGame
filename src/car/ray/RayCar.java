@@ -8,7 +8,7 @@ import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.FastMath;
-import com.jme3.math.Matrix3f;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
 import car.data.CarDataConst;
@@ -93,7 +93,7 @@ public class RayCar implements PhysicsTickListener {
 	}
 	
 	private void applySuspension(PhysicsSpace space, float tpf) {
-		Matrix3f w_angle = rbc.getPhysicsRotationMatrix();
+		Quaternion w_angle = rbc.getPhysicsRotation();
 		
 		//Do suspension ray cast
 		doForEachWheel((w_id) -> {
@@ -134,7 +134,7 @@ public class RayCar implements PhysicsTickListener {
 			
 			if (wheels[w_id].susRayLength < 0) { // suspension bottomed out, apply max
                 wheels[w_id].susForce = (sus.preload_force + sus.travelTotal()) * sus.stiffness * 1000;
-                Vector3f f = w_angle.invert().mult(wheels[w_id].hitNormalInWorld.mult(wheels[w_id].susForce * tpf));
+                Vector3f f = w_angle.inverse().mult(wheels[w_id].hitNormalInWorld.mult(wheels[w_id].susForce * tpf));
                 applyWheelForce(f, wheels[w_id]);
                 return;
             }
@@ -182,13 +182,13 @@ public class RayCar implements PhysicsTickListener {
 	}
 	
 	private void applyTraction(PhysicsSpace space, float tpf) {
-		Matrix3f w_angle = rbc.getPhysicsRotationMatrix();
+		Quaternion w_angle = rbc.getPhysicsRotation();
 		Vector3f w_velocity = rbc.getLinearVelocity();
 		Vector3f w_angVel = rbc.getAngularVelocity();
 		
 		planarGForce.set(Vector3f.ZERO); //reset
 		
-		Vector3f velocity = w_angle.invert().mult(w_velocity);
+		Vector3f velocity = w_angle.inverse().mult(w_velocity);
 		if (velocity.z == 0) //NaN on divide avoidance strategy
 			velocity.z += 0.0001f;
 		
@@ -209,7 +209,7 @@ public class RayCar implements PhysicsTickListener {
 			
 			Vector3f objectRelVelocity = new Vector3f();
 			if (wheels[w_id].collisionObject != null) //convert contact object to local co-ords
-				objectRelVelocity = w_angle.invert().mult(wheels[w_id].collisionObject.getLinearVelocity());
+				objectRelVelocity = w_angle.inverse().mult(wheels[w_id].collisionObject.getLinearVelocity());
 
 			float slipr = wheels[w_id].radSec * carData.wheelData[w_id].radius - (velocity.z - objectRelVelocity.z);
 			float slipratio = slipr/slip_div;
@@ -267,10 +267,10 @@ public class RayCar implements PhysicsTickListener {
 	private void applyDrag(PhysicsSpace space, float tpf) {
 		//rolling resistance (https://en.wikipedia.org/wiki/Rolling_resistance)
 		Vector3f w_pos = rbc.getPhysicsLocation();
-		Matrix3f w_angle = rbc.getPhysicsRotationMatrix();
+		Quaternion w_angle = rbc.getPhysicsRotation();
 		Vector3f w_velocity = rbc.getLinearVelocity();
 		
-		Vector3f velocity = w_angle.invert().mult(w_velocity);
+		Vector3f velocity = w_angle.inverse().mult(w_velocity);
 		rollingResistance = 0;
 		doForEachWheel((w_id) -> {
 			if (!wheels[w_id].inContact)
@@ -330,7 +330,7 @@ public class RayCar implements PhysicsTickListener {
 	
 	private Vector3f vecLocalToWorld(Vector3f in) {
 		Vector3f out = new Vector3f();
-		return rbc.getPhysicsRotationMatrix().mult(out.set(in), out).add(rbc.getPhysicsLocation());
+		return rbc.getPhysicsRotation().mult(out.set(in), out).add(rbc.getPhysicsLocation());
 	}
 
 	private Vector3f getVelocityInWorldPoint(PhysicsRigidBody control, Vector3f worldPos) {

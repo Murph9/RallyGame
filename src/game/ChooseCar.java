@@ -4,7 +4,6 @@ import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.BulletAppState;
-import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
@@ -53,15 +52,13 @@ public class ChooseCar extends BaseAppState {
 	public void initialize(Application app) {
 		getState(BulletAppState.class).setEnabled(true);
 		
-		//init player
-		Vector3f start = worldType.start;
-		Matrix3f dir = new Matrix3f();
-
+		//init world
 		world = new StaticWorldBuilder(worldType);
 		getStateManager().attach(world);
-		
+        
+        //init player
 		cb = getState(CarBuilder.class);
-		cb.addCar(car, start, dir, true);
+		cb.addCar(car, worldType.start, new Quaternion(), true);
 
 		//init camera
 		camera = new BasicCamera("Camera", app.getCamera(), new Vector3f(0,3,7), new Vector3f(0,1.2f, 0));
@@ -88,7 +85,7 @@ public class ChooseCar extends BaseAppState {
                     car = c;
 
                     cb.removeCar(cb.get(0));
-    				cb.addCar(car, worldType.start, new Matrix3f(), true);
+    				cb.addCar(car, worldType.start, new Quaternion(), true);
                     
                     Screen screen = new Screen(app.getContext().getSettings());
 
