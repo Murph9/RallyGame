@@ -9,6 +9,9 @@ import helper.Log;
 
 public class ConstantChecker extends BaseAppState {
 
+    private static final float FREQUENCY = 1;
+    private float countDown;
+
     private final Vector3f unitX;
     private final Vector3f unitY;
     private final Vector3f unitZ;
@@ -31,6 +34,7 @@ public class ConstantChecker extends BaseAppState {
 
     @Override
     protected void initialize(Application app) {
+        countDown = FREQUENCY;
     }
 
     @Override
@@ -50,10 +54,11 @@ public class ConstantChecker extends BaseAppState {
     public void update(float tpf) {
         super.update(tpf);
         // NOTE: please measure the performance
-
-        if (!isEnabled())
-            return;
         
+        countDown -= tpf;
+        if (countDown > 0) return;
+        countDown = FREQUENCY;
+
         boolean error = false;
         // prevent any really dumb stuff with Vector3f
         if (!Vector3f.ZERO.equals(zero)) {
