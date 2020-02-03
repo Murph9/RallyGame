@@ -172,9 +172,6 @@ public class CarBuilder extends BaseAppState {
 	}
 	
 	public void update(float tpf) {
-		if (!isEnabled())
-			return;
-			
 		for (RayCarControl rcc: cars) {
 			rcc.update(tpf);
 		}

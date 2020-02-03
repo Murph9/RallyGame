@@ -173,9 +173,6 @@ public class CarUITelemetry extends BaseAppState {
 	
 	@Override
 	public void update(float tpf) {
-		if (!isEnabled())
-			return; //don't do any expensive updates pls
-		
 		//stats
 		statsText.setText(p.statsString());
 		

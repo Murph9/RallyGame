@@ -118,7 +118,6 @@ public class ChooseCar extends BaseAppState {
 
 
 	public void update(float tpf) {
-		if (!isEnabled()) return; //appstate stuff
 		super.update(tpf);
 
 		// keep the car still enough, and also prevent high frame rates from breaking it

@@ -49,14 +49,7 @@ public class Start extends BaseAppState {
         Button exit = myWindow.addChild(new Button("Exit"));
         exit.addClickCommands(source -> myapp.stop());
 	}
-	
-	public void update(float tpf) {
-		if (!isEnabled() || !isInitialized())
-			return;
 		
-		super.update(tpf);
-	}
-	
 	@Override
 	protected void onEnable() {}
 	@Override

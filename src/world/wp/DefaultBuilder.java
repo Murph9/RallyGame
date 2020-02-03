@@ -91,14 +91,11 @@ public abstract class DefaultBuilder extends World {
 
 	@Override
 	public void update(float tpf) {
-		if (!isEnabled())
-			return;
-
 		Vector3f camPos = getApplication().getCamera().getLocation();
 
 		try {
 			placeNewPieces(camPos);
-		} catch (Exception e) {
+		} catch (IllegalStateException e) {
 			//probably couldn't find something to place
 			e.printStackTrace();
 		}
@@ -117,7 +114,7 @@ public abstract class DefaultBuilder extends World {
 		}
 	}
 
-	protected void placeNewPieces(Vector3f camPos) throws Exception {
+	protected void placeNewPieces(Vector3f camPos) throws IllegalStateException {
 
 		//get list of valid pieces (i.e. pieces with the correct node type)
 		List<WPObject> wpoList = new ArrayList<>();
@@ -128,7 +125,7 @@ public abstract class DefaultBuilder extends World {
 		}
 
 		if (wpoList.isEmpty()) {
-			throw new Exception("No pieces with the node start " + nextNode.name() + " found on type " + WPObject.class.getName());
+			throw new IllegalStateException("No pieces with the node start " + nextNode.name() + " found on type " + WPObject.class.getName());
 		}
 
 		//if there is no piece to place then this gets stuck in an infinite loop
@@ -143,7 +140,7 @@ public abstract class DefaultBuilder extends World {
 				wpoList.remove(wpo);
 
 			if (wpoList.isEmpty())
-                throw new Exception("No piece matched the constraints :(. Type: " + WPObject.class.getName());
+                throw new IllegalStateException("No piece matched the constraints :(. Type: " + WPObject.class.getName());
 		}
 	}
 

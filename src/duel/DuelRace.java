@@ -113,8 +113,6 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
     public void update(float tpf) {
         super.update(tpf);
 
-        if (!isEnabled())
-            return;
         if (winner != null)
             return;
 

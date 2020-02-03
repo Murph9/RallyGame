@@ -96,11 +96,6 @@ public class ChooseMap extends BaseAppState {
         });
 	}
 
-	public void update(float tpf) {
-		if (!isEnabled()) return;
-		super.update(tpf);
-	}
-
 	@Override
 	public void cleanup(Application app) {
 		getStateManager().detach(camera);
