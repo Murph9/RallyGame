@@ -99,6 +99,9 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
 
     @Override
     protected void cleanup(Application app) {
+        getStateManager().detach(menu);
+        menu = null;
+        
         getStateManager().detach(progress);
         progress = null;
         
