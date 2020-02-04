@@ -48,7 +48,6 @@ public class RayCar implements PhysicsTickListener {
 	protected final float[] wheelTorque;
 	
 	//debug values
-	protected float rollingResistance;
 	protected Vector3f dragDir;
 	protected float driftAngle;
 	public final Vector3f planarGForce;
@@ -230,18 +229,18 @@ public class RayCar implements PhysicsTickListener {
             }
 
 			// Mild hack: prevent 'losing' traction through a large integration step, by detecting jumps past the max
-			// TO THINK ABOUT: If we just set the traction curve to be 'good' does this affect anything else?
-            if (lastSlipAngle < carData.wheelData[w_id].maxLat && wheels[w_id].slipAngle > carData.wheelData[w_id].maxLat) {
-                wheels[w_id].slipAngle = carData.wheelData[w_id].maxLat;
+            // TO THINK ABOUT: If we just set the traction curve to be 'good' does this affect anything else?
+            if (Math.abs(lastSlipAngle) < carData.wheelData[w_id].maxLat && Math.abs(wheels[w_id].slipAngle) > carData.wheelData[w_id].maxLat) {
+                wheels[w_id].slipAngle = carData.wheelData[w_id].maxLat * FastMath.sign(wheels[w_id].slipAngle);
             }
-            if (lastSlipAngle > carData.wheelData[w_id].maxLat && wheels[w_id].slipAngle < carData.wheelData[w_id].maxLat) {
-                wheels[w_id].slipAngle = carData.wheelData[w_id].maxLat;
+            if (Math.abs(lastSlipAngle) > carData.wheelData[w_id].maxLat && Math.abs(wheels[w_id].slipAngle) < carData.wheelData[w_id].maxLat) {
+                wheels[w_id].slipAngle = carData.wheelData[w_id].maxLat * FastMath.sign(lastSlipAngle);
             }
-            if (lastSlipRatio < carData.wheelData[w_id].maxLong && wheels[w_id].slipRatio > carData.wheelData[w_id].maxLong) {
-                wheels[w_id].slipRatio = carData.wheelData[w_id].maxLong;
+            if (Math.abs(lastSlipRatio) < carData.wheelData[w_id].maxLong && Math.abs(wheels[w_id].slipRatio) > carData.wheelData[w_id].maxLong) {
+                wheels[w_id].slipRatio = carData.wheelData[w_id].maxLong * FastMath.sign(wheels[w_id].slipRatio);
             }
-            if (lastSlipRatio > carData.wheelData[w_id].maxLong && wheels[w_id].slipRatio < carData.wheelData[w_id].maxLong) {
-                wheels[w_id].slipRatio = carData.wheelData[w_id].maxLong;
+            if (Math.abs(lastSlipRatio) > carData.wheelData[w_id].maxLong && Math.abs(wheels[w_id].slipRatio) < carData.wheelData[w_id].maxLong) {
+                wheels[w_id].slipRatio = carData.wheelData[w_id].maxLong * FastMath.sign(lastSlipRatio);
             }
 
             // merging the forces into a traction circle
@@ -288,20 +287,20 @@ public class RayCar implements PhysicsTickListener {
 		Vector3f w_velocity = rbc.getLinearVelocity();
 		
 		Vector3f velocity = w_angle.inverse().mult(w_velocity);
-		rollingResistance = 0;
 		doForEachWheel((w_id) -> {
-			if (!wheels[w_id].inContact)
-				return;
+			if (!wheels[w_id].inContact) {
+                wheels[w_id].rollingResistance = 0;
+                return;
+            }
 			
 			//apply rolling resistance in the negative direction
 			Vector3f wheel_force = new Vector3f(0, 0, FastMath.sign(velocity.z)* - carData.rollingResistance(w_id, wheels[w_id].susForce));
-			rollingResistance += Math.abs(wheel_force.z)*tpf; //for debug reasons
+			wheels[w_id].rollingResistance = wheel_force.z*tpf;
 			rbc.applyImpulse(w_angle.mult(wheel_force).mult(tpf), wheels[w_id].curBasePosWorld.subtract(w_pos));
 		});
 
-		//quadratic drag
+		//quadratic drag (air resistance)
 		dragDir = carData.quadraticDrag(w_velocity);
-		
 		float dragDown = -0.5f * carData.areo_downforce * 1.225f * (w_velocity.z*w_velocity.z); //formula for downforce from wikipedia
 		rbc.applyCentralForce(dragDir.add(0, dragDown, 0)); //apply downforce after
     }
@@ -332,7 +331,7 @@ public class RayCar implements PhysicsTickListener {
 	public final float getWheelTorque(int w_id) {
 		if (w_id < 0 || w_id > 4)
 			return 0;
-		return wheelTorque[w_id];
+		return wheelTorque[w_id] + wheels[w_id].rollingResistance;
 	}
 	
 	/////////////////

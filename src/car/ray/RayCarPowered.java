@@ -185,9 +185,17 @@ public class RayCarPowered extends RayCar {
 	}
 
 	public final String statsString() {
-		return helper.H.round3f(rbc.getPhysicsLocation(), 2)
-		 + "\nspeed:"+ helper.H.round3f(rbc.getLinearVelocity(), 2) + "m/s\nRPM:" + curRPM
-		 + "\nengine:" + engineTorque + "\ndrag:" + dragDir.length() +" rr("+ rollingResistance+")" + "N";
-	}
+		return helper.H.round3f(rbc.getPhysicsLocation(), 2) + "\nspeed:" + helper.H.round3f(rbc.getLinearVelocity(), 2)
+                + "m/s\nRPM:" + curRPM + "\nengine:" + engineTorque + "\ndrag:" + dragDir.length() + " rr("
+                + rollingResistanceTotal() + ")" + "N";
+    }
+    
+    private float rollingResistanceTotal() {
+        float total = 0;
+        for (int w_id = 0; w_id < wheels.length; w_id++) {
+            total += wheels[w_id].rollingResistance;
+        }
+        return total;
+    }
 }
  
