@@ -26,7 +26,7 @@ public class DuelApp extends SimpleApplication {
     }
 
     public static final Vector3f GRAVITY = new Vector3f(0, -9.81f, 0); // yay its down
-    public static final String PROJECT_VERSION = "v0.1.1";
+    public static final String PROJECT_VERSION = "v0.1.2";
 
     private DuelFlow flow;
 

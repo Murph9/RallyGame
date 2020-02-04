@@ -1,11 +1,15 @@
 package duel;
 
 import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
+import com.simsilica.lemur.Container;
+import com.simsilica.lemur.Label;
+import com.simsilica.lemur.style.ElementId;
 
 import car.CarBuilder;
 import car.CarCamera;
@@ -15,6 +19,7 @@ import car.data.CarDataConst;
 import car.ray.RayCarControl;
 import drive.ICheckpointDrive;
 import helper.Log;
+import service.Screen;
 import service.checkpoint.CheckpointProgress;
 
 public class DuelRace extends BaseAppState implements ICheckpointDrive {
@@ -24,6 +29,7 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
     private CarBuilder cb;
     private DuelRaceMenu menu;
     private CheckpointProgress progress;
+    private CountdownTimer countdown;
 
     private DuelWorld world;
     private CarCamera camera;
@@ -31,6 +37,12 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
 
     private float raceTimer;
     private RayCarControl winner;
+
+    private float readyStateTimeout;
+    private RaceState state = RaceState.BeforeLoad;
+    enum RaceState {
+        BeforeLoad, WaitingForStartPress, Ready, Racing, Finished,
+    }
 
     public DuelRace(IDuelFlow flow) {
         this.flow = flow;
@@ -73,11 +85,16 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
         });
         getStateManager().attach(menu);
 
-
+        countdown = new CountdownTimer();
+        
         //Checkpoint detection and stuff
         progress = new CheckpointProgress(checkpoints, cb.getAll(), rayCar);
-        // progress.attachVisualModel(false);
+        progress.setCheckpointSize(10);
+        progress.attachVisualModel(false);
         getStateManager().attach(progress);
+
+
+        goToState(RaceState.WaitingForStartPress);
     }
 
     @Override
@@ -113,23 +130,32 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
     public void update(float tpf) {
         super.update(tpf);
 
-        if (winner != null)
-            return;
+        // limit time step being large due to loading
+        float tpfLagless = Math.min(tpf, 1 / 30f);
 
-        raceTimer += Math.min(tpf, 1/30f); //limit time step being large due to loading
-        menu.setState(raceTimer);
+        if (state == RaceState.Ready) {
+            this.readyStateTimeout -= tpfLagless;
+            countdown.setTime(readyStateTimeout);
+            new Screen(getApplication().getContext().getSettings()).centerMe(countdown);
+            if (this.readyStateTimeout < 0) {
+                goToState(RaceState.Racing);
+            }
+        }
 
-        RayCarControl maybeWinner = progress.isThereAWinner(0, 2);
-        if (maybeWinner != null) {
-            this.winner = maybeWinner;
-            this.cb.setEnabled(false);
-            this.menu.raceStopped(this.winner == this.cb.get(0));
+        if (state == RaceState.Racing) {
+            raceTimer += tpfLagless;
+            menu.setState(raceTimer);
+
+            RayCarControl maybeWinner = progress.isThereAWinner(0, 2);
+            if (maybeWinner != null) {
+                this.winner = maybeWinner;
+                goToState(RaceState.Finished);
+            }
         }
     }
 
     void startRace() {
-        cb.setEnabled(true);
-        raceTimer = 0;
+        goToState(RaceState.Ready);
     }
 
     void quit() {
@@ -156,5 +182,44 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
         Quaternion q = new Quaternion();
         q.lookAt(next.subtract(pos), Vector3f.UNIT_Y);
         return new Transform(pos, q);
+    }
+
+    //#region state logic:
+    private void goToState(RaceState nextState) {
+        switch (nextState) {
+        case BeforeLoad:
+        case WaitingForStartPress:
+            break;
+        case Ready:
+            this.readyStateTimeout = 3;
+            ((SimpleApplication)getApplication()).getGuiNode().attachChild(countdown);
+            break;
+        case Racing:
+            ((SimpleApplication) getApplication()).getGuiNode().detachChild(countdown);
+            cb.setEnabled(true);
+            raceTimer = 0;
+            break;
+        case Finished:
+            this.cb.setEnabled(false);
+            this.menu.raceStopped(this.winner == this.cb.get(0));
+            break;
+        default:
+            throw new IllegalStateException("Unknown state: " + nextState);
+        }
+        state = nextState;
+    }
+    //#endregion
+
+
+    private class CountdownTimer extends Container {
+        private Label countDownLabel;
+        public CountdownTimer() {
+            this.addChild(new Label("", new ElementId("title")));
+            countDownLabel = this.addChild(new Label(""));
+        }
+
+        public void setTime(float value) {
+            countDownLabel.setText(helper.H.roundDecimal(value, 1) + " sec");
+        }
     }
 }

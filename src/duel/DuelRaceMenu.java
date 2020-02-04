@@ -44,7 +44,7 @@ public class DuelRaceMenu extends BaseAppState implements PauseState.ICallback {
         
         //init the timer at the top
         currentStateWindow = new Container();
-        currentStateWindow.addChild(new Label("Times"));
+        currentStateWindow.addChild(new Label("Time: "));
         currentTime = currentStateWindow.addChild(new Label("0.00sec"), 1);
 
         new Screen(getApplication().getContext().getSettings()).topCenterMe(currentStateWindow);
@@ -104,6 +104,9 @@ public class DuelRaceMenu extends BaseAppState implements PauseState.ICallback {
             Label l = endWindow.addChild(new Label("Loser", new ElementId("titleAlt")));
             l.setTextHAlignment(HAlignment.Center);
         }
+
+        Label l2 = endWindow.addChild(new Label(this.currentTime.getText()));
+        l2.setTextHAlignment(HAlignment.Center);
 
         Button b = endWindow.addChild(new Button("Close"));
         b.setTextHAlignment(HAlignment.Center);
