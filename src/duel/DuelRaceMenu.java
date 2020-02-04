@@ -53,19 +53,6 @@ public class DuelRaceMenu extends BaseAppState implements PauseState.ICallback {
         loadStartUi();
     }
 
-    @Override
-    protected void cleanup(Application app) {
-        getStateManager().detach(pauseState);
-        pauseState = null;
-
-        ((SimpleApplication) app).getGuiNode().detachChild(currentStateWindow);
-    }
-
-    @Override
-    protected void onDisable() { }
-    @Override
-    protected void onEnable() { }
-
     @SuppressWarnings("unchecked") // button checked vargs
     private void loadStartUi() {
         startWindow = new Container();
@@ -132,5 +119,32 @@ public class DuelRaceMenu extends BaseAppState implements PauseState.ICallback {
     @Override
     public void quit() {
         quit.run();
+    }
+
+    @Override
+    protected void cleanup(Application app) {
+        getStateManager().detach(pauseState);
+        pauseState = null;
+
+        ((SimpleApplication) app).getGuiNode().detachChild(currentStateWindow);
+    }
+
+    @Override
+    protected void onDisable() {
+    }
+
+    @Override
+    protected void onEnable() {
+    }
+
+    @Override
+    public void update(float tpf) {
+        super.update(tpf);
+
+        Screen screen = new Screen(getApplication().getContext().getSettings());
+        if (startWindow != null)
+            screen.centerMe(startWindow);
+        if (endWindow != null)
+            screen.centerMe(endWindow);
     }
 }

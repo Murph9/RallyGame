@@ -14,6 +14,7 @@ import com.simsilica.lemur.style.ElementId;
 import car.CarBuilder;
 import car.CarCamera;
 import car.CarUI;
+import car.ai.BrakeAI;
 import car.ai.RaceAI;
 import car.data.CarDataConst;
 import car.ray.RayCarControl;
@@ -154,11 +155,11 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
         }
     }
 
-    void startRace() {
+    protected void startRace() {
         goToState(RaceState.Ready);
     }
 
-    void quit() {
+    protected void quit() {
         DuelResultData d = new DuelResultData();
         d.raceResult = new DuelRaceResult();
         d.raceResult.playerWon = winner == this.cb.get(0);
@@ -166,7 +167,6 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
 
         Log.p("Winner: " + winner.getCarData().name);
         
-        cb.setEnabled(false);
         flow.nextState(this, d);
     }
 
@@ -184,7 +184,7 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
         return new Transform(pos, q);
     }
 
-    //#region state logic:
+
     private void goToState(RaceState nextState) {
         switch (nextState) {
         case BeforeLoad:
@@ -200,16 +200,16 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
             raceTimer = 0;
             break;
         case Finished:
-            this.cb.setEnabled(false);
-            this.menu.raceStopped(this.winner == this.cb.get(0));
+            menu.raceStopped(this.winner == this.cb.get(0));    
+            for (RayCarControl c: this.cb.getAll()) {
+                c.attachAI(new BrakeAI(c), true);
+            }
             break;
         default:
             throw new IllegalStateException("Unknown state: " + nextState);
         }
         state = nextState;
     }
-    //#endregion
-
 
     private class CountdownTimer extends Container {
         private Label countDownLabel;
