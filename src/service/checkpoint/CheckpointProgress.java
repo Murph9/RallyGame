@@ -15,6 +15,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
+import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.GhostControl;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
@@ -42,6 +43,7 @@ public class CheckpointProgress extends BaseAppState implements GhostObjectColli
     private final Map<RayCarControl, RacerState> racers;
     private final Map<Integer, Instant> timeAtCheckpoints;
 
+    private Spatial baseSpat;
     private float checkpointScale;
     private ColorRGBA checkpointColour;
     private boolean attachModels;
@@ -66,13 +68,14 @@ public class CheckpointProgress extends BaseAppState implements GhostObjectColli
 
         this.player = player;
     }
-    public void setCheckpointSize(float size) {
+
+    public void setBoxCheckpointSize(float size) {
         if (this.isInitialized())
             throw new IllegalStateException("This must be called before initialization.");
         this.checkpointScale = size;
     }
-    
-    public void setCheckpointColour(ColorRGBA colour) {
+
+    public void setBoxCheckpointColour(ColorRGBA colour) {
         if (this.isInitialized())
             throw new IllegalStateException("This must be called before initialization.");
         this.checkpointColour = colour;
@@ -84,18 +87,31 @@ public class CheckpointProgress extends BaseAppState implements GhostObjectColli
         this.attachModels = attach;
     }
 
+    public void setCheckpointModel(Spatial spat) {
+        if (this.isInitialized())
+            throw new IllegalStateException("This must be called before initialization.");
+        this.baseSpat = spat;
+        //TODO figure out checkpoint rotating
+    }
+
     @Override
     protected void initialize(Application app) {
         ((SimpleApplication) app).getRootNode().attachChild(rootNode);
 
         PhysicsSpace physicsSpace = getState(BulletAppState.class).getPhysicsSpace();
 
-        Vector3f checkpointSize = Vector3f.UNIT_XYZ.mult(checkpointScale);
+        // generate the checkpoint objects
+        if (baseSpat == null) {
+            Vector3f checkpointSize = Vector3f.UNIT_XYZ.mult(checkpointScale);
+            baseSpat = new Geometry("checkpoint", new Box(checkpointSize.negate(), checkpointSize));
+            baseSpat = LoadModelWrapper.create(app.getAssetManager(), baseSpat, checkpointColour);
+        }
+        CollisionShape colShape = CollisionShapeFactory.createBoxShape(baseSpat);
+
         for (int i = 0; i < checkpointPositions.length; i++) {
-            Spatial box = new Geometry("checkpoint box " + i, new Box(checkpointSize.negate(), checkpointSize));
-            box = LoadModelWrapper.create(app.getAssetManager(), box, checkpointColour);
-            
-            GhostControl ghost = new GhostControl(CollisionShapeFactory.createBoxShape(box));
+            GhostControl ghost = new GhostControl(colShape);
+
+            Spatial box = baseSpat.clone();
             box.setLocalTranslation(checkpointPositions[i]);
             box.addControl(ghost);
             if (attachModels)
@@ -106,6 +122,7 @@ public class CheckpointProgress extends BaseAppState implements GhostObjectColli
         }
         this.firstCheckpoint = this.checkpoints[0];
 
+        //set progress values
         for (RacerState racer : this.racers.values()) {
             racer.lastCheckpoint = this.firstCheckpoint;
             racer.nextCheckpoint = this.firstCheckpoint;
