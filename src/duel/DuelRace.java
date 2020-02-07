@@ -90,7 +90,7 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
         
         //Checkpoint detection and stuff
         progress = new CheckpointProgress(checkpoints, cb.getAll(), rayCar);
-        progress.setBoxCheckpointSize(10);
+        progress.setCheckpointModel(CheckpointProgress.GetDefaultCheckpointModel(app, 10));
         progress.attachVisualModel(false);
         getStateManager().attach(progress);
 
@@ -149,7 +149,7 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
             raceTimer += tpfLagless;
             menu.setState(raceTimer);
 
-            RayCarControl maybeWinner = progress.isThereAWinner(0, 2);
+            RayCarControl maybeWinner = progress.isThereSomeoneAtState(0, 2);
             if (maybeWinner != null) {
                 this.winner = maybeWinner;
                 goToState(RaceState.Finished);
