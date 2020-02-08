@@ -41,7 +41,7 @@ import com.jme3.texture.Texture.WrapMode;
 import com.jme3.util.BufferUtils;
 
 import car.ray.RayCarControl;
-import drive.DriveBase;
+import drive.IDrive;
 import game.App;
 import game.DebugAppState;
 import helper.H;
@@ -301,7 +301,7 @@ public class TrackWorld extends World implements IWorld {
 	@Override
 	public void update(float tpf) {
 		App a = (App)getApplication();
-		DriveBase drive = a.getStateManager().getState(DriveBase.class);
+		IDrive drive = a.getStateManager().getState(IDrive.class);
 		boolean noCars = drive.getAllCars().isEmpty();
 
 		if (this.trackSegments != null && drive != null && !noCars && DEBUG) {

@@ -134,7 +134,7 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
             Vector3f pos = dynWorld.getNextPieceClosestTo(hackToDetectCheckpoints.getLast());
             if (!pos.equals(hackToDetectCheckpoints.getLast())) {
                 hackToDetectCheckpoints.add(pos);
-                progress.addCheckpoint(pos.add(0, 1, 0)); //TODO hack
+                progress.addCheckpoint(pos.add(0, 0, 0));
             }
         }
         

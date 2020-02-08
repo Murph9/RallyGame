@@ -24,8 +24,7 @@ import car.JoystickEventListener;
 import car.MyKeyListener;
 import car.ai.ICarAI;
 import car.data.CarDataConst;
-import drive.DriveBase;
-import duel.DuelRace;
+import drive.IDrive;
 import helper.Log;
 import service.ray.PhysicsRaycaster;
 
@@ -384,24 +383,8 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
 
     
     private static Transform getResetPosition(AppStateManager stateManager, RayCarControl car) {
-        //TODO this checks out of scope
-        //Attempts:
-        //- A shared interface doesn't work because we can't fetch it from the statemanger
-        //  this is because it needs to extend AppState
-        //- A much more simple DriveBase would work, but its not great design
-        //- Any Drive class might need to register a 'reset callback class' which we just assume is global scope
-        //  Although whats inthe class could get very large, and we run into the App.CUR problem again
-
-        DriveBase drive = stateManager.getState(DriveBase.class);
-        Transform transform = null;
-        if (drive != null) {
-            transform = drive.resetPosition(car);
-            drive.resetWorld();
-        } else if (stateManager.getState(DuelRace.class) != null) {
-            DuelRace race = stateManager.getState(DuelRace.class);
-            transform = race.resetPosition(car);
-        }
-
-        return transform;
+        IDrive drive = stateManager.getState(IDrive.class);
+        drive.resetWorld();
+        return drive.resetPosition(car);
     }
 }

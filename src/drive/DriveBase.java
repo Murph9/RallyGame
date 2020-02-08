@@ -18,7 +18,7 @@ import effects.ParticleAtmosphere;
 import game.IDriveDone;
 import helper.Log;
 
-public class DriveBase extends BaseAppState {
+public class DriveBase extends BaseAppState implements IDrive {
 
     private final IDriveDone done;
     public DriveMenu menu;

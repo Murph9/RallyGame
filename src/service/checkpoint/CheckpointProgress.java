@@ -30,7 +30,6 @@ import car.ray.RayCarControl;
 import effects.LoadModelWrapper;
 
 // TODO figure out checkpoint rotation
-// TODO dynamic point to point races? (it already handles static point to point)
 // TODO change the collision channel of the ghost objects to prevent colliding with ground every update
 public class CheckpointProgress extends BaseAppState {
 

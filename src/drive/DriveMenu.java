@@ -11,14 +11,14 @@ import service.Screen;
 
 public class DriveMenu extends BaseAppState implements PauseState.ICallback {
 
-	protected final DriveBase drive;
+	protected final IDrive drive;
 	private PauseState pauseState;
 	
 	//random Label to print to the screen to show the user, assumed settable by 'Drive*'
 	public Label randomthing;
 	private Container random;
 		
-	public DriveMenu(DriveBase drive) {
+	public DriveMenu(IDrive drive) {
 		super();
 		this.drive = drive;
 	}

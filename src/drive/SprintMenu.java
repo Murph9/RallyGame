@@ -21,7 +21,7 @@ public class SprintMenu extends DriveMenu {
 	private Label scoresLabel;
 
 
-    public SprintMenu(DriveBase drive) {
+    public SprintMenu(IDrive drive) {
         super(drive);
     }
 
