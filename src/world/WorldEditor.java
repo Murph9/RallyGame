@@ -12,12 +12,12 @@ import world.wp.WP.DynamicType;
 
 public class WorldEditor extends Container {
 
-	private World currentSelection;
-	private Consumer<World> a;
+	private IWorld currentSelection;
+	private Consumer<IWorld> a;
 	
 	public float width;
 	
-	public WorldEditor(Consumer<World> a) {
+	public WorldEditor(Consumer<IWorld> a) {
 		super("WorldEditor");
 		
 		this.a = a;

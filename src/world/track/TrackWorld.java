@@ -46,10 +46,10 @@ import game.App;
 import game.DebugAppState;
 import helper.H;
 import helper.Log;
-import world.World;
+import world.World;import world.IWorld;
 import world.WorldType;
 
-public class TrackWorld extends World {
+public class TrackWorld extends World implements IWorld {
 
 	private static final boolean DEBUG = true;
 	

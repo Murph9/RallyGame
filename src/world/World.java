@@ -51,9 +51,9 @@ public abstract class World extends BaseAppState implements IWorld {
 	}
 
 	// Create another of myself, to use somewhere else
-	public World copy() throws InstantiationException, IllegalAccessException, IllegalArgumentException,
+	public IWorld copy() throws InstantiationException, IllegalAccessException, IllegalArgumentException,
 			InvocationTargetException, NoSuchMethodException, SecurityException {
-		Class<? extends World> clazz = this.getClass();
+		Class<? extends IWorld> clazz = this.getClass();
 		return clazz.getDeclaredConstructor().newInstance();
 	}
 }

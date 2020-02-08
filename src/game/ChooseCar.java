@@ -21,13 +21,13 @@ import helper.Log;
 import service.Screen;
 import world.StaticWorld;
 import world.StaticWorldBuilder;
-import world.World;
+import world.IWorld;
 
 public class ChooseCar extends BaseAppState {
 
 	private final IChooseStuff choose;
 
-	private World world;
+	private IWorld world;
 	private StaticWorld worldType;
 
 	private CarBuilder cb;

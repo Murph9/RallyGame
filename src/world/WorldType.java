@@ -26,7 +26,7 @@ public enum WorldType {
 
     }
 
-    public static World getWorld(String worldTypeStr, String subType) {
+    public static IWorld getWorld(String worldTypeStr, String subType) {
         WorldType worldType = WorldType.valueOf(WorldType.class, worldTypeStr);
         switch (worldType) {
         case STATIC:

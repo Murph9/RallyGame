@@ -1,6 +1,6 @@
 package drive;
 
-import world.World;
+import world.IWorld;
 import world.WorldType;
 
 import java.util.Collection;
@@ -22,7 +22,7 @@ public class DriveBase extends BaseAppState {
 
     private final IDriveDone done;
     public DriveMenu menu;
-    protected World world;
+    protected IWorld world;
 
     // car stuff
     private final Car car;
@@ -32,7 +32,7 @@ public class DriveBase extends BaseAppState {
     protected CarCamera camera;
     private CarUI uiNode;
 
-    public DriveBase(IDriveDone done, Car car, World world) {
+    public DriveBase(IDriveDone done, Car car, IWorld world) {
         super();
         this.done = done;
         this.car = car;

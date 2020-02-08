@@ -2,7 +2,7 @@ package drive;
 
 import world.StaticWorld;
 import world.StaticWorldBuilder;
-import world.World;
+import world.IWorld;
 import world.WorldEditor;
 
 import com.jme3.app.Application;
@@ -64,7 +64,7 @@ public class DriveDev extends DriveBase {
 		return this.cb.get(0);
 	}
 	
-	public void reloadWorld(World world) {
+	public void reloadWorld(IWorld world) {
 		//reload new world
 		getStateManager().detach(this.world);
 		this.world = world;

@@ -11,14 +11,15 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.shape.Box;
 
-import world.World;
+import world.IWorld;
 import world.WorldType;
+import world.World;
 
 //TODO thinking about creating an l-system road network
 //Main notes: http://www.tmwhere.com/city_generation.html
 //Other: https://www.reddit.com/r/gamedev/comments/19ic3j/procedural_content_generation_how_to_generate/
 
-public class LSystemWorld extends World {
+public class LSystemWorld extends World implements IWorld {
 
 	private LRoadGenerator lrg;
 	

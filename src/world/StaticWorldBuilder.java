@@ -12,7 +12,7 @@ import com.jme3.scene.Spatial;
 
 import effects.LoadModelWrapper;
 
-public class StaticWorldBuilder extends World {
+public class StaticWorldBuilder extends World implements IWorld {
 
 	protected StaticWorld world;
     protected RigidBodyControl landscape;
@@ -75,7 +75,7 @@ public class StaticWorldBuilder extends World {
     }
 	
 	// this doesn't have an empty constructor so we define it manually
-	public World copy() {
+	public IWorld copy() {
 		return new StaticWorldBuilder(world);
 	}
 }

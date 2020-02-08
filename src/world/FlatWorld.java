@@ -13,7 +13,7 @@ import car.CarBuilder;
 import car.ray.RayCarControl;
 import effects.LoadModelWrapper;
 
-public class FlatWorld extends World {
+public class FlatWorld extends World implements IWorld {
     
     private static final float RESET_DISTANCE = 1000;
 	private Spatial startGeometry;

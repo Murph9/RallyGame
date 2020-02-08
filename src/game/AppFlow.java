@@ -9,13 +9,13 @@ import drive.*;
 import helper.Log;
 import world.StaticWorld;
 import world.StaticWorldBuilder;
-import world.World;
+import world.IWorld;
 
 public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
 
     private final Application app;
 	private Car car;
-	private World world;
+	private IWorld world;
 
     public enum StartType {
         Fast,
@@ -87,7 +87,7 @@ public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
 		sm.attach(new ChooseMap((IChooseStuff)this));
 	}
 	@Override
-	public void chooseMap(World world) {
+	public void chooseMap(IWorld world) {
 		this.world = world;
 		
 		AppStateManager sm = app.getStateManager();

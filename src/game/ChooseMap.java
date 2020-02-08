@@ -19,7 +19,7 @@ import world.wp.WP.DynamicType;
 
 public class ChooseMap extends BaseAppState {
 
-	private static World world = null;
+	private static IWorld world = null;
 	private final IChooseStuff choose;
 	private BasicCamera camera;
 
@@ -117,8 +117,8 @@ public class ChooseMap extends BaseAppState {
 		if (world == null) { Log.e("no return value for ChooseMap()"); return; }
 		choose.chooseMap(getNewWorld());
 	}
-	private World getNewWorld() {
-		World newWorld = null;
+	private IWorld getNewWorld() {
+		IWorld newWorld = null;
 		try {
             newWorld = world.copy();
 			getStateManager().detach(world);

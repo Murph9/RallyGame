@@ -13,7 +13,7 @@ import com.jme3.scene.shape.Box;
 import car.CarBuilder;
 import effects.LoadModelWrapper;
 
-public class MovingWorld extends World {
+public class MovingWorld extends World implements IWorld {
     
     private static final float BOX_HEIGHT = 1;
     private static final float BOX_SIZE = 20;

@@ -13,7 +13,7 @@ import game.App;
 import effects.LoadModelWrapper;
 import jme3tools.optimize.GeometryBatchFactory;
 
-public class FullCityWorld extends World {
+public class FullCityWorld extends World implements IWorld {
 
 	private static final int 
 			GRID_SIZE = 40,

@@ -31,8 +31,9 @@ import game.DebugAppState;
 import helper.H;
 import helper.Log;
 import terrainWorld.NoiseBasedWorld;
-import world.World;
+import world.IWorld;
 import world.WorldType;
+import world.World;
 
 /*
 Basic idea is:
@@ -55,7 +56,7 @@ Later Things:
 //Large TODO:
 //Set the height in the filteredBasis
 
-public class HighwayWorld extends World {
+public class HighwayWorld extends World implements IWorld {
 	public NoiseBasedWorld terrain;
 	private int blockSize; //(distance between points)/tileSize
 	private int tileSize; //the grid piece size
