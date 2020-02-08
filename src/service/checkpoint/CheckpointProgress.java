@@ -6,11 +6,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -19,7 +18,6 @@ import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.GhostControl;
-import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -30,10 +28,10 @@ import com.jme3.scene.shape.Box;
 
 import car.ray.RayCarControl;
 import effects.LoadModelWrapper;
-import service.GhostObjectCollisionListener;
 
 // TODO figure out checkpoint rotation
 // TODO dynamic point to point races? (it already handles static point to point)
+// TODO change the collision channel of the ghost objects to prevent colliding with ground every update
 public class CheckpointProgress extends BaseAppState {
 
     private final Vector3f[] checkpointPositions;
@@ -43,9 +41,13 @@ public class CheckpointProgress extends BaseAppState {
 
     private Checkpoint firstCheckpoint;
     private final List<Checkpoint> checkpoints;
-    private final Node rootNode;
     private final Map<RayCarControl, RacerState> racers;
     private final Map<Integer, Instant> timeAtCheckpoints;
+
+    private final Node rootNode;
+    private final List<Checkpoint> attachedCheckpoints;
+
+    private CollisionShape colShape;
 
     private Spatial baseSpat;
     private boolean attachModels;
@@ -57,6 +59,7 @@ public class CheckpointProgress extends BaseAppState {
         this.attachModels = true;
         this.player = player;
         this.rootNode = new Node("checkpoint progress root");
+        this.attachedCheckpoints = new LinkedList<>();
 
         this.racers = new HashMap<>();
         for (RayCarControl car : cars) {
@@ -98,6 +101,7 @@ public class CheckpointProgress extends BaseAppState {
     }
 
     public void attachVisualModel(boolean attach) {
+        // TODO we can change this to just toggle the root node, removing the init condition
         if (this.isInitialized()) throw new IllegalStateException("This must be only called before initialization.");
         this.attachModels = attach;
     }
@@ -113,19 +117,10 @@ public class CheckpointProgress extends BaseAppState {
         PhysicsSpace physicsSpace = getState(BulletAppState.class).getPhysicsSpace();
 
         // generate the checkpoint objects
-        CollisionShape colShape = CollisionShapeFactory.createBoxShape(baseSpat);
+        colShape = CollisionShapeFactory.createBoxShape(baseSpat);
 
         for (int i = 0; i < checkpointPositions.length; i++) {
-            GhostControl ghost = new GhostControl(colShape);
-
-            Spatial box = baseSpat.clone();
-            box.setLocalTranslation(checkpointPositions[i]);
-            box.addControl(ghost);
-            if (attachModels)
-                rootNode.attachChild(box);
-            physicsSpace.add(ghost);
-
-            this.checkpoints.add(new Checkpoint(i, checkpointPositions[i], ghost));
+            addCheckpoint(checkpointPositions[i]);
         }
         this.firstCheckpoint = this.checkpoints.get(0);
 
@@ -136,6 +131,29 @@ public class CheckpointProgress extends BaseAppState {
         }
 
         listener.startListening(physicsSpace);
+    }
+
+    /** Adds a checkpoint to the list, doesn't affect laps at all */
+    public void addCheckpoint(Vector3f pos) {
+        if (!this.isInitialized()) // TODO this can be fixed if we get them all before init and batch them
+            throw new IllegalStateException("This must be only called after initialization.");
+
+        GhostControl ghost = new GhostControl(colShape);
+        Spatial box = baseSpat.clone();
+        box.setLocalTranslation(pos);
+        box.addControl(ghost);
+        if (attachModels)
+            rootNode.attachChild(box);
+
+        int checkpointCount = this.checkpoints.size();
+        this.checkpoints.add(new Checkpoint(checkpointCount, pos, ghost));
+    }
+
+    public List<RayCarControl> setMinCheckpoint(Vector3f pos) {
+        // TODO so that cars don't ever lose the checkpoint
+        // called by the race class so that this can remove old checkpoints, and update anyone really behind with a better one
+        // maybe it could also remove the ghost control from the physics space?
+        throw new NoSuchMethodError();
     }
 
     public RayCarControl isThereSomeoneAtState(int laps, int checkpoints) {
@@ -167,7 +185,24 @@ public class CheckpointProgress extends BaseAppState {
 
     @Override
     public void update(float tpf) {
-        // this is intentionally blank
+        attachNextCheckpoints();
+    }
+
+    private void attachNextCheckpoints() {
+        // lazy load ghost controls until someone is up to it for physics lag reasons
+
+        List<Checkpoint> ghosts = new LinkedList<>();
+        for (RacerState racer : this.racers.values())
+            ghosts.add(racer.nextCheckpoint);
+
+        for (Checkpoint check : this.attachedCheckpoints)
+            getState(BulletAppState.class).getPhysicsSpace().remove(check.ghost);
+
+        for (Checkpoint check : ghosts)
+            getState(BulletAppState.class).getPhysicsSpace().add(check.ghost);
+
+        this.attachedCheckpoints.clear();
+        this.attachedCheckpoints.addAll(ghosts);
     }
 
     @Override
@@ -201,43 +236,5 @@ public class CheckpointProgress extends BaseAppState {
         Vector3f checkpointSize = Vector3f.UNIT_XYZ.mult(scale);
         Spatial baseSpat = new Geometry("checkpoint", new Box(checkpointSize.negate(), checkpointSize));
         return LoadModelWrapper.create(app.getAssetManager(), baseSpat, colour);
-    }
-
-    protected class CheckpointListener implements GhostObjectCollisionListener.IListener {
-        
-        private final Function<GhostControl, Checkpoint> ifCheckpoint;
-        private final Function<RigidBodyControl, RacerState> ifCar;
-        private final Consumer<RacerState> nextCheckpoint;
-
-        private final GhostObjectCollisionListener checkpointCollisionListener;
-
-        public CheckpointListener(Function<GhostControl, Checkpoint> ifCheckpoint,
-            Function<RigidBodyControl, RacerState> ifCar,
-            Consumer<RacerState> nextCheckpoint) {
-            this.ifCheckpoint = ifCheckpoint;
-            this.ifCar = ifCar;
-            this.nextCheckpoint = nextCheckpoint;
-
-            this.checkpointCollisionListener = new GhostObjectCollisionListener(this);
-        }
-
-        public void startListening(PhysicsSpace space) {
-            space.addCollisionListener(checkpointCollisionListener);
-        }
-        public void stopListening(PhysicsSpace space) {
-            space.removeCollisionListener(checkpointCollisionListener);
-        }
-
-        @Override
-        public void ghostCollision(GhostControl ghost, RigidBodyControl obj) {
-            Checkpoint checkpoint = ifCheckpoint.apply(ghost);
-            RacerState racer = ifCar.apply(obj);
-            if (checkpoint == null || racer == null)
-                return;
-
-            if (racer.nextCheckpoint == checkpoint) {
-                nextCheckpoint.accept(racer);
-            }
-        }
     }
 }

@@ -9,6 +9,8 @@ import drive.*;
 import helper.Log;
 import world.StaticWorld;
 import world.StaticWorldBuilder;
+import world.wp.DefaultBuilder;
+import world.wp.WP.DynamicType;
 import world.IWorld;
 
 public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
@@ -23,6 +25,7 @@ public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
 		Crash,
 		Getaway,
 		Race,
+		RaceDyn,
 		Drag,
 		Dev;
     }
@@ -60,6 +63,11 @@ public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
                 StaticWorldBuilder world = new StaticWorldBuilder(StaticWorld.duct2);
                 sm.attach(world);
 				sm.attach(new DriveRace(world, (IDriveDone) this));
+				break;
+			case RaceDyn:
+				DefaultBuilder dynWorld = DynamicType.Valley.getBuilder();
+				sm.attach(dynWorld);
+				sm.attach(new DriveDynamicRace(dynWorld, (IDriveDone) this));
 				break;
 			case Drag:
 				sm.attach(new DriveDrag((IDriveDone)this));
