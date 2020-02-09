@@ -30,7 +30,9 @@ import car.ray.RayCarControl;
 import effects.LoadModelWrapper;
 
 // TODO figure out checkpoint rotation
+
 // TODO change the collision channel of the ghost objects to prevent colliding with ground every update
+// https://wiki.jmonkeyengine.org/jme3/advanced/physics.html see PhysicsControl.addCollideWithGroup
 public class CheckpointProgress extends BaseAppState {
 
     private final Vector3f[] checkpointPositions;

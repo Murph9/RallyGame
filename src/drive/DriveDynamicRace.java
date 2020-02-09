@@ -182,6 +182,11 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
     }
 
     @Override
+    public void resetWorld() {
+        //TODO nothing, because it breaks the checkpoints
+    }
+
+    @Override
     public Transform resetPosition(RayCarControl car) {
         Vector3f pos = progress.getLastCheckpoint(car);
         Vector3f next = progress.getNextCheckpoint(car);
