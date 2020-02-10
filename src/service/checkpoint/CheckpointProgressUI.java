@@ -148,6 +148,11 @@ class RacerStateTableView extends Container {
                 durationStr = String.format("%02d:%02d", d.toMinutesPart(), d.toSecondsPart());
         }
 
-        return new String[] { state.getName(), state.lap + "", durationStr, isPlayer ? "-" : "" };
+        return new String[] {
+            state.getName(),
+            state.lap + "(" + state.lastCheckpoint.num + ")",
+            durationStr,
+            isPlayer ? "-" : ""
+        };
     }
 }

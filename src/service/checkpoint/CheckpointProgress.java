@@ -188,11 +188,13 @@ public class CheckpointProgress extends BaseAppState {
         // and update anyone really behind with a better, valid one
         
         for (RacerState racer: this.getRaceState()) {
-            if (racer.nextCheckpoint.num <= check.num) {
+            if (racer.nextCheckpoint.num <= check.num + 1) {
                 racer.lastCheckpoint = this.checkpoints.get(check.num + 1);
                 racer.nextCheckpoint = this.checkpoints.get(check.num + 2);
                 Vector3f dir = racer.nextCheckpoint.position.subtract(racer.lastCheckpoint.position).normalize();
-                racer.car.setPhysicsProperties(racer.lastCheckpoint.position.add(0, 1, 0), dir.mult(10), new Quaternion(), new Vector3f());
+                Quaternion q = new Quaternion();
+                q.lookAt(dir, new Vector3f());
+                racer.car.setPhysicsProperties(racer.lastCheckpoint.position.add(0, 1, 0), dir.mult(10), q, new Vector3f());
             }
         }
     }
