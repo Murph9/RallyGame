@@ -29,6 +29,7 @@ import com.jme3.scene.shape.Box;
 
 import car.ray.RayCarControl;
 import effects.LoadModelWrapper;
+import helper.H;
 
 // TODO figure out checkpoint rotation
 
@@ -94,16 +95,16 @@ public class CheckpointProgress extends BaseAppState {
                     return null;
                 },
                 (racer) -> {
-                    racerCompletedCheckpoint(racer);
+                    int nextNum = (racer.nextCheckpoint.num + 1 % this.checkpoints.size());
+                    if (nextNum == 0)
+                        racer.lap++;
+                    racerCompletedCheckpoint(racer, racer.nextCheckpoint.num, nextNum);
                 });
     }
-    private void racerCompletedCheckpoint(RacerState racer) {
-        // update to next checkpoint
-        int nextNum = (racer.nextCheckpoint.num + 1 % this.checkpoints.size());
-        if (nextNum == 0)
-            racer.lap++;
-        racer.lastCheckpoint = racer.nextCheckpoint;
-        racer.nextCheckpoint = this.checkpoints.get(nextNum);
+    private void racerCompletedCheckpoint(RacerState racer, int lastCheckNum, int nextCheckNum) {
+        // update to given checkpoints
+        racer.lastCheckpoint = this.checkpoints.get(lastCheckNum);
+        racer.nextCheckpoint = this.checkpoints.get(nextCheckNum);
 
         // update last time
         int fakeCheckpointHash = racer.lap * 10000 + racer.lastCheckpoint.num;
@@ -160,7 +161,7 @@ public class CheckpointProgress extends BaseAppState {
             rootNode.attachChild(box);
 
         int checkpointCount = this.checkpoints.size();
-        this.checkpoints.add(new Checkpoint(checkpointCount, pos, ghost));
+        this.checkpoints.add(new Checkpoint(checkpointCount, pos, ghost, box));
     }
 
     private Checkpoint getCheckpointFromPos(Vector3f pos) {
@@ -189,13 +190,21 @@ public class CheckpointProgress extends BaseAppState {
         
         for (RacerState racer: this.getRaceState()) {
             if (racer.nextCheckpoint.num <= check.num + 1) {
-                racer.lastCheckpoint = this.checkpoints.get(check.num + 1);
-                racer.nextCheckpoint = this.checkpoints.get(check.num + 2);
+                racerCompletedCheckpoint(racer, check.num+1, check.num + 2);
                 Vector3f dir = racer.nextCheckpoint.position.subtract(racer.lastCheckpoint.position).normalize();
                 Quaternion q = new Quaternion();
                 q.lookAt(dir, new Vector3f());
                 racer.car.setPhysicsProperties(racer.lastCheckpoint.position.add(0, 1, 0), dir.mult(10), q, new Vector3f());
             }
+        }
+
+        //remove all visual checkpoints
+        int checkNum = check.num;
+        for (int i = checkNum - 1; i > 0; i--) {
+            Checkpoint curC = this.checkpoints.get(i);
+            if (curC == null)
+                break;
+            curC.visualModel.removeFromParent();
         }
     }
 
@@ -273,11 +282,17 @@ public class CheckpointProgress extends BaseAppState {
     }
 
     public static Spatial GetDefaultCheckpointModel(Application app, float scale) {
-        return GetDefaultCheckpointModel(app, scale, new ColorRGBA(0, 1, 0, 0.4f));
+        return GetDefaultCheckpointModel(app, scale, new ColorRGBA(0, 0, 0, 1));
     }
     public static Spatial GetDefaultCheckpointModel(Application app, float scale, ColorRGBA colour) {
         Vector3f checkpointSize = Vector3f.UNIT_XYZ.mult(scale);
         Spatial baseSpat = new Geometry("checkpoint", new Box(checkpointSize.negate(), checkpointSize));
-        return LoadModelWrapper.create(app.getAssetManager(), baseSpat, colour);
+        Spatial out = LoadModelWrapper.create(app.getAssetManager(), baseSpat, colour);
+        for (Geometry g :H.getGeomList(out)) {
+            g.getMaterial().getAdditionalRenderState().setWireframe(true);
+            g.getMaterial().getAdditionalRenderState().setLineWidth(5);
+        }
+
+        return out;
     }
 }
