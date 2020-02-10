@@ -27,7 +27,8 @@ import world.wp.DefaultBuilder;
 
 
 // TODO This doesn't really handle cars outside of the world that well
-// too far ahead is a crash, and too far back it can never make it back
+// too far ahead is a crash
+//TODO sometimes you spawn with the last checkpoint
 public class DriveDynamicRace extends DriveBase implements PauseState.ICallback, ICheckpointDrive, DefaultBuilder.IPieceChanged {
 
     // ai things
@@ -74,8 +75,8 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
 
         //buildCars and load ai
         for (int i = 0; i < this.themCount; i++) {
-            RayCarControl c = this.cb.addCar(Car.Rally, worldStarts[i+1], worldRot, false);
-            RaceAI rAi = new RaceAI(c, this);
+            RayCarControl c = this.cb.addCar(Car.LeMans, worldStarts[i+1], worldRot, false);
+            RaceAI rAi = new RaceAI(c, this, false);
             c.attachAI(rAi, true);
         }
         

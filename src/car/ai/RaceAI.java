@@ -7,11 +7,16 @@ import drive.ICheckpointDrive;
 
 public class RaceAI extends CarAI {
 
-	private ICheckpointDrive race;
-	
-	public RaceAI(RayCarControl car, ICheckpointDrive race) {
+    private ICheckpointDrive race;
+    private final boolean doFowardRayCast;
+    
+    public RaceAI(RayCarControl car, ICheckpointDrive race) {
+        this(car, race, true);
+    }
+	public RaceAI(RayCarControl car, ICheckpointDrive race, boolean doForwardRayCast) {
 		super(car);
-		this.race = race;
+        this.race = race;
+        this.doFowardRayCast = doForwardRayCast;
 	}
 
 	@Override
@@ -38,9 +43,11 @@ public class RaceAI extends CarAI {
         applySelfTractionControl(tpf);
 
         //prevent hitting straight into walls
-        float result = forwardRayCollideTime();
-        if (result < 1.5f) {
-            onEvent("Brake", true);
+        if (doFowardRayCast) {
+            float result = forwardRayCollideTime();
+            if (result < 1.5f) {
+                onEvent("Brake", true);
+            }
         }
         
         // if going too slow speed up
