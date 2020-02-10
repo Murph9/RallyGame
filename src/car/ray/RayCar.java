@@ -229,19 +229,21 @@ public class RayCar implements PhysicsTickListener {
             }
 
 			// Mild hack: prevent 'losing' traction through a large integration step, by detecting jumps past the max
-            // TO THINK ABOUT: If we just set the traction curve to be 'good' does this affect anything else?
-            if (Math.abs(lastSlipAngle) < carData.wheelData[w_id].maxLat && Math.abs(wheels[w_id].slipAngle) > carData.wheelData[w_id].maxLat) {
-                wheels[w_id].slipAngle = carData.wheelData[w_id].maxLat * FastMath.sign(wheels[w_id].slipAngle);
-            }
-            if (Math.abs(lastSlipAngle) > carData.wheelData[w_id].maxLat && Math.abs(wheels[w_id].slipAngle) < carData.wheelData[w_id].maxLat) {
-                wheels[w_id].slipAngle = carData.wheelData[w_id].maxLat * FastMath.sign(lastSlipAngle);
-            }
-            if (Math.abs(lastSlipRatio) < carData.wheelData[w_id].maxLong && Math.abs(wheels[w_id].slipRatio) > carData.wheelData[w_id].maxLong) {
-                wheels[w_id].slipRatio = carData.wheelData[w_id].maxLong * FastMath.sign(wheels[w_id].slipRatio);
-            }
-            if (Math.abs(lastSlipRatio) > carData.wheelData[w_id].maxLong && Math.abs(wheels[w_id].slipRatio) < carData.wheelData[w_id].maxLong) {
-                wheels[w_id].slipRatio = carData.wheelData[w_id].maxLong * FastMath.sign(lastSlipRatio);
-            }
+			// TO THINK ABOUT: If we just set the traction curve to be 'good' does this affect anything else?
+			if (brakingCur == 0) { // needs to be disabled during braking as it prevents you from stopping
+				if (Math.abs(lastSlipAngle) < carData.wheelData[w_id].maxLat && Math.abs(wheels[w_id].slipAngle) > carData.wheelData[w_id].maxLat) {
+					wheels[w_id].slipAngle = carData.wheelData[w_id].maxLat * FastMath.sign(wheels[w_id].slipAngle);
+				}
+				if (Math.abs(lastSlipAngle) > carData.wheelData[w_id].maxLat && Math.abs(wheels[w_id].slipAngle) < carData.wheelData[w_id].maxLat) {
+					wheels[w_id].slipAngle = carData.wheelData[w_id].maxLat * FastMath.sign(lastSlipAngle);
+				}
+				if (Math.abs(lastSlipRatio) < carData.wheelData[w_id].maxLong && Math.abs(wheels[w_id].slipRatio) > carData.wheelData[w_id].maxLong) {
+					wheels[w_id].slipRatio = carData.wheelData[w_id].maxLong * FastMath.sign(wheels[w_id].slipRatio);
+				}
+				if (Math.abs(lastSlipRatio) > carData.wheelData[w_id].maxLong && Math.abs(wheels[w_id].slipRatio) < carData.wheelData[w_id].maxLong) {
+					wheels[w_id].slipRatio = carData.wheelData[w_id].maxLong * FastMath.sign(lastSlipRatio);
+				}
+			}
 
             // merging the forces into a traction circle
             // normalise based on their independant max values
