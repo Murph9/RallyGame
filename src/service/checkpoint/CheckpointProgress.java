@@ -20,6 +20,7 @@ import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.GhostControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -160,6 +161,40 @@ public class CheckpointProgress extends BaseAppState {
 
         int checkpointCount = this.checkpoints.size();
         this.checkpoints.add(new Checkpoint(checkpointCount, pos, ghost));
+    }
+
+    private Checkpoint getCheckpointFromPos(Vector3f pos) {
+        Checkpoint check = null;
+        for (Checkpoint c : this.checkpoints) {
+            if (c.position.equals(pos)) {
+                check = c;
+                break;
+            }
+        }
+        return check;
+    }
+
+    public void setMinCheckpoint(Vector3f pos) {
+        if (this.type == Type.Lap)
+            throw new IllegalStateException("Only a " + Type.Sprint + " type should use this method");
+
+        Checkpoint check = getCheckpointFromPos(pos);
+        if (check == null)
+            return;
+        
+        
+        // called by the race class so that this can remove old checkpoints
+        // so that cars don't ever lose the checkpoint
+        // and update anyone really behind with a better, valid one
+        
+        for (RacerState racer: this.getRaceState()) {
+            if (racer.nextCheckpoint.num <= check.num) {
+                racer.lastCheckpoint = this.checkpoints.get(check.num + 1);
+                racer.nextCheckpoint = this.checkpoints.get(check.num + 2);
+                Vector3f dir = racer.nextCheckpoint.position.subtract(racer.lastCheckpoint.position).normalize();
+                racer.car.setPhysicsProperties(racer.lastCheckpoint.position.add(0, 1, 0), dir.mult(10), new Quaternion(), new Vector3f());
+            }
+        }
     }
 
     public RayCarControl isThereSomeoneAtState(int laps, int checkpoints) {

@@ -25,7 +25,10 @@ import service.checkpoint.CheckpointProgress;
 import service.checkpoint.CheckpointProgressUI;
 import world.wp.DefaultBuilder;
 
-public class DriveDynamicRace extends DriveBase implements PauseState.ICallback, ICheckpointDrive {
+
+// TODO This doesn't really handle cars outside of the world that well
+// too far ahead is a crash, and too far back it can never make it back
+public class DriveDynamicRace extends DriveBase implements PauseState.ICallback, ICheckpointDrive, DefaultBuilder.IPieceChanged {
 
     // ai things
     private final int themCount = 1;
@@ -37,15 +40,13 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
     private Vector3f[] worldStarts;
     private Quaternion worldRot;
     
-    private DefaultBuilder dynWorld;
-    private LinkedList<Vector3f> hackToDetectCheckpoints;
+    private LinkedList<Vector3f> initCheckpointBuffer;
 
     public DriveDynamicRace(DefaultBuilder world, IDriveDone done) {
         super(done, Car.Runner, world);
-        dynWorld = world;
+        world.registerListener(this);
 
-        hackToDetectCheckpoints = new LinkedList<>();
-        hackToDetectCheckpoints.add(new Vector3f());
+        initCheckpointBuffer = new LinkedList<>();
     }
     
     @Override
@@ -79,7 +80,7 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
         }
         
         progress = new CheckpointProgress(CheckpointProgress.Type.Sprint, checkpoints, cb.getAll(), cb.get(0));
-        progress.setCheckpointModel(CheckpointProgress.GetDefaultCheckpointModel(app, 10, new ColorRGBA(0, 1, 0, 0.4f)), true);
+        progress.setCheckpointModel(CheckpointProgress.GetDefaultCheckpointModel(app, 4, new ColorRGBA(0, 1, 0, 0.4f)), true);
         getStateManager().attach(progress);
 
         progressMenu = new CheckpointProgressUI(progress);
@@ -128,17 +129,14 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
         if (!isEnabled())
             return;
 
-        //hack to detect new checkpoints to add to the checkpoint service
-
-        if (progress.isInitialized()) {
-            Vector3f pos = dynWorld.getNextPieceClosestTo(hackToDetectCheckpoints.getLast());
-            if (!pos.equals(hackToDetectCheckpoints.getLast())) {
-                hackToDetectCheckpoints.add(pos);
-                progress.addCheckpoint(pos.add(0, 0, 0));
-            }
-        }
-        
         super.update(tpf);
+
+        //add any buffered checkpoints
+        if (progress.isInitialized() && !initCheckpointBuffer.isEmpty()) {
+            for (Vector3f p : initCheckpointBuffer)
+                progress.addCheckpoint(p);
+            initCheckpointBuffer.clear();
+        }
 
         progressMenu.setBasicText("State:" + state.name() + "\nStateTimeout:" + this.stateTimeout);
         
@@ -183,7 +181,7 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
 
     @Override
     public void resetWorld() {
-        //TODO nothing, because it breaks the checkpoints
+        // nothing, because it breaks the checkpoints
     }
 
     @Override
@@ -249,5 +247,23 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
     @Override
     public void quit() {
         next();
+    }
+
+    @Override
+    public void pieceAdded(Vector3f pos) {
+        if (!progress.isInitialized())   {
+            initCheckpointBuffer.add(pos);
+            return;
+        }
+        
+        progress.addCheckpoint(pos);
+    }
+
+    @Override
+    public void pieceRemoved(Vector3f pos) {
+        if (!progress.isInitialized())
+            throw new IllegalStateException("Think about it, how?");
+
+        progress.setMinCheckpoint(pos);
     }
 }
