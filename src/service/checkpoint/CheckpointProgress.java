@@ -35,7 +35,7 @@ import effects.LoadModelWrapper;
 // https://wiki.jmonkeyengine.org/jme3/advanced/physics.html see PhysicsControl.addCollideWithGroup
 public class CheckpointProgress extends BaseAppState {
 
-    private final Vector3f[] checkpointPositions;
+    private final Vector3f[] initCheckpointPositions;
     private final RayCarControl player;
 
     private final CheckpointListener listener;
@@ -52,9 +52,19 @@ public class CheckpointProgress extends BaseAppState {
 
     private Spatial baseSpat;
     private boolean attachModels;
+    
+    private final Type type;
+    public enum Type {
+        Lap,
+        Sprint
+    }
 
-    public CheckpointProgress(Vector3f[] checkpoints, Collection<RayCarControl> cars, RayCarControl player) {
-        this.checkpointPositions = checkpoints;
+    public CheckpointProgress(Type type, Vector3f[] checkpoints, Collection<RayCarControl> cars, RayCarControl player) {
+        this.type = type; //TODO this should be different classes somehow
+
+        if (checkpoints == null || checkpoints.length < 2)
+            throw new IllegalStateException(Type.Lap + " type should set checkpoints");
+        this.initCheckpointPositions = checkpoints;
         this.checkpoints = new ArrayList<Checkpoint>(checkpoints.length);
         
         this.attachModels = true;
@@ -83,31 +93,31 @@ public class CheckpointProgress extends BaseAppState {
                     return null;
                 },
                 (racer) -> {
-                    // update to next checkpoint
-                    int nextNum = (racer.nextCheckpoint.num + 1 % this.checkpoints.size());
-                    if (nextNum == 0)
-                        racer.lap++;
-                    racer.lastCheckpoint = racer.nextCheckpoint;
-                    racer.nextCheckpoint = this.checkpoints.get(nextNum);
-
-                    // update last time
-                    int fakeCheckpointHash = racer.lap * 10000 + racer.lastCheckpoint.num;
-                    if (!timeAtCheckpoints.containsKey(fakeCheckpointHash)) {
-                        timeAtCheckpoints.put(fakeCheckpointHash, Instant.now());
-                        racer.duration = Duration.ZERO;
-                    } else {
-                        racer.duration = Duration.between(timeAtCheckpoints.get(fakeCheckpointHash), Instant.now());
-                    }
+                    racerCompletedCheckpoint(racer);
                 });
     }
+    private void racerCompletedCheckpoint(RacerState racer) {
+        // update to next checkpoint
+        int nextNum = (racer.nextCheckpoint.num + 1 % this.checkpoints.size());
+        if (nextNum == 0)
+            racer.lap++;
+        racer.lastCheckpoint = racer.nextCheckpoint;
+        racer.nextCheckpoint = this.checkpoints.get(nextNum);
 
-    public void attachVisualModel(boolean attach) {
-        // TODO we can change this to just toggle the root node, removing the init condition
-        if (this.isInitialized()) throw new IllegalStateException("This must be only called before initialization.");
-        this.attachModels = attach;
+        // update last time
+        int fakeCheckpointHash = racer.lap * 10000 + racer.lastCheckpoint.num;
+        if (!timeAtCheckpoints.containsKey(fakeCheckpointHash)) {
+            timeAtCheckpoints.put(fakeCheckpointHash, Instant.now());
+            racer.duration = Duration.ZERO;
+        } else {
+            racer.duration = Duration.between(timeAtCheckpoints.get(fakeCheckpointHash), Instant.now());
+        }
     }
-    public void setCheckpointModel(Spatial spat) {
-        if (this.isInitialized()) throw new IllegalStateException("This must be only called before initialization.");
+
+    public void setCheckpointModel(Spatial spat, boolean isVisual) {
+        if (this.isInitialized())
+            throw new IllegalStateException("This must be only called before initialization.");
+        this.attachModels = isVisual; // TODO we can change this to just toggle the root node, removing the init condition
         this.baseSpat = spat;
     }
 
@@ -120,8 +130,8 @@ public class CheckpointProgress extends BaseAppState {
         // generate the checkpoint objects
         colShape = CollisionShapeFactory.createBoxShape(baseSpat);
 
-        for (int i = 0; i < checkpointPositions.length; i++) {
-            addCheckpoint(checkpointPositions[i]);
+        for (int i = 0; i < initCheckpointPositions.length; i++) {
+            addCheckpoint(initCheckpointPositions[i]);
         }
         this.firstCheckpoint = this.checkpoints.get(0);
 
@@ -136,6 +146,8 @@ public class CheckpointProgress extends BaseAppState {
 
     /** Adds a checkpoint to the list, doesn't affect laps at all */
     public void addCheckpoint(Vector3f pos) {
+        if (this.type == Type.Lap)
+            throw new IllegalStateException("Only a " + Type.Sprint + " type should use this method");
         if (!this.isInitialized()) // TODO this can be fixed if we get them all before init and batch them
             throw new IllegalStateException("This must be only called after initialization.");
 
@@ -148,13 +160,6 @@ public class CheckpointProgress extends BaseAppState {
 
         int checkpointCount = this.checkpoints.size();
         this.checkpoints.add(new Checkpoint(checkpointCount, pos, ghost));
-    }
-
-    public List<RayCarControl> setMinCheckpoint(Vector3f pos) {
-        // TODO so that cars don't ever lose the checkpoint
-        // called by the race class so that this can remove old checkpoints, and update anyone really behind with a better one
-        // maybe it could also remove the ghost control from the physics space?
-        throw new NoSuchMethodError();
     }
 
     public RayCarControl isThereSomeoneAtState(int laps, int checkpoints) {

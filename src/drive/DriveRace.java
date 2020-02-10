@@ -94,8 +94,8 @@ public class DriveRace extends DriveBase implements PauseState.ICallback, ICheck
             c.attachAI(rAi, true);
         }
         
-        progress = new CheckpointProgress(checkpoints, cb.getAll(), cb.get(0));
-        progress.setCheckpointModel(CheckpointProgress.GetDefaultCheckpointModel(app, 2, new ColorRGBA(0, 1, 0, 0.4f)));
+        progress = new CheckpointProgress(CheckpointProgress.Type.Lap, checkpoints, cb.getAll(), cb.get(0));
+        progress.setCheckpointModel(CheckpointProgress.GetDefaultCheckpointModel(app, 2, new ColorRGBA(0, 1, 0, 0.4f)), true);
         getStateManager().attach(progress);
 
         progressMenu = new CheckpointProgressUI(progress);
