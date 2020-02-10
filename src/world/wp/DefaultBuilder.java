@@ -44,7 +44,9 @@ public abstract class DefaultBuilder extends World implements IWorld {
 	protected Random rand;
 	
 	protected int count = 0;
-	
+    
+    protected IPieceChanged changedListener;
+
 	DefaultBuilder(WP[] type) {
 		this(type, (long)(Math.random()*Long.MAX_VALUE));
 	}
@@ -93,28 +95,12 @@ public abstract class DefaultBuilder extends World implements IWorld {
 	public void update(float tpf) {
 		Vector3f camPos = getApplication().getCamera().getLocation();
 
-		try {
-			placeNewPieces(camPos);
-		} catch (IllegalStateException e) {
-			//probably couldn't find something to place
-			e.printStackTrace();
-		}
-		
-		List<Spatial> temp = new LinkedList<Spatial>(curPieces);
-		for (Spatial sp: temp) {
-			Vector3f endSpPos = sp.getWorldTranslation();
-			if (endSpPos.subtract(camPos).length() > SPAWN_DISTANCE/2) {
-				//2 because don't delete the ones we just placed
-				getState(BulletAppState.class).getPhysicsSpace().remove(sp.getControl(0));
-				rootNode.detachChild(sp);
-				curPieces.remove(sp);
-			} else {
-				break; //this means only remove pieces in order
-			}
-		}
+		placeNewPieces(camPos);
+        
+        removePieces(camPos);
 	}
 
-	protected void placeNewPieces(Vector3f camPos) throws IllegalStateException {
+	protected void placeNewPieces(Vector3f camPos) {
 
 		//get list of valid pieces (i.e. pieces with the correct node type)
 		List<WPObject> wpoList = new ArrayList<>();
@@ -123,10 +109,8 @@ public abstract class DefaultBuilder extends World implements IWorld {
 				wpoList.add(w);
 			}
 		}
-
-		if (wpoList.isEmpty()) {
+		if (wpoList.isEmpty())
 			throw new IllegalStateException("No pieces with the node start " + nextNode.name() + " found on type " + WPObject.class.getName());
-		}
 
 		//if there is no piece to place then this gets stuck in an infinite loop
 		//probably because there is no piece that satisfies the angle constraint
@@ -134,9 +118,11 @@ public abstract class DefaultBuilder extends World implements IWorld {
             int i = rand.nextInt(wpoList.size());
 			WPObject wpo = wpoList.get(i);
 
-			if (testConstraints(wpo))
-				placePiece(wpo);
-			else
+			if (testConstraints(wpo)) {
+                Vector3f pos = placePiece(wpo);
+                if (changedListener != null)
+                    changedListener.pieceAdded(pos);
+            } else
 				wpoList.remove(wpo);
 
 			if (wpoList.isEmpty())
@@ -162,7 +148,7 @@ public abstract class DefaultBuilder extends World implements IWorld {
 	// Please attempt to use the wonderful getRotation().toAngles() and fromAngles() methods
 	// which should stop the slowly getting off track if you just create the quaternion everytime
 	// there will always be floating point errors though, unless we really care about that...
-	protected void placePiece(WPObject wpo) {
+	protected Vector3f placePiece(WPObject wpo) {
 		WP worldPiece = wpo.wp;
 		Spatial s = wpo.sp.clone();
 		CollisionShape coll = wpo.col;
@@ -189,9 +175,30 @@ public abstract class DefaultBuilder extends World implements IWorld {
         nextRot.multLocal(worldPiece.getNewAngle());
 		
 		nextNode = worldPiece.endNode();
-		count++;
+        count++;
+        
+        return s.getWorldTranslation();
 	}
-	
+    
+    protected void removePieces(Vector3f camPos) {
+        List<Spatial> temp = new LinkedList<Spatial>(curPieces);
+        for (Spatial sp : temp) {
+            Vector3f endSpPos = sp.getWorldTranslation();
+            if (endSpPos.subtract(camPos).length() > SPAWN_DISTANCE / 2) {
+                // 2 because don't delete the ones we just placed TODO curPieces should be in a linkedlist structure?
+                getState(BulletAppState.class).getPhysicsSpace().remove(sp.getControl(0));
+                rootNode.detachChild(sp);
+                curPieces.remove(sp);
+
+                if (changedListener != null)
+                    changedListener.pieceRemoved(endSpPos);
+
+            } else {
+                break; // this means only remove pieces in order
+            }
+        }
+    }
+
 	public void reset() {
 		for (Spatial s: curPieces) {
 			getState(BulletAppState.class).getPhysicsSpace().remove(s.getControl(0));
@@ -258,5 +265,17 @@ public abstract class DefaultBuilder extends World implements IWorld {
 		WP wp;
 		Spatial sp;
 		CollisionShape col;
-	}
+    }
+    
+    public void registerListener(IPieceChanged changedListener) {
+        if (this.changedListener != null)
+            throw new IllegalStateException("Already has a listener");
+
+        this.changedListener = changedListener;
+    }
+
+    public interface IPieceChanged {
+        void pieceAdded(Vector3f pos);
+        void pieceRemoved(Vector3f pos);
+    }
 }
