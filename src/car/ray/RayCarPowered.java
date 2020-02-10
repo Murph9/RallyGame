@@ -7,6 +7,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
 import car.data.CarDataConst;
+import helper.H;
 
 //handles engine/drivetrain stuff
 public class RayCarPowered extends RayCar {
@@ -186,8 +187,8 @@ public class RayCarPowered extends RayCar {
 
 	public final String statsString() {
 		return helper.H.round3f(rbc.getPhysicsLocation(), 2) + "\nspeed:" + helper.H.round3f(rbc.getLinearVelocity(), 2)
-                + "m/s\nRPM:" + curRPM + "\nengine:" + engineTorque + "\ndrag:" + dragDir.length() + " rr("
-                + rollingResistanceTotal() + ")" + "N";
+                + "m/s\nRPM:" + curRPM + "\nengine:" + engineTorque + "\ndrag:" + H.roundDecimal(dragDir.length(), 3) + " rr("
+                + H.roundDecimal(rollingResistanceTotal(), 3) + ")" + "N";
     }
     
     private float rollingResistanceTotal() {
