@@ -29,7 +29,7 @@ import world.wp.WP.NodeType;
 /** Generates the world infront of the player dynamically from static set pieces */
 public abstract class DefaultBuilder extends World implements IWorld {
 
-    protected static final float SPAWN_DISTANCE = 500;
+    protected static final float SPAWN_DISTANCE = 1000;
 
 	protected final WP[] type;
 	protected final List<Spatial> curPieces = new ArrayList<Spatial>();

@@ -110,10 +110,15 @@ public abstract class CarAI implements ICarAI {
 
 		boolean accel = IfTooSlowForPoint(targetPos, curPos, this.car.vel);
 		boolean targetInFront = curPos.subtract(targetPos).length() > curPos.add(car.forward).subtract(targetPos).length();
-		if (accel && targetInFront && !ifDrifting()) {
-            //drive at point
-            this.onEvent("Accel", true);
-            this.onEvent("Brake", false);
+		if (accel && targetInFront) {
+            if (ifDrifting()) {
+                // aim at point
+                this.onEvent("Accel", false);
+                this.onEvent("Brake", false);
+            } else { //drive at point
+                this.onEvent("Accel", true);
+                this.onEvent("Brake", false);
+            }
         } else {
             //drive as best to point, and don't accel
             this.onEvent("Accel", false);
