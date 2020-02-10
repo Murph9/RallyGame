@@ -143,9 +143,9 @@ class RacerStateTableView extends Container {
         String durationStr = "";
         if (d != null) {
             if (d.toHoursPart() > 0)
-                durationStr = "+59:99";
+                durationStr = "+59:99:999";
             else
-                durationStr = String.format("%02d:%02d", d.toMinutesPart(), d.toSecondsPart());
+                durationStr = String.format("%02d:%02d:%03d", d.toMinutesPart(), d.toSecondsPart(), d.toMillisPart());
         }
 
         return new String[] {
