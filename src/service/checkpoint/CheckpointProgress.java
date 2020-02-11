@@ -48,6 +48,7 @@ public class CheckpointProgress extends BaseAppState {
     private final Map<Integer, Instant> timeAtCheckpoints;
 
     private final Node rootNode;
+    private final List<Vector3f> preInitCheckpoints;
     private final List<Checkpoint> attachedCheckpoints;
 
     private CollisionShape colShape;
@@ -73,6 +74,7 @@ public class CheckpointProgress extends BaseAppState {
         this.player = player;
         this.rootNode = new Node("checkpoint progress root");
         this.attachedCheckpoints = new LinkedList<>();
+        this.preInitCheckpoints = new LinkedList<>();
 
         this.racers = new HashMap<>();
         for (RayCarControl car : cars) {
@@ -123,18 +125,26 @@ public class CheckpointProgress extends BaseAppState {
         }
     }
 
-    public void setCheckpointModel(Spatial spat, boolean isVisual) {
+    public void setVisualModels(boolean isVisual) {
+        this.attachModels = isVisual;
+        if (this.isInitialized()) {
+            if (isVisual)
+                ((SimpleApplication) getApplication()).getRootNode().attachChild(rootNode);
+            else
+                ((SimpleApplication) getApplication()).getRootNode().detachChild(rootNode);
+        }
+    }
+
+    public void setCheckpointModel(Spatial spat) {
         if (this.isInitialized())
             throw new IllegalStateException("This must be only called before initialization.");
-        this.attachModels = isVisual; // TODO we can change this to just toggle the root node, removing the init condition
         this.baseSpat = spat;
     }
 
     @Override
     protected void initialize(Application app) {
-        ((SimpleApplication) app).getRootNode().attachChild(rootNode);
-
-        PhysicsSpace physicsSpace = getState(BulletAppState.class).getPhysicsSpace();
+        if (attachModels)
+            ((SimpleApplication) app).getRootNode().attachChild(rootNode);
 
         // generate the checkpoint objects
         colShape = CollisionShapeFactory.createBoxShape(baseSpat);
@@ -150,17 +160,24 @@ public class CheckpointProgress extends BaseAppState {
             racer.nextCheckpoint = this.firstCheckpoint;
         }
 
-        listener.startListening(physicsSpace);
+        // add in any pre init checkpoints
+        if (!preInitCheckpoints.isEmpty()) {
+            for (Vector3f checkPos : preInitCheckpoints)
+                attachCheckpoint(checkPos);
+        }
+
+        listener.startListening(getState(BulletAppState.class).getPhysicsSpace());
     }
 
-    /** Adds a checkpoint to the list, doesn't affect laps at all */
+    /** Adds a checkpoint to the list, not applicable for lap type */
     public void addCheckpoint(Vector3f pos) {
         if (this.type == Type.Lap)
             throw new IllegalStateException("Only a " + Type.Sprint + " type should use this method");
-        if (!this.isInitialized()) // TODO this can be fixed if we get them all before init and batch them
-            throw new IllegalStateException("This must be only called after initialization.");
+        if (this.isInitialized())
+            preInitCheckpoints.add(pos);
         attachCheckpoint(pos);
     }
+
     private void attachCheckpoint(Vector3f pos) {
         int checkpointCount = this.checkpoints.size();
         Vector3f prevCheckpointPos = pos;
@@ -177,8 +194,7 @@ public class CheckpointProgress extends BaseAppState {
 
         GhostControl ghost = new GhostControl(colShape);
         box.addControl(ghost);
-        if (attachModels)
-            rootNode.attachChild(box);
+        rootNode.attachChild(box);
         
         this.checkpoints.add(new Checkpoint(checkpointCount, pos, ghost, box));
     }
@@ -262,6 +278,7 @@ public class CheckpointProgress extends BaseAppState {
 
     private void attachNextCheckpoints() {
         // lazy load ghost controls until someone is up to it for physics lag reasons
+        // Even though this is called every frame it isn't that slow
 
         List<Checkpoint> ghosts = new LinkedList<>();
         for (RacerState racer : this.racers.values())
@@ -279,7 +296,7 @@ public class CheckpointProgress extends BaseAppState {
 
     @Override
     public void cleanup(Application app) {
-        ((SimpleApplication) app).getRootNode().detachChild(rootNode);
+        rootNode.removeFromParent();
 
         PhysicsSpace physicsSpace = app.getStateManager().getState(BulletAppState.class).getPhysicsSpace();
         for (Checkpoint checkpoint : checkpoints) {

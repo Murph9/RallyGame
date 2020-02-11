@@ -81,7 +81,7 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
         }
         
         progress = new CheckpointProgress(CheckpointProgress.Type.Sprint, checkpoints, cb.getAll(), cb.get(0));
-        progress.setCheckpointModel(CheckpointProgress.GetDefaultCheckpointModel(app, 4, new ColorRGBA(0, 1, 0, 0.4f)), true);
+        progress.setCheckpointModel(CheckpointProgress.GetDefaultCheckpointModel(app, 4, new ColorRGBA(0, 1, 0, 0.4f)));
         getStateManager().attach(progress);
 
         progressMenu = new CheckpointProgressUI(progress);
