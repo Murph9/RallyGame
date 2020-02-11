@@ -32,6 +32,7 @@ import effects.LoadModelWrapper;
 import helper.H;
 
 // TODO figure out checkpoint rotation
+// TODO show their current checkpoint to the player
 
 // TODO change the collision channel of the ghost objects to prevent colliding with ground every update
 // https://wiki.jmonkeyengine.org/jme3/advanced/physics.html see PhysicsControl.addCollideWithGroup
@@ -95,17 +96,24 @@ public class CheckpointProgress extends BaseAppState {
                     return null;
                 },
                 (racer) -> {
-                    int nextNum = (racer.nextCheckpoint.num + 1 % this.checkpoints.size());
-                    if (nextNum == 0)
-                        racer.lap++;
-                    racerCompletedCheckpoint(racer, racer.nextCheckpoint.num, nextNum);
+                    racerCompletedCheckpoint(racer, racer.nextCheckpoint.num);
                 });
     }
-    private void racerCompletedCheckpoint(RacerState racer, int lastCheckNum, int nextCheckNum) {
-        // update to given checkpoints
-        racer.lastCheckpoint = this.checkpoints.get(lastCheckNum);
-        racer.nextCheckpoint = this.checkpoints.get(nextCheckNum);
 
+    private void racerCompletedCheckpoint(RacerState racer, int checkNum) {
+        //calc next checkpoint then
+        int nextNum = (checkNum + 1 % this.checkpoints.size());
+        if (nextNum == 0)
+            racer.lap++;
+
+        // update to given checkpoints
+        racer.lastCheckpoint = this.checkpoints.get(checkNum);
+        racer.nextCheckpoint = this.checkpoints.get(nextNum);
+
+        updateTimingHash(racer);
+    }
+
+    private void updateTimingHash(RacerState racer) {
         // update last time
         int fakeCheckpointHash = racer.lap * 10000 + racer.lastCheckpoint.num;
         if (!timeAtCheckpoints.containsKey(fakeCheckpointHash)) {
@@ -190,7 +198,8 @@ public class CheckpointProgress extends BaseAppState {
         
         for (RacerState racer: this.getRaceState()) {
             if (racer.nextCheckpoint.num <= check.num + 1) {
-                racerCompletedCheckpoint(racer, check.num+1, check.num + 2);
+                racerCompletedCheckpoint(racer, check.num + 1);
+
                 Vector3f dir = racer.nextCheckpoint.position.subtract(racer.lastCheckpoint.position).normalize();
                 Quaternion q = new Quaternion();
                 q.lookAt(dir, new Vector3f());
