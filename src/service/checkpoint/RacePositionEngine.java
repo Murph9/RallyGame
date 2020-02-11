@@ -19,7 +19,6 @@ import car.ray.RayCarControl;
 
 public class RacePositionEngine {
 
-    private Checkpoint firstCheckpoint;
     private final List<Checkpoint> checkpoints;
     private final Map<RayCarControl, RacerState> racers;
     private final Map<Integer, Instant> timeAtCheckpoints;
@@ -34,21 +33,18 @@ public class RacePositionEngine {
         }
     }
 
-    public Vector3f getCheckpointPos(int i) {
-        return this.checkpoints.get(i).position;
-    }
-
     public void addCheckpoint(Checkpoint check) {
         this.checkpoints.add(check);
     }
 
     public void init(Application app) {
-        this.firstCheckpoint = this.checkpoints.get(0);
+        if (this.checkpoints.isEmpty())
+            throw new IllegalStateException("Checkpoints is empty?");
 
         // set progress values
         for (RacerState racer : this.racers.values()) {
-            racer.lastCheckpoint = this.firstCheckpoint;
-            racer.nextCheckpoint = this.firstCheckpoint;
+            racer.lastCheckpoint = this.checkpoints.get(0);
+            racer.nextCheckpoint = this.checkpoints.get(0);
         }
     }
 
@@ -66,7 +62,9 @@ public class RacePositionEngine {
         return null;
     }
 
-    public void racerCompletedCheckpoint(RacerState racer, int checkNum) {
+    public void racerHitCheckpoint(RacerState racer, Checkpoint check) {
+        int checkNum = check.num;
+        
         // calc next checkpoint then
         int nextNum = (checkNum + 1 % this.checkpoints.size());
         if (nextNum == 0)
@@ -87,36 +85,21 @@ public class RacePositionEngine {
     }
 
     public Checkpoint getCheckpointFromPos(Vector3f pos) {
-        Checkpoint check = null;
-        for (Checkpoint c : this.checkpoints) {
-            if (c.position.equals(pos)) {
-                check = c;
-                break;
-            }
-        }
-        return check;
+        for (Checkpoint c : this.checkpoints)
+            if (c.position.equals(pos))
+                return c;
+        return null;
     }
 
     public Checkpoint getCheckpoint(int i) {
+        if (i < 0 || i >= this.checkpoints.size())
+            return null;
+
         return this.checkpoints.get(i);
     }
 
-	public Vector3f getNextCheckpoint(RayCarControl car) {
-		Checkpoint check = racers.get(car).nextCheckpoint;
-        if (check == null)
-            return null;
-        return check.position;
-	}
-
-	public Vector3f getLastCheckpoint(RayCarControl car) {
-		Checkpoint check = racers.get(car).lastCheckpoint;
-        if (check == null)
-            return null;
-        return check.position;
-	}
-
-	public RacerState getPlayerRacerState(RayCarControl player) {
-		return this.racers.get(player);
+	public RacerState getRacerState(RayCarControl car) {
+		return this.racers.get(car);
 	}
 
 	public List<RacerState> getAllRaceStates() {
@@ -130,10 +113,15 @@ public class RacePositionEngine {
 	public Vector3f getLastCheckpointPos() {
         if (this.checkpoints.size() < 1)
             return null;
-        return this.checkpoints.get(this.checkpoints.size() - 1).position;
+        return posOfCheckpoint(getCheckpoint(this.checkpoints.size() - 1));
 	}
 
 	public List<Checkpoint> getNextCheckpoints() {
         return racers.values().stream().map(x -> x.nextCheckpoint).collect(Collectors.toList());
-	}
+    }
+    
+
+    private Vector3f posOfCheckpoint(Checkpoint check) {
+        return check == null ? null : check.position;
+    }
 }

@@ -26,7 +26,7 @@ import car.ray.RayCarControl;
 import effects.LoadModelWrapper;
 import helper.H;
 
-// TODO show their current checkpoint to the player
+// TODO show the player's current checkpoint highlighted in some way?
 public class CheckpointProgress extends BaseAppState {
 
     private final RayCarControl player;
@@ -69,7 +69,7 @@ public class CheckpointProgress extends BaseAppState {
         }, (body) -> {
             return engine.getIfRayCar(body);
         }, (racer) -> {
-            engine.racerCompletedCheckpoint(racer, racer.nextCheckpoint.num);
+            engine.racerHitCheckpoint(racer, racer.nextCheckpoint);
         });
     }
 
@@ -94,14 +94,12 @@ public class CheckpointProgress extends BaseAppState {
         if (attachModels)
             ((SimpleApplication) app).getRootNode().attachChild(rootNode);
 
+        engine.init(app);
+
         // generate the checkpoint objects
         colShape = CollisionShapeFactory.createBoxShape(baseSpat);
-
-        // add in any pre init checkpoints
         for (Vector3f checkPos : preInitCheckpoints)
             attachCheckpoint(checkPos);
-
-        engine.init(app);
 
         listener.startListening(getState(BulletAppState.class).getPhysicsSpace());
     }
@@ -109,7 +107,7 @@ public class CheckpointProgress extends BaseAppState {
     /** Adds a checkpoint to the list, not applicable for lap type */
     public void addCheckpoint(Vector3f pos) {
         if (this.type == Type.Lap)
-            throw new IllegalStateException("Only a " + Type.Sprint + " type should use this method");
+            throw new IllegalStateException("The " + Type.Sprint + " type cannot use this method");
         if (this.isInitialized())
             preInitCheckpoints.add(pos);
         attachCheckpoint(pos);
@@ -141,7 +139,7 @@ public class CheckpointProgress extends BaseAppState {
 
     public void setMinCheckpoint(Vector3f pos) {
         if (this.type == Type.Lap)
-            throw new IllegalStateException("Only a " + Type.Sprint + " type should use this method");
+            throw new IllegalStateException("The " + Type.Sprint + " type cannot use this method");
 
         Checkpoint check = engine.getCheckpointFromPos(pos);
         if (check == null)
@@ -152,8 +150,8 @@ public class CheckpointProgress extends BaseAppState {
         // and update anyone really behind with a better, valid one
 
         for (RacerState racer : this.getRaceState()) {
-            if (racer.nextCheckpoint.num <= check.num + 1) {
-                engine.racerCompletedCheckpoint(racer, check.num + 1);
+            if (racer.nextCheckpoint.num <= check.num) {
+                engine.racerHitCheckpoint(racer, check);
 
                 Vector3f dir = racer.nextCheckpoint.position.subtract(racer.lastCheckpoint.position).normalize();
                 Quaternion q = new Quaternion();
@@ -193,7 +191,7 @@ public class CheckpointProgress extends BaseAppState {
     }
 
     public RacerState getPlayerRacerState() {
-        return engine.getPlayerRacerState(player);
+        return engine.getRacerState(player);
     }
 
     protected List<RacerState> getRaceState() {
@@ -213,7 +211,7 @@ public class CheckpointProgress extends BaseAppState {
         for (Checkpoint check : this.attachedCheckpoints) // remove old
             getState(BulletAppState.class).getPhysicsSpace().remove(check.ghost);
 
-        for (Checkpoint check : ghosts) //add new
+        for (Checkpoint check : ghosts) // add new
             getState(BulletAppState.class).getPhysicsSpace().add(check.ghost);
 
         this.attachedCheckpoints.clear();
@@ -234,11 +232,11 @@ public class CheckpointProgress extends BaseAppState {
     }
 
     public Vector3f getNextCheckpoint(RayCarControl car) {
-        return engine.getNextCheckpoint(car);
+        return engine.getRacerState(car).nextCheckpoint.position;
     }
 
     public Vector3f getLastCheckpoint(RayCarControl car) {
-        return engine.getLastCheckpoint(car);
+        return engine.getRacerState(car).lastCheckpoint.position;
     }
 
     public static Spatial GetDefaultCheckpointModel(Application app, float scale) {
