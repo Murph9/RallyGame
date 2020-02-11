@@ -94,12 +94,13 @@ public class CheckpointProgress extends BaseAppState {
         if (attachModels)
             ((SimpleApplication) app).getRootNode().attachChild(rootNode);
 
-        engine.init(app);
-
         // generate the checkpoint objects
         colShape = CollisionShapeFactory.createBoxShape(baseSpat);
         for (Vector3f checkPos : preInitCheckpoints)
             attachCheckpoint(checkPos);
+
+
+        engine.init(app);
 
         listener.startListening(getState(BulletAppState.class).getPhysicsSpace());
     }
@@ -232,11 +233,11 @@ public class CheckpointProgress extends BaseAppState {
     }
 
     public Vector3f getNextCheckpoint(RayCarControl car) {
-        return engine.getRacerState(car).nextCheckpoint.position;
+        return engine.getRacerNextCheckpoint(car);
     }
 
     public Vector3f getLastCheckpoint(RayCarControl car) {
-        return engine.getRacerState(car).lastCheckpoint.position;
+        return engine.getRacerLastCheckpoint(car);
     }
 
     public static Spatial GetDefaultCheckpointModel(Application app, float scale) {

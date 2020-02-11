@@ -98,6 +98,13 @@ public class RacePositionEngine {
         return this.checkpoints.get(i);
     }
 
+    public Vector3f getRacerNextCheckpoint(RayCarControl car) {
+        return posOfCheckpoint(this.racers.get(car).nextCheckpoint);
+    }
+    public Vector3f getRacerLastCheckpoint(RayCarControl car) {
+        return posOfCheckpoint(this.racers.get(car).nextCheckpoint);
+    }
+
 	public RacerState getRacerState(RayCarControl car) {
 		return this.racers.get(car);
 	}
