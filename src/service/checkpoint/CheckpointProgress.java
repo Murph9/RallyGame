@@ -1,15 +1,10 @@
 package service.checkpoint;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -32,20 +27,12 @@ import effects.LoadModelWrapper;
 import helper.H;
 
 // TODO show their current checkpoint to the player
-
-// TODO change the collision channel of the ghost objects to prevent colliding with ground every update
-// https://wiki.jmonkeyengine.org/jme3/advanced/physics.html see PhysicsControl.addCollideWithGroup
 public class CheckpointProgress extends BaseAppState {
 
-    private final Vector3f[] initCheckpointPositions;
     private final RayCarControl player;
 
     private final CheckpointListener listener;
-
-    private Checkpoint firstCheckpoint;
-    private final List<Checkpoint> checkpoints;
-    private final Map<RayCarControl, RacerState> racers;
-    private final Map<Integer, Instant> timeAtCheckpoints;
+    private final RacePositionEngine engine;
 
     private final Node rootNode;
     private final List<Vector3f> preInitCheckpoints;
@@ -55,74 +42,35 @@ public class CheckpointProgress extends BaseAppState {
 
     private Spatial baseSpat;
     private boolean attachModels;
-    
+
     private final Type type;
+
     public enum Type {
-        Lap,
-        Sprint
+        Lap, Sprint
     }
 
     public CheckpointProgress(Type type, Vector3f[] checkpoints, Collection<RayCarControl> cars, RayCarControl player) {
-        this.type = type; //TODO this should be different classes somehow
+        this.type = type; // TODO this should be different classes somehow
 
-        if (checkpoints == null || checkpoints.length < 2)
+        if (type == Type.Lap && (checkpoints == null || checkpoints.length < 2))
             throw new IllegalStateException(Type.Lap + " type should set checkpoints");
-        this.initCheckpointPositions = checkpoints;
-        this.checkpoints = new ArrayList<Checkpoint>(checkpoints.length);
+
+        this.player = player;
+
+        this.preInitCheckpoints = new LinkedList<>(Arrays.asList(checkpoints));
+        this.engine = new RacePositionEngine(cars);
         
         this.attachModels = true;
-        this.player = player;
         this.rootNode = new Node("checkpoint progress root");
         this.attachedCheckpoints = new LinkedList<>();
-        this.preInitCheckpoints = new LinkedList<>();
 
-        this.racers = new HashMap<>();
-        for (RayCarControl car : cars) {
-            this.racers.put(car, new RacerState(car));
-        }
-        this.timeAtCheckpoints = new HashMap<>();
-
-
-        this.listener = new CheckpointListener(
-                (ghost) -> {
-                    for (Checkpoint checkpoint : this.checkpoints)
-                        if (checkpoint.ghost == ghost)
-                            return checkpoint;
-                    return null;
-                },
-                (body) -> {
-                    for (Entry<RayCarControl, RacerState> racer : racers.entrySet())
-                        if (body == racer.getKey().getPhysicsObject())
-                            return racer.getValue();
-                    return null;
-                },
-                (racer) -> {
-                    racerCompletedCheckpoint(racer, racer.nextCheckpoint.num);
-                });
-    }
-
-    private void racerCompletedCheckpoint(RacerState racer, int checkNum) {
-        //calc next checkpoint then
-        int nextNum = (checkNum + 1 % this.checkpoints.size());
-        if (nextNum == 0)
-            racer.lap++;
-
-        // update to given checkpoints
-        racer.lastCheckpoint = this.checkpoints.get(checkNum);
-        racer.nextCheckpoint = this.checkpoints.get(nextNum);
-
-        updateTimingHash(racer);
-    }
-
-    private void updateTimingHash(RacerState racer) {
-        // update last time
-        int fakeCheckpointHash = racer.lap * 10000 + racer.lastCheckpoint.num;
-        if (!timeAtCheckpoints.containsKey(fakeCheckpointHash)) {
-            timeAtCheckpoints.put(fakeCheckpointHash, Instant.now());
-            racer.duration = Duration.ZERO;
-        } else {
-            racer.duration = Duration.between(timeAtCheckpoints.get(fakeCheckpointHash), Instant.now());
-        }
+        this.listener = new CheckpointListener((ghost) -> {
+            return engine.getIfCheckpoint(ghost);
+        }, (body) -> {
+            return engine.getIfRayCar(body);
+        }, (racer) -> {
+            engine.racerCompletedCheckpoint(racer, racer.nextCheckpoint.num);
+        });
     }
 
     public void setVisualModels(boolean isVisual) {
@@ -149,22 +97,11 @@ public class CheckpointProgress extends BaseAppState {
         // generate the checkpoint objects
         colShape = CollisionShapeFactory.createBoxShape(baseSpat);
 
-        for (int i = 0; i < initCheckpointPositions.length; i++) {
-            attachCheckpoint(initCheckpointPositions[i]);
-        }
-        this.firstCheckpoint = this.checkpoints.get(0);
-
-        //set progress values
-        for (RacerState racer : this.racers.values()) {
-            racer.lastCheckpoint = this.firstCheckpoint;
-            racer.nextCheckpoint = this.firstCheckpoint;
-        }
-
         // add in any pre init checkpoints
-        if (!preInitCheckpoints.isEmpty()) {
-            for (Vector3f checkPos : preInitCheckpoints)
-                attachCheckpoint(checkPos);
-        }
+        for (Vector3f checkPos : preInitCheckpoints)
+            attachCheckpoint(checkPos);
+
+        engine.init(app);
 
         listener.startListening(getState(BulletAppState.class).getPhysicsSpace());
     }
@@ -179,14 +116,14 @@ public class CheckpointProgress extends BaseAppState {
     }
 
     private void attachCheckpoint(Vector3f pos) {
-        int checkpointCount = this.checkpoints.size();
-        Vector3f prevCheckpointPos = pos;
-        if (checkpointCount > 0)
-            prevCheckpointPos = this.checkpoints.get(checkpointCount - 1).position;
+        //due to no removing, the last checkpoint is always the previous one
+        Vector3f prevCheckpointPos = engine.getLastCheckpointPos();
+        if (prevCheckpointPos == null)
+            prevCheckpointPos  = pos;
 
         Spatial box = baseSpat.clone();
         box.setLocalTranslation(pos);
-        //rotate box to angle towards 
+        // rotate box to angle towards
         Quaternion q = new Quaternion();
         if (prevCheckpointPos != pos)
             q.lookAt(pos.subtract(prevCheckpointPos), Vector3f.UNIT_Y);
@@ -195,49 +132,41 @@ public class CheckpointProgress extends BaseAppState {
         GhostControl ghost = new GhostControl(colShape);
         box.addControl(ghost);
         rootNode.attachChild(box);
-        
-        this.checkpoints.add(new Checkpoint(checkpointCount, pos, ghost, box));
+
+        Checkpoint check = new Checkpoint(engine.getCheckpointCount(), pos, ghost, box);
+        engine.addCheckpoint(check);
     }
 
-    private Checkpoint getCheckpointFromPos(Vector3f pos) {
-        Checkpoint check = null;
-        for (Checkpoint c : this.checkpoints) {
-            if (c.position.equals(pos)) {
-                check = c;
-                break;
-            }
-        }
-        return check;
-    }
+    
 
     public void setMinCheckpoint(Vector3f pos) {
         if (this.type == Type.Lap)
             throw new IllegalStateException("Only a " + Type.Sprint + " type should use this method");
 
-        Checkpoint check = getCheckpointFromPos(pos);
+        Checkpoint check = engine.getCheckpointFromPos(pos);
         if (check == null)
             return;
-        
-        
+
         // called by the race class so that this can remove old checkpoints
         // so that cars don't ever lose the checkpoint
         // and update anyone really behind with a better, valid one
-        
-        for (RacerState racer: this.getRaceState()) {
+
+        for (RacerState racer : this.getRaceState()) {
             if (racer.nextCheckpoint.num <= check.num + 1) {
-                racerCompletedCheckpoint(racer, check.num + 1);
+                engine.racerCompletedCheckpoint(racer, check.num + 1);
 
                 Vector3f dir = racer.nextCheckpoint.position.subtract(racer.lastCheckpoint.position).normalize();
                 Quaternion q = new Quaternion();
                 q.lookAt(dir, new Vector3f());
-                racer.car.setPhysicsProperties(racer.lastCheckpoint.position.add(0, 1, 0), dir.mult(10), q, new Vector3f());
+                racer.car.setPhysicsProperties(racer.lastCheckpoint.position.add(0, 1, 0), dir.mult(10), q,
+                        new Vector3f());
             }
         }
 
-        //remove all visual checkpoints
+        // remove all visual checkpoints
         int checkNum = check.num;
         for (int i = checkNum - 1; i > 0; i--) {
-            Checkpoint curC = this.checkpoints.get(i);
+            Checkpoint curC = engine.getCheckpoint(i);
             if (curC == null)
                 break;
             curC.visualModel.removeFromParent();
@@ -264,30 +193,27 @@ public class CheckpointProgress extends BaseAppState {
     }
 
     public RacerState getPlayerRacerState() {
-        return this.racers.get(player);
+        return engine.getPlayerRacerState(player);
     }
 
     protected List<RacerState> getRaceState() {
-        return new ArrayList<>(this.racers.values());
+        return engine.getAllRaceStates();
     }
 
     @Override
     public void update(float tpf) {
-        attachNextCheckpoints();
-    }
-
-    private void attachNextCheckpoints() {
         // lazy load ghost controls until someone is up to it for physics lag reasons
         // Even though this is called every frame it isn't that slow
 
-        List<Checkpoint> ghosts = new LinkedList<>();
-        for (RacerState racer : this.racers.values())
-            ghosts.add(racer.nextCheckpoint);
+        // TODO change the collision channel of the ghost objects to prevent colliding with ground every update
+        // https://wiki.jmonkeyengine.org/jme3/advanced/physics.html see PhysicsControl.addCollideWithGroup
 
-        for (Checkpoint check : this.attachedCheckpoints)
+        List<Checkpoint> ghosts = this.engine.getNextCheckpoints();
+        
+        for (Checkpoint check : this.attachedCheckpoints) // remove old
             getState(BulletAppState.class).getPhysicsSpace().remove(check.ghost);
 
-        for (Checkpoint check : ghosts)
+        for (Checkpoint check : ghosts) //add new
             getState(BulletAppState.class).getPhysicsSpace().add(check.ghost);
 
         this.attachedCheckpoints.clear();
@@ -299,33 +225,31 @@ public class CheckpointProgress extends BaseAppState {
         rootNode.removeFromParent();
 
         PhysicsSpace physicsSpace = app.getStateManager().getState(BulletAppState.class).getPhysicsSpace();
-        for (Checkpoint checkpoint : checkpoints) {
-            physicsSpace.remove(checkpoint.ghost);
+        for (int i = 0; i < engine.getCheckpointCount(); i++) {
+            Checkpoint c = engine.getCheckpoint(i);
+            physicsSpace.remove(c.ghost);
         }
 
         listener.stopListening(physicsSpace);
     }
 
     public Vector3f getNextCheckpoint(RayCarControl car) {
-        Checkpoint check = racers.get(car).nextCheckpoint;
-        if (check == null) return null;
-        return check.position;
+        return engine.getNextCheckpoint(car);
     }
 
     public Vector3f getLastCheckpoint(RayCarControl car) {
-        Checkpoint check = racers.get(car).lastCheckpoint;
-        if (check == null) return null;
-        return check.position;
+        return engine.getLastCheckpoint(car);
     }
 
     public static Spatial GetDefaultCheckpointModel(Application app, float scale) {
         return GetDefaultCheckpointModel(app, scale, new ColorRGBA(0, 0, 0, 1));
     }
+
     public static Spatial GetDefaultCheckpointModel(Application app, float scale, ColorRGBA colour) {
         Vector3f checkpointSize = Vector3f.UNIT_XYZ.mult(scale);
         Spatial baseSpat = new Geometry("checkpoint", new Box(checkpointSize.negate(), checkpointSize));
         Spatial out = LoadModelWrapper.create(app.getAssetManager(), baseSpat, colour);
-        for (Geometry g :H.getGeomList(out)) {
+        for (Geometry g : H.getGeomList(out)) {
             g.getMaterial().getAdditionalRenderState().setWireframe(true);
             g.getMaterial().getAdditionalRenderState().setLineWidth(5);
         }
