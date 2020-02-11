@@ -31,7 +31,6 @@ import car.ray.RayCarControl;
 import effects.LoadModelWrapper;
 import helper.H;
 
-// TODO figure out checkpoint rotation
 // TODO show their current checkpoint to the player
 
 // TODO change the collision channel of the ghost objects to prevent colliding with ground every update
@@ -141,7 +140,7 @@ public class CheckpointProgress extends BaseAppState {
         colShape = CollisionShapeFactory.createBoxShape(baseSpat);
 
         for (int i = 0; i < initCheckpointPositions.length; i++) {
-            addCheckpoint(initCheckpointPositions[i]);
+            attachCheckpoint(initCheckpointPositions[i]);
         }
         this.firstCheckpoint = this.checkpoints.get(0);
 
@@ -160,15 +159,27 @@ public class CheckpointProgress extends BaseAppState {
             throw new IllegalStateException("Only a " + Type.Sprint + " type should use this method");
         if (!this.isInitialized()) // TODO this can be fixed if we get them all before init and batch them
             throw new IllegalStateException("This must be only called after initialization.");
+        attachCheckpoint(pos);
+    }
+    private void attachCheckpoint(Vector3f pos) {
+        int checkpointCount = this.checkpoints.size();
+        Vector3f prevCheckpointPos = pos;
+        if (checkpointCount > 0)
+            prevCheckpointPos = this.checkpoints.get(checkpointCount - 1).position;
 
-        GhostControl ghost = new GhostControl(colShape);
         Spatial box = baseSpat.clone();
         box.setLocalTranslation(pos);
+        //rotate box to angle towards 
+        Quaternion q = new Quaternion();
+        if (prevCheckpointPos != pos)
+            q.lookAt(pos.subtract(prevCheckpointPos), Vector3f.UNIT_Y);
+        box.rotate(q);
+
+        GhostControl ghost = new GhostControl(colShape);
         box.addControl(ghost);
         if (attachModels)
             rootNode.attachChild(box);
-
-        int checkpointCount = this.checkpoints.size();
+        
         this.checkpoints.add(new Checkpoint(checkpointCount, pos, ghost, box));
     }
 
