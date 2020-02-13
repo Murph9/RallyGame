@@ -114,7 +114,8 @@ public class CarBuilder extends BaseAppState {
 			} else { // Node
 				collisionGeometry = H.getGeomList(collisionShape).get(0); //lets hope its the only one too
 			}
-			Mesh collisionMesh = collisionGeometry.getMesh();
+            Mesh collisionMesh = collisionGeometry.getMesh();
+            collisionMesh.setStatic();
 			colShape = new HullCollisionShape(collisionMesh);
 		} catch (Exception e) {
 			Log.e("!! car type " + carData.carModel + " is missing a collision shape.");

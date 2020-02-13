@@ -197,6 +197,7 @@ public class CarUI extends BaseAppState {
                 mq.setBuffer(Type.TexCoord, 2, BufferUtils.createFloatBuffer(TEX_COORD));
                 mq.setBuffer(Type.Index, 3, BufferUtils.createIntBuffer(INDEXES));
                 mq.updateBound();
+
                 Material mat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
                 mat.setColor("Color", new ColorRGBA(ColorRGBA.Red));
                 Geometry redLine2 = new Geometry("redline2", mq);
