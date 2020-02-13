@@ -163,11 +163,7 @@ public class CheckpointProgress extends BaseAppState {
         }
 
         // remove all visual checkpoints
-        int checkNum = check.num;
-        for (int i = checkNum - 1; i > 0; i--) {
-            Checkpoint curC = engine.getCheckpoint(i);
-            if (curC == null)
-                break;
+        for (Checkpoint curC: engine.getAllPreviousCheckpoints(check.num)) {
             curC.visualModel.removeFromParent();
         }
     }
@@ -207,7 +203,7 @@ public class CheckpointProgress extends BaseAppState {
         // TODO change the collision channel of the ghost objects to prevent colliding with ground every update
         // https://wiki.jmonkeyengine.org/jme3/advanced/physics.html see PhysicsControl.addCollideWithGroup
 
-        List<Checkpoint> ghosts = this.engine.getNextCheckpoints();
+        Collection<Checkpoint> ghosts = this.engine.getNextCheckpoints();
         
         for (Checkpoint check : this.attachedCheckpoints) // remove old
             getState(BulletAppState.class).getPhysicsSpace().remove(check.ghost);
@@ -224,8 +220,7 @@ public class CheckpointProgress extends BaseAppState {
         rootNode.removeFromParent();
 
         PhysicsSpace physicsSpace = app.getStateManager().getState(BulletAppState.class).getPhysicsSpace();
-        for (int i = 0; i < engine.getCheckpointCount(); i++) {
-            Checkpoint c = engine.getCheckpoint(i);
+        for (Checkpoint c: engine.getAllPreviousCheckpoints(Integer.MAX_VALUE)) {
             physicsSpace.remove(c.ghost);
         }
 

@@ -123,7 +123,7 @@ public class RacePositionEngine {
         return posOfCheckpoint(getCheckpoint(this.checkpoints.size() - 1));
 	}
 
-	public List<Checkpoint> getNextCheckpoints() {
+	public Collection<Checkpoint> getNextCheckpoints() {
         return racers.values().stream().map(x -> x.nextCheckpoint).collect(Collectors.toList());
     }
     
@@ -131,4 +131,8 @@ public class RacePositionEngine {
     private Vector3f posOfCheckpoint(Checkpoint check) {
         return check == null ? null : check.position;
     }
+
+	public Collection<Checkpoint> getAllPreviousCheckpoints(int num) {
+        return checkpoints.stream().filter(x -> x.num < num).collect(Collectors.toList());
+	}
 }
