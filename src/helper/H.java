@@ -1,6 +1,7 @@
 package helper;
 
 import java.lang.reflect.Field;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -150,6 +151,9 @@ public class H {
 		return sb.toString();
 	}
 
+    public static String decimalFormat(float num, String format) {
+        return new DecimalFormat(format).format(num);
+    }
 	public static String roundDecimal(float num, int places) {
 		if (places <= 0) {
 			return Integer.toString(Math.round(num));

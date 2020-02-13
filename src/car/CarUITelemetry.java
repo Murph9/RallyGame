@@ -1,7 +1,5 @@
 package car;
 
-import java.text.DecimalFormat;
-
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
@@ -36,7 +34,6 @@ public class CarUITelemetry extends BaseAppState {
     private Node rootNode;
 
     private final WheelUI[] w = new WheelUI[4];
-    private static final DecimalFormat Force_Format = new DecimalFormat("00000");
         
     //the g force meter circles
     private Geometry gForceDot1;
@@ -199,7 +196,7 @@ public class CarUITelemetry extends BaseAppState {
             Material m = new Material(getApplication().getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
             w.gripValue.setText(String.format("%.2f slip", wheel.skidFraction));
             w.wheelRot.setText(String.format("%.2f rad/s", wheel.radSec));
-            w.engineTorque.setText(Force_Format.format(p.getWheelTorque(i))+" Nm");
+            w.engineTorque.setText(H.decimalFormat(p.getWheelTorque(i), "00000")+" Nm");
             m.setColor("Color", getGripBoxColour(wheel.skidFraction));
             w.gripBox.setMaterial(m);
             

@@ -93,7 +93,8 @@ public class CarUI extends BaseAppState {
 		
 		this.redline = p.getCarData().e_redline;
 		this.finalRPM = (int)FastMath.ceil(this.redline) + 1000;
-	}
+    }
+    
 	@Override
 	protected void initialize(Application app) {
 		SimpleApplication r = (SimpleApplication)app;
