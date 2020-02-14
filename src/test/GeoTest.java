@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import helper.Geo;
 
-public class GHelpTest {
+public class GeoTest {
 
     private static final float V3_ERROR = 0.01f;
     private static final float[] CirclePoints4 = new float[] {
