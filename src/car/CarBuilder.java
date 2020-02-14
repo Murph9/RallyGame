@@ -28,7 +28,7 @@ import car.data.CarDataAdjuster;
 import car.data.CarDataConst;
 import car.ray.RayCarControl;
 import effects.LoadModelWrapper;
-import helper.H;
+import helper.Geo;
 import helper.Log;
 
 public class CarBuilder extends BaseAppState {
@@ -105,14 +105,14 @@ public class CarBuilder extends BaseAppState {
 		Node carModel = LoadModelWrapper.create(am, carData.carModel, carData.baseColor);
 		
 		//fetch the single collision shape
-		Spatial collisionShape = H.removeNamedSpatial(carModel, CarPart.Collision.getPartName());
+		Spatial collisionShape = Geo.removeNamedSpatial(carModel, CarPart.Collision.getPartName());
 		CollisionShape colShape = null;
 		try {
 			Geometry collisionGeometry = null;
 			if (collisionGeometry instanceof Geometry) {
 				collisionGeometry = (Geometry)collisionShape;
 			} else { // Node
-				collisionGeometry = H.getGeomList(collisionShape).get(0); //lets hope its the only one too
+				collisionGeometry = Geo.getGeomList(collisionShape).get(0); //lets hope its the only one too
 			}
             Mesh collisionMesh = collisionGeometry.getMesh();
             collisionMesh.setStatic();

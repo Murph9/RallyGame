@@ -21,7 +21,7 @@ import com.jme3.scene.Mesh.Mode;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.util.BufferUtils;
 
-import helper.H;
+import helper.Geo;
 import helper.Log;
 
 public class WireframeHighlighter {
@@ -49,7 +49,7 @@ public class WireframeHighlighter {
 			return s;
 		}
 		Node n = (Node)s;
-		List<Geometry> gList = H.getGeomList(n);
+		List<Geometry> gList = Geo.getGeomList(n);
 		for (Geometry g: gList) {
 			Mesh m = g.getMesh();
 			if (m.getMode() != Mode.Triangles) {

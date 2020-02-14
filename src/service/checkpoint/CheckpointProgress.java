@@ -24,7 +24,7 @@ import com.jme3.scene.shape.Box;
 
 import car.ray.RayCarControl;
 import effects.LoadModelWrapper;
-import helper.H;
+import helper.Geo;
 
 // TODO show the player's current checkpoint highlighted in some way?
 public class CheckpointProgress extends BaseAppState {
@@ -243,7 +243,7 @@ public class CheckpointProgress extends BaseAppState {
         Vector3f checkpointSize = Vector3f.UNIT_XYZ.mult(scale);
         Spatial baseSpat = new Geometry("checkpoint", new Box(checkpointSize.negate(), checkpointSize));
         Spatial out = LoadModelWrapper.create(app.getAssetManager(), baseSpat, colour);
-        for (Geometry g : H.getGeomList(out)) {
+        for (Geometry g : Geo.getGeomList(out)) {
             g.getMaterial().getAdditionalRenderState().setWireframe(true);
             g.getMaterial().getAdditionalRenderState().setLineWidth(5);
         }

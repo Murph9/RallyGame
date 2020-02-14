@@ -12,6 +12,7 @@ import game.App;
 import game.DebugAppState;
 import helper.H;
 import helper.Log;
+import helper.Geo;
 import terrainWorld.NoiseBasedWorld;
 import terrainWorld.TerrainChunk;
 import terrainWorld.TileListener;
@@ -138,8 +139,8 @@ public class RoadMaker implements TileListener {
 		RoadMesh m = new RoadMesh(5, 2, Arrays.asList(newPoints));
 		world.generateRoad(m);
 		
-		app.getRootNode().attachChild(H.makeShapeArrow(app.getAssetManager(), ColorRGBA.White, q.mult(new Vector3f(10,0,0)), lastPoints[3]));
-		app.getRootNode().attachChild(H.makeShapeArrow(app.getAssetManager(), ColorRGBA.Red, newPoints[3].subtract(newPoints[0]), newPoints[0]));
+		app.getRootNode().attachChild(Geo.makeShapeArrow(app.getAssetManager(), ColorRGBA.White, q.mult(new Vector3f(10,0,0)), lastPoints[3]));
+		app.getRootNode().attachChild(Geo.makeShapeArrow(app.getAssetManager(), ColorRGBA.Red, newPoints[3].subtract(newPoints[0]), newPoints[0]));
 		
 		lastPoints = newPoints;
 		

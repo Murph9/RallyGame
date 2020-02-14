@@ -8,9 +8,9 @@ import com.jme3.scene.VertexBuffer.Type;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import helper.Primatives;
+import helper.Geo;
 
-public class PrimativesTest {
+public class GHelpTest {
 
     private static final float V3_ERROR = 0.01f;
     private static final float[] CirclePoints4 = new float[] {
@@ -22,7 +22,7 @@ public class PrimativesTest {
 
     @Test
     public void getXYCircleGeometry() {
-        Geometry g = Primatives.getXYCircleGeometry(4);
+        Geometry g = Geo.getXYCircleGeometry(4);
         VertexBuffer points = g.getMesh().getBuffer(Type.Position);
 
         for (int i = 0; i < points.getNumElements(); i++) {

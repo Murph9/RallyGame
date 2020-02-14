@@ -19,7 +19,7 @@ import com.jme3.scene.Node;
 import java.util.HashMap;
 import java.util.Map;
 
-import helper.H;
+import helper.Geo;
 
 public class DebugAppState extends BaseAppState {
 
@@ -61,21 +61,21 @@ public class DebugAppState extends BaseAppState {
         if (!debug)
             return;
 
-        addThing(key, H.makeShapeArrow(getApplication().getAssetManager(), colour, dir, pos));
+        addThing(key, Geo.makeShapeArrow(getApplication().getAssetManager(), colour, dir, pos));
     }
 
     public void drawBox(String key, ColorRGBA colour, Vector3f pos, float size) {
         if (!debug)
             return;
 
-        addThing(key, H.makeShapeBox(getApplication().getAssetManager(), colour, pos, size));
+        addThing(key, Geo.makeShapeBox(getApplication().getAssetManager(), colour, pos, size));
     }
 
     public void drawSphere(String key, ColorRGBA colour, Vector3f pos, float size) {
         if (!debug)
             return;
         
-        addThing(key, H.makeShapeSphere(getApplication().getAssetManager(), colour, pos, size));
+        addThing(key, Geo.makeShapeSphere(getApplication().getAssetManager(), colour, pos, size));
     }
 
     private void addThing(String key, Geometry thing) {

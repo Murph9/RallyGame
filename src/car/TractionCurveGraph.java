@@ -9,7 +9,7 @@ import com.simsilica.lemur.Container;
 import car.data.CarDataConst;
 import car.data.WheelDataTractionConst;
 import car.ray.GripHelper;
-import helper.H;
+import helper.Geo;
 
 public class TractionCurveGraph extends Container {
 
@@ -41,14 +41,14 @@ public class TractionCurveGraph extends Container {
 		Float[] points = simulateGraphPoints(size, latData);
 		for (int i = 0; i < points.length; i++) {
 			Vector3f pos = new Vector3f(i*(size.x/points.length), -(size.y/2)+(size.y/2)*(points[i]/ maxLat), 0);
-			this.attachChild(H.makeShapeBox(am, ColorRGBA.Blue, pos, 1));
+			this.attachChild(Geo.makeShapeBox(am, ColorRGBA.Blue, pos, 1));
 		}
 		
 		maxLong = GripHelper.tractionFormula(longData, GripHelper.calcSlipMax(longData));
 		points = simulateGraphPoints(size, longData);
 		for (int i = 0; i < points.length; i++) {
 			Vector3f pos = new Vector3f(i*(size.x/points.length), -(size.y)+(size.y/2)*(points[i]/maxLong), 0);
-			this.attachChild(H.makeShapeBox(am, ColorRGBA.Red, pos, 1));
+			this.attachChild(Geo.makeShapeBox(am, ColorRGBA.Red, pos, 1));
 		}
 	}
 	private Float[] simulateGraphPoints(Vector3f screenSize, WheelDataTractionConst d) {

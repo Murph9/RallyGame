@@ -12,7 +12,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
-import helper.H;
+import helper.Geo;
 import helper.Log;
 
 public class LoadModelWrapper {
@@ -36,7 +36,7 @@ public class LoadModelWrapper {
             return n;
         }
         Node n = (Node)s;
-        List<Geometry> gList = H.getGeomList(n);
+        List<Geometry> gList = Geo.getGeomList(n);
         for (Geometry g: gList) {
             g.getParent().attachChild(setMatColor(am, g, color));
         }

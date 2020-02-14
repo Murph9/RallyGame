@@ -52,7 +52,7 @@ public class CarUITelemetry extends BaseAppState {
         this.rootNode = new Node("telemetry");
         this.p = p;
 
-        this.gForceAverager = new AverageV3f(15, Type.Simple);
+        this.gForceAverager = new AverageV3f(30, Type.Simple);
     }
     
     @Override
@@ -170,7 +170,7 @@ public class CarUITelemetry extends BaseAppState {
         float gravity = p.getPhysicsObject().getGravity().length();
         float maxLat = GripHelper.calcMaxLoad(p.getCarData().wheelData[0].pjk_lat);
         float maxLong = GripHelper.calcMaxLoad(p.getCarData().wheelData[0].pjk_long);
-        gForceGeom = helper.Primatives.getXYCircleGeometry(24);
+        gForceGeom = helper.Geo.getXYCircleGeometry(24);
         gForceGeom.setLocalTranslation(gcenter);
         Material m = white.clone();
         m.getAdditionalRenderState().setWireframe(true);

@@ -18,7 +18,7 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 
 import effects.LoadModelWrapper;
-import helper.H;
+import helper.Geo;
 import jme3tools.optimize.GeometryBatchFactory;
 
 public class ObjectWorld extends World implements IWorld {
@@ -119,7 +119,7 @@ public class ObjectWorld extends World implements IWorld {
 		Vector3f offset = new Vector3f((x-GRID_SIZE/2)*TILE_SIZE, 0, (y-GRID_SIZE/2)*TILE_SIZE);
 		
 		Spatial f = floor.clone();
-		for (Geometry g: H.getGeomList(f))
+		for (Geometry g: Geo.getGeomList(f))
 			g.getMaterial().setColor("Color", ColorRGBA.randomColor());
 		
 		f.setLocalTranslation(offset);

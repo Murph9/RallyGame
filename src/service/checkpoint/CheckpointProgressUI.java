@@ -88,7 +88,7 @@ public class CheckpointProgressUI extends BaseAppState {
         if (getState(DebugAppState.class).DEBUG()) {
             debugNode = new Node("debugnode");
             for (RacerState entry : racers) {
-                entry.arrow = helper.H.makeShapeLine(getApplication().getAssetManager(), ColorRGBA.Cyan,
+                entry.arrow = helper.Geo.makeShapeLine(getApplication().getAssetManager(), ColorRGBA.Cyan,
                         entry.car.location, entry.nextCheckpoint.position, 3);
                 debugNode.attachChild(entry.arrow);
             }

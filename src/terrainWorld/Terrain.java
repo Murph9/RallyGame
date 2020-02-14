@@ -18,6 +18,7 @@ import com.jme3.terrain.geomipmap.TerrainLodControl;
 
 import helper.H;
 import helper.Log;
+import helper.Geo;
 import jme3tools.optimize.GeometryBatchFactory;
 
 import java.io.Closeable;
@@ -676,7 +677,7 @@ public abstract class Terrain extends BaseAppState implements Closeable
 
     	if (DEBUG) {
     		Log.p("Set height", ht.v, ht.tc);
-    		boxNode.attachChild(H.makeShapeBox(app.getAssetManager(), ColorRGBA.Brown, ht.v, 0.1f));
+    		boxNode.attachChild(Geo.makeShapeBox(app.getAssetManager(), ColorRGBA.Brown, ht.v, 0.1f));
     	}
     }
 
