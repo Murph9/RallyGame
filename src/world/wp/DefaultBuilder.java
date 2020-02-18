@@ -250,11 +250,10 @@ public abstract class DefaultBuilder extends World implements IWorld {
 	
 	@Override
 	public void cleanup(Application app) {
-        // TODO this removes things that are already not in the physics space
         PhysicsSpace space = getState(BulletAppState.class).getPhysicsSpace();
-		for (Spatial s: curPieces) {
-			space.remove(s.getControl(0));
-			rootNode.detachChild(s);
+		for (Spatial sp: curPieces) {
+			space.remove(sp);
+			rootNode.detachChild(sp);
         }
         space.remove(startGeometry);
 
