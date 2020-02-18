@@ -25,6 +25,7 @@ import com.jme3.scene.Spatial;
 
 import car.data.CarDataConst;
 import car.ray.RayCarControl;
+import helper.Geo;
 import helper.H;
 import service.averager.AverageV3f;
 import service.averager.IAverager;
@@ -175,7 +176,7 @@ public class CarCamera extends BaseAppState implements RawInputListener {
                 // ignore GhostObjects like checkpoints
                 if (!hasGhostControl(g)) {
                     // attempt to not collide with the car TODO doesn't work
-                    if (!H.hasParentNode(g, p.getRootNode())) {
+                    if (!Geo.hasParentNode(g, p.getRootNode())) {
                         return result.getContactPoint();
                     }
                 }

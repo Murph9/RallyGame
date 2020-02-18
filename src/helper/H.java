@@ -11,10 +11,8 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
 
-//Its short for help, name length was a concern
+/**Its short for help, name length was a concern*/
 public class H {
 
 	public static String str(Object[] ol, String sep) {
@@ -317,16 +315,6 @@ public class H {
 		return array[FastMath.nextRandomInt(0, array.length-1)];
 	}
 	
-	public static Boolean hasParentNode(Spatial s, Node node) {
-		while (s != null) {
-			if (s == node) {
-				return true;
-			}
-			
-			s = s.getParent();
-		}
-		return false;
-	}
 	
 	public static Map<String, Object> toMap(Object obj) {
         Field[] fields = obj.getClass().getFields();

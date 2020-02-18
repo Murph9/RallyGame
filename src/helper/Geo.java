@@ -144,4 +144,14 @@ public class Geo {
         return listg;
     }
 
+    public static Boolean hasParentNode(Spatial s, Node node) {
+        while (s != null) {
+            if (s == node) {
+                return true;
+            }
+
+            s = s.getParent();
+        }
+        return false;
+    }
 }

@@ -28,7 +28,7 @@ import world.wp.DefaultBuilder;
 
 // TODO This doesn't really handle cars outside of the world that well
 // too far ahead is a crash
-//TODO sometimes you spawn with the last checkpoint
+// TODO sometimes you spawn with the last checkpoint
 public class DriveDynamicRace extends DriveBase implements PauseState.ICallback, ICheckpointDrive, DefaultBuilder.IPieceChanged {
 
     // ai things
