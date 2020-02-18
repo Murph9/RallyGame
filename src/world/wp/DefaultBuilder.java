@@ -22,7 +22,8 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 
 import effects.LoadModelWrapper;
-import world.World;import world.IWorld;
+import world.World;
+import world.IWorld;
 import world.WorldType;
 import world.wp.WP.NodeType;
 
@@ -32,7 +33,7 @@ public abstract class DefaultBuilder extends World implements IWorld {
     protected static final float SPAWN_DISTANCE = 1000;
 
 	protected final WP[] type;
-	protected final List<Spatial> curPieces = new ArrayList<Spatial>();
+	protected final List<Spatial> curPieces;
     
     private Geometry startGeometry;
     protected List<WPObject> wpos;
@@ -48,17 +49,33 @@ public abstract class DefaultBuilder extends World implements IWorld {
     protected IPieceChanged changedListener;
 
 	DefaultBuilder(WP[] type) {
-		this(type, (long)(Math.random()*Long.MAX_VALUE));
+		this(type, (long)FastMath.nextRandomInt());
 	}
 	DefaultBuilder(WP[] type, long seed) {
 		super("builder root node");
-		this.type = type;
-		
+        this.type = type;
+        this.curPieces = new ArrayList<Spatial>();
         this.rand = new Random(seed);
         
         reset();
     }
     
+    public void reset() {
+        for (Spatial s : curPieces) {
+            getState(BulletAppState.class).getPhysicsSpace().remove(s);
+            rootNode.detachChild(s);
+        }
+        curPieces.clear();
+
+        nextPos = new Vector3f();
+        nextRot = new Quaternion();
+        nextNode = null;
+    }
+    
+    //TODO a way of setting how it determines the need to add or delete things
+    //eg: Supplier<float> or Function<Vector3f, float> to say if a spawn is required
+    //we may need multiple targets for multiple cars in the race now
+
 	@Override
 	public void initialize(Application app) {
 		super.initialize(app);
@@ -185,8 +202,9 @@ public abstract class DefaultBuilder extends World implements IWorld {
         for (Spatial sp : temp) {
             Vector3f endSpPos = sp.getWorldTranslation();
             if (endSpPos.subtract(camPos).length() > SPAWN_DISTANCE / 2) {
-                // 2 because don't delete the ones we just placed TODO curPieces should be in a linkedlist structure?
-                getState(BulletAppState.class).getPhysicsSpace().remove(sp.getControl(0));
+                // '/2' because don't delete the ones we just placed TODO curPieces should be in a linkedlist structure?
+                
+                getState(BulletAppState.class).getPhysicsSpace().remove(sp);
                 rootNode.detachChild(sp);
                 curPieces.remove(sp);
 
@@ -198,18 +216,6 @@ public abstract class DefaultBuilder extends World implements IWorld {
             }
         }
     }
-
-	public void reset() {
-		for (Spatial s: curPieces) {
-			getState(BulletAppState.class).getPhysicsSpace().remove(s.getControl(0));
-			rootNode.detachChild(s);
-        }
-        curPieces.clear();
-
-        nextPos = new Vector3f();
-        nextRot = new Quaternion();
-        nextNode = null;
-	}
 
 	@Override
 	public Vector3f getStartPos() {
