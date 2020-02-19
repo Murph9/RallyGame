@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Supplier;
 
 import com.jme3.app.Application;
 import com.jme3.bullet.BulletAppState;
@@ -33,7 +34,8 @@ public abstract class DefaultBuilder extends World implements IWorld {
     protected static final float SPAWN_DISTANCE = 1000;
 
 	protected final WP[] type;
-	protected final List<Spatial> curPieces;
+    protected final List<Spatial> curPieces;
+    private final Supplier<Vector3f[]> objectDistFunction;
     
     private Geometry startGeometry;
     protected List<WPObject> wpos;
@@ -50,12 +52,21 @@ public abstract class DefaultBuilder extends World implements IWorld {
 
 	DefaultBuilder(WP[] type) {
 		this(type, (long)FastMath.nextRandomInt());
-	}
-	DefaultBuilder(WP[] type, long seed) {
+    }
+    DefaultBuilder(WP[] type, long seed) {
+        this(type, seed, null);
+    }
+
+	DefaultBuilder(WP[] type, long seed, Supplier<Vector3f[]> objectDistFunction) {
 		super("builder root node");
         this.type = type;
         this.curPieces = new ArrayList<Spatial>();
         this.rand = new Random(seed);
+        if (objectDistFunction == null) {
+            this.objectDistFunction = (() -> new Vector3f[] { getApplication().getCamera().getLocation() });
+        } else {
+            this.objectDistFunction = objectDistFunction;
+        }
         
         reset();
     }
@@ -110,14 +121,24 @@ public abstract class DefaultBuilder extends World implements IWorld {
 
 	@Override
 	public void update(float tpf) {
-		Vector3f camPos = getApplication().getCamera().getLocation();
+		Vector3f[] posList = objectDistFunction.get();
 
-		placeNewPieces(camPos);
-        
-        removePieces(camPos);
+		placeNewPieces(posList);
+        removePieces(posList);
 	}
 
-	protected void placeNewPieces(Vector3f camPos) {
+    private boolean oneCloserThen(Vector3f from, float distance, Vector3f[] list) {
+        if (list.length == 1)
+            return from.distance(list[0]) < distance;
+        throw new IllegalArgumentException("TODO support more than one list");
+    }
+    private boolean allFurtherAwayThen(Vector3f from, float distance, Vector3f[] list) {
+        if (list.length == 1)
+            return from.distance(list[0]) > distance;
+        throw new IllegalArgumentException("TODO support more than one list");
+    }
+    
+	protected void placeNewPieces(Vector3f[] posList) {
 
 		//get list of valid pieces (i.e. pieces with the correct node type)
 		List<WPObject> wpoList = new ArrayList<>();
@@ -130,8 +151,8 @@ public abstract class DefaultBuilder extends World implements IWorld {
 			throw new IllegalStateException("No pieces with the node start " + nextNode.name() + " found on type " + WPObject.class.getName());
 
 		//if there is no piece to place then this gets stuck in an infinite loop
-		//probably because there is no piece that satisfies the angle constraint
-		while (nextPos.subtract(camPos).length() < SPAWN_DISTANCE) {
+        //probably because there is no piece that satisfies the angle constraint
+		while (oneCloserThen(nextPos, SPAWN_DISTANCE, posList)) {
             int i = rand.nextInt(wpoList.size());
 			WPObject wpo = wpoList.get(i);
 
@@ -197,11 +218,11 @@ public abstract class DefaultBuilder extends World implements IWorld {
         return s.getWorldTranslation();
 	}
     
-    protected void removePieces(Vector3f camPos) {
+    protected void removePieces(Vector3f[] posList) {
         List<Spatial> temp = new LinkedList<Spatial>(curPieces);
         for (Spatial sp : temp) {
             Vector3f endSpPos = sp.getWorldTranslation();
-            if (endSpPos.subtract(camPos).length() > SPAWN_DISTANCE / 2) {
+            if (allFurtherAwayThen(endSpPos, SPAWN_DISTANCE / 2, posList)) {
                 // '/2' because don't delete the ones we just placed TODO curPieces should be in a linkedlist structure?
                 
                 getState(BulletAppState.class).getPhysicsSpace().remove(sp);
@@ -250,10 +271,11 @@ public abstract class DefaultBuilder extends World implements IWorld {
 	
 	@Override
 	public void cleanup(Application app) {
+        // TODO this removes things that are already not in the physics space
         PhysicsSpace space = getState(BulletAppState.class).getPhysicsSpace();
-		for (Spatial sp: curPieces) {
-			space.remove(sp);
-			rootNode.detachChild(sp);
+		for (Spatial s: curPieces) {
+			space.remove(s.getControl(0));
+			rootNode.detachChild(s);
         }
         space.remove(startGeometry);
 
