@@ -21,7 +21,7 @@ import effects.LoadModelWrapper;
 import helper.Geo;
 import jme3tools.optimize.GeometryBatchFactory;
 
-public class ObjectWorld extends World implements IWorld {
+public class ObjectWorld extends World {
 	
 	private static final int 
 		COUNT_A_TILE = 10,

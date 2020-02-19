@@ -12,7 +12,7 @@ import com.jme3.scene.Spatial;
 
 import effects.LoadModelWrapper;
 
-public class StaticWorldBuilder extends World implements IWorld {
+public class StaticWorldBuilder extends World {
 
 	protected StaticWorld world;
     protected RigidBodyControl landscape;

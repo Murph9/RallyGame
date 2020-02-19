@@ -23,10 +23,10 @@ import com.jme3.util.BufferUtils;
 
 import effects.LoadModelWrapper;
 import helper.Log;
-import world.World;import world.IWorld;
+import world.World;
 import world.WorldType;
 
-public class OsmWorld extends World implements IWorld {
+public class OsmWorld extends World {
     private static String OSM_FILE_NAME = "/assets/osm/data.osm";
     private static Quaternion ROT_90 = new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y);
 

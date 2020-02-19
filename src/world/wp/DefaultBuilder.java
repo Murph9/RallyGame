@@ -24,12 +24,11 @@ import com.jme3.scene.shape.Box;
 
 import effects.LoadModelWrapper;
 import world.World;
-import world.IWorld;
 import world.WorldType;
 import world.wp.WP.NodeType;
 
 /** Generates the world infront of the player dynamically from static set pieces */
-public abstract class DefaultBuilder extends World implements IWorld {
+public abstract class DefaultBuilder extends World {
 
     protected static final float SPAWN_DISTANCE = 1000;
 
