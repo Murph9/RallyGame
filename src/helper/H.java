@@ -3,6 +3,7 @@ package helper;
 import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -37,7 +38,14 @@ public class H {
 		}
 		return s;
 	}
-	
+    
+    @SafeVarargs
+    public static <T> Boolean oneTrue(Function<T, Boolean> f, T... ts) {
+        for (T t : ts)
+            if (f.apply(t))
+                return true;
+        return false;
+    }
 	@SafeVarargs
 	public static <T> Boolean allTrue(Function<T, Boolean> f, T... ts) {
 		for (T t: ts)
@@ -313,7 +321,10 @@ public class H {
 	}
 	public static <T> T randFromArray(T[] array) {
 		return array[FastMath.nextRandomInt(0, array.length-1)];
-	}
+    }
+    public static <T> T randFromList(List<T> list) {
+        return list.get(FastMath.nextRandomInt(0, list.size() - 1));
+    }
 	
 	
 	public static Map<String, Object> toMap(Object obj) {

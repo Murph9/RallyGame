@@ -26,9 +26,6 @@ import service.checkpoint.CheckpointProgressUI;
 import world.wp.DefaultBuilder;
 
 
-// TODO This doesn't really handle cars outside of the world that well
-// too far ahead is a crash
-// TODO sometimes you spawn with the last checkpoint
 public class DriveDynamicRace extends DriveBase implements PauseState.ICallback, ICheckpointDrive, DefaultBuilder.IPieceChanged {
 
     // ai things
@@ -46,6 +43,7 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
     public DriveDynamicRace(DefaultBuilder world, IDriveDone done) {
         super(done, Car.Runner, world);
         world.registerListener(this);
+        world.setDistFunction(() -> this.cb.getAll().stream().map(x -> x.location).toArray(Vector3f[]::new));
 
         initCheckpointBuffer = new LinkedList<>();
     }
@@ -59,7 +57,7 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
         //hard coded checkpoints for duct2 (small)
         Vector3f[] checkpoints = new Vector3f[] {
                 new Vector3f(0, 0, 0),
-                new Vector3f(10, 0, 0) //TODO probably preventing a hard crash with this length
+                new Vector3f(10, 0, 0) //starting vector to get the cars to drive forward
             };
         
 

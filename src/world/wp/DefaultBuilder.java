@@ -23,6 +23,7 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 
 import effects.LoadModelWrapper;
+import helper.H;
 import world.World;
 import world.WorldType;
 import world.wp.WP.NodeType;
@@ -30,11 +31,11 @@ import world.wp.WP.NodeType;
 /** Generates the world infront of the player dynamically from static set pieces */
 public abstract class DefaultBuilder extends World {
 
-    protected static final float SPAWN_DISTANCE = 1000;
+    protected static final float SPAWN_DISTANCE = 100;
 
 	protected final WP[] type;
     protected final List<Spatial> curPieces;
-    private final Supplier<Vector3f[]> objectDistFunction;
+    private Supplier<Vector3f[]> objectDistFunction;
     
     private Geometry startGeometry;
     protected List<WPObject> wpos;
@@ -52,21 +53,13 @@ public abstract class DefaultBuilder extends World {
 	DefaultBuilder(WP[] type) {
 		this(type, (long)FastMath.nextRandomInt());
     }
-    DefaultBuilder(WP[] type, long seed) {
-        this(type, seed, null);
-    }
-
-	DefaultBuilder(WP[] type, long seed, Supplier<Vector3f[]> objectDistFunction) {
+	DefaultBuilder(WP[] type, long seed) {
 		super("builder root node");
         this.type = type;
         this.curPieces = new ArrayList<Spatial>();
         this.rand = new Random(seed);
-        if (objectDistFunction == null) {
-            this.objectDistFunction = (() -> new Vector3f[] { getApplication().getCamera().getLocation() });
-        } else {
-            this.objectDistFunction = objectDistFunction;
-        }
-        
+
+        this.objectDistFunction = defaultDistFunction();
         reset();
     }
     
@@ -82,9 +75,9 @@ public abstract class DefaultBuilder extends World {
         nextNode = null;
     }
     
-    //TODO a way of setting how it determines the need to add or delete things
-    //eg: Supplier<float> or Function<Vector3f, float> to say if a spawn is required
-    //we may need multiple targets for multiple cars in the race now
+    public void setDistFunction(Supplier<Vector3f[]> objectDistFunction) {
+        this.objectDistFunction = objectDistFunction;
+    }
 
 	@Override
 	public void initialize(Application app) {
@@ -127,20 +120,16 @@ public abstract class DefaultBuilder extends World {
 	}
 
     private boolean oneCloserThen(Vector3f from, float distance, Vector3f[] list) {
-        if (list.length == 1)
-            return from.distance(list[0]) < distance;
-        throw new IllegalArgumentException("TODO support more than one list");
+        return H.oneTrue((pos) -> from.distance(pos) < distance, list);
     }
     private boolean allFurtherAwayThen(Vector3f from, float distance, Vector3f[] list) {
-        if (list.length == 1)
-            return from.distance(list[0]) > distance;
-        throw new IllegalArgumentException("TODO support more than one list");
+        return H.allTrue((pos) -> from.distance(pos) > distance, list);
     }
     
 	protected void placeNewPieces(Vector3f[] posList) {
 
 		//get list of valid pieces (i.e. pieces with the correct node type)
-		List<WPObject> wpoList = new ArrayList<>();
+		List<WPObject> wpoList = new LinkedList<>();
 		for (WPObject w: wpos) {
 			if (nextNode == null || nextNode == w.wp.startNode()) {
 				wpoList.add(w);
@@ -152,8 +141,7 @@ public abstract class DefaultBuilder extends World {
 		//if there is no piece to place then this gets stuck in an infinite loop
         //probably because there is no piece that satisfies the angle constraint
 		while (oneCloserThen(nextPos, SPAWN_DISTANCE, posList)) {
-            int i = rand.nextInt(wpoList.size());
-			WPObject wpo = wpoList.get(i);
+            WPObject wpo = H.randFromList(wpoList);
 
 			if (testConstraints(wpo)) {
                 Vector3f pos = placePiece(wpo);
@@ -163,7 +151,7 @@ public abstract class DefaultBuilder extends World {
 				wpoList.remove(wpo);
 
 			if (wpoList.isEmpty())
-                throw new IllegalStateException("No piece matched the constraints :(. Type: " + WPObject.class.getName());
+                throw new IllegalStateException("No piece matched the constraints :( - Type: " + WPObject.class.getName());
 		}
 	}
 
@@ -219,12 +207,13 @@ public abstract class DefaultBuilder extends World {
     
     protected void removePieces(Vector3f[] posList) {
         List<Spatial> temp = new LinkedList<Spatial>(curPieces);
+        PhysicsSpace space = getState(BulletAppState.class).getPhysicsSpace();
         for (Spatial sp : temp) {
             Vector3f endSpPos = sp.getWorldTranslation();
             if (allFurtherAwayThen(endSpPos, SPAWN_DISTANCE / 2, posList)) {
-                // '/2' because don't delete the ones we just placed TODO curPieces should be in a linkedlist structure?
+                // '/2' because don't delete the ones we just placed
                 
-                getState(BulletAppState.class).getPhysicsSpace().remove(sp);
+                space.remove(sp);
                 rootNode.detachChild(sp);
                 curPieces.remove(sp);
 
@@ -270,11 +259,10 @@ public abstract class DefaultBuilder extends World {
 	
 	@Override
 	public void cleanup(Application app) {
-        // TODO this removes things that are already not in the physics space
         PhysicsSpace space = getState(BulletAppState.class).getPhysicsSpace();
-		for (Spatial s: curPieces) {
-			space.remove(s.getControl(0));
-			rootNode.detachChild(s);
+		for (Spatial sp: curPieces) {
+			space.remove(sp);
+			rootNode.detachChild(sp);
         }
         space.remove(startGeometry);
 
@@ -303,5 +291,10 @@ public abstract class DefaultBuilder extends World {
     public interface IPieceChanged {
         void pieceAdded(Vector3f pos);
         void pieceRemoved(Vector3f pos);
+    }
+
+    //NOTE: this method is at the bottom of the file because it screws with code editing styles in VSCode
+    private Supplier<Vector3f[]> defaultDistFunction() {
+        return (() -> new Vector3f[] { getApplication().getCamera().getLocation() });
     }
 }
