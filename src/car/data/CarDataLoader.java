@@ -1,6 +1,12 @@
 package car.data;
 
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.math.Vector3f;
@@ -10,6 +16,7 @@ import org.yaml.snakeyaml.constructor.Constructor;
 
 import car.data.CarModelData.CarPart;
 import car.ray.GripHelper;
+import helper.Duo;
 import helper.Log;
 
 /** Private class for CarBuilder, manages the CarDataConst file */
@@ -125,9 +132,9 @@ public class CarDataLoader { //CarDataFactory
         
         
         // Output the optimal gear up change point based on the torque curve
-        // TODO possibly making CarDataConst.getGearSpeed() redundant in some way
+        List<Duo<Integer, Float>> changeTimes = new LinkedList<>();
         float maxTransSpeed = data.speedAtRpm(data.trans_gearRatios.length - 1, data.e_redline);
-        for (float speed = 0; speed < maxTransSpeed; speed++) {
+        for (float speed = 0; speed < maxTransSpeed; speed+=0.1f) {
             int bestGear = -1;
             float bestTorque = -1;
             for (int gear = 1; gear < data.trans_gearRatios.length; gear++) {
@@ -141,9 +148,15 @@ public class CarDataLoader { //CarDataFactory
                 }
             }
             
-            //TODO use
-            //Log.p(speed * 3.6f, bestTorque, bestGear);
+            //This prints a nice graph: Log.p(speed * 3.6f, bestTorque, bestGear);
+            changeTimes.add(new Duo<Integer,Float>(bestGear, speed));
         }
+        //Get the first and last value for each gear
+        for (Entry<Integer, List<Duo<Integer, Float>>> entry: changeTimes.stream().collect(Collectors.groupingBy(x -> x.first)).entrySet()) {
+            Log.p("Gear", entry.getKey(), "min", entry.getValue().get(0).second, "max", entry.getValue().get(entry.getValue().size() - 1).second);
+        }
+        // TODO use these values
+        // TODO at least making up rpm and down rpm redundant
 
         return data;
     }
