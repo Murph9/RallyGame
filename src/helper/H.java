@@ -1,5 +1,9 @@
 package helper;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 import java.util.HashMap;
@@ -103,16 +107,6 @@ public class H {
 		float low = array[clamp(whole, 0, array.length-1)]; //clamp to the the end of the array to prevent an index exeception
 		float high = array[clamp(whole+1, 0, array.length-1)];
 		return FastMath.interpolateLinear(rem, low, high);
-	}
-	
-	public static float lerpTorqueArray(int rpm, float[] array) {
-		if (rpm < 0) rpm = 0; //prevent negative torque issues
-		
-		int intrpm = (rpm / 1000); //basically divide by 1000 and round down
-		float remrpm = (float)(rpm % 1000)/1000;
-		float before = array[clamp(intrpm, 0, array.length-1)];
-		float after = array[clamp(intrpm+1, 0, array.length-1)];
-		return FastMath.interpolateLinear(remrpm, before, after);
 	}
 		
 	public static int clamp(int input, int low, int high) {
@@ -349,5 +343,25 @@ public class H {
 		for (int i = 0; i < array.length; i++)
 			result = Math.max(result, func.apply(array[i], i));
 		return result;
-	}
+    }
+    
+    public static void writeToFile(String data, String filePath) {
+        File file = new File(filePath);
+        if (!file.exists())
+            try {
+                file.createNewFile();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+                return;
+            }
+
+        try (PrintWriter out = new PrintWriter(file)) {
+            out.println(data);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        Log.p("Done, see file in: " + file.getAbsolutePath());
+    }
 }

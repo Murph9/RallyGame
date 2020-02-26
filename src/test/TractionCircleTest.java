@@ -3,11 +3,6 @@ package test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
-
 import com.jme3.math.FastMath;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -16,9 +11,9 @@ import org.junit.jupiter.api.Test;
 
 import car.data.WheelDataTractionConst;
 import car.ray.GripHelper;
-import helper.Log;
+import helper.H;
 
-public class RayCarTest {
+public class TractionCircleTest {
 
     private WheelDataTractionConst curveConstLong;
     private WheelDataTractionConst curveConstLat;
@@ -68,27 +63,10 @@ public class RayCarTest {
                 sb.append(slipRatio + " " + slipAngle +  " " + result + "\n");
             }
         }
-        writeToFile(sb.toString(), "S:\\murph\\Desktop\\tractionCurveResults.txt");
-    }
-    private void writeToFile(String data, String filePath) {
-        File file = new File(filePath);
-        if (!file.exists())
-            try {
-                file.createNewFile();
-            } catch (IOException e1) {
-                e1.printStackTrace();
-                return;
-            }
 
-        try (PrintWriter out = new PrintWriter(file)) {
-            out.println(data);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return;
-        }
-
-        Log.p("Done, see file in: " + file.getAbsolutePath());
+        H.writeToFile(sb.toString(), "S:\\murph\\Desktop\\tractionCurveResults.txt");
     }
+    
 
     private static float GetFromSlips(WheelDataTractionConst curveConstLong, WheelDataTractionConst curveConstLat, float maxLong, float maxLat, float slipRatio, float slipAngle)
     {

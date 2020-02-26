@@ -45,14 +45,7 @@ public class HTest {
         assertEquals(2f, H.lerpArray(2f, new float[] { 0, 1, 2 }));
         assertEquals(1.22f, H.lerpArray(1.22f, new float[] { 0, 1, 2 }));
     }
-
-    @Test
-    public void lerpTorqueArray() {
-        assertEquals(1.5f, H.lerpTorqueArray(1500, new float[] { 0, 1, 2 }));
-        assertEquals(2f, H.lerpTorqueArray(2000, new float[] { 0, 1, 2 }));
-        assertEquals(1.22f, H.lerpTorqueArray(1220, new float[] { 0, 1, 2 }));
-    }
-
+    
     @Test
     public void lerpColor() {
         assertEquals(new ColorRGBA(0.5f, 0.5f, 0.5f, 0.5f), 
