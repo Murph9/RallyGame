@@ -93,6 +93,9 @@ public class CarDataLoader { //CarDataFactory
             throw new IllegalStateException("!!! Missing car model wheel position data for: " + data.carModel);
         }
 
+        if (!modelData.hasCollision())
+            throw new IllegalStateException(CarPart.Collision.name() + " should exist.");
+
         // validate that the wheels are in the correct quadrant for a car
         if (data.wheelOffset[0].x < 0 || data.wheelOffset[0].z < 0)
             throw new IllegalStateException(CarPart.Wheel_FL.name() + " should be in pos x and pos z");
@@ -103,11 +106,15 @@ public class CarDataLoader { //CarDataFactory
             throw new IllegalStateException(CarPart.Wheel_RL.name() + " should be in pos x and neg z");
         if (data.wheelOffset[3].x > 0 || data.wheelOffset[3].z > 0)
             throw new IllegalStateException(CarPart.Wheel_RR.name() + " should be in neg x and neg z");
+       
+        //validate that the D1 and D2 pjk const values fit the weight of the car
+        for (int i = 0; i < data.wheelData.length; i++) {
+            if (GripHelper.loadFormula(data.wheelData[i].pjk_lat, quarterMassForce) <= 0)
+                throw new IllegalStateException("Wheel load lat formula not in range: " + data.wheelData[i].pjk_lat + " " + quarterMassForce);
+            if (GripHelper.loadFormula(data.wheelData[i].pjk_long, quarterMassForce) <= 0)
+                throw new IllegalStateException("Wheel load long formula not in range: " + data.wheelData[i].pjk_lat + " " + quarterMassForce);
+        }
 
-        if (!modelData.hasCollision())
-            throw new IllegalStateException(CarPart.Collision.name() + " should exist.");
-
-        
         // Checking that there is gear overlap between up and down:
         // [2>----[3>-<2]---<3] not [2>----<2]--[3>---<3]
         for (int i = 1; i < data.trans_gearRatios.length - 1; i++) {
@@ -116,12 +123,26 @@ public class CarDataLoader { //CarDataFactory
             }
         }
         
-        //validate that the D1 and D2 pjk const values actually are useful for the weight of the car
-        for (int i = 0; i < data.wheelData.length; i++) {
-            if (GripHelper.loadFormula(data.wheelData[i].pjk_lat, quarterMassForce) <= 0)
-                throw new IllegalStateException("Wheel load lat formula not in range: " + data.wheelData[i].pjk_lat + " " + quarterMassForce);
-            if (GripHelper.loadFormula(data.wheelData[i].pjk_long, quarterMassForce) <= 0)
-                throw new IllegalStateException("Wheel load long formula not in range: " + data.wheelData[i].pjk_lat + " " + quarterMassForce);
+        
+        // Output the optimal gear up change point based on the torque curve
+        // TODO possibly making CarDataConst.getGearSpeed() redundant in some way
+        float maxTransSpeed = data.speedAtRpm(data.trans_gearRatios.length - 1, data.e_redline);
+        for (float speed = 0; speed < maxTransSpeed; speed++) {
+            int bestGear = -1;
+            float bestTorque = -1;
+            for (int gear = 1; gear < data.trans_gearRatios.length; gear++) {
+                int rpm = data.rpmAtSpeed(gear, speed);
+                if (rpm > data.e_redline)
+                    continue;
+                float wheelTorque = data.lerpTorque(rpm) * data.trans_gearRatios[gear] * data.trans_finaldrive;
+                if (bestTorque < wheelTorque) {
+                    bestTorque = wheelTorque;
+                    bestGear = gear;
+                }
+            }
+            
+            //TODO use
+            //Log.p(speed * 3.6f, bestTorque, bestGear);
         }
 
         return data;
