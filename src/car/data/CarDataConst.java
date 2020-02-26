@@ -40,9 +40,6 @@ public class CarDataConst implements Serializable {
 	//travel values are relative to wheel offset pos
 	public CarSusDataConst susF;
 	public CarSusDataConst susR;
-	public CarSusDataConst susByWheelNum(int i) {
-		return (i < 2 ? susF : susR);
-	}
 
 	////////
 	//Drivetrain stuff
@@ -89,15 +86,23 @@ public class CarDataConst implements Serializable {
 	public CarDataConst() {}
 
 	////////////////////////////////////////////////////////
-	//usefulMethods
+    //usefulMethods
+    
+    public CarSusDataConst susByWheelNum(int i) {
+        return (i < 2 ? susF : susR);
+    }
 
 	public float getGearUpSpeed(int gear) { return getGearSpeed(gear, false); }
 	public float getGearDownSpeed(int gear) { return getGearSpeed(gear, true); }
 	private float getGearSpeed(int gear, boolean down) {
-		// TODO Find the optimal gear change point based on the torque curve
-		float driveSpeed = (trans_gearRatios[gear] * trans_finaldrive * (60 / FastMath.TWO_PI)) / driveWheelRadius();
-		return (down ? auto_gearDown : auto_gearUp) / driveSpeed;
-	}
+        return speedAtRpm(gear, (down ? auto_gearDown : auto_gearUp));
+    }
+    public float speedAtRpm(int gear, int rpm) {
+        return rpm / (trans_gearRatios[gear] * trans_finaldrive * (60 / FastMath.TWO_PI)) * driveWheelRadius();
+    }
+    public int rpmAtSpeed(int gear, float speed) {
+        return (int)(speed * (trans_gearRatios[gear] * trans_finaldrive * (60 / FastMath.TWO_PI)) / driveWheelRadius());
+    }
 
 	// https://en.wikipedia.org/wiki/Automobile_drag_coefficient#Drag_area
 	public Vector3f quadraticDrag(Vector3f velocity) {
@@ -170,6 +175,6 @@ public class CarDataConst implements Serializable {
 		if (driveRear)
 			return (wheelData[2].radius + wheelData[3].radius) / 2f;
 
-		return 1;
+		throw new IllegalStateException("No drive wheels set, no wheel radius found.");
 	}
 }
