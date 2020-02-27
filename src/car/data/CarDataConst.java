@@ -51,8 +51,8 @@ public class CarDataConst implements Serializable {
 	public float e_compression; // is going to be multiplied by the RPM
 	public float e_mass; // kg, this is the interia of the engine, 100 is high
 
-	public int auto_gearDown; //rpm triggering a gear down
-	public int auto_gearUp; //rpm triggering a gear up
+    public float[] auto_gearUpSpeed; //m/s for triggering the next gear [calculated]
+    public float[] auto_gearDownSpeed; // m/s for triggering the next gear [calculated]
 	public float auto_changeTime;
 	
 	//NOTE: please check torque curves are at the crank before using this value as anything other than 1.0f
@@ -91,11 +91,12 @@ public class CarDataConst implements Serializable {
     public CarSusDataConst susByWheelNum(int i) {
         return (i < 2 ? susF : susR);
     }
-
-	public float getGearUpSpeed(int gear) { return getGearSpeed(gear, false); }
-	public float getGearDownSpeed(int gear) { return getGearSpeed(gear, true); }
-	private float getGearSpeed(int gear, boolean down) {
-        return speedAtRpm(gear, (down ? auto_gearDown : auto_gearUp));
+    
+    public float getGearUpSpeed(int gear) {
+        return auto_gearUpSpeed[gear];
+    }
+    public float getGearDownSpeed(int gear) {
+        return auto_gearDownSpeed[gear];
     }
     public float speedAtRpm(int gear, int rpm) {
         return rpm / (trans_gearRatios[gear] * trans_finaldrive * (60 / FastMath.TWO_PI)) * driveWheelRadius();

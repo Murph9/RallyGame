@@ -148,7 +148,8 @@ public class RayCarPowered extends RayCar {
 			return; //no changing out of reverse on me please...
 		if (helper.H.allTrue((w) -> { return !w.inContact; }, wheels))
 			return; //if no contact, no changing of gear
-		
+        
+        // TODO should probably take into account ground speed when changing gear
 		if (vz > carData.getGearUpSpeed(curGear) && curGear < carData.trans_gearRatios.length-1) {
 			gearChangeTime = carData.auto_changeTime;
 			gearChangeTo = curGear + 1;

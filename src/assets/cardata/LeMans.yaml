@@ -5,8 +5,6 @@ areo_downforce: 0.0
 areo_drag: 0.29
 areo_lineardrag: 0.012
 auto_changeTime: 0.1
-auto_gearDown: 4500
-auto_gearUp: 8300
 brakeMaxTorque: 8000
 cam_lookAtHeight: 1.2
 cam_offsetLength: -9.0
