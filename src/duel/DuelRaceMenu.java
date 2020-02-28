@@ -85,17 +85,19 @@ public class DuelRaceMenu extends BaseAppState implements PauseState.ICallback {
         ((SimpleApplication) getApplication()).getGuiNode().attachChild(endWindow);
 
         if (playerWon) {
-            Label l = endWindow.addChild(new Label("Winner", new ElementId("title")));
+            Label l = endWindow.addChild(new Label("Winner @ " + this.currentTime.getText(), new ElementId("title")));
             l.setTextHAlignment(HAlignment.Center);
         } else {
             Label l = endWindow.addChild(new Label("Loser", new ElementId("titleAlt")));
             l.setTextHAlignment(HAlignment.Center);
         }
 
-        Label l2 = endWindow.addChild(new Label(this.currentTime.getText()));
-        l2.setTextHAlignment(HAlignment.Center);
-
-        Button b = endWindow.addChild(new Button("Close"));
+        Button b;
+        if (playerWon) {
+            b = endWindow.addChild(new Button("Next Race"));
+        } else {
+            b = endWindow.addChild(new Button("Close"));
+        }
         b.setTextHAlignment(HAlignment.Center);
         b.addClickCommands((source) -> {
             ((SimpleApplication) getApplication()).getGuiNode().detachChild(endWindow);
