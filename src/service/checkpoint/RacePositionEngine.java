@@ -66,7 +66,7 @@ public class RacePositionEngine {
         int checkNum = check.num;
         
         // calc next checkpoint then
-        int nextNum = (checkNum + 1 % this.checkpoints.size());
+        int nextNum = (checkNum + 1) % this.checkpoints.size();
         if (nextNum == 0)
             racer.lap++;
 
