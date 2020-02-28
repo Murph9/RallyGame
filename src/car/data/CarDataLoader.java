@@ -121,14 +121,15 @@ public class CarDataLoader { //CarDataFactory
         }
         
         // Output the optimal gear up change point based on the torque curve
+        final int redlineOffset = 250;
         List<Duo<Integer, Float>> changeTimes = new LinkedList<>();
-        float maxTransSpeed = data.speedAtRpm(data.trans_gearRatios.length - 1, data.e_redline);
+        float maxTransSpeed = data.speedAtRpm(data.trans_gearRatios.length - 1, data.e_redline - redlineOffset);
         for (float speed = 0; speed < maxTransSpeed; speed+=0.1f) {
             int bestGear = -1;
             float bestTorque = -1;
             for (int gear = 1; gear < data.trans_gearRatios.length; gear++) {
                 int rpm = data.rpmAtSpeed(gear, speed);
-                if (rpm > data.e_redline) //just a bit off of redline because its not that smooth
+                if (rpm > data.e_redline - redlineOffset) //just a bit off of redline because its not that smooth
                     continue;
                 float wheelTorque = data.lerpTorque(rpm) * data.trans_gearRatios[gear] * data.trans_finaldrive;
                 if (bestTorque < wheelTorque) {
