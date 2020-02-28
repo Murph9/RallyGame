@@ -124,6 +124,7 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
         this.camera = new RotatesCarCamera(app.getCamera(), car);
         getStateManager().attach(this.camera);
 
+        this.cb.setEnabled(true);
         getState(BulletAppState.class).setEnabled(true);
     }
 
@@ -141,6 +142,7 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
         camera = null;
 
         cb.removeAll();
+        cb.setEnabled(false);
         cb = null;
     }
 
