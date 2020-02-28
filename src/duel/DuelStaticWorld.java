@@ -17,13 +17,13 @@ import world.ICheckpointWorld;
 import world.StaticWorld;
 import world.StaticWorldBuilder;
 
-public class DuelWorld extends StaticWorldBuilder implements ICheckpointWorld {
+public class DuelStaticWorld extends StaticWorldBuilder implements ICheckpointWorld {
 
     private Vector3f[] path;
     private Vector3f[] worldStarts;
     private Quaternion worldRot;
 
-    public DuelWorld() {
+    public DuelStaticWorld() {
         super(StaticWorld.dragstrip);
     }
 

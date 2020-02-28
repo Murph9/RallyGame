@@ -32,7 +32,7 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
     private CheckpointProgress progress;
     private CountdownTimer countdown;
 
-    private DuelWorld world;
+    private DuelStaticWorld world;
     private CarCamera camera;
     private CarUI uiNode;
 
@@ -51,7 +51,7 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
 
     @Override
     protected void initialize(Application app) {
-        world = new DuelWorld();
+        world = new DuelStaticWorld();
         world.loadCheckpoints(app.getAssetManager());
         getStateManager().attach(world);
         Vector3f[] checkpoints = world.checkpoints();
@@ -89,7 +89,7 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
         countdown = new CountdownTimer();
         
         //Checkpoint detection and stuff
-        progress = new CheckpointProgress(CheckpointProgress.Type.Lap, checkpoints, cb.getAll(), rayCar);
+        progress = new CheckpointProgress(CheckpointProgress.Type.Sprint, checkpoints, cb.getAll(), rayCar);
         progress.setCheckpointModel(CheckpointProgress.GetDefaultCheckpointModel(app, 10));
         progress.setVisualModels(false);
         getStateManager().attach(progress);
