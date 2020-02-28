@@ -46,7 +46,20 @@ public class RayCarPowered extends RayCar {
 		Vector3f velocity = w_angle.inverse().mult(w_velocity);
 		
 		engineTorque = getEngineWheelTorque(tpf);
-		
+        
+        //subtract the largest ground velocity for the drive wheels, so moving on things doesn't break the transmission
+        Vector3f groundVel = new Vector3f();
+        for (int w_id = 0; w_id == wheels.length; w_id++) {
+            if (!carData.driveFront && (w_id == 0 || w_id == 1))
+                continue;
+            if (!carData.driveRear && (w_id == 2 || w_id == 3))
+                continue;
+            Vector3f vel = w_angle.inverse().mult(wheels[w_id].collisionObject.getLinearVelocity());
+            if (vel.length() > groundVel.length())
+                groundVel = vel;
+        };
+        velocity.subtractLocal(groundVel);
+
 		float vz = velocity.length() * Math.signum(velocity.z);
 		autoTransmission(tpf, curRPM, vz);
 
@@ -149,7 +162,6 @@ public class RayCarPowered extends RayCar {
 		if (helper.H.allTrue((w) -> { return !w.inContact; }, wheels))
 			return; //if no contact, no changing of gear
         
-        // TODO should probably take into account ground speed when changing gear
 		if (vz > carData.getGearUpSpeed(curGear) && curGear < carData.trans_gearRatios.length-1) {
 			gearChangeTime = carData.auto_changeTime;
 			gearChangeTo = curGear + 1;
