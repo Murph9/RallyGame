@@ -228,30 +228,17 @@ public class RayCar implements PhysicsTickListener {
                 wheels[w_id].slipAngle = FastMath.atan2(slipa_rear, slip_div); // slip_div is questionable here
             }
 
-            // Mild hack: prevent 'losing' traction through a large integration step, by detecting jumps past the curve peak
-            // this should only affect this class as its only affecting the force by affecting where on curve the current state is
-            if (Math.abs(lastSlipAngle) < carData.wheelData[w_id].maxLat && Math.abs(wheels[w_id].slipAngle) > carData.wheelData[w_id].maxLat) {
-                wheels[w_id].slipAngle = carData.wheelData[w_id].maxLat * FastMath.sign(wheels[w_id].slipAngle);
-            }
-            if (Math.abs(lastSlipAngle) > carData.wheelData[w_id].maxLat && Math.abs(wheels[w_id].slipAngle) < carData.wheelData[w_id].maxLat) {
-                wheels[w_id].slipAngle = carData.wheelData[w_id].maxLat * FastMath.sign(lastSlipAngle);
-            }
-            if (brakingCur == 0) { // needs to be disabled during braking as it prevents you from stopping
-				if (Math.abs(lastSlipRatio) < carData.wheelData[w_id].maxLong && Math.abs(wheels[w_id].slipRatio) > carData.wheelData[w_id].maxLong) {
-					wheels[w_id].slipRatio = carData.wheelData[w_id].maxLong * FastMath.sign(wheels[w_id].slipRatio);
-				}
-				if (Math.abs(lastSlipRatio) > carData.wheelData[w_id].maxLong && Math.abs(wheels[w_id].slipRatio) < carData.wheelData[w_id].maxLong) {
-					wheels[w_id].slipRatio = carData.wheelData[w_id].maxLong * FastMath.sign(lastSlipRatio);
-				}
-			}
+            slipSimulationHacks(w_id, lastSlipAngle, lastSlipRatio);
 
             // merging the forces into a traction circle
             // normalise based on their independant max values
             float ratiofract = wheels[w_id].slipRatio / carData.wheelData[w_id].maxLong;
 			float anglefract = wheels[w_id].slipAngle / carData.wheelData[w_id].maxLat;
 			float p = FastMath.sqrt(ratiofract*ratiofract + anglefract*anglefract);
-			if (p == 0)
-				p = 0.001f;
+			if (p == 0) {
+                //if p is zero then both anglefract and ratiofract are 0. So to prevent a 'div 0' we just make the denominator 1
+                p = 1;
+            }
 			
             wheels[w_id].skidFraction = p;
             			
@@ -281,7 +268,33 @@ public class RayCar implements PhysicsTickListener {
 		
 		planarGForce.multLocal(1/carData.mass); //F=m*a => a=F/m
 	}
-	
+    
+    private void slipSimulationHacks(int w_id, float lastSlipAngle, float lastSlipRatio) {
+        // Hack1: prevent 'losing' traction through a large integration step, by detecting jumps past the curve peak
+        // this should only affect this class as its only affecting the force by affecting where on curve the current state is
+        if (Math.abs(lastSlipAngle) < carData.wheelData[w_id].maxLat && Math.abs(wheels[w_id].slipAngle) > carData.wheelData[w_id].maxLat) {
+            wheels[w_id].slipAngle = carData.wheelData[w_id].maxLat * FastMath.sign(wheels[w_id].slipAngle);
+        }
+        if (Math.abs(lastSlipAngle) > carData.wheelData[w_id].maxLat && Math.abs(wheels[w_id].slipAngle) < carData.wheelData[w_id].maxLat) {
+            wheels[w_id].slipAngle = carData.wheelData[w_id].maxLat * FastMath.sign(lastSlipAngle);
+        }
+        if (brakingCur == 0) { // needs to be disabled during braking as it prevents you from stopping
+            if (Math.abs(lastSlipRatio) < carData.wheelData[w_id].maxLong && Math.abs(wheels[w_id].slipRatio) > carData.wheelData[w_id].maxLong) {
+                wheels[w_id].slipRatio = carData.wheelData[w_id].maxLong * FastMath.sign(wheels[w_id].slipRatio);
+            }
+            if (Math.abs(lastSlipRatio) > carData.wheelData[w_id].maxLong && Math.abs(wheels[w_id].slipRatio) < carData.wheelData[w_id].maxLong) {
+                wheels[w_id].slipRatio = carData.wheelData[w_id].maxLong * FastMath.sign(lastSlipRatio);
+            }
+        }
+        // Hack2: prevent flipping traction over 0 too fast, by always applying 0 inbetween
+        if (Math.abs(lastSlipAngle) * carData.wheelData[w_id].maxLat < 0) { // will be negative if they have both signs
+            wheels[w_id].slipAngle = 0;
+        }
+        if (Math.abs(lastSlipRatio) * carData.wheelData[w_id].maxLong < 0) { // will be negative if they have both signs
+            wheels[w_id].slipRatio = 0;
+        }
+    }
+
 	private void applyDrag(PhysicsSpace space, float tpf) {
 		//rolling resistance (https://en.wikipedia.org/wiki/Rolling_resistance)
 		Vector3f w_pos = rbc.getPhysicsLocation();
