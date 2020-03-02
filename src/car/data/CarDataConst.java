@@ -110,7 +110,8 @@ public class CarDataConst implements Serializable {
 		float dragx = -1.225f * areo_drag * areo_crossSection * velocity.x * FastMath.abs(velocity.x);
 		float dragy = -1.225f * areo_drag * areo_crossSection * velocity.y * FastMath.abs(velocity.y);
 		float dragz = -1.225f * areo_drag * areo_crossSection * velocity.z * FastMath.abs(velocity.z);
-		// TODO change cross section for each xyz direction to make a realistic drag feeling
+        // Optional: use a cross section for each xyz direction to make a realistic drag feeling
+        // but what we would really need is angle of attack -> much harder
 		return new Vector3f(dragx, dragy, dragz);
 	}
 	//linear drag component (https://en.wikipedia.org/wiki/Rolling_resistance)

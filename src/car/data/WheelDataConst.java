@@ -12,6 +12,4 @@ public class WheelDataConst {
 	
 	public WheelDataTractionConst pjk_lat;
 	public WheelDataTractionConst pjk_long;
-
-	public WheelDataConst() {}
 }

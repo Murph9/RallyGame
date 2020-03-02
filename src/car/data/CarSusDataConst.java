@@ -18,6 +18,4 @@ public class CarSusDataConst {
 	public float relax; //[0.3f]
 	public float compression() { return comp * 2 * FastMath.sqrt(stiffness); }
 	public float relax() { return relax * 2 * FastMath.sqrt(stiffness); }
-	
-	public CarSusDataConst() {}
 }

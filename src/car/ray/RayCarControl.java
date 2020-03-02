@@ -169,7 +169,6 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
 //		return Math.min(-maxAngle*FastMath.atan(0.3f*(local_vel - 1))
 //				+ maxAngle*FastMath.PI/2 + this.wheels[0].maxLat*2, Math.abs(trySteerAngle));
 		
-        //TODO PLEASE FIX THIS
         //TODO max turn angle really should just be the best angle on the lat traction curve (while going straight)
         // return FastMath.atan2(Math.abs(local_vel.z), carData.wheelData[0].maxLat);
         // return carData.wheelData[0].maxLat + FastMath.DEG_TO_RAD * driftAngle;

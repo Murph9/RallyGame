@@ -13,7 +13,7 @@ import helper.Log;
 
 public class CarModelData {
 	
-	private HashMap<CarPart, CarPartData> pieces;
+	private final HashMap<CarPart, CarPartData> pieces;
 	
 	public CarModelData(AssetManager am, String car, String wheel) {
 		this.pieces = new HashMap<>();
