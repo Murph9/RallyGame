@@ -50,42 +50,23 @@ public class CarDataLoader { //CarDataFactory
             data.name = carName;
         } catch (Exception e) {
             e.printStackTrace();
-            Log.exit(-343, "!!! car data load failed");
+            Log.exit(-343, "!!! car data load really failed");
         }
-
-        // Wheel validation
-        float quarterMassForce = Math.abs(gravity.y) * data.mass / 4f;
-        for (int i = 0; i < data.wheelData.length; i++) {
-            CarSusDataConst sus = data.susByWheelNum(i);
-
-            // Validate that rest suspension position is within min and max
-            float minSusForce = (sus.preload_force + sus.stiffness * 0) * 1000;
-            float maxSusForce = (sus.preload_force + sus.stiffness * (sus.max_travel - sus.min_travel)) * 1000;
-            if (quarterMassForce < minSusForce) {
-                Log.e("!! Sus min range too high: " + quarterMassForce + " < " + minSusForce + ", decrease pre-load or stiffness");
-            }
-            if (quarterMassForce > maxSusForce) {
-                Log.e("!! Sus max range too low: " + quarterMassForce + " > " + maxSusForce + ", increase pre-load or stiffness");
-            }
-
-            WheelDataConst wheel = data.wheelData[i];
-            // generate the slip* max force from the car wheel data, and validate they are 'real'
-            wheel.maxLat = GripHelper.calcSlipMax(wheel.pjk_lat);
-            wheel.maxLong = GripHelper.calcSlipMax(wheel.pjk_long);
-
-            try {
-                if (Float.isNaN(wheel.maxLat))
-                    throw new Exception("maxLat was: '" + wheel.maxLat + "'.");
-                if (Float.isNaN(wheel.maxLong))
-                    throw new Exception("maxLong was: '" + wheel.maxLong + "'.");
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                Log.exit(-1021, "error in calculating max(lat|long) values of wheel #" + i);
-            }
-        }
-
         
+        updateFromModelData(data, am);
+        updateGripValues(data, gravity);
+        updateAutoGearChanges(data);
+
+        return data;
+    }
+
+    public void reValidateData(CarDataConst data, AssetManager am, Vector3f gravity) {
+        updateFromModelData(data, am);
+        updateGripValues(data, gravity);
+        updateAutoGearChanges(data);
+    }
+
+    private void updateFromModelData(CarDataConst data, AssetManager am) {
         // init car static data based on the 3d model
         CarModelData modelData = new CarModelData(am, data.carModel, data.wheelModel);
         if (modelData.foundSomething() && modelData.foundAllWheels()) {
@@ -112,19 +93,58 @@ public class CarDataLoader { //CarDataFactory
         if (data.wheelOffset[3].x > 0 || data.wheelOffset[3].z > 0)
             throw new IllegalStateException(CarPart.Wheel_RR.name() + " should be in neg x and neg z");
        
-        //validate that the D1 and D2 pjk const values fit the weight of the car
+    }
+
+    private void updateGripValues(CarDataConst data, Vector3f gravity) {
+        // Wheel validation
+        float quarterMassForce = Math.abs(gravity.y) * data.mass / 4f;
+        for (int i = 0; i < data.wheelData.length; i++) {
+            CarSusDataConst sus = data.susByWheelNum(i);
+
+            // Validate that rest suspension position is within min and max
+            float minSusForce = (sus.preload_force + sus.stiffness * 0) * 1000;
+            float maxSusForce = (sus.preload_force + sus.stiffness * (sus.max_travel - sus.min_travel)) * 1000;
+            if (quarterMassForce < minSusForce) {
+                Log.e("!! Sus min range too high: " + quarterMassForce + " < " + minSusForce
+                        + ", decrease pre-load or stiffness");
+            }
+            if (quarterMassForce > maxSusForce) {
+                Log.e("!! Sus max range too low: " + quarterMassForce + " > " + maxSusForce
+                        + ", increase pre-load or stiffness");
+            }
+
+            WheelDataConst wheel = data.wheelData[i];
+            // generate the slip* max force from the car wheel data, and validate they are 'real'
+            wheel.maxLat = GripHelper.calcSlipMax(wheel.pjk_lat);
+            wheel.maxLong = GripHelper.calcSlipMax(wheel.pjk_long);
+
+            try {
+                if (Float.isNaN(wheel.maxLat))
+                    throw new Exception("maxLat was: '" + wheel.maxLat + "'.");
+                if (Float.isNaN(wheel.maxLong))
+                    throw new Exception("maxLong was: '" + wheel.maxLong + "'.");
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.exit(-1021, "error in calculating max(lat|long) values of wheel #" + i);
+            }
+        }
+
+        // validate that the D1 and D2 pjk const values fit the weight of the car
         for (int i = 0; i < data.wheelData.length; i++) {
             if (GripHelper.loadFormula(data.wheelData[i].pjk_lat, quarterMassForce) <= 0)
                 throw new IllegalStateException("Wheel load lat formula not in range: " + data.wheelData[i].pjk_lat + " " + quarterMassForce);
             if (GripHelper.loadFormula(data.wheelData[i].pjk_long, quarterMassForce) <= 0)
                 throw new IllegalStateException("Wheel load long formula not in range: " + data.wheelData[i].pjk_lat + " " + quarterMassForce);
         }
-        
+    }
+
+    private void updateAutoGearChanges(CarDataConst data) {
         // Output the optimal gear up change point based on the torque curve
         final int redlineOffset = 250;
         List<Duo<Integer, Float>> changeTimes = new LinkedList<>();
         float maxTransSpeed = data.speedAtRpm(data.trans_gearRatios.length - 1, data.e_redline - redlineOffset);
-        for (float speed = 0; speed < maxTransSpeed; speed+=0.1f) {
+        for (float speed = 0; speed < maxTransSpeed; speed += 0.1f) {
             int bestGear = -1;
             float bestTorque = -1;
             for (int gear = 1; gear < data.trans_gearRatios.length; gear++) {
@@ -138,34 +158,34 @@ public class CarDataLoader { //CarDataFactory
                 }
                 // This prints a more detailed graph: Log.p(speed * 3.6f, wheelTorque, gear);
             }
-            
-            //This prints a nice graph: Log.p(speed * 3.6f, bestTorque, bestGear);
-            changeTimes.add(new Duo<Integer,Float>(bestGear, speed));
+
+            // This prints a nice graph: Log.p(speed * 3.6f, bestTorque, bestGear);
+            changeTimes.add(new Duo<Integer, Float>(bestGear, speed));
         }
 
         data.auto_gearDownSpeed = new float[data.trans_gearRatios.length];
         data.auto_gearDownSpeed[0] = Float.MAX_VALUE; // never change out of reverse
         data.auto_gearUpSpeed = new float[data.trans_gearRatios.length];
-        data.auto_gearUpSpeed[0] = Float.MAX_VALUE; //never change out of reverse
+        data.auto_gearUpSpeed[0] = Float.MAX_VALUE; // never change out of reverse
         // Get the first and last value for each gear
-        for (Entry<Integer, List<Duo<Integer, Float>>> entry: changeTimes.stream().collect(Collectors.groupingBy(x -> x.first)).entrySet()) {
+        for (Entry<Integer, List<Duo<Integer, Float>>> entry : changeTimes.stream()
+                .collect(Collectors.groupingBy(x -> x.first)).entrySet()) {
             int gear = entry.getKey();
             float downValue = entry.getValue().get(0).second;
             float upValue = entry.getValue().get(entry.getValue().size() - 1).second;
 
-            //set the auto up and down changes
-            data.auto_gearDownSpeed[gear] = downValue - 2f; //buffer so they overlap a little
+            // set the auto up and down changes
+            data.auto_gearDownSpeed[gear] = downValue - 2f; // buffer so they overlap a little
             data.auto_gearUpSpeed[gear] = upValue;
         }
 
-        // Checking that there is gear overlap between up and down (as it prevents the car from changing gear):
+        // Checking that there is gear overlap between up and down (as it prevents the
+        // car from changing gear):
         // [2>----[3>-<2]---<3] not [2>----<2]--[3>---<3]
         for (int i = 1; i < data.trans_gearRatios.length - 1; i++) {
             if (data.getGearUpSpeed(i) < data.getGearDownSpeed(i + 1)) {
                 throw new IllegalStateException("Gear overlap test failed for up: " + i + " down: " + (i + 1));
             }
         }
-
-        return data;
     }
 }

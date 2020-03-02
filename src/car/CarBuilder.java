@@ -79,6 +79,8 @@ public class CarBuilder extends BaseAppState {
         if (adjuster != null) {
             adjuster.applyAll(data);
         }
+        
+        loader.reValidateData(data, getApplication().getAssetManager(), grav);
 		return data;
 	}
 
