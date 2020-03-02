@@ -1,8 +1,10 @@
 package car.data;
 
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
@@ -22,6 +24,12 @@ public class CarDataLoader { //CarDataFactory
     
     private static final String YAML_CAR_DATA = "/assets/cardata/";
 
+    private static Map<Car, CarDataConst> dataCache = new HashMap<>();
+
+    public void clearLoadingCache() {
+        dataCache.clear();
+    }
+
     private CarDataConst loadFromFile(String carName) throws Exception {
         InputStream in = getClass().getResourceAsStream(YAML_CAR_DATA + carName + ".yaml");
         Yaml yaml = new Yaml(new Constructor(CarDataConst.class));
@@ -40,8 +48,10 @@ public class CarDataLoader { //CarDataFactory
     }
 
     public CarDataConst get(AssetManager am, Car car, Vector3f gravity) throws IllegalStateException {
-        String carName = car.getCarName();
+        if (dataCache.containsKey(car))
+            return dataCache.get(car);
         
+        String carName = car.getCarName();
         Log.p("Loading file data for car type: " + carName);
 
         CarDataConst data = null;
@@ -56,6 +66,8 @@ public class CarDataLoader { //CarDataFactory
         updateFromModelData(data, am);
         updateGripValues(data, gravity);
         updateAutoGearChanges(data);
+
+        dataCache.put(car, data);
 
         return data;
     }
