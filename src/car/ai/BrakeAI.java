@@ -12,7 +12,7 @@ public class BrakeAI extends CarAI {
     }
 
     @Override
-    public void update(float tpf) {
-        justBrake();
+    public void run() {
+        runBehaviour(justBrake);
     }
 }

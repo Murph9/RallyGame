@@ -20,27 +20,26 @@ public class RaceAI extends CarAI {
 	}
 
 	@Override
-	public void update(float tpf) {
-		Vector3f atPos = race.getNextCheckpoint(car);
+	public void run() {
+		Vector3f atPos = race.getNextCheckpoint(data.car);
 		if (atPos == null) {
-			justBrake();
+			runBehaviour(justBrake);
 			return;
 		}
         
-        driveAt(atPos);
-        
+        runBehaviour(driveAt);
 
-        tryStuffIfStuck(tpf);
-        detectVeryLongFall(tpf);
+        runBehaviour(tryStuffIfStuck);
+        runBehaviour(detectVeryLongFall);
 
-        float velocity = car.vel.length();
+        float velocity = data.car.vel.length();
 
         // very still, flip
-        if (velocity < 0.05f && car.up.y < 0) {
+        if (velocity < 0.05f && data.car.up.y < 0) {
             onEvent("Flip", true);
         }
 
-        applySelfTractionControl(tpf);
+        runBehaviour(applySelfTractionControl);
 
         //prevent hitting straight into walls
         if (doFowardRayCast) {

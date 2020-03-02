@@ -30,19 +30,20 @@ public class DriveAlongAI extends CarAI {
 	}
 
 	@Override
-	public void update(float tpf) {
-		Vector3f pos = this.car.location;
+	public void run() {
+		Vector3f pos = data.car.location;
 		Vector3f target = getGoal.apply(pos);
 		if (target == null) {
-			justBrake();
+			runBehaviour(justBrake);
 			return;
-		}
+        }
+        
+        setTarget(target);
 		
-		//drive at target
-		driveAt(target);
+		runBehaviour(driveAt);
 
 		//if going too slow at all speed up
-		float velocity = car.vel.length();
+		float velocity = data.car.vel.length();
 		if (velocity < 4) {
 			onEvent("Accel", true);
 			onEvent("Brake", false);
@@ -53,4 +54,5 @@ public class DriveAlongAI extends CarAI {
 			onEvent("Brake", false);
 		}
 	}
+
 }

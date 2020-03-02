@@ -9,7 +9,7 @@ public class NullAI extends CarAI {
 	}
 
 	@Override
-	public void update(float tpf) {
+	public void run() {
 		//Nothing by choice
 	}
 }
