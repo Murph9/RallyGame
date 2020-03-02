@@ -178,5 +178,10 @@ public class CarDataConst implements Serializable {
 			return (wheelData[2].radius + wheelData[3].radius) / 2f;
 
 		throw new IllegalStateException("No drive wheels set, no wheel radius found.");
-	}
+    }
+    
+    @Override
+    public String toString() {
+        return this.name + " " + this.carModel;
+    }
 }
