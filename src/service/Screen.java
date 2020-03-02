@@ -2,6 +2,7 @@ package service;
 
 import com.jme3.math.Vector3f;
 import com.jme3.system.AppSettings;
+import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Panel;
 
 public class Screen {
@@ -53,4 +54,12 @@ public class Screen {
         Vector3f size = c.getPreferredSize();
         c.setLocalTranslation(getTopRightFor(size));
     }
+
+    public Vector3f getTopLeftFor(Vector3f size) {
+        return new Vector3f(0, set.getHeight(), 0);
+    }
+	public void topLeftMe(Container c) {
+        Vector3f size = c.getPreferredSize();
+        c.setLocalTranslation(getTopLeftFor(size));
+	}
 }

@@ -26,6 +26,7 @@ import helper.H;
 
 public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
 
+    private static String POLICE_TEXT = "You are in trouble from the physics police\nthey are trying to nab you for breaking physics laws\n specifcally for being rediculously bouncy.\n";
     private static Vector3f[] spawns = new Vector3f[] { new Vector3f(0, 0, 0), new Vector3f(0, 10, 0),
             new Vector3f(5, 5, 0) };
 
@@ -40,7 +41,7 @@ public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
     public DriveCrash(IDriveDone done) {
         super(done, Car.Runner, new StaticWorldBuilder(StaticWorld.duct2));
         this.them = Car.Rally;
-        this.themCount = 1;
+        this.themCount = 40;
         this.totalKilled = 0;
 
         this.hitList = new LinkedList<>();
@@ -70,20 +71,21 @@ public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
 
         // check if any hit ones are upside down, if so kill them
         List<RayCarControl> toKill = new ArrayList<RayCarControl>();
-        for (RayCarControl c : this.hitList) {
-            if (c.up != null && c.up.y < 0 && c != this.cb.get(0)) {
+        for (RayCarControl c : this.hitList)
+            if (c.up != null && c.up.y < 0 && c != this.cb.get(0))
                 toKill.add(c);
-            }
-        }
+        for (RayCarControl c : this.hitList)
+            if (c.location.y < -100)
+                toKill.add(c);
         for (RayCarControl c : toKill) {
-            // killed
             totalKilled++;
             cb.removeCar(c);
             hitList.remove(c);
         }
 
-        if (this.menu.randomthing != null)
-            this.menu.randomthing.setText("Total Killed: " + totalKilled);
+        if (this.menu.randomthing != null) {
+            this.menu.randomthing.setText(POLICE_TEXT + "Total Killed: " + totalKilled);
+        }
     }
 
     private RayCarControl getCarFrom(Spatial node) {
@@ -119,10 +121,9 @@ public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
             this.hitList.add(them);
 
         PhysicsRigidBody prb = them.getPhysicsObject();
-        prb.applyImpulse(normalInWorld.mult(appliedImpulse*5), themLocalPos);
+        prb.applyImpulse(normalInWorld.mult(Math.max(10000, appliedImpulse*5)), themLocalPos);
 
         Vector3f posInWorld = prb.getPhysicsRotation().mult(themLocalPos).add(prb.getPhysicsLocation());
-
         getState(DebugAppState.class).drawArrow("playerCollision", ColorRGBA.Orange, posInWorld, normalInWorld);
     }
 }

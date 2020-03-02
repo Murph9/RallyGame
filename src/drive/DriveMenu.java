@@ -28,15 +28,14 @@ public class DriveMenu extends BaseAppState implements PauseState.ICallback {
         this.pauseState = new PauseState(this);
         getStateManager().attach(this.pauseState);
 
-		
 		//init gui
-        Screen screen = new Screen(app.getContext().getSettings());
+		Screen screen = new Screen(app.getContext().getSettings());
         SimpleApplication sm = (SimpleApplication) app;
 
 		random = new Container();
 		randomthing = new Label("");
 		random.attachChild(randomthing);
-		random.setLocalTranslation(screen.topRight().add(-100, 0, 0));
+		screen.topLeftMe(random);
 		sm.getGuiNode().attachChild(random);
 	}
 	
