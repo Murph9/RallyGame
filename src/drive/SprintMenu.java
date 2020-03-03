@@ -9,6 +9,8 @@ import com.simsilica.lemur.Label;
 import car.ray.RayCarControl;
 import helper.H;
 import service.Screen;
+import service.Screen.HorizontalPos;
+import service.Screen.VerticalPos;
 
 public class SprintMenu extends DriveMenu {
 
@@ -39,13 +41,13 @@ public class SprintMenu extends DriveMenu {
 		countDown = new Container();
 		countDownLabel = new Label("Sprint state?");
 		countDown.attachChild(countDownLabel);
-		countDown.setLocalTranslation(screen.center());
+		countDown.setLocalTranslation(screen.get(HorizontalPos.Middle, VerticalPos.Middle));
 		rootNode.attachChild(countDown);
 
 		scores = new Container();
 		scoresLabel = new Label("scoresLabel");
 		scores.attachChild(scoresLabel);
-		scores.setLocalTranslation(screen.topLeft());
+		scores.setLocalTranslation(screen.get(HorizontalPos.Left, VerticalPos.Top));
 		rootNode.attachChild(scores);
 	}
 

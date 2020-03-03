@@ -15,6 +15,8 @@ import car.data.CarDataConst;
 import car.ray.RayCarControl;
 import game.IDriveDone;
 import service.Screen;
+import service.Screen.HorizontalPos;
+import service.Screen.VerticalPos;
 
 
 public class DriveDev extends DriveBase {
@@ -35,16 +37,16 @@ public class DriveDev extends DriveBase {
 		
     	//init input gui
 		carEditor = new CarEditor(app.getInputManager(), this.cb.get(0), (data) -> { reloadCar(data);}, (car) -> { return resetCar(car); });
-		carEditor.setLocalTranslation(screen.topLeft().add(0, -20, 0));
+		carEditor.setLocalTranslation(screen.get(HorizontalPos.Left, VerticalPos.Top).add(0, -20, 0));
 		((SimpleApplication)app).getGuiNode().attachChild(carEditor);
 		
-		worldEditor = new WorldEditor((a) -> { reloadWorld(a); });
-		worldEditor.setLocalTranslation(screen.topRight().add(-worldEditor.width, 0, 0));
+        worldEditor = new WorldEditor((a) -> { reloadWorld(a); });
+		worldEditor.setLocalTranslation(screen.get(HorizontalPos.Right, VerticalPos.Top).add(-worldEditor.width, 0, 0));
 		((SimpleApplication)app).getGuiNode().attachChild(worldEditor);
 		
 		Vector3f size = new Vector3f(400,400,0);
-		wheelGraphs = new TractionCurveGraph(app.getAssetManager(), this.cb.get(0).getCarData(), size);
-		wheelGraphs.setLocalTranslation(screen.bottomRight().subtract(size.add(-5,-25,0)));
+        wheelGraphs = new TractionCurveGraph(app.getAssetManager(), this.cb.get(0).getCarData(), size);
+        wheelGraphs.setLocalTranslation(screen.get(HorizontalPos.Right, VerticalPos.Bottom, size));
 		((SimpleApplication)app).getGuiNode().attachChild(wheelGraphs);
 	}
 	

@@ -82,7 +82,7 @@ public class PauseState extends BaseAppState {
     @Override
     public void update(float tpf) {
         Screen screen = new Screen(getApplication().getContext().getSettings());
-        pauseMenu.setLocalTranslation(screen.center().add(pauseMenu.getPreferredSize().mult(-0.5f)));
+        screen.centerMe(pauseMenu);
     }
 
     @Override

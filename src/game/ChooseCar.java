@@ -19,6 +19,8 @@ import car.data.Car;
 import car.ray.RayCarControl;
 import helper.Log;
 import service.Screen;
+import service.Screen.HorizontalPos;
+import service.Screen.VerticalPos;
 import world.StaticWorld;
 import world.StaticWorldBuilder;
 import world.IWorld;
@@ -68,8 +70,8 @@ public class ChooseCar extends BaseAppState {
         Screen screen = new Screen(app.getContext().getSettings());
 
 		//info window first so the event listeners can delete it
-		infoWindow = new CarStatsUI(app.getAssetManager(), this.cb.get(0).getCarData());
-		infoWindow.setLocalTranslation(screen.topLeft());
+        infoWindow = new CarStatsUI(app.getAssetManager(), this.cb.get(0).getCarData());
+        screen.topLeftMe(infoWindow);
 		((SimpleApplication) app).getGuiNode().attachChild(infoWindow);
 
 		Container myWindow = new Container();
@@ -91,7 +93,7 @@ public class ChooseCar extends BaseAppState {
 
 					((SimpleApplication) app).getGuiNode().detachChild(infoWindow);
 					infoWindow = new CarStatsUI(app.getAssetManager(), cb.get(0).getCarData());
-					infoWindow.setLocalTranslation(screen.topLeft());
+                    screen.topLeftMe(infoWindow);
 					((SimpleApplication) app).getGuiNode().attachChild(infoWindow);
 
     				graph.updateMyPhysicsVehicle(cb.get(0).getCarData());
@@ -111,8 +113,8 @@ public class ChooseCar extends BaseAppState {
         });
         
         Vector3f size = new Vector3f(400,400,0);
-		graph = new PowerCurveGraph(app.getAssetManager(), this.cb.get(0).getCarData(), size);
-		graph.setLocalTranslation(screen.bottomRight().subtract(size.add(5,-25,0)));
+        graph = new PowerCurveGraph(app.getAssetManager(), this.cb.get(0).getCarData(), size);
+		graph.setLocalTranslation(screen.get(HorizontalPos.Right, VerticalPos.Bottom, size));
 		((SimpleApplication)app).getGuiNode().attachChild(graph);
 	}
 

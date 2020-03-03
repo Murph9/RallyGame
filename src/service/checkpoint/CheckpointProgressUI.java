@@ -23,7 +23,6 @@ public class CheckpointProgressUI extends BaseAppState {
     private RacerStateTableView progressTable;
     private Screen screen;
 
-    private Container basicPanel;
     private Label basicLabel;
 
     // debug things
@@ -37,14 +36,8 @@ public class CheckpointProgressUI extends BaseAppState {
     protected void initialize(Application app) {
         screen = new Screen(app.getContext().getSettings());
 
-        basicPanel = new Container();
-        basicLabel = new Label("Race state?");
-        basicPanel.attachChild(basicLabel);
-        basicPanel.setLocalTranslation(screen.topLeft().add(0, -25, 0));
-        ((SimpleApplication) app).getGuiNode().attachChild(basicPanel);
-
         this.main = new Container();
-        main.setLocalTranslation(screen.topLeft().add(0, -100, 0));
+        screen.topRightMe(main);
         ((SimpleApplication) app).getGuiNode().attachChild(main);
 
         progressTable = new RacerStateTableView(progress.getRaceState());
@@ -53,7 +46,6 @@ public class CheckpointProgressUI extends BaseAppState {
 
     @Override
     protected void cleanup(Application app) {
-        ((SimpleApplication) app).getGuiNode().detachChild(basicPanel);
         ((SimpleApplication) app).getGuiNode().detachChild(main);
     }
 

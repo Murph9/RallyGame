@@ -40,7 +40,7 @@ public class ChooseMap extends BaseAppState {
         ((SimpleApplication)app).getGuiNode().attachChild(myWindow);
         
         Screen screen = new Screen(app.getContext().getSettings());
-		myWindow.setLocalTranslation(screen.topLeft());
+        screen.topLeftMe(myWindow);
 		
 		//these values are not x and y because they are causing confusion
 		int i = 0;
