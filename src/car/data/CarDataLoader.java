@@ -130,16 +130,10 @@ public class CarDataLoader { //CarDataFactory
             wheel.maxLat = GripHelper.calcSlipMax(wheel.pjk_lat);
             wheel.maxLong = GripHelper.calcSlipMax(wheel.pjk_long);
 
-            try {
-                if (Float.isNaN(wheel.maxLat))
-                    throw new Exception("maxLat was: '" + wheel.maxLat + "'.");
-                if (Float.isNaN(wheel.maxLong))
-                    throw new Exception("maxLong was: '" + wheel.maxLong + "'.");
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                Log.exit(-1021, "error in calculating max(lat|long) values of wheel #" + i);
-            }
+            if (Float.isNaN(wheel.maxLat))
+                throw new IllegalStateException("maxLat was: '" + wheel.maxLat + "'.");
+            if (Float.isNaN(wheel.maxLong))
+                throw new IllegalStateException("maxLong was: '" + wheel.maxLong + "'.");
         }
 
         // validate that the D1 and D2 pjk const values fit the weight of the car

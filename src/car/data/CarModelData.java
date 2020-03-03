@@ -8,9 +8,6 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
-import helper.H;
-import helper.Log;
-
 public class CarModelData {
 	
 	private final HashMap<CarPart, CarPartData> pieces;
@@ -20,8 +17,6 @@ public class CarModelData {
 		
 		Spatial rootSpat = am.loadModel(car);
 		readInModelData(rootSpat);
-		
-		Log.p("Car part data for: '" + car + "': ", H.join(pieces.keySet()));
 	}
 	
 	private void readInModelData(Spatial s) {
