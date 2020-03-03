@@ -14,6 +14,7 @@ import com.jme3.bullet.collision.PhysicsCollisionEvent;
 import com.jme3.bullet.collision.PhysicsCollisionListener;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
 import com.jme3.system.AppSettings;
@@ -24,8 +25,6 @@ import com.simsilica.lemur.component.QuadBackgroundComponent;
 
 import car.ai.DriveAtAI;
 import car.data.Car;
-import car.data.CarDataAdjuster;
-import car.data.CarDataAdjustment;
 import car.data.CarDataConst;
 import car.ray.RayCarControl;
 import game.DebugAppState;
@@ -40,15 +39,16 @@ public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
     private static String POLICE_TEXT = "You are in trouble from the 'physics' police.\n"
         +"They are trying to nab you for breaking normal physics laws\n"
         +"specifcally for being rediculously bouncy.\n"
-        +"Try and survive [by staying above 30km/h]\n";
+        +"Try and survive [reset it by touching them]\n";
 
     private final Car them;
     private final int themCount;
 
     private final List<RayCarControl> hitList;
 
-    private int totalKilled;
+    private int totalFlipped;
     private int frameCount = 0; // global frame timer
+    
     private float loseTimer;
     private static float TIMEOUT = 10;
 
@@ -59,7 +59,7 @@ public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
         super(done, Car.Runner, new StaticWorldBuilder(StaticWorld.duct2));
         this.them = Car.Rally;
         this.themCount = 10;
-        this.totalKilled = 0;
+        this.totalFlipped = 0;
 
         this.hitList = new LinkedList<>();
     }
@@ -100,9 +100,7 @@ public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
             spawn.y = 0; //maybe ray cast from very high to find the ground height?
             spawn.z = Math.round(spawn.z)*2;
 
-            CarDataConst data = this.cb.loadData(them, new CarDataAdjuster(CarDataAdjustment.asFunc((constData) -> {
-                //TODO change the properties
-            })));
+            CarDataConst data = this.cb.loadData(them);
             RayCarControl c = this.cb.addCar(data, spawn, world.getStartRot(), false);
             c.attachAI(new DriveAtAI(c, playerBody), true);
         }
@@ -118,25 +116,17 @@ public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
         for (RayCarControl c : toKill) {
             cb.removeCar(c);
             if (hitList.contains(c)) {
-                totalKilled++;
+                totalFlipped++;
                 hitList.remove(c);
             }
         }
 
         if (this.menu.randomthing != null) {
-            this.menu.randomthing.setText(POLICE_TEXT + "Total Killed: " + totalKilled);
+            this.menu.randomthing.setText(POLICE_TEXT + "Total Flipped: " + totalFlipped);
         }
 
         //update timeout mode
-        float playerVelocity = playerBody.getLinearVelocity().length();
-        if (playerVelocity < 30 / 3.6f) //30 km/h -> m/s
-            loseTimer += tpf;
-        else
-            loseTimer -= tpf;
-        
-        if (loseTimer < 0)
-            loseTimer = 0;
-
+        loseTimer += tpf;
         if (loseTimer > TIMEOUT) {
             // you lose
             this.cb.setEnabled(false);
@@ -179,10 +169,12 @@ public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
             this.hitList.add(them);
 
         PhysicsRigidBody prb = them.getPhysicsObject();
-        prb.applyImpulse(normalInWorld.mult(Math.max(10000, appliedImpulse*5)), themLocalPos);
+        prb.applyImpulse(normalInWorld.mult(FastMath.clamp(appliedImpulse, 3000, 10000) * 5), themLocalPos);
 
         Vector3f posInWorld = prb.getPhysicsRotation().mult(themLocalPos).add(prb.getPhysicsLocation());
         getState(DebugAppState.class).drawArrow("playerCollision", ColorRGBA.Orange, posInWorld, normalInWorld);
+
+        loseTimer = 0;
     }
 
     private ProgressBar createBar(float value) {
