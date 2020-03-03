@@ -24,6 +24,9 @@ import com.simsilica.lemur.component.QuadBackgroundComponent;
 
 import car.ai.DriveAtAI;
 import car.data.Car;
+import car.data.CarDataAdjuster;
+import car.data.CarDataAdjustment;
+import car.data.CarDataConst;
 import car.ray.RayCarControl;
 import game.DebugAppState;
 import game.IDriveDone;
@@ -55,7 +58,7 @@ public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
     public DriveCrash(IDriveDone done) {
         super(done, Car.Runner, new StaticWorldBuilder(StaticWorld.duct2));
         this.them = Car.Rally;
-        this.themCount = 40;
+        this.themCount = 10;
         this.totalKilled = 0;
 
         this.hitList = new LinkedList<>();
@@ -97,7 +100,10 @@ public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
             spawn.y = 0; //maybe ray cast from very high to find the ground height?
             spawn.z = Math.round(spawn.z)*2;
 
-            RayCarControl c = this.cb.addCar(them, spawn, world.getStartRot(), false);
+            CarDataConst data = this.cb.loadData(them, new CarDataAdjuster(CarDataAdjustment.asFunc((constData) -> {
+                //TODO change the properties
+            })));
+            RayCarControl c = this.cb.addCar(data, spawn, world.getStartRot(), false);
             c.attachAI(new DriveAtAI(c, playerBody), true);
         }
 
@@ -132,7 +138,8 @@ public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
             loseTimer = 0;
 
         if (loseTimer > TIMEOUT) {
-            //TODO do something
+            // you lose
+            this.cb.setEnabled(false);
         }
         
         this.progressBar.setModel(new DefaultRangedValueModel(0, 1, loseTimer/TIMEOUT));
