@@ -16,6 +16,13 @@ public class Colours {
         return lerpColor((value - 2f/3f)*3, ColorRGBA.Red, ColorRGBA.Blue);
     }
 
+    public static ColorRGBA getOnGreenToRedScale(float value) {
+        //0 is green, 1 is red
+        if (value < 0) return ColorRGBA.Green;
+        if (value > 1) return ColorRGBA.Red;
+        return lerpColor(value, ColorRGBA.Green, ColorRGBA.Red);
+    }
+
     public static ColorRGBA lerpColor(float value, ColorRGBA a, ColorRGBA b) {
         return new ColorRGBA().interpolateLocal(a, b, value);
     }

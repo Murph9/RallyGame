@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.PhysicsCollisionEvent;
 import com.jme3.bullet.collision.PhysicsCollisionListener;
@@ -15,28 +16,41 @@ import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
+import com.jme3.system.AppSettings;
+import com.simsilica.lemur.Container;
+import com.simsilica.lemur.DefaultRangedValueModel;
+import com.simsilica.lemur.ProgressBar;
+import com.simsilica.lemur.component.QuadBackgroundComponent;
 
 import car.ai.DriveAtAI;
 import car.data.Car;
 import car.ray.RayCarControl;
 import game.DebugAppState;
 import game.IDriveDone;
+import helper.Colours;
 import helper.Geo;
 import helper.H;
+import service.Screen;
 
 public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
 
-    private static String POLICE_TEXT = "You are in trouble from the physics police\nthey are trying to nab you for breaking physics laws\n specifcally for being rediculously bouncy.\n";
-    private static Vector3f[] spawns = new Vector3f[] { new Vector3f(0, 0, 0), new Vector3f(0, 10, 0),
-            new Vector3f(5, 5, 0) };
+    private static String POLICE_TEXT = "You are in trouble from the 'physics' police.\n"
+        +"They are trying to nab you for breaking normal physics laws\n"
+        +"specifcally for being rediculously bouncy.\n"
+        +"Try and survive [by staying above 30km/h]\n";
 
     private final Car them;
     private final int themCount;
 
+    private final List<RayCarControl> hitList;
+
     private int totalKilled;
     private int frameCount = 0; // global frame timer
+    private float loseTimer;
+    private static float TIMEOUT = 10;
 
-    private final List<RayCarControl> hitList;
+    private Container progressContainer;
+    private ProgressBar progressBar;
 
     public DriveCrash(IDriveDone done) {
         super(done, Car.Runner, new StaticWorldBuilder(StaticWorld.duct2));
@@ -51,10 +65,22 @@ public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
     public void initialize(Application app) {
         super.initialize(app);
         getState(BulletAppState.class).getPhysicsSpace().addCollisionListener(this);
+
+        progressContainer = new Container();
+        progressBar = createBar(0);
+        progressContainer.addChild(progressBar);
+
+        AppSettings settings = app.getContext().getSettings();
+        progressContainer.setPreferredSize(new Vector3f(settings.getWidth() / 3, settings.getHeight() / 15f, 0));
+        
+        new Screen(settings).bottomCenterMe(progressContainer);
+
+        ((SimpleApplication) app).getGuiNode().attachChild(progressContainer);
     }
 
     @Override
     public void cleanup(Application app) {
+        ((SimpleApplication) app).getGuiNode().detachChild(progressContainer);
         getState(BulletAppState.class).getPhysicsSpace().removeCollisionListener(this);
         super.cleanup(app);
     }
@@ -63,10 +89,16 @@ public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
         super.update(tpf);
         frameCount++;
 
+        PhysicsRigidBody playerBody = this.cb.get(0).getPhysicsObject();
+
         if (this.cb.getCount() < (themCount+1) && frameCount % 60 == 0) {
-            Vector3f spawn = H.randFromArray(spawns);
+            Vector3f spawn = H.randV3f(10, true);
+            spawn.x = Math.round(spawn.x)*2;
+            spawn.y = 0; //maybe ray cast from very high to find the ground height?
+            spawn.z = Math.round(spawn.z)*2;
+
             RayCarControl c = this.cb.addCar(them, spawn, world.getStartRot(), false);
-            c.attachAI(new DriveAtAI(c, this.cb.get(0).getPhysicsObject()), true);
+            c.attachAI(new DriveAtAI(c, playerBody), true);
         }
 
         // check if any hit ones are upside down, if so kill them
@@ -74,18 +106,37 @@ public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
         for (RayCarControl c : this.hitList)
             if (c.up != null && c.up.y < 0 && c != this.cb.get(0))
                 toKill.add(c);
-        for (RayCarControl c : this.hitList)
+        for (RayCarControl c : this.cb.getAll())
             if (c.location.y < -100)
                 toKill.add(c);
         for (RayCarControl c : toKill) {
-            totalKilled++;
             cb.removeCar(c);
-            hitList.remove(c);
+            if (hitList.contains(c)) {
+                totalKilled++;
+                hitList.remove(c);
+            }
         }
 
         if (this.menu.randomthing != null) {
             this.menu.randomthing.setText(POLICE_TEXT + "Total Killed: " + totalKilled);
         }
+
+        //update timeout mode
+        float playerVelocity = playerBody.getLinearVelocity().length();
+        if (playerVelocity < 30 / 3.6f) //30 km/h -> m/s
+            loseTimer += tpf;
+        else
+            loseTimer -= tpf;
+        
+        if (loseTimer < 0)
+            loseTimer = 0;
+
+        if (loseTimer > TIMEOUT) {
+            //TODO do something
+        }
+        
+        this.progressBar.setModel(new DefaultRangedValueModel(0, 1, loseTimer/TIMEOUT));
+        this.progressBar.getValueIndicator().setBackground(new QuadBackgroundComponent(Colours.getOnGreenToRedScale(loseTimer / TIMEOUT)));
     }
 
     private RayCarControl getCarFrom(Spatial node) {
@@ -125,5 +176,13 @@ public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
 
         Vector3f posInWorld = prb.getPhysicsRotation().mult(themLocalPos).add(prb.getPhysicsLocation());
         getState(DebugAppState.class).drawArrow("playerCollision", ColorRGBA.Orange, posInWorld, normalInWorld);
+    }
+
+    private ProgressBar createBar(float value) {
+        ProgressBar pb = new ProgressBar();
+        pb.setProgressPercent(value);
+        pb.setModel(new DefaultRangedValueModel(0, 1, value));
+        pb.getValueIndicator().setBackground(new QuadBackgroundComponent(Colours.getOnGreenToRedScale(value)));
+        return pb;
     }
 }
