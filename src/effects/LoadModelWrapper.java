@@ -65,4 +65,25 @@ public class LoadModelWrapper {
         g.setMaterial(baseMat);
         return g;
     }
+
+    public static void updateColour(Spatial s, ColorRGBA colour, boolean recursive) {
+        if (colour == null)
+            throw new IllegalArgumentException("Please don't send me a null colour");
+        if (recursive)
+            throw new IllegalArgumentException("Recursive mode not written yet."); // TODO set colour recursive
+
+        if (s instanceof Geometry) {
+            Geometry g = (Geometry)s;
+            g.getMaterial().setColor("Color", colour);
+        }
+        if (s instanceof Node) {
+            Node n = (Node) s;
+            for (Spatial sp: n.getChildren()) {
+                if (sp instanceof Geometry) {
+                    Geometry g = (Geometry) sp;
+                    g.getMaterial().setColor("Color", colour);
+                }
+            }
+        }
+    }
 }

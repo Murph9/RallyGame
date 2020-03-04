@@ -108,13 +108,16 @@ public class Geo {
         return g;
     }
 
+    public static Spatial getNamedSpatial(Node n, String name) {
+        return n.getChild(name);
+    }
 
-    public static Spatial removeNamedSpatial(Node s, String name) {
-        Spatial result = s.getChild(name);
-        if (result == null)
+    public static Spatial removeNamedSpatial(Node n, String name) {
+        Spatial s = n.getChild(name);
+        if (s == null)
             return null;
-        result.removeFromParent();
-        return result;
+        s.removeFromParent();
+        return s;
     }
 
     public static List<Geometry> getGeomList(Spatial n) {
