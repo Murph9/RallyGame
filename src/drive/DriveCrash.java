@@ -3,8 +3,8 @@ package drive;
 import world.StaticWorld;
 import world.StaticWorldBuilder;
 
+import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +50,7 @@ public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
     private final int themCount;
 
     private final Map<RayCarControl, Instant> hitList;
+    private static final Duration HIT_TIMEOUT = Duration.ofSeconds(5);
 
     private int totalFlipped;
     private int frameCount = 0; // global frame timer
@@ -187,12 +188,12 @@ public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
         updateToColour(them, ColorRGBA.Blue);
 
         if (!this.hitList.containsKey(them))
-            this.hitList.put(them, now.plus(5, ChronoUnit.SECONDS));
+            this.hitList.put(them, now.plus(HIT_TIMEOUT));
         else {
             //check if its been 5 seconds since the last collision
             if (this.hitList.get(them).isBefore(now)) {
-                this.hitList.put(them, now.plus(5, ChronoUnit.SECONDS));
-                return; //delay collisions until 5 seconds have passed
+                this.hitList.put(them, now.plus(HIT_TIMEOUT));
+                return; //prevent any more collisions
             }
         }
 
