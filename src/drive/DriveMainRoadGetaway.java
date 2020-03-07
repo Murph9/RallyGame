@@ -75,11 +75,11 @@ public class DriveMainRoadGetaway extends DriveBase {
 		hunter.attachAI(new DriveAtAI(hunter, this.cb.get(0).getPhysicsObject()), true);
 
 		display = new Container();
-		display.addChild(new Label("Score: "));
-		scoreLabel = display.addChild(new Label("0"), 1);
-		display.addChild(new Label("Life: "));
-		lifeLabel = display.addChild(new Label("0"), 1);
-		gameOverLabel = display.addChild(new Label(""), 1);
+		display.addChild(new Label("Score: "), 0, 0);
+		scoreLabel = display.addChild(new Label("<score>"), 0, 1);
+		display.addChild(new Label("Life: "), 1, 0);
+		lifeLabel = display.addChild(new Label("<life>"), 1, 1);
+		gameOverLabel = display.addChild(new Label(""), 2);
 		
 		AppSettings set = app.getContext().getSettings();
 		display.setLocalTranslation(new Vector3f(set.getWidth() / 2, set.getHeight(), 0));
@@ -107,8 +107,8 @@ public class DriveMainRoadGetaway extends DriveBase {
 			return;
 		}
 
-		this.scoreLabel.setText(((int) distanceFromStart)+"");
-		this.lifeLabel.setText(((int) (life*100))+"");
+		this.scoreLabel.setText(H.roundDecimal(distanceFromStart, 0));
+		this.lifeLabel.setText(H.roundDecimal(life*100, 0));
 
 		//environment:
 		readyForHunter = distanceFromStart > HUNTER_BUFFER;
