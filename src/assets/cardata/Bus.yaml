@@ -44,8 +44,8 @@ wheelData:
 - &w
   mass: 10.0
   modelName: assets/models/busbus_wheel.blend
-  pjk_lat: {B: 10, C: 1.9, D1: 1.6, D2: 0.00001, E: 0.97}
-  pjk_long: {B: 10, C: 1.9, D1: 1.6, D2: 0.00001, E: 0.97}
+  pjk_lat: {B: 40, C: 1.9, D1: 1.6, D2: 0.00001, E: 0.97}
+  pjk_long: {B: 30, C: 1.9, D1: 1.6, D2: 0.00001, E: 0.97}
   radius: 0.48
   width: 0.38
 - *w

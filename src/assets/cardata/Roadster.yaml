@@ -46,8 +46,8 @@ wheelData:
 - &w
   mass: 10.0
   modelName: assets/models/na_w_1_out.blend
-  pjk_lat: {B: 10, C: 1.9, D1: 1.4, D2: 0.000055, E: 0.97}
-  pjk_long: {B: 10, C: 1.9, D1: 1.4, D2: 0.000055, E: 0.97}
+  pjk_lat: {B: 60, C: 1.9, D1: 1.4, D2: 0.000055, E: 0.97}
+  pjk_long: {B: 40, C: 1.9, D1: 1.4, D2: 0.000055, E: 0.97}
   radius: 0.289 #https://www.tyresizecalculator.com/tyre-wheel-calculators/tire-size-calculator-tire-dimensions
   width: 0.185
 - *w

@@ -44,8 +44,8 @@ wheelData:
 - &w
   mass: 10.0
   modelName: assets/models/Wagon_Wheel.blend
-  pjk_lat: {B: 10.0, C: 1.32, D1: 0.8, D2: 0.000055, E: 0.97}
-  pjk_long: {B: 10.0, C: 1.9, D1: 1.4, D2: 0.000055, E: 0.95}
+  pjk_lat: {B: 160.0, C: 1.32, D1: 0.8, D2: 0.000055, E: 0.97}
+  pjk_long: {B: 160.0, C: 1.9, D1: 1.4, D2: 0.000055, E: 0.95}
   radius: 0.5
   width: 0.15
 - *w
