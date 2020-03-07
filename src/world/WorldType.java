@@ -3,6 +3,7 @@ package world;
 import world.highway.HighwayWorld;
 import world.lsystem.LSystemWorld;
 import world.osm.OsmWorld;
+import world.track.TrackWorld;
 import world.wp.WP.DynamicType;
 
 public enum WorldType {
@@ -49,6 +50,8 @@ public enum WorldType {
             return new MovingWorld();
         case OSM:
             return new OsmWorld();
+        case TRACK:
+            return new TrackWorld();
 
         default:
             throw new IllegalArgumentException("Non valid world type given: " + worldTypeStr);
