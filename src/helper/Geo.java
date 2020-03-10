@@ -2,6 +2,7 @@ package helper;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
@@ -118,6 +119,13 @@ public class Geo {
             return null;
         s.removeFromParent();
         return s;
+    }
+
+    public static List<Geometry> getGeomsContaining(Spatial s, String str) {
+        return Geo.getGeomList(s)
+            .stream()
+            .filter(x -> x.getName().contains(str))
+            .collect(Collectors.toList());
     }
 
     public static List<Geometry> getGeomList(Spatial n) {

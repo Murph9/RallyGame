@@ -11,7 +11,7 @@ public class MaterialColourer {
     // geometry format required: <blah blah>[<colour>]
     private static Pattern GEO_NAME_REGEX = Pattern.compile(".*\\[(.+)\\].*");
 
-    public static ColorRGBA getColorFromMaterialName(Material m) {
+    public static ColorRGBA getColourFromMaterialName(Material m) {
         if (m == null)
             return null;
 
@@ -24,9 +24,9 @@ public class MaterialColourer {
             return null;
         String colour = mat.group(1);
 
-        if (colour.startsWith("#")) {
+        if (colour.startsWith("#"))
             return parseAsHex(colour);
-        }
+
         return null;
     }
 

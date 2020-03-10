@@ -118,6 +118,9 @@ public class CarModelData {
 			}
 			
 			return out;
-		}
+        }
+        
+        public static String PRIMARY_TAG = "[primary]";
+        public static String SECONDARY_TAG = "[secondary]";
 	}
 }

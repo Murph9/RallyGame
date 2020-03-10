@@ -73,7 +73,7 @@ public class WireframeHighlighter {
 	}
 	
 	private static Geometry _do(AssetManager am, Geometry g, ColorRGBA highlight) {
-		ColorRGBA defColour = MaterialColourer.getColorFromMaterialName(g.getMaterial());
+		ColorRGBA defColour = MaterialColourer.getColourFromMaterialName(g.getMaterial());
 		if (defColour != null)
 			highlight = defColour;
 		else

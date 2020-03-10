@@ -180,7 +180,7 @@ public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
     
     private void updateToColour(RayCarControl car, ColorRGBA colour) {
         Spatial s = Geo.getNamedSpatial(car.getRootNode(), CarPart.Chassis.getPartName());
-        LoadModelWrapper.updateColour(s, colour, false);
+        LoadModelWrapper.setPrimaryColour(s, colour);
     }
 
     private void playerCollision(RayCarControl player, RayCarControl them, Vector3f normalInWorld, Vector3f themLocalPos, float appliedImpulse) {
