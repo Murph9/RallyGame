@@ -19,7 +19,37 @@
             "options": {
                 "shell": {}
             },
-            "problemMatcher": []
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Generate blend model files",
+            "command": ".\\gradlew.bat convertAllBlendFiles",
+            "type": "shell",
+            "options": {
+                "shell": {}
+            },
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always"
+            },
+            "detail": "Requires blender is installed"
+        },
+        {
+            "label": "Delete blend generated gltf model files",
+            "command": ".\\gradlew.bat cleanBlendGltfFiles",
+            "type": "shell",
+            "options": {
+                "shell": {}
+            },
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always"
+            },
+            "detail": "Removes all *.blend.gld files"
         }
     ]
 }

@@ -28,7 +28,7 @@ sourceSets.test {
 
 
 task createFatJar(type: Jar) {
-    baseName = 'rally'
+    archiveBaseName = 'rally'
 	manifest {
 		attributes 'Main-Class': 'game.Main'
 	}
@@ -41,7 +41,7 @@ task createFatJar(type: Jar) {
 }
 
 task createDuelFatJar(type: Jar) {
-    baseName = 'duel'
+    archiveBaseName = 'duel'
 	manifest {
 		attributes 'Main-Class': 'duel.DuelApp'
 	}
@@ -53,6 +53,20 @@ task createDuelFatJar(type: Jar) {
 	dependsOn 'build'
 }
 
+task cleanBlendGltfFiles(type: Delete) {
+    delete fileTree('src/assets') {
+        include '**/*.blend.glb'
+    }
+}
+
+task convertAllBlendFiles(type: Exec) {
+    workingDir 'src/assets'
+    
+    //sorry windows only unless you install powershell on linux
+    commandLine 'cmd', '/c', 'Powershell -File blend2gltf.ps1'
+}
+compileJava.dependsOn(convertAllBlendFiles)
+
 test {
     useJUnitPlatform()
 }
@@ -60,19 +74,19 @@ test {
 def jme3Version = '3.2.4-stable'
 
 dependencies {
-	compile "org.jmonkeyengine:jme3-blender:${jme3Version}"
-	compile "org.jmonkeyengine:jme3-bullet:${jme3Version}"
-	compile "org.jmonkeyengine:jme3-bullet-native:${jme3Version}"
-	compile "org.jmonkeyengine:jme3-core:${jme3Version}"
-	compile "org.jmonkeyengine:jme3-desktop:${jme3Version}"
-	compile "org.jmonkeyengine:jme3-effects:${jme3Version}"
-	compile "org.jmonkeyengine:jme3-lwjgl:${jme3Version}"
-	compile "org.jmonkeyengine:jme3-plugins:${jme3Version}"
-	compile "org.jmonkeyengine:jme3-terrain:${jme3Version}"
-	compile "org.jmonkeyengine:jme3-jogg:${jme3Version}"
+	implementation "org.jmonkeyengine:jme3-blender:${jme3Version}"
+	implementation "org.jmonkeyengine:jme3-bullet:${jme3Version}"
+	implementation "org.jmonkeyengine:jme3-bullet-native:${jme3Version}"
+	implementation "org.jmonkeyengine:jme3-core:${jme3Version}"
+	implementation "org.jmonkeyengine:jme3-desktop:${jme3Version}"
+	implementation "org.jmonkeyengine:jme3-effects:${jme3Version}"
+	implementation "org.jmonkeyengine:jme3-lwjgl:${jme3Version}"
+	implementation "org.jmonkeyengine:jme3-plugins:${jme3Version}"
+	implementation "org.jmonkeyengine:jme3-terrain:${jme3Version}"
+	implementation "org.jmonkeyengine:jme3-jogg:${jme3Version}"
 	
-	compile 'org.yaml:snakeyaml:1.25'
-	compile 'com.simsilica:lemur:1.13.0'
+	implementation 'org.yaml:snakeyaml:1.25'
+	implementation 'com.simsilica:lemur:1.13.0'
 
 	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.1'
 	testImplementation 'org.junit.jupiter:junit-jupiter-params:5.5.1'

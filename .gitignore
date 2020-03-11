@@ -43,7 +43,9 @@ local.properties
 # STS (Spring Tool Suite)
 .springBeans
 
-# blender save files
+# blender save files and generated gltf files
 *.blend1
+*.blend.glb
+
 /target/
 .vscode/settings.json
