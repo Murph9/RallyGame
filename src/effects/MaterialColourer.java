@@ -24,8 +24,8 @@ public class MaterialColourer {
             return null;
 
         // check every matching group
-        for (int i = 1; i < mat.groupCount(); i++) {
-            ColorRGBA col = parseAsHex(mat.group(i));
+        for (int i = 0; i < mat.groupCount(); i++) {
+            ColorRGBA col = parseAsHex(mat.group(i + 1));
             if (col != null)
                 return col;
         }
