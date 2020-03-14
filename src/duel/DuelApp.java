@@ -42,7 +42,6 @@ public class DuelApp extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
-        Logger.getLogger("com.jme3.scene.plugins.blender").setLevel(Level.SEVERE); // ignore blender warnings
         Logger.getLogger("com.jme3.scene.plugins.OBJLoader").setLevel(Level.SEVERE);
 
         inputManager.setCursorVisible(true);

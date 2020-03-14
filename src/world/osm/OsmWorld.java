@@ -17,7 +17,6 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.VertexBuffer.Type;
-import com.jme3.scene.plugins.blender.math.Vector3d;
 import com.jme3.scene.shape.Line;
 import com.jme3.util.BufferUtils;
 
@@ -54,16 +53,16 @@ public class OsmWorld extends World {
 
         // next load the roads
         for (world.osm.OsmReader.Road l : reader.getWithScale(scale)) {
-            generateQuadFromLine(fromV3d(l.a), fromV3d(l.b), mapColorToType(l.subRoadType));
+            generateQuadFromLine(l.a, l.b, mapColorToType(l.subRoadType));
 
-            Line objL = new Line(fromV3d(l.a), fromV3d(l.b));
+            Line objL = new Line(l.a, l.b);
             this.rootNode.attachChild(LoadModelWrapper.create(app.getAssetManager(), new Geometry("line", objL), ColorRGBA.Blue));
         }
     }
 
     @Override
     public Vector3f getStartPos() {
-        return fromV3d(reader.getWithScale(scale).get(0).a).add(0, 1, 0);
+        return reader.getWithScale(scale).get(0).a.add(0, 1, 0);
     }
 
     @Override
@@ -77,10 +76,6 @@ public class OsmWorld extends World {
     @Override
     public WorldType getType() {
         return WorldType.OSM;
-    }
-
-    private Vector3f fromV3d(Vector3d vec3d) {
-        return new Vector3f((float) vec3d.x, (float) vec3d.y, (float) vec3d.z);
     }
 
     private void generateQuadFromLine(Vector3f start, Vector3f end, ColorRGBA colour) {

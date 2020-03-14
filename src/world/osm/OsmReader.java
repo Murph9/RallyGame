@@ -12,7 +12,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import com.jme3.scene.plugins.blender.math.Vector3d; //TODO use a different vec lib
+import com.jme3.math.Vector3f;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -24,17 +24,17 @@ public class OsmReader {
 
     public class Road {
         final String subRoadType;
-        final Vector3d a;
-        final Vector3d b;
+        final Vector3f a;
+        final Vector3f b;
 
-        public Road(String subRoadType, Vector3d a, Vector3d b) {
+        public Road(String subRoadType, Vector3f a, Vector3f b) {
             this.subRoadType = subRoadType;
             this.a = a;
             this.b = b;
         }
     }
 
-    private Vector3d middle;
+    private Vector3f middle;
     private List<Road> lines;
 
     public void load(InputStream fileStream) throws SAXException, IOException, ParserConfigurationException {
@@ -43,7 +43,7 @@ public class OsmReader {
         DocumentBuilder documentBuilder = factory.newDocumentBuilder();
         Document document = documentBuilder.parse(fileStream);
 
-        Map<String, Vector3d> points = new HashMap<>();
+        Map<String, Vector3f> points = new HashMap<>();
 
         NodeList childNodes = document.getDocumentElement().getChildNodes();
         for (int i = 0; i < childNodes.getLength(); i++) {
@@ -57,13 +57,13 @@ public class OsmReader {
                 double minLon = Double.parseDouble(childElement.getAttribute("minlon"));
                 double maxLon = Double.parseDouble(childElement.getAttribute("maxlon"));
 
-                this.middle = new Vector3d((maxLat + minLat) / 2d, 0d, (maxLon + minLon) / 2d);
+                this.middle = new Vector3f((float)((maxLat + minLat) / 2d), 0f, (float)((maxLon + minLon) / 2d));
             }
 
             if (childNode.getNodeName().equals("node")) {
                 Element childElement = (Element) childNode;
-                Vector3d p = new Vector3d(Double.parseDouble(childElement.getAttribute("lat")), 0d,
-                        Double.parseDouble(childElement.getAttribute("lon")));
+                Vector3f p = new Vector3f(Float.parseFloat(childElement.getAttribute("lat")), 0f,
+                        Float.parseFloat(childElement.getAttribute("lon")));
                 points.put(childElement.getAttribute("id"), p);
             }
 
@@ -86,13 +86,13 @@ public class OsmReader {
                 if (!isRoad)
                     continue;
 
-                Vector3d p = null;
+                Vector3f p = null;
                 for (int j = 0; j < wayChildren.getLength(); j++) {
                     Node wayChild = wayChildren.item(j);
                     if (wayChild.getNodeName().equals("nd")) {
                         Element wayChildElement = (Element) wayChild;
                         String pointId = wayChildElement.getAttribute("ref");
-                        Vector3d curP = points.get(pointId);
+                        Vector3f curP = points.get(pointId);
                         if (p != null) {
                             lines.add(new Road(roadType, p, curP));
                         }
@@ -109,13 +109,13 @@ public class OsmReader {
                 convertToLocal(x.b, middle, scale))).collect(Collectors.toList());
     }
 
-    private Vector3d convertToLocal(Vector3d p, Vector3d offset, double scale) {
-        return new Vector3d(subThenMult(p.x, offset.x, scale), subThenMult(p.y, offset.y, scale),
+    private Vector3f convertToLocal(Vector3f p, Vector3f offset, double scale) {
+        return new Vector3f(subThenMult(p.x, offset.x, scale), subThenMult(p.y, offset.y, scale),
                 subThenMult(p.z, offset.z, scale));
     }
 
-    private double subThenMult(double input, double sub, double scale) {
-        return (input - sub) * scale;
+    private float subThenMult(float input, float sub, double scale) {
+        return (float)((input - sub) * scale);
     }
 
 }

@@ -22,13 +22,13 @@ import terrainWorld.TileListener;
 public class TreeMaker implements TileListener {
 
 	private static final String[] Tree_Strings = new String[] {
-			"assets/objects/tree_0.blend",
-			"assets/objects/tree_1.blend",
-			"assets/objects/tree_2.blend",
-			"assets/objects/tree_3.blend",
-			"assets/objects/tree_4.blend",
-			"assets/objects/tree_5.blend",
-			"assets/objects/tree_6.blend",
+			"assets/objects/tree_0.blend.glb",
+			"assets/objects/tree_1.blend.glb",
+			"assets/objects/tree_2.blend.glb",
+			"assets/objects/tree_3.blend.glb",
+			"assets/objects/tree_4.blend.glb",
+			"assets/objects/tree_5.blend.glb",
+			"assets/objects/tree_6.blend.glb",
 		};
 	
 	private Spatial treeGeoms[] = new Spatial[Tree_Strings.length];

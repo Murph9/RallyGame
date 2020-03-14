@@ -9,50 +9,50 @@ import helper.H;
 //Simple class that makes changing static world quite easy
 public enum StaticWorld {
 	//special
-	garage("garage.blend", 1, new Vector3f(0,1,0), null),
-	garage2("garage_2.blend", 1, new Vector3f(0,1,0), null),
+	garage("garage", 1, new Vector3f(0,1,0), null),
+	garage2("garage_2", 1, new Vector3f(0,1,0), null),
 
 	//normal
-	duct("duct.blend", 50 * 3.223f, new Vector3f(0,-34,0), null),
-	duct2("duct.blend", 5 * 3.223f, null, null),
-	raleigh("raleigh.blend", 8, new Vector3f(34.441566f, 20.72906f, 27.334211f), null),
+	duct("duct", 50 * 3.223f, new Vector3f(0,-34,0), null),
+	duct2("duct", 5 * 3.223f, null, null),
+	raleigh("raleigh", 8, new Vector3f(34.441566f, 20.72906f, 27.334211f), null),
 
-	dragstrip("dragstrip.blend", 10, null, null),
-	multidragstrip("multidragstrip.blend", 1, null, null),
+	dragstrip("dragstrip", 10, null, null),
+	multidragstrip("multidragstrip", 1, null, null),
 
-	realroad("real_road.blend", 1, new Vector3f(225, -19, 708), H.FromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y)),
+	realroad("real_road", 1, new Vector3f(225, -19, 708), H.FromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y)),
 
 	//other peoples:
-	track2("track2.blend", 1, null, H.FromAngleAxis(FastMath.PI, Vector3f.UNIT_Y)),
-	carpark("carpark.blend", 1, null, null),
-	unbenannt("unbenannt_track.blend", 1, null, null),
+	track2("track2", 1, null, H.FromAngleAxis(FastMath.PI, Vector3f.UNIT_Y)),
+	carpark("carpark", 1, null, null),
+	unbenannt("unbenannt_track", 1, null, null),
 	
-	block_fort("block_fort.blend", 10, new Vector3f(-20,0,-12), null),
-	rainbow_road("rainbow_road.blend", 1, null, null),
-	wuhu_island("wuhu_island.blend", 2, null, H.FromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y)),
+	block_fort("block_fort", 10, new Vector3f(-20,0,-12), null),
+	rainbow_road("rainbow_road", 1, null, null),
+	wuhu_island("wuhu_island", 2, null, H.FromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y)),
 
     //checkpoints
-    lakelooproad("lakelooproad.blend", 1, null, null),
+    lakelooproad("lakelooproad", 1, null, null),
 
 	//debug ones:
-	slope_test("slope_test.blend", 1, null, null)
-//	paris1("paris1.blend", 1, new Vector3f(40,75,0)), //be careful with this one, large
-//	track1("track1.blend", 1, new Vector3f(255.12906f, 0.7663503f, -40.224197f)),
-//	track3("track3.blend", 1, new Vector3f(-24.227085f, 0.7908745f, 98.21415f)),
-//	track4("track4.blend", 0.4f, new Vector3f(721.67365f, 0.84544f, -404.1729f)),
-//	skyline("skyline.blend", 800, new Vector3f(-27.7f, 89.5f, 111.3f)), //large
+	slope_test("slope_test", 1, null, null)
+//	paris1("paris1", 1, new Vector3f(40,75,0)), //be careful with this one, large
+//	track1("track1", 1, new Vector3f(255.12906f, 0.7663503f, -40.224197f)),
+//	track3("track3", 1, new Vector3f(-24.227085f, 0.7908745f, 98.21415f)),
+//	track4("track4", 0.4f, new Vector3f(721.67365f, 0.84544f, -404.1729f)),
+//	skyline("skyline", 800, new Vector3f(-27.7f, 89.5f, 111.3f)), //large
 //	mine("minecraft_world1.obj", 30, new Vector3f(0,15,0)),
 	;
 	
-	static final String dir = "assets/staticworld/";
+	static final String dirFormat = "assets/staticworld/%s.blend.glb";
 	
 	public String name;
 	public float scale;
 	public Vector3f start;
 	public Quaternion rot;
 
-	StaticWorld(String a, float size, Vector3f pos, Quaternion rot) {
-		this.name = dir + a;
+	StaticWorld(String modelName, float size, Vector3f pos, Quaternion rot) {
+		this.name = String.format(dirFormat, modelName);
         this.scale = size;
         this.start = pos;
         if (this.start == null)

@@ -20,7 +20,7 @@ public class CarDataConst implements Serializable {
 	public String name;
 	public ColorRGBA baseColor;
 
-	// model strings (can be xx.obj or xx.blend)
+	// model strings (can be xx.obj or xx.blend.glb)
 	public String carModel;
 	public String wheelModel;
 	

@@ -74,7 +74,6 @@ test {
 def jme3Version = '3.2.4-stable'
 
 dependencies {
-	implementation "org.jmonkeyengine:jme3-blender:${jme3Version}"
 	implementation "org.jmonkeyengine:jme3-bullet:${jme3Version}"
 	implementation "org.jmonkeyengine:jme3-bullet-native:${jme3Version}"
 	implementation "org.jmonkeyengine:jme3-core:${jme3Version}"

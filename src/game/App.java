@@ -2,8 +2,6 @@ package game;
 
 
 import java.util.Collection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.StatsAppState;
@@ -46,8 +44,6 @@ public class App extends SimpleApplication {
 
 	@Override
 	public void simpleInitApp() {
-		Logger.getLogger("com.jme3.scene.plugins.blender").setLevel(Level.WARNING); //ignore blender warnings
-
 		inputManager.setCursorVisible(true);
 		inputManager.deleteMapping(INPUT_MAPPING_EXIT); //no esc close pls
 

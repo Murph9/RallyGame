@@ -124,11 +124,11 @@ public class FullCityWorld extends World {
 	}
 	
 	private enum CityPieceType {
-		STRAIGHT("straight.blend", 9), //1,8
-		LEFT_T("leftT.blend", 11), //1,2,8
-		RIGHT_T("rightT.blend", 13), //1,4,8
-		CROSS("cross.blend", 15), //1,2,4,8
-		BUILDING("building.blend", 0),
+		STRAIGHT("straight.blend.glb", 9), //1,8
+		LEFT_T("leftT.blend.glb", 11), //1,2,8
+		RIGHT_T("rightT.blend.glb", 13), //1,4,8
+		CROSS("cross.blend.glb", 15), //1,2,4,8
+		BUILDING("building.blend.glb", 0),
 		;
 		
 		//straight = 1, left = 2, right = 4, back = 8
