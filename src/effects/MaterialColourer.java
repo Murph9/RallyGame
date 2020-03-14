@@ -8,8 +8,8 @@ import com.jme3.math.ColorRGBA;
 
 public class MaterialColourer {
     
-    // geometry format required: <blah blah>[<colour>]
-    private static Pattern GEO_NAME_REGEX = Pattern.compile(".*\\[(.+)\\].*");
+    // geometry material name format: <blah blah>[<colour>] [<possibly other square bracket sections>]
+    private static Pattern GEO_NAME_REGEX = Pattern.compile("\\[(#.+?)\\]");
 
     public static ColorRGBA getColourFromMaterialName(Material m) {
         if (m == null)
@@ -22,11 +22,13 @@ public class MaterialColourer {
         Matcher mat = GEO_NAME_REGEX.matcher(name);
         if (!mat.find())
             return null;
-        String colour = mat.group(1);
 
-        if (colour.startsWith("#"))
-            return parseAsHex(colour);
-
+        // check every matching group
+        for (int i = 1; i < mat.groupCount(); i++) {
+            ColorRGBA col = parseAsHex(mat.group(i));
+            if (col != null)
+                return col;
+        }
         return null;
     }
 
