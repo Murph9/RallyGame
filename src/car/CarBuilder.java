@@ -33,47 +33,47 @@ import helper.Log;
 
 public class CarBuilder extends BaseAppState {
 
-	private final CarDataLoader loader;
-	private final List<RayCarControl> cars;
+    private final CarDataLoader loader;
+    private final List<RayCarControl> cars;
     private final Node rootNode;
     private final float angularDampening;
 
-	public CarBuilder(float angularDampening, CarDataLoader loader) {
-		this.cars = new LinkedList<>();
-		this.rootNode = new Node("Car Builder Root");
+    public CarBuilder(float angularDampening, CarDataLoader loader) {
+        this.cars = new LinkedList<>();
+        this.rootNode = new Node("Car Builder Root");
         this.loader = loader;
         this.angularDampening = angularDampening;
-	}
-	
-	@Override
-	public void initialize(Application app) {
-		Log.p("CarBuilder init");
+    }
+    
+    @Override
+    public void initialize(Application app) {
+        Log.p("CarBuilder init");
 
-		((SimpleApplication)app).getRootNode().attachChild(rootNode);
-	}
-	
-	@Override
-	protected void onEnable() {
-		_setEnabled(true);
-	}
-	@Override
-	protected void onDisable() {
-		_setEnabled(false);
-	}
-	private void _setEnabled(boolean state) {
-		for (RayCarControl r : cars) {
-			r.setEnabled(state);
-		}
-	}
-	
-	/** Load car data from yaml file */
-	public CarDataConst loadData(Car car) {
-		return loadData(car, null);
-	}
-	/** Load car data from yaml file, with a value adjuster */
-	public CarDataConst loadData(Car car, CarDataAdjuster adjuster) {
-		Vector3f grav = new Vector3f();
-		getState(BulletAppState.class).getPhysicsSpace().getGravity(grav);
+        ((SimpleApplication)app).getRootNode().attachChild(rootNode);
+    }
+    
+    @Override
+    protected void onEnable() {
+        _setEnabled(true);
+    }
+    @Override
+    protected void onDisable() {
+        _setEnabled(false);
+    }
+    private void _setEnabled(boolean state) {
+        for (RayCarControl r : cars) {
+            r.setEnabled(state);
+        }
+    }
+    
+    /** Load car data from yaml file */
+    public CarDataConst loadData(Car car) {
+        return loadData(car, null);
+    }
+    /** Load car data from yaml file, with a value adjuster */
+    public CarDataConst loadData(Car car, CarDataAdjuster adjuster) {
+        Vector3f grav = new Vector3f();
+        getState(BulletAppState.class).getPhysicsSpace().getGravity(grav);
 
         CarDataConst data = loader.get(getApplication().getAssetManager(), car, grav);
         if (adjuster != null) {
@@ -81,123 +81,125 @@ public class CarBuilder extends BaseAppState {
         }
         
         loader.reValidateData(data, getApplication().getAssetManager(), grav);
-		return data;
-	}
+        return data;
+    }
 
-	/** Creates the vehicle and loads it into the world. */
-	public RayCarControl addCar(Car car, Vector3f start, Quaternion rot, boolean aPlayer) {
-		return addCar(loadData(car), start, rot, aPlayer);
-	}
-	/** Creates the vehicle and loads it into the world. */
-	public RayCarControl addCar(CarDataConst carData, Transform trans, boolean aPlayer) {
-		return addCar(carData, trans.getTranslation(), trans.getRotation(), aPlayer);
-	}
-	/** Creates the vehicle and loads it into the world. */
-	public RayCarControl addCar(CarDataConst carData, Vector3f start, Quaternion rot, boolean aPlayer) {
-		try {
-			if (!isInitialized())
-				throw new Exception(getClass().getName() + " hasn't been initialised");
-		} catch (Exception e) {
-			e.printStackTrace();
-			//this is a runtime exception that should have been fixed by the only dev
-			return null;
-		}
-		
+    /** Creates the vehicle and loads it into the world. */
+    public RayCarControl addCar(Car car, Vector3f start, Quaternion rot, boolean aPlayer) {
+        return addCar(loadData(car), start, rot, aPlayer);
+    }
+    /** Creates the vehicle and loads it into the world. */
+    public RayCarControl addCar(CarDataConst carData, Transform trans, boolean aPlayer) {
+        return addCar(carData, trans.getTranslation(), trans.getRotation(), aPlayer);
+    }
+    /** Creates the vehicle and loads it into the world. */
+    public RayCarControl addCar(CarDataConst carData, Vector3f start, Quaternion rot, boolean aPlayer) {
+        try {
+            if (!isInitialized())
+                throw new Exception(getClass().getName() + " hasn't been initialised");
+        } catch (Exception e) {
+            e.printStackTrace();
+            //this is a runtime exception that should have been fixed by the only dev
+            return null;
+        }
+        
 		AssetManager am = getApplication().getAssetManager();
-		Node carModel = LoadModelWrapper.create(am, carData.carModel, carData.baseColor);
+		//pre load car model so we can remove the collision object before materials are set
+        Spatial initialCarModel = am.loadModel(carData.carModel);
+        // remove and fetch the single collision shape to use as collision
+        Spatial collisionShape = Geo.removeNamedSpatial((Node)initialCarModel, CarPart.Collision.getPartName());
 		
-		//fetch the single collision shape
-		Spatial collisionShape = Geo.removeNamedSpatial(carModel, CarPart.Collision.getPartName());
-		CollisionShape colShape = null;
-		try {
-			Geometry collisionGeometry = null;
-			if (collisionGeometry instanceof Geometry) {
-				collisionGeometry = (Geometry)collisionShape;
-			} else { // Node
-				collisionGeometry = Geo.getGeomList(collisionShape).get(0); //lets hope its the only one too
-			}
+        CollisionShape colShape = null;
+        try {
+            Geometry collisionGeometry = null;
+            if (collisionGeometry instanceof Geometry) {
+                collisionGeometry = (Geometry)collisionShape;
+            } else { // Node
+                collisionGeometry = Geo.getGeomList(collisionShape).get(0); //lets hope its the only one too
+            }
             Mesh collisionMesh = collisionGeometry.getMesh();
             collisionMesh.setStatic();
-			colShape = new HullCollisionShape(collisionMesh);
-		} catch (Exception e) {
-			Log.e("!! car type " + carData.carModel + " is missing a collision shape.");
-			e.printStackTrace();
-			return null; //to make it clear this failed, and you need to fix it
-		}
+            colShape = new HullCollisionShape(collisionMesh);
+        } catch (Exception e) {
+            Log.e("!! car type " + carData.carModel + " is missing a collision shape.");
+            e.printStackTrace();
+            return null; //to make it clear this failed, and you need to fix it
+        }
 
-		//init car
-		Node carNode = new Node("Car:" + carData);
-		RayCarControl carControl = new RayCarControl((SimpleApplication)getApplication(), colShape, carData, carNode);
+        //init car
+        Node carNode = new Node("Car:" + carData);
+        RayCarControl carControl = new RayCarControl((SimpleApplication)getApplication(), colShape, carData, carNode);
 		
-		carNode.attachChild(carModel);
-		carNode.setLocalTranslation(start);
-		carNode.setLocalRotation(rot);
+		Node carModel = LoadModelWrapper.create(am, initialCarModel, carData.baseColor);
+        carNode.attachChild(carModel);
+        carNode.setLocalTranslation(start);
+        carNode.setLocalRotation(rot);
 
-		rootNode.attachChild(carNode);
+        rootNode.attachChild(carNode);
         
         carControl.setPhysicsProperties(start, null, rot, null);
         // a fake angular rotational reducer, very important for driving feel
         carControl.getPhysicsObject().setAngularDamping(angularDampening);
-		
-		if (aPlayer) {
-			//players get the keyboard and sound
-			carControl.attachControls(getApplication().getInputManager());
-			carControl.giveSound(new AudioNode(am, "assets/sounds/engine.wav", AudioData.DataType.Buffer));
-		}
-		
-		cars.add(carControl);
-		carControl.setEnabled(this.isEnabled()); //copy carbuilder enabled-ness
-		return carControl;
-	}
+        
+        if (aPlayer) {
+            //players get the keyboard and sound
+            carControl.attachControls(getApplication().getInputManager());
+            carControl.giveSound(new AudioNode(am, "assets/sounds/engine.wav", AudioData.DataType.Buffer));
+        }
+        
+        cars.add(carControl);
+        carControl.setEnabled(this.isEnabled()); //copy carbuilder enabled-ness
+        return carControl;
+    }
 
-	public int removeAll() {
-		for (RayCarControl car: cars) {
-			rootNode.detachChild(car.getRootNode());
-			car.cleanup((SimpleApplication)getApplication());
-		}
-		int size = cars.size();
-		cars.clear();
-		return size;
-	}
-	public void removeCar(RayCarControl car) {
-		if (!cars.contains(car)) {
-			try {
-				throw new Exception("That car is not in my records, *shrug*.");
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			return;
-		}
-		
-		rootNode.detachChild(car.getRootNode());
-		car.cleanup((SimpleApplication)getApplication());
-		cars.remove(car);
-	}
-	
-	public void update(float tpf) {
-		for (RayCarControl rcc: cars) {
-			rcc.update(tpf);
-		}
-	}
+    public int removeAll() {
+        for (RayCarControl car: cars) {
+            rootNode.detachChild(car.getRootNode());
+            car.cleanup((SimpleApplication)getApplication());
+        }
+        int size = cars.size();
+        cars.clear();
+        return size;
+    }
+    public void removeCar(RayCarControl car) {
+        if (!cars.contains(car)) {
+            try {
+                throw new Exception("That car is not in my records, *shrug*.");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return;
+        }
+        
+        rootNode.detachChild(car.getRootNode());
+        car.cleanup((SimpleApplication)getApplication());
+        cars.remove(car);
+    }
+    
+    public void update(float tpf) {
+        for (RayCarControl rcc: cars) {
+            rcc.update(tpf);
+        }
+    }
 
-	public RayCarControl get(int a) {
+    public RayCarControl get(int a) {
         if (cars.size() <= a) return null;
-		return cars.get(a);
-	}
-	public Collection<RayCarControl> getAll() {
-		return new LinkedList<>(cars);
-	}
-	public int getCount() {
-		return cars.size();
-	}
+        return cars.get(a);
+    }
+    public Collection<RayCarControl> getAll() {
+        return new LinkedList<>(cars);
+    }
+    public int getCount() {
+        return cars.size();
+    }
 
-	@Override
-	public void cleanup(Application app) {
-		for (RayCarControl car : cars) {
-			car.cleanup((SimpleApplication)app);
-		}
+    @Override
+    public void cleanup(Application app) {
+        for (RayCarControl car : cars) {
+            car.cleanup((SimpleApplication)app);
+        }
 
-		((SimpleApplication)app).getRootNode().detachChild(rootNode);
-		Log.p("CarBuilder cleanup");
-	}
+        ((SimpleApplication)app).getRootNode().detachChild(rootNode);
+        Log.p("CarBuilder cleanup");
+    }
 }
