@@ -50,13 +50,14 @@ public class LoadModelWrapper {
         if (colour == null) {
             colour = MaterialColourer.getColourFromMaterialName(g.getMaterial());
             if (colour == null) {
-                Log.e("!Material for geom:", g.getName(), "doesn't have a colour set, but was requested!");
-                colour = new ColorRGBA(0, 0.354f, 1, 0.7f); //orange but transparent, hopefully i will remember this
+                Log.e("!Material for geom:", g.getName(), "doesn't have a colour set, but i wasn't given a default.!");
+                colour = new ColorRGBA(0, 0.354f, 1, 0.7f); //blue but transparent, hopefully i will remember this
             }
         }
         
         Material baseMat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
         baseMat.setColor("Color", colour);
+        baseMat.setName(g.getMaterial().getName()); //keep the name
         if (colour.a < 1) {
             //needs alpha stuff
             baseMat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Back);
@@ -84,7 +85,7 @@ public class LoadModelWrapper {
         if (colour == null)
             throw new IllegalArgumentException("Please don't send me a null colour");
 
-        List<Geometry> geoms = Geo.getGeomsContaining(s, tag);
+        List<Geometry> geoms = Geo.getGeomsWithMaterialNameContaining(s, tag);
         if (geoms.isEmpty()) {
             Log.e("No part tagged with " + tag + "found for " + s.getName());
             return;

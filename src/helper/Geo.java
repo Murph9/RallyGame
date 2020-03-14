@@ -35,9 +35,9 @@ public class Geo {
     }
 
     private static float[] getCirclePoints(int count) {
-        float[] points = new float[count*3];
+        float[] points = new float[count * 3];
 
-        float radStep = FastMath.TWO_PI/count;
+        float radStep = FastMath.TWO_PI / count;
         for (int i = 0; i < count; i++) {
             points[i * 3] = FastMath.sin(FastMath.HALF_PI + i * radStep);
             points[i * 3 + 1] = FastMath.cos(FastMath.HALF_PI + i * radStep);
@@ -46,8 +46,6 @@ public class Geo {
 
         return points;
     }
-
-
 
     public static Geometry makeShapeArrow(AssetManager am, ColorRGBA color, Vector3f dir, Vector3f pos) {
         if (!Vector3f.isValidVector(pos) || !Vector3f.isValidVector(dir)) {
@@ -121,10 +119,11 @@ public class Geo {
         return s;
     }
 
-    public static List<Geometry> getGeomsContaining(Spatial s, String str) {
+    public static List<Geometry> getGeomsWithMaterialNameContaining(Spatial s, String str) {
         return Geo.getGeomList(s)
             .stream()
-            .filter(x -> x.getName().contains(str))
+            .filter(x -> x.getMaterial() != null && x.getMaterial().getName() != null && 
+                x.getMaterial().getName().contains(str))
             .collect(Collectors.toList());
     }
 
