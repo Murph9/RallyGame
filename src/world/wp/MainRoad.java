@@ -6,7 +6,7 @@ import com.jme3.math.Vector3f;
 //stands for world piece simple, as in its a simple piece of the world
 public enum MainRoad implements WP {
 	
-	STRAIGHT("straight.blend", new Vector3f(25,0,0), WP.STRAIGHT),
+	STRAIGHT("straight", new Vector3f(25,0,0), WP.STRAIGHT),
 	;
 	
 	private static String dir = "assets/wb/mainroad/";
@@ -32,7 +32,7 @@ public enum MainRoad implements WP {
 	public float getScale() { return 1; }
 	public boolean needsMaterial() { return false; }
 	
-	public String getName() { return dir+name;}
+	public String getName() { return String.format(WP.FileFormat, dir, name); }
 	public Vector3f getNewPos() { return new Vector3f(newPos); }
 	public Quaternion getNewAngle() { return new Quaternion(newRot); }
 	

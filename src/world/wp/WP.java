@@ -12,6 +12,7 @@ public interface WP {
 		A, B, C, D, E, F, G, H; //for defining what can connect to the end of the previous piece
 	}
 	
+	static final String FileFormat = "%s%s.blend.glb";
 	static final Quaternion
 		STRAIGHT = new Quaternion(0, 0, 0, 1),
 		BACK = new Quaternion(0, 1, 0, 0),

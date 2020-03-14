@@ -8,24 +8,24 @@ public enum Rocks implements WP {
 
 	//(x,z,y) left is minus y
 	
-	STRAIGHT("straight.blend", new Vector3f(10, 0, 0), WP.STRAIGHT),
-	DIP("dip.blend", new Vector3f(20f,0,0), WP.STRAIGHT),
-	BUMP("bump.blend", new Vector3f(20f,0,0), WP.STRAIGHT),
+	STRAIGHT("straight", new Vector3f(10, 0, 0), WP.STRAIGHT),
+	DIP("dip", new Vector3f(20f,0,0), WP.STRAIGHT),
+	BUMP("bump", new Vector3f(20f,0,0), WP.STRAIGHT),
 	
-	LEFT_90("left_90.blend", new Vector3f(45.41f, 0, -41.60521f), WP.LEFT_90),
-	RIGHT_90("right_90.blend", new Vector3f(45.41f, 0, 41.60521f), WP.RIGHT_90),
+	LEFT_90("left_90", new Vector3f(45.41f, 0, -41.60521f), WP.LEFT_90),
+	RIGHT_90("right_90", new Vector3f(45.41f, 0, 41.60521f), WP.RIGHT_90),
 	
-	LEFT_45("left_45.blend", new Vector3f(17.26f, 0, -8.0011f), fromDEGAngles(0, 59.6f, 0)),
-	RIGHT_45("right_45.blend", new Vector3f(17.26f, 0, 8.0011f), fromDEGAngles(0, -59.6f, 0)),
+	LEFT_45("left_45", new Vector3f(17.26f, 0, -8.0011f), fromDEGAngles(0, 59.6f, 0)),
+	RIGHT_45("right_45", new Vector3f(17.26f, 0, 8.0011f), fromDEGAngles(0, -59.6f, 0)),
 	
-//	UP_RIGHT("up_right.blend", new Vector3f(19.72025f, 1.45857f, 2.91713f), fromDEGAngles(1.2f, -16.4f, 7.3f)),
-//	UP_LEFT("up_left.blend", new Vector3f(19.72025f, 1.45857f, -2.91713f), fromDEGAngles(-1.2f, 16.4f, 7.3f)),
+//	UP_RIGHT("up_right", new Vector3f(19.72025f, 1.45857f, 2.91713f), fromDEGAngles(1.2f, -16.4f, 7.3f)),
+//	UP_LEFT("up_left", new Vector3f(19.72025f, 1.45857f, -2.91713f), fromDEGAngles(-1.2f, 16.4f, 7.3f)),
 	
-//	DOWN_LEFT("down_left.blend", new Vector3f(19.77269f, -0.48878f, -2.9327f), fromDEGAngles(0.3f, 16.5f, 2.5f)),
-//	DOWN_RIGHT("down_right.blend", new Vector3f(19.7727f, -0.4868f, 2.9327f), fromDEGAngles(0.3f, -16.5f, 2.5f)), //are these actually down?
+//	DOWN_LEFT("down_left", new Vector3f(19.77269f, -0.48878f, -2.9327f), fromDEGAngles(0.3f, 16.5f, 2.5f)),
+//	DOWN_RIGHT("down_right", new Vector3f(19.7727f, -0.4868f, 2.9327f), fromDEGAngles(0.3f, -16.5f, 2.5f)), //are these actually down?
 	
-	UP_SOME("up_unknown.blend", new Vector3f(19.9696f, 1.1286f, 0), fromDEGAngles(0, 0, 5.75f)),
-	DOWN_SOME("down_unknown.blend", new Vector3f(19.9696f, -1.1286f, 0), fromDEGAngles(0, 0, -5.75f)),
+	UP_SOME("up_unknown", new Vector3f(19.9696f, 1.1286f, 0), fromDEGAngles(0, 0, 5.75f)),
+	DOWN_SOME("down_unknown", new Vector3f(19.9696f, -1.1286f, 0), fromDEGAngles(0, 0, -5.75f)),
 	;
 	
 	private static String dir = "assets/wb/rocks/";
@@ -53,7 +53,7 @@ public enum Rocks implements WP {
 	@Override
 	public float getScale() { return 1; }
 	@Override
-	public String getName() { return dir+name; }
+	public String getName() { return String.format(WP.FileFormat, dir, name); }
 
 	@Override
 	public Vector3f getNewPos() { return newPos.clone(); }
