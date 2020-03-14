@@ -57,7 +57,8 @@ public class LoadModelWrapper {
         
         Material baseMat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
         baseMat.setColor("Color", colour);
-        baseMat.setName(g.getMaterial().getName()); //keep the name
+        if (g.getMaterial() != null) // keep the name if given
+            baseMat.setName(g.getMaterial().getName());
         if (colour.a < 1) {
             //needs alpha stuff
             baseMat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Back);
