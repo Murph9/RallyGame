@@ -10,7 +10,7 @@ cam_lookAtHeight: 1.3
 cam_offsetLength: -6.0
 cam_offsetHeight: 2.1
 cam_shake: 2.0E-7
-carModel: assets/models/rocket1_1.blend
+carModel: assets/models/rocket1_1.blend.glb
 driveFront: true
 driveRear: true
 e_compression: 0.1
