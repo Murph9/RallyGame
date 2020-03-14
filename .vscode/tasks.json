@@ -7,18 +7,12 @@
             "label": "Create Duel Fat jar",
             "command": ".\\gradlew.bat createDuelFatJar",
             "type": "shell",
-            "options": {
-                "shell": {}
-            },
             "problemMatcher": []
         },
         {
             "label": "Create Base Fat jar",
             "command": ".\\gradlew.bat createFatJar", //--info
             "type": "shell",
-            "options": {
-                "shell": {}
-            },
             "problemMatcher": [],
             "group": {
                 "kind": "build",
@@ -29,9 +23,6 @@
             "label": "Generate blend model files",
             "command": ".\\gradlew.bat convertAllBlendFiles",
             "type": "shell",
-            "options": {
-                "shell": {}
-            },
             "problemMatcher": [],
             "presentation": {
                 "reveal": "always"
@@ -42,9 +33,6 @@
             "label": "Delete blend generated gltf model files",
             "command": ".\\gradlew.bat cleanBlendGltfFiles",
             "type": "shell",
-            "options": {
-                "shell": {}
-            },
             "problemMatcher": [],
             "presentation": {
                 "reveal": "always"

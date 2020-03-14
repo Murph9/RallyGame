@@ -12,7 +12,7 @@ $blenderPythonFile = 'blend2gltf.py'
 
 function Convert-gltf {
     param(
-        [Parameter(Mandatory="true")] [string] $FilePath,
+        [Parameter(Mandatory = "true")] [string] $FilePath,
         [Parameter(Mandatory = "true")] [string] $BlenderPython
     )
     $generatedFile = @(Get-ChildItem -ErrorAction SilentlyContinue "$FilePath.glb")
