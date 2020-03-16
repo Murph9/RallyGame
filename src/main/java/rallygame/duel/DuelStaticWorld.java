@@ -33,8 +33,7 @@ public class DuelStaticWorld extends StaticWorldBuilder implements ICheckpointWo
         // attempt to read checkpoints from model
         if (spat instanceof Node) {
             List<Vector3f> _checkpoints = new LinkedList<Vector3f>();
-            Spatial s = ((Node) spat).getChild(0);
-            for (Spatial points : ((Node) s).getChildren()) {
+            for (Spatial points : ((Node) spat).getChildren()) {
                 if (points.getName().equals("Points")) {
                     for (Spatial checkpoint : ((Node) points).getChildren()) {
                         _checkpoints.add(checkpoint.getLocalTranslation());
