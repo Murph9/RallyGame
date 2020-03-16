@@ -1,0 +1,25 @@
+MaterialDef Radial {
+
+	MaterialParameters {
+		Vector4 Color
+		Texture2D ColorMap
+		Texture2D ThresholdMap
+		Float Threshold
+		
+		Float AlphaDiscardThreshold (AlphaTestFallOff)
+	}
+	
+	Technique {
+		VertexShader GLSL100: mat/Radial.vert
+		FragmentShader GLSL100: mat/Radial.frag
+		
+		WorldParameters {
+            WorldViewProjectionMatrix
+        }
+        
+        Defines {
+        	HAS_COLORMAP : ColorMap
+        	DISCARD_ALPHA : AlphaDiscardThreshold
+        }
+    }
+}

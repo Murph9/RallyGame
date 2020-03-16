@@ -4,6 +4,16 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "Gradle build (for assets mainly)",
+            "command": ".\\gradlew.bat build",
+            "type": "shell",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
             "label": "Create Duel Fat jar",
             "command": ".\\gradlew.bat createDuelFatJar",
             "type": "shell",
@@ -13,11 +23,7 @@
             "label": "Create Base Fat jar",
             "command": ".\\gradlew.bat createFatJar", //--info
             "type": "shell",
-            "problemMatcher": [],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
+            "problemMatcher": []
         },
         {
             "label": "Generate blend model files",
@@ -27,7 +33,7 @@
             "presentation": {
                 "reveal": "always"
             },
-            "detail": "Requires blender is installed"
+            "detail": "Generates .blend.glb files, requires blender application to be installed"
         },
         {
             "label": "Delete blend generated gltf model files",

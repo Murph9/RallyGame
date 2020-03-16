@@ -1,0 +1,53 @@
+!!car.data.CarDataConst
+JUMP_FORCE: {x: 0.0, y: 920, z: 0.0}
+areo_crossSection: 0.42
+areo_downforce: 0.0
+areo_drag: 0.34
+areo_lineardrag: 0.012
+auto_changeTime: 0.1
+brakeMaxTorque: 8000
+cam_lookAtHeight: 1.3
+cam_offsetLength: -9.0
+cam_offsetHeight: 3.1
+cam_shake: 1.5E-6
+carModel: models/extreme_green.blend.glb
+driveFront: true
+driveRear: true
+e_compression: 0.09
+e_idle: 1400
+e_mass: 2
+e_redline: 8500
+e_torque: [0, 450, 500, 590, 650, 710, 740, 710, 600]
+mass: 920
+minDriftAngle: 7.0
+nitro_force: 1.0
+nitro_max: 1.0
+nitro_on: false
+nitro_rate: 1.0
+susF: &sus {
+  antiroll: 60.0,
+  comp: 0.3,
+  max_force: 40000,
+  max_travel: 0.1,
+  min_travel: -0.1,
+  preload_force: 0.6,
+  relax: 0.3,
+  stiffness: 60.0
+}
+susR: *sus
+trans_effic: 1
+trans_finaldrive: 4.6
+trans_gearRatios: [-3.28, 2.97, 2.07, 1.43, 1.00, 0.84, 0.56]
+trans_powerBalance: 0.5
+w_steerAngle: 0.5
+wheelData:
+- &w
+  mass: 7.0
+  modelName: models/wheel.obj
+  pjk_lat: {B: 60, C: 1.39, D1: 1.1, D2: 0.000055, E: 0.05} #TODO much harsher
+  pjk_long: {B: 41, C: 1.8, D1: 2, D2: 0.000055, E: 0.98}
+  radius: 0.355
+  width: 0.3
+- *w
+- *w
+- *w

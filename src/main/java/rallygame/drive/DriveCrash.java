@@ -1,0 +1,218 @@
+package rallygame.drive;
+
+import rallygame.world.StaticWorld;
+import rallygame.world.StaticWorldBuilder;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
+import com.jme3.bullet.BulletAppState;
+import com.jme3.bullet.collision.PhysicsCollisionEvent;
+import com.jme3.bullet.collision.PhysicsCollisionListener;
+import com.jme3.bullet.objects.PhysicsRigidBody;
+import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
+import com.jme3.math.Vector3f;
+import com.jme3.scene.Spatial;
+import com.jme3.system.AppSettings;
+import com.simsilica.lemur.Container;
+import com.simsilica.lemur.DefaultRangedValueModel;
+import com.simsilica.lemur.ProgressBar;
+import com.simsilica.lemur.component.QuadBackgroundComponent;
+
+import rallygame.car.ai.DriveAtAI;
+import rallygame.car.data.Car;
+import rallygame.car.data.CarDataConst;
+import rallygame.car.data.CarModelData.CarPart;
+import rallygame.car.ray.RayCarControl;
+import rallygame.effects.LoadModelWrapper;
+import rallygame.game.DebugAppState;
+import rallygame.game.IDriveDone;
+import rallygame.helper.Colours;
+import rallygame.helper.Geo;
+import rallygame.helper.H;
+import rallygame.service.Screen;
+
+public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
+
+    private static String POLICE_TEXT = "You are in trouble from the 'physics' police.\n"
+            + "They are trying to nab you for breaking standard physics laws,\n specifcally for being rediculously bouncy.\n"
+            + "Your existance is brief, so try and survive\n[reset the death timer touching them]\n";
+
+    private final Car them;
+    private final int themCount;
+
+    private final Map<RayCarControl, Instant> hitList;
+    private static final Duration HIT_TIMEOUT = Duration.ofSeconds(5);
+
+    private int totalFlipped;
+    private int frameCount = 0; // global frame timer
+
+    private float loseTimer;
+    private static float TIMEOUT = 10;
+
+    private Container progressContainer;
+    private ProgressBar progressBar;
+
+    public DriveCrash(IDriveDone done) {
+        super(done, Car.Runner, new StaticWorldBuilder(StaticWorld.duct2));
+        this.them = Car.Rally;
+        this.themCount = 10;
+        this.totalFlipped = 0;
+
+        this.hitList = new HashMap<>();
+    }
+
+    @Override
+    public void initialize(Application app) {
+        super.initialize(app);
+        getState(BulletAppState.class).getPhysicsSpace().addCollisionListener(this);
+
+        progressContainer = new Container();
+        progressBar = createBar(0);
+        progressContainer.addChild(progressBar);
+
+        AppSettings settings = app.getContext().getSettings();
+        progressContainer.setPreferredSize(new Vector3f(settings.getWidth() / 3, settings.getHeight() / 15f, 0));
+
+        new Screen(settings).bottomCenterMe(progressContainer);
+
+        ((SimpleApplication) app).getGuiNode().attachChild(progressContainer);
+    }
+
+    @Override
+    public void cleanup(Application app) {
+        ((SimpleApplication) app).getGuiNode().detachChild(progressContainer);
+        getState(BulletAppState.class).getPhysicsSpace().removeCollisionListener(this);
+
+        super.cleanup(app);
+    }
+
+    public void update(float tpf) {
+        super.update(tpf);
+        frameCount++;
+
+        PhysicsRigidBody playerBody = this.cb.get(0).getPhysicsObject();
+
+        if (this.cb.getCount() < (themCount + 1) && frameCount % 60 == 0) {
+            Vector3f spawn = H.randV3f(10, true);
+            spawn.x = Math.round(spawn.x) * 2;
+            spawn.y = 0; // maybe ray cast from very high to find the ground height?
+            spawn.z = Math.round(spawn.z) * 2;
+
+            CarDataConst data = this.cb.loadData(them);
+            RayCarControl c = this.cb.addCar(data, spawn, world.getStartRot(), false);
+            c.attachAI(new DriveAtAI(c, playerBody), true);
+        }
+
+        // check if any hit ones are upside down, if so kill them
+        List<RayCarControl> toKill = new ArrayList<RayCarControl>();
+        for (RayCarControl c : this.hitList.keySet())
+            if (c.up != null && c.up.y < 0 && c != this.cb.get(0))
+                toKill.add(c);
+        for (RayCarControl c : this.cb.getAll())
+            if (c.location.y < -100)
+                toKill.add(c);
+        for (RayCarControl c : toKill) {
+            cb.removeCar(c);
+            if (hitList.containsKey(c)) {
+                totalFlipped++;
+                hitList.remove(c);
+            }
+        }
+
+        if (this.menu.randomthing != null) {
+            this.menu.randomthing.setText(POLICE_TEXT + "Total Flipped: " + totalFlipped);
+        }
+
+        // update timeout mode only if we have an opponent
+        if (this.cb.getCount() > 1) {
+            loseTimer += tpf;
+            if (loseTimer > TIMEOUT) // you lose
+                this.cb.setEnabled(false);
+        }
+
+        this.progressBar.setModel(new DefaultRangedValueModel(0, 1, loseTimer / TIMEOUT));
+        this.progressBar.getValueIndicator().setBackground(new QuadBackgroundComponent(Colours.getOnGreenToRedScale(loseTimer / TIMEOUT)));
+
+        //update the visual color of them when they come back from blue
+        Instant now = Instant.now();
+        for (Entry<RayCarControl, Instant> entry: this.hitList.entrySet()) {
+            if (entry.getValue().isBefore(now))
+                updateToColour(entry.getKey(), ColorRGBA.White);
+        }
+    }
+
+    private RayCarControl getCarFrom(Spatial node) {
+        for (RayCarControl car : this.cb.getAll()) {
+            if (Geo.hasParentNode(node, car.getRootNode())) {
+                return car;
+            }
+        }
+        return null;
+    }
+
+    // detect if collisions are from the player
+    @Override
+    public void collision(PhysicsCollisionEvent event) {
+        RayCarControl carA = getCarFrom(event.getNodeA());
+        RayCarControl carB = getCarFrom(event.getNodeB());
+
+        if (carA == null || carB == null)
+            return; // not 2 car collisions
+        if (carA.getAI() != null && carB.getAI() != null)
+            return; // both are ai
+        if (carA.getAI() == null && carB.getAI() == null)
+            return; // both are a player !!!
+
+        if (carA.getAI() == null)
+            playerCollision(carA, carB, event.getNormalWorldOnB().negate(), event.getLocalPointB(), event.getAppliedImpulse());
+        else
+            playerCollision(carB, carA, event.getNormalWorldOnB(), event.getLocalPointA(), event.getAppliedImpulse());
+    }
+    
+    private void updateToColour(RayCarControl car, ColorRGBA colour) {
+        Spatial s = Geo.getNamedSpatial(car.getRootNode(), CarPart.Chassis.getPartName());
+        LoadModelWrapper.setPrimaryColour(s, colour);
+    }
+
+    private void playerCollision(RayCarControl player, RayCarControl them, Vector3f normalInWorld, Vector3f themLocalPos, float appliedImpulse) {
+        Instant now = Instant.now();
+        updateToColour(them, ColorRGBA.Blue);
+
+        if (!this.hitList.containsKey(them))
+            this.hitList.put(them, now.plus(HIT_TIMEOUT));
+        else {
+            //check if its been 5 seconds since the last collision
+            if (this.hitList.get(them).isBefore(now)) {
+                this.hitList.put(them, now.plus(HIT_TIMEOUT));
+                return; //prevent any more collisions
+            }
+        }
+
+        loseTimer = 0;
+
+        PhysicsRigidBody prb = them.getPhysicsObject();
+        Vector3f newDir = Vector3f.UNIT_Y.mult(FastMath.clamp(appliedImpulse, 3000, 5000) * 2f);
+        // Vector3f newDir = normalInWorld.mult(FastMath.clamp(appliedImpulse, 3000, 10000) * 5);
+        prb.applyImpulse(newDir, themLocalPos);
+
+        Vector3f posInWorld = prb.getPhysicsRotation().mult(themLocalPos).add(prb.getPhysicsLocation());
+        getState(DebugAppState.class).drawArrow("playerCollision", ColorRGBA.Orange, posInWorld, newDir.normalize());
+    }
+
+    private ProgressBar createBar(float value) {
+        ProgressBar pb = new ProgressBar();
+        pb.setProgressPercent(value);
+        pb.setModel(new DefaultRangedValueModel(0, 1, value));
+        pb.getValueIndicator().setBackground(new QuadBackgroundComponent(Colours.getOnGreenToRedScale(value)));
+        return pb;
+    }
+}
