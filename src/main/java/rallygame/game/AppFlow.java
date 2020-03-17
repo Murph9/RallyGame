@@ -7,11 +7,10 @@ import com.jme3.app.state.AppStateManager;
 import rallygame.car.data.Car;
 import rallygame.drive.*;
 import rallygame.helper.Log;
-import rallygame.world.StaticWorld;
-import rallygame.world.StaticWorldBuilder;
+import rallygame.world.*;
 import rallygame.world.wp.DefaultBuilder;
 import rallygame.world.wp.WP.DynamicType;
-import rallygame.world.IWorld;
+import rallygame.world.PathWorld;
 
 public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
 
@@ -48,7 +47,7 @@ public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
                 sm.attach(new ChooseCar((IChooseStuff)this));
                 break;
             case Fast:
-                sm.attach(new DriveBase((IDriveDone)this, Car.Runner, new StaticWorldBuilder(StaticWorld.duct)));
+                sm.attach(new DriveBase((IDriveDone)this, Car.Runner, new PathWorld()));
                 break;
 			case Getaway:
 				sm.attach(new DriveMainRoadGetaway((IDriveDone)this));

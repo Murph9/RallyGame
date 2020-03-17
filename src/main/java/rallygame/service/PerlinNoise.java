@@ -1,8 +1,10 @@
-package rallygame.helper;
+package rallygame.service;
 
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.terrain.heightmap.AbstractHeightMap;
+
+import rallygame.helper.Log;
 
 public class PerlinNoise extends AbstractHeightMap {
 
@@ -12,23 +14,25 @@ public class PerlinNoise extends AbstractHeightMap {
 	private int octaves, randomseed;
 	
 	private Vector2f origin;
-	
+	public PerlinNoise(int size) {
+		this(size, 1, 0.1f, 2, 2);
+	}
 	public PerlinNoise(int size, double persistence, double freq, double amp, int octave) {
 		this.size = size;
 		
-		this.persistence = persistence;//1;
-		this.frequency = freq;//0.1f;
-		this.amplitude = amp;//2;
-		this.octaves = octave;//2;
+		this.persistence = persistence;
+		this.frequency = freq;
+		this.amplitude = amp;
+		this.octaves = octave;
 		this.randomseed = 0;
 		
 		this.origin = Vector2f.ZERO;
 	}
 	
-	public void SetOrigin(Vector3f org) {
-		SetOrigin(new Vector2f(org.x, org.z));
+	public void setOrigin(Vector3f org) {
+		setOrigin(new Vector2f(org.x, org.z));
 	}
-	public void SetOrigin(Vector2f org) {
+	public void setOrigin(Vector2f org) {
 		if (org == null)
 			throw new IllegalArgumentException();
 		this.origin = org;

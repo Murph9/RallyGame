@@ -16,7 +16,9 @@ public enum WorldType {
 	TRACK,
 	LSYSTEM,
 	HIGHWAY,
-	OSM,
+    OSM,
+    
+    PATH,
 
 	FLAT,
 	MOVING,
@@ -52,6 +54,8 @@ public enum WorldType {
             return new OsmWorld();
         case TRACK:
             return new TrackWorld();
+        case PATH:
+            return new PathWorld();
 
         default:
             throw new IllegalArgumentException("Non valid world type given: " + worldTypeStr);
