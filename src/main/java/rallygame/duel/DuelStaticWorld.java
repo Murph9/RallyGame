@@ -28,7 +28,7 @@ public class DuelStaticWorld extends StaticWorldBuilder implements ICheckpointWo
     }
 
     public void loadCheckpoints(AssetManager am) {
-        Spatial spat = LoadModelWrapper.create(am, world.name, null);
+        Spatial spat = LoadModelWrapper.create(am, world.name);
 
         // attempt to read checkpoints from model
         if (spat instanceof Node) {

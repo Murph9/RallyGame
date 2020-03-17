@@ -85,7 +85,7 @@ public class RayWheelControl {
 		
 		//rotate and translate the wheel rootNode
 		rootNode = new Node("wheel " + wheel.num);
-		spat = LoadModelWrapper.create(app.getAssetManager(), wheel.data.modelName, ColorRGBA.DarkGray);
+		spat = LoadModelWrapper.create(app.getAssetManager(), wheel.data.modelName);
 		spat.center();
 		rootNode.attachChild(spat);
 		

@@ -17,50 +17,46 @@ import rallygame.helper.Geo;
 import rallygame.helper.Log;
 
 public class LoadModelWrapper {
-    /**Loads a model with geometry with its given color
-     * Colour == null means use the material color
-     */
-    public static Node create(AssetManager am, String model, ColorRGBA colour) {
-        return create(am, am.loadModel(model), colour);
+    
+    /**Loads a model with geometry with its own colours */
+    public static Node create(AssetManager am, String model) {
+        return create(am, am.loadModel(model), null);
     }
 
-    /**Loads a model with geometry with its given color.
-     * Colour == null means use the material color
-     */
-    public static Node create(AssetManager am, Spatial s, ColorRGBA colour) {
+    /**Loads a model with geometry with a primaryColor, a null colour means it needs its own colour*/
+    public static Node create(AssetManager am, Spatial s, ColorRGBA primaryColor) {
         if (s == null)
             return null;
 
-        //TODO this should eventually only set the primary/secondary colours of the model and warn about the other pieces
-        
         if (s instanceof Geometry) {
             Node n = new Node();
-            n.attachChild(setMatColour(am, (Geometry)s, colour));
+            n.attachChild(setMatColour(am, (Geometry) s, primaryColor));
             return n;
         }
-        Node n = (Node)s;
+        Node n = (Node) s;
         List<Geometry> gList = Geo.getGeomList(n);
-        for (Geometry g: gList) {
-            g.getParent().attachChild(setMatColour(am, g, colour));
+        for (Geometry g : gList) {
+            g.getParent().attachChild(setMatColour(am, g, primaryColor));
         }
         return n;
     }
 
-    private static Geometry setMatColour(AssetManager am, Geometry g, ColorRGBA colour) {
-        if (colour == null) {
-            colour = MaterialColourer.getColourFromMaterialName(g.getMaterial());
-            if (colour == null) {
-                Log.e("!Material for geom:", g.getName(), "doesn't have a colour set, but i wasn't given a default.!");
-                colour = new ColorRGBA(0, 0.354f, 1, 0.7f); //blue but transparent, hopefully i will remember this
+    private static Geometry setMatColour(AssetManager am, Geometry g, ColorRGBA primaryColor) {
+        Material mat = g.getMaterial();
+        if (primaryColor == null) {
+            primaryColor = MaterialColourer.getColourFromMaterialName(mat);
+            if (primaryColor == null) {
+                throw new IllegalArgumentException("Material " + mat.getName() + " for geom: " + g.getName()
+                        + " doesn't have a colour set and i wasn't given one");
             }
         }
-        
+
         Material baseMat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-        baseMat.setColor("Color", colour);
-        if (g.getMaterial() != null) // keep the name if given
-            baseMat.setName(g.getMaterial().getName());
-        if (colour.a < 1) {
-            //needs alpha stuff
+        baseMat.setColor("Color", primaryColor);
+        if (mat != null) // keep the name if given
+            baseMat.setName(mat.getName());
+        if (primaryColor.a < 1) {
+            // needs alpha stuff
             baseMat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Back);
             baseMat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
             g.setQueueBucket(Bucket.Transparent);
@@ -76,7 +72,7 @@ public class LoadModelWrapper {
     public static void setPrimaryColour(Spatial s, ColorRGBA colour) {
         setColour(s, colour, CarModelData.CarPart.PRIMARY_TAG);
     }
-    
+
     /** Sets the colour of the secondary tagged part */
     public static void setSecondaryColour(Spatial s, ColorRGBA colour) {
         setColour(s, colour, CarModelData.CarPart.SECONDARY_TAG);

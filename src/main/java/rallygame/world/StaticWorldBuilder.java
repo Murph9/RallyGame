@@ -32,7 +32,7 @@ public class StaticWorldBuilder extends World {
         super.initialize(app);
         
 		// imported model
-		model = LoadModelWrapper.create(app.getAssetManager(), world.name, null);
+		model = LoadModelWrapper.create(app.getAssetManager(), world.name);
 		model.scale(world.scale);
 
 		CollisionShape col = CollisionShapeFactory.createMeshShape(model);

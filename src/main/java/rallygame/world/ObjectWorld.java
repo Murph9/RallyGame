@@ -67,7 +67,7 @@ public class ObjectWorld extends World {
 		floor.setLocalTranslation(0, 0, 0);
 		floor = LoadModelWrapper.create(app.getAssetManager(), floor, ColorRGBA.White);
 		
-		Spatial spat = LoadModelWrapper.create(app.getAssetManager(), ITEM, null);
+		Spatial spat = LoadModelWrapper.create(app.getAssetManager(), ITEM);
 		if (spat instanceof Node) {
 			for (Spatial s: ((Node) spat).getChildren()) {
 				geomI = s;
