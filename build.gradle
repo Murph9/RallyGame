@@ -121,7 +121,7 @@ task cleanBlendGltfFiles(type: Delete) {
     }
 }
 
-def blenderCommand = "C:\\Program Files\\Blender Foundation\\Blender 2.82\\blender"
+def blenderCommand = "C:\\Program Files\\Blender Foundation\\Blender 2.81\\blender"
 def blenderPythonFile = "$projectDir\\assets\\blend2gltf.py"
 
 task convertAllBlendFiles {
@@ -135,6 +135,7 @@ task convertAllBlendFiles {
                 def ip = new ByteArrayOutputStream()
                 exec {
                     standardOutput = ip
+                    ignoreExitValue = true
                     def command = '"' + blenderCommand + '" "'+file.path+'" ' + '--background ' + '--python "' + blenderPythonFile + '"'
                     commandLine 'cmd', '/s', '/c', '"'+command+'"'
                 }
