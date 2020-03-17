@@ -84,8 +84,9 @@ public class RayWheelControl {
 		this.offset = pos;
 		
 		//rotate and translate the wheel rootNode
-		rootNode = new Node("wheel " + wheel.num);
-		spat = LoadModelWrapper.create(app.getAssetManager(), wheel.data.modelName);
+        rootNode = new Node("wheel " + wheel.num);
+        Spatial wheelModel = app.getAssetManager().loadModel(wheel.data.modelName); //TODO change back to string version when the wheels get colours
+		spat = LoadModelWrapper.create(app.getAssetManager(), wheelModel, ColorRGBA.DarkGray);
 		spat.center();
 		rootNode.attachChild(spat);
 		
