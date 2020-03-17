@@ -4,7 +4,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Gradle build (for assets mainly)",
+            "label": "Gradle build",
             "command": ".\\gradlew.bat build",
             "type": "shell",
             "problemMatcher": [],

@@ -3,6 +3,7 @@ plugins {
     id 'java'
     // Apply the application plugin to add support for building a CLI application.
     id 'application'
+    id 'eclipse'
 }
 
 sourceCompatibility = 11
@@ -15,6 +16,14 @@ repositories {
     }
 }
 
+//allow vscode -> buildship -> f5 to read the generated assets.jar
+sourceSets {
+    main {
+        resources {
+            srcDirs "build/assets/libs/"
+        }
+    }
+}
 
 project(":assets") {
     apply plugin: "java"
@@ -36,9 +45,7 @@ project(":assets") {
     }
 }
 
-
 def jme3Version = '3.2.4-stable'
-
 dependencies {
     implementation 'com.google.guava:guava:28.0-jre'
 
@@ -60,8 +67,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.5.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.1'
 
-    runtimeOnly fileTree(dir: 'build/assets/lib', include: '*.jar')
-    runtime project(':assets')
+    runtimeOnly project(':assets')
 }
 
 test {
@@ -73,7 +79,6 @@ application {
     // Define the main class for the application
     mainClassName = 'rallygame.game.Main'
 }
-
 
 
 task createFatJar(type: Jar) {
@@ -116,23 +121,28 @@ task cleanBlendGltfFiles(type: Delete) {
     }
 }
 
-def blenderCommand = '"C:\\Program Files\\Blender Foundation\\Blender 2.82\\blender"'
-def blenderPythonFile = '\\assets\\blend2gltf.py'
+def blenderCommand = "C:\\Program Files\\Blender Foundation\\Blender 2.82\\blender"
+def blenderPythonFile = "$projectDir\\assets\\blend2gltf.py"
 
-task convertAllBlendFiles(type: Exec) {
-    workingDir 'assets'
-    ConfigurableFileTree files = fileTree(dir: '.', include: '**/*.blend')
-    
-    files.each { File file ->
-        exec {
+task convertAllBlendFiles {
+    doFirst {
+        ConfigurableFileTree files = fileTree(dir: 'assets', include: '**/*.blend')
+        
+        files.each { File file ->
             File glbFile = new File(file.path + '.glb')
             if (!glbFile.exists() && file.lastModified() > glbFile.lastModified()) {
-                commandLine 'cmd', '/c', blenderCommand + ' "'+file.path+'" ' + '--background ' + '--python '+ blenderPythonFile
+                println 'Running: ' + file.path
+                def ip = new ByteArrayOutputStream()
+                exec {
+                    standardOutput = ip
+                    def command = '"' + blenderCommand + '" "'+file.path+'" ' + '--background ' + '--python "' + blenderPythonFile + '"'
+                    commandLine 'cmd', '/s', '/c', '"'+command+'"'
+                }
+                //println ip
             } else {
-                commandLine 'cmd', '/c', 'echo ' + file.name + ' is older\n"'
+                println 'generated is newer for: ' + file.name
             }
         }
     }
-    commandLine 'cmd', '/c', 'echo 0'
 }
 compileJava.dependsOn(convertAllBlendFiles)
