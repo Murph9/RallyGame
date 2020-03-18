@@ -126,6 +126,9 @@ def blenderPythonFile = "$projectDir\\assets\\blend2gltf.py"
 
 task convertAllBlendFiles {
     doFirst {
+        //check blender exists first
+        assert file(blenderCommand+'.exe').exists()
+
         ConfigurableFileTree files = fileTree(dir: 'assets', include: '**/*.blend')
         
         files.each { File file ->
