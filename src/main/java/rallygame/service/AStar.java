@@ -21,10 +21,11 @@ public class AStar<T> {
     }
 
     private final IAStarWorld<T> world;
-    public Set<T> closed;
+    public final Set<T> closed;
 
     public AStar(IAStarWorld<T> world) {
         this.world = world;
+        closed = Collections.newSetFromMap(new ConcurrentHashMap<>());
     }
 
     public List<T> findPath(T start, T end) {
@@ -32,7 +33,7 @@ public class AStar<T> {
             return Float.compare(x.weight + x.heuristic, y.weight + y.heuristic);
         });
 
-        closed = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        closed.clear();
         Map<T, Float> gScore = new HashMap<>();
 
         Node<T> curNode = new Node<T>(null, start, 0, 0);

@@ -1,0 +1,16 @@
+MaterialDef TerrainHeightColor {
+
+    MaterialParameters {
+        Float Scale
+        Float Offset
+    }
+
+     Technique {
+        VertexShader GLSL150 GLSL100:   mat/terrainheight/TerrainColorByHeight.vert
+        FragmentShader GLSL150 GLSL100: mat/terrainheight/TerrainColorByHeight.frag
+
+        WorldParameters {
+            WorldViewProjectionMatrix
+        }
+    }
+}
