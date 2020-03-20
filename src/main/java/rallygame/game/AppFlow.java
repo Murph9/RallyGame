@@ -10,7 +10,7 @@ import rallygame.helper.Log;
 import rallygame.world.*;
 import rallygame.world.wp.DefaultBuilder;
 import rallygame.world.wp.WP.DynamicType;
-import rallygame.world.PathWorld;
+import rallygame.world.path.PathWorld;
 
 public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
 

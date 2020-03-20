@@ -3,6 +3,7 @@ package rallygame.world;
 import rallygame.world.highway.HighwayWorld;
 import rallygame.world.lsystem.LSystemWorld;
 import rallygame.world.osm.OsmWorld;
+import rallygame.world.path.PathWorld;
 import rallygame.world.track.TrackWorld;
 import rallygame.world.wp.WP.DynamicType;
 

@@ -1,4 +1,4 @@
-package rallygame.world;
+package rallygame.world.path;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -23,13 +23,16 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.control.Control;
 import com.jme3.scene.shape.Box;
-import com.jme3.scene.shape.Curve;
 import com.jme3.terrain.geomipmap.TerrainQuad;
 
+import rallygame.effects.LoadModelWrapper;
 import rallygame.helper.Geo;
 import rallygame.helper.H;
+import rallygame.helper.Log;
 import rallygame.service.AStar;
 import rallygame.service.PerlinNoise;
+import rallygame.world.World;
+import rallygame.world.WorldType;
 
 public class PathWorld extends World {
 
@@ -61,6 +64,9 @@ public class PathWorld extends World {
     private AStar<Vector2f> astar;
     private List<Vector3f> list;
     private boolean done;
+
+    //TODO maybe we need to have 'any' point on the other side of the quad to win with
+    //this is how we keep it moving along the world, the other sideways quads are only for show
 
     public PathWorld() {
         super("PathWorld");
@@ -121,6 +127,7 @@ public class PathWorld extends World {
             this.list = list.stream().map(x -> new Vector3f(x.x, terrain.getHeight(x), x.y))
                     .collect(Collectors.toList());
             this.done = true;
+            Log.p("Done astar search, path length = ", list == null ? 0 : list.size());
         });
 
         this.rootNode.attachChild(lineNode);
@@ -135,14 +142,15 @@ public class PathWorld extends World {
             // get explored nodes to show them visually
             drawHelpNodes(am); // stop drawing them once done
         } else {
+            if (list != null) {
+                // draw a spline road to show where it is
+                Spline s3 = new Spline(SplineType.CatmullRom, list, 1, false); // [0-1], 1 is more smooth
+                CatmullRomRoad c3 = new CatmullRomRoad(s3, 16, 10);
+                Geometry g = new Geometry("spline road", c3);
+                this.lineNode.attachChild(LoadModelWrapper.create(am, g, ColorRGBA.Green));
 
-            // draw a spline to show where it is
-            //TODO: On a Catmull-Rom spline, the tangent at the point Pi is in the direction of the vector Pi+1−Pi−1
-            //TODO also look into what they guy did with textures
-
-            Spline s3 = new Spline(SplineType.CatmullRom, list, 1, false); // [0-1], 1 is more smooth
-            Curve c3 = new Curve(s3, 16);
-            this.lineNode.attachChild(Geo.createShape(am, c3, ColorRGBA.Red, new Vector3f(), "spline?"));
+                list = null;
+            }
         }
     }
 
@@ -185,11 +193,13 @@ public class PathWorld extends World {
         public float getWeight(Vector2f v1, Vector2f v2) {
             float diffHeight = Math.abs(terrain.getHeight(v1) - terrain.getHeight(v2));
             // http://blog.runevision.com/2016/03/note-on-creating-natural-paths-in.html
-            return v2.distance(v1) * (1 + diffHeight * diffHeight * 54);
+            return v2.distance(v1) * (1 + diffHeight * diffHeight * 0.4f);
         }
 
         @Override
         public float getHeuristic(Vector2f v1, Vector2f v2) {
+            //to be admissable this must be strictly less than the getWeight function
+            //however its height diff is squared for weighting reasons, so we can't just and the height diff here
             return v2.distance(v1);
         }
 
@@ -206,6 +216,7 @@ public class PathWorld extends World {
 
                     if (Float.isNaN(terrain.getHeight(newPos)))
                         continue;
+                    //TODO how do we avoid the edge of the terrain?
                     results.add(newPos);
                 }
             }
