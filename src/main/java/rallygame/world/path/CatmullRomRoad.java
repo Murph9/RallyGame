@@ -1,6 +1,8 @@
 package rallygame.world.path;
 
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
@@ -10,6 +12,7 @@ import com.jme3.math.Spline.SplineType;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.VertexBuffer;
 
+// TODO the first and last ones seem to stretch to the origin
 public class CatmullRomRoad extends Mesh {
 
     // https://github.com/JulienGreen/RoadTessalation/blob/master/RoadMesh.java
@@ -19,18 +22,19 @@ public class CatmullRomRoad extends Mesh {
     private final Vector3f temp1 = new Vector3f();
     private final Vector3f temp2 = new Vector3f();
     private final float width;
+    private final float[] vertexArray;
 
+    /** Road based on a CatmullRom spline, with width. Remember it can't use the first and last ones. */
     public CatmullRomRoad(Spline spline, int nbSubSegments, float width) {
         this.spline = spline;
         this.width = width;
         if (spline.getType() != SplineType.CatmullRom)
-            throw new IllegalArgumentException("Only CatmullRom please");
+            throw new IllegalArgumentException("Only " + SplineType.CatmullRom + " please");
+        if (spline.getControlPoints().size() < 4)
+            throw new IllegalArgumentException("Spline must have at least 2 sections");
+        
+        this.vertexArray = new float[((spline.getControlPoints().size() - 1) * nbSubSegments + 1) * 3 * 2];
 
-        createCatmullRomMesh(nbSubSegments);
-    }
-
-    private void createCatmullRomMesh(int nbSubSegments) {
-        float[] array = new float[((spline.getControlPoints().size() - 1) * nbSubSegments + 1) * 3 * 2];
         int i = 0;
         int cptCP = 0;
         for (Iterator<Vector3f> it = spline.getControlPoints().iterator(); it.hasNext();) {
@@ -38,23 +42,23 @@ public class CatmullRomRoad extends Mesh {
             if (it.hasNext()) {
                 for (int j = 0; j < nbSubSegments; j++) {
                     setTempNormalPoints((float) j / nbSubSegments, cptCP);
-                    array[i] = temp1.getX();
+                    vertexArray[i] = temp1.getX();
                     i++;
-                    array[i] = temp1.getY();
+                    vertexArray[i] = temp1.getY();
                     i++;
-                    array[i] = temp1.getZ();
+                    vertexArray[i] = temp1.getZ();
                     i++;
-                    array[i] = temp2.getX();
+                    vertexArray[i] = temp2.getX();
                     i++;
-                    array[i] = temp2.getY();
+                    vertexArray[i] = temp2.getY();
                     i++;
-                    array[i] = temp2.getZ();
+                    vertexArray[i] = temp2.getZ();
                     i++;
                 }
             }
             cptCP++;
         }
-        this.setBuffer(VertexBuffer.Type.Position, 3, array);
+        this.setBuffer(VertexBuffer.Type.Position, 3, vertexArray);
         this.setMode(Mesh.Mode.TriangleStrip);
         this.updateBound();
         this.updateCounts();
@@ -70,5 +74,21 @@ public class CatmullRomRoad extends Mesh {
         
         pos.add(normal.mult(width / 2), temp1);
         pos.add(normal.mult(-width / 2), temp2);
+    }
+
+    public List<Vector3f[]> getMeshAsQuads() {
+        //[0, 1, 2, 3, 4, 5, 6, 7, 8, 9] -> [[0,1,2,3], [1,2,3,4], [2,3,4,5], ...]
+
+        List<Vector3f[]> results = new LinkedList<>();
+        for (int i = 0; i < vertexArray.length-4*3; i+=3*4) {
+            results.add(new Vector3f[]{
+                    new Vector3f(vertexArray[i], vertexArray[i + 1], vertexArray[i + 2]),
+                    new Vector3f(vertexArray[i + 3], vertexArray[i + 4], vertexArray[i + 5]),
+                    new Vector3f(vertexArray[i + 6], vertexArray[i + 7], vertexArray[i + 8]),
+                    new Vector3f(vertexArray[i + 9], vertexArray[i + 10], vertexArray[i + 11])
+            });
+        }
+        
+        return results;
     }
 }

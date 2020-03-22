@@ -3,6 +3,7 @@ package rallygame.world.path;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.stream.Collectors;
@@ -29,6 +30,7 @@ import rallygame.effects.LoadModelWrapper;
 import rallygame.helper.Geo;
 import rallygame.helper.H;
 import rallygame.helper.Log;
+import rallygame.helper.TerrainUtil;
 import rallygame.service.AStar;
 import rallygame.service.PerlinNoise;
 import rallygame.world.World;
@@ -67,6 +69,8 @@ public class PathWorld extends World {
 
     //TODO maybe we need to have 'any' point on the other side of the quad to win with
     //this is how we keep it moving along the world, the other sideways quads are only for show
+
+    // https://github.com/jMonkeyEngine/sdk/blob/master/jme3-terrain-editor/src/com/jme3/gde/terraineditor/tools/LevelTerrainToolAction.java
 
     public PathWorld() {
         super("PathWorld");
@@ -149,13 +153,27 @@ public class PathWorld extends World {
                 Geometry g = new Geometry("spline road", c3);
                 this.lineNode.attachChild(LoadModelWrapper.create(am, g, ColorRGBA.Green));
 
+                /* TODO terrain modification (as always)
+                executor.submit(() -> {
+                    List<Vector3f[]> quads = c3.getMeshAsQuads();
+                    getApplication().enqueue(() -> {
+                        Log.p("Finished height fetch: " + quads.size());
+                        Map<Vector2f, Float> heights = TerrainUtil.setHeightsFor(terrain, quads);
+                        List<Vector3f> heights3 = heights.entrySet().stream()
+                            .map(x -> new Vector3f(x.getKey().x, x.getValue()*terrain.getWorldScale().y, x.getKey().y))
+                            .collect(Collectors.toList());
+                        drawNodes(am, this.lineNode, heights3);
+                    });
+                });
+                */
+                
                 list = null;
             }
         }
     }
 
     private void drawHelpNodes(AssetManager am) {
-        float size = 0.02f;
+        float size = 0.05f;
         Box box = new Box(size, size, size);
 
         for (Vector2f pos : new LinkedList<>(astar.closed)) {
@@ -168,9 +186,17 @@ public class PathWorld extends World {
 
         Vector3f start3 = gridToWorldSpace(terrain, start);
         this.lineNode.attachChild(Geo.makeShapeBox(am, ColorRGBA.Pink, start3, 0.2f));
-        Vector3f end3 = H.v2tov3fXZ(end);
-        end3.y = terrain.getHeight(end);
+        Vector3f end3 = gridToWorldSpace(terrain, end);
         this.lineNode.attachChild(Geo.makeShapeBox(am, ColorRGBA.Pink, end3, 0.2f));
+    }
+    private void drawNodes(AssetManager am, Node node, List<Vector3f> points) {
+        float size = 0.2f;
+        Box box = new Box(size, size, size);
+        for (Vector3f pos : points) {
+            Geometry g = Geo.createShape(am, box, ColorRGBA.Yellow, pos.add(0, size / 2, 0), "box2");
+            g.getMaterial().getAdditionalRenderState().setWireframe(false);
+            this.lineNode.attachChild(g);
+        }
     }
 
     @Override
