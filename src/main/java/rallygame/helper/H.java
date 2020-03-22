@@ -179,6 +179,10 @@ public class H {
 		list[3] = new Vector3f(start.x - px, start.y,  start.z - py);
 		return list;
 	}
+	
+	public static float heightInQuad(Vector3f p, Vector3f a, Vector3f b, Vector3f c, Vector3f d) {
+		return heightInQuad(H.v3tov2fXZ(p), a, b, c, d);
+	}
 	/**
 	 * Vector3f the y is the height, and must be defined for a b c d.
 	 * p is the point, which we want the height for.
@@ -187,29 +191,32 @@ public class H {
 	 * - p is inside abcd
 	 * @return the height of point p
 	 */
-	//Quad Height method:
-	//Line through AP, intercept with BC and CD, whichever is inside find point q.
-	//Interpolate height of q on BC or CD, then interpolate height of p using line Aq.
-	public static float heightInQuad(Vector3f p, Vector3f a, Vector3f b, Vector3f c, Vector3f d) {
-		Vector2f q = intersectionOf2LinesGiven2PointsEach(H.v3tov2fXZ(a), H.v3tov2fXZ(p), H.v3tov2fXZ(b), H.v3tov2fXZ(c));
+	public static float heightInQuad(Vector2f p, Vector3f a, Vector3f b, Vector3f c, Vector3f d) {
+		// Quad Height method:
+		// Line through AP, intercept with BC and CD, whichever is inside find point q.
+		// Interpolate height of q on BC or CD, then interpolate height of p using line Aq.
+		Vector2f q = intersectionOf2LinesGiven2PointsEach(H.v3tov2fXZ(a), p, H.v3tov2fXZ(b), H.v3tov2fXZ(c));
 		float slopeBC = (b.y-c.y)/(H.v3tov2fXZ(b).subtract(H.v3tov2fXZ(c)).length()); //length is never negative
 		float distCToq = q.subtract(H.v3tov2fXZ(c)).length();
 		
 		Vector3f q3 = new Vector3f(q.x, c.y+slopeBC*distCToq, q.y);
 		float slopeAQ = (a.y-q3.y)/(q.subtract(H.v3tov2fXZ(a)).length());
-		float distAToq = H.v3tov2fXZ(p).subtract(H.v3tov2fXZ(a)).length();
+		float distAToq = p.subtract(H.v3tov2fXZ(a)).length();
 		
 		float pheight = a.y-slopeAQ*distAToq;
 		return pheight;
 	}
 	public static float heightInTri(Vector3f a, Vector3f b, Vector3f c, Vector3f p) {
-		Vector2f q = intersectionOf2LinesGiven2PointsEach(H.v3tov2fXZ(a), H.v3tov2fXZ(p), H.v3tov2fXZ(b), H.v3tov2fXZ(c));
+		return heightInTri(a, b, c, H.v3tov2fXZ(p));
+	}
+	public static float heightInTri(Vector3f a, Vector3f b, Vector3f c, Vector2f p) {
+		Vector2f q = intersectionOf2LinesGiven2PointsEach(H.v3tov2fXZ(a), p, H.v3tov2fXZ(b), H.v3tov2fXZ(c));
 		float slopeBC = (b.y-c.y)/(H.v3tov2fXZ(b).subtract(H.v3tov2fXZ(c)).length()); //length is never negative
 		float distCToq = q.subtract(H.v3tov2fXZ(c)).length();
 		
 		Vector3f q3 = new Vector3f(q.x, c.y+slopeBC*distCToq, q.y);
 		float slopeAQ = (a.y-q3.y)/(q.subtract(H.v3tov2fXZ(a)).length());
-		float distAToq = H.v3tov2fXZ(p).subtract(H.v3tov2fXZ(a)).length();
+		float distAToq = p.subtract(H.v3tov2fXZ(a)).length();
 		
 		float pheight = a.y-slopeAQ*distAToq;
 		return pheight;
