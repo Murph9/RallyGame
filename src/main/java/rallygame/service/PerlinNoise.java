@@ -14,17 +14,20 @@ public class PerlinNoise extends AbstractHeightMap {
 	private int octaves, randomseed;
 	
 	private Vector2f origin;
-	public PerlinNoise(int size) {
+	public PerlinNoise(int size, int seed) {
 		this(size, 1, 0.1f, 2, 2);
 	}
 	public PerlinNoise(int size, double persistence, double freq, double amp, int octave) {
+        this(size, 0, persistence, freq, amp, octave);
+    }
+    public PerlinNoise(int size, int seed, double persistence, double freq, double amp, int octave) {
 		this.size = size;
 		
 		this.persistence = persistence;
 		this.frequency = freq;
 		this.amplitude = amp;
 		this.octaves = octave;
-		this.randomseed = 0;
+		this.randomseed = seed;
 		
 		this.origin = Vector2f.ZERO;
 	}

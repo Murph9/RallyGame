@@ -12,7 +12,7 @@ import com.jme3.math.Spline.SplineType;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.VertexBuffer;
 
-// TODO the first and last ones seem to stretch to the origin
+// TODO the first and last ones seem to connect to each other
 public class CatmullRomRoad extends Mesh {
 
     // https://github.com/JulienGreen/RoadTessalation/blob/master/RoadMesh.java

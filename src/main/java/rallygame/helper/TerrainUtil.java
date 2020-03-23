@@ -26,8 +26,6 @@ public class TerrainUtil {
             box[1] = (int) (box[1] / scale.z) * scale.z;
             box[2] = (1 + (int) (box[2] / scale.x)) * scale.x;
             box[3] = (1 + (int) (box[3] / scale.z)) * scale.z;
-            Log.p(quad, ",");
-            Log.p(box[0], box[1], box[2], box[3]);
 
             for (int i = (int) box[0]; i < box[2]; i += scale.x) {
                 for (int j = (int) box[1]; j < box[3]; j += scale.z) {

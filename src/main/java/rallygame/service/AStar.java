@@ -1,13 +1,13 @@
 package rallygame.service;
 
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
 
 //AStar on a terrainquad
 public class AStar<T> {
@@ -21,11 +21,17 @@ public class AStar<T> {
     }
 
     private final IAStarWorld<T> world;
-    public final Set<T> closed;
+    private final Set<T> closed;
+    private final BiConsumer<String, List<T>> progressCallback;
+    private long prevTime;
 
     public AStar(IAStarWorld<T> world) {
+        this(world, null);
+    }
+    public AStar(IAStarWorld<T> world, BiConsumer<String, List<T>> progressCallback) {
         this.world = world;
-        closed = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        this.progressCallback = progressCallback;
+        closed = new HashSet<>();
     }
 
     public List<T> findPath(T start, T end) {
@@ -34,16 +40,19 @@ public class AStar<T> {
         });
 
         closed.clear();
-        Map<T, Float> gScore = new HashMap<>();
+        Map<T, Float> gScore = new HashMap<>(); //TODO does this work?
 
         Node<T> curNode = new Node<T>(null, start, 0, 0);
         closed.add(curNode.value);
         for (T pos : world.getNeighbours(curNode.value))
             queue.add(new Node<T>(curNode, pos, 0, world.getHeuristic(end, pos)));
 
+        prevTime = System.nanoTime();
         while (!queue.isEmpty()) {
             curNode = queue.poll();
             closed.add(curNode.value);
+            if (!gScore.containsKey(curNode.value) || gScore.get(curNode.value) < curNode.weight)
+                gScore.put(curNode.value, curNode.weight);
 
             if (curNode.value.equals(end))
                 return generatePath(curNode);
@@ -52,11 +61,17 @@ public class AStar<T> {
                 Node<T> n = new Node<T>(curNode, pos, curNode.weight + world.getWeight(curNode.value, pos),
                         world.getHeuristic(end, pos));
                 if (!(closed.contains(n.value))) {
-                    if (!gScore.containsKey(n.value)
-                            || (gScore.containsKey(n.value) && (n.weight) < gScore.get(n.value))) {
+                    if (!gScore.containsKey(n.value) || n.weight < gScore.get(n.value)) {
                         queue.add(n);
                     }
                 }
+            }
+
+            long nowTime = System.nanoTime();
+            if (prevTime + 4e8 < nowTime) {
+                prevTime = nowTime;
+                if (progressCallback != null)
+                    this.progressCallback.accept(queue.size()+"", generatePath(curNode));
             }
         }
 

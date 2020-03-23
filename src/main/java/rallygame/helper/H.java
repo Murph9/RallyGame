@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
@@ -237,7 +239,12 @@ public class H {
 		return new Vector2f(px, py);
 	}
 	
-	
+    public static <T> List<T> takeEveryN(List<T> list, int n) {
+        return IntStream.range(0, list.size())
+            .filter(x -> x % n == 0)
+            .mapToObj(list::get)
+            .collect(Collectors.toList());
+    }
 	
 	
 	/** copies to first array */

@@ -19,7 +19,7 @@ public class AStarTest {
     @Test
     public void BasicAStar() {
         int sideLength = 9;
-        PerlinNoise noise = new PerlinNoise(sideLength);
+        PerlinNoise noise = new PerlinNoise(sideLength, 0);
         noise.load();
 
         float[] heightMap = noise.getHeightMap();
