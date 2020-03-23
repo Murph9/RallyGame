@@ -21,16 +21,55 @@ import rallygame.helper.H;
 public class HTest {
 
     @Test
+    public void str() {
+        assertEquals("1,2", H.str(Arrays.asList(1, 2), ","));
+        assertEquals("1,2", H.str(new Integer[] { 1, 2 }, ","));
+        assertEquals("1,2", H.join(1, 2));
+    }
+
+    @Test
+    public void oneTrue() {
+        assertTrue(!H.oneTrue((x) -> x, new Boolean[] { }));
+        assertTrue(H.oneTrue((x) -> x, new Boolean[] { true, false, false }));
+        assertTrue(!H.oneTrue((x) -> x, new Boolean[] { false, false, false }));
+        assertTrue(H.oneTrue((x) -> x, new Boolean[] { true, true, true }));
+    }
+    
+    @Test
+    public void allTrue() {
+        assertTrue(H.allTrue((x) -> x, new Boolean[] {}));
+        assertTrue(!H.allTrue((x) -> x, new Boolean[] { true, false, false }));
+        assertTrue(!H.allTrue((x) -> x, new Boolean[] { false, false, false }));
+        assertTrue(H.allTrue((x) -> x, new Boolean[] { true, true, true }));
+    }
+
+    @Test
+    public void dotXZ() {
+        assertEquals(1, H.dotXZ(new Vector3f(0, 0, 1), new Vector3f(0, 1, 1)));
+        assertEquals(0, H.dotXZ(new Vector3f(2, 1, 0), new Vector3f(0, 0, 2)));
+        assertEquals(2, H.dotXZ(new Vector3f(2, 1, 0), new Vector3f(1, 0, 1)));
+    }
+
+    @Test
     public void roundDecimal() {
         assertEquals("1.2", H.roundDecimal(1.23f, 1));
         assertEquals("1.235", H.roundDecimal(1.23456f, 3));
         assertNotEquals("10.674", H.roundDecimal(10.6745, 3));
     }
+    @Test 
+    public void decimalFormat() {
+        assertEquals("001.2", H.decimalFormat(1.23f, "#000.0"));
+        assertEquals("0001.2", H.decimalFormat(1.23456f, "0000.0"));
+        assertNotEquals("0010.6", H.decimalFormat(10.6745f, "0000.0"));
+    }
 
     @Test
-    public void allTrue() {
-        assertTrue(H.allTrue((x) -> { return x != -1; }, 0, 1, 2));
-        assertFalse(H.allTrue((x) -> { return x != 1; }, 0, 1, 2));
+    public void rectFromLine() {
+        Vector3f[] result = H.rectFromLineXZ(new Vector3f(0, 0, 0), new Vector3f(0, 0, 1), 1);
+        assertEquals(result[0], new Vector3f(-0.5f, 0, 0));
+        assertEquals(result[0], new Vector3f(-0.5f, 0, 1));
+        assertEquals(result[0], new Vector3f(0.5f, 0, 1));
+        assertEquals(result[0], new Vector3f(0.5f, 0, 0));
     }
 
     @Test
@@ -61,6 +100,27 @@ public class HTest {
         assertEquals(12, H.clamp(10, 12, 120));
         assertEquals(120, H.clamp(1320, 12, 120));
         assertEquals(100, H.clamp(100, 12, 120));
+    }
+
+    @Test
+    public void cylinderInertia() {
+        assertEquals(1, H.cylinderInertia(1, 2));
+        assertEquals(10000/2, H.cylinderInertia(100, 1));
+    }
+
+    @Test
+    public void substringBeforeFirst() {
+        assertEquals("hello w", H.substringBeforeFirst("hello world", 'o'));
+    }
+    @Test
+    public void substringAfterLast() {
+        assertEquals("rld", H.substringAfterLast("hello world", 'o'));
+    }
+
+    @Test
+    public void leftPad() {
+        assertEquals("     aaa", H.leftPad("aaa", 8, ' '));
+        assertEquals("aaa", H.leftPad("aaa", 3, 'x'));
     }
 
     @Test
