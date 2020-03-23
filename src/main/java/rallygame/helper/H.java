@@ -22,25 +22,23 @@ public class H {
 
 	public static String str(Object[] ol, String sep) {
 		if (ol == null) return null;
-		String str = "";
+        if (sep == null) sep = ",";
+        String str = "";
 		for (Object o: ol)
 			str += sep + o;
-		return str;
+		return str.substring(sep.length());
 	}
 	public static String str(Iterable<Object> ol, String sep) {
-		if (ol == null) return null;
+        if (ol == null) return null;
+        if (sep == null) sep = ",";
 		String str = "";
 		for (Object o: ol)
 			str += sep + o.toString();
-		return str;
+		return str.substring(sep.length());
 	}
 	
 	public static String join(Object... os) {
-		String s = "";
-		for (Object o: os) {
-			s += o + " ";
-		}
-		return s;
+		return str(os, ",");
 	}
     
     @SafeVarargs
@@ -131,7 +129,7 @@ public class H {
 	public static String leftPad(String str, int length, char pad) {
 		StringBuilder sb = new StringBuilder();
 
-		for (int toPrepend = 10 - str.length(); toPrepend > 0; toPrepend--) {
+		for (int toPrepend = length - str.length(); toPrepend > 0; toPrepend--) {
 			sb.append(pad);
 		}
 
@@ -157,7 +155,7 @@ public class H {
 		return "x:"+H.roundDecimal(vec.x, places) + ", y:"+H.roundDecimal(vec.y, places)+", z:"+H.roundDecimal(vec.z, places);
 	}
 	
-	public static Vector3f[] rectFromLine(Vector3f start, Vector3f end, float thickness) {
+	public static Vector3f[] rectFromLineXZ(Vector3f start, Vector3f end, float thickness) {
 		//https://stackoverflow.com/a/1937202, with comment fix by Ryan Clarke
 		
 		Vector3f[] list = new Vector3f[4];
