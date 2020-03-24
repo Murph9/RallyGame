@@ -21,7 +21,7 @@ public class TerrainUtil {
             float height = (quad[0].y + quad[1].y + quad[2].y + quad[3].y)/4;
             height /= scale.y;
 
-            float[] box = H.boundingBoxXZ(quad);
+            float[] box = Trig.boundingBoxXZ(quad);
             box[0] = (int) (box[0] / scale.x) * scale.x; // find the closest lower grid point
             box[1] = (int) (box[1] / scale.z) * scale.z;
             box[2] = (1 + (int) (box[2] / scale.x)) * scale.x;
