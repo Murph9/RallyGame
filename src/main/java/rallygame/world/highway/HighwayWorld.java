@@ -30,6 +30,7 @@ import rallygame.game.App;
 import rallygame.game.DebugAppState;
 import rallygame.helper.H;
 import rallygame.helper.Log;
+import rallygame.helper.Trig;
 import rallygame.terrainWorld.NoiseBasedWorld;
 import rallygame.world.WorldType;
 import rallygame.world.World;
@@ -238,7 +239,7 @@ public class HighwayWorld extends World {
 
 			quad = order.apply(quad);
 			
-			float[] box = H.boundingBoxXZ(quad);
+			float[] box = Trig.boundingBoxXZ(quad);
 			box[0] -= 1; //extend the extends so they cover it completely
 			box[1] -= 1;
 			box[2] += 1;
@@ -249,10 +250,10 @@ public class HighwayWorld extends World {
 					Vector3f pos = new Vector3f(i, 0, j);
 					//use the jme3 library method for point in triangle
 					if (FastMath.pointInsideTriangle(H.v3tov2fXZ(quad[0]), H.v3tov2fXZ(quad[2]), H.v3tov2fXZ(quad[3]), H.v3tov2fXZ(pos)) != 0) {
-						pos.y = H.heightInTri(quad[0], quad[2], quad[3], pos) - 0.01f;
+						pos.y = Trig.heightInTri(quad[0], quad[2], quad[3], pos) - 0.01f;
 						heightList.add(pos);
 					} else if (FastMath.pointInsideTriangle(H.v3tov2fXZ(quad[0]), H.v3tov2fXZ(quad[2]), H.v3tov2fXZ(quad[1]), H.v3tov2fXZ(pos)) != 0) {
-						pos.y = H.heightInTri(quad[0], quad[2], quad[1], pos) - 0.01f;
+						pos.y = Trig.heightInTri(quad[0], quad[2], quad[1], pos) - 0.01f;
 						heightList.add(pos);
 					}
 				}
