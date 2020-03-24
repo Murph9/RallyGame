@@ -1,0 +1,105 @@
+package rallygame;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
+
+import rallygame.helper.Trig;
+
+import com.jme3.math.Vector2f;
+import com.jme3.math.Vector3f;
+
+public class TrigTest {
+
+    @Test
+    public void boundingBoxXZ() {
+        float[] result = Trig.boundingBoxXZ(new Vector3f());
+        assertEquals(0, result[0]);
+        assertEquals(0, result[1]);
+        assertEquals(0, result[2]);
+        assertEquals(0, result[3]);
+
+        result = Trig.boundingBoxXZ(new Vector3f(-1, 0, 1), new Vector3f(1, 0, -1));
+        assertEquals(-1, result[0]);
+        assertEquals(-1, result[1]);
+        assertEquals(1, result[2]);
+        assertEquals(1, result[3]);
+
+        result = Trig.boundingBoxXZ(new Vector3f(0, 1, 0));
+        assertEquals(0, result[0]);
+        assertEquals(0, result[1]);
+        assertEquals(0, result[2]);
+        assertEquals(0, result[3]);
+    }
+
+    @Test
+    public void dotXZ() {
+        assertEquals(1, Trig.dotXZ(new Vector3f(0, 0, 1), new Vector3f(0, 1, 1)));
+        assertEquals(0, Trig.dotXZ(new Vector3f(2, 1, 0), new Vector3f(0, 0, 2)));
+        assertEquals(2, Trig.dotXZ(new Vector3f(2, 1, 0), new Vector3f(1, 0, 1)));
+    }
+
+    @Test
+    public void rectFromLineXZ() {
+        Vector3f[] result = Trig.rectFromLineXZ(new Vector3f(0, 0, 0), new Vector3f(0, 0, 1), 1);
+        assertEquals(result[0], new Vector3f(-0.5f, 0, 0));
+        assertEquals(result[1], new Vector3f(-0.5f, 0, 1));
+        assertEquals(result[2], new Vector3f(0.5f, 0, 1));
+        assertEquals(result[3], new Vector3f(0.5f, 0, 0));
+    }
+
+    @Test
+    public void distFromLineXZ() {
+        assertEquals(1f, Trig.distFromLineXZ(new Vector3f(), new Vector3f(1, 0, 0), new Vector3f(0, 0, 1)));
+        assertEquals(1 / Math.sqrt(2), Trig.distFromLineXZ(new Vector3f(), new Vector3f(1, 0, 1), new Vector3f(0, 0, 1)),
+                0.0001);
+    }
+
+    @Test
+    public void heightInQuad() {
+        Vector3f a = new Vector3f(0, 0, 0);
+        Vector3f b = new Vector3f(1, 1, 1);
+        Vector3f c = new Vector3f(1, 1, -1);
+        Vector3f d = new Vector3f(2, 2, 0);
+        float z = 0f;
+        assertEquals(z, Trig.heightInQuad(new Vector2f(z, 0), a, b, c, d));
+        z = 0.3f;
+        assertEquals(z, Trig.heightInQuad(new Vector2f(z, 0), a, b, c, d));
+        z = 1.3f;
+        assertEquals(z, Trig.heightInQuad(new Vector2f(z, 0), a, b, c, d));
+        z = 2f;
+        assertEquals(z, Trig.heightInQuad(new Vector2f(z, 0), a, b, c, d));
+        z = 4f;
+        assertEquals(Float.NaN, Trig.heightInQuad(new Vector2f(z, 0), a, b, c, d));
+
+        assertEquals(0.5f, Trig.heightInQuad(new Vector2f(0.5f, 0.5f), a, b, c, d), 0.0001f);
+        assertEquals(1.5f, Trig.heightInQuad(new Vector2f(1.5f, 0.5f), a, b, c, d), 0.0001f);
+        assertEquals(Float.NaN, Trig.heightInQuad(new Vector2f(1.5f, 0.51f), a, b, c, d), 0.0001f);
+    }
+
+    @Test
+    public void heightInTri() {
+        //isoceles base on y axis
+        Vector3f a = new Vector3f(0, 1, 1);
+        Vector3f b = new Vector3f(0, 1, 0);
+        Vector3f c = new Vector3f(2, 3, 0.5f);
+        assertEquals(2, Trig.heightInTri(a, b, c, new Vector3f(1, 999, 0.5f)));
+        assertEquals(Float.NaN, Trig.heightInTri(a, b, c, new Vector3f(1, 999, 1)));
+        assertEquals(Float.NaN, Trig.heightInTri(a, b, c, new Vector2f(1, 1)));
+        assertEquals(1, Trig.heightInTri(a, b, c, new Vector3f(0, 1, 1)));
+        assertEquals(1, Trig.heightInTri(a, b, c, new Vector2f(0, 1)));
+        assertEquals(1, Trig.heightInTri(a, b, c, new Vector3f(0, 1, 0.2f)));
+    }
+    // TODO intersectionOf2LinesGiven2PointsEach
+
+    @Test
+    public void closestTo() {
+        Vector3f a = new Vector3f(1, 0, 0);
+        Vector3f b = new Vector3f(0, 1, 0);
+        Vector3f c = new Vector3f(0, 0, 1);
+        Vector3f[] list = new Vector3f[] { a, b, c };
+        assertEquals(a, Trig.closestTo(new Vector3f(0.1f, 0, 0), list));
+        assertEquals(c, Trig.closestTo(new Vector3f(0, 0, 0.1f), list));
+        assertEquals(b, Trig.closestTo(new Vector3f(0, 0.1f, 0), list));
+    }
+}

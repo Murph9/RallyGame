@@ -2,11 +2,14 @@ package rallygame;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.Map;
 
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
@@ -29,12 +32,12 @@ public class HTest {
 
     @Test
     public void oneTrue() {
-        assertTrue(!H.oneTrue((x) -> x, new Boolean[] { }));
+        assertTrue(!H.oneTrue((x) -> x, new Boolean[] {}));
         assertTrue(H.oneTrue((x) -> x, new Boolean[] { true, false, false }));
         assertTrue(!H.oneTrue((x) -> x, new Boolean[] { false, false, false }));
         assertTrue(H.oneTrue((x) -> x, new Boolean[] { true, true, true }));
     }
-    
+
     @Test
     public void allTrue() {
         assertTrue(H.allTrue((x) -> x, new Boolean[] {}));
@@ -44,19 +47,13 @@ public class HTest {
     }
 
     @Test
-    public void dotXZ() {
-        assertEquals(1, H.dotXZ(new Vector3f(0, 0, 1), new Vector3f(0, 1, 1)));
-        assertEquals(0, H.dotXZ(new Vector3f(2, 1, 0), new Vector3f(0, 0, 2)));
-        assertEquals(2, H.dotXZ(new Vector3f(2, 1, 0), new Vector3f(1, 0, 1)));
-    }
-
-    @Test
     public void roundDecimal() {
         assertEquals("1.2", H.roundDecimal(1.23f, 1));
         assertEquals("1.235", H.roundDecimal(1.23456f, 3));
         assertNotEquals("10.674", H.roundDecimal(10.6745, 3));
     }
-    @Test 
+
+    @Test
     public void decimalFormat() {
         assertEquals("001.2", H.decimalFormat(1.23f, "#000.0"));
         assertEquals("0001.2", H.decimalFormat(1.23456f, "0000.0"));
@@ -64,19 +61,13 @@ public class HTest {
     }
 
     @Test
-    public void rectFromLine() {
-        Vector3f[] result = H.rectFromLineXZ(new Vector3f(0, 0, 0), new Vector3f(0, 0, 1), 1);
-        assertEquals(result[0], new Vector3f(-0.5f, 0, 0));
-        assertEquals(result[0], new Vector3f(-0.5f, 0, 1));
-        assertEquals(result[0], new Vector3f(0.5f, 0, 1));
-        assertEquals(result[0], new Vector3f(0.5f, 0, 0));
+    public void round3f() {
+        assertEquals("x:?, y:?, z:?", H.round3f(null, 0));
+        assertEquals("x:?, y:?, z:?", H.round3f(null, 100));
+        assertEquals("x:0, y:0, z:0", H.round3f(new Vector3f(), 0));
+        assertEquals("x:3.14, y:10.56, z:9.00", H.round3f(new Vector3f(3.144f, 10.555f, 9), 2));
     }
 
-    @Test
-    public void distFromLineXZ() {
-        assertEquals(1f, H.distFromLineXZ(new Vector3f(), new Vector3f(1,0,0), new Vector3f(0,0,1)));
-        assertEquals(1/Math.sqrt(2), H.distFromLineXZ(new Vector3f(), new Vector3f(1,0,1), new Vector3f(0,0,1)), 0.0001);
-    }
 
     @Test
     public void lerpArray() {
@@ -84,14 +75,14 @@ public class HTest {
         assertEquals(2f, H.lerpArray(2f, new float[] { 0, 1, 2 }));
         assertEquals(1.22f, H.lerpArray(1.22f, new float[] { 0, 1, 2 }));
     }
-    
+
     @Test
     public void lerpColor() {
-        assertEquals(new ColorRGBA(0.5f, 0.5f, 0.5f, 0.5f), 
+        assertEquals(new ColorRGBA(0.5f, 0.5f, 0.5f, 0.5f),
                 Colours.lerpColor(0.5f, new ColorRGBA(0, 0, 0, 0), new ColorRGBA(1, 1, 1, 1)));
-        assertEquals(new ColorRGBA(1, 1, 1, 1), 
+        assertEquals(new ColorRGBA(1, 1, 1, 1),
                 Colours.lerpColor(1, new ColorRGBA(0, 0, 0, 0), new ColorRGBA(1, 1, 1, 1)));
-        assertEquals(new ColorRGBA(0, 0, 0, 0), 
+        assertEquals(new ColorRGBA(0, 0, 0, 0),
                 Colours.lerpColor(0, new ColorRGBA(0, 0, 0, 0), new ColorRGBA(1, 1, 1, 1)));
     }
 
@@ -105,13 +96,14 @@ public class HTest {
     @Test
     public void cylinderInertia() {
         assertEquals(1, H.cylinderInertia(1, 2));
-        assertEquals(10000/2, H.cylinderInertia(100, 1));
+        assertEquals(10000 / 2, H.cylinderInertia(100, 1));
     }
 
     @Test
     public void substringBeforeFirst() {
-        assertEquals("hello w", H.substringBeforeFirst("hello world", 'o'));
+        assertEquals("hell", H.substringBeforeFirst("hello world", 'o'));
     }
+
     @Test
     public void substringAfterLast() {
         assertEquals("rld", H.substringAfterLast("hello world", 'o'));
@@ -124,28 +116,27 @@ public class HTest {
     }
 
     @Test
+    public void addTogether() {
+        float[] one = new float[] { 0, 1, 2 };
+        float[] two = new float[] { 4, 3, 2 };
+        assertArrayEquals(new float[] { 4, 4, 4 }, H.addTogetherNew(one.clone(), two));
+        assertArrayEquals(new float[] { 4, 4, 4 }, H.addTogetherNew(two.clone(), one));
+        assertArrayEquals(new float[] { 0, 0, 0 }, H.addTogetherNew(one.clone(), new float[] { 0, -1, -2 }));
+    }
+
+    @Test
     public void addTogetherNew() {
         float[] one = new float[] { 0, 1, 2 };
         float[] two = new float[] { 4, 3, 2 };
         assertArrayEquals(new float[] { 4, 4, 4 }, H.addTogetherNew(one, two));
         assertArrayEquals(new float[] { 4, 4, 4 }, H.addTogetherNew(two, one));
-        assertArrayEquals(new float[] { 0, 0, 0 }, H.addTogetherNew(one, new float[]{ 0, -1, -2}));
+        assertArrayEquals(new float[] { 0, 0, 0 }, H.addTogetherNew(one, new float[] { 0, -1, -2 }));
     }
 
-    @Test
-    public void closestTo() {
-        Vector3f a = new Vector3f(1,0,0);
-        Vector3f b = new Vector3f(0,1,0);
-        Vector3f c = new Vector3f(0,0,1);
-        Vector3f[] list = new Vector3f[] { a, b, c };
-        assertEquals(a, H.closestTo(new Vector3f(0.1f, 0, 0), list));
-        assertEquals(c, H.closestTo(new Vector3f(0, 0, 0.1f), list));
-        assertEquals(b, H.closestTo(new Vector3f(0, 0.1f, 0), list));
-    }
 
     @Test
     public void v3tov2fXZ() {
-        Vector3f a = new Vector3f(1.2f,4.1f,9f);
+        Vector3f a = new Vector3f(1.2f, 4.1f, 9f);
         assertEquals(a.x, H.v3tov2fXZ(a).x);
         assertEquals(a.z, H.v3tov2fXZ(a).y);
     }
@@ -187,36 +178,18 @@ public class HTest {
         assertEquals(1, H.maxInArray(new float[] { 1 }));
         assertEquals(-12, H.maxInArray(new float[] { -12, -65 }));
         assertEquals(2, H.maxInArray(new float[] { 2, -3 }));
+
+        assertEquals(1, H.maxInArray(new float[] { 1 }, (x, y) -> x));
+        assertEquals(-1, H.maxInArray(new float[] { 4, 667, 1 }, (x, y) -> -x));
+        assertEquals(4, H.maxInArray(new float[] { 1, 5, 93 }, (x, y) -> x == 4 ? x : 4)); // everything is a 4
     }
-
-    @Test
-    public void boundingBoxXZ() {
-        float[] result = H.boundingBoxXZ(new Vector3f());
-        assertEquals(0, result[0]);
-        assertEquals(0, result[1]);
-        assertEquals(0, result[2]);
-        assertEquals(0, result[3]);
-
-        result = H.boundingBoxXZ(new Vector3f(-1, 0, 1), new Vector3f(1, 0, -1));
-        assertEquals(-1, result[0]);
-        assertEquals(-1, result[1]);
-        assertEquals(1, result[2]);
-        assertEquals(1, result[3]);
-
-        result = H.boundingBoxXZ(new Vector3f(0, 1, 0));
-        assertEquals(0, result[0]);
-        assertEquals(0, result[1]);
-        assertEquals(0, result[2]);
-        assertEquals(0, result[3]);
-    }
-
 
     @Test
     public void skew() {
         assertEquals(5, H.skew(5, 0, 10, 0, 10));
         assertEquals(0, H.skew(0, 0, 10, 0, 10));
         assertEquals(1, H.skew(0, 0, 1, 1, 2));
-        
+
         assertEquals(1, H.skew(5, 4, 5, 0, 1));
 
         assertEquals(0.5f, H.skew(4.5f, 4, 5, 0, 1));
@@ -227,5 +200,32 @@ public class HTest {
         assertEquals(0.75f, H.skew(1, -2, 2, 0, 1));
 
         assertEquals(-1, H.skew(0.25f, 0.75f, 1.25f, 0, 1));
+    }
+
+    @Test
+    public void toMap() {
+        assertEquals(null, H.toMap(null));
+        
+        TestObj to = new TestObj();
+        to.bool = true;
+        to.str = "yo";
+        to.value = -9.222f;
+
+        Map<String, Object> result = H.toMap(to);
+        assertEquals(true, result.get("bool"));
+        assertEquals("yo", result.get("str"));
+        assertEquals(-9.222f, result.get("value"));
+    }
+
+    @Test
+    public void writeToFile() throws IOException {
+        String text = "hey";
+        File tempFile = File.createTempFile("murph9-test-", null);
+        H.writeToFile(text, tempFile.getAbsolutePath());
+
+        String results = Files.readAllLines(tempFile.toPath()).get(0);
+        assertEquals(text, results);
+
+        Files.delete(tempFile.toPath());
     }
 }
