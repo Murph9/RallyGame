@@ -13,7 +13,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import com.jme3.math.FastMath;
-import com.jme3.math.Quaternion;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 
@@ -69,35 +68,7 @@ public class H {
 		}
 		return newV;
 	}
-	public static float dotXZ(Vector3f a, Vector3f b) {
-		return a.x*b.x + a.z*b.z;
-	}
-	public static float distFromLineXZ(Vector3f start, Vector3f end, Vector3f point) {
-		float x0 = point.x;
-		float y0 = point.z;
-		float x1 = start.x;
-		float y1 = start.z;
-		float x2 = end.x;
-		float y2 = end.z;
-		return (Math.abs((y2-y1)*x0 - (x2-x1)*y0 + x2*y1 - y2*x1))/
-				FastMath.sqrt((y2-y1)*(y2-y1) + (x2-x1)*(x2-x1));
-	}
 
-	/** Returns extents of V3f in xz directions. [xmin, zmin, xmax, zmax] */
-	public static float[] boundingBoxXZ(Vector3f... p) {
-		float xmin = Float.POSITIVE_INFINITY;
-		float xmax = Float.NEGATIVE_INFINITY;
-		float zmin = Float.POSITIVE_INFINITY;
-		float zmax = Float.NEGATIVE_INFINITY;
-		for (Vector3f v: p) {
-			xmin = Math.min(xmin, v.x);
-			xmax = Math.max(xmax, v.x);
-			zmin = Math.min(zmin, v.z);
-			zmax = Math.max(zmax, v.z);
-		}
-		return new float[] { xmin, zmin, xmax, zmax };
-	}
-	
 	public static float lerpArray(float i, float[] array) {
 		if (i < 0) i = 0; //prevent array issues
 		int whole = (int) i;
@@ -155,88 +126,6 @@ public class H {
 		return "x:"+H.roundDecimal(vec.x, places) + ", y:"+H.roundDecimal(vec.y, places)+", z:"+H.roundDecimal(vec.z, places);
 	}
 	
-	public static Vector3f[] rectFromLineXZ(Vector3f start, Vector3f end, float thickness) {
-		//https://stackoverflow.com/a/1937202, with comment fix by Ryan Clarke
-		
-		Vector3f[] list = new Vector3f[4];
-		float dx = end.x - start.x; //delta x
-		float dy = end.z - start.z; //delta z
-		float linelength = FastMath.sqrt(dx * dx + dy * dy);
-		dx /= linelength;
-		dy /= linelength;
-		if (linelength == 0)
-			return null;
-		
-		//Ok, (dx, dy) is now a unit vector pointing in the direction of the line
-		//A perpendicular vector is given by (-dy, dx)
-		float px = 0.5f * thickness * (-dy); //perpendicular vector with lenght thickness * 0.5
-		float py = 0.5f * thickness * dx;
-		list[0] = new Vector3f(start.x + px, start.y, start.z + py);
-		list[1] = new Vector3f(end.x + px, end.y, end.z + py);
-		list[2] = new Vector3f(end.x - px, end.y,  end.z - py);
-		list[3] = new Vector3f(start.x - px, start.y,  start.z - py);
-		return list;
-	}
-	
-	public static float heightInQuad(Vector3f p, Vector3f a, Vector3f b, Vector3f c, Vector3f d) {
-		return heightInQuad(H.v3tov2fXZ(p), a, b, c, d);
-	}
-	/**
-	 * Vector3f the y is the height, and must be defined for a b c d.
-	 * p is the point, which we want the height for.
-	 * Assumptions:
-	 * - All abcd are coplanar
-	 * - p is inside abcd
-	 * @return the height of point p
-	 */
-	public static float heightInQuad(Vector2f p, Vector3f a, Vector3f b, Vector3f c, Vector3f d) {
-		// Quad Height method:
-		// Line through AP, intercept with BC and CD, whichever is inside find point q.
-		// Interpolate height of q on BC or CD, then interpolate height of p using line Aq.
-		Vector2f q = intersectionOf2LinesGiven2PointsEach(H.v3tov2fXZ(a), p, H.v3tov2fXZ(b), H.v3tov2fXZ(c));
-		float slopeBC = (b.y-c.y)/(H.v3tov2fXZ(b).subtract(H.v3tov2fXZ(c)).length()); //length is never negative
-		float distCToq = q.subtract(H.v3tov2fXZ(c)).length();
-		
-		Vector3f q3 = new Vector3f(q.x, c.y+slopeBC*distCToq, q.y);
-		float slopeAQ = (a.y-q3.y)/(q.subtract(H.v3tov2fXZ(a)).length());
-		float distAToq = p.subtract(H.v3tov2fXZ(a)).length();
-		
-		float pheight = a.y-slopeAQ*distAToq;
-		return pheight;
-	}
-	public static float heightInTri(Vector3f a, Vector3f b, Vector3f c, Vector3f p) {
-		return heightInTri(a, b, c, H.v3tov2fXZ(p));
-	}
-	public static float heightInTri(Vector3f a, Vector3f b, Vector3f c, Vector2f p) {
-		Vector2f q = intersectionOf2LinesGiven2PointsEach(H.v3tov2fXZ(a), p, H.v3tov2fXZ(b), H.v3tov2fXZ(c));
-		float slopeBC = (b.y-c.y)/(H.v3tov2fXZ(b).subtract(H.v3tov2fXZ(c)).length()); //length is never negative
-		float distCToq = q.subtract(H.v3tov2fXZ(c)).length();
-		
-		Vector3f q3 = new Vector3f(q.x, c.y+slopeBC*distCToq, q.y);
-		float slopeAQ = (a.y-q3.y)/(q.subtract(H.v3tov2fXZ(a)).length());
-		float distAToq = p.subtract(H.v3tov2fXZ(a)).length();
-		
-		float pheight = a.y-slopeAQ*distAToq;
-		return pheight;
-	}
-
-	/**
-	 * https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection#Given_two_points_on_each_line
-	 * Gets the point where 2 lines interept, when the 2 lines are given as points. (p1 and p2) and (p3 and p4)
-	 * @return the point
-	 */
-	public static Vector2f intersectionOf2LinesGiven2PointsEach(Vector2f p1, Vector2f p2, Vector2f p3, Vector2f p4) {
-		
-		float px = ((p1.x*p2.y - p1.y*p2.x)*(p3.x-p4.x) - (p1.x-p2.x)*(p3.x*p4.y-p3.y*p4.x))
-				/((p1.x-p2.x)*(p3.y-p4.y) - (p1.y-p2.y)*(p3.x-p4.x));
-		float py = ((p1.x*p2.y - p1.y*p2.x)*(p3.y-p4.y) - (p1.y-p2.y)*(p3.x*p4.y-p3.y*p4.x))
-				/((p1.x-p2.x)*(p3.y-p4.y) - (p1.y-p2.y)*(p3.x-p4.x));
-		
-		return new Vector2f(px, py);
-	}
-	
-	
-	
 	
 	/** copies to first array */
 	public static void addTogether(float[] a, float[] b) {
@@ -262,40 +151,7 @@ public class H {
 		return out;
 	}
 	
-	public static Vector3f closestTo(Vector3f pos, Vector3f[] list) {
-		Vector3f cur = null;
-		float curDist = Float.MAX_VALUE;
-		for (int i = 0; i < list.length; i++) {
-			float dist = pos.distance(list[i]);
-			if (dist < curDist) {
-				cur = list[i];
-				curDist = dist;
-			}
-		}
-		return cur;
-	}
 	
-	
-	//http://nghiaho.com/?p=997
-	public static float nearlyAtan(float x) {
-		float xabs = FastMath.abs(x);
-		return FastMath.QUARTER_PI*x - x*(xabs - 1)*(0.2447f + 0.0663f*xabs);
-	}
-	
-	public static float nearlyAtan2(float x, float y) {
-		float xabs = FastMath.abs(x);
-		float yabs = FastMath.abs(y);
-		float a = Math.min (xabs, yabs) / Math.max(xabs, yabs);
-		float s = a * a;
-		float r = ((-0.0464964749f * s + 0.15931422f) * s - 0.327622764f) * s * a + a;
-		if (yabs > xabs)
-			r = FastMath.HALF_PI - r;
-		if (x < 0)
-			r = FastMath.PI - r;
-		if (y < 0) 
-			r = -r;
-		return 7;
-	}
 	
 	public static Vector2f v3tov2fXZ(Vector3f v) {
 		return new Vector2f(v.x, v.z);
@@ -304,11 +160,6 @@ public class H {
 		return new Vector3f(v.x, 0, v.y);
 	}
 	
-	public static Quaternion FromAngleAxis(float angle, Vector3f axis) {
-		Quaternion m = new Quaternion();
-		m.fromAngleAxis(angle, axis);
-		return m;
-	}
 	
 	/**Generate a random Vector3f([0,1), [0,1), [0,1))
 	 * scaleNegative for [-1, 1) parts
@@ -327,6 +178,7 @@ public class H {
 	
 	
 	public static Map<String, Object> toMap(Object obj) {
+        if (obj == null) return null;
         Field[] fields = obj.getClass().getFields();
         Map<String, Object> map = new HashMap<String, Object>();
         try {

@@ -4,8 +4,6 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
-import rallygame.helper.H;
-
 //Simple class that makes changing static world quite easy
 public enum StaticWorld {
 	//special
@@ -20,16 +18,16 @@ public enum StaticWorld {
 	dragstrip("dragstrip", 10, null, null),
 	multidragstrip("multidragstrip", 1, null, null),
 
-	realroad("real_road", 1, new Vector3f(225, -19, 708), H.FromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y)),
+	realroad("real_road", 1, new Vector3f(225, -19, 708), new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y)),
 
 	//other peoples:
-	track2("track2", 1, null, H.FromAngleAxis(FastMath.PI, Vector3f.UNIT_Y)),
+	track2("track2", 1, null, new Quaternion().fromAngleAxis(FastMath.PI, Vector3f.UNIT_Y)),
 	carpark("carpark", 1, null, null),
 	unbenannt("unbenannt_track", 1, null, null),
 	
 	block_fort("block_fort", 10, new Vector3f(-20,0,-12), null),
 	rainbow_road("rainbow_road", 1, null, null),
-	wuhu_island("wuhu_island", 2, null, H.FromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y)),
+	wuhu_island("wuhu_island", 2, null, new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y)),
 
     //checkpoints
     lakelooproad("lakelooproad", 1, null, null),
