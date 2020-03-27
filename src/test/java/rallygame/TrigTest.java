@@ -1,6 +1,7 @@
 package rallygame;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -51,8 +52,8 @@ public class TrigTest {
     @Test
     public void distFromLineXZ() {
         assertEquals(1f, Trig.distFromLineXZ(new Vector3f(), new Vector3f(1, 0, 0), new Vector3f(0, 0, 1)));
-        assertEquals(1 / Math.sqrt(2), Trig.distFromLineXZ(new Vector3f(), new Vector3f(1, 0, 1), new Vector3f(0, 0, 1)),
-                0.0001);
+        assertEquals(1 / Math.sqrt(2),
+                Trig.distFromLineXZ(new Vector3f(), new Vector3f(1, 0, 1), new Vector3f(0, 0, 1)), 0.0001);
     }
 
     @Test
@@ -79,7 +80,7 @@ public class TrigTest {
 
     @Test
     public void heightInTri() {
-        //isoceles base on y axis
+        // isoceles base on y axis
         Vector3f a = new Vector3f(0, 1, 1);
         Vector3f b = new Vector3f(0, 1, 0);
         Vector3f c = new Vector3f(2, 3, 0.5f);
@@ -90,7 +91,51 @@ public class TrigTest {
         assertEquals(1, Trig.heightInTri(a, b, c, new Vector2f(0, 1)));
         assertEquals(1, Trig.heightInTri(a, b, c, new Vector3f(0, 1, 0.2f)));
     }
-    // TODO intersectionOf2LinesGiven2PointsEach
+
+    @Test
+    public void intersectionOf2LinesGiven2PointsEach() {
+        // cross
+        Vector2f v1 = new Vector2f(1, -1);
+        Vector2f v2 = new Vector2f(-1, 1);
+        Vector2f v3 = new Vector2f(-1, -1);
+        Vector2f v4 = new Vector2f(1, 1);
+        assertEquals(0, Trig.intersectionOf2LinesGiven2PointsEach(v1, v2, v3, v4).x, 0.000001f);
+        assertEquals(0, Trig.intersectionOf2LinesGiven2PointsEach(v1, v2, v3, v4).y, 0.000001f);
+
+        // perpendicular
+        v1 = new Vector2f(0, 3);
+        v2 = new Vector2f(0, 1);
+        v3 = new Vector2f(1, 2);
+        v4 = new Vector2f(2, 2);
+        assertEquals(0, Trig.intersectionOf2LinesGiven2PointsEach(v1, v2, v3, v4).x, 0.000001f);
+        assertEquals(2, Trig.intersectionOf2LinesGiven2PointsEach(v1, v2, v3, v4).y, 0.000001f);
+
+        // y=x and x = 10000
+        v1 = new Vector2f(0, 0);
+        v2 = new Vector2f(1, 1);
+        v3 = new Vector2f(10000, 1);
+        v4 = new Vector2f(10000, 0);
+        assertEquals(10000, Trig.intersectionOf2LinesGiven2PointsEach(v1, v2, v3, v4).x, 0.000001f);
+        assertEquals(10000, Trig.intersectionOf2LinesGiven2PointsEach(v1, v2, v3, v4).y, 0.000001f);
+
+        // parrallel
+        v1 = new Vector2f(0, 0);
+        v2 = new Vector2f(0, 1);
+        v3 = new Vector2f(1, 1);
+        v4 = new Vector2f(1, 0);
+        Vector2f result = Trig.intersectionOf2LinesGiven2PointsEach(v1, v2, v3, v4);
+        assertTrue(Float.isNaN(result.x) || Float.isInfinite(result.x));
+        assertTrue(Float.isNaN(result.y) || Float.isInfinite(result.y));
+
+        // co-linear
+        v1 = new Vector2f(0, 0);
+        v2 = new Vector2f(0, 3);
+        v3 = new Vector2f(0, 1);
+        v4 = new Vector2f(0, 2);
+        result = Trig.intersectionOf2LinesGiven2PointsEach(v1, v2, v3, v4);
+        assertTrue(Float.isNaN(result.x) || Float.isInfinite(result.x));
+        assertTrue(Float.isNaN(result.y) || Float.isInfinite(result.y));
+    }
 
     @Test
     public void closestTo() {
