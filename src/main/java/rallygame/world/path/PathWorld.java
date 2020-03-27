@@ -61,6 +61,8 @@ public class PathWorld extends World {
     private final int sideLength;
     private final Vector2f start;
     private final Vector2f end;
+    private final float terrainScaleXZ;
+    private final float terrainScaleY;
 
     private PerlinNoise noise;
     private TerrainQuad terrain;
@@ -78,9 +80,11 @@ public class PathWorld extends World {
         super("PathWorld");
 
         roadNode = new Node("lineNode");
-        sideLength = 65;
+        sideLength = (1 << 6) + 1;//64 -> 6
+        terrainScaleXZ = 20;
+        terrainScaleY = 90;
 
-        int length = sideLength / 2 - 4;
+        int length = sideLength / 2 - 2;
         start = new Vector2f(-length, -length);
         end = new Vector2f(length, length);
     }
@@ -111,7 +115,7 @@ public class PathWorld extends World {
         noise.load();
         float[] heights = noise.findMinMaxHeights();
         terrain = new TerrainQuad("path terrain", sideLength, sideLength, noise.getHeightMap());
-        terrain.setLocalScale(new Vector3f(30, 80, 30));
+        terrain.setLocalScale(new Vector3f(terrainScaleXZ, terrainScaleY, terrainScaleXZ));
         Material baseMat = new Material(am, "mat/terrainheight/TerrainColorByHeight.j3md");
         baseMat.setFloat("Scale", heights[1] - heights[0]);
         baseMat.setFloat("Offset", heights[0]);
@@ -139,11 +143,10 @@ public class PathWorld extends World {
             roadPointList.add(roadPointList.get(roadPointList.size() -1)); // copy the last one
             CatmullRomRoad road = drawRoad(am, roadPointList);
 
-            // TODO terrain modification (as always)
             executor.submit(() -> {
                 List<Vector3f[]> quads = road.getMeshAsQuads();
                 getApplication().enqueue(() -> {
-                    Map<Vector2f, Float> heights = TerrainUtil.setHeightsFor(terrain, quads);
+                    Map<Vector2f, Float> heights = TerrainUtil.lowerTerrainSoItsUnderQuads(terrain, quads);
                     List<Vector3f> heights3 = heights.entrySet().stream()
                         .map(x -> new Vector3f(x.getKey().x, x.getValue()*terrain.getWorldScale().y, x.getKey().y))
                         .collect(Collectors.toList());
@@ -156,7 +159,7 @@ public class PathWorld extends World {
     }
 
     private CatmullRomRoad drawRoad(AssetManager am, List<Vector3f> list) {
-        //TODO use a rolling average to smooth incoming points so there are less hard corners?
+        //TODO use a rolling average to smooth points so there are less hard corners
 
         // draw a spline road to show where it is
         Spline s3 = new Spline(SplineType.CatmullRom, list, 1, false); // [0-1], 1 is more smooth
@@ -180,12 +183,16 @@ public class PathWorld extends World {
     private void searchFrom(Vector2f start, Vector2f end, List<Vector3f> outList) {
         executor = new ScheduledThreadPoolExecutor(1);
         executor.submit(() -> {
-            List<Vector2f> list = search.findPath(H.v3tov2fXZ(gridToWorldSpace(terrain, start)),
+            List<Vector2f> list = null;
+            try {
+                list = search.findPath(H.v3tov2fXZ(gridToWorldSpace(terrain, start)),
                     H.v3tov2fXZ(gridToWorldSpace(terrain, end)));
             
-            outList.addAll(list.stream().map(x -> new Vector3f(x.x, terrain.getHeight(x), x.y))
-                .collect(Collectors.toList()));
-        
+                outList.addAll(list.stream().map(x -> new Vector3f(x.x, terrain.getHeight(x), x.y))
+                    .collect(Collectors.toList()));
+            } catch (Exception e) {
+                Log.e(e);
+            }
             Log.p("Done astar search, path length = ", list == null ? 0 : list.size());
         });
     }
@@ -197,7 +204,7 @@ public class PathWorld extends World {
     }
 
     class SearchWorld implements ISearchWorld<Vector2f> {
-        private static final float HEIGHT_WEIGHT = 0.4f;
+        private static final float HEIGHT_WEIGHT = 0.08f;
         private final TerrainQuad terrain;
         private final Vector3f scale;
 
@@ -210,7 +217,7 @@ public class PathWorld extends World {
         public float getWeight(Vector2f v1, Vector2f v2) {
             float diffHeight = Math.abs(terrain.getHeight(v1) - terrain.getHeight(v2));
             // http://blog.runevision.com/2016/03/note-on-creating-natural-paths-in.html
-            return v2.distance(v1) * (1 + diffHeight * diffHeight * scale.y * HEIGHT_WEIGHT);
+            return v2.distance(v1) * (1 + diffHeight * diffHeight * scale.y/scale.x * HEIGHT_WEIGHT);
         }
 
         @Override
