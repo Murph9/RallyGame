@@ -32,7 +32,7 @@ import rallygame.helper.Geo;
 import rallygame.helper.H;
 import rallygame.helper.Log;
 import rallygame.helper.TerrainUtil;
-import rallygame.service.search.GreedySearch;
+import rallygame.service.search.AStar;
 import rallygame.service.search.ISearch;
 import rallygame.service.PerlinNoise;
 import rallygame.service.search.ISearchWorld;
@@ -57,7 +57,7 @@ public class PathWorld extends World {
         return out;
     }
 
-    private final Node lineNode;
+    private final Node roadNode;
     private final int sideLength;
     private final Vector2f start;
     private final Vector2f end;
@@ -67,8 +67,7 @@ public class PathWorld extends World {
     private Control collision;
     private ScheduledThreadPoolExecutor executor;
     private ISearch<Vector2f> search;
-    private List<Vector3f> list;
-    private boolean done;
+    private List<Vector3f> roadPointList;
 
     //TODO maybe we need to have 'any' point on the other side of the quad as the search goal
     //this is how we keep it moving along the world, the other sideways quads are only for show
@@ -78,7 +77,7 @@ public class PathWorld extends World {
     public PathWorld() {
         super("PathWorld");
 
-        lineNode = new Node("lineNode");
+        roadNode = new Node("lineNode");
         sideLength = 65;
 
         int length = sideLength / 2 - 4;
@@ -125,58 +124,46 @@ public class PathWorld extends World {
         terrain.addControl(collision);
         getState(BulletAppState.class).getPhysicsSpace().add(collision);
 
-        search = new GreedySearch<Vector2f>(new SearchWorld(terrain), (string, list) -> {
-            getApplication().enqueue(() -> {
-                Log.p("progress", string);
-                // this.lineNode.detachAllChildren();
-                // drawRoad(am, list.stream()
-                        // .map(x -> new Vector3f(x.x, terrain.getHeight(x), x.y))
-                        // .collect(Collectors.toList()));
-            });
-        });
-        searchFrom(start, end);
-
-
-        Vector3f start3 = gridToWorldSpace(terrain, start);
-        this.lineNode.attachChild(Geo.makeShapeBox(am, ColorRGBA.Pink, start3, 0.2f));
-        Vector3f end3 = gridToWorldSpace(terrain, end);
-        this.lineNode.attachChild(Geo.makeShapeBox(am, ColorRGBA.Pink, end3, 0.2f));
-
-        this.rootNode.attachChild(lineNode);
+        search = new AStar<Vector2f>(new SearchWorld(terrain), null);
+        roadPointList = new LinkedList<>();
+        searchFrom(start, end, roadPointList);
+        
+        this.rootNode.attachChild(roadNode);
     }
 
     @Override
     public void update(float tpf) {
-        if (done) {
-            if (list != null) {
-                AssetManager am = getApplication().getAssetManager();
+        if (roadPointList != null && !roadPointList.isEmpty()) {
+            AssetManager am = getApplication().getAssetManager();
+            roadPointList.add(0, roadPointList.get(0)); // copy the first one
+            roadPointList.add(roadPointList.get(roadPointList.size() -1)); // copy the last one
+            CatmullRomRoad road = drawRoad(am, roadPointList);
 
-                CatmullRomRoad road = drawRoad(am, list);
-/*
-                executor.submit(() -> {
-                    // TODO terrain modification (as always)
-                    List<Vector3f[]> quads = road.getMeshAsQuads();
-                    getApplication().enqueue(() -> {
-                        Map<Vector2f, Float> heights = TerrainUtil.setHeightsFor(terrain, quads);
-                        List<Vector3f> heights3 = heights.entrySet().stream()
-                            .map(x -> new Vector3f(x.getKey().x, x.getValue()*terrain.getWorldScale().y, x.getKey().y))
-                            .collect(Collectors.toList());
-                        drawBoxes(am, this.lineNode, heights3);
-                    });
+            // TODO terrain modification (as always)
+            executor.submit(() -> {
+                List<Vector3f[]> quads = road.getMeshAsQuads();
+                getApplication().enqueue(() -> {
+                    Map<Vector2f, Float> heights = TerrainUtil.setHeightsFor(terrain, quads);
+                    List<Vector3f> heights3 = heights.entrySet().stream()
+                        .map(x -> new Vector3f(x.getKey().x, x.getValue()*terrain.getWorldScale().y, x.getKey().y))
+                        .collect(Collectors.toList());
+                    drawBoxes(am, this.roadNode, heights3);
                 });
-*/
-                list = null;
-            }
+            });
+
+            roadPointList = null;
         }
     }
 
     private CatmullRomRoad drawRoad(AssetManager am, List<Vector3f> list) {
+        //TODO use a rolling average to smooth incoming points so there are less hard corners?
+
         // draw a spline road to show where it is
         Spline s3 = new Spline(SplineType.CatmullRom, list, 1, false); // [0-1], 1 is more smooth
-        CatmullRomRoad c3 = new CatmullRomRoad(s3, 16, 10);
+        CatmullRomRoad c3 = new CatmullRomRoad(s3, 1, 10);
         Geometry g = new Geometry("spline road", c3);
         g.setLocalTranslation(0, 0.2f, 0);
-        this.lineNode.attachChild(LoadModelWrapper.create(am, g, ColorRGBA.Green));
+        this.roadNode.attachChild(LoadModelWrapper.create(am, g, ColorRGBA.Green));
         return c3;
     }
 
@@ -184,21 +171,21 @@ public class PathWorld extends World {
         float size = 0.2f;
         Box box = new Box(size, size, size);
         for (Vector3f pos : points) {
-            Geometry g = Geo.createShape(am, box, ColorRGBA.Yellow, pos.add(0, size / 2, 0), "box2");
+            Geometry g = Geo.createShape(am, box, ColorRGBA.Yellow, pos.add(0, size / 2, 0), "boxes");
             g.getMaterial().getAdditionalRenderState().setWireframe(false);
-            this.lineNode.attachChild(g);
+            this.roadNode.attachChild(g);
         }
     }
 
-    private void searchFrom(Vector2f start, Vector2f end) {
+    private void searchFrom(Vector2f start, Vector2f end, List<Vector3f> outList) {
         executor = new ScheduledThreadPoolExecutor(1);
         executor.submit(() -> {
             List<Vector2f> list = search.findPath(H.v3tov2fXZ(gridToWorldSpace(terrain, start)),
                     H.v3tov2fXZ(gridToWorldSpace(terrain, end)));
-
-            this.list = list.stream().map(x -> new Vector3f(x.x, terrain.getHeight(x), x.y))
-                    .collect(Collectors.toList());
-            this.done = true;
+            
+            outList.addAll(list.stream().map(x -> new Vector3f(x.x, terrain.getHeight(x), x.y))
+                .collect(Collectors.toList()));
+        
             Log.p("Done astar search, path length = ", list == null ? 0 : list.size());
         });
     }
@@ -210,7 +197,7 @@ public class PathWorld extends World {
     }
 
     class SearchWorld implements ISearchWorld<Vector2f> {
-
+        private static final float HEIGHT_WEIGHT = 0.4f;
         private final TerrainQuad terrain;
         private final Vector3f scale;
 
@@ -223,15 +210,14 @@ public class PathWorld extends World {
         public float getWeight(Vector2f v1, Vector2f v2) {
             float diffHeight = Math.abs(terrain.getHeight(v1) - terrain.getHeight(v2));
             // http://blog.runevision.com/2016/03/note-on-creating-natural-paths-in.html
-            return v2.distance(v1) * (1 + diffHeight * diffHeight * scale.y);
+            return v2.distance(v1) * (1 + diffHeight * diffHeight * scale.y * HEIGHT_WEIGHT);
         }
 
         @Override
         public float getHeuristic(Vector2f v1, Vector2f v2) {
             //to be admissable this must be strictly less than the getWeight function
             //however its height diff is squared for weighting reasons, so we can't just and the height diff here
-            float diffHeight = Math.abs(terrain.getHeight(v1) - terrain.getHeight(v2));
-            return v2.distance(v1) * (1 + diffHeight * diffHeight);//scale.y);
+            return v2.distance(v1);
         }
 
         @Override

@@ -59,11 +59,12 @@ public class AStar<T> implements ISearch<T> {
                 }
             }
 
-            long nowTime = System.nanoTime();
-            if (prevTime + 4e8 < nowTime) {
-                prevTime = nowTime;
-                if (progressCallback != null)
-                    this.progressCallback.accept(queue.size()+"", generatePath(curNode));
+            if (progressCallback != null) {
+                long nowTime = System.nanoTime();
+                if (prevTime + 4e8 < nowTime) {
+                    prevTime = nowTime;
+                    this.progressCallback.accept(queue.size() + "", generatePath(curNode));
+                }
             }
         }
 
