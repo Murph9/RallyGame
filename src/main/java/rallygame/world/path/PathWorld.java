@@ -32,8 +32,10 @@ import rallygame.helper.Geo;
 import rallygame.helper.H;
 import rallygame.helper.Log;
 import rallygame.helper.TerrainUtil;
-import rallygame.service.AStar;
+import rallygame.service.search.GreedySearch;
+import rallygame.service.search.ISearch;
 import rallygame.service.PerlinNoise;
+import rallygame.service.search.ISearchWorld;
 import rallygame.world.World;
 import rallygame.world.WorldType;
 
@@ -64,7 +66,7 @@ public class PathWorld extends World {
     private TerrainQuad terrain;
     private Control collision;
     private ScheduledThreadPoolExecutor executor;
-    private AStar<Vector2f> astar;
+    private ISearch<Vector2f> search;
     private List<Vector3f> list;
     private boolean done;
 
@@ -123,7 +125,7 @@ public class PathWorld extends World {
         terrain.addControl(collision);
         getState(BulletAppState.class).getPhysicsSpace().add(collision);
 
-        astar = new AStar<Vector2f>(new AStarWorld(terrain), (string, list) -> {
+        search = new GreedySearch<Vector2f>(new SearchWorld(terrain), (string, list) -> {
             getApplication().enqueue(() -> {
                 Log.p("progress", string);
                 // this.lineNode.detachAllChildren();
@@ -150,7 +152,7 @@ public class PathWorld extends World {
                 AssetManager am = getApplication().getAssetManager();
 
                 CatmullRomRoad road = drawRoad(am, list);
-
+/*
                 executor.submit(() -> {
                     // TODO terrain modification (as always)
                     List<Vector3f[]> quads = road.getMeshAsQuads();
@@ -162,7 +164,7 @@ public class PathWorld extends World {
                         drawBoxes(am, this.lineNode, heights3);
                     });
                 });
-
+*/
                 list = null;
             }
         }
@@ -191,7 +193,7 @@ public class PathWorld extends World {
     private void searchFrom(Vector2f start, Vector2f end) {
         executor = new ScheduledThreadPoolExecutor(1);
         executor.submit(() -> {
-            List<Vector2f> list = astar.findPath(H.v3tov2fXZ(gridToWorldSpace(terrain, start)),
+            List<Vector2f> list = search.findPath(H.v3tov2fXZ(gridToWorldSpace(terrain, start)),
                     H.v3tov2fXZ(gridToWorldSpace(terrain, end)));
 
             this.list = list.stream().map(x -> new Vector3f(x.x, terrain.getHeight(x), x.y))
@@ -207,12 +209,12 @@ public class PathWorld extends World {
         super.cleanup(app);
     }
 
-    class AStarWorld implements AStar.IAStarWorld<Vector2f> {
+    class SearchWorld implements ISearchWorld<Vector2f> {
 
         private final TerrainQuad terrain;
         private final Vector3f scale;
 
-        public AStarWorld(TerrainQuad terrain) {
+        public SearchWorld(TerrainQuad terrain) {
             this.terrain = terrain;
             this.scale = terrain.getWorldScale().clone();
         }
@@ -228,7 +230,8 @@ public class PathWorld extends World {
         public float getHeuristic(Vector2f v1, Vector2f v2) {
             //to be admissable this must be strictly less than the getWeight function
             //however its height diff is squared for weighting reasons, so we can't just and the height diff here
-            return v2.distance(v1);
+            float diffHeight = Math.abs(terrain.getHeight(v1) - terrain.getHeight(v2));
+            return v2.distance(v1) * (1 + diffHeight * diffHeight);//scale.y);
         }
 
         @Override

@@ -11,7 +11,8 @@ import com.jme3.terrain.geomipmap.TerrainQuad;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import rallygame.service.AStar;
+import rallygame.service.search.AStar;
+import rallygame.service.search.ISearchWorld;
 import rallygame.service.PerlinNoise;
 
 public class AStarTest {
@@ -31,7 +32,7 @@ public class AStarTest {
         Assertions.assertTrue(result.size() == 5);
     }
 
-    class AStarWorld implements AStar.IAStarWorld<Vector2f> {
+    class AStarWorld implements ISearchWorld<Vector2f> {
 
         private final TerrainQuad terrain;
 
