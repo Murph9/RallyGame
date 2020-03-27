@@ -30,6 +30,17 @@ public class TrigTest {
         assertEquals(0, result[1]);
         assertEquals(0, result[2]);
         assertEquals(0, result[3]);
+
+        //some 'random' numbers test
+        result = Trig.boundingBoxXZ(
+            new Vector3f(-63.535f, 0.94f, -63.535f),
+            new Vector3f(-56.4644f, 0.94f, -56.4644f),
+            new Vector3f(-56.499f, 0.94f, -56.499f),
+            new Vector3f(-63.500f, 0.94f, -63.500f));
+        assertEquals(-63.535f, result[0]);
+        assertEquals(-63.535f, result[1]);
+        assertEquals(-56.4644f, result[2]);
+        assertEquals(-56.4644f, result[3]);
     }
 
     @Test
