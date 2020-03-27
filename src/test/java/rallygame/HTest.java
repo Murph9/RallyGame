@@ -173,6 +173,19 @@ public class HTest {
     }
 
     @Test
+    public void minInArray() {
+        assertEquals(0, H.minInArray(new float[] { 0, 1, 7, 3, 4, 5 }));
+        assertEquals(1, H.minInArray(new float[] { 1 }));
+        assertEquals(-65, H.minInArray(new float[] { -12, -65 }));
+        assertEquals(-3, H.minInArray(new float[] { 2, -3 }));
+
+        assertEquals(0, H.minIn(0, 1, 7, 3, 4, 5 ));
+        assertEquals(1, H.minIn(1));
+        assertEquals(-65, H.minIn(-12, -65));
+        assertEquals(-3, H.minIn(2, -3));
+    }
+
+    @Test
     public void maxInArray() {
         assertEquals(7, H.maxInArray(new float[] { 0, 1, 7, 3, 4, 5 }));
         assertEquals(1, H.maxInArray(new float[] { 1 }));

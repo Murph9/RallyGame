@@ -189,7 +189,17 @@ public class H {
 		}
         return map;
 	}
-	public static float maxInArray(float[] array) {
+    
+    public static float minIn(float ...array) {
+        return minInArray(array);
+    }
+    public static float minInArray(float[] array) {
+        float result = Float.POSITIVE_INFINITY;
+        for (float value : array)
+            result = Math.min(result, value);
+        return result;
+    }
+    public static float maxInArray(float[] array) {
 		float result = Float.NEGATIVE_INFINITY;
 		for (float value: array)
 			result = Math.max(result, value);
