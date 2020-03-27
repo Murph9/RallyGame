@@ -12,7 +12,6 @@ import com.jme3.math.Spline.SplineType;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.VertexBuffer;
 
-// TODO the first and last ones seem to connect to each other
 public class CatmullRomRoad extends Mesh {
 
     // https://github.com/JulienGreen/RoadTessalation/blob/master/RoadMesh.java
@@ -33,15 +32,15 @@ public class CatmullRomRoad extends Mesh {
         if (spline.getControlPoints().size() < 4)
             throw new IllegalArgumentException("Spline must have at least 2 sections");
         
-        this.vertexArray = new float[((spline.getControlPoints().size() - 1) * nbSubSegments + 1) * 3 * 2];
+        this.vertexArray = new float[((spline.getControlPoints().size() - 1) * nbSubSegments) * 3 * 2];
 
         int i = 0;
         int cptCP = 0;
-        for (Iterator<Vector3f> it = spline.getControlPoints().iterator(); it.hasNext();) {
+        for (Iterator<Vector3f> it = spline.getControlPoints().iterator(); it.hasNext(); cptCP++) {
             it.next();
             if (it.hasNext()) {
                 for (int j = 0; j < nbSubSegments; j++) {
-                    setTempNormalPoints((float) j / nbSubSegments, cptCP);
+                    setNormalPointsIntoTemp((float) j / nbSubSegments, cptCP);
                     vertexArray[i] = temp1.getX();
                     i++;
                     vertexArray[i] = temp1.getY();
@@ -56,7 +55,6 @@ public class CatmullRomRoad extends Mesh {
                     i++;
                 }
             }
-            cptCP++;
         }
         this.setBuffer(VertexBuffer.Type.Position, 3, vertexArray);
         this.setMode(Mesh.Mode.TriangleStrip);
@@ -65,7 +63,7 @@ public class CatmullRomRoad extends Mesh {
     }
 
     private static final Quaternion rot90 = new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y);
-    private void setTempNormalPoints(float t, int cptCP) {
+    private void setNormalPointsIntoTemp(float t, int cptCP) {
         Vector3f pos = spline.interpolate(t, cptCP, temp1).clone();
         spline.interpolate(t + 0.01f, cptCP, temp2);
         Vector3f diff = temp2.subtract(temp1);
