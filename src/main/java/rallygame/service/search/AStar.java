@@ -1,5 +1,7 @@
 package rallygame.service.search;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -27,6 +29,9 @@ public class AStar<T> implements ISearch<T> {
     }
 
     public List<T> findPath(T start, T end) {
+        if (start.equals(end))
+            return Arrays.asList(start);
+
         PriorityQueue<AStar<T>.Node> queue = new PriorityQueue<>((x, y) -> {
             return Float.compare(x.weight + x.heuristic, y.weight + y.heuristic);
         });
@@ -78,6 +83,7 @@ public class AStar<T> implements ISearch<T> {
             result.add(cur.value);
             cur = cur.parent;
         }
+        Collections.reverse(result);
         return result;
     }
 
