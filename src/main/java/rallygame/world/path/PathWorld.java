@@ -68,8 +68,7 @@ public class PathWorld extends World {
     private TerrainQuad terrain;
     private Control collision;
     private ScheduledThreadPoolExecutor executor;
-    private ISearch<Vector2f> search;
-    private List<Vector3f> roadPointList;
+    private List<List<Vector3f>> roadPointLists;
 
     //TODO maybe we need to have 'any' point on the other side of the quad as the search goal
     //this is how we keep it moving along the world, the other sideways quads are only for show
@@ -80,9 +79,9 @@ public class PathWorld extends World {
         super("PathWorld");
 
         roadNode = new Node("lineNode");
-        sideLength = (1 << 6) + 1;//64 -> 6
-        terrainScaleXZ = 20;
-        terrainScaleY = 90;
+        sideLength = (1 << 7) + 1;//64 -> 6
+        terrainScaleXZ = 10;
+        terrainScaleY = 20;
 
         int length = sideLength / 2 - 2;
         start = new Vector2f(-length, -length);
@@ -128,34 +127,36 @@ public class PathWorld extends World {
         terrain.addControl(collision);
         getState(BulletAppState.class).getPhysicsSpace().add(collision);
 
-        search = new AStar<Vector2f>(new SearchWorld(terrain), null);
-        roadPointList = new LinkedList<>();
-        searchFrom(start, end, roadPointList);
-        
+        executor = new ScheduledThreadPoolExecutor(2);
+        roadPointLists = new LinkedList<>();
+        searchFrom(start, new Vector2f());
+        searchFrom(new Vector2f(), end);
+                
         this.rootNode.attachChild(roadNode);
     }
 
     @Override
     public void update(float tpf) {
-        if (roadPointList != null && !roadPointList.isEmpty()) {
-            AssetManager am = getApplication().getAssetManager();
-            roadPointList.add(0, roadPointList.get(0)); // copy the first one
-            roadPointList.add(roadPointList.get(roadPointList.size() -1)); // copy the last one
-            CatmullRomRoad road = drawRoad(am, roadPointList);
+        for (List<Vector3f> roadPointList: new LinkedList<>(roadPointLists))
+            if (roadPointList != null && !roadPointList.isEmpty()) {
+                AssetManager am = getApplication().getAssetManager();
+                roadPointList.add(0, roadPointList.get(0)); // copy the first one
+                roadPointList.add(roadPointList.get(roadPointList.size() -1)); // copy the last one
+                CatmullRomRoad road = drawRoad(am, roadPointList);
 
-            executor.submit(() -> {
-                List<Vector3f[]> quads = road.getMeshAsQuads();
-                getApplication().enqueue(() -> {
-                    Map<Vector2f, Float> heights = TerrainUtil.lowerTerrainSoItsUnderQuads(terrain, quads);
-                    List<Vector3f> heights3 = heights.entrySet().stream()
-                        .map(x -> new Vector3f(x.getKey().x, x.getValue()*terrain.getWorldScale().y, x.getKey().y))
-                        .collect(Collectors.toList());
-                    drawBoxes(am, this.roadNode, heights3);
+                executor.submit(() -> {
+                    List<Vector3f[]> quads = road.getMeshAsQuads();
+                    getApplication().enqueue(() -> {
+                        Map<Vector2f, Float> heights = TerrainUtil.lowerTerrainSoItsUnderQuads(terrain, quads);
+                        List<Vector3f> heights3 = heights.entrySet().stream()
+                            .map(x -> new Vector3f(x.getKey().x, x.getValue()*terrain.getWorldScale().y, x.getKey().y))
+                            .collect(Collectors.toList());
+                        drawBoxes(am, this.roadNode, heights3);
+                    });
                 });
-            });
 
-            roadPointList = null;
-        }
+                roadPointLists.remove(roadPointList);
+            }
     }
 
     private CatmullRomRoad drawRoad(AssetManager am, List<Vector3f> list) {
@@ -180,18 +181,21 @@ public class PathWorld extends World {
         }
     }
 
-    private void searchFrom(Vector2f start, Vector2f end, List<Vector3f> outList) {
-        executor = new ScheduledThreadPoolExecutor(1);
+    private void searchFrom(Vector2f start, Vector2f end) {
+        List<Vector3f> outList = new LinkedList<>();
+        roadPointLists.add(outList);
         executor.submit(() -> {
+            Log.p("Started astar search ", outList);
             List<Vector2f> list = null;
             try {
+                ISearch<Vector2f> search = new AStar<Vector2f>(new SearchWorld(terrain), null);
                 list = search.findPath(H.v3tov2fXZ(gridToWorldSpace(terrain, start)),
                     H.v3tov2fXZ(gridToWorldSpace(terrain, end)));
             
                 outList.addAll(list.stream().map(x -> new Vector3f(x.x, terrain.getHeight(x), x.y))
                     .collect(Collectors.toList()));
             } catch (Exception e) {
-                Log.e(e);
+                Log.p(e);
             }
             Log.p("Done astar search, path length = ", list == null ? 0 : list.size());
         });
@@ -199,7 +203,7 @@ public class PathWorld extends World {
 
     @Override
     protected void cleanup(Application app) {
-        executor.shutdown();
+        executor.shutdownNow(); //TODO forceful because when the search doesn't finish this blocks
         super.cleanup(app);
     }
 
