@@ -133,7 +133,7 @@ task convertAllBlendFiles {
         
         files.each { File file ->
             File glbFile = new File(file.path + '.glb')
-            if (!glbFile.exists() && file.lastModified() > glbFile.lastModified()) {
+            if (!glbFile.exists() || file.lastModified() > glbFile.lastModified()) {
                 println 'Running: ' + file.path
                 def ip = new ByteArrayOutputStream()
                 exec {

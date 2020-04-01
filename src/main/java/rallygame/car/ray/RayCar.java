@@ -249,7 +249,7 @@ public class RayCar implements PhysicsTickListener {
 			
 			// braking and abs
 			float brakeCurrent2 = brakingCur;
-			if (Math.abs(ratiofract) >= 1 && velocity.length() > 2 && brakingCur == 1)
+			if (Math.abs(ratiofract) >= 1 && velocity.length() > 10 && brakingCur == 1)
 				brakeCurrent2 = 0; //abs (which i think works way too well gameplay wise)
 			
 			//add the wheel force after merging the forces
