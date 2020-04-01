@@ -32,38 +32,57 @@ public class CatmullRomRoad extends Mesh {
         if (spline.getControlPoints().size() < 4)
             throw new IllegalArgumentException("Spline must have at least 2 sections");
         
-        this.vertexArray = new float[((spline.getControlPoints().size() - 1) * nbSubSegments) * 3 * 2];
+        this.vertexArray = new float[((spline.getControlPoints().size() - 2) * nbSubSegments) * 3 * 2 * 3];
 
+        Vector3f temp3 = null;
+        Vector3f temp4 = null;
         int i = 0;
         int cptCP = 0;
         for (Iterator<Vector3f> it = spline.getControlPoints().iterator(); it.hasNext(); cptCP++) {
             it.next();
             if (it.hasNext()) {
                 for (int j = 0; j < nbSubSegments; j++) {
-                    setNormalPointsIntoTemp((float) j / nbSubSegments, cptCP);
-                    vertexArray[i] = temp1.getX();
-                    i++;
-                    vertexArray[i] = temp1.getY();
-                    i++;
-                    vertexArray[i] = temp1.getZ();
-                    i++;
-                    vertexArray[i] = temp2.getX();
-                    i++;
-                    vertexArray[i] = temp2.getY();
-                    i++;
-                    vertexArray[i] = temp2.getZ();
-                    i++;
+                    setNormalPointsInto(temp1, temp2, (float) j / nbSubSegments, cptCP);
+                    if (temp3 != null && temp4 != null) {
+                        vertexArray[i++] = temp3.getX();
+                        vertexArray[i++] = temp3.getY();
+                        vertexArray[i++] = temp3.getZ();
+                        
+                        vertexArray[i++] = temp4.getX();
+                        vertexArray[i++] = temp4.getY();
+                        vertexArray[i++] = temp4.getZ();
+    
+                        vertexArray[i++] = temp1.getX();
+                        vertexArray[i++] = temp1.getY();
+                        vertexArray[i++] = temp1.getZ();
+    
+
+                        vertexArray[i++] = temp4.getX();
+                        vertexArray[i++] = temp4.getY();
+                        vertexArray[i++] = temp4.getZ();
+
+                        vertexArray[i++] = temp1.getX();
+                        vertexArray[i++] = temp1.getY();
+                        vertexArray[i++] = temp1.getZ();
+
+                        vertexArray[i++] = temp2.getX();
+                        vertexArray[i++] = temp2.getY();
+                        vertexArray[i++] = temp2.getZ();
+                    }
+                    
+                    temp3 = temp1.clone();
+                    temp4 = temp2.clone();
                 }
             }
         }
         this.setBuffer(VertexBuffer.Type.Position, 3, vertexArray);
-        this.setMode(Mesh.Mode.TriangleStrip);
+        this.setMode(Mesh.Mode.Triangles);
         this.updateBound();
         this.updateCounts();
     }
 
     private static final Quaternion rot90 = new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y);
-    private void setNormalPointsIntoTemp(float t, int cptCP) {
+    private void setNormalPointsInto(Vector3f temp1, Vector3f temp2, float t, int cptCP) {
         Vector3f pos = spline.interpolate(t, cptCP, temp1).clone();
         spline.interpolate(t + 0.01f, cptCP, temp2);
         Vector3f diff = temp2.subtract(temp1);
