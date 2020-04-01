@@ -11,8 +11,10 @@ import java.util.stream.Collectors;
 import com.jme3.app.Application;
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
+import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.collision.shapes.HeightfieldCollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
@@ -41,20 +43,9 @@ import rallygame.world.WorldType;
 
 public class PathWorld extends World {
 
-    public static Vector3f gridToWorldSpace(TerrainQuad terrain, Vector2f pos) {
-        Vector3f scale = terrain.getLocalScale();
-        Vector2f worldPos = pos.clone();
-        worldPos.x *= scale.x;
-        worldPos.y *= scale.z;
-        return new Vector3f(worldPos.x, terrain.getHeight(worldPos), worldPos.y);
-    }
-    
-    public static Vector2f worldToGridSpace(TerrainQuad terrain, Vector3f pos) {
-        Vector3f scale = terrain.getLocalScale();
-        Vector2f out = H.v3tov2fXZ(pos);
-        out.x /= scale.x;
-        out.y /= scale.z;
-        return out;
+    class RoadPointList extends LinkedList<Vector3f> {
+        private static final long serialVersionUID = 1L;
+        public boolean used;
     }
 
     private final Node roadNode;
@@ -68,10 +59,12 @@ public class PathWorld extends World {
     private TerrainQuad terrain;
     private Control collision;
     private ScheduledThreadPoolExecutor executor;
-    private List<List<Vector3f>> roadPointLists;
+    private List<RoadPointList> roadPointLists;
 
-    //TODO maybe we need to have 'any' point on the other side of the quad as the search goal
-    //this is how we keep it moving along the world, the other sideways quads are only for show
+    // TODO maybe we need to have 'any' point on the other side of the quad as the
+    // search goal
+    // this is how we keep it moving along the world, the other sideways quads are
+    // only for show
 
     // https://github.com/jMonkeyEngine/sdk/blob/master/jme3-terrain-editor/src/com/jme3/gde/terraineditor/tools/LevelTerrainToolAction.java
 
@@ -79,7 +72,7 @@ public class PathWorld extends World {
         super("PathWorld");
 
         roadNode = new Node("lineNode");
-        sideLength = (1 << 7) + 1;//64 -> 6
+        sideLength = (1 << 6) + 1;// 64 -> 6
         terrainScaleXZ = 10;
         terrainScaleY = 20;
 
@@ -122,45 +115,52 @@ public class PathWorld extends World {
         terrain.setMaterial(baseMat);
         terrain.setQueueBucket(Bucket.Opaque);
         this.rootNode.attachChild(terrain);
-
-        collision = new RigidBodyControl(new HeightfieldCollisionShape(terrain.getHeightMap(), terrain.getLocalScale()), 0);
-        terrain.addControl(collision);
-        getState(BulletAppState.class).getPhysicsSpace().add(collision);
+        updateTerrainCollision();
 
         executor = new ScheduledThreadPoolExecutor(2);
         roadPointLists = new LinkedList<>();
         searchFrom(start, new Vector2f());
         searchFrom(new Vector2f(), end);
-                
+
         this.rootNode.attachChild(roadNode);
+    }
+
+    private void updateTerrainCollision() {
+        if (collision != null)
+            getState(BulletAppState.class).getPhysicsSpace().remove(collision);
+
+        collision = new RigidBodyControl(new HeightfieldCollisionShape(terrain.getHeightMap(), terrain.getLocalScale()), 0);
+        terrain.addControl(collision);
+        getState(BulletAppState.class).getPhysicsSpace().add(collision);
     }
 
     @Override
     public void update(float tpf) {
-        for (List<Vector3f> roadPointList: new LinkedList<>(roadPointLists))
-            if (roadPointList != null && !roadPointList.isEmpty()) {
+        for (RoadPointList roadPointList : new LinkedList<>(roadPointLists))
+            if (roadPointList != null && !roadPointList.isEmpty() && !roadPointList.used) {
                 AssetManager am = getApplication().getAssetManager();
                 roadPointList.add(0, roadPointList.get(0)); // copy the first one
-                roadPointList.add(roadPointList.get(roadPointList.size() -1)); // copy the last one
+                roadPointList.add(roadPointList.get(roadPointList.size() - 1)); // copy the last one
                 CatmullRomRoad road = drawRoad(am, roadPointList);
 
                 executor.submit(() -> {
                     List<Vector3f[]> quads = road.getMeshAsQuads();
                     getApplication().enqueue(() -> {
                         Map<Vector2f, Float> heights = TerrainUtil.lowerTerrainSoItsUnderQuads(terrain, quads);
-                        List<Vector3f> heights3 = heights.entrySet().stream()
-                            .map(x -> new Vector3f(x.getKey().x, x.getValue()*terrain.getWorldScale().y, x.getKey().y))
-                            .collect(Collectors.toList());
+                        updateTerrainCollision();
+                        List<Vector3f> heights3 = heights.entrySet().stream().map(
+                                x -> new Vector3f(x.getKey().x, x.getValue() * terrain.getWorldScale().y, x.getKey().y))
+                                .collect(Collectors.toList());
                         drawBoxes(am, this.roadNode, heights3);
                     });
                 });
 
-                roadPointLists.remove(roadPointList);
+                roadPointList.used = true;
             }
     }
 
     private CatmullRomRoad drawRoad(AssetManager am, List<Vector3f> list) {
-        //TODO use a rolling average to smooth points so there are less hard corners
+        // TODO use a rolling average to smooth points so there are less hard corners
 
         // draw a spline road to show where it is
         Spline s3 = new Spline(SplineType.CatmullRom, list, 1, false); // [0-1], 1 is more smooth
@@ -168,6 +168,12 @@ public class PathWorld extends World {
         Geometry g = new Geometry("spline road", c3);
         g.setLocalTranslation(0, 0.2f, 0);
         this.roadNode.attachChild(LoadModelWrapper.create(am, g, ColorRGBA.Green));
+
+        // add to physics space
+        CollisionShape col = CollisionShapeFactory.createMeshShape(g);
+        RigidBodyControl c = new RigidBodyControl(col, 0);
+        getState(BulletAppState.class).getPhysicsSpace().add(c);
+
         return c3;
     }
 
@@ -182,7 +188,7 @@ public class PathWorld extends World {
     }
 
     private void searchFrom(Vector2f start, Vector2f end) {
-        List<Vector3f> outList = new LinkedList<>();
+        RoadPointList outList = new RoadPointList();
         roadPointLists.add(outList);
         executor.submit(() -> {
             Log.p("Started astar search ", outList);
@@ -190,10 +196,10 @@ public class PathWorld extends World {
             try {
                 ISearch<Vector2f> search = new AStar<Vector2f>(new SearchWorld(terrain), null);
                 list = search.findPath(H.v3tov2fXZ(gridToWorldSpace(terrain, start)),
-                    H.v3tov2fXZ(gridToWorldSpace(terrain, end)));
-            
+                        H.v3tov2fXZ(gridToWorldSpace(terrain, end)));
+
                 outList.addAll(list.stream().map(x -> new Vector3f(x.x, terrain.getHeight(x), x.y))
-                    .collect(Collectors.toList()));
+                        .collect(Collectors.toList()));
             } catch (Exception e) {
                 Log.p(e);
             }
@@ -203,7 +209,7 @@ public class PathWorld extends World {
 
     @Override
     protected void cleanup(Application app) {
-        executor.shutdownNow(); //TODO forceful because when the search doesn't finish this blocks
+        executor.shutdownNow(); // TODO forceful because when the search doesn't finish this blocks
         super.cleanup(app);
     }
 
@@ -221,13 +227,14 @@ public class PathWorld extends World {
         public float getWeight(Vector2f v1, Vector2f v2) {
             float diffHeight = Math.abs(terrain.getHeight(v1) - terrain.getHeight(v2));
             // http://blog.runevision.com/2016/03/note-on-creating-natural-paths-in.html
-            return v2.distance(v1) * (1 + diffHeight * diffHeight * scale.y/scale.x * HEIGHT_WEIGHT);
+            return v2.distance(v1) * (1 + diffHeight * diffHeight * scale.y / scale.x * HEIGHT_WEIGHT);
         }
 
         @Override
         public float getHeuristic(Vector2f v1, Vector2f v2) {
-            //to be admissable this must be strictly less than the getWeight function
-            //however its height diff is squared for weighting reasons, so we can't just and the height diff here
+            // to be admissable this must be strictly less than the getWeight function
+            // however its height diff is squared for weighting reasons, so we can't just
+            // and the height diff here
             return v2.distance(v1);
         }
 
@@ -245,12 +252,27 @@ public class PathWorld extends World {
 
                     if (Float.isNaN(terrain.getHeight(newPos)))
                         continue;
-                    //TODO how do we avoid the edge of the terrain?
+                    // TODO how do we avoid the edge of the terrain?
                     results.add(newPos);
                 }
             }
             return new HashSet<>(results);
         }
+    }
 
+    static Vector3f gridToWorldSpace(TerrainQuad terrain, Vector2f pos) {
+        Vector3f scale = terrain.getLocalScale();
+        Vector2f worldPos = pos.clone();
+        worldPos.x *= scale.x;
+        worldPos.y *= scale.z;
+        return new Vector3f(worldPos.x, terrain.getHeight(worldPos), worldPos.y);
+    }
+
+    static Vector2f worldToGridSpace(TerrainQuad terrain, Vector3f pos) {
+        Vector3f scale = terrain.getLocalScale();
+        Vector2f out = H.v3tov2fXZ(pos);
+        out.x /= scale.x;
+        out.y /= scale.z;
+        return out;
     }
 }
