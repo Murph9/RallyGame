@@ -2,6 +2,7 @@ package rallygame.service;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -21,6 +22,8 @@ public class LoadingState extends BaseAppState {
     private final AppState[] toPause;
     private final List<AppState> enabledStates;
 
+    private Consumer<ILoadable[]> callback;
+    private AppState[] loadAfter;
     private Node rootNode;
     private Container loadingContainer;
     private ProgressBar progressBar;
@@ -41,6 +44,13 @@ public class LoadingState extends BaseAppState {
         this.toPause = toPause;
         this.enabledStates = new LinkedList<AppState>();
     }
+    
+    public void setAfterLoad(AppState... states) {
+        loadAfter = states;
+    }
+    public void setCallback(Consumer<ILoadable[]> callback) {
+        this.callback = callback;
+    }
 
     @Override
     protected void initialize(Application app) {
@@ -60,6 +70,12 @@ public class LoadingState extends BaseAppState {
                 state.setEnabled(false);
                 enabledStates.add(state);
             }
+        
+        //make sure the states we are waiting on are added and will load
+        for (AppState state: loadingStates) {
+            getStateManager().attach(state);
+            state.setEnabled(true);
+        }
     }
 
     @Override
@@ -72,6 +88,14 @@ public class LoadingState extends BaseAppState {
 
         SimpleApplication sm = (SimpleApplication) app;
         sm.getGuiNode().detachChild(rootNode);
+
+        //init any load after states
+        if (loadAfter != null)
+            for (AppState state: loadAfter)
+                app.getStateManager().attach(state);
+
+        if (callback != null)
+            callback.accept(loadingStates);
     }
 
     @Override

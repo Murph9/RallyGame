@@ -79,6 +79,8 @@ public class PathWorld extends World {
         int length = sideLength / 2 - 2;
         start = new Vector2f(-length, -length);
         end = new Vector2f(length, length);
+
+        roadPointLists = new LinkedList<>();
     }
 
     @Override
@@ -120,7 +122,7 @@ public class PathWorld extends World {
         updateTerrainCollision();
 
         executor = new ScheduledThreadPoolExecutor(2);
-        roadPointLists = new LinkedList<>();
+        
         searchFrom(start, new Vector2f());
         searchFrom(new Vector2f(), end);
     }
@@ -278,6 +280,9 @@ public class PathWorld extends World {
 
     @Override
     public float loadPercent() {
+        if (roadPointLists.isEmpty())
+            return 0;
+
         float total = 0;
         for (RoadPointList pointList : roadPointLists) {
             total += pointList.used ? 1 : 0;

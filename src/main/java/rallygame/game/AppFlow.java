@@ -1,5 +1,8 @@
 package rallygame.game;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import com.jme3.app.Application;
 import com.jme3.app.state.AppState;
 import com.jme3.app.state.AppStateManager;
@@ -7,6 +10,8 @@ import com.jme3.app.state.AppStateManager;
 import rallygame.car.data.Car;
 import rallygame.drive.*;
 import rallygame.helper.Log;
+import rallygame.service.ILoadable;
+import rallygame.service.LoadingState;
 import rallygame.world.*;
 import rallygame.world.wp.DefaultBuilder;
 import rallygame.world.wp.WP.DynamicType;
@@ -40,41 +45,61 @@ public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
 
     public void startCallback(StartType type) {
 		AppStateManager sm = app.getStateManager();
-        sm.detach(sm.getState(Start.class));
-
+		sm.detach(sm.getState(Start.class));
+		
+		List<ILoadable> loadingStates = new LinkedList<>();
+		List<AppState> loadme = new LinkedList<>();
         switch(type) {
             case Start:
-                sm.attach(new ChooseCar((IChooseStuff)this));
+                loadme.add(new ChooseCar((IChooseStuff)this));
                 break;
-            case Fast:
-                sm.attach(new DriveBase((IDriveDone)this, Car.Runner, new PathWorld()));
+			case Fast:
+				World w = new PathWorld();
+				loadingStates.add(w);
+                loadme.add(new DriveBase((IDriveDone)this, Car.Runner, w));
                 break;
 			case Getaway:
-				sm.attach(new DriveMainRoadGetaway((IDriveDone)this));
+				loadme.add(new DriveMainRoadGetaway((IDriveDone)this));
 				break;
 			case Dev:
-				sm.attach(new DriveDev((IDriveDone)this));
+				loadme.add(new DriveDev((IDriveDone)this));
 				break;
 			case Crash:
-				sm.attach(new DriveCrash((IDriveDone)this));
+				loadme.add(new DriveCrash((IDriveDone)this));
 				break;
             case Race:
                 StaticWorldBuilder world = new StaticWorldBuilder(StaticWorld.duct2);
-                sm.attach(world);
-				sm.attach(new DriveRace(world, (IDriveDone) this));
+                loadingStates.add(world);
+				loadme.add(new DriveRace(world, (IDriveDone) this));
 				break;
 			case RaceDyn:
 				DefaultBuilder dynWorld = DynamicType.Valley.getBuilder();
-				sm.attach(dynWorld);
-				sm.attach(new DriveDynamicRace(dynWorld, (IDriveDone) this));
+				loadingStates.add(dynWorld);
+				loadme.add(new DriveDynamicRace(dynWorld, (IDriveDone) this));
 				break;
 			case Drag:
-				sm.attach(new DriveDrag((IDriveDone)this));
+				loadme.add(new DriveDrag((IDriveDone)this));
 				break;
 			default:
 				Log.p("No idea which world type that was: " + type.name());
-        }
-    }
+		}
+		
+		if (!loadingStates.isEmpty()) {
+			//load them first
+			LoadingState loading = new LoadingState(loadingStates.toArray(new ILoadable[loadingStates.size()]), null);
+			loading.setCallback((states) -> {
+				loadIt(sm, loadme);
+			});
+			sm.attach(loading);
+		} else {
+			loadIt(sm, loadme);
+		}
+	}
+	private void loadIt(AppStateManager sm, List<AppState> states) {
+		for (AppState s: states) {
+			sm.attach(s);
+		}
+	}
 
     public void done(AppState state) {
         app.getStateManager().detach(state);
