@@ -3,7 +3,6 @@ package rallygame.service;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.google.common.collect.Lists;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AppState;
@@ -18,11 +17,10 @@ import rallygame.helper.H;
 
 public class LoadingState extends BaseAppState {
 
-    private final List<ILoadable> loadingStates;
-    private final List<AppState> toPause;
+    private final ILoadable[] loadingStates;
+    private final AppState[] toPause;
     private final List<AppState> enabledStates;
 
-    private int loadedStates = 0;
     private Node rootNode;
     private Container loadingContainer;
     private ProgressBar progressBar;
@@ -34,8 +32,13 @@ public class LoadingState extends BaseAppState {
 
     /**states = states that we want to wait for. toPause = states to pause */
     public LoadingState(ILoadable[] states, AppState[] toPause) {
-        this.loadingStates = Lists.newArrayList(states);
-        this.toPause = Lists.newArrayList(toPause);
+        if (states == null || states.length < 1)
+            throw new IllegalArgumentException("Please give me an actual state to load on.");
+        if (toPause == null)
+            toPause = new AppState[0];
+
+        this.loadingStates = states;
+        this.toPause = toPause;
         this.enabledStates = new LinkedList<AppState>();
     }
 
@@ -57,16 +60,14 @@ public class LoadingState extends BaseAppState {
                 state.setEnabled(false);
                 enabledStates.add(state);
             }
-
-        for (ILoadable state: loadingStates) {
-            app.getStateManager().attach(state);
-        }
     }
 
     @Override
     protected void cleanup(Application app) {
-        //unpause them
+        //unpause them all
         for (AppState state: enabledStates)
+            state.setEnabled(true);
+        for (AppState state: loadingStates)
             state.setEnabled(true);
 
         SimpleApplication sm = (SimpleApplication) app;
@@ -83,24 +84,21 @@ public class LoadingState extends BaseAppState {
 
     @Override
     public void update(float tpf) {
+        if (H.allTrue((state) -> state.loadPercent() >= 1, loadingStates)) {
+            getStateManager().detach(this);
+            return;
+        }
+        
         float total = 0;
-        for (ILoadable state: new LinkedList<>(loadingStates)) {
+        for (ILoadable state: loadingStates) {
             float percent = state.loadPercent();
             if (state.loadPercent() >= 1) {
-                loadedStates++;
-                loadingStates.remove(state);
                 state.setEnabled(false);
-                continue;
             }
-
             total += percent;
         }
 
-        total += loadedStates;
-        if (loadingStates.isEmpty()) {
-            getStateManager().detach(this);
-        } else
-            total /= (loadedStates + loadingStates.size());
+        total /= loadingStates.length;
 
         // update the loading bar
         progressBar.setProgressValue(total);
