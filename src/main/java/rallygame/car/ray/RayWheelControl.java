@@ -85,7 +85,8 @@ public class RayWheelControl {
 		
 		//rotate and translate the wheel rootNode
         rootNode = new Node("wheel " + wheel.num);
-        Spatial wheelModel = app.getAssetManager().loadModel(wheel.data.modelName); //TODO change back to string version when the wheels get colours
+        Spatial wheelModel = app.getAssetManager().loadModel(wheel.data.modelName);
+        //TODO change back to string version when the wheels get colours
 		spat = LoadModelWrapper.create(app.getAssetManager(), wheelModel, ColorRGBA.DarkGray);
 		spat.center();
 		rootNode.attachChild(spat);
@@ -227,7 +228,10 @@ public class RayWheelControl {
 	
 	public RayWheel getRayWheel() {
 		return wheel;
-	}
+    }
+    public void reset() {
+        //TODO
+    }
 	
 	public void cleanup() {
 		rootNode.detachChild(spat);

@@ -349,6 +349,9 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
             w.radSec = 0; // stop rotation of the wheels
             w.inContact = false; // stop any forces for at least one physics frame
         }
+        //reset all skidmarks
+        for (RayWheelControl c : this.wheelControls)
+            c.reset();
 
         Transform transform = getResetPosition(this.app.getStateManager(), this);
         rbc.setPhysicsLocation(transform.getTranslation());
