@@ -17,6 +17,7 @@ import rallygame.car.ray.RayCarControl;
 import rallygame.effects.ParticleAtmosphere;
 import rallygame.game.IDriveDone;
 import rallygame.helper.Log;
+import rallygame.service.LoadingState;
 
 public class DriveBase extends BaseAppState implements IDrive {
 
@@ -69,6 +70,8 @@ public class DriveBase extends BaseAppState implements IDrive {
         camera = new CarCamera(app.getCamera(), rayCar);
         stateManager.attach(camera);
         app.getInputManager().addRawInputListener(camera);
+
+        app.getStateManager().attach(new LoadingState(world, camera, uiNode, menu, cb));
 
         getState(BulletAppState.class).setEnabled(true);
     }

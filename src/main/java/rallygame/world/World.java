@@ -50,6 +50,11 @@ public abstract class World extends BaseAppState implements IWorld {
 		return null;
 	}
 
+	@Override
+	public float loadPercent() {
+		return 1; //TODO always loads in a frame
+	}
+
 	// Create another of myself, to use somewhere else
 	public IWorld copy() throws InstantiationException, IllegalAccessException, IllegalArgumentException,
 			InvocationTargetException, NoSuchMethodException, SecurityException {

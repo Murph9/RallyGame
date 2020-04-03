@@ -2,11 +2,12 @@ package rallygame.world;
 
 import java.lang.reflect.InvocationTargetException;
 
-import com.jme3.app.state.AppState;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
-public interface IWorld extends AppState {
+import rallygame.service.ILoadable;
+
+public interface IWorld extends ILoadable {
     /** Reset the world */
     void reset();
 

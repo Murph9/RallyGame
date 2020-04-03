@@ -72,7 +72,7 @@ public class PathWorld extends World {
         super("PathWorld");
 
         roadNode = new Node("lineNode");
-        sideLength = (1 << 6) + 1;// 64 -> 6
+        sideLength = (1 << 7) + 1;// 64 -> 6
         terrainScaleXZ = 10;
         terrainScaleY = 20;
 
@@ -101,6 +101,8 @@ public class PathWorld extends World {
     public void initialize(Application app) {
         super.initialize(app);
 
+        this.rootNode.attachChild(roadNode);
+
         AssetManager am = app.getAssetManager();
 
         noise = new PerlinNoise(sideLength, FastMath.nextRandomInt());
@@ -121,8 +123,6 @@ public class PathWorld extends World {
         roadPointLists = new LinkedList<>();
         searchFrom(start, new Vector2f());
         searchFrom(new Vector2f(), end);
-
-        this.rootNode.attachChild(roadNode);
     }
 
     private void updateTerrainCollision() {
@@ -274,5 +274,14 @@ public class PathWorld extends World {
         out.x /= scale.x;
         out.y /= scale.z;
         return out;
+    }
+
+    @Override
+    public float loadPercent() {
+        float total = 0;
+        for (RoadPointList pointList : roadPointLists) {
+            total += pointList.used ? 1 : 0;
+        }
+        return total/roadPointLists.size();
     }
 }
