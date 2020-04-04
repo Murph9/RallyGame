@@ -19,6 +19,26 @@ public abstract class AveragerBase<T extends Object> implements IAverager<T> {
     protected abstract T add(T value1, T value2);
     protected abstract T mult(T value, float mult);
 
+    public T get() {
+        float size = list.size(); // float for dividing
+        T total = createBlank();
+        switch (type) {
+            case Simple:
+                for (T t : this.list) {
+                    total = add(total, t);
+                }
+                return mult(total, 1 / (float) size);
+            case Weighted:
+                int i = 0;
+                for (T t : this.list) {
+                    total = add(total, mult(t, (size - i)));
+                    i++;
+                }
+                return mult(total, 1 / ((size * (size + 1)) / 2));
+            default:
+                return list.getLast();
+        }
+    }
     public T get(T value) {
         if (size <= 1)
             return value;
@@ -27,23 +47,6 @@ public abstract class AveragerBase<T extends Object> implements IAverager<T> {
         if (list.size() > size)
             list.removeLast();
 
-        float size = list.size(); //float for dividing
-        T total = createBlank();
-        switch (type) {
-        case Simple:
-            for (T t : this.list) {
-                total = add(total, t);
-            }
-            return mult(total, 1/(float)size);
-        case Weighted:
-            int i = 0;
-            for (T t : this.list) {
-                total = add(total, mult(t, (size - i)));
-                i++;
-            }
-            return mult(total, 1/ ((size * (size + 1)) / 2));
-        default:
-            return value;
-        }
+        return get();
     }
 }
