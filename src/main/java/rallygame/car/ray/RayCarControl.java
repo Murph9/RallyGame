@@ -26,6 +26,8 @@ import rallygame.car.ai.ICarAI;
 import rallygame.car.data.CarDataConst;
 import rallygame.drive.IDrive;
 import rallygame.helper.Log;
+import rallygame.service.averager.AverageFloat;
+import rallygame.service.averager.IAverager;
 import rallygame.service.ray.PhysicsRaycaster;
 
 //visual/input things
@@ -39,7 +41,10 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
 	//sound stuff
 	private AudioNode engineSound;
 	
-	// control fields
+    // Steering averager (to get smooth left <-> right)
+    private AverageFloat steeringAverager;
+
+    // control fields
 	private float steerLeft;
 	private float steerRight;
 	private float steeringCurrent;
@@ -74,7 +79,9 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
 
         vel = forward = up = left = right = location = angularVel = new Vector3f();
         rotation = new Quaternion();
-		
+
+        this.steeringAverager = new AverageFloat((int)(0.3f*30f), IAverager.Type.Weighted);
+
 		//init visual wheels
 		this.wheelControls = new RayWheelControl[4];
 		for (int i = 0; i < wheelControls.length; i++) {
@@ -130,7 +137,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
             angularVel = rbc.getAngularVelocity();
             location = rbc.getPhysicsLocation();
             
-            travelledDistance += rbc.getLinearVelocity().length()*tpf;
+            travelledDistance += rbc.getLinearVelocity().length() * tpf;
             
             //wheel turning logic
             steeringCurrent = 0;
@@ -138,7 +145,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
                 steeringCurrent += getBestTurnAngle(steerLeft, 1);
             if (steerRight != 0) //right
                 steeringCurrent -= getBestTurnAngle(steerRight, -1);
-            //TODO 0.3 - 0.4 seconds from lock to lock seems okay from what ive seen
+            steeringCurrent = steeringAverager.get(steeringCurrent); //TODO BAD: this is framerate dependant
             steeringCurrent = FastMath.clamp(steeringCurrent, -carData.w_steerAngle, carData.w_steerAngle);
 			
 			updateControlInputs(steeringCurrent, brakeCurrent, handbrakeCurrent);
@@ -164,17 +171,11 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
             //eg: car is pointing more left than velocity, and is also turning left
             //and drift angle needs to be large enough to matter
         }
-		
-		// steering factor = atan(0.08 * vel - 1) + maxAngle*PI/2 + maxLat
-//		return Math.min(-maxAngle*FastMath.atan(0.3f*(local_vel - 1))
-//				+ maxAngle*FastMath.PI/2 + this.wheels[0].maxLat*2, Math.abs(trySteerAngle));
-		
-        //TODO max turn angle really should just be the best angle on the lat traction curve (while going straight)
-        // return FastMath.atan2(Math.abs(local_vel.z), carData.wheelData[0].maxLat);
-        // return carData.wheelData[0].maxLat + FastMath.DEG_TO_RAD * driftAngle;
-		return trySteerAngle;
-		
-		// remember that this value is clamped after this method is called
+
+        // this is magic, but: minimum should be bast pjk lat, but it doesn't catch up to the turning angle required
+        // so we just add some of the angular vel value to it
+		return this.wheels[0].data.maxLat + angularVel.length()*0.25f; //constant needs minor adjustments
+        // remember that this value is clamped after this method is called
 	}
 
     public RayCarControlInput getInput() {
