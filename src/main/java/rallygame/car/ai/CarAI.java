@@ -246,13 +246,16 @@ public abstract class CarAI implements ICarAI {
     }
 
     protected final void applySelfTractionControl(float tpf) {
+        if (car.vel.length() <= SLOW_SPEED_LIMIT)
+            return;
+        
         // reduce excess wheel slipping
         List<RayWheelControl> wheels = car.getDriveWheels();
         float gripSum = 0;
         for (RayWheelControl wheel : wheels) {
             gripSum += wheel.getRayWheel().skidFraction;
         }
-        if (car.vel.length() > SLOW_SPEED_LIMIT && gripSum > wheels.size()) {
+        if (gripSum > wheels.size() && ifDrifting()) {
             onEvent(RayCarControlInput.ACTION_ACCEL, false);
         }
     }
