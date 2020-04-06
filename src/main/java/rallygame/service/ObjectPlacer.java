@@ -7,6 +7,7 @@ import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.BulletAppState;
+import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -16,7 +17,7 @@ import rallygame.effects.LoadModelWrapper;
 public class ObjectPlacer extends BaseAppState {
 
     public static int incObjNum = 0;
-    class ObjectId {
+    public class ObjectId {
         private final int value;
 
         ObjectId() {
@@ -72,8 +73,8 @@ public class ObjectPlacer extends BaseAppState {
     public ObjectId add(Spatial sp, Vector3f location) {
         ObjectId id = new ObjectId();
         objects.put(id, sp);
-        sp.setLocalTranslation(location); //TODO remove from this class?
-
+        sp.setLocalTranslation(location);
+        sp.addControl(new RigidBodyControl(0));
         rootNode.attachChild(sp);
         if (usePhysics)
             getState(BulletAppState.class).getPhysicsSpace().add(sp);

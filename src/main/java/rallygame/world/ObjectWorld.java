@@ -5,9 +5,6 @@ import java.util.List;
 
 import com.jme3.app.Application;
 import com.jme3.asset.AssetManager;
-import com.jme3.bullet.BulletAppState;
-import com.jme3.bullet.PhysicsSpace;
-import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
@@ -19,6 +16,8 @@ import com.jme3.scene.shape.Box;
 
 import rallygame.effects.LoadModelWrapper;
 import rallygame.helper.Geo;
+import rallygame.service.ObjectPlacer;
+import rallygame.service.ObjectPlacer.ObjectId;
 import jme3tools.optimize.GeometryBatchFactory;
 
 public class ObjectWorld extends World {
@@ -34,14 +33,14 @@ public class ObjectWorld extends World {
 	private Spatial floor;
 	
 	private Spatial geomI;
-	private List<Spatial> addedObjects;
+	private List<ObjectPlacer.ObjectId> addedObjects;
 	
 	private boolean[][] grid;
 	
 	public ObjectWorld() {
 		super("object world rootNode");
 		
-		addedObjects = new LinkedList<Spatial>();
+		addedObjects = new LinkedList<>();
 		grid = new boolean[GRID_SIZE][GRID_SIZE];
 	}
 	
@@ -122,26 +121,15 @@ public class ObjectWorld extends World {
 		for (Geometry g: Geo.getGeomList(f))
 			g.getMaterial().setColor("Color", ColorRGBA.randomColor());
 		
-		f.setLocalTranslation(offset);
-		f.addControl(new RigidBodyControl(0));
-		
-		addedObjects.add(f);
-		rootNode.attachChild(f);
-
-		PhysicsSpace space = getState(BulletAppState.class).getPhysicsSpace();
-		space.add(f);
-		
+		ObjectPlacer op = getState(ObjectPlacer.class);
+		addedObjects.add(op.add(f, offset));
+				
 		for (int i = 0; i < COUNT_A_TILE; i++) {
 			Spatial s = geomI.clone();
 			
-			Vector3f newPos = new Vector3f((float)(2*Math.random()-1)*TILE_SIZE/2, 0, (float)(2*Math.random()-1)*TILE_SIZE/2);
-			s.setLocalTranslation(offset.add(newPos));
-			
-			s.addControl(new RigidBodyControl(0));
-			
-			addedObjects.add(s);
-			rootNode.attachChild(s);
-			space.add(s);
+			Vector3f tilePos = new Vector3f((float)(2*Math.random()-1)*TILE_SIZE/2, 0, (float)(2*Math.random()-1)*TILE_SIZE/2);
+			Vector3f pos = offset.add(tilePos);
+			addedObjects.add(op.add(s, pos));
 		}
 		
 		//If you remove this line: fps = fps/n for large n
@@ -162,9 +150,9 @@ public class ObjectWorld extends World {
 	public void reset() {
 		rootNode.detachAllChildren();
 
-		PhysicsSpace space = getState(BulletAppState.class).getPhysicsSpace();
-		for (Spatial g: addedObjects) {
-			space.remove(g);
+		ObjectPlacer op = getState(ObjectPlacer.class);
+		for (ObjectId g : addedObjects) {
+			op.remove(g);
 		}
 		addedObjects.clear();
 		
@@ -179,9 +167,9 @@ public class ObjectWorld extends World {
 	public void cleanup(Application app) {
 		super.cleanup(app);
 		
-		PhysicsSpace space = getState(BulletAppState.class).getPhysicsSpace();
-		for (Spatial g: addedObjects) {
-			space.remove(g);
+		ObjectPlacer op = getState(ObjectPlacer.class);
+		for (ObjectId g : addedObjects) {
+			op.remove(g);
 		}
 	}
 }

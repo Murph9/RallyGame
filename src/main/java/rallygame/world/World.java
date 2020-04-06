@@ -39,9 +39,10 @@ public abstract class World extends BaseAppState implements IWorld {
 		if (this.rootNode == null)
 			Log.e(rootNode.getName() + " was cleaned up twice or never initialised, please don't do that.");
 
-		((SimpleApplication) app).getRootNode().detachChild(this.rootNode);
+		Node realRootNode = ((SimpleApplication) app).getRootNode();
+		realRootNode.detachChild(this.rootNode);
 
-		Log.e("cleanup() world: " + rootNode.getName());
+		Log.e("cleanup() world: " + rootNode.getName() + " rm(" + realRootNode.getChildren().size() + ")");
 		this.rootNode = null;
 	}
 
