@@ -3,6 +3,7 @@ package rallygame.car.ai;
 import com.jme3.math.Vector3f;
 
 import rallygame.car.ray.RayCarControl;
+import rallygame.car.ray.RayCarControlInput;
 import rallygame.drive.ICheckpointDrive;
 
 public class RaceAI extends CarAI {
@@ -37,7 +38,7 @@ public class RaceAI extends CarAI {
 
         // very still, flip
         if (velocity < 0.05f && car.up.y < 0) {
-            onEvent("Flip", true);
+            onEvent(RayCarControlInput.ACTION_FLIP, true);
         }
 
         applySelfTractionControl(tpf);
@@ -46,14 +47,14 @@ public class RaceAI extends CarAI {
         if (doFowardRayCast) {
             float result = forwardRayCollideTime();
             if (result < 1.5f) {
-                onEvent("Brake", true);
+                onEvent(RayCarControlInput.ACTION_BRAKE, true);
             }
         }
         
         // if going too slow speed up
         if (velocity < 2) {
-            onEvent("Accel", true);
-            onEvent("Brake", false);
+            onEvent(RayCarControlInput.ACTION_ACCEL, true);
+            onEvent(RayCarControlInput.ACTION_BRAKE, false);
         }
     }
 }

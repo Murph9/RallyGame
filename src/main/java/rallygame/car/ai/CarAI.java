@@ -65,11 +65,11 @@ public abstract class CarAI implements ICarAI {
 
 	/** Only brake, no accel and no steering */
 	protected final void justBrake() {
-		onEvent("Left", false);
-		onEvent("Right", false);
+		onEvent(RayCarControlInput.ACTION_LEFT, false);
+		onEvent(RayCarControlInput.ACTION_RIGHT, false);
 		
-		onEvent("Accel", false);
-		onEvent("Brake", true);
+		onEvent(RayCarControlInput.ACTION_ACCEL, false);
+		onEvent(RayCarControlInput.ACTION_BRAKE, true);
 	}
 
 	/**
@@ -101,11 +101,11 @@ public abstract class CarAI implements ICarAI {
 
 		// turn towards
 		if (nowTurn < 0) {
-			onEvent("Left", false);
-			onEvent("Right", true, Math.abs(nowTurn) * reverse);
+			onEvent(RayCarControlInput.ACTION_LEFT, false);
+			onEvent(RayCarControlInput.ACTION_RIGHT, true, Math.abs(nowTurn) * reverse);
 		} else {
-			onEvent("Left", true, Math.abs(nowTurn) * reverse);
-			onEvent("Right", false);
+			onEvent(RayCarControlInput.ACTION_LEFT, true, Math.abs(nowTurn) * reverse);
+			onEvent(RayCarControlInput.ACTION_RIGHT, false);
 		}
 
 		boolean accel = IfTooSlowForPoint(targetPos, curPos, this.car.vel);
@@ -113,16 +113,16 @@ public abstract class CarAI implements ICarAI {
 		if (accel && targetInFront) {
             if (ifDrifting()) {
                 // aim at point
-                this.onEvent("Accel", false);
-                this.onEvent("Brake", false);
+                this.onEvent(RayCarControlInput.ACTION_ACCEL, false);
+                this.onEvent(RayCarControlInput.ACTION_BRAKE, false);
             } else { //drive at point
-                this.onEvent("Accel", true);
-                this.onEvent("Brake", false);
+                this.onEvent(RayCarControlInput.ACTION_ACCEL, true);
+                this.onEvent(RayCarControlInput.ACTION_BRAKE, false);
             }
         } else {
             //drive as best to point, and don't accel
-            this.onEvent("Accel", false);
-            this.onEvent("Brake", true);
+            this.onEvent(RayCarControlInput.ACTION_ACCEL, false);
+            this.onEvent(RayCarControlInput.ACTION_BRAKE, true);
 		}
 	}
 
@@ -217,7 +217,7 @@ public abstract class CarAI implements ICarAI {
             fallTimer += tpf;
 
             if (fallTimer > 7) {
-                onEvent("Reset", true);
+                onEvent(RayCarControlInput.ACTION_RESET, true);
                 fallTimer = 0;
             }
         } else {
@@ -228,12 +228,12 @@ public abstract class CarAI implements ICarAI {
     protected final void tryStuffIfStuck(float tpf) {
         if (reverseTimer > 0) {
             //reverse for a bit
-            onEvent("Reverse", true);
+            onEvent(RayCarControlInput.ACTION_REVERSE, true);
             reverseTimer -= tpf;
             if (reverseTimer < 0) {
-                onEvent("Reverse", false);
-                onEvent("Right", false);
-                onEvent("Left", false);
+                onEvent(RayCarControlInput.ACTION_REVERSE, false);
+                onEvent(RayCarControlInput.ACTION_RIGHT, false);
+                onEvent(RayCarControlInput.ACTION_LEFT, false);
             }
         } else if (car.vel.length() < 0.5f) {
             stuckTimer += tpf;
@@ -253,7 +253,7 @@ public abstract class CarAI implements ICarAI {
             gripSum += wheel.getRayWheel().skidFraction;
         }
         if (car.vel.length() > SLOW_SPEED_LIMIT && gripSum > wheels.size()) {
-            onEvent("Accel", false);
+            onEvent(RayCarControlInput.ACTION_ACCEL, false);
         }
     }
 }

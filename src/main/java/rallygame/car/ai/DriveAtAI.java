@@ -3,6 +3,7 @@ package rallygame.car.ai;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 
 import rallygame.car.ray.RayCarControl;
+import rallygame.car.ray.RayCarControlInput;
 
 public class DriveAtAI extends CarAI {
 
@@ -24,7 +25,7 @@ public class DriveAtAI extends CarAI {
 		
 		//try and fix a stuck situation
 		if (!reversing) {
-			onEvent("Reverse", false);
+			onEvent(RayCarControlInput.ACTION_REVERSE, false);
 			
 			if (velocity < 0.5f) {
 				reversingTimer += tpf;
@@ -37,11 +38,11 @@ public class DriveAtAI extends CarAI {
 			}
 	
 			if (velocity < 1 && car.up.y < 0) { //if very still and not the right way up then flip over
-				onEvent("Flip", true);
+				onEvent(RayCarControlInput.ACTION_FLIP, true);
 			}
 		} else {
 			//currently reversing
-			onEvent("Reverse", true);
+			onEvent(RayCarControlInput.ACTION_REVERSE, true);
 			reversingTimer -= tpf;
 			if (reversingTimer < 0)
 				reversing = false;
@@ -52,8 +53,8 @@ public class DriveAtAI extends CarAI {
 
 		//if going to slow speed up
 		if (velocity < 10) {
-			onEvent("Accel", true);
-			onEvent("Brake", false);
+			onEvent(RayCarControlInput.ACTION_ACCEL, true);
+			onEvent(RayCarControlInput.ACTION_BRAKE, false);
 		}
 	}
 }

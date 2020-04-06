@@ -2,6 +2,19 @@ package rallygame.car.ray;
 
 public class RayCarControlInput {
 
+    public static final String ACTION_LEFT = "Left";
+    public static final String ACTION_RIGHT = "Right";
+    public static final String ACTION_ACCEL = "Accel";
+    public static final String ACTION_BRAKE = "Brake";
+    public static final String ACTION_NITRO = "Nitro";
+    public static final String ACTION_JUMP = "Jump";
+    public static final String ACTION_HANDBRAKE = "Handbrake";
+    public static final String ACTION_FLIP = "Flip";
+    public static final String ACTION_RESET = "Reset";
+    public static final String ACTION_REVERSE = "Reverse";
+    public static final String ACTION_IgnoreSteeringSpeedFactor = "IgnoreSteeringSpeedFactor";
+    public static final String ACTION_IgnoreTractionModel = "IgnoreTractionModel";
+
     private final ICarControlled control;
 
     public RayCarControlInput(ICarControlled control) {
@@ -17,54 +30,54 @@ public class RayCarControlInput {
         // value == 'if pressed (down) - we get one back when its unpressed (up)'
         // tpf is being used as the value for joysticks. deal with it
         switch (binding) {
-        case "Left":
+        case ACTION_LEFT:
             control.setSteerLeft(tpf);
             break;
 
-        case "Right":
+        case ACTION_RIGHT:
             control.setSteerRight(tpf);
             break;
 
-        case "Accel":
+        case ACTION_ACCEL:
             control.setAccel(tpf);
             break;
 
-        case "Brake":
+        case ACTION_BRAKE:
             control.setBraking(tpf);
             break;
 
-        case "Nitro":
+        case ACTION_NITRO:
             control.setNitro(value);
             break;
 
-        case "Jump":
+        case ACTION_JUMP:
             if (value)
                 control.jump();
             break;
 
-        case "Handbrake":
+        case ACTION_HANDBRAKE:
             control.setHandbrake(value);
             break;
 
-        case "Flip":
+        case ACTION_FLIP:
             if (value)    
                 control.flip();
             break;
 
-        case "Reset":
+        case ACTION_RESET:
             if (value)
                 control.reset();
             break;
 
-        case "Reverse":
+        case ACTION_REVERSE:
             control.reverse(value);
             break;
 
-        case "IgnoreSteeringSpeedFactor":
+        case ACTION_IgnoreSteeringSpeedFactor:
             control.ignoreSpeedFactor(value);
             break;
 
-        case "IgnoreTractionModel":
+        case ACTION_IgnoreTractionModel:
             control.ignoreTractionModel(value);
             break;
 

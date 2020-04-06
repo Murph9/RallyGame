@@ -5,6 +5,7 @@ import java.util.function.Function;
 import com.jme3.math.Vector3f;
 
 import rallygame.car.ray.RayCarControl;
+import rallygame.car.ray.RayCarControlInput;
 import rallygame.helper.Log;
 
 public class DriveAlongAI extends CarAI {
@@ -44,13 +45,13 @@ public class DriveAlongAI extends CarAI {
 		//if going too slow at all speed up
 		float velocity = car.vel.length();
 		if (velocity < 4) {
-			onEvent("Accel", true);
-			onEvent("Brake", false);
+			onEvent(RayCarControlInput.ACTION_ACCEL, true);
+			onEvent(RayCarControlInput.ACTION_BRAKE, false);
 		}
 
 		if (velocity > maxSpeed) {
-			onEvent("Accel", false); //do not
-			onEvent("Brake", false);
+			onEvent(RayCarControlInput.ACTION_ACCEL, false); //do not
+			onEvent(RayCarControlInput.ACTION_BRAKE, false);
 		}
 	}
 }
