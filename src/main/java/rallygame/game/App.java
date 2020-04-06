@@ -20,6 +20,7 @@ import rallygame.effects.FilterManager;
 import rallygame.effects.ParticleAtmosphere;
 import rallygame.helper.Log;
 import rallygame.service.ConstantChecker;
+import rallygame.service.ObjectPlacer;
 
 
 public class App extends SimpleApplication {
@@ -33,7 +34,8 @@ public class App extends SimpleApplication {
 				, new AudioListenerState()
 				, new StatsAppState()
 				, new FilterManager()
-                , new CarBuilder(0.4f, new CarDataLoader())
+				, new ObjectPlacer()
+				, new CarBuilder(0.4f, new CarDataLoader())
                 , new ConstantChecker()
 				, new DebugAppState()
                 
