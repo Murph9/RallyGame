@@ -34,7 +34,7 @@ public class App extends SimpleApplication {
 				, new AudioListenerState()
 				, new StatsAppState()
 				, new FilterManager()
-				, new ObjectPlacer()
+				, new ObjectPlacer(true)
 				, new CarBuilder(0.4f, new CarDataLoader())
                 , new ConstantChecker()
 				, new DebugAppState()

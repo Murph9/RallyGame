@@ -6,6 +6,7 @@ import java.util.Map;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
+import com.jme3.bullet.BulletAppState;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -36,10 +37,12 @@ public class ObjectPlacer extends BaseAppState {
         }
     }
 
+    private final boolean usePhysics;
     private final Node rootNode;
     private final Map<ObjectId, Spatial> objects;
 
-    public ObjectPlacer() {
+    public ObjectPlacer(boolean usePhysics) {
+        this.usePhysics = usePhysics;
         rootNode = new Node("object root");
         objects = new HashMap<>();
     }
@@ -72,6 +75,9 @@ public class ObjectPlacer extends BaseAppState {
         sp.setLocalTranslation(location); //TODO remove from this class?
 
         rootNode.attachChild(sp);
+        if (usePhysics)
+            getState(BulletAppState.class).getPhysicsSpace().add(sp);
+        
         return id;
     }
     public void remove(ObjectId id) {
@@ -80,6 +86,9 @@ public class ObjectPlacer extends BaseAppState {
         Spatial sp = objects.remove(id);
         if (sp == null)
             return;
+
         sp.removeFromParent();
+        if (usePhysics)
+            getState(BulletAppState.class).getPhysicsSpace().remove(sp);
     }
 }
