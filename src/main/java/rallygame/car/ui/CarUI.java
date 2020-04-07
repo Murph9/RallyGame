@@ -1,4 +1,4 @@
-package rallygame.car;
+package rallygame.car.ui;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;

@@ -1,4 +1,4 @@
-package rallygame.car;
+package rallygame.car.ui;
 
 import java.util.LinkedList;
 import java.util.List;

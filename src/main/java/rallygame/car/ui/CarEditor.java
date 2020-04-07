@@ -1,4 +1,4 @@
-package rallygame.car;
+package rallygame.car.ui;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;

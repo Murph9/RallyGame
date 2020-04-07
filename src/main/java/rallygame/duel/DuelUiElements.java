@@ -4,8 +4,8 @@ import com.jme3.asset.AssetManager;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
-import rallygame.car.CarStatsUI;
 import rallygame.car.data.CarDataConst;
+import rallygame.car.ui.CarStatsUI;
 
 public class DuelUiElements {
 

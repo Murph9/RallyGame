@@ -9,10 +9,11 @@ import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.math.Vector3f;
 
-import rallygame.car.*;
 import rallygame.car.data.Car;
 import rallygame.car.data.CarDataConst;
 import rallygame.car.ray.RayCarControl;
+import rallygame.car.ui.CarEditor;
+import rallygame.car.ui.TractionCurveGraph;
 import rallygame.game.IDriveDone;
 import rallygame.service.Screen;
 import rallygame.service.Screen.HorizontalPos;

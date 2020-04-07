@@ -13,10 +13,10 @@ import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
 import rallygame.car.CarBuilder;
-import rallygame.car.CarStatsUI;
-import rallygame.car.PowerCurveGraph;
 import rallygame.car.data.Car;
 import rallygame.car.ray.RayCarControl;
+import rallygame.car.ui.CarStatsUI;
+import rallygame.car.ui.PowerCurveGraph;
 import rallygame.helper.Log;
 import rallygame.service.Screen;
 import rallygame.service.Screen.HorizontalPos;

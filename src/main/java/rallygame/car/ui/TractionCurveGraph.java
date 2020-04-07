@@ -1,4 +1,4 @@
-package rallygame.car;
+package rallygame.car.ui;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.math.ColorRGBA;

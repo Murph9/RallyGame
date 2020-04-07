@@ -20,12 +20,12 @@ import com.simsilica.lemur.Label;
 import com.simsilica.lemur.style.ElementId;
 
 import rallygame.car.CarBuilder;
-import rallygame.car.CarStatsUI;
 import rallygame.car.RotatesCarCamera;
 import rallygame.car.ai.DriveAlongAI;
 import rallygame.car.data.Car;
 import rallygame.car.data.CarDataConst;
 import rallygame.car.ray.RayCarControl;
+import rallygame.car.ui.CarStatsUI;
 import rallygame.service.Screen;
 import rallygame.world.wp.DefaultBuilder;
 import rallygame.world.wp.WP.DynamicType;
