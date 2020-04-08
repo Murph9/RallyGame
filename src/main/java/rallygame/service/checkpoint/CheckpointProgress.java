@@ -140,7 +140,7 @@ public class CheckpointProgress extends BaseAppState {
 
     public void setMinCheckpoint(Vector3f pos) {
         if (this.type == Type.Lap)
-            throw new IllegalStateException("The " + Type.Sprint + " type cannot use this method");
+            throw new IllegalStateException("The type of " + this.type + " cannot use this method");
 
         Checkpoint check = engine.getCheckpointFromPos(pos);
         if (check == null)
