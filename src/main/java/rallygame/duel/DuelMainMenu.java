@@ -73,7 +73,7 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
         if (duelData != null) {
             Button b = mainWindow.addChild(new Button("Retry"));
             b.addClickCommands((source) -> {
-                start();
+                startRace();
             });
 
             mainWindow.addChild(new Label("Wins: " + duelData.wins));
@@ -170,25 +170,25 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
     @Override
     public void onJoyButtonEvent(JoyButtonEvent evt) {
         if (evt.isPressed())
-            start();
+            startRace();
     }
     @Override
     public void onMouseMotionEvent(MouseMotionEvent evt) {}
     @Override
     public void onMouseButtonEvent(MouseButtonEvent evt) {
         if (evt.isReleased())
-            start();
+            startRace();
     }
     @Override
     public void onKeyEvent(KeyInputEvent evt) {
         if (!evt.isRepeating() && evt.isReleased()) 
-            start();
+            startRace();
     }
     @Override
     public void onTouchEvent(TouchEvent evt) {}
     //#endregion
 
-    private void start() {
+    private void startRace() {
         if (isEnabled()) {
             DuelResultData d = new DuelResultData();
             flow.nextState(this, d);

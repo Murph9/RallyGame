@@ -10,6 +10,9 @@ import com.jme3.math.ColorRGBA;
 import rallygame.car.data.Car;
 import rallygame.car.data.CarDataAdjuster;
 import rallygame.car.data.CarDataAdjustment;
+import rallygame.service.LoadingState;
+import rallygame.world.ICheckpointWorld;
+import rallygame.world.path.PathWorld;
 
 interface IDuelFlow {
     void nextState(AppState state, DuelResultData result);
@@ -58,7 +61,7 @@ public class DuelFlow implements IDuelFlow {
         }
 
         if (state instanceof DuelMainMenu) {
-            curState = new DuelRace(this);
+            loadRace();
         } else if (state instanceof DuelRace) {
             if (result.raceResult != null && result.raceResult.playerWon) {
                 this.data.wins++;
@@ -68,16 +71,26 @@ public class DuelFlow implements IDuelFlow {
                 Racer rival = generateNextRival(this.data.wins);
                 this.data.theirCar = rival.car;
                 this.data.theirAdjuster = rival.adj;
-                curState = new DuelRace(this);
+                loadRace();
             } else {
-                curState = new DuelMainMenu(this, this.data, version);
                 this.data = getStartDataState();
+                curState = new DuelMainMenu(this, this.data, version);
+                sm.attach(curState);
             }
         } else {
             throw new IllegalArgumentException("Unknown state type: " + state.getClass());
         }
-        
-        sm.attach(curState);
+    }
+
+    private void loadRace() {
+        AppStateManager sm = app.getStateManager();
+        ICheckpointWorld world = new PathWorld(1);
+        LoadingState loading = new LoadingState(world, (AppState[])null);
+        loading.setCallback((states) -> {
+            curState = new DuelRace(this, world);
+            sm.attach(curState);
+        });
+        sm.attach(loading);
     }
 
 	public void cleanup() {

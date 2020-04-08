@@ -1,5 +1,7 @@
 package rallygame.duel;
 
+import java.util.Collection;
+
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
@@ -22,6 +24,7 @@ import rallygame.drive.ICheckpointDrive;
 import rallygame.helper.Log;
 import rallygame.service.Screen;
 import rallygame.service.checkpoint.CheckpointProgress;
+import rallygame.world.ICheckpointWorld;
 
 public class DuelRace extends BaseAppState implements ICheckpointDrive {
 
@@ -32,7 +35,8 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
     private CheckpointProgress progress;
     private CountdownTimer countdown;
 
-    private DuelStaticWorld world;
+    private ICheckpointWorld world;
+    private int checkpointCount;
     private CarCamera camera;
     private CarUI uiNode;
 
@@ -41,20 +45,21 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
 
     private float readyStateTimeout;
     private RaceState state = RaceState.BeforeLoad;
+
     enum RaceState {
         BeforeLoad, WaitingForStartPress, Ready, Racing, Finished,
     }
 
-    public DuelRace(IDuelFlow flow) {
+    public DuelRace(IDuelFlow flow, ICheckpointWorld world) {
         this.flow = flow;
+        this.world = world;
     }
 
     @Override
     protected void initialize(Application app) {
-        world = new DuelStaticWorld();
-        world.loadCheckpoints(app.getAssetManager());
         getStateManager().attach(world);
         Vector3f[] checkpoints = world.checkpoints();
+        checkpointCount = checkpoints.length;
 
         this.cb = getState(CarBuilder.class);
 
@@ -75,10 +80,10 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
         getStateManager().attach(camera);
         app.getInputManager().addRawInputListener(camera);
 
-        //wait until race start
+        // wait until race start
         cb.setEnabled(false);
 
-        //init menu
+        // init menu
         this.menu = new DuelRaceMenu(this, yourCarData, theirCarData, () -> {
             DuelResultData drd = new DuelResultData();
             drd.quitGame = true;
@@ -87,8 +92,8 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
         getStateManager().attach(menu);
 
         countdown = new CountdownTimer();
-        
-        //Checkpoint detection and stuff
+
+        // Checkpoint detection and stuff
         progress = new CheckpointProgress(CheckpointProgress.Type.Sprint, checkpoints, cb.getAll(), rayCar);
         progress.setCheckpointModel(CheckpointProgress.GetDefaultCheckpointModel(app, 10));
         progress.setVisualModels(false);
@@ -101,10 +106,10 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
     protected void cleanup(Application app) {
         getStateManager().detach(menu);
         menu = null;
-        
+
         getStateManager().detach(progress);
         progress = null;
-        
+
         getStateManager().detach(world);
         world = null;
 
@@ -124,11 +129,12 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
     protected void onEnable() {
         getState(BulletAppState.class).setEnabled(true);
     }
+
     @Override
     protected void onDisable() {
         getState(BulletAppState.class).setEnabled(false);
     }
-    
+
     @Override
     public void update(float tpf) {
         super.update(tpf);
@@ -149,7 +155,7 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
             raceTimer += tpfLagless;
             menu.setState(raceTimer);
 
-            RayCarControl maybeWinner = progress.isThereSomeoneAtState(0, 2);
+            RayCarControl maybeWinner = progress.isThereSomeoneAtState(0, checkpointCount - 1);
             if (maybeWinner != null) {
                 this.winner = maybeWinner;
                 goToState(RaceState.Finished);
@@ -168,7 +174,7 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
         d.raceResult.mills = (long) (raceTimer * 1000f);
 
         Log.p("Winner: " + winner.getCarData().name);
-        
+
         flow.nextState(this, d);
     }
 
@@ -186,35 +192,35 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
         return new Transform(pos, q);
     }
 
-
     private void goToState(RaceState nextState) {
         switch (nextState) {
-        case BeforeLoad:
-        case WaitingForStartPress:
-            break;
-        case Ready:
-            this.readyStateTimeout = 3;
-            ((SimpleApplication)getApplication()).getGuiNode().attachChild(countdown);
-            break;
-        case Racing:
-            ((SimpleApplication) getApplication()).getGuiNode().detachChild(countdown);
-            cb.setEnabled(true);
-            raceTimer = 0;
-            break;
-        case Finished:
-            menu.raceStopped(this.winner == this.cb.get(0));    
-            for (RayCarControl c: this.cb.getAll()) {
-                c.attachAI(new BrakeAI(c), true);
-            }
-            break;
-        default:
-            throw new IllegalStateException("Unknown state: " + nextState);
+            case BeforeLoad:
+            case WaitingForStartPress:
+                break;
+            case Ready:
+                this.readyStateTimeout = 3;
+                ((SimpleApplication) getApplication()).getGuiNode().attachChild(countdown);
+                break;
+            case Racing:
+                ((SimpleApplication) getApplication()).getGuiNode().detachChild(countdown);
+                cb.setEnabled(true);
+                raceTimer = 0;
+                break;
+            case Finished:
+                menu.raceStopped(this.winner == this.cb.get(0));
+                for (RayCarControl c : this.cb.getAll()) {
+                    c.attachAI(new BrakeAI(c), true);
+                }
+                break;
+            default:
+                throw new IllegalStateException("Unknown state: " + nextState);
         }
         state = nextState;
     }
 
     private class CountdownTimer extends Container {
         private Label countDownLabel;
+
         public CountdownTimer() {
             this.addChild(new Label("", new ElementId("title")));
             countDownLabel = this.addChild(new Label(""));
@@ -223,5 +229,18 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
         public void setTime(float value) {
             countDownLabel.setText(rallygame.helper.H.roundDecimal(value, 1) + " sec");
         }
+    }
+
+    @Override
+    public void next() {
+    }
+
+    @Override
+    public void resetWorld() {
+    }
+
+    @Override
+    public Collection<RayCarControl> getAllCars() {
+        return this.cb.getAll();
     }
 }

@@ -5,7 +5,7 @@ import com.jme3.math.Vector3f;
 
 import rallygame.car.ray.RayCarControl;
 
-public interface ICheckpointDrive {
+public interface ICheckpointDrive extends IDrive {
 
     Transform resetPosition(RayCarControl car);
     Vector3f getNextCheckpoint(RayCarControl car);
