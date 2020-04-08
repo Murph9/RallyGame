@@ -230,7 +230,9 @@ public class RayWheelControl {
 		return wheel;
     }
     public void reset() {
-        //TODO
+        this.lastl = null;
+        this.lastr = null;
+        this.lastColor = ColorRGBA.BlackNoAlpha;
     }
 	
 	public void cleanup() {
