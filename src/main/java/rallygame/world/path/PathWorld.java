@@ -1,10 +1,9 @@
 package rallygame.world.path;
 
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Random;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.stream.Collectors;
 
@@ -17,17 +16,25 @@ import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.FastMath;
 import com.jme3.math.Spline;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.math.Spline.SplineType;
+import com.jme3.math.Transform;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.control.Control;
 import com.jme3.scene.shape.Box;
 import com.jme3.terrain.geomipmap.TerrainQuad;
+import com.jme3.terrain.noise.ShaderUtils;
+import com.jme3.terrain.noise.basis.FilteredBasis;
+import com.jme3.terrain.noise.filter.IterativeFilter;
+import com.jme3.terrain.noise.filter.OptimizedErode;
+import com.jme3.terrain.noise.filter.PerturbFilter;
+import com.jme3.terrain.noise.filter.SmoothFilter;
+import com.jme3.terrain.noise.fractal.FractalSum;
+import com.jme3.terrain.noise.modulator.NoiseModulator;
 
 import rallygame.effects.LoadModelWrapper;
 import rallygame.helper.Geo;
@@ -36,17 +43,19 @@ import rallygame.helper.Log;
 import rallygame.helper.TerrainUtil;
 import rallygame.service.search.AStar;
 import rallygame.service.search.ISearch;
-import rallygame.service.PerlinNoise;
-import rallygame.service.search.ISearchWorld;
+import rallygame.world.ICheckpointWorld;
 import rallygame.world.World;
 import rallygame.world.WorldType;
 
-public class PathWorld extends World {
+public class PathWorld extends World implements ICheckpointWorld {
 
     class RoadPointList extends LinkedList<Vector3f> {
         private static final long serialVersionUID = 1L;
+        public boolean set;
         public boolean used;
     }
+
+    private static final float HEIGHT_WEIGHT = 0.04f;
 
     private final Node roadNode;
     private final int sideLength;
@@ -54,27 +63,35 @@ public class PathWorld extends World {
     private final Vector2f end;
     private final float terrainScaleXZ;
     private final float terrainScaleY;
+    private final Random rand;
 
-    private PerlinNoise noise;
+    private FilteredBasis filteredBasis;
     private TerrainQuad terrain;
     private Control collision;
     private ScheduledThreadPoolExecutor executor;
     private List<RoadPointList> roadPointLists;
 
-    // TODO maybe we need to have 'any' point on the other side of the quad as the
-    // search goal
-    // this is how we keep it moving along the world, the other sideways quads are
-    // only for show
+    // TODO:
+    // maybe we need to have 'any' point on the other side of the quad as the search goal
+    // this is how we keep it moving along the world, the other sideways quads are only for show
 
     // https://github.com/jMonkeyEngine/sdk/blob/master/jme3-terrain-editor/src/com/jme3/gde/terraineditor/tools/LevelTerrainToolAction.java
 
     public PathWorld() {
+        this(0);
+    }
+    public PathWorld(int seed) {
+        this(seed, 6, 25, 400);
+    }
+    public PathWorld(int seed, int size, float scaleXZ, float scaleY) {
         super("PathWorld");
 
         roadNode = new Node("lineNode");
-        sideLength = (1 << 7) + 1;// 64 -> 6
-        terrainScaleXZ = 10;
-        terrainScaleY = 20;
+        sideLength = (1 << size) + 1; //6 -> 64 + 1
+        terrainScaleXZ = scaleXZ;
+        terrainScaleY = scaleY;
+        
+        rand = new Random(seed);
 
         int length = sideLength / 2 - 2;
         start = new Vector2f(-length, -length);
@@ -99,6 +116,38 @@ public class PathWorld extends World {
         return WorldType.PATH;
     }
 
+    private FilteredBasis getFilteredBasis() {
+        // larger height variance filter
+        FractalSum base = new FractalSum();
+        base.addModulator(new NoiseModulator() {
+            @Override
+            public float value(float... in) {
+                return ShaderUtils.clamp(in[0] * 0.5f + 0.5f, 0, 1);
+            }
+        });
+        FilteredBasis ground = new FilteredBasis(base);
+        PerturbFilter perturb = new PerturbFilter();
+        perturb.setMagnitude(0.119f);
+
+        OptimizedErode therm = new OptimizedErode();
+        therm.setRadius(10);
+        therm.setTalus(0.011f);
+
+        SmoothFilter smooth = new SmoothFilter();
+        smooth.setRadius(1);
+        smooth.setEffect(0.7f);
+
+        IterativeFilter iterate = new IterativeFilter();
+        iterate.addPreFilter(perturb);
+        iterate.addPostFilter(smooth);
+        iterate.setFilter(therm);
+        iterate.setIterations(1); // higher numbers make it really smooth
+
+        ground.addPreFilter(iterate);
+
+        return ground;
+    }
+
     @Override
     public void initialize(Application app) {
         super.initialize(app);
@@ -107,14 +156,17 @@ public class PathWorld extends World {
 
         AssetManager am = app.getAssetManager();
 
-        noise = new PerlinNoise(sideLength, FastMath.nextRandomInt());
-        noise.load();
-        float[] heights = noise.findMinMaxHeights();
-        terrain = new TerrainQuad("path terrain", sideLength, sideLength, noise.getHeightMap());
+        filteredBasis = getFilteredBasis();
+
+        int sx = rand.nextInt(1000);
+        int sy = rand.nextInt(1000);
+        float[] heightMap = filteredBasis.getBuffer(sx*(sideLength - 1), sy*(sideLength - 1), 0, sideLength).array();
+        terrain = new TerrainQuad("path terrain", sideLength, sideLength, heightMap);
         terrain.setLocalScale(new Vector3f(terrainScaleXZ, terrainScaleY, terrainScaleXZ));
+
         Material baseMat = new Material(am, "mat/terrainheight/TerrainColorByHeight.j3md");
-        baseMat.setFloat("Scale", heights[1] - heights[0]);
-        baseMat.setFloat("Offset", heights[0]);
+        baseMat.setFloat("Scale", terrainScaleY * 0.8f); //margin of 0.1f
+        baseMat.setFloat("Offset", terrainScaleY * 0.1f);
 
         terrain.setMaterial(baseMat);
         terrain.setQueueBucket(Bucket.Opaque);
@@ -122,7 +174,7 @@ public class PathWorld extends World {
         updateTerrainCollision();
 
         executor = new ScheduledThreadPoolExecutor(2);
-        
+
         searchFrom(start, new Vector2f());
         searchFrom(new Vector2f(), end);
     }
@@ -138,27 +190,30 @@ public class PathWorld extends World {
 
     @Override
     public void update(float tpf) {
-        for (RoadPointList roadPointList : new LinkedList<>(roadPointLists))
-            if (roadPointList != null && !roadPointList.isEmpty() && !roadPointList.used) {
-                AssetManager am = getApplication().getAssetManager();
-                roadPointList.add(0, roadPointList.get(0)); // copy the first one
-                roadPointList.add(roadPointList.get(roadPointList.size() - 1)); // copy the last one
-                CatmullRomRoad road = drawRoad(am, roadPointList);
+        // wait until all the road points lists are set before doing this
+        if (!H.allTrue(x -> x != null && x.set && !x.used, roadPointLists))
+            return;
 
-                executor.submit(() -> {
-                    List<Vector3f[]> quads = road.getMeshAsQuads();
-                    getApplication().enqueue(() -> {
-                        Map<Vector2f, Float> heights = TerrainUtil.lowerTerrainSoItsUnderQuads(terrain, quads);
-                        updateTerrainCollision();
-                        List<Vector3f> heights3 = heights.entrySet().stream().map(
-                                x -> new Vector3f(x.getKey().x, x.getValue() * terrain.getWorldScale().y, x.getKey().y))
-                                .collect(Collectors.toList());
-                        drawBoxes(am, this.roadNode, heights3);
-                    });
+        for (RoadPointList roadPointList : new LinkedList<>(roadPointLists)) {
+            AssetManager am = getApplication().getAssetManager();
+            roadPointList.add(0, roadPointList.get(0)); // copy the first one
+            roadPointList.add(roadPointList.get(roadPointList.size() - 1)); // copy the last one
+            CatmullRomRoad road = drawRoad(am, roadPointList);
+
+            executor.submit(() -> {
+                List<Vector3f[]> quads = road.getMeshAsQuads();
+                getApplication().enqueue(() -> {
+                    Map<Vector2f, Float> heights = TerrainUtil.lowerTerrainSoItsUnderQuads(terrain, quads);
+                    updateTerrainCollision();
+                    List<Vector3f> heights3 = heights.entrySet().stream().map(
+                            x -> new Vector3f(x.getKey().x, x.getValue() * terrain.getWorldScale().y, x.getKey().y))
+                            .collect(Collectors.toList());
+                    drawBoxes(am, this.roadNode, heights3);
                 });
+            });
 
-                roadPointList.used = true;
-            }
+            roadPointList.used = true;
+        }
     }
 
     private CatmullRomRoad drawRoad(AssetManager am, List<Vector3f> list) {
@@ -193,15 +248,15 @@ public class PathWorld extends World {
         RoadPointList outList = new RoadPointList();
         roadPointLists.add(outList);
         executor.submit(() -> {
-            Log.p("Started astar search ", outList);
             List<Vector2f> list = null;
             try {
-                ISearch<Vector2f> search = new AStar<Vector2f>(new SearchWorld(terrain), null);
+                ISearch<Vector2f> search = new AStar<Vector2f>(new SearchWorld(terrain, HEIGHT_WEIGHT), null);
                 list = search.findPath(H.v3tov2fXZ(gridToWorldSpace(terrain, start)),
                         H.v3tov2fXZ(gridToWorldSpace(terrain, end)));
 
                 outList.addAll(list.stream().map(x -> new Vector3f(x.x, terrain.getHeight(x), x.y))
                         .collect(Collectors.toList()));
+                outList.set = true;
             } catch (Exception e) {
                 Log.p(e);
             }
@@ -211,55 +266,8 @@ public class PathWorld extends World {
 
     @Override
     protected void cleanup(Application app) {
-        executor.shutdownNow(); // TODO forceful because when the search doesn't finish this blocks
+        executor.shutdownNow(); // TODO forceful because when the search doesn't finish this blocks closing
         super.cleanup(app);
-    }
-
-    class SearchWorld implements ISearchWorld<Vector2f> {
-        private static final float HEIGHT_WEIGHT = 0.08f;
-        private final TerrainQuad terrain;
-        private final Vector3f scale;
-
-        public SearchWorld(TerrainQuad terrain) {
-            this.terrain = terrain;
-            this.scale = terrain.getWorldScale().clone();
-        }
-
-        @Override
-        public float getWeight(Vector2f v1, Vector2f v2) {
-            float diffHeight = Math.abs(terrain.getHeight(v1) - terrain.getHeight(v2));
-            // http://blog.runevision.com/2016/03/note-on-creating-natural-paths-in.html
-            return v2.distance(v1) * (1 + diffHeight * diffHeight * scale.y / scale.x * HEIGHT_WEIGHT);
-        }
-
-        @Override
-        public float getHeuristic(Vector2f v1, Vector2f v2) {
-            // to be admissable this must be strictly less than the getWeight function
-            // however its height diff is squared for weighting reasons, so we can't just
-            // and the height diff here
-            return v2.distance(v1);
-        }
-
-        @Override
-        public Set<Vector2f> getNeighbours(Vector2f pos) {
-            List<Vector2f> results = new LinkedList<>();
-            float scaleX = scale.x;
-            float scaleZ = scale.z;
-            for (float x = pos.x - scaleX; x < pos.x + 2 * scaleX; x += scaleX) {
-                for (float z = pos.y - scaleZ; z < pos.y + 2 * scaleZ; z += scaleZ) {
-                    if (x == pos.x && z == pos.y)
-                        continue; // ignore self
-
-                    Vector2f newPos = new Vector2f(x, z);
-
-                    if (Float.isNaN(terrain.getHeight(newPos)))
-                        continue;
-                    // TODO how do we avoid the edge of the terrain?
-                    results.add(newPos);
-                }
-            }
-            return new HashSet<>(results);
-        }
     }
 
     static Vector3f gridToWorldSpace(TerrainQuad terrain, Vector2f pos) {
@@ -287,6 +295,23 @@ public class PathWorld extends World {
         for (RoadPointList pointList : roadPointLists) {
             total += pointList.used ? 1 : 0;
         }
-        return total/roadPointLists.size();
+        return total / roadPointLists.size();
+    }
+
+    @Override
+    public Transform start(int i) {
+        return new Transform(this.getStartPos(), this.getStartRot());
+    }
+
+    @Override
+    public Vector3f[] checkpoints() {
+        if (this.roadPointLists.isEmpty())
+            throw new IllegalStateException("Unknown checkpoint position, was i called before i was loaded?");
+        List<Vector3f> output = new LinkedList<>();
+        for (RoadPointList p: this.roadPointLists) {
+            output.addAll(p);
+        }
+
+        return output.toArray(new Vector3f[0]);
     }
 }

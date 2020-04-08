@@ -6,6 +6,7 @@ import java.util.List;
 import com.jme3.app.Application;
 import com.jme3.app.state.AppState;
 import com.jme3.app.state.AppStateManager;
+import com.jme3.math.FastMath;
 
 import rallygame.car.data.Car;
 import rallygame.drive.*;
@@ -54,7 +55,7 @@ public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
                 loadme.add(new ChooseCar((IChooseStuff)this));
                 break;
 			case Fast:
-				World w = new PathWorld();
+				World w = new PathWorld(FastMath.nextRandomInt() % 10);
 				loadingStates.add(w);
                 loadme.add(new DriveBase((IDriveDone)this, Car.Runner, w));
                 break;
