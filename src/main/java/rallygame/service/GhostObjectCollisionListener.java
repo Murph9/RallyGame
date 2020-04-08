@@ -26,6 +26,9 @@ public class GhostObjectCollisionListener implements PhysicsCollisionListener {
         Spatial b = event.getNodeB();
         PhysicsCollisionObject bc = event.getObjectB();
 
+        if (a == null || b == null)
+            return; //something didn't add it to the physics space correctly, so ignore it it will come up somewhere else
+
         if (a.getControl(GhostControl.class) != null && b.getControl(GhostControl.class) != null) {
             return; // ignore ghost | ghost collisions
         }
