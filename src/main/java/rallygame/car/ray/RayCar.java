@@ -51,6 +51,7 @@ public class RayCar implements PhysicsTickListener {
 	protected Vector3f dragDir;
 	protected float driftAngle;
 	public final Vector3f planarGForce;
+	protected float travelledDistance;
 	
 	//hacks
 	protected boolean tractionEnabled = true;
@@ -77,7 +78,9 @@ public class RayCar implements PhysicsTickListener {
 	public void prePhysicsTick(PhysicsSpace space, float tpf) {
         if (this.raycaster == null || raycaster.getPhysicsSpace() != space)
             this.raycaster = new PhysicsRaycaster(space);
-        
+		
+		travelledDistance += rbc.getLinearVelocity().length() * tpf;
+		
         if (!rbEnabled())
             return;
 

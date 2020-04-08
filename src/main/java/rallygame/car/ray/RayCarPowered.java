@@ -201,7 +201,7 @@ public class RayCarPowered extends RayCar {
 	public final String statsString() {
 		return rallygame.helper.H.round3f(rbc.getPhysicsLocation(), 2) + "\nspeed:" + rallygame.helper.H.round3f(rbc.getLinearVelocity(), 2)
                 + "m/s\nRPM:" + curRPM + "\nengine:" + engineTorque + "\ndrag:" + H.roundDecimal(dragDir.length(), 3) + " rr("
-                + H.roundDecimal(rollingResistanceTotal(), 3) + ")" + "N";
+                + H.roundDecimal(rollingResistanceTotal(), 3) + ")N\ndistanceTravelled:" + H.roundDecimal(travelledDistance, 1)+"m";
     }
     
     private float rollingResistanceTotal() {

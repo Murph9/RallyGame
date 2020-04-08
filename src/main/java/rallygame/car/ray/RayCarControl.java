@@ -56,7 +56,6 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
 	private final List<RawInputListener> controls;
 	private ICarAI ai;
 	
-	private float travelledDistance;
 	public float getDistanceTravelled() { return this.travelledDistance; }
 	
 	private final Node rootNode;
@@ -136,9 +135,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
             right = rotation.mult(Vector3f.UNIT_X.negate());
             angularVel = rbc.getAngularVelocity();
             location = rbc.getPhysicsLocation();
-            
-            travelledDistance += rbc.getLinearVelocity().length() * tpf;
-            
+                        
             //wheel turning logic
             steeringCurrent = 0;
             if (steerLeft != 0) //left
