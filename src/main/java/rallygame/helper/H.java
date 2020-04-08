@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.text.DecimalFormat;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,19 +41,26 @@ public class H {
 		return str(os, ",");
 	}
     
-    @SafeVarargs
-    public static <T> Boolean oneTrue(Function<T, Boolean> f, T... ts) {
+    
+    public static <T> Boolean oneTrue(Function<T, Boolean> f, List<T> ts) {
         for (T t : ts)
             if (f.apply(t))
                 return true;
         return false;
-    }
+	}
 	@SafeVarargs
-	public static <T> Boolean allTrue(Function<T, Boolean> f, T... ts) {
-		for (T t: ts)
+	public static <T> Boolean oneTrue(Function<T, Boolean> f, T... ts) {
+		return oneTrue(f, Arrays.asList(ts));
+	}
+	public static <T> Boolean allTrue(Function<T, Boolean> f, List<T> ts) {
+		for (T t : ts)
 			if (!f.apply(t))
 				return false;
 		return true;
+	}
+	@SafeVarargs
+	public static <T> Boolean allTrue(Function<T, Boolean> f, T... ts) {
+		return allTrue(f, Arrays.asList(ts));
 	}
     
     public static float skew(float input, float min, float max, float outMin, float outMax) {
