@@ -31,10 +31,11 @@ class SearchWorld implements ISearchWorld<Vector2f> {
 
     @Override
     public float getHeuristic(Vector2f v1, Vector2f v2) {
-        // to be admissable this must be strictly less than the getWeight function
-        // however its height diff is squared for weighting reasons, so we can't just
-        // and the height diff here
-        return v2.distance(v1);
+        // for the perfect solition this must be admissable (<= getWeight() always)
+        // getWeight() is x^2 which is invalid for values less than 1
+        // but will just get a slightly non-optimal path and we don't care
+        float diffHeight = Math.abs(terrain.getHeight(v1) - terrain.getHeight(v2));
+        return v2.distance(v1) * (1 + diffHeight * diffHeight * scale.y / scale.x * heightWeight);
     }
 
     @Override
