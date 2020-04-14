@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 
 import com.jme3.math.Vector2f;
 import com.jme3.terrain.geomipmap.TerrainQuad;
@@ -18,7 +19,7 @@ import rallygame.service.PerlinNoise;
 public class AStarTest {
 
     @Test
-    public void BasicAStar() {
+    public void BasicAStar() throws TimeoutException {
         int sideLength = 9;
         PerlinNoise noise = new PerlinNoise(sideLength, 0);
         noise.load();

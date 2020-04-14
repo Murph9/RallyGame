@@ -20,8 +20,7 @@ public class TerrainUtil {
         Vector3f scale = terrain.getWorldScale();
 
         for (Vector3f[] quad : quads) {
-            float height = H.minIn(quad[0].y, quad[1].y, quad[2].y, quad[3].y);
-            height /= scale.y;
+            float height = H.minIn(quad[0].y, quad[1].y, quad[2].y, quad[3].y) / scale.y;
 
             List<Vector2f> points = getGridPosBoundingQuad(scale, quad);
             for (Vector2f point : points) {
@@ -30,7 +29,7 @@ public class TerrainUtil {
             }
         }
 
-        terrain.setHeight(new ArrayList<Vector2f>(results.keySet()), new ArrayList<Float>(results.values()));
+        terrain.setHeight(new ArrayList<>(results.keySet()), new ArrayList<>(results.values()));
         return results;
     }
 

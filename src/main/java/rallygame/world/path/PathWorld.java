@@ -43,7 +43,6 @@ import rallygame.helper.H;
 import rallygame.helper.Log;
 import rallygame.helper.TerrainUtil;
 import rallygame.service.search.AStar;
-import rallygame.service.search.ISearch;
 import rallygame.world.ICheckpointWorld;
 import rallygame.world.World;
 import rallygame.world.WorldType;
@@ -56,7 +55,7 @@ public class PathWorld extends World implements ICheckpointWorld {
         public boolean used;
     }
 
-    private static final float HEIGHT_WEIGHT = 0.04f;
+    private static final float HEIGHT_WEIGHT = 0.02f;
 
     private final Node roadNode;
     private final int sideLength;
@@ -195,25 +194,26 @@ public class PathWorld extends World implements ICheckpointWorld {
         if (!H.allTrue(x -> x != null && x.set && !x.used, roadPointLists))
             return;
 
+        AssetManager am = getApplication().getAssetManager();
         for (RoadPointList roadPointList : new LinkedList<>(roadPointLists)) {
-            AssetManager am = getApplication().getAssetManager();
+            if (roadPointList.isEmpty()) {
+                roadPointList.used = true;
+                continue;
+            }
+            
             roadPointList.add(0, roadPointList.get(0)); // copy the first one
             roadPointList.add(roadPointList.get(roadPointList.size() - 1)); // copy the last one
             CatmullRomRoad road = drawRoad(am, roadPointList);
 
+            roadPointList.used = true;
             executor.submit(() -> {
                 List<Vector3f[]> quads = road.getMeshAsQuads();
                 getApplication().enqueue(() -> {
                     Map<Vector2f, Float> heights = TerrainUtil.lowerTerrainSoItsUnderQuads(terrain, quads);
                     updateTerrainCollision();
-                    List<Vector3f> heights3 = heights.entrySet().stream().map(
-                            x -> new Vector3f(x.getKey().x, x.getValue() * terrain.getWorldScale().y, x.getKey().y))
-                            .collect(Collectors.toList());
-                    drawBoxes(am, this.roadNode, heights3);
+                    drawBoxes(am, this.roadNode, heights);
                 });
             });
-
-            roadPointList.used = true;
         }
     }
 
@@ -234,6 +234,12 @@ public class PathWorld extends World implements ICheckpointWorld {
         return c3;
     }
 
+    private void drawBoxes(AssetManager am, Node node, Map<Vector2f, Float> vecMap) {
+        List<Vector3f> heights3 = vecMap.entrySet().stream()
+                .map(x -> new Vector3f(x.getKey().x, x.getValue() * terrain.getWorldScale().y, x.getKey().y))
+                .collect(Collectors.toList());
+        drawBoxes(am, this.roadNode, heights3);
+    }
     private void drawBoxes(AssetManager am, Node node, List<Vector3f> points) {
         float size = 0.2f;
         Box box = new Box(size, size, size);
@@ -250,17 +256,20 @@ public class PathWorld extends World implements ICheckpointWorld {
         executor.submit(() -> {
             List<Vector2f> list = null;
             try {
-                ISearch<Vector2f> search = new AStar<Vector2f>(new SearchWorld(terrain, HEIGHT_WEIGHT), null);
+                AStar<Vector2f> search = new AStar<>(new SearchWorld(terrain, HEIGHT_WEIGHT));
+                search.setTimeoutMills((long)(10*1E6)); // x sec
                 list = search.findPath(H.v3tov2fXZ(gridToWorldSpace(terrain, start)),
                         H.v3tov2fXZ(gridToWorldSpace(terrain, end)));
-
                 outList.addAll(list.stream().map(x -> new Vector3f(x.x, terrain.getHeight(x), x.y))
                         .collect(Collectors.toList()));
-                outList.set = true;
+                Log.p("Done astar search, path length = ", list.size());
             } catch (Exception e) {
-                Log.p(e);
+                outList.addAll(new LinkedList<>());
+                Log.e(e);
+                Log.e("Astar search failed");
+            } finally {
+                outList.set = true;
             }
-            Log.p("Done astar search, path length = ", list == null ? 0 : list.size());
         });
     }
 

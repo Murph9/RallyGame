@@ -9,14 +9,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
+
+import rallygame.helper.H;
 
 //AStar on a terrainquad
 public class AStar<T> implements ISearch<T> {
 
     private final ISearchWorld<T> world;
     private final Set<T> closed;
-    private final BiConsumer<String, List<T>> progressCallback;
+    private BiConsumer<String, List<T>> progressCallback;
+    private long timeoutNanos;
+
+    private long startTime;
     private long prevTime;
 
     public AStar(ISearchWorld<T> world) {
@@ -27,8 +33,15 @@ public class AStar<T> implements ISearch<T> {
         this.progressCallback = progressCallback;
         closed = new HashSet<>();
     }
+    public void setProgressCallback(BiConsumer<String, List<T>> progressCallback) {
+        this.progressCallback = progressCallback;
+    }
+    public void setTimeoutMills(long mills) {
+        this.timeoutNanos = mills*1000;
+    }
 
-    public List<T> findPath(T start, T end) {
+    @Override
+    public List<T> findPath(T start, T end) throws TimeoutException {
         if (start.equals(end))
             return Arrays.asList(start);
 
@@ -44,7 +57,7 @@ public class AStar<T> implements ISearch<T> {
         for (T pos : world.getNeighbours(curNode.value))
             queue.add(new Node(curNode, pos, 0, world.getHeuristic(end, pos)));
 
-        prevTime = System.nanoTime();
+        startTime = prevTime = System.nanoTime();
         while (!queue.isEmpty()) {
             curNode = queue.poll();
             closed.add(curNode.value);
@@ -64,13 +77,15 @@ public class AStar<T> implements ISearch<T> {
                 }
             }
 
-            if (progressCallback != null) {
-                long nowTime = System.nanoTime();
-                if (prevTime + 4e8 < nowTime) {
-                    prevTime = nowTime;
+            long nowTime = System.nanoTime();
+            if (prevTime + 4e8 < nowTime) {
+                prevTime = nowTime;
+                if (progressCallback != null) {
                     this.progressCallback.accept(queue.size() + "", generatePath(curNode));
                 }
             }
+            if (timeoutNanos != 0 && nowTime - startTime > timeoutNanos)
+                throw new TimeoutException("The given timeout of " + H.roundDecimal(timeoutNanos / 1E9, 4) + "s was reached");
         }
 
         throw new IllegalStateException("Unknown path, please try and fix that");
