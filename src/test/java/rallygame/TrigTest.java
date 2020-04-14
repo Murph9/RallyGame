@@ -158,4 +158,27 @@ public class TrigTest {
         assertEquals(c, Trig.closestTo(new Vector3f(0, 0, 0.1f), list));
         assertEquals(b, Trig.closestTo(new Vector3f(0, 0.1f, 0), list));
     }
+
+    @Test
+    public void calcPlaneEquationFromPoints() {
+        float[] result2 = Trig.calcPlaneEquationFromPoints(new Vector3f(0, 0, 0), new Vector3f(1, 0, 0),
+                new Vector3f(0, 1, 0));
+        assertEquals(0, result2[0], 0.0001f);
+        assertEquals(0, result2[1], 0.0001f);
+        assertEquals(1, result2[2], 0.0001f);
+        assertEquals(0, result2[3], 0.0001f);
+
+        float z2 = Trig.getZFromPlaneEqandXY(result2, 0, 0);
+        assertEquals(0, z2, 0.0001f);
+
+        float[] result = Trig.calcPlaneEquationFromPoints(new Vector3f(6, 2, -2), new Vector3f(0, 4, 11),
+                new Vector3f(2, 31, 3));
+        assertEquals(-367, result[0], 0.0001f);
+        assertEquals(-22, result[1], 0.0001f);
+        assertEquals(-166, result[2], 0.0001f);
+        assertEquals(1914, result[3], 0.0001f);
+
+        float z = Trig.getZFromPlaneEqandXY(result, 0, 0);
+        assertEquals(1914f / 166f, z, 0.0001f);
+    }
 }

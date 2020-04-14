@@ -134,4 +134,22 @@ public class Trig {
         return new Vector2f(px, py);
     }
     
+
+    /** Uses an equation of the form: ax + by + cz + d = 0 and returns z */
+    public static float getZFromPlaneEqandXY(float[] eq, float x, float y) {
+        return -(eq[0] * x + eq[1] * y + eq[3]) / eq[2];
+    }
+
+    /** Uses the 3 points and returns the equation in the form: ax + by + cz + d = 0 */
+    public static float[] calcPlaneEquationFromPoints(Vector3f a, Vector3f b, Vector3f c) {
+        Vector3f BA = b.subtract(a);
+        Vector3f CA = c.subtract(a);
+
+        float A = (BA.y * CA.z) - (CA.y * BA.z);
+        float B = (BA.z * CA.x) - (CA.z * BA.x);
+        float C = (BA.x * CA.y) - (CA.x * BA.y);
+        float D = -(A * a.x + B * a.y + C * a.z);
+
+        return new float[] { A, B, C, D };
+    }
 }
