@@ -16,6 +16,7 @@ import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
 import com.jme3.math.Spline;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
@@ -78,7 +79,7 @@ public class PathWorld extends World implements ICheckpointWorld {
     // https://github.com/jMonkeyEngine/sdk/blob/master/jme3-terrain-editor/src/com/jme3/gde/terraineditor/tools/LevelTerrainToolAction.java
 
     public PathWorld() {
-        this(0);
+        this(FastMath.nextRandomInt());
     }
     public PathWorld(int seed) {
         this(seed, 6, 25, 400);
@@ -223,7 +224,6 @@ public class PathWorld extends World implements ICheckpointWorld {
         Spline s3 = new Spline(SplineType.CatmullRom, list, 1, false); // [0-1], 1 is more smooth
         CatmullRomRoad c3 = new CatmullRomRoad(s3, 1, 10);
         Geometry g = new Geometry("spline road", c3);
-        g.setLocalTranslation(0, 0.2f, 0);
         this.roadNode.attachChild(LoadModelWrapper.create(am, g, ColorRGBA.Green));
 
         // add to physics space
