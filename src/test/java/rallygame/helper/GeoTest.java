@@ -1,4 +1,4 @@
-package rallygame;
+package rallygame.helper;
 
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
@@ -7,8 +7,6 @@ import com.jme3.scene.VertexBuffer.Type;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import rallygame.helper.Geo;
 
 public class GeoTest {
 

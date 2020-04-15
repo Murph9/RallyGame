@@ -1,4 +1,4 @@
-package rallygame;
+package rallygame.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -9,8 +9,6 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 
 import org.junit.jupiter.api.Test;
-
-import rallygame.service.GridPositions;
 
 public class GridPositionsTest {
     

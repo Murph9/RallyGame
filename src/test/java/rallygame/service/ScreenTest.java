@@ -1,4 +1,4 @@
-package rallygame;
+package rallygame.service;
 
 import com.jme3.math.Vector3f;
 import com.jme3.system.AppSettings;
@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import rallygame.service.Screen;
 import rallygame.service.Screen.HorizontalPos;
 import rallygame.service.Screen.VerticalPos;
 

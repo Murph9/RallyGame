@@ -1,4 +1,4 @@
-package rallygame;
+package rallygame.helper;
 
 public class TestObj {
     public float value;

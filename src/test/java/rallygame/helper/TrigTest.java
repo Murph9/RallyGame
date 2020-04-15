@@ -1,11 +1,9 @@
-package rallygame;
+package rallygame.helper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
-
-import rallygame.helper.Trig;
 
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;

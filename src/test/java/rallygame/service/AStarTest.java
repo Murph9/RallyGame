@@ -1,4 +1,4 @@
-package rallygame;
+package rallygame.service;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 
 import rallygame.service.search.AStar;
 import rallygame.service.search.ISearchWorld;
-import rallygame.service.PerlinNoise;
 
 public class AStarTest {
 
@@ -49,7 +48,8 @@ public class AStarTest {
 
         @Override
         public float getHeuristic(Vector2f v1, Vector2f v2) {
-            return v2.distance(v1);
+            float diffHeight = Math.abs(terrain.getHeight(v1) - terrain.getHeight(v2));
+            return v2.distance(v1) * (1 + diffHeight * diffHeight * 5);
         }
 
         @Override

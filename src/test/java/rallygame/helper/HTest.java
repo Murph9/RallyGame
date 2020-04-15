@@ -1,4 +1,4 @@
-package rallygame;
+package rallygame.helper;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -17,9 +17,6 @@ import com.jme3.math.Vector3f;
 
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
-
-import rallygame.helper.Colours;
-import rallygame.helper.H;
 
 public class HTest {
 

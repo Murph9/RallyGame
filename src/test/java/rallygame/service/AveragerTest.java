@@ -1,4 +1,4 @@
-package rallygame;
+package rallygame.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
