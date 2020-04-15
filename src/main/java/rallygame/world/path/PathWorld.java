@@ -86,6 +86,8 @@ public class PathWorld extends World implements ICheckpointWorld {
     public PathWorld(int seed, int size, float scaleXZ, float scaleY) {
         super("PathWorld");
 
+        Log.p("Starting path world with seed: " + seed);
+
         roadNode = new Node("lineNode");
         sideLength = (1 << size) + 1; //6 -> 64 + 1
         terrainScaleXZ = scaleXZ;
@@ -210,14 +212,24 @@ public class PathWorld extends World implements ICheckpointWorld {
                     Map<Vector2f, Float> heights = TerrainUtil.lowerTerrainSoItsUnderQuads(terrain, quads);
                     // alt: TerrainUtil.lowerTerrainSoItsUnderQuadsMin(terrain, quads);
                     updateTerrainCollision();
-                    drawBoxes(am, this.roadNode, heights);
+                    // drawBoxes(am, this.roadNode, heights);
                 });
             });
         }
     }
 
-    private CatmullRomRoad drawRoad(AssetManager am, List<Vector3f> list) {
+    private List<Vector3f> smoothPoints(List<Vector3f> points) {
         // TODO use a rolling average to smooth points so there are less hard corners
+        List<Vector3f> out = points.stream().filter(x -> rand.nextDouble() > 0.6f).collect(Collectors.toList());
+        if (!out.contains(points.get(0)))
+            out.add(0, points.get(0)); //add the first point in if its not there
+        if (!out.contains(points.get(points.size() - 1)))
+            out.add(points.get(points.size() - 1)); // add the last point in if its not there
+        return out;
+    }
+
+    private CatmullRomRoad drawRoad(AssetManager am, List<Vector3f> list) {
+        list = smoothPoints(list);
 
         // draw a spline road to show where it is
         Spline s3 = new Spline(SplineType.CatmullRom, list, 1, false); // [0-1], 1 is more smooth
@@ -233,8 +245,8 @@ public class PathWorld extends World implements ICheckpointWorld {
         return c3;
     }
 
-    private void drawBoxes(AssetManager am, Node node, Map<Vector2f, Float> vecMap) {
-        List<Vector3f> heights3 = vecMap.entrySet().stream()
+    private void drawBoxes(AssetManager am, Node node, Map<Vector2f, Float> vecHeightMap) {
+        List<Vector3f> heights3 = vecHeightMap.entrySet().stream()
                 .map(x -> new Vector3f(x.getKey().x, x.getValue() * terrain.getWorldScale().y, x.getKey().y))
                 .collect(Collectors.toList());
         drawBoxes(am, this.roadNode, heights3);
@@ -244,7 +256,6 @@ public class PathWorld extends World implements ICheckpointWorld {
         Box box = new Box(size, size, size);
         for (Vector3f pos : points) {
             Geometry g = Geo.createShape(am, box, ColorRGBA.Yellow, pos.add(0, size / 2, 0), "boxes");
-            g.getMaterial().getAdditionalRenderState().setWireframe(false);
             this.roadNode.attachChild(g);
         }
     }
@@ -256,7 +267,7 @@ public class PathWorld extends World implements ICheckpointWorld {
             List<Vector2f> list = null;
             try {
                 AStar<Vector2f> search = new AStar<>(new SearchWorld(terrain, HEIGHT_WEIGHT));
-                search.setTimeoutMills((long)(10*1E6)); // x sec
+                search.setTimeoutMills((long)(30*1E6)); // x sec
                 list = search.findPath(H.v3tov2fXZ(gridToWorldSpace(terrain, start)),
                         H.v3tov2fXZ(gridToWorldSpace(terrain, end)));
                 outList.addAll(list.stream().map(x -> new Vector3f(x.x, terrain.getHeight(x), x.y))
