@@ -140,7 +140,9 @@ public class Trig {
         return -(eq[0] * x + eq[1] * y + eq[3]) / eq[2];
     }
 
-    /** Uses the 3 points and returns the equation in the form: ax + by + cz + d = 0 */
+    /** Uses the 3 points and returns the equation in the form: ax + by + cz + d = 0 
+     * WARNING: this seems to have some issues, use jme3 Plane class instead
+    */
     public static float[] calcPlaneEquationFromPoints(Vector3f a, Vector3f b, Vector3f c) {
         Vector3f BA = b.subtract(a);
         Vector3f CA = c.subtract(a);

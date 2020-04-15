@@ -201,8 +201,6 @@ public class PathWorld extends World implements ICheckpointWorld {
                 continue;
             }
             
-            roadPointList.add(0, roadPointList.get(0)); // copy the first one
-            roadPointList.add(roadPointList.get(roadPointList.size() - 1)); // copy the last one
             CatmullRomRoad road = drawRoad(am, roadPointList);
 
             roadPointList.used = true;
@@ -210,6 +208,7 @@ public class PathWorld extends World implements ICheckpointWorld {
                 List<Vector3f[]> quads = road.getMeshAsQuads();
                 getApplication().enqueue(() -> {
                     Map<Vector2f, Float> heights = TerrainUtil.lowerTerrainSoItsUnderQuads(terrain, quads);
+                    // alt: TerrainUtil.lowerTerrainSoItsUnderQuadsMin(terrain, quads);
                     updateTerrainCollision();
                     drawBoxes(am, this.roadNode, heights);
                 });
@@ -262,7 +261,7 @@ public class PathWorld extends World implements ICheckpointWorld {
                         H.v3tov2fXZ(gridToWorldSpace(terrain, end)));
                 outList.addAll(list.stream().map(x -> new Vector3f(x.x, terrain.getHeight(x), x.y))
                         .collect(Collectors.toList()));
-                Log.p("Done astar search, path length = ", list.size());
+                Log.p("Done astar search, path length =", list.size());
             } catch (Exception e) {
                 outList.addAll(new LinkedList<>());
                 Log.e(e);

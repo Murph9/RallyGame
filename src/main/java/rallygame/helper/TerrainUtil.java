@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.jme3.math.FastMath;
+import com.jme3.math.Plane;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.terrain.geomipmap.TerrainQuad;
@@ -14,6 +15,32 @@ import com.jme3.terrain.geomipmap.TerrainQuad;
 public class TerrainUtil {
 
     public static Map<Vector2f, Float> lowerTerrainSoItsUnderQuads(TerrainQuad terrain, List<Vector3f[]> quads) {
+        Map<Vector2f, Float> results = new HashMap<>();
+
+        Vector3f scale = terrain.getWorldScale();
+
+        for (Vector3f[] quad : quads) {
+            // get plane of the quad
+            Plane plane = new Plane();
+            plane.setPlanePoints(quad[0], quad[1], quad[2]);
+
+            List<Vector2f> points = getGridPosBoundingQuad(scale, quad);
+            for (Vector2f point : points) {
+                // get height at point on the plane
+                Vector3f p3 = H.v2tov3fXZ(point);
+                p3.y = quad[0].y;
+                float height = plane.getClosestPoint(p3).y / scale.y;
+                if (Float.isNaN(height) || height <= 0)
+                    break;
+                if (!results.containsKey(point) || results.get(point) > height) // pick the lower one
+                    results.put(point, height);
+            }
+        }
+        terrain.setHeight(new ArrayList<>(results.keySet()), new ArrayList<>(results.values()));
+        return results;
+    }
+
+    public static Map<Vector2f, Float> lowerTerrainSoItsUnderQuadsMin(TerrainQuad terrain, List<Vector3f[]> quads) {
 
         Map<Vector2f, Float> results = new HashMap<>();
 
