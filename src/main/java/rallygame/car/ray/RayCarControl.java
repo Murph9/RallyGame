@@ -169,6 +169,9 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
             //and drift angle needs to be large enough to matter
         }
 
+        if (local_vel.length() < 8) //prevent being able to turn at slow speeds
+            return trySteerAngle;
+
         // this is magic, but: minimum should be bast pjk lat, but it doesn't catch up to the turning angle required
         // so we just add some of the angular vel value to it
 		return this.wheels[0].data.maxLat + angularVel.length()*0.25f; //constant needs minor adjustments
