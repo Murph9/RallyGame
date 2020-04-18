@@ -1,6 +1,7 @@
 package rallygame.service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.jme3.app.Application;
@@ -12,6 +13,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
+import jme3tools.optimize.GeometryBatchFactory;
 import rallygame.effects.LoadModelWrapper;
 
 public class ObjectPlacer extends BaseAppState {
@@ -37,15 +39,22 @@ public class ObjectPlacer extends BaseAppState {
             return value;
         }
     }
+    public class NodeId extends ObjectId {}
 
     private final boolean usePhysics;
     private final Node rootNode;
     private final Map<ObjectId, Spatial> objects;
+    
+    private final Map<NodeId, Node> nodes;
+    private final Map<Node, List<Spatial>> nodePhysicsObjs;
 
     public ObjectPlacer(boolean usePhysics) {
         this.usePhysics = usePhysics;
         rootNode = new Node("object root");
         objects = new HashMap<>();
+        
+        nodes = new HashMap<>();
+        nodePhysicsObjs = new HashMap<>();
     }
 
     @Override
@@ -91,5 +100,36 @@ public class ObjectPlacer extends BaseAppState {
         sp.removeFromParent();
         if (usePhysics)
             getState(BulletAppState.class).getPhysicsSpace().remove(sp);
+    }
+
+    /** Add many as optimised node */
+    public NodeId addBulk(List<Spatial> sp, List<Vector3f> locations) {
+        if (sp.size() != locations.size())
+            throw new IllegalArgumentException("Please, same lengths: " + sp.size() + " " + locations.size());
+
+        NodeId id = new NodeId();
+        Node node = new Node();
+        nodes.put(id, node);
+        for (int i = 0; i < sp.size(); i++) {
+            sp.get(i).setLocalTranslation(locations.get(i));
+            sp.get(i).addControl(new RigidBodyControl(0));
+            node.attachChild(sp.get(i));
+            if (usePhysics)
+                getState(BulletAppState.class).getPhysicsSpace().add(sp.get(i));
+        }
+
+        nodePhysicsObjs.put(node, sp);
+        GeometryBatchFactory.optimize(node);
+        rootNode.attachChild(node);
+        return id;
+    }
+    public void removeBulk(NodeId id) {
+        if (id == null)
+            return;
+        Spatial sp = nodes.remove(id);
+        if (sp == null)
+            return;
+
+        sp.removeFromParent();
     }
 }
