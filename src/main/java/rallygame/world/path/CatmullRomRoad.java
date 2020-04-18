@@ -6,6 +6,7 @@ import java.util.List;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Spline;
+import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.math.Spline.SplineType;
 import com.jme3.scene.Mesh;
@@ -20,6 +21,8 @@ public class CatmullRomRoad extends Mesh {
     private final Spline spline;
     private final float width;
     private final Vector3f[] vertexArray;
+    private final Vector2f[] vertexTexCoord;
+    private final Vector3f[] vertexNormalCoord;
 
     /** Road based on a CatmullRom spline, with width. Remember it can't use the first and last ones. */
     public CatmullRomRoad(Spline spline, int nbSubSegments, float width) {
@@ -68,8 +71,26 @@ public class CatmullRomRoad extends Mesh {
             vertexArray[i++] = temp4.clone();
             vertexArray[i++] = temp2.clone();
         }
-        
+
+        vertexTexCoord = new Vector2f[cpCount * nbSubSegments * 3 * 2];
+        for (int k = 0; k < vertexTexCoord.length; k += 6) {
+            vertexTexCoord[k] = new Vector2f(0, 1);
+            vertexTexCoord[k + 1] = new Vector2f(1, 0);
+            vertexTexCoord[k + 2] = new Vector2f(0, 1);
+            vertexTexCoord[k + 3] = new Vector2f(0, 1);
+            vertexTexCoord[k + 4] = new Vector2f(1, 0);
+            vertexTexCoord[k + 5] = new Vector2f(1, 1);
+        }
+
+        vertexNormalCoord = new Vector3f[cpCount * nbSubSegments * 3 * 2];
+        for (int k = 0; k < vertexNormalCoord.length; k++) {
+            vertexNormalCoord[k] = new Vector3f(0, 0, 1);
+        }
+
         this.setBuffer(VertexBuffer.Type.Position, 3, BufferUtils.createFloatBuffer(vertexArray));
+        this.setBuffer(VertexBuffer.Type.TexCoord, 2, BufferUtils.createFloatBuffer(vertexTexCoord));
+        this.setBuffer(VertexBuffer.Type.Normal, 3, BufferUtils.createFloatBuffer(vertexNormalCoord));
+
         this.setMode(Mesh.Mode.Triangles);
         this.updateCounts();
         this.updateBound();
