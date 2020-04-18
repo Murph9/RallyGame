@@ -71,8 +71,10 @@ public class CatmullRomRoad extends Mesh {
         
         this.setBuffer(VertexBuffer.Type.Position, 3, BufferUtils.createFloatBuffer(vertexArray));
         this.setMode(Mesh.Mode.Triangles);
-        this.updateBound();
         this.updateCounts();
+        this.updateBound();
+
+        this.setStatic();
     }
 
     private static final Quaternion rot90 = new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y);

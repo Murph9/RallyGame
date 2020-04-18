@@ -107,7 +107,8 @@ public class RayWheelControl {
         mesh.setBuffer(Type.TexCoord, 2, BufferUtils.createFloatBuffer(coord));
         // this is the default, but i have to come looking for this again...
         mesh.setMode(Mode.Triangles);
-		this.skidLine.setMesh(mesh);
+        mesh.setStreamed(); //will be updated rather often
+        this.skidLine.setMesh(mesh);
 		
 		//material uses vertex colours
 		Material mat = new Material(app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
