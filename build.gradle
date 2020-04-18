@@ -45,7 +45,7 @@ project(":assets") {
     }
 }
 
-def jme3Version = '3.2.4-stable'
+def jme3Version = '3.3.0-stable'
 dependencies {
     implementation 'com.google.guava:guava:28.0-jre'
 
