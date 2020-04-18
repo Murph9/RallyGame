@@ -17,14 +17,15 @@ import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Spline;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.math.Spline.SplineType;
 import com.jme3.math.Transform;
-import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.control.Control;
 import com.jme3.scene.shape.Box;
 import com.jme3.terrain.geomipmap.TerrainQuad;
@@ -42,6 +43,9 @@ import rallygame.helper.Geo;
 import rallygame.helper.H;
 import rallygame.helper.Log;
 import rallygame.helper.TerrainUtil;
+import rallygame.helper.Trig;
+import rallygame.service.ObjectPlacer;
+import rallygame.service.ObjectPlacer.NodeId;
 import rallygame.service.search.AStar;
 import rallygame.world.ICheckpointWorld;
 import rallygame.world.World;
@@ -56,6 +60,7 @@ public class PathWorld extends World implements ICheckpointWorld {
     }
 
     private static final float HEIGHT_WEIGHT = 0.02f;
+    private static final float ROAD_WIDTH = 10f;
 
     private final Node roadNode;
     private final int sideLength;
@@ -65,11 +70,26 @@ public class PathWorld extends World implements ICheckpointWorld {
     private final float terrainScaleY;
     private final Random rand;
 
+    private final List<RoadPointList> roadPointLists;
+    private final List<CatmullRomRoad> roads;
+    private NodeId placedObjects;
+
+    private Pass pass;
+
     private FilteredBasis filteredBasis;
     private TerrainQuad terrain;
     private Control collision;
     private ScheduledThreadPoolExecutor executor;
-    private List<RoadPointList> roadPointLists;
+
+    enum Pass {
+        Terrain(1 / 3f), Objects(2 / 3f), Done(1);
+
+        private final float percent;
+        Pass(float percent) {
+            this.percent = percent;
+        }
+        public float getPercent() { return percent; }
+    }
 
     // TODO:
     // maybe we need to have 'any' point on the other side of the quad as the search goal
@@ -100,6 +120,7 @@ public class PathWorld extends World implements ICheckpointWorld {
         end = new Vector2f(length, length);
 
         roadPointLists = new LinkedList<>();
+        roads = new LinkedList<>();
     }
 
     @Override
@@ -154,6 +175,8 @@ public class PathWorld extends World implements ICheckpointWorld {
     public void initialize(Application app) {
         super.initialize(app);
 
+        pass = Pass.Terrain;
+
         this.rootNode.attachChild(roadNode);
 
         AssetManager am = app.getAssetManager();
@@ -171,7 +194,6 @@ public class PathWorld extends World implements ICheckpointWorld {
         baseMat.setFloat("Offset", terrainScaleY * 0.1f);
 
         terrain.setMaterial(baseMat);
-        terrain.setQueueBucket(Bucket.Opaque);
         this.rootNode.attachChild(terrain);
         updateTerrainCollision();
 
@@ -192,48 +214,67 @@ public class PathWorld extends World implements ICheckpointWorld {
 
     @Override
     public void update(float tpf) {
-        // wait until all the road points lists are set before doing this
-        if (!H.allTrue(x -> x != null && x.set && !x.used, roadPointLists))
-            return;
-
         AssetManager am = getApplication().getAssetManager();
-        for (RoadPointList roadPointList : new LinkedList<>(roadPointLists)) {
-            if (roadPointList.isEmpty()) {
-                roadPointList.used = true;
-                continue;
-            }
-            
-            CatmullRomRoad road = drawRoad(am, roadPointList);
 
-            roadPointList.used = true;
-            executor.submit(() -> {
-                List<Vector3f[]> quads = road.getMeshAsQuads();
-                getApplication().enqueue(() -> {
-                    Map<Vector2f, Float> heights = TerrainUtil.lowerTerrainSoItsUnderQuads(terrain, quads);
-                    // alt: TerrainUtil.lowerTerrainSoItsUnderQuadsMin(terrain, quads);
-                    updateTerrainCollision();
-                    // drawBoxes(am, this.roadNode, heights);
+        if (pass == Pass.Objects) {
+            ObjectPlacer op = getState(ObjectPlacer.class);
+            float size = 1f;
+            Box b = new Box(size, size, size);
+            Spatial s = new Geometry("box", b);
+            s = LoadModelWrapper.create(am, s, ColorRGBA.Blue);
+            float maxXZ = terrainScaleXZ * (sideLength - 1) / 2;
+
+            List<Spatial> list = new LinkedList<>();
+            List<Vector3f> locations = new LinkedList<>();
+            for (int i = 0; i < 1000; i++) {
+                Spatial s1 = s.clone();
+                float scale = FastMath.nextRandomFloat()*25 + 1;
+                s1.setLocalScale(scale);
+                s1.setLocalRotation(new Quaternion(FastMath.nextRandomFloat(), FastMath.nextRandomFloat(), FastMath.nextRandomFloat(), FastMath.nextRandomFloat()));
+                list.add(s1);
+                locations.add(selectPointNotOnRoad(scale, maxXZ));
+            }
+
+            placedObjects = op.addBulk(list, locations);
+            pass = Pass.Done;
+        }
+
+        if (pass == Pass.Terrain) {
+            // wait until all the road points lists are set before doing this
+            if (!H.allTrue(x -> x != null && x.set && !x.used, roadPointLists))
+                return;
+
+            for (RoadPointList roadPointList : new LinkedList<>(roadPointLists)) {
+                if (roadPointList.isEmpty()) {
+                    roadPointList.used = true;
+                    continue;
+                }
+                
+                CatmullRomRoad road = drawRoad(am, roadPointList);
+                roads.add(road);
+
+                roadPointList.used = true;
+                executor.submit(() -> {
+                    List<Vector3f[]> quads = road.getMeshAsQuads();
+                    getApplication().enqueue(() -> {
+                        Map<Vector2f, Float> heights = TerrainUtil.lowerTerrainSoItsUnderQuads(terrain, quads);
+                        // alt: TerrainUtil.lowerTerrainSoItsUnderQuadsMin(terrain, quads);
+                        updateTerrainCollision();
+                        // drawBoxes(am, this.roadNode, heights);
+                    });
                 });
-            });
+            }
+
+            pass = Pass.Objects;
         }
     }
 
-    private List<Vector3f> smoothPoints(List<Vector3f> points) {
-        // TODO use a rolling average to smooth points so there are less hard corners
-        List<Vector3f> out = points.stream().filter(x -> rand.nextDouble() > 0.6f).collect(Collectors.toList());
-        if (!out.contains(points.get(0)))
-            out.add(0, points.get(0)); //add the first point in if its not there
-        if (!out.contains(points.get(points.size() - 1)))
-            out.add(points.get(points.size() - 1)); // add the last point in if its not there
-        return out;
-    }
-
     private CatmullRomRoad drawRoad(AssetManager am, List<Vector3f> list) {
-        list = smoothPoints(list);
+        // TODO use a rolling average to smooth points so there are less hard corners
 
         // draw a spline road to show where it is
         Spline s3 = new Spline(SplineType.CatmullRom, list, 1, false); // [0-1], 1 is more smooth
-        CatmullRomRoad c3 = new CatmullRomRoad(s3, 1, 10);
+        CatmullRomRoad c3 = new CatmullRomRoad(s3, 1, ROAD_WIDTH);
         Geometry g = new Geometry("spline road", c3);
         this.roadNode.attachChild(LoadModelWrapper.create(am, g, ColorRGBA.Green));
 
@@ -283,10 +324,38 @@ public class PathWorld extends World implements ICheckpointWorld {
         });
     }
 
+    private Vector3f selectPointNotOnRoad(float objRadius, float max) {
+        Vector3f location = H.randV3f(max, true);
+        while (meshOnRoad(objRadius, location)) {
+            location = H.randV3f(max, true);
+        }
+        location.y = terrain.getHeight(H.v3tov2fXZ(location));
+        return location;
+    }
+    private boolean meshOnRoad(float objRadius, Vector3f location) { 
+        //simple check that its more than x from a road vertex
+        for (RoadPointList road: this.roadPointLists) {
+            for (int i = 0; i < road.size() - 1; i++) {
+                Vector3f cur = road.get(i);
+                Vector3f point = road.get(i + 1);
+                if (Trig.distFromSegment(H.v3tov2fXZ(cur), H.v3tov2fXZ(point), H.v3tov2fXZ(location)) < objRadius + ROAD_WIDTH/2)
+                    return true;
+                cur = point;
+            }
+        }
+
+        return false;
+    }
+
     @Override
     protected void cleanup(Application app) {
         executor.shutdownNow(); // TODO forceful because when the search doesn't finish this blocks closing
         super.cleanup(app);
+
+        if (this.placedObjects != null) {
+            ObjectPlacer op = getState(ObjectPlacer.class);
+            op.removeBulk(this.placedObjects);
+        }
     }
 
     static Vector3f gridToWorldSpace(TerrainQuad terrain, Vector2f pos) {
@@ -307,14 +376,15 @@ public class PathWorld extends World implements ICheckpointWorld {
 
     @Override
     public float loadPercent() {
-        if (roadPointLists.isEmpty())
-            return 0;
-
-        float total = 0;
-        for (RoadPointList pointList : roadPointLists) {
-            total += pointList.used ? 1 : 0;
+        if (pass == Pass.Terrain) {
+            float total = 0;
+            for (RoadPointList pointList : roadPointLists) {
+                total += pointList.used ? 1 : 0;
+            }
+            return pass.getPercent() * total / roadPointLists.size();
         }
-        return total / roadPointLists.size();
+
+        return pass.getPercent();
     }
 
     @Override

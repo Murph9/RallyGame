@@ -99,4 +99,8 @@ public class CatmullRomRoad extends Mesh {
         
         return results;
     }
+
+    public Spline getSpline() {
+        return this.spline;
+    }
 }
