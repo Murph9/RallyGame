@@ -46,8 +46,8 @@ public class CatmullRomRoad extends Mesh {
                     vertexArray[i++] = temp4.clone();
                     vertexArray[i++] = temp1.clone();
 
-                    vertexArray[i++] = temp4.clone();
                     vertexArray[i++] = temp1.clone();
+                    vertexArray[i++] = temp4.clone();
                     vertexArray[i++] = temp2.clone();
                 }
                 
@@ -64,8 +64,8 @@ public class CatmullRomRoad extends Mesh {
             vertexArray[i++] = temp4.clone();
             vertexArray[i++] = temp1.clone();
 
-            vertexArray[i++] = temp4.clone();
             vertexArray[i++] = temp1.clone();
+            vertexArray[i++] = temp4.clone();
             vertexArray[i++] = temp2.clone();
         }
         
