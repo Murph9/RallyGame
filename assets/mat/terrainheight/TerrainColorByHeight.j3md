@@ -5,7 +5,7 @@ MaterialDef TerrainHeightColor {
         Float Offset
     }
 
-     Technique {
+    Technique {
         VertexShader GLSL150 GLSL100:   mat/terrainheight/TerrainColorByHeight.vert
         FragmentShader GLSL150 GLSL100: mat/terrainheight/TerrainColorByHeight.frag
 
