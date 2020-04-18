@@ -82,7 +82,7 @@ public class PathWorld extends World implements ICheckpointWorld {
     private ScheduledThreadPoolExecutor executor;
 
     enum Pass {
-        Terrain(1 / 3f), Objects(2 / 3f), Done(1);
+        Init(0), Terrain(1 / 3f), Objects(2 / 3f), Done(1);
 
         private final float percent;
         Pass(float percent) {
@@ -121,6 +121,8 @@ public class PathWorld extends World implements ICheckpointWorld {
 
         roadPointLists = new LinkedList<>();
         roads = new LinkedList<>();
+
+        pass = Pass.Init;
     }
 
     @Override
