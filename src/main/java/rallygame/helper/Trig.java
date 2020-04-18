@@ -21,6 +21,21 @@ public class Trig {
                 / FastMath.sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1));
     }
 
+    public static float distFromSegment(Vector3f start, Vector3f end, Vector3f point) {
+        // https://stackoverflow.com/a/1501725
+
+        float listDist = start.distance(end);
+        if (listDist == 0)
+            return point.distance(start);
+        
+        //float t = ((px - lx1) * (lx2 - lx1) + (py - ly1) * (ly2 - ly1) + (pz - lz1) * (lz2 - lz1)) / line_dist;
+        Vector3f l2SubL1 = end.subtract(start);
+        float t = point.subtract(start).dot(l2SubL1);
+        t = FastMath.clamp(t, 0, 1);
+        //return dist_sq(px, py, pz, lx1 + t * (lx2 - lx1), ly1 + t * (ly2 - ly1), lz1 + t * (lz2 - lz1));
+        return point.distance(l2SubL1.mult(t).add(start));
+    }
+
     /** Returns extents of V3f in xz directions. [xmin, zmin, xmax, zmax] */
     public static float[] boundingBoxXZ(Vector3f... p) {
         float xmin = Float.POSITIVE_INFINITY;

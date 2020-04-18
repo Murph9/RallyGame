@@ -60,9 +60,38 @@ public class TrigTest {
 
     @Test
     public void distFromLineXZ() {
-        assertEquals(1f, Trig.distFromLineXZ(new Vector3f(), new Vector3f(1, 0, 0), new Vector3f(0, 0, 1)));
+        assertEquals(0, Trig.distFromLineXZ(new Vector3f(0, 0, 0), new Vector3f(1, 0, 0), new Vector3f(0, 0, 0)));
+        assertEquals(0, Trig.distFromLineXZ(new Vector3f(0, 0, 0), new Vector3f(1, 0, 0), new Vector3f(1, 0, 0)));
+
+        assertEquals(1f, Trig.distFromLineXZ(new Vector3f(0, 0, 0), new Vector3f(1, 0, 0), new Vector3f(1, 0, 1)));
+        assertEquals(1f, Trig.distFromLineXZ(new Vector3f(0, 0, 0), new Vector3f(1, 0, 0), new Vector3f(0, 0, 1)));
+
+        assertEquals(4f, Trig.distFromLineXZ(new Vector3f(0, 0, 0), new Vector3f(1, 0, 0), new Vector3f(-3, 0, 4)));
+
         assertEquals(1 / Math.sqrt(2),
-                Trig.distFromLineXZ(new Vector3f(), new Vector3f(1, 0, 1), new Vector3f(0, 0, 1)), 0.0001);
+                Trig.distFromLineXZ(new Vector3f(0, 0, 0), new Vector3f(1, 0, 1), new Vector3f(0, 0, 1)), 0.0001);
+
+        assertEquals(0, Trig.distFromLineXZ(new Vector3f(0, 0, 0), new Vector3f(5, 0, 0), new Vector3f(10, 0, 0)));
+    }
+
+    @Test
+    public void distFromSegment() {
+        assertEquals(0, Trig.distFromSegment(new Vector3f(0, 0, 0), new Vector3f(1, 0, 0), new Vector3f(0, 0, 0)));
+        assertEquals(0, Trig.distFromSegment(new Vector3f(0, 0, 0), new Vector3f(1, 0, 0), new Vector3f(1, 0, 0)));
+
+        assertEquals(1f, Trig.distFromSegment(new Vector3f(0, 0, 0), new Vector3f(1, 0, 0), new Vector3f(1, 0, 1)));
+        assertEquals(1f, Trig.distFromSegment(new Vector3f(0, 0, 0), new Vector3f(1, 0, 0), new Vector3f(0, 0, 1)));
+
+        assertEquals(5f, Trig.distFromSegment(new Vector3f(0, 0, 0), new Vector3f(1, 0, 0), new Vector3f(-3, 0, 4)));
+        assertEquals(1, Trig.distFromSegment(new Vector3f(0, 0, 0), new Vector3f(1, 0, 1), new Vector3f(0, 0, 1)));
+
+        assertEquals(4.24f, Trig.distFromSegment(new Vector3f(0, 0, 0), new Vector3f(3, 0, 0), new Vector3f(6, 0, 3)), 0.01f);
+        assertEquals(1.27f, Trig.distFromSegment(new Vector3f(0, 0, 0), new Vector3f(3, 0, 0), new Vector3f(4.18f, 0, -0.48f)), 0.01f);
+        assertEquals(14.03f, Trig.distFromSegment(new Vector3f(0, 0, 0), new Vector3f(3, 0, 0), new Vector3f(-10.04f, 0, 9.8f)), 0.01f);
+
+        assertEquals(15.39f, Trig.distFromSegment(new Vector3f(1.76f, 0, -2.26f), new Vector3f(2.6f, 0, 1.02f), new Vector3f(-10.04f, 0, 9.8f)), 0.01f);
+
+        assertEquals(5, Trig.distFromSegment(new Vector3f(0, 0, 0), new Vector3f(5, 0, 0), new Vector3f(10, 0, 0)));
     }
 
     @Test
