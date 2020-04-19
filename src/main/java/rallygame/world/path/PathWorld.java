@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import com.jme3.app.Application;
@@ -53,10 +54,13 @@ import rallygame.world.WorldType;
 
 public class PathWorld extends World implements ICheckpointWorld {
 
+    //TODO can see through the terrain with the EdgeFilter still
+
     class RoadPointList extends LinkedList<Vector3f> {
         private static final long serialVersionUID = 1L;
         public boolean set;
         public boolean used;
+        public boolean failed;
     }
 
     private static final float HEIGHT_WEIGHT = 0.02f;
@@ -115,10 +119,12 @@ public class PathWorld extends World implements ICheckpointWorld {
         
         rand = new Random(seed);
 
-        int length = sideLength / 2 - 2;
-        start = new Vector2f(-length, -length);
-        end = new Vector2f(length, length);
 
+        //generate start points from one edge to the other
+        final int halfLength = sideLength / 2;
+        start = new Vector2f(-halfLength, rand.nextInt(halfLength) - halfLength/2);
+        end = new Vector2f(halfLength-1, rand.nextInt(halfLength) - halfLength/2);
+        
         roadPointLists = new LinkedList<>();
         roads = new LinkedList<>();
 
@@ -133,7 +139,21 @@ public class PathWorld extends World implements ICheckpointWorld {
     public Vector3f getStartPos() {
         if (terrain == null)
             return H.v2tov3fXZ(this.start);
-        return gridToWorldSpace(terrain, this.start);
+
+        Vector3f start = this.roadPointLists.get(0).getFirst();
+        Vector3f start2 = this.roadPointLists.get(0).get(1);
+        Vector3f offset = start2.subtract(start).normalize();
+        return start.add(0, 0.5f, 0).add(offset.mult(3));
+    }
+
+    @Override
+    public Quaternion getStartRot() {
+        if (terrain == null)
+            return Quaternion.IDENTITY.clone();
+
+        Vector3f start = this.roadPointLists.get(0).getFirst();
+        Vector3f start2 = this.roadPointLists.get(0).get(1);
+        return new Quaternion().lookAt(start2.subtract(start), Vector3f.UNIT_Y);
     }
 
     @Override
@@ -245,6 +265,11 @@ public class PathWorld extends World implements ICheckpointWorld {
             // wait until all the road points lists are set before doing this
             if (!H.allTrue(x -> x != null && x.set && !x.used, roadPointLists))
                 return;
+            if (H.oneTrue(x -> x.failed, roadPointLists)) {
+                //one of the Astar searches failed, so tag as such
+                pass = Pass.Done;
+                return;
+            }
 
             for (RoadPointList roadPointList : new LinkedList<>(roadPointLists)) {
                 if (roadPointList.isEmpty()) {
@@ -309,17 +334,20 @@ public class PathWorld extends World implements ICheckpointWorld {
         executor.submit(() -> {
             List<Vector2f> list = null;
             try {
-                AStar<Vector2f> search = new AStar<>(new SearchWorld(terrain, HEIGHT_WEIGHT));
+                AStar<Vector2f> search = new AStar<>(new SearchWorld(terrain, HEIGHT_WEIGHT, 0.2f));
                 search.setTimeoutMills((long)(30*1E6)); // x sec
                 list = search.findPath(H.v3tov2fXZ(gridToWorldSpace(terrain, start)),
                         H.v3tov2fXZ(gridToWorldSpace(terrain, end)));
                 outList.addAll(list.stream().map(x -> new Vector3f(x.x, terrain.getHeight(x), x.y))
                         .collect(Collectors.toList()));
                 Log.p("Done astar search, path length =", list.size());
-            } catch (Exception e) {
+            } catch (TimeoutException e) {
                 outList.addAll(new LinkedList<>());
                 Log.e(e);
-                Log.e("Astar search failed");
+                Log.e("Astar search failed due to timeout");
+                outList.failed = true;
+            } catch (Exception e) {
+                Log.e(e);
             } finally {
                 outList.set = true;
             }

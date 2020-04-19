@@ -15,11 +15,13 @@ class SearchWorld implements ISearchWorld<Vector2f> {
     private final float heightWeight;
     private final TerrainQuad terrain;
     private final Vector3f scale;
+    private final float maxSlope;
 
-    public SearchWorld(TerrainQuad terrain, float heightWeight) {
+    public SearchWorld(TerrainQuad terrain, float heightWeight, float maxSlope) {
         this.terrain = terrain;
         this.heightWeight = heightWeight;
         this.scale = terrain.getWorldScale().clone();
+        this.maxSlope = maxSlope;
     }
 
     @Override
@@ -40,6 +42,9 @@ class SearchWorld implements ISearchWorld<Vector2f> {
 
     @Override
     public Set<Vector2f> getNeighbours(Vector2f pos) {
+        float prevPosHeight = terrain.getHeight(pos);
+        float maxHeightDiff = scale.x * maxSlope;
+
         List<Vector2f> results = new LinkedList<>();
         float scaleX = scale.x;
         float scaleZ = scale.z;
@@ -49,13 +54,16 @@ class SearchWorld implements ISearchWorld<Vector2f> {
                     continue; // ignore self
 
                 Vector2f newPos = new Vector2f(x, z);
+                float newHeight = terrain.getHeight(newPos);
+                if (Float.isNaN(newHeight))
+                    continue; //therefore not on the terrain
+                if (Math.abs(prevPosHeight - newHeight) > maxHeightDiff)
+                    continue; //ignore high differences in height
 
-                if (Float.isNaN(terrain.getHeight(newPos)))
-                    continue;
-                // TODO how do we avoid the edge of the terrain?
                 results.add(newPos);
             }
         }
+        
         return new HashSet<>(results);
     }
 }
