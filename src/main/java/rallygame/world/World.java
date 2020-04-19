@@ -52,8 +52,8 @@ public abstract class World extends BaseAppState implements IWorld {
 	}
 
 	@Override
-	public float loadPercent() {
-		return 1; //TODO always loads in a frame
+	public LoadResult loadPercent() {
+		return new LoadResult(1, "Loaded immediately.");
 	}
 
 	// Create another of myself, to use somewhere else

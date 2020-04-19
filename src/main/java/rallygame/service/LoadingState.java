@@ -108,15 +108,15 @@ public class LoadingState extends BaseAppState {
 
     @Override
     public void update(float tpf) {
-        if (H.allTrue((state) -> state.loadPercent() >= 1, loadingStates)) {
+        if (H.allTrue((state) -> state.loadPercent().percent >= 1, loadingStates)) {
             getStateManager().detach(this);
             return;
         }
         
         float total = 0;
         for (ILoadable state: loadingStates) {
-            float percent = state.loadPercent();
-            if (state.loadPercent() >= 1) {
+            float percent = state.loadPercent().percent;
+            if (percent >= 1) {
                 state.setEnabled(false);
             }
             total += percent;
@@ -126,7 +126,14 @@ public class LoadingState extends BaseAppState {
 
         // update the loading bar
         progressBar.setProgressValue(total);
-        progressBar.setMessage("Loading... " + H.roundDecimal(total * 100, 1) + "%");
+        StringBuilder sb = new StringBuilder();
+        for (ILoadable state: loadingStates) {
+            String message= state.loadPercent().message;
+            if (message != null && !message.isBlank())
+                sb.append(message + "\n");
+        }
+        
+        progressBar.setMessage("Loading... " + H.roundDecimal(total * 100, 1) + "%\n"+sb.toString());
         Screen screen = new Screen(getApplication().getContext().getSettings());
         screen.centerMe(loadingContainer);
     }

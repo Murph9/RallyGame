@@ -86,13 +86,19 @@ public class PathWorld extends World implements ICheckpointWorld {
     private ScheduledThreadPoolExecutor executor;
 
     enum Pass {
-        Init(0), Terrain(1 / 3f), Objects(2 / 3f), Done(1);
+        Init(0, "Initialising"),
+        Terrain(1 / 3f, "Creating terrain"),
+        Objects(2 / 3f, "Adding in some other objects"),
+        Done(1, "Yay");
 
         private final float percent;
-        Pass(float percent) {
+        private final String message;
+        Pass(float percent, String message) {
             this.percent = percent;
+            this.message = message;
         }
         public float getPercent() { return percent; }
+        public String getMessage() { return message; }
     }
 
     // TODO:
@@ -405,16 +411,16 @@ public class PathWorld extends World implements ICheckpointWorld {
     }
 
     @Override
-    public float loadPercent() {
+    public LoadResult loadPercent() {
         if (pass == Pass.Terrain) {
             float total = 0;
             for (RoadPointList pointList : roadPointLists) {
                 total += pointList.used ? 1 : 0;
             }
-            return pass.getPercent() * total / roadPointLists.size();
+            return new LoadResult(pass.getPercent() * total / roadPointLists.size(), pass.getMessage());
         }
 
-        return pass.getPercent();
+        return new LoadResult(pass.getPercent(), pass.getMessage());
     }
 
     @Override
