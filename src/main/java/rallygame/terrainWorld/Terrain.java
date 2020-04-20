@@ -1,4 +1,3 @@
-
 package rallygame.terrainWorld;
 
 import com.jme3.app.Application;
@@ -114,8 +113,7 @@ public abstract class Terrain extends BaseAppState implements Closeable
     protected void cleanup(Application app) {
     }
 
-    private int bitCalc(int blockSize)
-    {
+    private int bitCalc(int blockSize) {
         switch (blockSize)
         {
             case 17: return 4;
