@@ -16,6 +16,7 @@ import rallygame.effects.FilterManager;
 import rallygame.effects.ParticleAtmosphere;
 import rallygame.game.DebugAppState;
 import rallygame.service.ConstantChecker;
+import rallygame.service.ObjectPlacer;
 
 public class DuelApp extends SimpleApplication {
 
@@ -36,6 +37,7 @@ public class DuelApp extends SimpleApplication {
                 , new FilterManager()
                 , new CarBuilder(0.4f, new CarDataLoader())
                 , new DebugAppState()
+                , new ObjectPlacer(true)
                 , new ConstantChecker()
         );
     }
