@@ -31,7 +31,9 @@ public class GrassTerrain extends Mesh {
         FloatBuffer textureBuffer = BufferUtils.createVector2Buffer(count * 3);
 
         for (int i = 0; i < count; i++) {
-            Vector2f pos = genValidPoint();
+            Vector2f pos = validPoint();
+            if (pos == null)
+                continue; //then it lost the lottery
             float height = piece.terrain.getHeight(pos);
             if (Float.isNaN(height))
                 continue;
@@ -60,12 +62,10 @@ public class GrassTerrain extends Mesh {
         this.setStatic();
     }
 
-    private Vector2f genValidPoint() {
+    private Vector2f validPoint() {
         Vector2f pos = H.randV2f(piece.terrainScale.x * piece.sideLength, true);
-        while (posValid.apply(pos)) {
-            pos = H.randV2f(piece.terrainScale.x * piece.sideLength, true);
-        }
-
+        if (posValid.apply(pos))
+            return null;
         return pos;
     }
 }

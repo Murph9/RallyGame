@@ -203,7 +203,7 @@ class TerrainPiece {
     }
 
     private GrassTerrain drawGrass(AssetManager am) {
-        GrassTerrain gt = new GrassTerrain(this, 1000000, (v2) -> meshOnRoad(v2));
+        GrassTerrain gt = new GrassTerrain(this, 100000, (v2) -> meshOnRoad(v2));
         Geometry g = new Geometry("'grass'", gt);
         rootNode.attachChild(LoadModelWrapper.create(am, g, ColorRGBA.Pink));
 
