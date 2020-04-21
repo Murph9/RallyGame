@@ -50,10 +50,9 @@ public class DuelStaticWorld extends StaticWorldBuilder implements ICheckpointWo
         this.worldRot = new Quaternion();
         this.worldRot.lookAt(path[1].subtract(path[0]), Vector3f.UNIT_Y);
 
-        List<Vector3f> startPositions = new GridPositions(2, 4).generate(2, path[0],
-                path[1].subtract(path[0]));
-
-        this.worldStarts = startPositions.toArray(new Vector3f[0]);
+        this.worldStarts = new GridPositions(2, 5)
+                .generate(path[0], path[1].subtract(path[0]))
+                .limit(2).toArray(i -> new Vector3f[i]);
     }
 
     @Override

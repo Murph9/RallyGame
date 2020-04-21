@@ -6,6 +6,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 
+import rallygame.service.GridPositions;
 import rallygame.world.ICheckpointWorld;
 import rallygame.world.World;
 import rallygame.world.WorldType;
@@ -83,17 +84,23 @@ public class PathWorld extends World implements ICheckpointWorld {
 
     @Override
     public Transform start(int i) {
+        Quaternion rot = this.getStartRot();
+        Vector3f startPos = this.getStartPos();
+
         if (this.loadPercent().percent >= 1) {
-            return terrain.getStart();
-            //TODO offset each other based on i
+            GridPositions grid = new GridPositions(2, 7);
+            Vector3f pos = grid.generate(startPos, rot.mult(Vector3f.UNIT_Z))
+                .skip(i)
+                .findFirst().get();
+            return new Transform(pos, rot);
         }
 
-        return new Transform(this.getStartPos(), this.getStartRot());
+        return new Transform(startPos, rot);
     }
 
     @Override
     public Vector3f[] checkpoints() {
-        if (this.loadPercent().percent >= 1) {
+        if (this.loadPercent().percent < 1) {
             return null;
         }
 

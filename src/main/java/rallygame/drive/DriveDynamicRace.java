@@ -1,6 +1,5 @@
 package rallygame.drive;
 
-import java.util.List;
 import java.util.LinkedList;
 
 import com.jme3.app.Application;
@@ -64,11 +63,9 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
         this.worldRot = new Quaternion();
         worldRot.fromAngleAxis(FastMath.DEG_TO_RAD * 90, new Vector3f(0, 1, 0));
 
-        GridPositions gridPositions = new GridPositions(1.3f, 10);
-        List<Vector3f> startPositions = gridPositions.generate(themCount+1, checkpoints[0], 
-                checkpoints[0].subtract(checkpoints[checkpoints.length - 1]).negate());
-
-        this.worldStarts = startPositions.toArray(new Vector3f[0]);
+        this.worldStarts = new GridPositions(1.3f, 10).generate(checkpoints[0], 
+                checkpoints[0].subtract(checkpoints[checkpoints.length - 1]).negate())
+                .limit(themCount+1).toArray(i -> new Vector3f[i]);
 
         //buildCars and load ai
         for (int i = 0; i < this.themCount; i++) {

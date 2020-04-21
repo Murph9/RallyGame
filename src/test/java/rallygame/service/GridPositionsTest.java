@@ -1,17 +1,15 @@
 package rallygame.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.List;
-
-import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 
 import org.junit.jupiter.api.Test;
 
 public class GridPositionsTest {
     
+    private static final float ERROR = 0.001f;
+
     @Test
     public void generate_normal_correctCount() {
         GridPositions grid = new GridPositions(3, 8);
@@ -21,10 +19,10 @@ public class GridPositionsTest {
 
         Vector3f dir = nextCheckpointPos.subtract(start).normalize();
 
-        int count = 10;
-        List<Vector3f> positions = grid.generate(count, start, dir);
+        int count = 1000;
+        Vector3f[] positions = grid.generate(start, dir).limit(count).toArray(i -> new Vector3f[i]);
 
-        assertEquals(positions.size(), count);
+        assertEquals(count, positions.length);
     }
 
     @Test
@@ -39,23 +37,23 @@ public class GridPositionsTest {
         Vector3f dir = nextCheckpointPos.subtract(start).normalize();
 
         int count = 4;
-        List<Vector3f> positions = grid.generate(count, start, dir);
+        Vector3f[] positions = grid.generate(start, dir).limit(count).toArray(i -> new Vector3f[i]);
 
-        assertEquals(positions.get(0).x, 0);
-        assertEquals(positions.get(0).y, 0);
-        assertTrue(FastMath.approximateEquals(positions.get(0).z, -apart));
+        assertEquals(0, positions[0].x);
+        assertEquals(0, positions[0].y);
+        assertEquals(-apart, positions[0].z, ERROR);
         
-        assertEquals(positions.get(1).x, 0);
-        assertEquals(positions.get(1).y, 0);
-        assertTrue(FastMath.approximateEquals(positions.get(1).z, apart));
+        assertEquals(0, positions[1].x);
+        assertEquals(0, positions[1].y);
+        assertEquals(apart, positions[1].z, ERROR);
 
-        assertTrue(FastMath.approximateEquals(positions.get(2).x, -back));
-        assertEquals(positions.get(2).y, 0);
-        assertTrue(FastMath.approximateEquals(positions.get(2).z, -apart));
+        assertEquals(-back, positions[2].x, ERROR);
+        assertEquals(0, positions[2].y);
+        assertEquals(-apart, positions[2].z, ERROR);
 
-        assertTrue(FastMath.approximateEquals(positions.get(3).x, -back));
-        assertEquals(positions.get(3).y, 0);
-        assertTrue(FastMath.approximateEquals(positions.get(3).z, apart));
+        assertEquals(-back, positions[3].x, ERROR);
+        assertEquals(0, positions[3].y);
+        assertEquals(apart, positions[3].z, ERROR);
     }
 
     @Test
@@ -70,10 +68,10 @@ public class GridPositionsTest {
         Vector3f dir = nextCheckpointPos.subtract(start).normalize();
 
         int count = 1;
-        List<Vector3f> positions = grid.generate(count, start, dir);
+        Vector3f[] positions = grid.generate(start, dir).limit(count).toArray(i -> new Vector3f[i]);
 
-        assertEquals(positions.get(0).x, 0);
-        assertEquals(positions.get(0).y, height);
-        assertTrue(FastMath.approximateEquals(positions.get(0).z, -apart));
+        assertEquals(0, positions[0].x);
+        assertEquals(height, positions[0].y);
+        assertEquals(-apart, positions[0].z, ERROR);
     }
 }

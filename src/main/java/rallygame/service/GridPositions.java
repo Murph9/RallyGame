@@ -1,7 +1,6 @@
 package rallygame.service;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.stream.Stream;
 
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
@@ -17,24 +16,15 @@ public class GridPositions {
         this.backDistance = backDist;
     }
 
-    public List<Vector3f> generate(int count, Vector3f start, Vector3f forward) {
+    public Stream<Vector3f> generate(Vector3f start, Vector3f forward) {
         Vector3f dir = forward.normalize();
-
-        List<Vector3f> positions = new LinkedList<>();
         Vector3f leftRightOffset = new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y).mult(dir);
 
-        for (int i = 0; i < count; i += 2) {
+        return Stream.iterate(0, i -> i+1).map((Integer i) -> {
             Vector3f pos = start.clone();
-            pos.addLocal(leftRightOffset.mult(sizeDistance));
+            pos.addLocal(leftRightOffset.mult(i % 2 == 0 ? sizeDistance : -sizeDistance));
             pos.addLocal(dir.mult(((int) (i / 2)) * -backDistance));
-            positions.add(pos);
-
-            pos = start.clone();
-            pos.addLocal(leftRightOffset.mult(-sizeDistance));
-            pos.addLocal(dir.mult(((int) (i / 2)) * -backDistance));
-            positions.add(pos);
-        }
-
-        return positions;
+            return pos;
+        });
     }
 }

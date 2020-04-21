@@ -1,7 +1,5 @@
 package rallygame.drive;
 
-import java.util.List;
-
 import com.jme3.app.Application;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.math.ColorRGBA;
@@ -79,11 +77,9 @@ public class DriveRace extends DriveBase implements PauseState.ICallback, ICheck
         this.worldRot = new Quaternion();
         this.worldRot.lookAt(checkpoints[0].subtract(checkpoints[checkpoints.length - 1]), Vector3f.UNIT_Y);
 
-        GridPositions gridPositions = new GridPositions(3, 10);
-        List<Vector3f> startPositions = gridPositions.generate(themCount+1, checkpoints[0], 
-                checkpoints[0].subtract(checkpoints[checkpoints.length - 1]));
-
-        this.worldStarts = startPositions.toArray(new Vector3f[0]);
+        this.worldStarts = new GridPositions(3, 10)
+                .generate(checkpoints[0], checkpoints[0].subtract(checkpoints[checkpoints.length - 1]).negate())
+                .limit(themCount + 1).toArray(i -> new Vector3f[i]);
 
         //buildCars and load ai
         for (int i = 0; i < this.themCount; i++) {
