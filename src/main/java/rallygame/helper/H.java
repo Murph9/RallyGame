@@ -168,6 +168,14 @@ public class H {
 		return new Vector3f(v.x, 0, v.y);
 	}
 	
+	/**Generate a random Vector2f([0,1), [0,1))
+	 * scaleNegative for [-1, 1) parts
+	 */
+	public static Vector2f randV2f(float max, boolean scaleNegative) {
+		float offset = scaleNegative ? max : 0;
+		float scale = scaleNegative ? 2 : 1;
+		return new Vector2f(FastMath.nextRandomFloat() * scale * max - offset, FastMath.nextRandomFloat() * scale * max - offset);
+	}
 	
 	/**Generate a random Vector3f([0,1), [0,1), [0,1))
 	 * scaleNegative for [-1, 1) parts

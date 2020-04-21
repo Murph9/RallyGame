@@ -155,11 +155,25 @@ public class HTest {
     }
 
     @RepeatedTest(100)
+    public void randV2f() {
+        Vector2f result = H.randV2f(1, false);
+        assertTrue(result.x < 1);
+        assertTrue(result.y < 1);
+
+        assertTrue(result.x >= 0);
+        assertTrue(result.y >= 0);
+    }
+
+    @RepeatedTest(100)
     public void randV3f() {
         Vector3f result = H.randV3f(1, false);
-        assertTrue(result.x <= 1);
-        assertTrue(result.y <= 1);
-        assertTrue(result.z <= 1);
+        assertTrue(result.x < 1);
+        assertTrue(result.y < 1);
+        assertTrue(result.z < 1);
+
+        assertTrue(result.x >= 0);
+        assertTrue(result.y >= 0);
+        assertTrue(result.z >= 0);
     }
 
     @RepeatedTest(100)
