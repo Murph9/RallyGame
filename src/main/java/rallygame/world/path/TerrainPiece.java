@@ -116,6 +116,7 @@ class TerrainPiece {
         }
         
         Application app = terrainApp.getApplication();
+        AssetManager am = app.getAssetManager();
         app.enqueue(() -> {
             for (RoadPointList outRoad : roadPointLists) {
                 outRoad.road = drawRoad(app.getAssetManager(), outRoad, space);
@@ -126,7 +127,7 @@ class TerrainPiece {
             
             updateTerrainCollision(space);
         
-            AssetManager am = app.getAssetManager();
+            
             // Place random cubes
             ObjectPlacer op = terrainApp.getState(ObjectPlacer.class);
             float size = 1f;
@@ -148,6 +149,8 @@ class TerrainPiece {
             }
 
             placedObjects = op.addBulk(list, locations);
+
+            drawGrass(am);
 
             this.loaded = true;
         });
@@ -199,22 +202,32 @@ class TerrainPiece {
         return c3;
     }
 
-    private Vector3f selectPointNotOnRoad(float objRadius, float max) {
-        Vector3f location = H.randV3f(max, true);
-        while (meshOnRoad(objRadius, location)) {
-            location = H.randV3f(max, true);
-        }
-        location.y = terrain.getHeight(H.v3tov2fXZ(location));
-        return location;
+    private GrassTerrain drawGrass(AssetManager am) {
+        GrassTerrain gt = new GrassTerrain(this, 10000000, (v2) -> meshOnRoad(v2));
+        Geometry g = new Geometry("'grass'", gt);
+        rootNode.attachChild(LoadModelWrapper.create(am, g, ColorRGBA.Pink));
+
+        return gt;
     }
 
-    private boolean meshOnRoad(float objRadius, Vector3f location) {
+    private Vector3f selectPointNotOnRoad(float objRadius, float max) {
+        Vector2f location = H.randV2f(max, true);
+        while (meshOnRoad(objRadius, location)) {
+            location = H.randV2f(max, true);
+        }
+        return new Vector3f(location.x, terrain.getHeight(location), location.y);
+    }
+
+    private boolean meshOnRoad(Vector2f location) {
+        return meshOnRoad(0, location);
+    }
+    private boolean meshOnRoad(float objRadius, Vector2f location) {
         // simple check that its more than x from a road vertex
         for (RoadPointList road : this.roadPointLists) {
             for (int i = 0; i < road.size() - 1; i++) {
                 Vector3f cur = road.get(i);
                 Vector3f point = road.get(i + 1);
-                if (Trig.distFromSegment(H.v3tov2fXZ(cur), H.v3tov2fXZ(point), H.v3tov2fXZ(location)) < objRadius
+                if (Trig.distFromSegment(H.v3tov2fXZ(cur), H.v3tov2fXZ(point), location) < FastMath.sqrt(2) * objRadius
                         + Terrain.ROAD_WIDTH / 2)
                     return true;
                 cur = point;
