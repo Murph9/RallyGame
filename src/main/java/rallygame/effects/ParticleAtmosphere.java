@@ -13,6 +13,7 @@ import com.jme3.renderer.Camera;
 
 public class ParticleAtmosphere extends BaseAppState {
 
+	private final static float PARTICLE_EMITTER_SIZE = 150f;
     private final static float FORWARD_FACTOR = 0.5f;
 	private final static int PARTICLE_MULT = 50;
 	private final static int PARTICLE_MAX = 5000;
@@ -49,7 +50,7 @@ public class ParticleAtmosphere extends BaseAppState {
 		particles.setEndSize(0.01f);
 		
 		//spread out the initial spawn positions
-		particles.setShape(new EmitterSphereShape(Vector3f.ZERO, 150f));
+		particles.setShape(new EmitterSphereShape(Vector3f.ZERO, PARTICLE_EMITTER_SIZE));
 		particles.setInWorldSpace(true); //don't move them after
 		
 		particles.setStartColor(ColorRGBA.White);
