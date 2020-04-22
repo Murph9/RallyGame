@@ -32,6 +32,7 @@ public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
 		Race,
 		RaceDyn,
 		Drag,
+		Path,
 		Dev;
     }
 
@@ -50,15 +51,16 @@ public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
 		
 		List<ILoadable> loadingStates = new LinkedList<>();
 		List<AppState> loadme = new LinkedList<>();
+		StaticWorldBuilder sWorld = null;
         switch(type) {
             case Start:
                 loadme.add(new ChooseCar((IChooseStuff)this));
                 break;
 			case Fast:
-				World w = new PathWorld(FastMath.nextRandomInt() % 10);
-				loadingStates.add(w);
-                loadme.add(new DriveBase((IDriveDone)this, Car.Runner, w));
-                break;
+				sWorld = new StaticWorldBuilder(StaticWorld.track2);
+				loadingStates.add(sWorld);
+				loadme.add(new DriveBase((IDriveDone) this, Car.Runner, sWorld));
+				break;
 			case Getaway:
 				loadme.add(new DriveMainRoadGetaway((IDriveDone)this));
 				break;
@@ -69,14 +71,19 @@ public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
 				loadme.add(new DriveCrash((IDriveDone)this));
 				break;
             case Race:
-                StaticWorldBuilder world = new StaticWorldBuilder(StaticWorld.duct2);
-                loadingStates.add(world);
-				loadme.add(new DriveRace(world, (IDriveDone) this));
+                sWorld = new StaticWorldBuilder(StaticWorld.duct2);
+                loadingStates.add(sWorld);
+				loadme.add(new DriveRace(sWorld, (IDriveDone) this));
 				break;
 			case RaceDyn:
 				DefaultBuilder dynWorld = DynamicType.Valley.getBuilder();
 				loadingStates.add(dynWorld);
 				loadme.add(new DriveDynamicRace(dynWorld, (IDriveDone) this));
+				break;
+			case Path:
+				World w = new PathWorld(FastMath.nextRandomInt() % 10);
+				loadingStates.add(w);
+				loadme.add(new DriveBase((IDriveDone) this, Car.Runner, w));
 				break;
 			case Drag:
 				loadme.add(new DriveDrag((IDriveDone)this));
