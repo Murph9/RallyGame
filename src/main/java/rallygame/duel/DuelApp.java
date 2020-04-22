@@ -17,6 +17,7 @@ import rallygame.effects.ParticleAtmosphere;
 import rallygame.game.DebugAppState;
 import rallygame.service.ConstantChecker;
 import rallygame.service.ObjectPlacer;
+import rallygame.service.WorldGuiText;
 
 public class DuelApp extends SimpleApplication {
 
@@ -39,6 +40,7 @@ public class DuelApp extends SimpleApplication {
                 , new DebugAppState()
                 , new ObjectPlacer(true)
                 , new ConstantChecker()
+                , new WorldGuiText()
         );
     }
 
