@@ -8,9 +8,12 @@ import com.jme3.math.Vector3f;
 
 public class GridPositions {
 
-    private float sizeDistance = 3;
-    private float backDistance = 8;
+    private final float sizeDistance;
+    private final float backDistance;
 
+    public GridPositions() {
+        this(3, 8);
+    }
     public GridPositions(float width, float backDist) {
         this.sizeDistance = width;
         this.backDistance = backDist;
