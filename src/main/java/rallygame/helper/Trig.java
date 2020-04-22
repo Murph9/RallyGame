@@ -1,6 +1,8 @@
 package rallygame.helper;
 
 import com.jme3.math.FastMath;
+import com.jme3.math.LineSegment;
+import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 
@@ -26,22 +28,23 @@ public class Trig {
                 / FastMath.sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1));
     }
 
+    /** Get distance from Ray with start, direction and inf length */
+    public static float distFromRay(Vector2f start, Vector2f dir, Vector2f point) {
+        return distFromRay(H.v2tov3fXZ(start), H.v2tov3fXZ(dir), H.v2tov3fXZ(point));
+    }
+    /** Get distance from Ray with start, direction and inf length */
+    public static float distFromRay(Vector3f start, Vector3f dir, Vector3f point) {
+        Ray r = new Ray(start, dir.normalize());
+        return FastMath.sqrt(r.distanceSquared(point));
+    }
+
     /**Get distance from a line segment. If you want an inf line then try distFromLine */
     public static float distFromSegment(Vector2f start, Vector2f end, Vector2f point) {
         return distFromSegment(H.v2tov3fXZ(start), H.v2tov3fXZ(end), H.v2tov3fXZ(point));
     }
     /**Get distance from a line segment. If you want an inf line then try distFromLine */
     public static float distFromSegment(Vector3f start, Vector3f end, Vector3f point) {
-        // https://stackoverflow.com/a/1501725
-
-        float listDist = start.distanceSquared(end);
-        if (listDist == 0)
-            return FastMath.sqrt(point.distance(start));
-        
-        Vector3f l2SubL1 = end.subtract(start);
-        float t = point.subtract(start).dot(l2SubL1) / listDist;
-        t = FastMath.clamp(t, 0, 1);
-        return point.distance(l2SubL1.mult(t).add(start));
+        return new LineSegment(start, end).distance(point);
     }
 
     /** Returns extents of V3f in xz directions. [xmin, zmin, xmax, zmax] */
