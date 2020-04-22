@@ -111,9 +111,10 @@ public class RacePositionEngine {
         //calc the next 'count' checkpoints
         int checkNum = this.racers.get(car).nextCheckpoint.num;
         Vector3f[] checks = new Vector3f[count];
-        for (int i = 0; i < count; i++) {
+        checks[0] = posOfCheckpoint(this.racers.get(car).nextCheckpoint);
+        for (int i = 0; i < count - 1; i++) {
             int check = calcNextCheckFrom(checkNum + i);
-            checks[i] = this.checkpoints.get(check).position;
+            checks[i + 1] = this.checkpoints.get(check).position;
         }
 
         return checks;
