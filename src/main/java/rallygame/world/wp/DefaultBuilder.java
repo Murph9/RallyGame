@@ -165,7 +165,7 @@ public abstract class DefaultBuilder extends World {
 		
 		// checking the difference from vertical helps from the weird ever increasing hill
 		Vector3f newUp = newRot.mult(Vector3f.UNIT_Y);
-		if (newUp.angleBetween(Vector3f.UNIT_Y) > 0.3f)
+		if (newUp.angleBetween(Vector3f.UNIT_Y) > 0.2f)
 			return false;
 		return true;
 	}
