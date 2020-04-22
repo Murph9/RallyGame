@@ -65,8 +65,8 @@ public class RacePositionEngine {
     public void racerHitCheckpoint(RacerState racer, Checkpoint check) {
         int checkNum = check.num;
         
-        // calc next checkpoint then
-        int nextNum = (checkNum + 1) % this.checkpoints.size();
+        // get next checkpoint then
+        int nextNum = calcNextCheckFrom(checkNum);
         if (nextNum == 0)
             racer.lap++;
 
@@ -83,6 +83,9 @@ public class RacePositionEngine {
             racer.duration = Duration.between(timeAtCheckpoints.get(fakeCheckpointHash), Instant.now());
         }
     }
+    private int calcNextCheckFrom(int checkNum) {
+        return (checkNum + 1) % this.checkpoints.size();
+    }
 
     public Checkpoint getCheckpointFromPos(Vector3f pos) {
         for (Checkpoint c : this.checkpoints)
@@ -98,9 +101,24 @@ public class RacePositionEngine {
         return this.checkpoints.get(i);
     }
 
-    public Vector3f getRacerNextCheckpoint(RayCarControl car) {
-        return posOfCheckpoint(this.racers.get(car).nextCheckpoint);
+    public Vector3f[] getRacerNextCheckpoints(RayCarControl car, int count) {
+        if (count <= 1) {
+            return new Vector3f[] { posOfCheckpoint(this.racers.get(car).nextCheckpoint) };
+        }
+        if (count > this.getCheckpointCount())
+            return null; //not allowed
+
+        //calc the next 'count' checkpoints
+        int checkNum = this.racers.get(car).nextCheckpoint.num;
+        Vector3f[] checks = new Vector3f[count];
+        for (int i = 0; i < count; i++) {
+            int check = calcNextCheckFrom(checkNum + i);
+            checks[i] = this.checkpoints.get(check).position;
+        }
+
+        return checks;
     }
+
     public Vector3f getRacerLastCheckpoint(RayCarControl car) {
         return posOfCheckpoint(this.racers.get(car).lastCheckpoint);
     }

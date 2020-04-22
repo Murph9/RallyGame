@@ -230,8 +230,14 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
         this.cb.setEnabled(false);
     }
     
+    @Override
     public Vector3f getNextCheckpoint(RayCarControl car) {
         return progress.getNextCheckpoint(car);
+    }
+    
+    @Override
+    public Vector3f[] getNextCheckpoints(RayCarControl car, int count) {
+        return progress.getNextCheckpoints(car, count);
     }
 
     @Override

@@ -183,6 +183,12 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
         return progress.getNextCheckpoint(car);
     }
 
+    @Override
+    public Vector3f[] getNextCheckpoints(RayCarControl car, int count) {
+        return progress.getNextCheckpoints(car, count);
+    }
+
+    @Override
     public Transform resetPosition(RayCarControl car) {
         Vector3f pos = progress.getLastCheckpoint(car);
         Vector3f next = progress.getNextCheckpoint(car);

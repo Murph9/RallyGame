@@ -227,8 +227,11 @@ public class CheckpointProgress extends BaseAppState {
         listener.stopListening(physicsSpace);
     }
 
+    public Vector3f[] getNextCheckpoints(RayCarControl car, int count) {
+        return engine.getRacerNextCheckpoints(car, count);
+    }
     public Vector3f getNextCheckpoint(RayCarControl car) {
-        return engine.getRacerNextCheckpoint(car);
+        return getNextCheckpoints(car, 1)[0];
     }
 
     public Vector3f getLastCheckpoint(RayCarControl car) {

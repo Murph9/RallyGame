@@ -78,7 +78,7 @@ public class DriveRace extends DriveBase implements PauseState.ICallback, ICheck
         this.worldRot.lookAt(checkpoints[0].subtract(checkpoints[checkpoints.length - 1]), Vector3f.UNIT_Y);
 
         this.worldStarts = new GridPositions(3, 10)
-                .generate(checkpoints[0], checkpoints[0].subtract(checkpoints[checkpoints.length - 1]).negate())
+                .generate(checkpoints[0], checkpoints[0].subtract(checkpoints[checkpoints.length - 1]))
                 .limit(themCount + 1).toArray(i -> new Vector3f[i]);
 
         //buildCars and load ai
@@ -232,8 +232,14 @@ public class DriveRace extends DriveBase implements PauseState.ICallback, ICheck
         this.cb.setEnabled(false);
     }
     
+    @Override
     public Vector3f getNextCheckpoint(RayCarControl car) {
         return progress.getNextCheckpoint(car);
+    }
+
+    @Override
+    public Vector3f[] getNextCheckpoints(RayCarControl car, int count) {
+        return progress.getNextCheckpoints(car, count);
     }
 
     @Override

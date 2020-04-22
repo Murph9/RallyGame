@@ -9,4 +9,5 @@ public interface ICheckpointDrive extends IDrive {
 
     Transform resetPosition(RayCarControl car);
     Vector3f getNextCheckpoint(RayCarControl car);
+    Vector3f[] getNextCheckpoints(RayCarControl car, int count);
 }
