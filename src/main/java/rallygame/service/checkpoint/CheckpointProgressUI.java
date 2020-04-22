@@ -2,22 +2,28 @@ package rallygame.service.checkpoint;
 
 import java.time.Duration;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
 import rallygame.game.DebugAppState;
 import rallygame.service.Screen;
+import rallygame.service.WorldGuiText;
+import rallygame.service.WorldGuiText.WorldText;
 
 public class CheckpointProgressUI extends BaseAppState {
 
     private final CheckpointProgress progress;
+    private final Map<RacerState, WorldText> positionLabels;
 
     private Container main;
     private RacerStateTableView progressTable;
@@ -30,6 +36,7 @@ public class CheckpointProgressUI extends BaseAppState {
 
     public CheckpointProgressUI(CheckpointProgress progress) {
         this.progress = progress;
+        this.positionLabels = new HashMap<>();
     }
 
     @Override
@@ -42,6 +49,13 @@ public class CheckpointProgressUI extends BaseAppState {
 
         progressTable = new RacerStateTableView(progress.getRaceState());
         this.main.addChild(progressTable);
+
+        WorldGuiText textEngine = getState(WorldGuiText.class);
+        for (RacerState state : progress.getRaceState()) {
+            if (state == progress.getPlayerRacerState())
+                continue;
+            this.positionLabels.put(state, textEngine.addTextAt("yo", new Vector3f()));
+        }
     }
 
     @Override
@@ -69,10 +83,23 @@ public class CheckpointProgressUI extends BaseAppState {
         List<RacerState> racers = progress.getRaceState();
         Collections.sort(racers);
 
-        RacerState st = progress.getPlayerRacerState();
-        progressTable.update(racers, st);
+        RacerState player = progress.getPlayerRacerState();
+        progressTable.update(racers, player);
 
         screen.topRightMe(main);
+
+        // update position in world labels
+        int i = 0;
+        for (RacerState racer : racers) {
+            i++;
+            if (racer == player)
+                continue;
+
+            WorldText text = this.positionLabels.get(racer);
+            Vector3f pos = racer.car.location.add(0, 1, 0);
+            text.setText(i + "");
+            text.setWorldPos(pos);
+        }
 
         // update the debug checkpoint lines
         if (debugNode != null)
