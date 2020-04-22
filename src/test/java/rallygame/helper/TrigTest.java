@@ -59,6 +59,21 @@ public class TrigTest {
     }
 
     @Test
+    public void distFromLine() {
+        assertEquals(0, Trig.distFromLine(new Vector2f(0, 0), new Vector2f(1, 0), new Vector2f(0, 0)));
+        assertEquals(0, Trig.distFromLine(new Vector2f(0, 0), new Vector2f(1, 0), new Vector2f(1, 0)));
+
+        assertEquals(1f, Trig.distFromLine(new Vector2f(0, 0), new Vector2f(1, 0), new Vector2f(1, 1)));
+        assertEquals(1f, Trig.distFromLine(new Vector2f(0, 0), new Vector2f(1, 0), new Vector2f(0, 1)));
+
+        assertEquals(4f, Trig.distFromLine(new Vector2f(0, 0), new Vector2f(1, 0), new Vector2f(-3, 4)));
+
+        assertEquals(1 / Math.sqrt(2),
+                Trig.distFromLine(new Vector2f(0, 0), new Vector2f(1, 1), new Vector2f(0, 1)), 0.0001);
+
+        assertEquals(0, Trig.distFromLine(new Vector2f(0, 0), new Vector2f(5, 0), new Vector2f(10, 0)));
+    }
+    @Test
     public void distFromLineXZ() {
         assertEquals(0, Trig.distFromLineXZ(new Vector3f(0, 0, 0), new Vector3f(1, 0, 0), new Vector3f(0, 0, 0)));
         assertEquals(0, Trig.distFromLineXZ(new Vector3f(0, 0, 0), new Vector3f(1, 0, 0), new Vector3f(1, 0, 0)));

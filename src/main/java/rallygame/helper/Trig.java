@@ -12,12 +12,16 @@ public class Trig {
 
     /**Get distance from an inf line. If you want a segment then try distFromSegment */
     public static float distFromLineXZ(Vector3f start, Vector3f end, Vector3f point) {
+        return distFromLine(H.v3tov2fXZ(start), H.v3tov2fXZ(end), H.v3tov2fXZ(point));
+    }
+    /** Get distance from an inf line. If you want a segment then try distFromSegment */
+    public static float distFromLine(Vector2f start, Vector2f end, Vector2f point) {
         float x0 = point.x;
-        float y0 = point.z;
+        float y0 = point.y;
         float x1 = start.x;
-        float y1 = start.z;
+        float y1 = start.y;
         float x2 = end.x;
-        float y2 = end.z;
+        float y2 = end.y;
         return (Math.abs((y2 - y1) * x0 - (x2 - x1) * y0 + x2 * y1 - y2 * x1))
                 / FastMath.sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1));
     }
