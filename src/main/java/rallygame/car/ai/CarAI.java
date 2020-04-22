@@ -15,6 +15,7 @@ import rallygame.car.ray.RayWheelControl;
 import rallygame.game.DebugAppState;
 import rallygame.helper.H;
 import rallygame.helper.Log;
+import rallygame.helper.Trig;
 import rallygame.service.ray.IPhysicsRaycaster;
 import rallygame.service.ray.RaycasterResult;
 
@@ -136,7 +137,7 @@ public abstract class CarAI implements ICarAI {
         // r = (m*v*v)/f
         float bestRadius = this.car.getCarData().mass * speed.lengthSquared() / BEST_LAT_FORCE;
 
-        // generate a cone that the car can reach using 2 circles on either side
+        // generate a curved cone that the car can reach using 2 circles on either side
         // using the speed as the tangent of the circles
         Vector2f radiusDir = new Vector2f(speed.y, -speed.x).normalize().mult(bestRadius);
 
@@ -154,8 +155,51 @@ public abstract class CarAI implements ICarAI {
 			debug.drawSphere("aiTooFastForPointc2", ColorRGBA.White, H.v2tov3fXZ(center2), bestRadius);
 		}
 
+        // finally return if the cone contains the target
         return distance1 > bestRadius && distance2 > bestRadius;
-	}
+    }
+    
+    /** Similar to the too fast for point method, but it tries to avoid the wall as close as possible */
+    protected final boolean IfTooFastForWall(Vector2f wallStart, Vector2f wallDir, Vector2f pos, Vector2f speed, Vector2f target) {
+        // r = (m*v*v)/f
+        float bestRadius = this.car.getCarData().mass * speed.lengthSquared() / BEST_LAT_FORCE;
+        // generate a curved cone that the car can reach using 2 circles on either side
+        // using the speed as the tangent of the circles
+        Vector2f radiusDir = new Vector2f(speed.y, -speed.x).normalize().mult(bestRadius);
+
+        // create both 'spheres'
+        Vector2f center1 = pos.add(radiusDir);
+        Vector2f center2 = pos.add(radiusDir.negate());
+        
+        if (debug != null) {
+            Vector3f wallStart3f = H.v2tov3fXZ(wallStart);
+            wallStart3f.y = this.car.location.y;
+            Vector3f wallDir3f = H.v2tov3fXZ(wallDir);
+            debug.drawArrow("aiTooFastForWall", ColorRGBA.Red, wallStart3f.add(0, 1, 0), wallDir3f);
+        }
+
+        // calc if cone contains the wall
+        float dist1 = Trig.distFromRay(wallStart, wallDir, center1);
+        float dist2 = Trig.distFromRay(wallStart, wallDir, center2);
+        return dist1 < bestRadius || dist2 < bestRadius;
+    }
+    
+    protected Vector3f[] getOuterWallFromCheckpoints(Vector3f checkpoint1, Vector3f checkpoint2) {
+        Vector3f wallDir = checkpoint2.subtract(checkpoint1);
+        Vector3f wallStart = checkpoint1;
+
+        Vector3f normal = new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y).mult(wallDir);
+        // TODO hard coded road width
+        Vector3f newPos = wallStart.add(normal.normalize().mult(5));
+        Vector3f newPos2 = wallStart.add(normal.normalize().negate().mult(5));
+
+        // pick the futhest pos so its the opposite wall
+        if (newPos.distance(car.location) < newPos2.distance(car.location)) {
+            return new Vector3f[] { newPos2, wallDir };
+        }
+
+        return new Vector3f[] { newPos, wallDir };
+    }
     
     /** Detect a high drift angle, which might mean stop accelerating */
     protected final boolean ifDrifting() {
