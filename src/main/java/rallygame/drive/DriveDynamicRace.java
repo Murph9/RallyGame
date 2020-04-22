@@ -80,7 +80,7 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
 
         progressMenu = new CheckpointProgressUI(progress);
         getStateManager().attach(progressMenu);
-        
+
         //actually init
         nextState();
     }

@@ -66,6 +66,8 @@ public class RaceAI extends CarAI {
 
     private boolean tooFastForNextCheckpoints(Vector3f atPos) {
         Vector3f[] checkpoints = race.getNextCheckpoints(car, 6);
+        if (checkpoints == null)
+            return false;
 
         Vector3f targetDir = car.location.subtract(atPos).normalize();
         for (int i = 0; i < checkpoints.length - 1; i++) {
