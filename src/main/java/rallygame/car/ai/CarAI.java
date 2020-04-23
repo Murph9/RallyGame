@@ -184,21 +184,20 @@ public abstract class CarAI implements ICarAI {
         return dist1 < bestRadius || dist2 < bestRadius;
     }
     
-    protected Vector3f[] getOuterWallFromCheckpoints(Vector3f checkpoint1, Vector3f checkpoint2) {
+    protected Vector3f[] getOuterWallFromCheckpoints(Vector3f checkpoint1, Vector3f checkpoint2, float roadWidth) {
         Vector3f wallDir = checkpoint2.subtract(checkpoint1);
         Vector3f wallStart = checkpoint1;
 
         Vector3f normal = new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y).mult(wallDir);
-        // TODO hard coded road width
-        Vector3f newPos = wallStart.add(normal.normalize().mult(5));
-        Vector3f newPos2 = wallStart.add(normal.normalize().negate().mult(5));
+        Vector3f newPosX = wallStart.add(normal.normalize().mult(roadWidth));
+        Vector3f newPosXM = wallStart.add(normal.normalize().negate().mult(roadWidth));
 
         // pick the futhest pos so its the opposite wall
-        if (newPos.distance(car.location) < newPos2.distance(car.location)) {
-            return new Vector3f[] { newPos2, wallDir };
+        if (newPosX.distance(car.location) < newPosXM.distance(car.location)) {
+            return new Vector3f[] { newPosXM, wallDir };
         }
 
-        return new Vector3f[] { newPos, wallDir };
+        return new Vector3f[] { newPosX, wallDir };
     }
     
     /** Detect a high drift angle, which might mean stop accelerating */

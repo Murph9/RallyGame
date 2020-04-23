@@ -11,6 +11,7 @@ public class RaceAI extends CarAI {
 
     private ICheckpointDrive race;
     private final boolean doFowardRayCast;
+    private float roadWidth;
     
     public RaceAI(RayCarControl car, ICheckpointDrive race) {
         this(car, race, true);
@@ -19,7 +20,11 @@ public class RaceAI extends CarAI {
 		super(car);
         this.race = race;
         this.doFowardRayCast = doForwardRayCast;
-	}
+        roadWidth = 5;
+    }
+    public void setRoadWidth(float roadWidth) {
+        this.roadWidth = roadWidth;
+    }
 
 	@Override
 	public void update(float tpf) {
@@ -31,7 +36,7 @@ public class RaceAI extends CarAI {
         
         driveAt(atPos);
         
-        boolean tooFast = tooFastForNextCheckpoints(atPos);
+        boolean tooFast = tooFastForNextCheckpoints(atPos, roadWidth);
         if (tooFast) {
             onEvent(RayCarControlInput.ACTION_ACCEL, false);
             onEvent(RayCarControlInput.ACTION_BRAKE, true);
@@ -64,7 +69,7 @@ public class RaceAI extends CarAI {
         }
     }
 
-    private boolean tooFastForNextCheckpoints(Vector3f atPos) {
+    private boolean tooFastForNextCheckpoints(Vector3f atPos, float roadWidth) {
         Vector3f[] checkpoints = race.getNextCheckpoints(car, 6);
         if (checkpoints == null)
             return false;
@@ -75,7 +80,7 @@ public class RaceAI extends CarAI {
             if (checkpoints[i].subtract(checkpoints[i+1]).normalize().dot(targetDir) > 0.9f) {
                 //pretty colinear, ignore
             } else {
-                Vector3f[] wall = this.getOuterWallFromCheckpoints(checkpoints[i], checkpoints[i+1]);
+                Vector3f[] wall = this.getOuterWallFromCheckpoints(checkpoints[i], checkpoints[i+1], roadWidth);
                 boolean result = this.IfTooFastForWall(H.v3tov2fXZ(wall[0]), H.v3tov2fXZ(wall[1]),
                 H.v3tov2fXZ(car.location), H.v3tov2fXZ(car.vel), H.v3tov2fXZ(atPos));
                 if (result) {

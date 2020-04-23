@@ -50,7 +50,7 @@ public class AStar<T> implements ISearch<T> {
         });
 
         closed.clear();
-        Map<T, Float> gScore = new HashMap<>(); //TODO does this work?
+        Map<T, Float> gScore = new HashMap<>();
 
         AStar<T>.Node curNode = new Node(null, start, 0, 0);
         closed.add(curNode.value);
