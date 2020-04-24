@@ -59,10 +59,10 @@ public class Terrain extends BaseAppState implements ILoadable {
 
         //load first terrainquad so we can start the race
         //TODO test an offset because im pretty sure some things aren't correct
-        generateQuadAt(new Vector2f(), app.getAssetManager());
+        generateTQuadAt(new Vector2f(), app.getAssetManager());
     }
 
-    private void generateQuadAt(Vector2f center, AssetManager am) {
+    private void generateTQuadAt(Vector2f center, AssetManager am) {
         TerrainPiece data = new TerrainPiece(this, center);
         data.generate(am, getState(BulletAppState.class).getPhysicsSpace());
         

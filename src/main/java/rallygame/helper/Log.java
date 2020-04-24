@@ -4,6 +4,8 @@ import java.io.PrintStream;
 
 public class Log {
 	
+	// Is it worth changing these to be recursive to be able to print many lists?
+
 	//This should really be configurable, if you want it isn't a complex file
 	private static PrintStream OUT = System.out;
 	private static PrintStream ERR = System.err;

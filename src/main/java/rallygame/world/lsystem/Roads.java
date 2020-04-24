@@ -1,6 +1,5 @@
 package rallygame.world.lsystem;
 
-import java.util.Arrays;
 import java.util.function.BiFunction;
 
 import com.jme3.asset.AssetManager;
@@ -19,13 +18,9 @@ import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
-import com.jme3.scene.VertexBuffer.Type;
-import com.jme3.scene.debug.Arrow;
-import com.jme3.scene.shape.Box;
 import com.jme3.terrain.geomipmap.TerrainQuad;
-import com.jme3.util.BufferUtils;
 
-import rallygame.helper.Log;
+import rallygame.helper.Geo;
 
 public class Roads {
 
@@ -182,57 +177,17 @@ public class Roads {
 	}
 	
 	private void drawMeAnArrow(AssetManager am, Node rootNode, Vector3f start, Vector3f dir) {  
-		Arrow arrow = new Arrow(dir);
-		Geometry g = new Geometry("coordinate axis", arrow);
-		Material mat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-		mat.getAdditionalRenderState().setWireframe(true);
-		mat.setColor("Color", ColorRGBA.Green);
-		g.setMaterial(mat);
-		g.setLocalTranslation(start);
-		rootNode.attachChild(g);
-		
-		Log.p(start+ ", " + dir);
+		Geometry geometry = Geo.makeShapeArrow(am, ColorRGBA.Green, dir, start);
+		rootNode.attachChild(geometry);
 	}
 	
 	private void drawMeAVerySmallBox(AssetManager am, Node rootNode, Vector3f pos, ColorRGBA colour) {
-		Box b = new Box(0.1f, 0.1f, 0.1f);
-		Geometry geometry = new Geometry("box", b);
-		Material mat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-		mat.setColor("Color", colour);
-		geometry.setMaterial(mat);
-		geometry.setLocalTranslation(pos);
+		Geometry geometry =	Geo.makeShapeBox(am, colour, pos, 0.1f);
 		rootNode.attachChild(geometry);
 	}
 	
 	private void drawMeAQuad(AssetManager am, Node rootNode, PhysicsSpace phys, Vector3f[] v, ColorRGBA colour) {
-		if (v == null || v.length != 4) {
-			Log.e("Roads-drawMeAQuad: Not the correct length drawMeAQuad()");
-			return;
-		}
-		if (Arrays.asList(v).stream().anyMatch(x -> !Vector3f.isValidVector(x))) {
-			Log.e("Roads-drawMeAQuad: Invalid vector given");
-			return;
-		}
-		
-		Mesh mesh = new Mesh(); //making a quad positions
-		
-		Vector2f[] texCoord = new Vector2f[4]; //texture of quad
-		texCoord[0] = new Vector2f(0, 0);
-		texCoord[1] = new Vector2f(0, 1);
-		texCoord[2] = new Vector2f(1, 0);
-		texCoord[3] = new Vector2f(1, 1);
-		
-		int[] indexes = { 2,0,1, 1,3,2 };
-		float[] normals = new float[12];
-		normals = new float[]{0,1,0, 0,1,0, 0,1,0, 0,1,0};
-		
-		mesh.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(v));
-		mesh.setBuffer(Type.Normal, 3, BufferUtils.createFloatBuffer(normals));
-		mesh.setBuffer(Type.TexCoord, 2, BufferUtils.createFloatBuffer(texCoord));
-		mesh.setBuffer(Type.Index,    3, BufferUtils.createIntBuffer(indexes));
-
-		mesh.updateBound();
-		
+		Mesh mesh = Geo.createQuad(v);
 		Geometry geo = new Geometry("Quad", mesh);
 		
 		Material mat = null;

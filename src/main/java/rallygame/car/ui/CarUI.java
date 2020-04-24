@@ -14,31 +14,23 @@ import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
-import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial.CullHint;
-import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.scene.shape.Quad;
 import com.jme3.system.AppSettings;
-import com.jme3.util.BufferUtils;
 
 import rallygame.car.ray.RayCarControl;
 import rallygame.car.ray.ICarPowered;
+import rallygame.helper.Geo;
 import rallygame.helper.H;
 
 public class CarUI extends BaseAppState {
 
 	//TODO scale it with monitor size and pixel density (forza doesn't deal with this)
     
-    private static final Vector2f[] TEX_COORD = new Vector2f[] { 
-        new Vector2f(0, 0), new Vector2f(1, 0),
-        new Vector2f(0, 1), new Vector2f(1, 1)
-    };
-    private static final int[] INDEXES = { 2, 0, 1, 1, 3, 2 };
-
 	private final RayCarControl p;
 	private Node rootNode;
 	
@@ -185,18 +177,15 @@ public class CarUI extends BaseAppState {
 			float angle = FastMath.interpolateLinear(i/(float)finalRPM, startAng, finalAng);
 			
 			if (i >= redline) {
-                float angle2 = FastMath.interpolateLinear((i + increment) / (float) finalRPM, startAng, finalAng);
-                Mesh mq = new Mesh();
+				float angle2 = FastMath.interpolateLinear((i + increment) / (float) finalRPM, startAng, finalAng);
+				
                 Vector3f[] corners = new Vector3f[] {
                         new Vector3f(FastMath.cos(angle) * radius, FastMath.sin(angle) * radius, 0),
                         new Vector3f(FastMath.cos(angle) * radius * 0.89f, FastMath.sin(angle) * radius * 0.89f, 0),
                         new Vector3f(FastMath.cos(angle2) * radius, FastMath.sin(angle2) * radius, 0),
                         new Vector3f(FastMath.cos(angle2) * radius * 0.89f, FastMath.sin(angle2) * radius * 0.89f, 0),
-                    };
-                mq.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(corners));
-                mq.setBuffer(Type.TexCoord, 2, BufferUtils.createFloatBuffer(TEX_COORD));
-                mq.setBuffer(Type.Index, 3, BufferUtils.createIntBuffer(INDEXES));
-                mq.updateBound();
+					};
+				Mesh mq = Geo.createQuad(corners);
 
                 Material mat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
                 mat.setColor("Color", new ColorRGBA(ColorRGBA.Red));

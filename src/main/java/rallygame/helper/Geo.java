@@ -1,5 +1,8 @@
 package rallygame.helper;
 
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -8,6 +11,7 @@ import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
+import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
@@ -20,6 +24,7 @@ import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Line;
 import com.jme3.scene.shape.Sphere;
+import com.jme3.util.BufferUtils;
 
 public class Geo {
 
@@ -163,5 +168,35 @@ public class Geo {
             s = s.getParent();
         }
         return false;
+    }
+
+
+    private static final FloatBuffer quadTexCoordBuffer = BufferUtils.createFloatBuffer(new Vector2f[] {
+        new Vector2f(0, 0), new Vector2f(0, 1), new Vector2f(1, 0), new Vector2f(1, 1)
+    });
+    private static final FloatBuffer quadNormalBuffer = BufferUtils.createFloatBuffer(new float[] {
+        0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0
+    });
+    private static final IntBuffer quadIndexBuffer = BufferUtils.createIntBuffer(new int[] { 2, 0, 1, 1, 3, 2 });
+
+    public static Mesh createQuad(Vector3f[] v) {
+        if (v == null || v.length != 4) {
+            Log.e("Geo.createQuad(): Not the correct length");
+            Log.e(v, ",");
+            return null;
+        }
+        if (Arrays.asList(v).stream().anyMatch(x -> !Vector3f.isValidVector(x))) {
+            Log.e("Geo.createQuad(): Invalid vector given");
+            Log.e(v, ",");
+            return null;
+        }
+
+        Mesh mesh = new Mesh();
+        mesh.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(v));
+        mesh.setBuffer(Type.Normal, 3, quadNormalBuffer);
+        mesh.setBuffer(Type.TexCoord, 2, quadTexCoordBuffer);
+        mesh.setBuffer(Type.Index, 3, quadIndexBuffer);
+        mesh.updateBound();
+        return mesh;
     }
 }

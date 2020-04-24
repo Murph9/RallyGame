@@ -1,7 +1,5 @@
 package rallygame.world.osm;
 
-import java.util.Arrays;
-
 import com.jme3.app.Application;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
@@ -11,17 +9,14 @@ import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
-import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
-import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.scene.shape.Line;
-import com.jme3.util.BufferUtils;
 
 import rallygame.effects.LoadModelWrapper;
-import rallygame.helper.Log;
+import rallygame.helper.Geo;
 import rallygame.world.World;
 import rallygame.world.WorldType;
 
@@ -97,32 +92,9 @@ public class OsmWorld extends World {
         drawMeAQuad(new Vector3f[] { lb, lt, rb, rt }, colour);
     }
 
-
-    private static int[] QUAD_INDEXES = { 2, 0, 1, 1, 3, 2 };
-    private static float[] QUAD_NORMALS = new float[] { 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0 };
-    private static Vector2f[] QUAD_TEX_COORD = new Vector2f[] {
-            new Vector2f(0, 0), new Vector2f(0, 1), new Vector2f(1, 0), new Vector2f(1, 1) 
-        };
     private void drawMeAQuad(Vector3f[] v, ColorRGBA colour) {
-        if (v == null || v.length != 4) {
-            Log.e("Roads-drawMeAQuad: Not the correct length drawMeAQuad()");
-            return;
-        }
-        if (Arrays.asList(v).stream().anyMatch(x -> !Vector3f.isValidVector(x))) {
-            Log.e("Roads-drawMeAQuad: Invalid vector given");
-            return;
-        }
-
         PhysicsSpace phys = getState(BulletAppState.class).getPhysicsSpace();
-
-        Mesh mesh = new Mesh(); // making a quad positions
-        mesh.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(v));
-        mesh.setBuffer(Type.Normal, 3, BufferUtils.createFloatBuffer(QUAD_NORMALS));
-        mesh.setBuffer(Type.TexCoord, 2, BufferUtils.createFloatBuffer(QUAD_TEX_COORD));
-        mesh.setBuffer(Type.Index, 3, BufferUtils.createIntBuffer(QUAD_INDEXES));
-
-        mesh.updateBound();
-
+        Mesh mesh = Geo.createQuad(v);
         Geometry geo = new Geometry("Quad", mesh);
         Node n = LoadModelWrapper.create(getApplication().getAssetManager(), geo, colour);
 
