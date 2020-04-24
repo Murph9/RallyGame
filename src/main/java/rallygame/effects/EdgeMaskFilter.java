@@ -44,7 +44,7 @@ public class EdgeMaskFilter extends Filter {
         this.viewPort = vp;
         normalPass = new Pass();
         normalPass.init(renderManager.getRenderer(), w, h, Format.RGBA8, Format.Depth);
-        material = new Material(manager, "mat/EdgeMaskFilter.j3md");
+        material = new Material(manager, "MatDefs/EdgeMaskFilter.j3md");
         material.setFloat("EdgeWidth", edgeWidth);
         material.setFloat("EdgeIntensity", edgeIntensity);
         material.setFloat("NormalThreshold", normalThreshold);

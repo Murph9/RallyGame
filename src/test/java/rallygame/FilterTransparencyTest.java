@@ -3,6 +3,7 @@ package rallygame;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
+import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
@@ -12,9 +13,11 @@ import com.jme3.math.Spline.SplineType;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Box;
+import com.jme3.terrain.geomipmap.TerrainQuad;
 
 import rallygame.effects.FilterManager;
 import rallygame.helper.Log;
+import rallygame.service.PerlinNoise;
 import rallygame.world.path.CatmullRomRoad;
 
 public class FilterTransparencyTest extends SimpleApplication {
@@ -27,7 +30,6 @@ public class FilterTransparencyTest extends SimpleApplication {
     @Override
     public void simpleInitApp() {
         inputManager.setCursorVisible(true);
-        inputManager.deleteMapping(INPUT_MAPPING_EXIT); // no esc close pls
 
         FilterManager fm = new FilterManager();
         getStateManager().attach(fm);
@@ -48,8 +50,9 @@ class FilterTransparencyState extends BaseAppState {
     protected void initialize(Application app) {
         rootNode = new Node("root node");
         ((SimpleApplication)app).getRootNode().attachChild(rootNode);
+        AssetManager am = app.getAssetManager();
 
-        Material baseMat = new Material(app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+        Material baseMat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
         baseMat.setColor("Color", ColorRGBA.Green);
         baseMat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
 
@@ -69,6 +72,22 @@ class FilterTransparencyState extends BaseAppState {
 
         app.getCamera().setLocation(new Vector3f(3, 3, 3));
         app.getCamera().lookAt(new Vector3f(0,0,0), Vector3f.UNIT_Y);
+
+
+        int sideLength = 9;
+        PerlinNoise noise = new PerlinNoise(sideLength, 0);
+        noise.load();
+
+        float[] heightMap = noise.getHeightMap();
+        TerrainQuad terrain = new TerrainQuad("path terrain", sideLength, sideLength, heightMap);
+        Material tMat = new Material(am, "MatDefs/terrainheight/TerrainColorByHeight.j3md");
+        baseMat.setColor("LowColor", new ColorRGBA(1.0f, 0.55f, 0.0f, 1.0f));
+        baseMat.setColor("HighColor", new ColorRGBA(0.0f, 0.0f, 1.0f, 1.0f));
+        tMat.setFloat("Scale", 0.8f); // margin of 0.1f
+        tMat.setFloat("Offset", 0.1f);
+        terrain.setMaterial(tMat);
+        
+        this.rootNode.attachChild(terrain);
     }
 
     @Override

@@ -165,7 +165,7 @@ public class CarUI extends BaseAppState {
 		Quad rpmQ = new Quad(220, 220);
 		rpmQuad = new Geometry("ui-background", rpmQ);
 		background.setCullHint(CullHint.Never);
-		rpmMat = new Material(am, "mat/Radial.j3md");
+		rpmMat = new Material(am, "MatDefs/Radial.j3md");
 		rpmMat.setTransparent(true);
 		rpmMat.setTexture("ThresholdMap", am.loadTexture("image/radialgradient_large.png"));
 		rpmMat.setFloat("Threshold", FastMath.nextRandomFloat());

@@ -1,0 +1,35 @@
+MaterialDef TerrainHeightColor {
+
+    MaterialParameters {
+        Float Scale
+        Float Offset
+        Color LowColor
+        Color HighColor
+    }
+
+    Technique {
+        VertexShader GLSL150 GLSL100:   MatDefs/terrainheight/TerrainColorByHeight.vert
+        FragmentShader GLSL150 GLSL100: MatDefs/terrainheight/TerrainColorByHeight.frag
+
+        WorldParameters {
+            WorldViewProjectionMatrix
+        }
+    }
+
+    Technique PreNormalPass {
+
+        VertexShader GLSL310 GLSL300 GLSL100 GLSL150 :   Common/MatDefs/SSAO/normal.vert
+        FragmentShader GLSL310 GLSL300 GLSL100 GLSL150 : Common/MatDefs/SSAO/normal.frag
+
+        WorldParameters {
+            WorldViewProjectionMatrix
+            WorldViewMatrix
+            NormalMatrix
+            ViewProjectionMatrix
+            ViewMatrix
+        }
+
+        Defines {
+        }
+   	}
+}

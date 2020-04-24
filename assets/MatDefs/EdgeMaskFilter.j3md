@@ -17,7 +17,7 @@ MaterialDef Cartoon Edge {
 
      Technique {
         VertexShader GLSL150 GLSL100:   Common/MatDefs/Post/Post.vert
-        FragmentShader GLSL150 GLSL100: mat/EdgeMaskFilter.frag
+        FragmentShader GLSL150 GLSL100: MatDefs/EdgeMaskFilter.frag
 
         WorldParameters {
             WorldViewMatrix

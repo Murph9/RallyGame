@@ -10,8 +10,8 @@ MaterialDef Radial {
 	}
 	
 	Technique {
-		VertexShader GLSL100: mat/Radial.vert
-		FragmentShader GLSL100: mat/Radial.frag
+		VertexShader GLSL100: MatDefs/Radial.vert
+		FragmentShader GLSL100: MatDefs/Radial.frag
 		
 		WorldParameters {
             WorldViewProjectionMatrix

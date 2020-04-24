@@ -74,7 +74,9 @@ class TerrainPiece {
         terrain = new TerrainQuad("path terrain", sideLength, sideLength, heightMap);
         terrain.setLocalScale(terrainScale);
 
-        Material baseMat = new Material(am, "mat/terrainheight/TerrainColorByHeight.j3md");
+        Material baseMat = new Material(am, "MatDefs/terrainheight/TerrainColorByHeight.j3md");
+        baseMat.setColor("LowColor", new ColorRGBA(1.0f, 0.55f, 0.0f, 1.0f));
+        baseMat.setColor("HighColor", new ColorRGBA(0.0f, 0.0f, 1.0f, 1.0f));
         baseMat.setFloat("Scale", terrainScale.y * 0.8f); // margin of 0.1f
         baseMat.setFloat("Offset", terrainScale.y * 0.1f);
 
