@@ -59,6 +59,7 @@ public class Terrain extends BaseAppState implements ILoadable {
 
         //load first terrainquad so we can start the race
         //TODO test an offset because im pretty sure some things aren't correct
+        // especially physics collision objects
         generateTQuadAt(new Vector2f(), app.getAssetManager());
     }
 
