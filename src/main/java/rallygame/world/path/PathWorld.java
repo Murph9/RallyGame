@@ -2,7 +2,6 @@ package rallygame.world.path;
 
 import com.jme3.app.Application;
 import com.jme3.math.FastMath;
-import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 
@@ -34,20 +33,11 @@ public class PathWorld extends World implements ICheckpointWorld {
     }
 
     @Override
-    public Vector3f getStartPos() {
+    public Transform getStart() {
         if (this.loadPercent().percent >= 1) {
-            return terrain.getStart().getTranslation();
+            return new Transform(terrain.getStart().getTranslation(), terrain.getStart().getRotation());
         }
-
-        return new Vector3f();
-    }
-
-    @Override
-    public Quaternion getStartRot() {
-        if (this.loadPercent().percent >= 1) {
-            return terrain.getStart().getRotation();
-        }
-        return Quaternion.IDENTITY.clone();
+        return new Transform();
     }
 
     @Override
@@ -82,18 +72,17 @@ public class PathWorld extends World implements ICheckpointWorld {
 
     @Override
     public Transform start(int i) {
-        Quaternion rot = this.getStartRot();
-        Vector3f startPos = this.getStartPos();
+        Transform start = this.getStart();
 
         if (this.loadPercent().percent >= 1) {
             GridPositions grid = new GridPositions(2, 7);
-            Vector3f pos = grid.generate(startPos, rot.mult(Vector3f.UNIT_Z))
+            Vector3f pos = grid.generate(start.getTranslation(), start.getRotation().mult(Vector3f.UNIT_Z))
                 .skip(i)
                 .findFirst().get();
-            return new Transform(pos, rot);
+            return new Transform(pos, start.getRotation());
         }
 
-        return new Transform(startPos, rot);
+        return start;
     }
 
     @Override

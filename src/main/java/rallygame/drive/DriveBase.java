@@ -61,7 +61,7 @@ public class DriveBase extends BaseAppState implements IDrive {
             this.cb.removeAll();
         }
 
-        RayCarControl rayCar = cb.addCar(car, world.getStartPos(), world.getStartRot(), true);
+        RayCarControl rayCar = cb.addCar(car, world.getStart(), true);
 
         uiNode = new CarUI(rayCar);
         stateManager.attach(uiNode);
@@ -136,7 +136,7 @@ public class DriveBase extends BaseAppState implements IDrive {
 
         this.cb.removeCar(cb.get(0));
 
-        RayCarControl c = this.cb.addCar(car, world.getStartPos(), world.getStartRot(), true);
+        RayCarControl c = this.cb.addCar(car, world.getStart(), true);
 
         // initCamera and ui again
         camera = new CarCamera(getApplication().getCamera(), c);
@@ -148,6 +148,6 @@ public class DriveBase extends BaseAppState implements IDrive {
     }
 
     public Transform resetPosition(RayCarControl car) {
-        return new Transform(world.getStartPos(), world.getStartRot());
+        return world.getStart();
     }
 }

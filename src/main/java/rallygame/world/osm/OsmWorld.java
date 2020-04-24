@@ -7,6 +7,7 @@ import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
@@ -54,8 +55,8 @@ public class OsmWorld extends World {
     }
 
     @Override
-    public Vector3f getStartPos() {
-        return reader.getWithScale(scale).get(0).a.add(0, 1, 0);
+    public Transform getStart() {
+        return new Transform(reader.getWithScale(scale).get(0).a.add(0, 1, 0));
     }
 
     @Override

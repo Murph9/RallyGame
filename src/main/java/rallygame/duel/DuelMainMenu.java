@@ -114,7 +114,7 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
         getStateManager().attach(world);
 
         // build player
-        RayCarControl car = cb.addCar(this.carType, world.getStartPos(), world.getStartRot(), true);
+        RayCarControl car = cb.addCar(this.carType, world.getStart(), true);
 
         // attach basic ai, for the view
         DriveAlongAI ai = new DriveAlongAI(car, (vec) -> world.getNextPieceClosestTo(vec));

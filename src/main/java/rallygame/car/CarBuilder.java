@@ -85,6 +85,10 @@ public class CarBuilder extends BaseAppState {
     }
 
     /** Creates the vehicle and loads it into the world. */
+    public RayCarControl addCar(Car car, Transform trans, boolean aPlayer) {
+        return addCar(loadData(car), trans, aPlayer);
+    }
+    /** Creates the vehicle and loads it into the world. */
     public RayCarControl addCar(Car car, Vector3f start, Quaternion rot, boolean aPlayer) {
         return addCar(loadData(car), start, rot, aPlayer);
     }

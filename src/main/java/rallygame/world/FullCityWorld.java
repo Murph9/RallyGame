@@ -6,6 +6,7 @@ import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.math.FastMath;
+import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
 
@@ -88,7 +89,9 @@ public class FullCityWorld extends World {
 	}
 
 	@Override
-	public Vector3f getStartPos() { return new Vector3f(0,2,0); }
+	public Transform getStart() {
+		return new Transform(new Vector3f(0, 2, 0));
+	}
 
 	@Override
 	public void update(float tpf) {

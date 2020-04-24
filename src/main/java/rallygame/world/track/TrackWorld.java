@@ -315,19 +315,15 @@ public class TrackWorld extends World implements ICheckpointWorld {
 	}
 
 	@Override
-	public Vector3f getStartPos() {
+	public Transform getStart() {
 		if (trackSegments == null || trackSegments.isEmpty())
-			return new Vector3f();
+			return new Transform();
 		TrackSegment segment = trackSegments.get(0);
 		if (segment.getControlPoints().length < 1)
-			return new Vector3f();
+			return new Transform();
 
-		return unnormalizeHeightIn(segment.getControlPoints()[0]).add(0, 2, 0);
-	}
-
-	@Override
-	public Quaternion getStartRot() {
-		return new Quaternion();
+		Vector3f pos = unnormalizeHeightIn(segment.getControlPoints()[0]).add(0, 2, 0);
+		return new Transform(pos);
 	}
 
 	@Override
@@ -443,7 +439,7 @@ public class TrackWorld extends World implements ICheckpointWorld {
 
 	@Override
 	public Transform start(int i) {
-		return new Transform(this.getStartPos(), this.getStartRot());
+		return this.getStart();
 	}
 
 	@Override

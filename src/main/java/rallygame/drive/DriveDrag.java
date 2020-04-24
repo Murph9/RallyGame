@@ -2,6 +2,7 @@ package rallygame.drive;
 
 import com.jme3.app.Application;
 import com.jme3.math.Quaternion;
+import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 
 import rallygame.car.ai.DriveAlongAI;
@@ -36,7 +37,7 @@ public class DriveDrag extends DriveBase {
 
         Car[] types = Car.values();
         for (int i = 0; i < this.themCount; i++) {
-            RayCarControl c = this.cb.addCar(types[i], world.getStartPos(), world.getStartRot(), false);
+            RayCarControl c = this.cb.addCar(types[i], world.getStart(), false);
             c.attachAI(new DriveAtAI(c, this.cb.get(0).getPhysicsObject()), true);
         }
 
@@ -49,6 +50,7 @@ public class DriveDrag extends DriveBase {
 
     private void setSpawns() {
         int count = this.cb.getAll().size();
+        Transform start = world.getStart();
         for (int i = 0; i < count; i++) {
 
             final int index = i * 5;
@@ -59,17 +61,18 @@ public class DriveDrag extends DriveBase {
                 }), true);
             }
 
-            car.setPhysicsProperties(new Vector3f(index, world.getStartPos().y, 0), null, (Quaternion) null, null);
+            car.setPhysicsProperties(new Vector3f(index, start.getTranslation().y, 0), null, (Quaternion) null, null);
         }
     }
     
     private void keepStill() {
         int count = this.cb.getAll().size();
+        Transform start = world.getStart();
         for (int i = 0; i < count; i++) {
             final int index = i*5;
             RayCarControl car = this.cb.get(i);
             Vector3f pos = car.location;
-            car.setPhysicsProperties(new Vector3f(index, world.getStartPos().y, pos.z), new Vector3f(), (Quaternion) null, new Vector3f());
+            car.setPhysicsProperties(new Vector3f(index, start.getTranslation().y, pos.z), new Vector3f(), (Quaternion) null, new Vector3f());
         }
     }
 

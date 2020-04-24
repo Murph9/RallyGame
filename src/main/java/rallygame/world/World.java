@@ -5,7 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
-import com.jme3.math.Quaternion;
+import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 
@@ -30,8 +30,10 @@ public abstract class World extends BaseAppState implements IWorld {
 	@Override
 	protected void onEnable() { }
 
-	public Vector3f getStartPos() { return new Vector3f(); }
-    public Quaternion getStartRot() { return Quaternion.IDENTITY.clone(); }
+	@Override
+	public Transform getStart() {
+		return new Transform();
+	}
 
 	@Override
 	protected void cleanup(Application app) {

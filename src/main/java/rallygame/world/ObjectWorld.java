@@ -8,6 +8,7 @@ import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -137,8 +138,8 @@ public class ObjectWorld extends World {
 	}
 
 	@Override
-	public Vector3f getStartPos() {
-		return new Vector3f(0,2,0);
+	public Transform getStart() {
+		return new Transform(new Vector3f(0, 2, 0));
 	}
 
 	@Override

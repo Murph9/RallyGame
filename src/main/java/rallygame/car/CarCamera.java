@@ -77,6 +77,7 @@ public class CarCamera extends BaseAppState implements RawInputListener {
 		
 	@Override
 	public void render(RenderManager rm) {
+		//TODO fix reversing not being directly behind the car
 		Vector3f carPos = p.getRootNode().getLocalTranslation();
 		Quaternion carRot = p.getRootNode().getLocalRotation();
 			

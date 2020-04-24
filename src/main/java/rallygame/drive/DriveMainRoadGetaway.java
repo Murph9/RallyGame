@@ -7,6 +7,7 @@ import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
+import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.system.AppSettings;
 import com.simsilica.lemur.Container;
@@ -71,7 +72,7 @@ public class DriveMainRoadGetaway extends DriveBase {
 		super.initialize(app);
 		
 		//add the chase car
-		hunter = this.cb.addCar(hunterType, new Vector3f(HUNTER_BUFFER - 10, 0.3f, 0), world.getStartRot(), false);
+		hunter = this.cb.addCar(hunterType, new Vector3f(HUNTER_BUFFER - 10, 0.3f, 0), world.getStart().getRotation(), false);
 		hunter.attachAI(new DriveAtAI(hunter, this.cb.get(0).getPhysicsObject()), true);
 
 		display = new Container();
@@ -111,10 +112,11 @@ public class DriveMainRoadGetaway extends DriveBase {
 		this.lifeLabel.setText(H.roundDecimal(life*100, 0));
 
 		//environment:
+		Transform start = world.getStart();
 		readyForHunter = distanceFromStart > HUNTER_BUFFER;
 		if (!readyForHunter) {
             // the chase car must stay still, for now
-            hunter.setPhysicsProperties(new Vector3f(HUNTER_BUFFER-10, 0.3f, 0), null, this.world.getStartRot(), null);
+            hunter.setPhysicsProperties(new Vector3f(HUNTER_BUFFER-10, 0.3f, 0), null, start.getRotation(), null);
 			return;
 		}
 
@@ -132,8 +134,8 @@ public class DriveMainRoadGetaway extends DriveBase {
 			Vector3f spawnPos = ((DefaultBuilder) this.world).getNextPieceClosestTo(new Vector3f(100000, 0, 0))
 					.add(-20, 0, z); //offset
 			Quaternion spawnDir = spawnPlayerDirection
-				? world.getStartRot()
-				: new Quaternion().fromAngleAxis(FastMath.PI, Vector3f.UNIT_Y).mult(world.getStartRot());
+				? start.getRotation()
+				: new Quaternion().fromAngleAxis(FastMath.PI, Vector3f.UNIT_Y).mult(start.getRotation());
 
 			RayCarControl c = this.cb.addCar(H.randFromArray(this.trafficTypes), spawnPos, spawnDir, false);
 
@@ -197,6 +199,6 @@ public class DriveMainRoadGetaway extends DriveBase {
 	}
 
 	private float getPlayerDistanceFromStart(RayCarControl car) {
-		return FastMath.abs(this.world.getStartPos().x - car.location.x);
+		return FastMath.abs(this.world.getStart().getTranslation().x - car.location.x);
 	}
 }

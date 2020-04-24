@@ -19,6 +19,7 @@ import com.jme3.bullet.collision.PhysicsCollisionListener;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
+import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
 import com.jme3.system.AppSettings;
@@ -100,7 +101,7 @@ public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
         frameCount++;
 
         PhysicsRigidBody playerBody = this.cb.get(0).getPhysicsObject();
-
+        Transform start = world.getStart();
         if (this.cb.getCount() < (themCount + 1) && frameCount % 60 == 0) {
             Vector3f spawn = H.randV3f(10, true);
             spawn.x = Math.round(spawn.x) * 2;
@@ -108,7 +109,7 @@ public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
             spawn.z = Math.round(spawn.z) * 2;
 
             CarDataConst data = this.cb.loadData(them);
-            RayCarControl c = this.cb.addCar(data, spawn, world.getStartRot(), false);
+            RayCarControl c = this.cb.addCar(data, spawn, start.getRotation(), false);
             c.attachAI(new DriveAtAI(c, playerBody), true);
         }
 

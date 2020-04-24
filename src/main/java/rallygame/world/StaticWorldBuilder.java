@@ -6,8 +6,7 @@ import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
-import com.jme3.math.Quaternion;
-import com.jme3.math.Vector3f;
+import com.jme3.math.Transform;
 import com.jme3.scene.Spatial;
 
 import rallygame.effects.LoadModelWrapper;
@@ -49,13 +48,9 @@ public class StaticWorldBuilder extends World {
     }
 
 	@Override
-	public Vector3f getStartPos() {
-		return world.start;
+	public Transform getStart() {
+		return new Transform(world.start, world.rot);
 	}
-	@Override
-	public Quaternion getStartRot() {
-		return world.rot;
-    }
     
 	@Override
 	public void cleanup(Application app) {

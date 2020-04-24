@@ -14,6 +14,7 @@ import com.jme3.material.RenderState.BlendMode;
 import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
+import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
@@ -265,8 +266,8 @@ public class HighwayWorld extends World {
 	
 	// interface nodes
 	@Override
-	public Vector3f getStartPos() { 
-		return new Vector3f(10, 260, 0);
+	public Transform getStart() {
+		return new Transform(new Vector3f(10, 260, 0));
 	}
 	@Override
 	public void update(float tpf) { 

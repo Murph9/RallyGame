@@ -2,7 +2,7 @@ package rallygame.world;
 
 import java.lang.reflect.InvocationTargetException;
 
-import com.jme3.math.Quaternion;
+import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 
 import rallygame.service.ILoadable;
@@ -14,11 +14,8 @@ public interface IWorld extends ILoadable {
     /** Get type of the world */
     WorldType getType();
 
-    /** Initial start position */
-    Vector3f getStartPos();
-
-    /** For initial start rotation */
-    Quaternion getStartRot();
+    /** Initial start */
+    Transform getStart();
 
     /** Clone method */
     IWorld copy() throws InstantiationException, IllegalAccessException, IllegalArgumentException,
