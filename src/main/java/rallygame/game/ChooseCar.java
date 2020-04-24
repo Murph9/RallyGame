@@ -87,7 +87,7 @@ public class ChooseCar extends BaseAppState {
                     car = c;
 
                     cb.removeCar(cb.get(0));
-    				cb.addCar(car, worldType.start, new Quaternion(), true);
+    				cb.addCar(car, worldType.start, worldType.rot, true);
                     
                     Screen screen = new Screen(app.getContext().getSettings());
 
