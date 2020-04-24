@@ -13,8 +13,6 @@ import rallygame.world.WorldType;
 
 public class PathWorld extends World implements ICheckpointWorld {
 
-    //TODO can see through the terrain with the EdgeFilter still
-
     private final Terrain terrain;
 
     // https://github.com/jMonkeyEngine/sdk/blob/master/jme3-terrain-editor/src/com/jme3/gde/terraineditor/tools/LevelTerrainToolAction.java
