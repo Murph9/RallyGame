@@ -11,16 +11,15 @@ uniform vec4 m_Color;
 
 void main() {
 	vec4 color = vec4(1.0);
-	//color *= texture2D(m_ThresholdMap, texCoord);
 	
     if (m_Threshold < texture2D(m_ThresholdMap, texCoord).a) {
     	color = m_Color;
     } else {
-    	color = vec4(.0, .0, .0, .0);
+    	color = vec4(0);
     }
 
 	#if defined(DISCARD_ALPHA)
-        if(color.a < m_AlphaDiscardThreshold){
+        if (color.a < m_AlphaDiscardThreshold) {
            discard;
         }
     #endif
