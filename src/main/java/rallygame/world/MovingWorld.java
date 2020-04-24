@@ -38,7 +38,9 @@ public class MovingWorld extends World {
 	public void initialize(Application app) {
 		super.initialize(app);
 
-        getState(CarBuilder.class).get(0).setPhysicsProperties(new Vector3f(0, BOX_HEIGHT + 0.5f, 0), null, null, null);
+		CarBuilder cb = getState(CarBuilder.class);
+		if (cb.get(0) != null)
+        	cb.get(0).setPhysicsProperties(new Vector3f(0, BOX_HEIGHT + 0.5f, 0), null, null, null);
 
 		//still box
 		startGeometry = LoadModelWrapper.create(app.getAssetManager(), 
