@@ -19,12 +19,13 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
+import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
-import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.terrain.geomipmap.TerrainLodControl;
 import com.jme3.terrain.geomipmap.TerrainQuad;
 import com.jme3.terrain.noise.ShaderUtils;
@@ -35,17 +36,17 @@ import com.jme3.terrain.noise.filter.PerturbFilter;
 import com.jme3.terrain.noise.filter.SmoothFilter;
 import com.jme3.terrain.noise.fractal.FractalSum;
 import com.jme3.terrain.noise.modulator.NoiseModulator;
-import com.jme3.texture.Texture;
-import com.jme3.texture.Texture.WrapMode;
 
 import rallygame.car.ray.RayCarControl;
 import rallygame.drive.IDrive;
-import rallygame.game.App;
+import rallygame.effects.LoadModelWrapper;
 import rallygame.game.DebugAppState;
 import rallygame.helper.Geo;
 import rallygame.helper.H;
 import rallygame.helper.Log;
 import rallygame.helper.Trig;
+import rallygame.service.ObjectPlacer;
+import rallygame.service.ObjectPlacer.NodeId;
 import rallygame.world.ICheckpointWorld;
 import rallygame.world.World;
 import rallygame.world.WorldType;
@@ -68,6 +69,7 @@ public class TrackWorld extends World implements ICheckpointWorld {
 	private TerrainTrackHelper terrainHelper;
 	private List<TrackSegment> trackSegments;
 	private List<Vector3f> controlPoints;
+	private NodeId treeNode;
 
 	private Vector3f normalizeHeightIn(Vector3f pos) {
 		Vector3f p = pos.clone();
@@ -162,8 +164,35 @@ public class TrackWorld extends World implements ICheckpointWorld {
 		getState(BulletAppState.class).getPhysicsSpace().add(rbc);
 
 		// tree world doesn't need to know the world before the scale
-		Node treeNode = new TreeTrackHelper((App) app, terrain, worldSize, 2000).getTreeNode();
-		rootNode.attachChild(treeNode);
+		treeNode = getTreeNode(2000);
+	}
+
+
+	private static final String[] Tree_Strings = new String[] { "objects/tree_0.blend.glb", "objects/tree_1.blend.glb",
+			"objects/tree_2.blend.glb", "objects/tree_3.blend.glb", "objects/tree_4.blend.glb",
+			"objects/tree_5.blend.glb", "objects/tree_6.blend.glb", };
+	private NodeId getTreeNode(int treeCount) {
+		Spatial treeGeoms[] = new Spatial[Tree_Strings.length];
+		for (int i = 0; i < Tree_Strings.length; i++) {
+			treeGeoms[i] = LoadModelWrapper.create(getApplication().getAssetManager(), Tree_Strings[i]);
+		}
+
+		Spatial[] spats = new Spatial[treeCount];
+		Vector3f[] positions = new Vector3f[treeCount];
+		for (int i = 0; i < treeCount; i++) {
+			Vector3f pos = H.randV3f(worldSize*terrain.getWorldScale().x/2, true);
+			float height = terrain.getHeight(new Vector2f(pos.x, pos.z));
+			if (Float.isNaN(height) || height == 0) {
+				Log.p("pos, ", pos, "isn't on the terrain :(");
+				height = 0;
+			}
+			pos.y = height;
+			positions[i] = pos;
+
+			spats[i] = treeGeoms[FastMath.nextRandomInt(0, treeGeoms.length - 1)].clone();
+		}
+		ObjectPlacer op = getState(ObjectPlacer.class);
+		return op.addBulk(Arrays.asList(spats), Arrays.asList(positions));
 	}
 
 	private float[] createHeightMap() {
@@ -172,8 +201,6 @@ public class TrackWorld extends World implements ICheckpointWorld {
 		// Create a noise based height variance filter
 		FractalSum base = new FractalSum();
 		base.setRoughness(0.7f);
-		base.setFrequency(1.0f);
-		base.setAmplitude(1.0f);
 		base.setLacunarity(3.12f);
 		base.setOctaves(8);
 		base.setScale(0.02125f);
@@ -262,46 +289,10 @@ public class TrackWorld extends World implements ICheckpointWorld {
 	}
 
 	private Material createTerrainMaterial(AssetManager am) {
-		//If this is ever used correctly it will need to use the PathWorld terrain material
-		Material terrainMaterial = new Material(am, "Common/MatDefs/Terrain/HeightBasedTerrain.j3md");
-
-		float grassScale = 16;
-		float dirtScale = 16;
-		float rockScale = 16;
-
-		// TODO lighting
-
-		// GRASS texture
-		Texture grass = am.loadTexture("terrain/grass.jpg");
-		grass.setWrap(WrapMode.Repeat);
-		terrainMaterial.setTexture("region1ColorMap", grass);
-		terrainMaterial.setVector3("region1", new Vector3f(58, worldScale.y, grassScale));
-
-		// DIRT texture
-		Texture dirt = am.loadTexture("terrain/dirt.jpg");
-		dirt.setWrap(WrapMode.Repeat);
-		terrainMaterial.setTexture("region2ColorMap", dirt);
-		terrainMaterial.setVector3("region2", new Vector3f(0, 60, dirtScale));
-
-		// ROCK textures
-		Texture rock = am.loadTexture("terrain/Rock.PNG");
-		rock.setWrap(WrapMode.Repeat);
-		terrainMaterial.setTexture("region3ColorMap", rock);
-		terrainMaterial.setVector3("region3", new Vector3f(worldScale.y, 260 * 2, rockScale));
-
-		terrainMaterial.setTexture("region4ColorMap", rock);
-		terrainMaterial.setVector3("region4", new Vector3f(worldScale.y, 260 * 2, rockScale));
-
-		Texture rock2 = am.loadTexture("terrain/rock.jpg");
-		rock2.setWrap(WrapMode.Repeat);
-
-		terrainMaterial.setTexture("slopeColorMap", rock2);
-		terrainMaterial.setFloat("slopeTileFactor", 32);
-
-		terrainMaterial.setFloat("terrainSize", worldScale.y);
-
-		return terrainMaterial;
-
+		Material m = new Material(am, "MatDefs/terrainheight/TerrainColorByHeight.j3md");
+		m.setColor("LowColor", ColorRGBA.Green);
+		m.setColor("HighColor", ColorRGBA.Green);
+		return m;
 	}
 
 	@Override
@@ -346,6 +337,9 @@ public class TrackWorld extends World implements ICheckpointWorld {
 		space.remove(terrain);
 		for (PhysicsControl c : physicsPieces)
 			space.remove(c);
+
+		if (treeNode != null)
+			getState(ObjectPlacer.class).removeBulk(treeNode);
 
 		super.cleanup(app);
 	}

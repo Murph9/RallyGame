@@ -7,8 +7,6 @@ import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.FastMath;
-import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
@@ -17,12 +15,12 @@ import com.jme3.scene.shape.Line;
 
 import rallygame.effects.LoadModelWrapper;
 import rallygame.helper.Geo;
+import rallygame.helper.Trig;
 import rallygame.world.World;
 import rallygame.world.WorldType;
 
 public class OsmWorld extends World {
     private static String OSM_FILE_NAME = "/osm/data.osm";
-    private static Quaternion ROT_90 = new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y);
 
     private final float scale = 48000;
     private final float roadScale = 8;
@@ -48,7 +46,7 @@ public class OsmWorld extends World {
 
         // next load the roads
         for (rallygame.world.osm.OsmReader.Road l : reader.getWithScale(scale)) {
-            generateQuadFromLine(l.a, l.b, mapColorToType(l.subRoadType));
+            drawMeAQuad(Trig.rectFromLineXZ(l.a, l.b, roadScale), mapColorToType(l.subRoadType));
 
             Line objL = new Line(l.a, l.b);
             this.rootNode.attachChild(LoadModelWrapper.create(app.getAssetManager(), new Geometry("line", objL), ColorRGBA.Blue));
@@ -71,25 +69,6 @@ public class OsmWorld extends World {
     @Override
     public WorldType getType() {
         return WorldType.OSM;
-    }
-
-    private void generateQuadFromLine(Vector3f start, Vector3f end, ColorRGBA colour) {
-        Vector3f dir = end.subtract(start);
-        dir.y = 0;
-        dir.normalizeLocal();
-        Vector3f left = ROT_90.mult(dir).mult(roadScale / 2);
-
-        // lt-e-rt (end)
-        // |..|..|
-        // lb-s-rb (start)
-
-        Vector3f lb = start.add(left);
-        Vector3f lt = end.add(left);
-
-        Vector3f rb = start.add(left.negate());
-        Vector3f rt = end.add(left.negate());
-
-        drawMeAQuad(new Vector3f[] { lb, lt, rb, rt }, colour);
     }
 
     private void drawMeAQuad(Vector3f[] v, ColorRGBA colour) {

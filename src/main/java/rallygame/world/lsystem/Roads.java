@@ -7,19 +7,18 @@ import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
-import com.jme3.material.Material;
-import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
-import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.terrain.geomipmap.TerrainQuad;
 
+import rallygame.effects.LoadModelWrapper;
 import rallygame.helper.Geo;
 
 public class Roads {
@@ -190,26 +189,12 @@ public class Roads {
 		Mesh mesh = Geo.createQuad(v);
 		Geometry geo = new Geometry("Quad", mesh);
 		
-		Material mat = null;
-		if (colour != null) {
-			mat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-			mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
-			mat.setColor("Color", colour);
-		} else {
-			mat = new Material(am, "Common/MatDefs/Light/Lighting.j3md");
-			mat.setTexture("DiffuseMap", am.loadTexture("image/asphalt_tile.jpg"));
-			mat.setBoolean("UseMaterialColors", true);
-			mat.setColor("Diffuse", ColorRGBA.White);
-			mat.setColor("Specular", ColorRGBA.White);
-			mat.setFloat("Shininess", 0); //none
-		}
-		geo.setShadowMode(ShadowMode.Receive);
-		geo.setMaterial(mat);
+		Spatial s = LoadModelWrapper.create(am, geo, colour != null ? colour : ColorRGBA.White);
 		
-		CollisionShape col = CollisionShapeFactory.createMeshShape(geo);
+		CollisionShape col = CollisionShapeFactory.createMeshShape(s);
 		RigidBodyControl c = new RigidBodyControl(col, 0);
 		
-		rootNode.attachChild(geo);
+		rootNode.attachChild(s);
 		phys.add(c);
 	}
 }
