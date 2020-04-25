@@ -3,6 +3,7 @@ package rallygame.game;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
+import com.jme3.bullet.BulletAppState;
 import com.jme3.input.KeyInput;
 import com.jme3.input.RawInputListener;
 import com.jme3.input.event.JoyAxisEvent;
@@ -24,6 +25,9 @@ import rallygame.helper.Geo;
 public class DebugAppState extends BaseAppState {
 
     private boolean debug;
+    private boolean slowMotion;
+    private boolean showWireframes;
+
     private Node node;
     private Map<String, Geometry> thingSet;
 
@@ -100,6 +104,21 @@ public class DebugAppState extends BaseAppState {
     public void toggleDebug() {
         this.debug = !this.debug;
     }
+    private void toggleSlowMotion() {
+        this.slowMotion = !this.slowMotion;
+        BulletAppState bullet = getState(BulletAppState.class);
+        // physics per second rate
+        if (slowMotion) {
+            bullet.setSpeed(0.1f);
+        } else {
+            bullet.setSpeed(1f);
+        }
+    }
+    private void toggleShowWireframes() {
+        this.showWireframes = !this.showWireframes;
+        BulletAppState bullet = getState(BulletAppState.class);
+        bullet.setDebugEnabled(this.showWireframes);
+    }
 
     class DebugListener implements RawInputListener {
         
@@ -114,6 +133,12 @@ public class DebugAppState extends BaseAppState {
         public void onKeyEvent(KeyInputEvent arg0) {
             if (arg0.isPressed() && arg0.getKeyCode() == KeyInput.KEY_GRAVE) 
                 state.toggleDebug();
+
+            if (arg0.isPressed() && arg0.getKeyCode() == KeyInput.KEY_PAUSE)
+                state.toggleSlowMotion();
+
+            if (arg0.isPressed() && arg0.getKeyCode() == KeyInput.KEY_PGUP)
+                state.toggleShowWireframes();
         }
 
         public void onMouseButtonEvent(MouseButtonEvent arg0) {}

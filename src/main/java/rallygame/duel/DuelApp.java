@@ -60,8 +60,6 @@ public class DuelApp extends SimpleApplication {
         // BulletAppState needs to wait until after the app is initialised, so can't be
         // called from the constructor
         BulletAppState bullet = new BulletAppState();
-        // bullet.setSpeed(0.1f); //physics per second rate
-        // bullet.setDebugEnabled(true); //show bullet wireframes
         bullet.setThreadingType(ThreadingType.PARALLEL);
         getStateManager().attach(bullet);
 
