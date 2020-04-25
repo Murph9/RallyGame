@@ -126,10 +126,14 @@ public class ObjectPlacer extends BaseAppState {
     public void removeBulk(NodeId id) {
         if (id == null)
             return;
-        Spatial sp = nodes.remove(id);
-        if (sp == null)
+        Node node = nodes.remove(id);
+        if (node == null)
             return;
 
-        sp.removeFromParent();
+        if (usePhysics) {
+            for (Spatial s: nodePhysicsObjs.remove(node))
+                getState(BulletAppState.class).getPhysicsSpace().remove(s);
+        }
+        node.removeFromParent();
     }
 }

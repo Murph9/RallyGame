@@ -157,7 +157,7 @@ public class CarCamera extends BaseAppState implements RawInputListener {
 		lookAt.addLocal(lastShake);
 		nextPos.addLocal(lastShake);
 
-		// and g force reactions by moving it up/down, left or right
+		// add g force reactions by moving it up/down, left or right
 		Vector3f gs = p.planarGForce.mult(1 / p.getPhysicsObject().getGravity().length());
 		gs.y = gs.z; // z is front back, convert to up/down
 		gs.z = 0;
