@@ -12,12 +12,12 @@ import com.jme3.audio.AudioData;
 import com.jme3.audio.AudioNode;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.CollisionShape;
-import com.jme3.bullet.collision.shapes.HullCollisionShape;
+import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
+import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
-import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
@@ -113,7 +113,7 @@ public class CarBuilder extends BaseAppState {
         // remove and fetch the single collision shape to use as collision
         Spatial collisionShape = Geo.removeNamedSpatial((Node)initialCarModel, CarPart.Collision.getPartName());
 		
-        CollisionShape colShape = null;
+        CompoundCollisionShape colShape = null;
         try {
             Geometry collisionGeometry = null;
             if (collisionGeometry instanceof Geometry) {
@@ -121,9 +121,17 @@ public class CarBuilder extends BaseAppState {
             } else { // Node
                 collisionGeometry = Geo.getGeomList(collisionShape).get(0); //lets hope its the only one too
             }
-            Mesh collisionMesh = collisionGeometry.getMesh();
-            collisionMesh.setStatic();
-            colShape = new HullCollisionShape(collisionMesh);
+            // Mesh collisionMesh = collisionGeometry.getMesh();
+            // collisionMesh.setStatic();
+            // colShape = new HullCollisionShape(collisionMesh);
+
+            CollisionShape boxCol = CollisionShapeFactory.createBoxShape(collisionGeometry);
+            colShape = new CompoundCollisionShape();
+
+            Vector3f worldTrans = collisionGeometry.getWorldTranslation();
+            Vector3f worldCenter = collisionGeometry.getWorldBound().getCenter();
+            Vector3f absTrans = worldTrans.subtract(worldCenter);
+            colShape.addChildShape(boxCol, absTrans.negate());
         } catch (Exception e) {
             Log.e("!! car type " + carData.carModel + " is missing a collision shape.");
             e.printStackTrace();
