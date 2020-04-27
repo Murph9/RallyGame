@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
@@ -17,6 +18,9 @@ import com.jme3.math.Vector3f;
 
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 public class HTest {
 
@@ -110,6 +114,29 @@ public class HTest {
     public void leftPad() {
         assertEquals("     aaa", H.leftPad("aaa", 8, ' '));
         assertEquals("aaa", H.leftPad("aaa", 3, 'x'));
+    }
+
+    @ParameterizedTest
+    @MethodSource()
+    public void asOrdinal(String expected, int value) {
+        assertEquals(expected, H.asOrdinal(value));
+        
+    }
+    private static Stream<Arguments> asOrdinal() {
+        return Stream.of(
+                Arguments.of(null, 0),
+                Arguments.of("1st", 1),
+                Arguments.of("2nd", 2),
+                Arguments.of("3rd", 3),
+                Arguments.of("4th", 4),
+                Arguments.of("10th", 10),
+                Arguments.of("11th", 11),
+                Arguments.of("12th", 12),
+                Arguments.of("13th", 13),
+                Arguments.of("14th", 14),
+                Arguments.of("20th", 20),
+                Arguments.of("21st", 21)
+        );
     }
 
     @Test
@@ -252,4 +279,5 @@ public class HTest {
 
         Files.delete(tempFile.toPath());
     }
+
 }

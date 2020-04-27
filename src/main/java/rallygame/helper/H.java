@@ -246,5 +246,22 @@ public class H {
         }
 
         Log.p("Done, see file in: " + file.getAbsolutePath());
-    }
+	}
+	
+	public static String asOrdinal(int value) {
+		if (value <= 0)
+			return null;
+		if (value >= 11 && value <= 13)
+			return value + "th";
+		switch(value % 10) {
+			case 1:
+				return value+"st";
+			case 2:
+				return value+"nd";
+			case 3:
+				return value+"rd";
+			default:
+				return value+"th";
+		}
+	}
 }

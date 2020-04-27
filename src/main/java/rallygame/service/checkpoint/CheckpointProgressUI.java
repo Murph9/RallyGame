@@ -16,6 +16,7 @@ import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
 import rallygame.game.DebugAppState;
+import rallygame.helper.H;
 import rallygame.service.Screen;
 import rallygame.service.WorldGuiText;
 import rallygame.service.WorldGuiText.WorldText;
@@ -97,7 +98,7 @@ public class CheckpointProgressUI extends BaseAppState {
 
             WorldText text = this.positionLabels.get(racer);
             Vector3f pos = racer.car.location.add(0, 1, 0);
-            text.setText(i + "");
+            text.setText(H.asOrdinal(i));
             text.setWorldPos(pos);
         }
 
