@@ -175,13 +175,13 @@ public abstract class CarAI implements ICarAI {
             Vector3f wallStart3f = H.v2tov3fXZ(wallStart);
             wallStart3f.y = this.car.location.y;
             Vector3f wallDir3f = H.v2tov3fXZ(wallDir);
-            debug.drawArrow("aiTooFastForWall", ColorRGBA.Red, wallStart3f.add(0, 1, 0), wallDir3f);
+            debug.drawArrow("aiTooFastForWall", ColorRGBA.Red, wallStart3f.add(0, 0.2f, 0), wallDir3f);
         }
 
         // calc if cone contains the wall
         float dist1 = Trig.distFromRay(wallStart, wallDir, center1);
         float dist2 = Trig.distFromRay(wallStart, wallDir, center2);
-        return dist1 < bestRadius || dist2 < bestRadius;
+        return Math.max(dist1, dist2) < bestRadius; //pick the inner sphere (which should be further from the ray)
     }
     
     protected Vector3f[] getOuterWallFromCheckpoints(Vector3f checkpoint1, Vector3f checkpoint2, float roadWidth) {

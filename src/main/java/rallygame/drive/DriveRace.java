@@ -77,7 +77,7 @@ public class DriveRace extends DriveBase implements PauseState.ICallback, ICheck
         this.worldRot = new Quaternion();
         this.worldRot.lookAt(checkpoints[0].subtract(checkpoints[checkpoints.length - 1]), Vector3f.UNIT_Y);
 
-        this.worldStarts = new GridPositions(3, 10)
+        this.worldStarts = new GridPositions()
                 .generate(checkpoints[0], checkpoints[0].subtract(checkpoints[checkpoints.length - 1]))
                 .limit(themCount + 1).toArray(i -> new Vector3f[i]);
 

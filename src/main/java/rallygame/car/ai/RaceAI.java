@@ -70,14 +70,14 @@ public class RaceAI extends CarAI {
     }
 
     private boolean tooFastForNextCheckpoints(Vector3f atPos, float roadWidth) {
-        Vector3f[] checkpoints = race.getNextCheckpoints(car, 6);
+        Vector3f[] checkpoints = race.getNextCheckpoints(car, 3);
         if (checkpoints == null)
             return false;
 
         Vector3f targetDir = car.location.subtract(atPos).normalize();
         for (int i = 0; i < checkpoints.length - 1; i++) {
         
-            if (checkpoints[i].subtract(checkpoints[i+1]).normalize().dot(targetDir) > 0.9f) {
+            if (checkpoints[i].subtract(checkpoints[i+1]).normalize().dot(targetDir) > 0.97f) {
                 //pretty colinear, ignore
             } else {
                 Vector3f[] wall = this.getOuterWallFromCheckpoints(checkpoints[i], checkpoints[i+1], roadWidth);
