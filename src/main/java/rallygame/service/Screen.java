@@ -88,4 +88,10 @@ public class Screen {
         Vector3f pos = get(HorizontalPos.Middle, VerticalPos.Bottom, c.getPreferredSize());
         c.setLocalTranslation(pos);
     }
+
+    /**Places the Panel at position, with the point at the center.*/
+    public void centeredAt(Panel c, Vector3f pos) {
+        Vector3f panelSize = c.getPreferredSize();
+        c.setLocalTranslation(new Vector3f(pos.x - panelSize.x/2, pos.y + panelSize.y/2, pos.z));
+    }
 }
