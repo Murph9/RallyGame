@@ -180,4 +180,25 @@ public class Trig {
 
         return new float[] { A, B, C, D };
     }
+
+    /** Gets the average of the given points */
+    public static Vector2f pointAverage(Vector2f ...p) {
+        Vector2f total = new Vector2f();
+        for (Vector2f cur: p) {
+            total.addLocal(cur);
+        }
+        return total.divide(p.length);
+    }
+
+    /** Finds the point closest to an external point, given a center and size */
+    public static Vector2f pointOnCircleClosestTo(Vector2f center, float circleSize, Vector2f point) {
+        Vector2f v = point.subtract(center);
+        return center.add(v.divide(v.length()/circleSize));
+    }
+
+    /** Finds the point closest to many external points, given a center and size */
+    public static Vector2f pointOnCircleClosestTo(Vector2f center, float circleSize, Vector2f... points) {
+        Vector2f avg = Trig.pointAverage(points);
+        return pointOnCircleClosestTo(center, circleSize, avg);
+    }
 }

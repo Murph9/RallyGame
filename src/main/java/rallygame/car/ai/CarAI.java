@@ -302,4 +302,11 @@ public abstract class CarAI implements ICarAI {
             onEvent(RayCarControlInput.ACTION_ACCEL, false);
         }
     }
+
+    protected final Vector3f calcBetterCheckpointPos(Vector3f pos, float offset, Vector3f c1, Vector3f c2) {
+        Vector2f newPos = Trig.pointOnCircleClosestTo(H.v3tov2fXZ(c1), offset, H.v3tov2fXZ(pos), H.v3tov2fXZ(c2));
+        Vector3f newPos3 = H.v2tov3fXZ(newPos);
+        newPos3.y = pos.y;
+        return newPos3;
+    }
 }

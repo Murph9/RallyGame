@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
+import com.jme3.math.FastMath;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 
@@ -225,5 +226,35 @@ public class TrigTest {
 
         float z = Trig.getZFromPlaneEqandXY(result, 0, 0);
         assertEquals(1914f / 166f, z, 0.0001f);
+    }
+
+
+    @Test
+    public void pointAverage() {
+        assertEquals(new Vector2f(Float.NaN, Float.NaN), Trig.pointAverage());
+        assertEquals(new Vector2f(), Trig.pointAverage(new Vector2f()));
+        assertEquals(new Vector2f(), Trig.pointAverage(new Vector2f(0, 1), new Vector2f(0, -1)));
+        assertEquals(new Vector2f(10, 5), Trig.pointAverage(new Vector2f(0, 5), new Vector2f(20, 5), new Vector2f(10, 5)));
+    }
+
+    @Test
+    public void pointOnCircleClosestTo() {
+        Vector2f result = Trig.pointOnCircleClosestTo(new Vector2f(), 1, new Vector2f(10, 0));
+        assertEquals(new Vector2f(1, 0), result);
+
+        Vector2f result2 = Trig.pointOnCircleClosestTo(new Vector2f(10, 0), 1, new Vector2f(20, 0));
+        assertEquals(new Vector2f(11, 0), result2);
+
+        Vector2f result3 = Trig.pointOnCircleClosestTo(new Vector2f(10, 0), 3, new Vector2f(0, 0));
+        assertEquals(new Vector2f(7, 0), result3);
+
+        Vector2f result4 = Trig.pointOnCircleClosestTo(new Vector2f(0, 0), 2, new Vector2f(5, 5));
+        assertEquals(new Vector2f(FastMath.sqrt(2), FastMath.sqrt(2)), result4);
+
+        Vector2f result5 = Trig.pointOnCircleClosestTo(new Vector2f(-2.74f, 3.94f), 2, new Vector2f(3.96f, 0.88f));
+        assertEquals(-0.9207578f, result5.x, 0.0001f);
+        assertEquals(3.1091223f, result5.y, 0.0001f);
+
+        //multi point calls are really a mix of this method and the average method
     }
 }
