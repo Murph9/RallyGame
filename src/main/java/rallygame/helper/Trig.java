@@ -190,9 +190,12 @@ public class Trig {
         return total.divide(p.length);
     }
 
-    /** Finds the point closest to an external point, given a center and size */
+    /** Finds the point closest to a point, given a center and size. (if inside circle, then the point) */
     public static Vector2f pointOnCircleClosestTo(Vector2f center, float circleSize, Vector2f point) {
         Vector2f v = point.subtract(center);
+        if (v.length() < circleSize)
+            return point; // already in the circle
+        
         return center.add(v.divide(v.length()/circleSize));
     }
 

@@ -233,6 +233,11 @@ public class DriveRace extends DriveBase implements PauseState.ICallback, ICheck
     }
     
     @Override
+    public Vector3f getLastCheckpoint(RayCarControl car) {
+        return progress.getLastCheckpoint(car);
+    }
+
+    @Override
     public Vector3f getNextCheckpoint(RayCarControl car) {
         return progress.getNextCheckpoint(car);
     }

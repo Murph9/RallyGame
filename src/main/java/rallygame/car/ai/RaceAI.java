@@ -26,7 +26,7 @@ public class RaceAI extends CarAI {
         this.roadWidth = roadWidth;
     }
 
-	@Override
+    @Override
 	public void update(float tpf) {
 		Vector3f atPos = race.getNextCheckpoint(car);
 		if (atPos == null) {
@@ -34,7 +34,9 @@ public class RaceAI extends CarAI {
 			return;
 		}
         
-        driveAt(atPos);
+        Vector3f[] nextCheckpoints = race.getNextCheckpoints(car, 2);
+        Vector3f pos = calcBetterCheckpointPos(race.getLastCheckpoint(car), 4, nextCheckpoints[0], nextCheckpoints[1]);
+        driveAt(pos);
         
         boolean tooFast = tooFastForNextCheckpoints(atPos, roadWidth);
         if (tooFast) {

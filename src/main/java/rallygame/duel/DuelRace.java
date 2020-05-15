@@ -21,6 +21,7 @@ import rallygame.car.data.CarDataConst;
 import rallygame.car.ray.RayCarControl;
 import rallygame.car.ui.CarUI;
 import rallygame.drive.ICheckpointDrive;
+import rallygame.effects.ParticleAtmosphere;
 import rallygame.helper.Log;
 import rallygame.service.Screen;
 import rallygame.service.checkpoint.CheckpointProgress;
@@ -128,11 +129,18 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
     @Override
     protected void onEnable() {
         getState(BulletAppState.class).setEnabled(true);
+        getState(ParticleAtmosphere.class).setEnabled(true);
+
+        this.camera.setEnabled(true);
+        //TODO this should be enabling/disabling the cb here
     }
 
     @Override
     protected void onDisable() {
         getState(BulletAppState.class).setEnabled(false);
+        getState(ParticleAtmosphere.class).setEnabled(false);
+
+        this.camera.setEnabled(false);
     }
 
     @Override
@@ -176,6 +184,11 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
         Log.p("Winner: " + winner.getCarData().name);
 
         flow.nextState(this, d);
+    }
+
+    @Override
+    public Vector3f getLastCheckpoint(RayCarControl car) {
+        return progress.getLastCheckpoint(car);
     }
 
     @Override
