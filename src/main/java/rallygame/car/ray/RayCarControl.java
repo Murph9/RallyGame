@@ -26,8 +26,7 @@ import rallygame.car.ai.ICarAI;
 import rallygame.car.data.CarDataConst;
 import rallygame.drive.IDrive;
 import rallygame.helper.Log;
-import rallygame.service.averager.AverageFloat;
-import rallygame.service.averager.IAverager;
+import rallygame.service.averager.AverageFloatFramerate;
 import rallygame.service.ray.PhysicsRaycaster;
 
 //visual/input things
@@ -42,7 +41,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
 	private AudioNode engineSound;
 	
     // Steering averager (to get smooth left <-> right)
-    private AverageFloat steeringAverager;
+    private AverageFloatFramerate steeringAverager;
 
     // control fields
 	private float steerLeft;
@@ -79,7 +78,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
         vel = forward = up = left = right = location = angularVel = new Vector3f();
         rotation = new Quaternion();
 
-        this.steeringAverager = new AverageFloat((int)(0.3f*30f), IAverager.Type.Weighted);
+        this.steeringAverager = new AverageFloatFramerate(0.15f);
 
 		//init visual wheels
 		this.wheelControls = new RayWheelControl[4];
@@ -142,7 +141,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
                 steeringCurrent += getBestTurnAngle(steerLeft, 1);
             if (steerRight != 0) //right
                 steeringCurrent -= getBestTurnAngle(steerRight, -1);
-            steeringCurrent = steeringAverager.get(steeringCurrent); //TODO BAD: this is framerate dependant
+            steeringCurrent = steeringAverager.get(steeringCurrent, tpf);
             steeringCurrent = FastMath.clamp(steeringCurrent, -carData.w_steerAngle, carData.w_steerAngle);
 			
 			updateControlInputs(steeringCurrent, brakeCurrent, handbrakeCurrent);
