@@ -20,14 +20,43 @@ import rallygame.car.ray.RayCarControl;
 
 public class RacePositionEngine {
 
+    protected class CheckpointPosition {
+        final int lap;
+        final int checkNum;
+        public CheckpointPosition(int lap, int checkNum) {
+            this.lap = lap;
+            this.checkNum = checkNum;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this)
+                return true;
+
+            if (!(obj instanceof CheckpointPosition))
+                return false;
+            
+            CheckpointPosition other = (CheckpointPosition)obj;
+            return other.lap == this.lap && other.checkNum == this.checkNum;
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 17;
+            hash = hash * 31 + lap;
+            hash = hash * 31 + checkNum;
+            return hash;
+        }
+    }
+
     private final List<Checkpoint> checkpoints;
     private final Map<RayCarControl, RacerState> racers;
-    private final Map<Integer, Instant> timeAtCheckpoints;
+    private final Map<CheckpointPosition, Instant> bestTimeAtCheckpoints;
 
     public RacePositionEngine(Collection<RayCarControl> cars) {
         this.checkpoints = new ArrayList<Checkpoint>();
 
-        this.timeAtCheckpoints = new HashMap<>();
+        this.bestTimeAtCheckpoints = new HashMap<>();
         this.racers = new HashMap<>();
         for (RayCarControl car : cars) {
             this.racers.put(car, new RacerState(car));
@@ -77,12 +106,12 @@ public class RacePositionEngine {
         racer.nextCheckpoint = this.checkpoints.get(nextNum);
 
         // update last time
-        int fakeCheckpointHash = racer.lap * 10000 + racer.lastCheckpoint.num;
-        if (!timeAtCheckpoints.containsKey(fakeCheckpointHash)) {
-            timeAtCheckpoints.put(fakeCheckpointHash, Instant.now());
+        CheckpointPosition pos = new CheckpointPosition(racer.lap, racer.lastCheckpoint.num);
+        if (!bestTimeAtCheckpoints.containsKey(pos)) {
+            bestTimeAtCheckpoints.put(pos, Instant.now());
             racer.duration = Duration.ZERO;
         } else {
-            racer.duration = Duration.between(timeAtCheckpoints.get(fakeCheckpointHash), Instant.now());
+            racer.duration = Duration.between(bestTimeAtCheckpoints.get(pos), Instant.now());
         }
     }
     private int calcNextCheckFrom(int checkNum) {
