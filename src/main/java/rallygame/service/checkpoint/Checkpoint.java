@@ -12,8 +12,12 @@ class Checkpoint {
 
     Checkpoint(int num, Vector3f pos, GhostControl ghost, Spatial visualModel) {
         this.num = num;
+        if (pos == null)
+            throw new IllegalArgumentException("Position must be set");
         this.position = pos;
         this.ghost = ghost;
+        if (ghost == null)
+            throw new IllegalArgumentException("Ghost control must be set");
         this.visualModel = visualModel;
     }
 }
