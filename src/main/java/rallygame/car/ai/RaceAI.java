@@ -78,7 +78,9 @@ public class RaceAI extends CarAI {
 
         Vector3f targetDir = car.location.subtract(atPos).normalize();
         for (int i = 0; i < checkpoints.length - 1; i++) {
-        
+            if (checkpoints[i] == null || checkpoints[i + 1] == null)
+                continue;
+
             if (checkpoints[i].subtract(checkpoints[i+1]).normalize().dot(targetDir) > 0.97f) {
                 //pretty colinear, ignore
             } else {

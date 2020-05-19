@@ -97,7 +97,6 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
         // Checkpoint detection and stuff
         progress = new CheckpointProgress(CheckpointProgress.Type.Sprint, checkpoints, cb.getAll(), rayCar);
         progress.setCheckpointModel(CheckpointProgress.GetDefaultCheckpointModel(app, 10));
-        progress.setVisualModels(false);
         getStateManager().attach(progress);
 
         goToState(RaceState.WaitingForStartPress);

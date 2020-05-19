@@ -26,7 +26,6 @@ import rallygame.car.ray.RayCarControl;
 import rallygame.effects.LoadModelWrapper;
 import rallygame.helper.Geo;
 
-// TODO show the player's current checkpoint highlighted in some way?
 public class CheckpointProgress extends BaseAppState {
 
     private final RayCarControl player;
@@ -34,16 +33,13 @@ public class CheckpointProgress extends BaseAppState {
     private final CheckpointListener listener;
     private final RacePositionEngine engine;
 
+    private final Type type;
     private final Node rootNode;
     private final List<Vector3f> preInitCheckpoints;
     private final List<Checkpoint> attachedCheckpoints;
 
     private CollisionShape colShape;
-
     private Spatial baseSpat;
-    private boolean attachModels;
-
-    private final Type type;
 
     public enum Type {
         Lap, Sprint
@@ -60,7 +56,6 @@ public class CheckpointProgress extends BaseAppState {
         this.preInitCheckpoints = new LinkedList<>(Arrays.asList(checkpoints));
         this.engine = new RacePositionEngine(cars);
         
-        this.attachModels = true;
         this.rootNode = new Node("checkpoint progress root");
         this.attachedCheckpoints = new LinkedList<>();
 
@@ -73,16 +68,6 @@ public class CheckpointProgress extends BaseAppState {
         });
     }
 
-    public void setVisualModels(boolean isVisual) {
-        this.attachModels = isVisual;
-        if (this.isInitialized()) {
-            if (isVisual)
-                ((SimpleApplication) getApplication()).getRootNode().attachChild(rootNode);
-            else
-                ((SimpleApplication) getApplication()).getRootNode().detachChild(rootNode);
-        }
-    }
-
     public void setCheckpointModel(Spatial spat) {
         if (this.isInitialized())
             throw new IllegalStateException("This must be only called before initialization.");
@@ -91,14 +76,12 @@ public class CheckpointProgress extends BaseAppState {
 
     @Override
     protected void initialize(Application app) {
-        if (attachModels)
-            ((SimpleApplication) app).getRootNode().attachChild(rootNode);
+        ((SimpleApplication) app).getRootNode().attachChild(rootNode);
 
         // generate the checkpoint objects
         colShape = CollisionShapeFactory.createBoxShape(baseSpat);
         for (Vector3f checkPos : preInitCheckpoints)
             attachCheckpoint(checkPos);
-
 
         engine.init(app);
 
@@ -118,7 +101,7 @@ public class CheckpointProgress extends BaseAppState {
         //due to no removing, the last checkpoint is always the previous one
         Vector3f prevCheckpointPos = engine.getLastCheckpointPos();
         if (prevCheckpointPos == null)
-            prevCheckpointPos  = pos;
+            prevCheckpointPos = pos;
 
         Spatial box = baseSpat.clone();
         box.setLocalTranslation(pos);
@@ -130,7 +113,6 @@ public class CheckpointProgress extends BaseAppState {
 
         GhostControl ghost = new GhostControl(colShape);
         box.addControl(ghost);
-        rootNode.attachChild(box);
 
         Checkpoint check = new Checkpoint(engine.getCheckpointCount(), pos, ghost, box);
         engine.addCheckpoint(check);
@@ -213,6 +195,12 @@ public class CheckpointProgress extends BaseAppState {
 
         this.attachedCheckpoints.clear();
         this.attachedCheckpoints.addAll(ghosts);
+
+        //show only the next 2 checkpoints to the player
+        for (Spatial sp : rootNode.getChildren())
+            sp.removeFromParent();
+        for (Spatial sp : engine.getRacerNextCheckpointsVisual(player, 2))
+            rootNode.attachChild(sp);
     }
 
     @Override

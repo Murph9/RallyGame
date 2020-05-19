@@ -14,6 +14,7 @@ import com.jme3.app.Application;
 import com.jme3.bullet.control.GhostControl;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Spatial;
 
 import rallygame.car.ray.RayCarControl;
 
@@ -42,9 +43,10 @@ public class RacePositionEngine {
             throw new IllegalStateException("Checkpoints is empty?");
 
         // set progress values
+        Checkpoint first = this.checkpoints.get(0);
         for (RacerState racer : this.racers.values()) {
-            racer.lastCheckpoint = this.checkpoints.get(0);
-            racer.nextCheckpoint = this.checkpoints.get(0);
+            racer.lastCheckpoint = first;
+            racer.nextCheckpoint = first;
         }
     }
 
@@ -102,26 +104,44 @@ public class RacePositionEngine {
     }
 
     public Vector3f[] getRacerNextCheckpoints(RayCarControl car, int count) {
-        if (count <= 1) {
-            return new Vector3f[] { posOfCheckpoint(this.racers.get(car).nextCheckpoint) };
+        Checkpoint[] checkpoints = getNextCheckpoints(car, count);
+        Vector3f[] positions = new Vector3f[checkpoints.length];
+        for (int i = 0; i < checkpoints.length; i++) {
+            if (checkpoints[i] != null)
+                positions[i] = checkpoints[i].position;
         }
-        if (count > this.getCheckpointCount())
-            return null; //not allowed
+        return positions;
+    }
+    public Spatial[] getRacerNextCheckpointsVisual(RayCarControl car, int count) {
+        Checkpoint[] checkpoints = getNextCheckpoints(car, count);
+        Spatial[] spatials = new Spatial[checkpoints.length];
+        for (int i = 0; i < checkpoints.length; i++) {
+            if (checkpoints[i] != null)
+                spatials[i] = checkpoints[i].visualModel;
+        }
+        return spatials;
+    }
+    private Checkpoint[] getNextCheckpoints(RayCarControl car, int count) {
+        if (count <= 1) {
+            return new Checkpoint[] { this.racers.get(car).nextCheckpoint };
+        }
+        //reduce to the size of the checkpoints given
+        count = Math.min(count, this.getCheckpointCount());
 
-        //calc the next 'count' checkpoints
+        // calc the next 'count' checkpoints
         int checkNum = this.racers.get(car).nextCheckpoint.num;
-        Vector3f[] checks = new Vector3f[count];
-        checks[0] = posOfCheckpoint(this.racers.get(car).nextCheckpoint);
+        Checkpoint[] checks = new Checkpoint[count];
+        checks[0] = this.racers.get(car).nextCheckpoint;
         for (int i = 0; i < count - 1; i++) {
             int check = calcNextCheckFrom(checkNum + i);
-            checks[i + 1] = this.checkpoints.get(check).position;
+            checks[i + 1] = this.checkpoints.get(check);
         }
 
         return checks;
     }
 
     public Vector3f getRacerLastCheckpoint(RayCarControl car) {
-        return posOfCheckpoint(this.racers.get(car).lastCheckpoint);
+        return this.racers.get(car).lastCheckpoint.position;
     }
 
 	public RacerState getRacerState(RayCarControl car) {
@@ -139,16 +159,11 @@ public class RacePositionEngine {
 	public Vector3f getLastCheckpointPos() {
         if (this.checkpoints.size() < 1)
             return null;
-        return posOfCheckpoint(getCheckpoint(this.checkpoints.size() - 1));
+        return getCheckpoint(this.checkpoints.size() - 1).position;
 	}
 
 	public Collection<Checkpoint> getNextCheckpoints() {
         return racers.values().stream().map(x -> x.nextCheckpoint).collect(Collectors.toList());
-    }
-    
-
-    private Vector3f posOfCheckpoint(Checkpoint check) {
-        return check == null ? null : check.position;
     }
 
 	public Collection<Checkpoint> getAllPreviousCheckpoints(int num) {
