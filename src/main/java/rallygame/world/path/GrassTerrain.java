@@ -1,9 +1,14 @@
 package rallygame.world.path;
 
 import java.nio.FloatBuffer;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Function;
 
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector2f;
+import com.jme3.math.Vector3f;
+import com.jme3.renderer.Camera;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.util.BufferUtils;
@@ -12,15 +17,17 @@ import rallygame.helper.H;
 
 public class GrassTerrain extends Mesh {
 
+    // https://github.com/Simsilica/IsoSurface/blob/master/src/main/java/com/simsilica/iso/plot/GrassZone.java
+
     private final TerrainPiece piece;
     private final Function<Vector2f, Boolean> posValid;
 
-    // TODO billboarding so they aren't all facing the same way
-    // https://github.com/Simsilica/IsoSurface/blob/master/src/main/java/com/simsilica/iso/plot/GrassZone.java
+    private final List<Grass> triangles;
 
     public GrassTerrain(TerrainPiece piece, int count, Function<Vector2f, Boolean> posValid) {
         this.piece = piece;
         this.posValid = posValid;
+        this.triangles = new LinkedList<>();
 
         init(count);
     }
@@ -38,6 +45,7 @@ public class GrassTerrain extends Mesh {
             if (Float.isNaN(height))
                 continue;
 
+            triangles.add(new Grass(new Vector3f(pos.x, height, pos.y), 1));
             vertexBuffer.put(pos.x - 1).put(height).put(pos.y);
             vertexBuffer.put(pos.x + 1).put(height).put(pos.y);
             vertexBuffer.put(pos.x).put(height + 1).put(pos.y);
@@ -58,8 +66,6 @@ public class GrassTerrain extends Mesh {
         this.setMode(Mesh.Mode.Triangles);
         this.updateCounts();
         this.updateBound();
-
-        this.setStatic();
     }
 
     private Vector2f validPoint() {
@@ -67,5 +73,39 @@ public class GrassTerrain extends Mesh {
         if (posValid.apply(pos))
             return null;
         return pos;
+    }
+
+    protected void update(Camera cam) {
+        FloatBuffer vertexBuffer = this.getFloatBuffer(VertexBuffer.Type.Position);
+        vertexBuffer.rewind();
+
+        Quaternion rot = cam.getRotation();
+        for (Grass f : triangles) {
+            vertexBuffer.put(f.calcPoints(rot));
+        }
+
+        this.setBuffer(VertexBuffer.Type.Position, 3, vertexBuffer);
+        this.updateBound();
+    }
+
+    private class Grass {
+        private final Vector3f pos;
+        private final float size;
+
+        public Grass(Vector3f pos, float size) {
+            this.pos = pos;
+            this.size = size;
+        }
+
+        private float[] calcPoints(Quaternion camRot) {
+            Vector3f left = pos.add(camRot.mult(new Vector3f(-size, 0, 0)));
+            Vector3f right = pos.add(camRot.mult(new Vector3f(size, 0, 0)));
+
+            return new float[] {
+                left.x, left.y, left.z,
+                right.x, right.y, right.z,
+                pos.x, pos.y + size, pos.z
+            };
+        }
     }
 }

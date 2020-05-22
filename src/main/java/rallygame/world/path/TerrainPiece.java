@@ -57,6 +57,7 @@ class TerrainPiece {
     public final Node rootNode;
     public NodeId placedObjects;
     public Control collision;
+    public GrassTerrain gt;
 
     public TerrainPiece(Terrain terrainApp, Vector2f center) {
         this.terrainApp = terrainApp;
@@ -152,7 +153,7 @@ class TerrainPiece {
 
             placedObjects = op.addBulk(list, locations);
 
-            drawGrass(am);
+            gt = drawGrass(am);
 
             this.loaded = true;
         });

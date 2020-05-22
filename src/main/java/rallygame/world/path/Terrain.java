@@ -17,6 +17,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
+import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
 
 import rallygame.helper.Log;
@@ -69,6 +70,17 @@ public class Terrain extends BaseAppState implements ILoadable {
         
         this.pieces.put(center, data);
         this.rootNode.attachChild(data.rootNode);
+    }
+
+    @Override
+    public void update(float tpf) {
+        super.update(tpf);
+
+        Camera cam = getApplication().getCamera();
+        for (TerrainPiece p :this.pieces.values()) {
+            if (p.gt != null)
+                p.gt.update(cam);
+        }
     }
 
     @Override
