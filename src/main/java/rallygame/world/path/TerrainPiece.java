@@ -186,20 +186,28 @@ class TerrainPiece {
         };
     }
 
-    private CatmullRomRoad drawRoad(AssetManager am, List<Vector3f> list, PhysicsSpace space) {
+    private CatmullRomWidth drawRoad(AssetManager am, List<Vector3f> list, PhysicsSpace space) {
         // TODO use a rolling average to smooth points so there are less hard corners
 
         // draw a spline road to show where it is
         Spline s3 = new Spline(SplineType.CatmullRom, list, 1, false); // [0-1], 1 is more smooth
-        CatmullRomRoad c3 = new CatmullRomRoad(s3, 1, Terrain.ROAD_WIDTH);
+        CatmullRomRoad road = new CatmullRomRoad(s3, 1, Terrain.ROAD_WIDTH);
+
+        CatmullRomWidth c3 = road.middle;
         Geometry g = new Geometry("spline road", c3);
         rootNode.attachChild(LoadModelWrapper.create(am, g, ColorRGBA.Green));
-        //TODO offset on this?
-
+        
         // add to physics space
         CollisionShape col = CollisionShapeFactory.createMeshShape(g);
         RigidBodyControl c = new RigidBodyControl(col, 0);
         space.add(c);
+
+        //add the extra things
+        for (CatmullRomWidth r : road.others) {
+            g = new Geometry("spline road", r);
+            g.setLocalTranslation(g.getLocalTranslation().add(0, -.0001f, 0));
+            rootNode.attachChild(LoadModelWrapper.create(am, g, ColorRGBA.Brown));
+        }
 
         return c3;
     }
@@ -288,5 +296,5 @@ class TerrainPiece {
 class RoadPointList extends LinkedList<Vector3f> {
     private static final long serialVersionUID = 1L;
     public boolean failed;
-    public CatmullRomRoad road;
+    public CatmullRomWidth road;
 }

@@ -18,7 +18,7 @@ import com.jme3.terrain.geomipmap.TerrainQuad;
 import rallygame.effects.FilterManager;
 import rallygame.helper.Log;
 import rallygame.service.PerlinNoise;
-import rallygame.world.path.CatmullRomRoad;
+import rallygame.world.path.CatmullRomWidth;
 
 public class FilterTransparencyTest extends SimpleApplication {
     public static void main(String[] args) {
@@ -58,7 +58,7 @@ class FilterTransparencyState extends BaseAppState {
 
         Vector3f[] list = new Vector3f[] { new Vector3f(0, 0, -10), new Vector3f(0, 0, 10) };
         Spline s = new Spline(SplineType.CatmullRom, list, 1, false);
-        CatmullRomRoad road = new CatmullRomRoad(s, 1, 5);
+        CatmullRomWidth road = new CatmullRomWidth(s, 1, 5);
         Geometry g = new Geometry("road", road);
         g.setMaterial(baseMat);
         this.rootNode.attachChild(g);

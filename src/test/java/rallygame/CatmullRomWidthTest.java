@@ -10,16 +10,16 @@ import com.jme3.math.Spline.SplineType;
 
 import org.junit.jupiter.api.Test;
 
-import rallygame.world.path.CatmullRomRoad;
+import rallygame.world.path.CatmullRomWidth;
 
-public class CatmullRomRoadTest {
+public class CatmullRomWidthTest {
 
     @Test
     public void getQuads() {
         Vector3f[] list = new Vector3f[] { new Vector3f(0, 0, 0), new Vector3f(0, 0, 1) };
         Spline s3 = new Spline(SplineType.CatmullRom, list, 1, false); // [0-1], 1 is more smooth
 
-        CatmullRomRoad road = new CatmullRomRoad(s3, 1, 1);
+        CatmullRomWidth road = new CatmullRomWidth(s3, 1, 1);
 
         List<Vector3f[]> quads = road.getMeshAsQuads();
 
