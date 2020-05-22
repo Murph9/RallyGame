@@ -19,9 +19,9 @@ public class CatmullRomWidthTest {
         Vector3f[] list = new Vector3f[] { new Vector3f(0, 0, 0), new Vector3f(0, 0, 1) };
         Spline s3 = new Spline(SplineType.CatmullRom, list, 1, false); // [0-1], 1 is more smooth
 
-        CatmullRomWidth road = new CatmullRomWidth(s3, 1, 1);
+        CatmullRomWidth width = new CatmullRomWidth(s3, 1, 1);
 
-        List<Vector3f[]> quads = road.getMeshAsQuads();
+        List<Vector3f[]> quads = width.getMeshAsQuads();
 
         assertEquals(1, quads.size());
 

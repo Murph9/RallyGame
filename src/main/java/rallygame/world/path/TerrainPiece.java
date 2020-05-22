@@ -203,10 +203,16 @@ class TerrainPiece {
         space.add(c);
 
         //add the extra things
+        road.addWidth(CatmullRomRoad.SideA(Terrain.ROAD_WIDTH));
+        road.addWidth(CatmullRomRoad.SideB(Terrain.ROAD_WIDTH));
         for (CatmullRomWidth r : road.others) {
             g = new Geometry("spline road", r);
-            g.setLocalTranslation(g.getLocalTranslation().add(0, -.0001f, 0));
+            g.setLocalTranslation(g.getLocalTranslation().add(0, -0.0001f, 0));
             rootNode.attachChild(LoadModelWrapper.create(am, g, ColorRGBA.Brown));
+
+            col = CollisionShapeFactory.createMeshShape(g);
+            c = new RigidBodyControl(col, 0);
+            space.add(c);
         }
 
         return c3;

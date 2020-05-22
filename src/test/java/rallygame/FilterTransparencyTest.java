@@ -58,8 +58,8 @@ class FilterTransparencyState extends BaseAppState {
 
         Vector3f[] list = new Vector3f[] { new Vector3f(0, 0, -10), new Vector3f(0, 0, 10) };
         Spline s = new Spline(SplineType.CatmullRom, list, 1, false);
-        CatmullRomWidth road = new CatmullRomWidth(s, 1, 5);
-        Geometry g = new Geometry("road", road);
+        CatmullRomWidth width = new CatmullRomWidth(s, 1, 5);
+        Geometry g = new Geometry("width", width);
         g.setMaterial(baseMat);
         this.rootNode.attachChild(g);
 

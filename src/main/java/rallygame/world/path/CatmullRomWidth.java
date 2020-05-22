@@ -2,6 +2,7 @@ package rallygame.world.path;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.BiFunction;
 
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
@@ -19,26 +20,28 @@ public class CatmullRomWidth extends Mesh {
     // https://github.com/jMonkeyEngine/jmonkeyengine/blob/master/jme3-core/src/main/java/com/jme3/scene/shape/Curve.java
 
     private final Spline spline;
-    private final RoadCrossSection cross;
+    private final BiFunction<Vector3f, Vector3f, Vector3f[]> cross;
     private final Vector3f[] vertexArray;
     private final Vector2f[] vertexTexCoord;
     private final Vector3f[] vertexNormalCoord;
     
     /** Road based on a CatmullRom spline, with width. Remember it can't use the first and last ones. */
     public CatmullRomWidth(Spline spline, int nbSubSegments, float width) {
-        this(spline, nbSubSegments, new RoadCrossSection(width));
+        this(spline, nbSubSegments, Flat(width));
     }
 
-    public CatmullRomWidth(Spline spline, int nbSubSegments, RoadCrossSection cross) {
+    public CatmullRomWidth(Spline spline, int nbSubSegments, BiFunction<Vector3f, Vector3f, Vector3f[]> cross) {
         this.spline = spline;
         this.cross = cross;
         if (spline.getType() != SplineType.CatmullRom)
             throw new IllegalArgumentException("Only " + SplineType.CatmullRom + " please");
         if (spline.getControlPoints().size() < 2)
             throw new IllegalArgumentException("Spline must have at least 2 control points making 1 section [start->end]");
+        if (cross.apply(new Vector3f(1, 0, 0), new Vector3f(0, 1, 0)).length != 2)
+            throw new IllegalArgumentException("Func should only returning 2 vectors");
         
         final int cpCount = spline.getControlPoints().size() - 1;
-        this.vertexArray = new Vector3f[cpCount * nbSubSegments * 3 * 2 * (cross.count - 1)];
+        this.vertexArray = new Vector3f[cpCount * nbSubSegments * 3 * 2];
 
         Vector3f[] tempsA = null;
         Vector3f[] tempsB = null;
@@ -79,7 +82,7 @@ public class CatmullRomWidth extends Mesh {
             }
         }
 
-        vertexTexCoord = new Vector2f[cpCount * nbSubSegments * 3 * 2 * (cross.count - 1)];
+        vertexTexCoord = new Vector2f[cpCount * nbSubSegments * 3 * 2];
         for (int k = 0; k < vertexTexCoord.length; k += 6) {
             vertexTexCoord[k] = new Vector2f(0, 1);
             vertexTexCoord[k + 1] = new Vector2f(1, 0);
@@ -89,7 +92,7 @@ public class CatmullRomWidth extends Mesh {
             vertexTexCoord[k + 5] = new Vector2f(1, 1);
         }
 
-        vertexNormalCoord = new Vector3f[cpCount * nbSubSegments * 3 * 2 * (cross.count - 1)];
+        vertexNormalCoord = new Vector3f[cpCount * nbSubSegments * 3 * 2];
         for (int k = 0; k < vertexNormalCoord.length; k++) {
             vertexNormalCoord[k] = new Vector3f(0, 0, 1);
         }
@@ -112,7 +115,7 @@ public class CatmullRomWidth extends Mesh {
         Vector3f diff = temp2.subtract(temp1);
         diff.y = 0; // prevent weird angle-ing of the road
         Vector3f normal = rot90.mult(diff.normalize());
-        return cross.CurveFunction.apply(pos, normal);
+        return cross.apply(pos, normal);
     }
 
     public List<Vector3f[]> getMeshAsQuads() {
@@ -130,5 +133,12 @@ public class CatmullRomWidth extends Mesh {
 
     public Spline getSpline() {
         return this.spline;
+    }
+
+    public static BiFunction<Vector3f, Vector3f, Vector3f[]> Flat(float width) {
+        final float w = width / 2f;
+        return (Vector3f mid, Vector3f normal) -> {
+            return new Vector3f[] { mid.add(normal.mult(w)), mid.add(normal.mult(-w)) };
+        };
     }
 }
