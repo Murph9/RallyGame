@@ -34,6 +34,17 @@ public class AveragerTest {
         assertEquals(14 / 3f, ave.get(7f), 0.0001f);
     }
 
+    @Test
+    public void weighted_2() {
+        IAverager<Float> ave = new AverageFloat(4, Type.Weighted);
+
+        ave.get(2f);
+        ave.get(2f);
+        ave.get(2f);
+        ave.get(3f);
+        assertEquals(3.9f, ave.get(6f), 0.0001f);
+    }
+
     @ParameterizedTest
     @ValueSource(ints = {1, 0, -1, -2323})
     public void sizesThatShouldBeOne(int size) {

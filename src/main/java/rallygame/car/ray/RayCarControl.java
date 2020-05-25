@@ -27,6 +27,7 @@ import rallygame.car.data.CarDataConst;
 import rallygame.drive.IDrive;
 import rallygame.helper.Log;
 import rallygame.service.averager.AverageFloatFramerate;
+import rallygame.service.averager.IAverager;
 import rallygame.service.ray.PhysicsRaycaster;
 
 //visual/input things
@@ -78,7 +79,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
         vel = forward = up = left = right = location = angularVel = new Vector3f();
         rotation = new Quaternion();
 
-        this.steeringAverager = new AverageFloatFramerate(0.15f);
+        this.steeringAverager = new AverageFloatFramerate(0.2f, IAverager.Type.Weighted);
 
 		//init visual wheels
 		this.wheelControls = new RayWheelControl[4];
@@ -141,7 +142,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
                 steeringCurrent += getBestTurnAngle(steerLeft, 1);
             if (steerRight != 0) //right
                 steeringCurrent -= getBestTurnAngle(steerRight, -1);
-            steeringCurrent = steeringAverager.get(steeringCurrent, tpf);
+            steeringCurrent = ignoreSpeedFactor ? steeringCurrent : steeringAverager.get(steeringCurrent, tpf);
             steeringCurrent = FastMath.clamp(steeringCurrent, -carData.w_steerAngle, carData.w_steerAngle);
 			
 			updateControlInputs(steeringCurrent, brakeCurrent, handbrakeCurrent);

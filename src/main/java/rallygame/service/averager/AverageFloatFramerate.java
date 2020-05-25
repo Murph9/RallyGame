@@ -7,31 +7,59 @@ import java.util.List;
 public class AverageFloatFramerate {
 
     private final float period;
+    private final IAverager.Type type;
     private List<Entry> total;
-    public AverageFloatFramerate(float period) {
+
+    public AverageFloatFramerate(float period, IAverager.Type type) {
         this.period = period;
+        this.type = type;
         total = new LinkedList<Entry>();
     }
 
     public float get(float value, float tpf) {
+        if (tpf <= 0)
+            throw new IllegalArgumentException("no negative tpf pls");
+
         total.add(0, new Entry(value, tpf));
 
-        float left = period;
-        float totalValue = 0;
         Iterator<Entry> li = total.iterator();
-        while (left > 0 && li.hasNext()) {
-            Entry e = li.next();
-            float time = Math.min(left, e.tpf);
-            totalValue += time*e.value;
-            left -= e.tpf;
-        }
+        switch (type) {
+            case Weighted:
+                float startsAt = period;
+                float sumN = 0;
+                float sumM = 0;
+                while (startsAt > 0 && li.hasNext()) {
+                    Entry e = li.next();
+                    float midWeight = startsAt - e.tpf / 2;
+                    float scaledWeight = e.tpf * midWeight;
+                    float weightValue = scaledWeight * e.value;
 
-        return totalValue / Math.min(period, period - left);
+                    sumM += scaledWeight;
+                    sumN += weightValue;
+                    startsAt -= e.tpf;
+                }
+
+                return sumN / sumM;
+            case Simple:
+                float left = period;
+                float totalValue = 0;
+
+                while (left > 0 && li.hasNext()) {
+                    Entry e = li.next();
+                    float time = Math.min(left, e.tpf);
+                    totalValue += time * e.value;
+                    left -= e.tpf;
+                }
+
+                return totalValue / Math.min(period, period - left);
+        }
+        throw new IllegalArgumentException("UNknown ytpe:" + type);
     }
 
     class Entry {
         public final float value;
         public final float tpf;
+
         Entry(float value, float tpf) {
             this.value = value;
             this.tpf = tpf;
@@ -39,7 +67,7 @@ public class AverageFloatFramerate {
 
         @Override
         public String toString() {
-            return "v:"+value+"["+tpf+"]";
+            return "v:" + value + "[" + tpf + "]";
         }
     }
 }
