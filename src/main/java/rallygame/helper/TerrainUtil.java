@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.jme3.math.FastMath;
 import com.jme3.math.Plane;
@@ -36,7 +37,10 @@ public class TerrainUtil {
                     results.put(point, height);
             }
         }
-        terrain.setHeight(new ArrayList<>(results.keySet()), new ArrayList<>(results.values()));
+        // convert to local coords (javadoc says nothing about this)
+        Vector2f offset = new Vector2f(terrain.getLocalTranslation().x, terrain.getLocalTranslation().y);
+        terrain.setHeight(new ArrayList<>(results.keySet().stream().map(x -> x.subtract(offset)).collect(Collectors.toList())),
+            new ArrayList<>(results.values()));
         return results;
     }
 
