@@ -3,9 +3,7 @@ package rallygame.world.path;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
@@ -27,7 +25,6 @@ import com.jme3.math.Spline.SplineType;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import com.jme3.scene.control.Control;
 import com.jme3.scene.shape.Box;
 import com.jme3.terrain.geomipmap.TerrainQuad;
 
@@ -43,43 +40,48 @@ import rallygame.service.search.AStar;
 class TerrainPiece {
 
     private final Terrain terrainApp;
-    public final List<RoadPointList> roadPointLists;
-    public final int sideLength;
-    public final Vector3f terrainScale;
+    protected final List<RoadPointList> roadPointLists;
 
-    public TerrainQuad terrain;
-    public Vector2f offset;
-    public boolean loaded;
+    protected final Node rootNode;
+    private final Vector2f offset;
 
-    public Vector2f roadStart;
-    public Vector2f roadEnd;
+    private final int cubeCount;
+    private final boolean ifGrass;
 
-    public final Node rootNode;
-    public NodeId placedObjects;
-    public Control collision;
-    public GrassTerrain gt;
+    private TerrainQuad terrain;
 
-    public TerrainPiece(Terrain terrainApp, Vector2f center) {
+    private Vector2f roadStart;
+    private Vector2f roadEnd;
+
+    private NodeId placedObjects;
+    private RigidBodyControl collision;
+
+    protected GrassTerrain gt;
+    protected boolean loaded;
+
+    public TerrainPiece(Terrain terrainApp, Vector2f center, int cubeCount, boolean ifGrass) {
         this.terrainApp = terrainApp;
-        this.sideLength = terrainApp.sideLength;
-        this.terrainScale = terrainApp.terrainScale;
         this.offset = center;
         this.rootNode = new Node("terrain at " + offset);
-        this.rootNode.setLocalTranslation(H.v2tov3fXZ(offset));
+
+        this.cubeCount = cubeCount;
+        this.ifGrass = ifGrass;
 
         this.roadPointLists = new LinkedList<RoadPointList>();
     }
 
     public void generate(AssetManager am, PhysicsSpace space) {
-        float[] heightMap = terrainApp.filteredBasis.getBuffer(sideLength, offset).array();
-        terrain = new TerrainQuad("path terrain", sideLength, sideLength, heightMap);
-        terrain.setLocalScale(terrainScale);
+        float[] heightMap = terrainApp.filteredBasis.getBuffer(terrainApp.sideLength, offset).array();
+        terrain = new TerrainQuad("path terrain", terrainApp.sideLength, terrainApp.sideLength, heightMap);
+        terrain.setLocalScale(terrainApp.terrainScale);
+
+        terrain.setLocalTranslation(pieceGridToWorldPos(this.offset.mult((terrainApp.sideLength - 1)), terrainApp.terrainScale));
 
         Material baseMat = new Material(am, "MatDefs/terrainheight/TerrainColorByHeight.j3md");
         baseMat.setColor("LowColor", new ColorRGBA(1.0f, 0.55f, 0.0f, 1.0f));
         baseMat.setColor("HighColor", new ColorRGBA(0.0f, 0.0f, 1.0f, 1.0f));
-        baseMat.setFloat("Scale", terrainScale.y * 0.8f); // margin of 0.1f
-        baseMat.setFloat("Offset", terrainScale.y * 0.1f);
+        baseMat.setFloat("Scale", terrainApp.terrainScale.y * 0.8f); // margin of 0.1f
+        baseMat.setFloat("Offset", terrainApp.terrainScale.y * 0.1f);
 
         terrain.setMaterial(baseMat);
         rootNode.attachChild(terrain);
@@ -87,49 +89,36 @@ class TerrainPiece {
         updateTerrainCollision(space);
 
         // generate start points from one edge to the other
-        final int halfLength = sideLength / 2;
+        final int halfLength = terrainApp.sideLength / 2;
         roadStart = new Vector2f(-halfLength, terrainApp.rand.nextInt(halfLength) - halfLength / 2);
         roadEnd = new Vector2f(halfLength - 1, terrainApp.rand.nextInt(halfLength) - halfLength / 2);
 
-        generateExtra(space);
+        generateExtra2(space);
     }
 
-    private void updateTerrainCollision(PhysicsSpace space) {
-        if (collision != null)
-            space.remove(collision);
+    private void generateExtra2(PhysicsSpace space) {
+        //generate both roads
+        CompletableFuture<RoadPointList> roadPart1 = searchFrom(roadStart, new Vector2f(), space);
+        CompletableFuture<RoadPointList> roadPart2 = searchFrom(new Vector2f(), roadEnd, space);
+        var roadList = Arrays.asList(roadPart1, roadPart2);
+        CompletableFuture.allOf(roadList.toArray(new CompletableFuture[0])).join();
 
-        collision = new RigidBodyControl(new HeightfieldCollisionShape(terrain.getHeightMap(), terrain.getLocalScale()),
-                0);
-        terrain.addControl(collision);
-        space.add(collision);
-    }
+        //add the points to the list
+        var points = roadList.stream().map(x -> x.join()).collect(Collectors.toList());
+        roadPointLists.addAll(points);
 
-    private void generateExtra(PhysicsSpace space) {
-        Callable<Void> roadPart1 = searchFrom(roadStart, new Vector2f(), space);
-        Callable<Void> roadPart2 = searchFrom(new Vector2f(), roadEnd, space);
-
-        try {
-            List<Future<Void>> waiting = terrainApp.executor.invokeAll(Arrays.asList(roadPart1, roadPart2));
-            for (Future<Void> wait: waiting)
-                wait.get();
-            //yay
-        } catch (InterruptedException | ExecutionException e) {
-            Log.e(e);
-            return;
-        }
-        
+        //add them to the world and physics spaces
         Application app = terrainApp.getApplication();
         AssetManager am = app.getAssetManager();
         app.enqueue(() -> {
+            List<Vector3f[]> quads = new LinkedList<>();
             for (RoadPointList outRoad : roadPointLists) {
                 outRoad.road = drawRoad(app.getAssetManager(), outRoad, space);
-                List<Vector3f[]> quads = outRoad.road.getMeshAsQuads();
-
-                TerrainUtil.lowerTerrainSoItsUnderQuads(terrain, quads);
+                quads.addAll(outRoad.road.getMeshAsQuads());
             }
             
+            TerrainUtil.lowerTerrainSoItsUnderQuads(terrain, quads);
             updateTerrainCollision(space);
-        
             
             // Place random cubes
             ObjectPlacer op = terrainApp.getState(ObjectPlacer.class);
@@ -137,11 +126,11 @@ class TerrainPiece {
             Box b = new Box(size, size, size);
             Spatial s = new Geometry("box", b);
             s = LoadModelWrapper.create(am, s, ColorRGBA.Blue);
-            float maxXZ = terrainScale.x * (sideLength - 1) / 2;
+            float maxXZ = terrainApp.terrainScale.x * (terrainApp.sideLength - 1) / 2;
 
             List<Spatial> list = new LinkedList<>();
             List<Vector3f> locations = new LinkedList<>();
-            for (int i = 0; i < 1000; i++) {
+            for (int i = 0; i < this.cubeCount; i++) {
                 Spatial s1 = s.clone();
                 float scale = FastMath.nextRandomFloat() * 25 + 1;
                 s1.setLocalScale(scale);
@@ -153,24 +142,31 @@ class TerrainPiece {
 
             placedObjects = op.addBulk(list, locations);
 
-            gt = drawGrass(am);
+            if (this.ifGrass)
+                gt = drawGrass(am);
 
             this.loaded = true;
         });
     }
 
-    private Callable<Void> searchFrom(Vector2f start, Vector2f end, PhysicsSpace space) {
-        RoadPointList outRoad = new RoadPointList();
-        roadPointLists.add(outRoad);
-        
-        return () -> {
+    private void updateTerrainCollision(PhysicsSpace space) {
+        if (collision != null)
+            space.remove(collision);
+
+        collision = new RigidBodyControl(new HeightfieldCollisionShape(terrain.getHeightMap(), terrain.getLocalScale()), 0);
+        terrain.addControl(collision);
+        space.add(collision);
+    }
+
+    private CompletableFuture<RoadPointList> searchFrom(Vector2f start, Vector2f end, PhysicsSpace space) {
+        return CompletableFuture.supplyAsync(() -> {
+            RoadPointList outRoad = new RoadPointList();
             List<Vector2f> list = null;
             try {
                 AStar<Vector2f> search = new AStar<>(new SearchWorld(terrain, Terrain.HEIGHT_WEIGHT, 0.2f));
                 search.setTimeoutMills((long) (30 * 1E6)); // x sec
-                list = search.findPath(H.v3tov2fXZ(
-                        gridToWorldSpace(this, start)),
-                        H.v3tov2fXZ(gridToWorldSpace(this, end)));
+                list = search.findPath(H.v3tov2fXZ(localGridToTerrainSpace(this, start)),
+                        H.v3tov2fXZ(localGridToTerrainSpace(this, end)));
                 outRoad.addAll(list.stream().map(x -> new Vector3f(x.x, terrain.getHeight(x), x.y))
                         .collect(Collectors.toList()));
                 Log.p("Done astar search, path length =", list.size());
@@ -183,8 +179,8 @@ class TerrainPiece {
                 Log.e(e);
             }
             
-            return null;
-        };
+            return outRoad;
+        }, terrainApp.executor);
     }
 
     private CatmullRomWidth drawRoad(AssetManager am, List<Vector3f> list, PhysicsSpace space) {
@@ -220,7 +216,7 @@ class TerrainPiece {
     }
 
     private GrassTerrain drawGrass(AssetManager am) {
-        GrassTerrain gt = new GrassTerrain(this, 100000, (v2) -> meshOnRoad(v2));
+        GrassTerrain gt = new GrassTerrain(this.terrain, terrainApp.terrainScale, 100000, (v2) -> meshOnRoad(v2));
         Geometry g = new Geometry("'grass'", gt);
         rootNode.attachChild(LoadModelWrapper.create(am, g, ColorRGBA.Pink));
 
@@ -254,25 +250,6 @@ class TerrainPiece {
         return false;
     }
 
-
-/*
-    private void drawBoxes(AssetManager am, Node node, Map<Vector2f, Float> vecHeightMap) {
-        List<Vector3f> heights3 = vecHeightMap.entrySet().stream()
-                .map(x -> new Vector3f(x.getKey().x, x.getValue() * terrain.getWorldScale().y, x.getKey().y))
-                .collect(Collectors.toList());
-        drawBoxes(am, this.rootNode, heights3);
-    }
-    private void drawBoxes(AssetManager am, Node node, List<Vector3f> points) {
-        float size = 0.2f;
-        Box box = new Box(size, size, size);
-        for (Vector3f pos : points) {
-            Geometry g = Geo.createShape(am, box, ColorRGBA.Yellow, pos.add(0, size / 2, 0), "boxes");
-            this.rootNode.attachChild(g);
-        }
-    }
-*/
-
-
     public void cleanup(Application app, PhysicsSpace space) {
         this.rootNode.removeFromParent();
 
@@ -282,21 +259,14 @@ class TerrainPiece {
         }
     }
 
-    private static Vector3f gridToWorldSpace(TerrainPiece piece, Vector2f pos) {
-        Vector3f scale = piece.terrain.getLocalScale();
-        Vector2f worldPos = pos.clone();
-        worldPos.x *= scale.x;
-        worldPos.y *= scale.z;
-        return new Vector3f(worldPos.x, piece.terrain.getHeight(worldPos), worldPos.y).add(H.v2tov3fXZ(piece.offset));
+    private static Vector3f localGridToTerrainSpace(TerrainPiece piece, Vector2f pos) {
+        Vector3f out = new Vector3f();
+        piece.terrain.getLocalTransform().transformVector(H.v2tov3fXZ(pos), out);
+        return out;
     }
 
-    //TODO test
-    static Vector2f worldToGridSpace(TerrainPiece piece, Vector3f pos) {
-        Vector3f scale = piece.terrain.getLocalScale();
-        Vector2f out = H.v3tov2fXZ(pos).subtract(piece.offset);
-        out.x /= scale.x;
-        out.y /= scale.z;
-        return out;
+    private static Vector3f pieceGridToWorldPos(Vector2f offset, Vector3f scale) {
+        return H.v2tov3fXZ(H.v3tov2fXZ(scale).multLocal(offset));
     }
 }
 

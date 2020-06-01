@@ -20,12 +20,15 @@ public class PathWorld extends World implements ICheckpointWorld {
         this(FastMath.nextRandomInt());
     }
     public PathWorld(int seed) {
-        this(seed, 6, 25, 400);
+        this(seed, true);
     }
-    public PathWorld(int seed, int size, float scaleXZ, float scaleY) {
+    public PathWorld(int seed, boolean terrainFeatures) {
+        this(seed, 6, 25, 400, terrainFeatures);
+    }
+    public PathWorld(int seed, int size, float scaleXZ, float scaleY, boolean terrainFeatures) {
         super("PathWorld");
 
-        terrain = new Terrain(seed, size, new Vector3f(scaleXZ, scaleY, scaleXZ));
+        terrain = new Terrain(seed, size, new Vector3f(scaleXZ, scaleY, scaleXZ), 1, terrainFeatures);
     }
 
     @Override

@@ -30,19 +30,23 @@ public class Terrain extends BaseAppState implements ILoadable {
 
     protected final int sideLength;
     protected final Vector3f terrainScale;
+    protected final int tileCount;
 
     protected final Random rand;
     protected final FilteredBasisTerrain filteredBasis;
     protected final ExecutorService executor;
     private final Node rootNode;
+    private final boolean showTerrainFeatures;
 
     // contains the list of TerrainQuads mapped to locations
     // each terrain quad contains the roads and objects that exist in it
     private final Map<Vector2f, TerrainPiece> pieces = new HashMap<>();
 
-    public Terrain(long seed, int size, Vector3f scale) {
+    public Terrain(long seed, int size, Vector3f scale, int tileCount, boolean showTerrainFeatures) {
         this.sideLength = (1 << size) + 1; // 6 -> 64 + 1
         this.terrainScale = scale;
+        this.tileCount = Math.max(tileCount, 1);
+        this.showTerrainFeatures = showTerrainFeatures;
 
         this.rootNode = new Node("Terrain root node");
 
@@ -58,18 +62,23 @@ public class Terrain extends BaseAppState implements ILoadable {
     protected void initialize(Application app) {
         ((SimpleApplication)app).getRootNode().attachChild(rootNode);
 
-        //load first terrainquad so we can start the race
-        //TODO test an offset because im pretty sure some things aren't correct
-        // especially physics collision objects
-        generateTQuadAt(new Vector2f(), app.getAssetManager());
+        //load terrainquads
+        for (int i = 0; i < tileCount; i++)
+            generateTQuadAt(new Vector2f(i, 0), app.getAssetManager());
     }
 
     private void generateTQuadAt(Vector2f center, AssetManager am) {
-        TerrainPiece data = new TerrainPiece(this, center);
-        data.generate(am, getState(BulletAppState.class).getPhysicsSpace());
+        int cubeCount = 0;
+        boolean drawGrass = false;
+        if (showTerrainFeatures) {
+            cubeCount = 1000;
+            drawGrass = true;
+        }
+        TerrainPiece piece = new TerrainPiece(this, center, cubeCount, drawGrass);
+        piece.generate(am, getState(BulletAppState.class).getPhysicsSpace());
         
-        this.pieces.put(center, data);
-        this.rootNode.attachChild(data.rootNode);
+        this.pieces.put(center, piece);
+        this.rootNode.attachChild(piece.rootNode);
     }
 
     @Override

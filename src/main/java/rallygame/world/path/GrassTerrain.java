@@ -11,6 +11,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.VertexBuffer;
+import com.jme3.terrain.geomipmap.TerrainQuad;
 import com.jme3.util.BufferUtils;
 
 import rallygame.helper.H;
@@ -19,13 +20,15 @@ public class GrassTerrain extends Mesh {
 
     // https://github.com/Simsilica/IsoSurface/blob/master/src/main/java/com/simsilica/iso/plot/GrassZone.java
 
-    private final TerrainPiece piece;
+    private final TerrainQuad quad;
+    private final Vector3f scale;
     private final Function<Vector2f, Boolean> posValid;
 
     private final List<Grass> triangles;
 
-    public GrassTerrain(TerrainPiece piece, int count, Function<Vector2f, Boolean> posValid) {
-        this.piece = piece;
+    public GrassTerrain(TerrainQuad quad, Vector3f scale, int count, Function<Vector2f, Boolean> posValid) {
+        this.quad = quad;
+        this.scale = scale;
         this.posValid = posValid;
         this.triangles = new LinkedList<>();
 
@@ -41,7 +44,7 @@ public class GrassTerrain extends Mesh {
             Vector2f pos = validPoint();
             if (pos == null)
                 continue; //then it lost the lottery
-            float height = piece.terrain.getHeight(pos);
+            float height = quad.getHeight(pos);
             if (Float.isNaN(height))
                 continue;
 
@@ -69,7 +72,7 @@ public class GrassTerrain extends Mesh {
     }
 
     private Vector2f validPoint() {
-        Vector2f pos = H.randV2f(piece.terrainScale.x * piece.sideLength, true);
+        Vector2f pos = H.randV2f(scale.x * quad.getTerrainSize(), true);
         if (posValid.apply(pos))
             return null;
         return pos;

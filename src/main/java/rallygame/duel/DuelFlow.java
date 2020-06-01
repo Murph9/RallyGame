@@ -85,7 +85,7 @@ public class DuelFlow implements IDuelFlow {
     private void loadRace() {
         AppStateManager sm = app.getStateManager();
         ICheckpointWorld world = new PathWorld(1);
-        LoadingState loading = new LoadingState(world, (AppState[])null);
+        LoadingState loading = new LoadingState(world);
         loading.setCallback((states) -> {
             curState = new DuelRace(this, world);
             sm.attach(curState);
