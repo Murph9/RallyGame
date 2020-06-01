@@ -7,10 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.jme3.asset.AssetManager;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Plane;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Node;
 import com.jme3.terrain.geomipmap.TerrainQuad;
 
 public class TerrainUtil {
@@ -85,5 +88,18 @@ public class TerrainUtil {
         box[3] = FastMath.ceil(box[3] / terrainScale.z) * terrainScale.z;
 
         return box;
+    }
+
+    //debug method to draw boxes at terrain heights, can be used with the output of the main method at the top
+    //i acknowledge that isn't where this should live 
+    public static void debugDrawHeights(TerrainQuad terrain, AssetManager am, Node node, Map<Vector2f, Float> vecHeightMap) {
+        List<Vector3f> heights3 = vecHeightMap.entrySet().stream()
+                .map(x -> new Vector3f(x.getKey().x, x.getValue() * terrain.getWorldScale().y, x.getKey().y))
+                .collect(Collectors.toList());
+        
+        float size = 0.2f;
+        for (Vector3f pos : heights3) {
+            node.attachChild(Geo.makeShapeBox(am, ColorRGBA.Yellow, pos.add(0, size / 2, 0), size / 2));
+        }
     }
 }
