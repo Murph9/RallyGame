@@ -103,19 +103,15 @@ public class ObjectPlacer extends BaseAppState {
     }
 
     /** Add many as optimised node */
-    public NodeId addBulk(List<Spatial> sp, List<Vector3f> locations) {
-        if (sp.size() != locations.size())
-            throw new IllegalArgumentException("Please, same lengths: " + sp.size() + " " + locations.size());
-
+    public NodeId addBulk(List<Spatial> sp) {
         NodeId id = new NodeId();
         Node node = new Node();
         nodes.put(id, node);
-        for (int i = 0; i < sp.size(); i++) {
-            sp.get(i).setLocalTranslation(locations.get(i));
-            sp.get(i).addControl(new RigidBodyControl(0));
-            node.attachChild(sp.get(i));
+        for (var s : sp) {
+            s.addControl(new RigidBodyControl(0));
+            node.attachChild(s);
             if (usePhysics)
-                getState(BulletAppState.class).getPhysicsSpace().add(sp.get(i));
+                getState(BulletAppState.class).getPhysicsSpace().add(s);
         }
 
         nodePhysicsObjs.put(node, sp);

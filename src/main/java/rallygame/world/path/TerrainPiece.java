@@ -17,15 +17,12 @@ import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
-import com.jme3.math.Quaternion;
 import com.jme3.math.Spline;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.math.Spline.SplineType;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
-import com.jme3.scene.shape.Box;
 import com.jme3.terrain.geomipmap.TerrainQuad;
 
 import rallygame.effects.LoadModelWrapper;
@@ -45,10 +42,9 @@ class TerrainPiece {
     protected final Node rootNode;
     private final Vector2f offset;
 
-    private final int cubeCount;
-    private final boolean ifGrass;
+    private final boolean needsRoad;
 
-    private TerrainQuad terrain;
+    protected TerrainQuad terrain;
 
     private Vector2f roadStart;
     private Vector2f roadEnd;
@@ -56,21 +52,20 @@ class TerrainPiece {
     private NodeId placedObjects;
     private RigidBodyControl collision;
 
-    protected GrassTerrain gt;
-    protected boolean loaded;
-
-    public TerrainPiece(Terrain terrainApp, Vector2f center, int cubeCount, boolean ifGrass) {
+    protected TerrainPiece(Terrain terrainApp, Vector2f center) {
+        this(terrainApp, center, true);
+    }
+    protected TerrainPiece(Terrain terrainApp, Vector2f center, boolean needsRoad) {
         this.terrainApp = terrainApp;
         this.offset = center;
         this.rootNode = new Node("terrain at " + offset);
 
-        this.cubeCount = cubeCount;
-        this.ifGrass = ifGrass;
+        this.needsRoad = needsRoad;
 
         this.roadPointLists = new LinkedList<RoadPointList>();
     }
 
-    public void generate(AssetManager am, PhysicsSpace space) {
+    protected void generate(AssetManager am, PhysicsSpace space) {
         float[] heightMap = terrainApp.filteredBasis.getBuffer(terrainApp.sideLength, offset).array();
         terrain = new TerrainQuad("path terrain", terrainApp.sideLength, terrainApp.sideLength, heightMap);
         terrain.setLocalScale(terrainApp.terrainScale);
@@ -80,8 +75,8 @@ class TerrainPiece {
         Material baseMat = new Material(am, "MatDefs/terrainheight/TerrainColorByHeight.j3md");
         baseMat.setColor("LowColor", new ColorRGBA(1.0f, 0.55f, 0.0f, 1.0f));
         baseMat.setColor("HighColor", new ColorRGBA(0.0f, 0.0f, 1.0f, 1.0f));
-        baseMat.setFloat("Scale", terrainApp.terrainScale.y * 0.8f); // margin of 0.1f
-        baseMat.setFloat("Offset", terrainApp.terrainScale.y * 0.1f);
+        baseMat.setFloat("Scale", terrainApp.terrainScale.y * 0.6f); // margin of 0.2f
+        baseMat.setFloat("Offset", terrainApp.terrainScale.y * 0.2f);
 
         terrain.setMaterial(baseMat);
         rootNode.attachChild(terrain);
@@ -93,10 +88,14 @@ class TerrainPiece {
         roadStart = new Vector2f(-halfLength, terrainApp.rand.nextInt(halfLength) - halfLength / 2);
         roadEnd = new Vector2f(halfLength - 1, terrainApp.rand.nextInt(halfLength) - halfLength / 2);
 
-        generateExtra2(space);
+        if (needsRoad)
+            generateRoad(space);
+        else
+            terrainApp.finishedMinimalLoading(this);
     }
 
-    private void generateExtra2(PhysicsSpace space) {
+    private void generateRoad(PhysicsSpace space) {
+
         //generate both roads
         CompletableFuture<RoadPointList> roadPart1 = searchFrom(roadStart, new Vector2f(), space);
         CompletableFuture<RoadPointList> roadPart2 = searchFrom(new Vector2f(), roadEnd, space);
@@ -113,39 +112,16 @@ class TerrainPiece {
         app.enqueue(() -> {
             List<Vector3f[]> quads = new LinkedList<>();
             for (RoadPointList outRoad : roadPointLists) {
-                outRoad.road = drawRoad(app.getAssetManager(), outRoad, space);
+                if (outRoad.failed)
+                    continue;
+                outRoad.road = drawRoad(am, outRoad, space);
                 quads.addAll(outRoad.road.getMeshAsQuads());
             }
             
             TerrainUtil.lowerTerrainSoItsUnderQuads(terrain, quads);
             updateTerrainCollision(space);
             
-            // Place random cubes
-            ObjectPlacer op = terrainApp.getState(ObjectPlacer.class);
-            float size = 1f;
-            Box b = new Box(size, size, size);
-            Spatial s = new Geometry("box", b);
-            s = LoadModelWrapper.create(am, s, ColorRGBA.Blue);
-            float maxXZ = terrainApp.terrainScale.x * (terrainApp.sideLength - 1) / 2;
-
-            List<Spatial> list = new LinkedList<>();
-            List<Vector3f> locations = new LinkedList<>();
-            for (int i = 0; i < this.cubeCount; i++) {
-                Spatial s1 = s.clone();
-                float scale = FastMath.nextRandomFloat() * 25 + 1;
-                s1.setLocalScale(scale);
-                s1.setLocalRotation(new Quaternion(FastMath.nextRandomFloat(), FastMath.nextRandomFloat(),
-                        FastMath.nextRandomFloat(), FastMath.nextRandomFloat()));
-                list.add(s1);
-                locations.add(selectPointNotOnRoad(scale, maxXZ));
-            }
-
-            placedObjects = op.addBulk(list, locations);
-
-            if (this.ifGrass)
-                gt = drawGrass(am);
-
-            this.loaded = true;
+            terrainApp.finishedMinimalLoading(this);
         });
     }
 
@@ -159,8 +135,8 @@ class TerrainPiece {
     }
 
     private CompletableFuture<RoadPointList> searchFrom(Vector2f start, Vector2f end, PhysicsSpace space) {
+        RoadPointList outRoad = new RoadPointList();
         return CompletableFuture.supplyAsync(() -> {
-            RoadPointList outRoad = new RoadPointList();
             List<Vector2f> list = null;
             try {
                 AStar<Vector2f> search = new AStar<>(new SearchWorld(terrain, Terrain.HEIGHT_WEIGHT, 0.2f));
@@ -180,7 +156,11 @@ class TerrainPiece {
             }
             
             return outRoad;
-        }, terrainApp.executor);
+        }, terrainApp.executor).exceptionally(ex -> {
+            outRoad.failed = true;
+            Log.e(ex);
+            return outRoad;
+        });
     }
 
     private CatmullRomWidth drawRoad(AssetManager am, List<Vector3f> list, PhysicsSpace space) {
@@ -215,26 +195,10 @@ class TerrainPiece {
         return c3;
     }
 
-    private GrassTerrain drawGrass(AssetManager am) {
-        GrassTerrain gt = new GrassTerrain(this.terrain, terrainApp.terrainScale, 100000, (v2) -> meshOnRoad(v2));
-        Geometry g = new Geometry("'grass'", gt);
-        rootNode.attachChild(LoadModelWrapper.create(am, g, ColorRGBA.Pink));
-
-        return gt;
+    public boolean meshOnRoad(Vector2f location) {
+        return meshOnRoad(location, 0);
     }
-
-    private Vector3f selectPointNotOnRoad(float objRadius, float max) {
-        Vector2f location = H.randV2f(max, true);
-        while (meshOnRoad(objRadius, location)) {
-            location = H.randV2f(max, true);
-        }
-        return new Vector3f(location.x, terrain.getHeight(location), location.y);
-    }
-
-    private boolean meshOnRoad(Vector2f location) {
-        return meshOnRoad(0, location);
-    }
-    private boolean meshOnRoad(float objRadius, Vector2f location) {
+    public boolean meshOnRoad(Vector2f location, float objRadius) {
         // simple check that its more than x from a road vertex
         for (RoadPointList road : this.roadPointLists) {
             for (int i = 0; i < road.size() - 1; i++) {
@@ -250,7 +214,7 @@ class TerrainPiece {
         return false;
     }
 
-    public void cleanup(Application app, PhysicsSpace space) {
+    protected void cleanup(Application app, PhysicsSpace space) {
         this.rootNode.removeFromParent();
 
         if (this.placedObjects != null) {

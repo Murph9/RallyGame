@@ -14,8 +14,6 @@ public class PathWorld extends World implements ICheckpointWorld {
 
     private final Terrain terrain;
 
-    // https://github.com/jMonkeyEngine/sdk/blob/master/jme3-terrain-editor/src/com/jme3/gde/terraineditor/tools/LevelTerrainToolAction.java
-
     public PathWorld() {
         this(FastMath.nextRandomInt());
     }
@@ -23,12 +21,12 @@ public class PathWorld extends World implements ICheckpointWorld {
         this(seed, true);
     }
     public PathWorld(int seed, boolean terrainFeatures) {
-        this(seed, 6, 25, 400, terrainFeatures);
+        this(seed, 5, 25, 200, terrainFeatures);
     }
     public PathWorld(int seed, int size, float scaleXZ, float scaleY, boolean terrainFeatures) {
         super("PathWorld");
 
-        terrain = new Terrain(seed, size, new Vector3f(scaleXZ, scaleY, scaleXZ), 1, terrainFeatures);
+        terrain = new Terrain(seed, size, new Vector3f(scaleXZ, scaleY, scaleXZ), 3, terrainFeatures);
     }
 
     @Override

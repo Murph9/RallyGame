@@ -178,7 +178,6 @@ public class TrackWorld extends World implements ICheckpointWorld {
 		}
 
 		Spatial[] spats = new Spatial[treeCount];
-		Vector3f[] positions = new Vector3f[treeCount];
 		for (int i = 0; i < treeCount; i++) {
 			Vector3f pos = H.randV3f(worldSize*terrain.getWorldScale().x/2, true);
 			float height = terrain.getHeight(new Vector2f(pos.x, pos.z));
@@ -187,12 +186,12 @@ public class TrackWorld extends World implements ICheckpointWorld {
 				height = 0;
 			}
 			pos.y = height;
-			positions[i] = pos;
 
 			spats[i] = treeGeoms[FastMath.nextRandomInt(0, treeGeoms.length - 1)].clone();
+			spats[i].setLocalTranslation(pos);
 		}
 		ObjectPlacer op = getState(ObjectPlacer.class);
-		return op.addBulk(Arrays.asList(spats), Arrays.asList(positions));
+		return op.addBulk(Arrays.asList(spats));
 	}
 
 	private float[] createHeightMap() {
