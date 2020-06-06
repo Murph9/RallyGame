@@ -1,11 +1,13 @@
 package rallygame.world.path;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -53,7 +55,8 @@ public class Terrain extends BaseAppState implements ILoadable {
     protected Terrain(long seed, int size, Vector3f scale, int tileCount, boolean createTerrainFeatures) {
         this.sideLength = (1 << size) + 1; // 6 -> 64 + 1
         this.terrainScale = scale;
-        this.tileCount = Math.max(tileCount, 1);
+        this.tileCount = 1;// TODO don't
+        //this.tileCount = Math.max(tileCount, 1);
         this.createTerrainFeatures = createTerrainFeatures;
 
         this.rootNode = new Node("Terrain root node");
@@ -88,25 +91,29 @@ public class Terrain extends BaseAppState implements ILoadable {
         var tObj = this.pieces.values().stream().filter(x -> x.piece == piece).findFirst();
         if (!tObj.isPresent())
             throw new IllegalStateException("How?");
+        
         TerrainObj obj = tObj.get();
         obj.loaded = true;
         AssetManager am = getApplication().getAssetManager();
 
         if (createTerrainFeatures) {
-            var grassFuture = GrassPlacer.generate(piece.terrain, am, 10000, (v2) -> piece.meshOnRoad(v2));
-            var cubeFuture = CubePlacer.generate(piece.terrain, am, 1000, (v2, size) -> piece.meshOnRoad(v2, size));
-
+            var grassCallable = GrassPlacer.generate(piece.terrain, am, 10000, (v2) -> piece.meshOnRoad(v2));
+            var callCallable = CubePlacer.generate(piece.terrain, am, 50, (v2, size) -> piece.meshOnRoad(v2, size));
+            List<Callable<? extends Object>> list = Arrays.asList(callCallable, grassCallable);
+            
             try {
+                executor.invokeAll(list);
+
                 // grass
-                obj.grass = grassFuture.get();
+                obj.grass = grassCallable.call();
                 Geometry g = new Geometry("'grass'", obj.grass);
                 this.rootNode.attachChild(LoadModelWrapper.create(am, g, ColorRGBA.Pink));
 
                 // cubes
-                var cubes = cubeFuture.get();
+                var cubes = callCallable.call();
                 var ob = getState(ObjectPlacer.class);
                 obj.cubes = ob.addBulk(cubes);
-            } catch (InterruptedException | ExecutionException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

@@ -2,7 +2,7 @@ package rallygame.world.path;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Callable;
 import java.util.function.Function;
 
 import com.jme3.asset.AssetManager;
@@ -14,10 +14,10 @@ import rallygame.helper.H;
 
 public class GrassPlacer {
 
-    public static CompletableFuture<GrassTerrain> generate(TerrainQuad terrain, AssetManager am, int count, Function<Vector2f, Boolean> posValid) {
-        return CompletableFuture.supplyAsync(() -> {
+    public static Callable<GrassTerrain> generate(TerrainQuad terrain, AssetManager am, int count, Function<Vector2f, Boolean> posValid) {
+        return () -> {
             return new GrassTerrain(generatePoints(count, terrain, posValid));
-        });
+        };
     }
 
     private static List<Vector3f> generatePoints(int count, TerrainQuad terrain, Function<Vector2f, Boolean> posValid) {

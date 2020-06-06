@@ -3,7 +3,7 @@ package rallygame.world.path;
 import java.util.function.BiFunction;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Callable;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.math.ColorRGBA;
@@ -20,9 +20,9 @@ import rallygame.effects.LoadModelWrapper;
 import rallygame.helper.H;
 
 public class CubePlacer {
-    public static CompletableFuture<List<Spatial>> generate(TerrainQuad terrain, AssetManager am, int count,
+    public static Callable<List<Spatial>> generate(TerrainQuad terrain, AssetManager am, int count,
         BiFunction<Vector2f, Float, Boolean> posValid) {
-        return CompletableFuture.supplyAsync(() -> {
+        return () -> {
             var maxXZ = terrain.getLocalScale().x * terrain.getTerrainSize();
 
             float size = 1f;
@@ -42,7 +42,7 @@ public class CubePlacer {
             }
 
             return list;
-        });
+        };
     }
 
     private static Vector3f generateValidPoint(TerrainQuad terrain, float maxXZ, float radius, BiFunction<Vector2f, Float, Boolean> posValid) {

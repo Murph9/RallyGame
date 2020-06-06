@@ -3,7 +3,9 @@ package rallygame.world.path;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
@@ -95,16 +97,19 @@ class TerrainPiece {
     }
 
     private void generateRoad(PhysicsSpace space) {
-
         //generate both roads
-        CompletableFuture<RoadPointList> roadPart1 = searchFrom(roadStart, new Vector2f(), space);
-        CompletableFuture<RoadPointList> roadPart2 = searchFrom(new Vector2f(), roadEnd, space);
-        var roadList = Arrays.asList(roadPart1, roadPart2);
-        CompletableFuture.allOf(roadList.toArray(new CompletableFuture[0])).join();
+        Callable<RoadPointList> roadPart1 = searchFrom(roadStart, new Vector2f(), space);
+        Callable<RoadPointList> roadPart2 = searchFrom(new Vector2f(), roadEnd, space);
 
-        //add the points to the list
-        var points = roadList.stream().map(x -> x.join()).collect(Collectors.toList());
-        roadPointLists.addAll(points);
+        try {
+            List<Future<RoadPointList>> waiting = terrainApp.executor.invokeAll(Arrays.asList(roadPart1, roadPart2));
+            for (Future<RoadPointList> wait: waiting)
+                roadPointLists.add(wait.get());
+            //yay
+        } catch (InterruptedException | ExecutionException e) {
+            Log.e(e);
+            return;
+        }
 
         //add them to the world and physics spaces
         Application app = terrainApp.getApplication();
@@ -134,9 +139,9 @@ class TerrainPiece {
         space.add(collision);
     }
 
-    private CompletableFuture<RoadPointList> searchFrom(Vector2f start, Vector2f end, PhysicsSpace space) {
+    private Callable<RoadPointList> searchFrom(Vector2f start, Vector2f end, PhysicsSpace space) {
         RoadPointList outRoad = new RoadPointList();
-        return CompletableFuture.supplyAsync(() -> {
+        return () -> {
             List<Vector2f> list = null;
             try {
                 AStar<Vector2f> search = new AStar<>(new SearchWorld(terrain, Terrain.HEIGHT_WEIGHT, 0.2f));
@@ -156,11 +161,7 @@ class TerrainPiece {
             }
             
             return outRoad;
-        }, terrainApp.executor).exceptionally(ex -> {
-            outRoad.failed = true;
-            Log.e(ex);
-            return outRoad;
-        });
+        };
     }
 
     private CatmullRomWidth drawRoad(AssetManager am, List<Vector3f> list, PhysicsSpace space) {
