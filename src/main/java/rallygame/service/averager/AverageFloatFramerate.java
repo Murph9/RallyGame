@@ -22,6 +22,19 @@ public class AverageFloatFramerate {
 
         total.add(0, new Entry(value, tpf));
 
+        if (total.size() > 1000) {
+            // do some culling when the list gets very long
+            var newList = new LinkedList<Entry>();
+            Iterator<Entry> li = total.iterator();
+            float startsAt = period;
+            while (startsAt > 0 && li.hasNext()) {
+                Entry e = li.next();
+                startsAt -= e.tpf;
+                newList.add(e); //add existing elements to new list, then delete the old one
+            }
+            total = newList;
+        }
+
         Iterator<Entry> li = total.iterator();
         switch (type) {
             case Weighted:
