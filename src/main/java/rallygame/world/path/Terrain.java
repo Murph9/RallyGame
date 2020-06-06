@@ -126,7 +126,7 @@ public class Terrain extends BaseAppState implements ILoadable {
         Camera cam = getApplication().getCamera();
         for (var feat :this.pieces.values()) {
             if (feat.grass != null)
-                feat.grass.update(cam);
+                feat.grass.update(cam.getRotation());
         }
     }
 

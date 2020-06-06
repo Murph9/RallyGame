@@ -40,23 +40,23 @@ public class GrassTerrain extends Mesh {
             textureBuffer.put(1).put(0);
             textureBuffer.put(0.5f).put(1);
         }
-
+        
         this.setBuffer(VertexBuffer.Type.Position, 3, vertexBuffer);
         this.setBuffer(VertexBuffer.Type.Normal, 3, normalBuffer);
         this.setBuffer(VertexBuffer.Type.TexCoord, 2, textureBuffer);
 
         this.setMode(Mesh.Mode.Triangles);
         this.updateCounts();
-        this.updateBound();
+
+        update(Quaternion.IDENTITY);
     }
 
-    protected void update(Camera cam) {
+    protected void update(Quaternion camRotation) {
         FloatBuffer vertexBuffer = this.getFloatBuffer(VertexBuffer.Type.Position);
         vertexBuffer.rewind();
 
-        Quaternion rot = cam.getRotation();
         for (Grass f : triangles) {
-            vertexBuffer.put(f.calcPoints(rot));
+            vertexBuffer.put(f.calcPoints(camRotation));
         }
 
         this.setBuffer(VertexBuffer.Type.Position, 3, vertexBuffer);
