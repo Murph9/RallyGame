@@ -25,8 +25,8 @@ public class PathWorld extends World implements ICheckpointWorld {
     }
     public PathWorld(int seed, int size, float scaleXZ, float scaleY, boolean terrainFeatures) {
         super("PathWorld");
-
-        terrain = new Terrain(seed, size, new Vector3f(scaleXZ, scaleY, scaleXZ), 3, terrainFeatures);
+        var ft = TerrainSettings.withFeatures(terrainFeatures);
+        terrain = new Terrain(ft);
     }
 
     @Override

@@ -1,6 +1,5 @@
 package rallygame.world.path;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -24,6 +23,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 
 import rallygame.effects.LoadModelWrapper;
 import rallygame.helper.Log;
@@ -39,30 +39,26 @@ public class Terrain extends BaseAppState implements ILoadable {
     protected static final float ROAD_WIDTH = 10f;
 
     protected final int sideLength;
-    protected final Vector3f terrainScale;
-    protected final int tileCount;
 
     protected final Random rand;
     protected final FilteredBasisTerrain filteredBasis;
     protected final ExecutorService executor;
     private final Node rootNode;
-    private final boolean createTerrainFeatures;
+    private final TerrainSettings features;
 
     // contains the list of TerrainQuads mapped to locations
     // each terrain quad contains the roads and objects that exist in it
     private final Map<Vector2f, TerrainObj> pieces = new HashMap<>();
 
-    protected Terrain(long seed, int size, Vector3f scale, int tileCount, boolean createTerrainFeatures) {
-        this.sideLength = (1 << size) + 1; // 6 -> 64 + 1
-        this.terrainScale = scale;
-        this.tileCount = 1;// TODO don't
-        //this.tileCount = Math.max(tileCount, 1);
-        this.createTerrainFeatures = createTerrainFeatures;
+    protected Terrain(TerrainSettings features) {
+        this.features = features;
+        this.sideLength = (1 << features.size) + 1; // 6 -> 64 + 1
+        features.tileCount = Math.max(features.tileCount, 1);
 
         this.rootNode = new Node("Terrain root node");
 
-        Log.p("Starting path world with seed: " + seed);
-        this.rand = new Random(seed);
+        Log.p("Starting path world with seed: " + features.seed);
+        this.rand = new Random(features.seed);
 
         this.filteredBasis = FilteredBasisTerrain.generate(new Vector2f(rand.nextInt(1000), rand.nextInt(1000)));
 
@@ -74,14 +70,14 @@ public class Terrain extends BaseAppState implements ILoadable {
         ((SimpleApplication) app).getRootNode().attachChild(rootNode);
 
         // load terrainquads
-        for (int i = 0; i < tileCount; i++)
+        for (int i = 0; i < features.tileCount; i++)
             generateTQuadAt(new Vector2f(i, 0), app.getAssetManager());
     }
 
     private void generateTQuadAt(Vector2f center, AssetManager am) {
         var obj = new TerrainObj();
         obj.piece = new TerrainPiece(this, center, true);
-        obj.piece.generate(am, getState(BulletAppState.class).getPhysicsSpace());
+        obj.piece.generate(am, getState(BulletAppState.class).getPhysicsSpace(), features.scale);
 
         this.pieces.put(center, obj);
         this.rootNode.attachChild(obj.piece.rootNode);
@@ -96,23 +92,36 @@ public class Terrain extends BaseAppState implements ILoadable {
         obj.loaded = true;
         AssetManager am = getApplication().getAssetManager();
 
-        if (createTerrainFeatures) {
-            var grassCallable = GrassPlacer.generate(piece.terrain, am, 10000, (v2) -> piece.meshOnRoad(v2));
-            var callCallable = CubePlacer.generate(piece.terrain, am, 50, (v2, size) -> piece.meshOnRoad(v2, size));
-            List<Callable<? extends Object>> list = Arrays.asList(callCallable, grassCallable);
+        List<Callable<? extends Object>> list = new LinkedList<>();
+        Callable<GrassTerrain> grassCallable = null;
+        Callable<List<Spatial>> cubeCallable = null;
+
+        if (features.cubes) {
+            cubeCallable = CubePlacer.generate(piece.terrain, am, 50, (v2, size) -> piece.meshOnRoad(v2, size));
+            list.add(cubeCallable);
+        }
+        if (features.grass) {
+            grassCallable = GrassPlacer.generate(piece.terrain, am, 10000, (v2) -> piece.meshOnRoad(v2));
+            list.add(grassCallable);
+        }
             
+        if (!list.isEmpty()) {
             try {
                 executor.invokeAll(list);
 
                 // grass
-                obj.grass = grassCallable.call();
-                Geometry g = new Geometry("'grass'", obj.grass);
-                this.rootNode.attachChild(LoadModelWrapper.create(am, g, ColorRGBA.Pink));
+                if (grassCallable != null) {
+                    obj.grass = grassCallable.call();
+                    Geometry g = new Geometry("'grass'", obj.grass);
+                    this.rootNode.attachChild(LoadModelWrapper.create(am, g, ColorRGBA.Pink));
+                }
 
                 // cubes
-                var cubes = callCallable.call();
-                var ob = getState(ObjectPlacer.class);
-                obj.cubes = ob.addBulk(cubes);
+                if (cubeCallable != null) {
+                    var cubes = cubeCallable.call();
+                    var ob = getState(ObjectPlacer.class);
+                    obj.cubes = ob.addBulk(cubes);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }

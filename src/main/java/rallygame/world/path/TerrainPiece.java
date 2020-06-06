@@ -67,18 +67,18 @@ class TerrainPiece {
         this.roadPointLists = new LinkedList<RoadPointList>();
     }
 
-    protected void generate(AssetManager am, PhysicsSpace space) {
+    protected void generate(AssetManager am, PhysicsSpace space, Vector3f scale) {
         float[] heightMap = terrainApp.filteredBasis.getBuffer(terrainApp.sideLength, offset).array();
         terrain = new TerrainQuad("path terrain", terrainApp.sideLength, terrainApp.sideLength, heightMap);
-        terrain.setLocalScale(terrainApp.terrainScale);
+        terrain.setLocalScale(scale);
 
-        terrain.setLocalTranslation(pieceGridToWorldPos(this.offset.mult((terrainApp.sideLength - 1)), terrainApp.terrainScale));
+        terrain.setLocalTranslation(pieceGridToWorldPos(this.offset.mult((terrainApp.sideLength - 1)), scale));
 
         Material baseMat = new Material(am, "MatDefs/terrainheight/TerrainColorByHeight.j3md");
         baseMat.setColor("LowColor", new ColorRGBA(1.0f, 0.55f, 0.0f, 1.0f));
         baseMat.setColor("HighColor", new ColorRGBA(0.0f, 0.0f, 1.0f, 1.0f));
-        baseMat.setFloat("Scale", terrainApp.terrainScale.y * 0.6f); // margin of 0.2f
-        baseMat.setFloat("Offset", terrainApp.terrainScale.y * 0.2f);
+        baseMat.setFloat("Scale", scale.y * 0.6f); // margin of 0.2f
+        baseMat.setFloat("Offset", scale.y * 0.2f);
 
         terrain.setMaterial(baseMat);
         rootNode.attachChild(terrain);
