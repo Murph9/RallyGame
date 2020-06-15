@@ -43,18 +43,16 @@ public class ObjectPlacer extends BaseAppState {
 
     private final boolean usePhysics;
     private final Node rootNode;
+
     private final Map<ObjectId, Spatial> objects;
-    
     private final Map<NodeId, Node> nodes;
-    private final Map<Node, List<Spatial>> nodePhysicsObjs;
 
     public ObjectPlacer(boolean usePhysics) {
         this.usePhysics = usePhysics;
         rootNode = new Node("object root");
+
         objects = new HashMap<>();
-        
         nodes = new HashMap<>();
-        nodePhysicsObjs = new HashMap<>();
     }
 
     @Override
@@ -108,15 +106,14 @@ public class ObjectPlacer extends BaseAppState {
         Node node = new Node();
         nodes.put(id, node);
         for (var s : sp) {
-            s.addControl(new RigidBodyControl(0));
             node.attachChild(s);
-            if (usePhysics)
-                getState(BulletAppState.class).getPhysicsSpace().add(s);
         }
-
-        nodePhysicsObjs.put(node, sp);
-        GeometryBatchFactory.optimize(node);
+        node = GeometryBatchFactory.optimize(node, true);
+        node.addControl(new RigidBodyControl(0));
         rootNode.attachChild(node);
+        if (usePhysics)
+            getState(BulletAppState.class).getPhysicsSpace().add(node);
+
         return id;
     }
     public void removeBulk(NodeId id) {
@@ -125,11 +122,8 @@ public class ObjectPlacer extends BaseAppState {
         Node node = nodes.remove(id);
         if (node == null)
             return;
-
-        if (usePhysics) {
-            for (Spatial s: nodePhysicsObjs.remove(node))
-                getState(BulletAppState.class).getPhysicsSpace().remove(s);
-        }
+        if (usePhysics)
+            getState(BulletAppState.class).getPhysicsSpace().remove(node);
         node.removeFromParent();
     }
 }
