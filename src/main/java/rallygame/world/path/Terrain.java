@@ -97,14 +97,14 @@ public class Terrain extends BaseAppState implements ILoadable {
         Callable<List<Spatial>> cubeCallable = null;
 
         if (features.cubes) {
-            cubeCallable = CubePlacer.generate(piece.terrain, am, 50, (v2, size) -> piece.meshOnRoad(v2, size));
+            cubeCallable = CubePlacer.generate(piece.terrain, am, 5000, (v2, size) -> piece.meshOnRoad(v2, size));
             list.add(cubeCallable);
         }
         if (features.grass) {
             grassCallable = GrassPlacer.generate(piece.terrain, am, 10000, (v2) -> piece.meshOnRoad(v2));
             list.add(grassCallable);
         }
-            
+        
         if (!list.isEmpty()) {
             try {
                 executor.invokeAll(list);

@@ -18,10 +18,17 @@ import com.jme3.terrain.geomipmap.TerrainQuad;
 
 public class TerrainUtil {
 
-    public static Map<Vector2f, Float> lowerTerrainSoItsUnderQuads(TerrainQuad terrain, List<Vector3f[]> quads) {
-        Map<Vector2f, Float> results = new HashMap<>();
+    public static void setTerrainHeights(List<TerrainQuad> terrains, Map<Vector2f, Float> heights) {
+        for (TerrainQuad tq: terrains) {
+            // convert to local coords (javadoc says nothing about this)
+            Vector2f offset = new Vector2f(tq.getLocalTranslation().x, tq.getLocalTranslation().y);
+            tq.setHeight(new ArrayList<>(heights.keySet().stream().map(x -> x.subtract(offset)).collect(Collectors.toList())),
+                    new ArrayList<>(heights.values()));
+        }
+    }
 
-        Vector3f scale = terrain.getWorldScale();
+    public static Map<Vector2f, Float> getHeightsForQuads(Vector3f scale, List<Vector3f[]> quads) {
+        Map<Vector2f, Float> results = new HashMap<>();
 
         for (Vector3f[] quad : quads) {
             // get plane of the quad
@@ -34,36 +41,28 @@ public class TerrainUtil {
                 Vector3f p3 = H.v2tov3fXZ(point);
                 p3.y = quad[0].y;
                 float height = plane.getClosestPoint(p3).y / scale.y;
-                if (Float.isNaN(height) || height <= 0)
+                if (Float.isNaN(height))
                     break;
                 if (!results.containsKey(point) || results.get(point) > height) // pick the lower one
                     results.put(point, height);
             }
         }
-        // convert to local coords (javadoc says nothing about this)
-        Vector2f offset = new Vector2f(terrain.getLocalTranslation().x, terrain.getLocalTranslation().y);
-        terrain.setHeight(new ArrayList<>(results.keySet().stream().map(x -> x.subtract(offset)).collect(Collectors.toList())),
-            new ArrayList<>(results.values()));
+
         return results;
     }
 
-    public static Map<Vector2f, Float> lowerTerrainSoItsUnderQuadsMin(TerrainQuad terrain, List<Vector3f[]> quads) {
-
+    public static Map<Vector2f, Float> getHeightsForQuadsMin(Vector3f terrainScale, List<Vector3f[]> quads) {
         Map<Vector2f, Float> results = new HashMap<>();
-
-        Vector3f scale = terrain.getWorldScale();
-
         for (Vector3f[] quad : quads) {
-            float height = H.minIn(quad[0].y, quad[1].y, quad[2].y, quad[3].y) / scale.y;
+            float height = H.minIn(quad[0].y, quad[1].y, quad[2].y, quad[3].y) / terrainScale.y;
 
-            List<Vector2f> points = getGridPosBoundingQuad(scale, quad);
+            List<Vector2f> points = getGridPosBoundingQuad(terrainScale, quad);
             for (Vector2f point : points) {
                 if (!results.containsKey(point) || results.get(point) > height) // pick the lower one
                     results.put(point, height);
             }
         }
 
-        terrain.setHeight(new ArrayList<>(results.keySet()), new ArrayList<>(results.values()));
         return results;
     }
 

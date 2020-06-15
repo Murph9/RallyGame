@@ -47,12 +47,12 @@ class TerrainPiece {
     private final boolean needsRoad;
 
     protected TerrainQuad terrain;
+    private boolean inPhysics;
 
     private Vector2f roadStart;
     private Vector2f roadEnd;
 
     private NodeId placedObjects;
-    private RigidBodyControl collision;
 
     protected TerrainPiece(Terrain terrainApp, Vector2f center) {
         this(terrainApp, center, true);
@@ -98,8 +98,8 @@ class TerrainPiece {
 
     private void generateRoad(PhysicsSpace space) {
         //generate both roads
-        Callable<RoadPointList> roadPart1 = searchFrom(roadStart, new Vector2f(), space);
-        Callable<RoadPointList> roadPart2 = searchFrom(new Vector2f(), roadEnd, space);
+        Callable<RoadPointList> roadPart1 = searchFrom(roadStart, new Vector2f());
+        Callable<RoadPointList> roadPart2 = searchFrom(new Vector2f(), roadEnd);
 
         try {
             List<Future<RoadPointList>> waiting = terrainApp.executor.invokeAll(Arrays.asList(roadPart1, roadPart2));
@@ -123,23 +123,24 @@ class TerrainPiece {
                 quads.addAll(outRoad.road.getMeshAsQuads());
             }
             
-            TerrainUtil.lowerTerrainSoItsUnderQuads(terrain, quads);
-            updateTerrainCollision(space);
-            
+            var heights = TerrainUtil.getHeightsForQuads(terrain.getLocalScale(), quads);
+            TerrainUtil.setTerrainHeights(Arrays.asList(terrain), heights);
             terrainApp.finishedMinimalLoading(this);
         });
     }
 
     private void updateTerrainCollision(PhysicsSpace space) {
-        if (collision != null)
-            space.remove(collision);
+        if (inPhysics) {
+            space.remove(terrain);
+            terrain.removeControl(RigidBodyControl.class);
+        }
 
-        collision = new RigidBodyControl(new HeightfieldCollisionShape(terrain.getHeightMap(), terrain.getLocalScale()), 0);
-        terrain.addControl(collision);
-        space.add(collision);
+        inPhysics = true;
+        terrain.addControl(new RigidBodyControl(new HeightfieldCollisionShape(terrain.getHeightMap(), terrain.getLocalScale()), 0));
+        space.add(terrain);
     }
 
-    private Callable<RoadPointList> searchFrom(Vector2f start, Vector2f end, PhysicsSpace space) {
+    private Callable<RoadPointList> searchFrom(Vector2f start, Vector2f end) {
         RoadPointList outRoad = new RoadPointList();
         return () -> {
             List<Vector2f> list = null;
