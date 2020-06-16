@@ -11,6 +11,7 @@ import com.jme3.asset.AssetManager;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Plane;
+import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
@@ -30,6 +31,9 @@ public class TerrainUtil {
     public static Map<Vector2f, Float> getHeightsForQuads(Vector3f scale, List<Vector3f[]> quads) {
         Map<Vector2f, Float> results = new HashMap<>();
 
+        Vector3f intersectionPoint = new Vector3f();
+        Ray r = new Ray(new Vector3f(), Vector3f.UNIT_Y); //vertical ray
+
         for (Vector3f[] quad : quads) {
             // get plane of the quad
             Plane plane = new Plane();
@@ -37,12 +41,16 @@ public class TerrainUtil {
 
             List<Vector2f> points = getGridPosBoundingQuad(scale, quad);
             for (Vector2f point : points) {
-                // get height at point on the plane
+                // get height at point on the plane, by intersecting it with a vertical ray
                 Vector3f p3 = H.v2tov3fXZ(point);
                 p3.y = quad[0].y;
-                float height = plane.getClosestPoint(p3).y / scale.y;
+                r.setOrigin(p3.subtract(Vector3f.UNIT_Y.mult(100)));
+                if (!r.intersectsWherePlane(plane, intersectionPoint))
+                    continue;
+
+                float height = intersectionPoint.y / scale.y;
                 if (Float.isNaN(height))
-                    break;
+                    continue;
                 if (!results.containsKey(point) || results.get(point) > height) // pick the lower one
                     results.put(point, height);
             }

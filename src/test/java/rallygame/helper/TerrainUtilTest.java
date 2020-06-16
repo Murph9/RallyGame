@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
+
 public class TerrainUtilTest {
    
     @Test
@@ -75,19 +76,12 @@ public class TerrainUtilTest {
             float height = pos.getValue() % 10;
             //specific corner tests
             if (p.x == 0 && p.y == 0) {
-                assertEquals(0, height, "height not correct");
+                assertEquals(0, height, 1e-4, "height not correct");
             } else if (p.x == 2 && p.y == 2) {
-                // assertEquals(2, height, "height not correct"); //TODO this test doesn't work
-            }
-
-            // generic range tests
-            if (pos.getKey().x < 5) {
-                assertTrue(pos.getValue() >= 0 && pos.getValue() <= 2);
+                assertEquals(2, height, 1e-4, "height not correct");
             } else {
-                assertTrue(pos.getValue() >= 10 && pos.getValue() <= 12);
+                assertTrue(height >= 0 - 1e-4 && height <= 2 + 1e-4, "not in range");
             }
         }
     }
-
-    //Please add more to this method
 }
