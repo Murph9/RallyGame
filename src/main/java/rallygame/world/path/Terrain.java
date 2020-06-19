@@ -40,9 +40,8 @@ import rallygame.service.ObjectPlacer.NodeId;
 
 public class Terrain extends BaseAppState implements ILoadable {
 
-    // TODO make private:
-    protected static final float HEIGHT_WEIGHT = 0.02f;
-    protected static final float ROAD_WIDTH = 10f;
+    private static final float HEIGHT_WEIGHT = 0.02f;
+    private static final float ROAD_WIDTH = 10f;
 
     protected final int sideLength;
 
@@ -112,11 +111,11 @@ public class Terrain extends BaseAppState implements ILoadable {
         this.loadingMessage = "Loading roads";
 
         // Generate roads
-        var roadGenerator = new TerrainRoadGenerator(this);
+        var roadGenerator = new TerrainRoadGenerator(this, HEIGHT_WEIGHT);
         List<TerrainQuad> terrainQuads = pieces.values().stream().map(x -> x.quad).collect(Collectors.toList());
         var roads = roadGenerator.generateFrom(terrainQuads);
 
-        var roadCreator = new TerrainRoadCreator();
+        var roadCreator = new TerrainRoadCreator(ROAD_WIDTH);
         this.roads.addAll(roadCreator.create(roads, app.getAssetManager()));
 
         app.enqueue(() -> {
@@ -239,8 +238,7 @@ public class Terrain extends BaseAppState implements ILoadable {
             for (int i = 0; i < road.size() - 1; i++) {
                 Vector3f cur = road.get(i);
                 Vector3f point = road.get(i + 1);
-                if (Trig.distFromSegment(H.v3tov2fXZ(cur), H.v3tov2fXZ(point), location) < FastMath.sqrt(2) * objRadius
-                        + Terrain.ROAD_WIDTH / 2)
+                if (Trig.distFromSegment(H.v3tov2fXZ(cur), H.v3tov2fXZ(point), location) < FastMath.sqrt(2) * objRadius + ROAD_WIDTH / 2)
                     return true;
                 cur = point;
             }

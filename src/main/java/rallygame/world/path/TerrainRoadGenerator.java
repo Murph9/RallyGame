@@ -16,8 +16,10 @@ import rallygame.service.search.AStar;
 
 public class TerrainRoadGenerator {
     private final Terrain terrainApp;
-    public TerrainRoadGenerator(Terrain terrainApp) {
+    private final float heightWeight;
+    public TerrainRoadGenerator(Terrain terrainApp, float heightWeight) {
         this.terrainApp = terrainApp;
+        this.heightWeight = heightWeight;
     }
 
     /**Generates a list of roads, please call on another thread. */
@@ -56,7 +58,7 @@ public class TerrainRoadGenerator {
         try {
             //TODO should SearchWorld be using local or world coords
             // i.e. should it care about the scale of the terrain? (it has to care about the relative height vs width though)
-            AStar<Vector2f> search = new AStar<>(new SearchWorld(terrain, Terrain.HEIGHT_WEIGHT, 0.2f));
+            AStar<Vector2f> search = new AStar<>(new SearchWorld(terrain, this.heightWeight, 0.2f));
             search.setTimeoutMills((long) (30 * 1E6)); // x sec
             list = search.findPath(H.v3tov2fXZ(localGridToTerrainSpace(terrain, localStart)),
                     H.v3tov2fXZ(localGridToTerrainSpace(terrain, localEnd)));

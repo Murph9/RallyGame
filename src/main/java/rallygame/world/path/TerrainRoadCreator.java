@@ -19,6 +19,11 @@ import rallygame.effects.LoadModelWrapper;
 /** Makes the road points a real thing */
 public class TerrainRoadCreator {
     
+    private final float roadWidth;
+    public TerrainRoadCreator(float roadWidth) {
+        this.roadWidth = roadWidth;
+    }
+
     public List<TerrainRoad> create(List<RoadPointList> roads, AssetManager am) {
         var list = new LinkedList<TerrainRoad>();
         for (var road : roads) {
@@ -38,11 +43,11 @@ public class TerrainRoadCreator {
         // TODO use a rolling average to smooth points so there are less hard corners
 
         Spline s3 = new Spline(SplineType.CatmullRom, list, 1, false); // [0-1], 1 is more smooth
-        CatmullRomRoad road = new CatmullRomRoad(s3, 1, Terrain.ROAD_WIDTH);
+        CatmullRomRoad road = new CatmullRomRoad(s3, 1, this.roadWidth);
 
         // add the extra things
-        road.addWidth(CatmullRomRoad.SideA(Terrain.ROAD_WIDTH));
-        road.addWidth(CatmullRomRoad.SideB(Terrain.ROAD_WIDTH));
+        road.addWidth(CatmullRomRoad.SideA(this.roadWidth));
+        road.addWidth(CatmullRomRoad.SideB(this.roadWidth));
 
         return road;
     }
