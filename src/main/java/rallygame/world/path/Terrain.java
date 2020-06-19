@@ -166,16 +166,16 @@ public class Terrain extends BaseAppState implements ILoadable {
         // Loaded!
         loaded = true;
         
-        for (var piece: this.pieces.values())
-            finishedMinimalLoading(piece);
+        for (var tObj: this.pieces.values())
+            finishedMinimalLoading(tObj);
     }
 
     
     protected void finishedMinimalLoading(TerrainObj tObj) {
         AssetManager am = getApplication().getAssetManager();
-
+        ColorRGBA colour = ColorRGBA.randomColor();
         if (features.cubes) {
-            List<Spatial> cubes = CubePlacer.generate(tObj.quad, am, 5000, (v2, size) -> onRoad(v2, size));
+            List<Spatial> cubes = CubePlacer.generate(tObj.quad, am, 500, (v2, size) -> onRoad(v2, size), colour);
             getApplication().enqueue(() -> {
                 var ob = getState(ObjectPlacer.class);
                 tObj.cubes = ob.addBulk(cubes);
@@ -186,7 +186,7 @@ public class Terrain extends BaseAppState implements ILoadable {
             tObj.grass = GrassPlacer.generate(tObj.quad, 10000, (v2) -> onRoad(v2));
             Geometry g = new Geometry("'grass'", tObj.grass);
             getApplication().enqueue(() -> {
-                this.rootNode.attachChild(LoadModelWrapper.create(am, g, ColorRGBA.Pink));
+                this.rootNode.attachChild(LoadModelWrapper.create(am, g, colour));
             });
         }
     }
@@ -211,8 +211,6 @@ public class Terrain extends BaseAppState implements ILoadable {
         for (var obj :this.pieces.values()) {
             if (obj.cubes != null)
                 ob.removeBulk(obj.cubes);
-
-            // TODO cleanup
         }
 
         this.rootNode.removeFromParent();
