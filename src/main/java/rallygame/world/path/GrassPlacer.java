@@ -2,10 +2,8 @@ package rallygame.world.path;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.function.Function;
 
-import com.jme3.asset.AssetManager;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.terrain.geomipmap.TerrainQuad;
@@ -14,10 +12,8 @@ import rallygame.helper.H;
 
 public class GrassPlacer {
 
-    public static Callable<GrassTerrain> generate(TerrainQuad terrain, AssetManager am, int count, Function<Vector2f, Boolean> posValid) {
-        return () -> {
-            return new GrassTerrain(generatePoints(count, terrain, posValid));
-        };
+    public static GrassTerrain generate(TerrainQuad terrain, int count, Function<Vector2f, Boolean> posValid) {
+        return new GrassTerrain(generatePoints(count, terrain, posValid));
     }
 
     private static List<Vector3f> generatePoints(int count, TerrainQuad terrain, Function<Vector2f, Boolean> posValid) {

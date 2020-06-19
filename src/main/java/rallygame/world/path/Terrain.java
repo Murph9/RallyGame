@@ -6,16 +6,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
+import com.jme3.bullet.collision.shapes.HeightfieldCollisionShape;
+import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector2f;
@@ -24,17 +27,20 @@ import com.jme3.renderer.Camera;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.terrain.geomipmap.TerrainQuad;
 
 import rallygame.effects.LoadModelWrapper;
+import rallygame.helper.H;
 import rallygame.helper.Log;
+import rallygame.helper.TerrainUtil;
+import rallygame.helper.Trig;
 import rallygame.service.ILoadable;
 import rallygame.service.ObjectPlacer;
 import rallygame.service.ObjectPlacer.NodeId;
 
 public class Terrain extends BaseAppState implements ILoadable {
 
-    // TODO height adjustments need to be set across shared edges
-
+    // TODO make private:
     protected static final float HEIGHT_WEIGHT = 0.02f;
     protected static final float ROAD_WIDTH = 10f;
 
@@ -46,9 +52,15 @@ public class Terrain extends BaseAppState implements ILoadable {
     private final Node rootNode;
     private final TerrainSettings features;
 
-    // contains the list of TerrainQuads mapped to locations
-    // each terrain quad contains the roads and objects that exist in it
+    // Contains the list of TerrainQuads mapped to locations
+    // Each terrain object contains the objects that exist on it
     private final Map<Vector2f, TerrainObj> pieces = new HashMap<>();
+    private final List<TerrainRoad> roads;
+
+    private String loadingMessage;
+    private final int loadSteps = 4;
+    private int curStep;
+    private boolean loaded = false;
 
     protected Terrain(TerrainSettings features) {
         this.features = features;
@@ -56,75 +68,126 @@ public class Terrain extends BaseAppState implements ILoadable {
         features.tileCount = Math.max(features.tileCount, 1);
 
         this.rootNode = new Node("Terrain root node");
+        this.roads = new LinkedList<>();
 
         Log.p("Starting path world with seed: " + features.seed);
         this.rand = new Random(features.seed);
 
         this.filteredBasis = FilteredBasisTerrain.generate(new Vector2f(rand.nextInt(1000), rand.nextInt(1000)));
 
-        this.executor = Executors.newFixedThreadPool(2);
+        this.executor = Executors.newFixedThreadPool(1); //-_-
     }
 
     @Override
     protected void initialize(Application app) {
         ((SimpleApplication) app).getRootNode().attachChild(rootNode);
-
-        // load terrainquads
-        for (int i = 0; i < features.tileCount; i++)
-            generateTQuadAt(new Vector2f(i, 0), app.getAssetManager());
-    }
-
-    private void generateTQuadAt(Vector2f center, AssetManager am) {
-        var obj = new TerrainObj();
-        obj.piece = new TerrainPiece(this, center, true);
-        obj.piece.generate(am, getState(BulletAppState.class).getPhysicsSpace(), features.scale);
-
-        this.pieces.put(center, obj);
-        this.rootNode.attachChild(obj.piece.rootNode);
-    }
-
-    protected void finishedMinimalLoading(TerrainPiece piece) {
-        var tObj = this.pieces.values().stream().filter(x -> x.piece == piece).findFirst();
-        if (!tObj.isPresent())
-            throw new IllegalStateException("How?");
         
-        TerrainObj obj = tObj.get();
-        obj.loaded = true;
+        executor.submit(() -> {
+            try {
+                offThreadInitialize(app);
+            } catch (Exception e) {
+                Log.e(e);
+                this.loaded = true;
+                this.loadingMessage = "Failed to load: " + e.getMessage();
+            }
+        });
+    }
+
+    protected void offThreadInitialize(Application app) {
+        var space = app.getStateManager().getState(BulletAppState.class).getPhysicsSpace();
+        var factory = new TerrainQuadFactory(this.filteredBasis);
+
+        this.loadingMessage = "Loading terrain";
+
+        for (int i = 0; i < features.tileCount; i++) {
+            var tObj = new TerrainObj();
+            tObj.offset = new Vector2f(i, 0);
+            tObj.quad = factory.create(app.getAssetManager(), new Vector2f(i, 0), features.scale, sideLength);
+            tObj.rootNode = new Node("terrain at " + tObj.offset);
+            tObj.rootNode.attachChild(tObj.quad);
+            this.pieces.put(tObj.offset, tObj);
+        }
+        
+        this.curStep++;
+        this.loadingMessage = "Loading roads";
+
+        // Generate roads
+        var roadGenerator = new TerrainRoadGenerator(this);
+        List<TerrainQuad> terrainQuads = pieces.values().stream().map(x -> x.quad).collect(Collectors.toList());
+        var roads = roadGenerator.generateFrom(terrainQuads);
+
+        var roadCreator = new TerrainRoadCreator();
+        this.roads.addAll(roadCreator.create(roads, app.getAssetManager()));
+
+        app.enqueue(() -> {
+            for (TerrainRoad road : this.roads) {
+                this.rootNode.attachChild(road.sp);
+
+                road.sp.addControl(new RigidBodyControl(road.col, 0));
+                space.add(road.sp);
+            }
+        });
+
+        this.curStep++;
+        this.loadingMessage = "Reloading terrain";
+
+        // Update terrain heights
+        List<Vector3f[]> quads = new LinkedList<>();
+        for (RoadPointList road : roads) {
+            if (road.failed)
+                continue;
+            quads.addAll(road.road.middle.getMeshAsQuads());
+        }
+        var heights = TerrainUtil.getHeightsForQuads(features.scale, quads);
+        TerrainUtil.setTerrainHeights(terrainQuads, heights);
+
+        this.curStep++;
+        this.loadingMessage = "Adding other features";
+
+        // Add visual and physics spaces
+        app.enqueue(() -> {
+            for (TerrainObj piece : pieces.values()) {
+                this.rootNode.attachChild(piece.rootNode);
+
+                if (piece.inPhysics()) {
+                    space.remove(piece.quad);
+                    piece.quad.removeControl(RigidBodyControl.class);
+                }
+
+                piece.quad.addControl(new RigidBodyControl(
+                        new HeightfieldCollisionShape(piece.quad.getHeightMap(), piece.quad.getLocalScale()), 0));
+                space.add(piece.quad);
+            }
+        });
+        
+        this.curStep++;
+        this.loadingMessage = "Done";
+
+        // Loaded!
+        loaded = true;
+        
+        for (var piece: this.pieces.values())
+            finishedMinimalLoading(piece);
+    }
+
+    
+    protected void finishedMinimalLoading(TerrainObj tObj) {
         AssetManager am = getApplication().getAssetManager();
 
-        List<Callable<? extends Object>> list = new LinkedList<>();
-        Callable<GrassTerrain> grassCallable = null;
-        Callable<List<Spatial>> cubeCallable = null;
-
         if (features.cubes) {
-            cubeCallable = CubePlacer.generate(piece.terrain, am, 5000, (v2, size) -> piece.meshOnRoad(v2, size));
-            list.add(cubeCallable);
+            List<Spatial> cubes = CubePlacer.generate(tObj.quad, am, 5000, (v2, size) -> onRoad(v2, size));
+            getApplication().enqueue(() -> {
+                var ob = getState(ObjectPlacer.class);
+                tObj.cubes = ob.addBulk(cubes);
+            });
         }
+
         if (features.grass) {
-            grassCallable = GrassPlacer.generate(piece.terrain, am, 10000, (v2) -> piece.meshOnRoad(v2));
-            list.add(grassCallable);
-        }
-        
-        if (!list.isEmpty()) {
-            try {
-                executor.invokeAll(list);
-
-                // grass
-                if (grassCallable != null) {
-                    obj.grass = grassCallable.call();
-                    Geometry g = new Geometry("'grass'", obj.grass);
-                    this.rootNode.attachChild(LoadModelWrapper.create(am, g, ColorRGBA.Pink));
-                }
-
-                // cubes
-                if (cubeCallable != null) {
-                    var cubes = cubeCallable.call();
-                    var ob = getState(ObjectPlacer.class);
-                    obj.cubes = ob.addBulk(cubes);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            tObj.grass = GrassPlacer.generate(tObj.quad, 10000, (v2) -> onRoad(v2));
+            Geometry g = new Geometry("'grass'", tObj.grass);
+            getApplication().enqueue(() -> {
+                this.rootNode.attachChild(LoadModelWrapper.create(am, g, ColorRGBA.Pink));
+            });
         }
     }
 
@@ -133,9 +196,9 @@ public class Terrain extends BaseAppState implements ILoadable {
         super.update(tpf);
 
         Camera cam = getApplication().getCamera();
-        for (var feat :this.pieces.values()) {
-            if (feat.grass != null)
-                feat.grass.update(cam.getRotation());
+        for (var tObj :this.pieces.values()) {
+            if (tObj.grass != null)
+                tObj.grass.update(cam.getRotation());
         }
     }
 
@@ -145,13 +208,11 @@ public class Terrain extends BaseAppState implements ILoadable {
         rootNode.removeFromParent();
 
         var ob = getState(ObjectPlacer.class);
-        for (var feat :this.pieces.values()) {
-            if (feat.cubes != null)
-                ob.removeBulk(feat.cubes);
-        }
+        for (var obj :this.pieces.values()) {
+            if (obj.cubes != null)
+                ob.removeBulk(obj.cubes);
 
-        for (var obj: this.pieces.values()) {
-            obj.piece.cleanup(app, getState(BulletAppState.class).getPhysicsSpace());
+            // TODO cleanup
         }
 
         this.rootNode.removeFromParent();
@@ -164,24 +225,48 @@ public class Terrain extends BaseAppState implements ILoadable {
 
     @Override
     public LoadResult loadPercent() {
-        if (this.pieces.values().isEmpty())
-            return new LoadResult(0, null);
-        var loaded = this.pieces.values().stream().filter(x -> x.loaded).count();
-        return new LoadResult((float)loaded/this.pieces.size(), null);
+        if (loaded)
+            return new LoadResult(1, loadingMessage);
+        return new LoadResult(curStep / (float)loadSteps, loadingMessage);
+    }
+
+    private boolean onRoad(Vector2f location) {
+        return onRoad(location, 0);
+    }
+
+    private boolean onRoad(Vector2f location, float objRadius) {
+        // simple check that its more than x from a road vertex
+        for (var r : this.roads) {
+            var road = r.points;
+            for (int i = 0; i < road.size() - 1; i++) {
+                Vector3f cur = road.get(i);
+                Vector3f point = road.get(i + 1);
+                if (Trig.distFromSegment(H.v3tov2fXZ(cur), H.v3tov2fXZ(point), location) < FastMath.sqrt(2) * objRadius
+                        + Terrain.ROAD_WIDTH / 2)
+                    return true;
+                cur = point;
+            }
+        }
+
+        return false;
     }
 
     protected Transform getStart() {
-        if (this.pieces.isEmpty())
-            return null;
+        if (this.roads.isEmpty()) {
+            return new Transform();
+        }
 
-        TerrainPiece first = this.pieces.values().iterator().next().piece;
+        if (this.roads.get(0).points.size() < 2) {
+            return new Transform(this.roads.get(0).points.peekFirst());
+        }
 
-        // TODO error checking at all
-        Vector3f start = first.roadPointLists.get(0).getFirst();
-        Vector3f start2 = first.roadPointLists.get(0).get(1);
-        Vector3f offset = start2.subtract(start).normalize();
+        Vector3f start = this.roads.get(0).points.get(0);
+        Vector3f next = this.roads.get(0).points.get(1);
+
+        Vector3f offset = next.subtract(start).normalize();
         return new Transform(start.add(0, 0.5f, 0).add(offset.mult(3)), 
-            new Quaternion().lookAt(start2.subtract(start), Vector3f.UNIT_Y));
+            new Quaternion().lookAt(next.subtract(start), Vector3f.UNIT_Y));
+            
     }
 
     protected Collection<Vector3f> getRoadPoints() {
@@ -189,17 +274,22 @@ public class Terrain extends BaseAppState implements ILoadable {
             return null;
 
         Collection<Vector3f> points = new LinkedList<>();
-        for (var obj: this.pieces.values()) {
-            for (RoadPointList list: obj.piece.roadPointLists)
-                points.addAll(list);
+        for (var roads: this.roads) {
+            points.addAll(roads.points);
         }
         return points;
     }
 
     class TerrainObj {
-        public TerrainPiece piece;
-        public boolean loaded;
+        public TerrainQuad quad;
+        public Node rootNode;
+        public Vector2f offset;
+
         public GrassTerrain grass;
         public NodeId cubes;
+
+        public boolean inPhysics() {
+            return quad.getNumControls() > 0;
+        }
     }
 }
