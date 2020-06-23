@@ -32,7 +32,7 @@ import com.jme3.terrain.geomipmap.TerrainQuad;
 import rallygame.effects.LoadModelWrapper;
 import rallygame.helper.H;
 import rallygame.helper.Log;
-import rallygame.helper.TerrainUtil;
+import rallygame.helper.TerrainQuadUtil;
 import rallygame.helper.Trig;
 import rallygame.service.ILoadable;
 import rallygame.service.ObjectPlacer;
@@ -42,6 +42,7 @@ public class Terrain extends BaseAppState implements ILoadable {
 
     private static final float HEIGHT_WEIGHT = 0.02f;
     private static final float ROAD_WIDTH = 10f;
+    private static final long SEARCH_TIMEOUT = 30 * (long)1e6; //x sec
 
     protected final int sideLength;
 
@@ -111,11 +112,11 @@ public class Terrain extends BaseAppState implements ILoadable {
         this.loadingMessage = "Loading roads";
 
         // Generate roads
-        var roadGenerator = new TerrainRoadGenerator(this, HEIGHT_WEIGHT);
+        var roadGenerator = new TerrainRoadGenerator(HEIGHT_WEIGHT, SEARCH_TIMEOUT, (s) -> this.loadingMessage = "Loading roads\n"+s);
         List<TerrainQuad> terrainQuads = pieces.values().stream().map(x -> x.quad).collect(Collectors.toList());
         var roads = roadGenerator.generateFrom(terrainQuads);
 
-        var roadCreator = new TerrainRoadCreator(ROAD_WIDTH);
+        var roadCreator = new TerrainRoadPointsToObject(ROAD_WIDTH);
         this.roads.addAll(roadCreator.create(roads, app.getAssetManager()));
 
         app.enqueue(() -> {
@@ -133,12 +134,20 @@ public class Terrain extends BaseAppState implements ILoadable {
         // Update terrain heights
         List<Vector3f[]> quads = new LinkedList<>();
         for (RoadPointList road : roads) {
-            if (road.failed)
+            if (road.failed) {
+                this.loadingMessage = road.failedMessage;
                 continue;
+            }
             quads.addAll(road.road.middle.getMeshAsQuads());
         }
-        var heights = TerrainUtil.getHeightsForQuads(features.scale, quads);
-        TerrainUtil.setTerrainHeights(terrainQuads, heights);
+
+        if (roads.stream().anyMatch(x -> x.failed)) {
+            loaded = true;
+            return;
+        }
+
+        var heights = TerrainQuadUtil.getHeightsForQuads(features.scale, quads);
+        TerrainQuadUtil.setTerrainHeights(terrainQuads, heights);
 
         this.curStep++;
         this.loadingMessage = "Adding other features";
