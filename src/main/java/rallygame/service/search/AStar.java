@@ -8,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
-import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 
@@ -18,7 +17,6 @@ import rallygame.helper.H;
 public class AStar<T> implements ISearch<T> {
 
     private final ISearchWorld<T> world;
-    private final Set<T> closed;
     private BiConsumer<String, List<T>> progressCallback;
     private long timeoutNanos;
 
@@ -31,7 +29,7 @@ public class AStar<T> implements ISearch<T> {
     public AStar(ISearchWorld<T> world, BiConsumer<String, List<T>> progressCallback) {
         this.world = world;
         this.progressCallback = progressCallback;
-        closed = new HashSet<>();
+        
     }
     public void setProgressCallback(BiConsumer<String, List<T>> progressCallback) {
         this.progressCallback = progressCallback;
@@ -49,7 +47,7 @@ public class AStar<T> implements ISearch<T> {
             return Float.compare(x.weight + x.heuristic, y.weight + y.heuristic);
         });
 
-        closed.clear();
+        var closed = new HashSet<>();
         Map<T, Float> gScore = new HashMap<>();
 
         AStar<T>.Node curNode = new Node(null, start, 0, 0);
