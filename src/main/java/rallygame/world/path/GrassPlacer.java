@@ -8,7 +8,9 @@ import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.terrain.geomipmap.TerrainQuad;
 
+import rallygame.helper.H;
 import rallygame.helper.Rand;
+import rallygame.helper.TerrainQuadUtil;
 
 public class GrassPlacer {
 
@@ -17,11 +19,13 @@ public class GrassPlacer {
     }
 
     private static List<Vector3f> generatePoints(int count, TerrainQuad terrain, Function<Vector2f, Boolean> posValid) {
-        var maxXZ = terrain.getLocalScale().x * terrain.getTerrainSize();
+        var boundingBox = TerrainQuadUtil.calcWorldExtents(terrain);
+        final var min = H.v3tov2fXZ(boundingBox.getMin(null));
+        final var max = H.v3tov2fXZ(boundingBox.getMax(null));
         var list = new LinkedList<Vector3f>();
 
         for (int i = 0; i < count; i++) {
-            Vector2f pos = Rand.randV2f(maxXZ, true);
+            Vector2f pos = Rand.randBetween(min, max);
             if (posValid.apply(pos))
                 continue; //then it lost the lottery
             float height = terrain.getHeight(pos);

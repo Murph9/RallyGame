@@ -18,13 +18,15 @@ import com.jme3.terrain.geomipmap.TerrainQuad;
 import rallygame.effects.LoadModelWrapper;
 import rallygame.helper.H;
 import rallygame.helper.Rand;
+import rallygame.helper.TerrainQuadUtil;
 
 public class CubePlacer {
     
     public static List<Spatial> generate(TerrainQuad terrain, AssetManager am, int count,
         BiFunction<Vector2f, Float, Boolean> posValid, ColorRGBA colour) {
-        var maxXZ = terrain.getLocalScale().x * terrain.getTerrainSize();
-        var offset = H.v3tov2fXZ(terrain.getLocalTranslation());
+        var boundingBox = TerrainQuadUtil.calcWorldExtents(terrain);
+        final var min = H.v3tov2fXZ(boundingBox.getMin(null));
+        final var max = H.v3tov2fXZ(boundingBox.getMax(null));
 
         float size = 1f;
         Box b = new Box(size, size, size);
@@ -39,16 +41,16 @@ public class CubePlacer {
             s1.setLocalRotation(new Quaternion(FastMath.nextRandomFloat(), FastMath.nextRandomFloat(),
                     FastMath.nextRandomFloat(), FastMath.nextRandomFloat()));
             list.add(s1);
-            s1.setLocalTranslation(generateValidPoint(terrain, offset, maxXZ, scale, posValid));
+            s1.setLocalTranslation(generateValidPoint(terrain, min, max, scale, posValid));
         }
 
         return list;
     }
 
-    private static Vector3f generateValidPoint(TerrainQuad terrain, Vector2f offset, float maxXZ, float radius, BiFunction<Vector2f, Float, Boolean> posValid) {
-        Vector2f location = Rand.randV2f(maxXZ, true).add(offset);
+    private static Vector3f generateValidPoint(TerrainQuad terrain, Vector2f min, Vector2f max, float radius, BiFunction<Vector2f, Float, Boolean> posValid) {
+        Vector2f location = Rand.randBetween(min, max);
         while (posValid.apply(location, radius)) {
-            location = Rand.randV2f(maxXZ, true).add(offset);
+            location = Rand.randBetween(min, max);
         }
         return new Vector3f(location.x, terrain.getHeight(location), location.y);
     }
