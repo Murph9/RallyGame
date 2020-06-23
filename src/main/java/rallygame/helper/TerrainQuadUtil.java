@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.jme3.asset.AssetManager;
+import com.jme3.bounding.BoundingBox;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Plane;
@@ -17,7 +18,15 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.terrain.geomipmap.TerrainQuad;
 
-public class TerrainUtil {
+public class TerrainQuadUtil {
+
+    public static Vector2f getClosestGridPoint(TerrainQuad terrain, Vector3f pos) {
+        return getClosestGridPoint(terrain, H.v3tov2fXZ(pos));
+    }
+    public static Vector2f getClosestGridPoint(TerrainQuad terrain, Vector2f pos) {
+        var terrainScale = terrain.getLocalScale();
+        return new Vector2f(Math.round(pos.x / terrainScale.x) * terrainScale.x, Math.round(pos.y / terrainScale.z) * terrainScale.z);
+    }
 
     public static void setTerrainHeights(List<TerrainQuad> terrains, Map<Vector2f, Float> heights) {
         for (TerrainQuad tq: terrains) {
@@ -95,6 +104,31 @@ public class TerrainUtil {
         box[3] = FastMath.ceil(box[3] / terrainScale.z) * terrainScale.z;
 
         return box;
+    }
+
+    public static BoundingBox calcWorldExtents(List<TerrainQuad> quads) {
+        BoundingBox bounding = new BoundingBox();
+        for (var quad: quads) {
+            var b = quad.getWorldBound();
+            b.setCenter(quad.getLocalTranslation());
+            bounding.mergeLocal(b);
+        }
+        return bounding;
+    }
+
+    public static BoundingBox calcWorldExtents(TerrainQuad quad) {
+        BoundingBox bounding = (BoundingBox)quad.getWorldBound();
+        bounding.setCenter(quad.getLocalTranslation());
+        return bounding;
+    }
+
+    public static float getHeight(List<TerrainQuad> terrains, Vector2f pos) {
+        for (var terrain : terrains) {
+            var value = terrain.getHeight(pos);
+            if (!Float.isNaN(value))
+                return value;
+        }
+        return Float.NaN;
     }
 
     //debug method to draw boxes at terrain heights, can be used with the output of the main method at the top
