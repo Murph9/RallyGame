@@ -16,7 +16,6 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -179,35 +178,6 @@ public class HTest {
         assertEquals(a.x, H.v2tov3fXZ(H.v3tov2fXZ(a)).x);
         assertEquals(0, H.v2tov3fXZ(H.v3tov2fXZ(a)).y);
         assertEquals(a.z, H.v2tov3fXZ(H.v3tov2fXZ(a)).z);
-    }
-
-    @RepeatedTest(100)
-    public void randV2f() {
-        Vector2f result = H.randV2f(1, false);
-        assertTrue(result.x < 1);
-        assertTrue(result.y < 1);
-
-        assertTrue(result.x >= 0);
-        assertTrue(result.y >= 0);
-    }
-
-    @RepeatedTest(100)
-    public void randV3f() {
-        Vector3f result = H.randV3f(1, false);
-        assertTrue(result.x < 1);
-        assertTrue(result.y < 1);
-        assertTrue(result.z < 1);
-
-        assertTrue(result.x >= 0);
-        assertTrue(result.y >= 0);
-        assertTrue(result.z >= 0);
-    }
-
-    @RepeatedTest(100)
-    public void randFromArray() {
-        Float[] array = new Float[] { 0f, 1f, 7f, 3f, 4f, 5f };
-        float result = H.randFromArray(array);
-        assertTrue(Arrays.asList(array).contains(result));
     }
 
     @Test

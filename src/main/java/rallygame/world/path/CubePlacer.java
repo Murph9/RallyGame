@@ -17,6 +17,7 @@ import com.jme3.terrain.geomipmap.TerrainQuad;
 
 import rallygame.effects.LoadModelWrapper;
 import rallygame.helper.H;
+import rallygame.helper.Rand;
 
 public class CubePlacer {
     
@@ -45,9 +46,9 @@ public class CubePlacer {
     }
 
     private static Vector3f generateValidPoint(TerrainQuad terrain, Vector2f offset, float maxXZ, float radius, BiFunction<Vector2f, Float, Boolean> posValid) {
-        Vector2f location = H.randV2f(maxXZ, true).add(offset);
+        Vector2f location = Rand.randV2f(maxXZ, true).add(offset);
         while (posValid.apply(location, radius)) {
-            location = H.randV2f(maxXZ, true).add(offset);
+            location = Rand.randV2f(maxXZ, true).add(offset);
         }
         return new Vector3f(location.x, terrain.getHeight(location), location.y);
     }

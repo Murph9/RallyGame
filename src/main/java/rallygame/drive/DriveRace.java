@@ -10,11 +10,10 @@ import com.jme3.math.Vector3f;
 import rallygame.car.ai.RaceAI;
 import rallygame.car.data.Car;
 import rallygame.car.ray.RayCarControl;
-import rallygame.drive.DriveBase;
 import rallygame.effects.ParticleAtmosphere;
 import rallygame.game.IDriveDone;
-import rallygame.helper.H;
 import rallygame.helper.Log;
+import rallygame.helper.Rand;
 import rallygame.service.GridPositions;
 import rallygame.service.checkpoint.CheckpointProgress;
 import rallygame.service.checkpoint.CheckpointProgressUI;
@@ -83,7 +82,7 @@ public class DriveRace extends DriveBase implements PauseState.ICallback, ICheck
 
         //buildCars and load ai
         for (int i = 0; i < this.themCount; i++) {
-            RayCarControl c = this.cb.addCar(H.randFromArray(Car.values()), worldStarts[i+1], worldRot, false);
+            RayCarControl c = this.cb.addCar(Rand.randFromArray(Car.values()), worldStarts[i+1], worldRot, false);
             RaceAI rAi = new RaceAI(c, this);
             c.attachAI(rAi, true);
         }

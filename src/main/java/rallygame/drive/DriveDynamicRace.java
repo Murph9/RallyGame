@@ -13,8 +13,6 @@ import com.jme3.math.Vector3f;
 import rallygame.car.ai.RaceAI;
 import rallygame.car.data.Car;
 import rallygame.car.ray.RayCarControl;
-import rallygame.drive.ICheckpointDrive;
-import rallygame.drive.DriveBase;
 import rallygame.effects.ParticleAtmosphere;
 import rallygame.game.IDriveDone;
 import rallygame.helper.Log;

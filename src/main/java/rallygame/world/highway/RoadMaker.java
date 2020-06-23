@@ -12,6 +12,7 @@ import rallygame.game.App;
 import rallygame.game.DebugAppState;
 import rallygame.helper.H;
 import rallygame.helper.Log;
+import rallygame.helper.Rand;
 import rallygame.helper.Geo;
 import rallygame.terrainWorld.NoiseBasedWorld;
 import rallygame.terrainWorld.TerrainChunk;
@@ -119,7 +120,7 @@ public class RoadMaker implements TileListener {
 	
 	private void generateRoadBit() {
 		//pick from the list of biezer curves
-		Vector2f[] points = H.randFromArray(CurveTypes.values()).points;
+		Vector2f[] points = Rand.randFromArray(CurveTypes.values()).points;
 
 		//transform points based of the last points
 		Vector3f[] newPoints = new Vector3f[] {

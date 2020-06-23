@@ -19,6 +19,7 @@ import rallygame.car.data.Car;
 import rallygame.car.ray.RayCarControl;
 import rallygame.game.IDriveDone;
 import rallygame.helper.H;
+import rallygame.helper.Rand;
 import rallygame.world.wp.DefaultBuilder;
 import rallygame.world.wp.WP.DynamicType;
 
@@ -137,7 +138,7 @@ public class DriveMainRoadGetaway extends DriveBase {
 				? start.getRotation()
 				: new Quaternion().fromAngleAxis(FastMath.PI, Vector3f.UNIT_Y).mult(start.getRotation());
 
-			RayCarControl c = this.cb.addCar(H.randFromArray(this.trafficTypes), spawnPos, spawnDir, false);
+			RayCarControl c = this.cb.addCar(Rand.randFromArray(this.trafficTypes), spawnPos, spawnDir, false);
 
 			DriveAlongAI daai = new DriveAlongAI(c, (vec) -> {
 				return new Vector3f(vec.x + 20 * (spawnPlayerDirection ? 1 : -1), 0, z); // next pos math

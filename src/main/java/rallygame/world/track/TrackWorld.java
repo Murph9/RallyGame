@@ -44,6 +44,7 @@ import rallygame.game.DebugAppState;
 import rallygame.helper.Geo;
 import rallygame.helper.H;
 import rallygame.helper.Log;
+import rallygame.helper.Rand;
 import rallygame.helper.Trig;
 import rallygame.service.ObjectPlacer;
 import rallygame.service.ObjectPlacer.NodeId;
@@ -179,7 +180,7 @@ public class TrackWorld extends World implements ICheckpointWorld {
 
 		Spatial[] spats = new Spatial[treeCount];
 		for (int i = 0; i < treeCount; i++) {
-			Vector3f pos = H.randV3f(worldSize*terrain.getWorldScale().x/2, true);
+			Vector3f pos = Rand.randV3f(worldSize*terrain.getWorldScale().x/2, true);
 			float height = terrain.getHeight(new Vector2f(pos.x, pos.z));
 			if (Float.isNaN(height) || height == 0) {
 				Log.p("pos, ", pos, "isn't on the terrain :(");
@@ -237,7 +238,7 @@ public class TrackWorld extends World implements ICheckpointWorld {
 
 		// generate some random points
 		for (int i = 0; i < POINT_COUNT; i++) {
-			Vector3f pos = H.randV3f(this.worldSize / 2, true);
+			Vector3f pos = Rand.randV3f(this.worldSize / 2, true);
 			pos.y = terrainHelper.getHeight(pos);
 
 			controlPoints.add(pos);

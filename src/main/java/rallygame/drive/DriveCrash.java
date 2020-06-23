@@ -38,7 +38,7 @@ import rallygame.game.DebugAppState;
 import rallygame.game.IDriveDone;
 import rallygame.helper.Colours;
 import rallygame.helper.Geo;
-import rallygame.helper.H;
+import rallygame.helper.Rand;
 import rallygame.service.Screen;
 
 public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
@@ -103,7 +103,7 @@ public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
         PhysicsRigidBody playerBody = this.cb.get(0).getPhysicsObject();
         Transform start = world.getStart();
         if (this.cb.getCount() < (themCount + 1) && frameCount % 60 == 0) {
-            Vector3f spawn = H.randV3f(10, true);
+            Vector3f spawn = Rand.randV3f(10, true);
             spawn.x = Math.round(spawn.x) * 2;
             spawn.y = 0; // maybe ray cast from very high to find the ground height?
             spawn.z = Math.round(spawn.z) * 2;

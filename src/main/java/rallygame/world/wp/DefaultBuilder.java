@@ -25,6 +25,7 @@ import com.jme3.scene.shape.Box;
 
 import rallygame.effects.LoadModelWrapper;
 import rallygame.helper.H;
+import rallygame.helper.Rand;
 import rallygame.world.World;
 import rallygame.world.WorldType;
 import rallygame.world.wp.WP.NodeType;
@@ -142,7 +143,7 @@ public abstract class DefaultBuilder extends World {
 		//if there is no piece to place then this gets stuck in an infinite loop
         //probably because there is no piece that satisfies the angle constraint
 		while (oneCloserThen(nextPos, SPAWN_DISTANCE, posList)) {
-            WPObject wpo = H.randFromList(wpoList);
+            WPObject wpo = Rand.randFromList(wpoList);
 
 			if (testConstraints(wpo)) {
                 Vector3f pos = placePiece(wpo);
