@@ -17,20 +17,20 @@ import com.jme3.scene.Spatial;
 import rallygame.effects.LoadModelWrapper;
 
 /** Makes the road points a real thing */
-public class TerrainRoadCreator {
+public class TerrainRoadPointsToObject {
     
     private final float roadWidth;
-    public TerrainRoadCreator(float roadWidth) {
+    public TerrainRoadPointsToObject(float roadWidth) {
         this.roadWidth = roadWidth;
     }
 
-    public List<TerrainRoad> create(List<RoadPointList> roads, AssetManager am) {
+    public List<TerrainRoad> create(List<RoadPointList> pointLists, AssetManager am) {
         var list = new LinkedList<TerrainRoad>();
-        for (var road : roads) {
+        for (var pointList : pointLists) {
             var tr = new TerrainRoad();
-            tr.points = road;
+            tr.points = pointList;
             tr.road = drawRoad(tr.points);
-            road.road = tr.road; // TODO this is such a mess
+            pointList.road = tr.road; // TODO this is such a mess
             tr.sp = generateSpatial(tr.road, am);
             tr.col = CollisionShapeFactory.createMeshShape(tr.sp);
             list.add(tr);
