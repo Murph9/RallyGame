@@ -78,7 +78,7 @@ public class RayWheelControl {
 	
 	private final Vector3f offset;
 	
-	public RayWheelControl(SimpleApplication app, RayWheel wheel, Node carRootNode, Vector3f pos) {
+	protected RayWheelControl(SimpleApplication app, RayWheel wheel, Node carRootNode, Vector3f pos) {
 		this.app = app;
 		this.wheel = wheel;
 		this.offset = pos;
@@ -224,19 +224,19 @@ public class RayWheelControl {
     }
 
     private static float calcSkidSkew(float skidFraction) {
-        return H.skew(skidFraction, 0.75f, 1.3f, 0, 1);
+        return H.skew(skidFraction, 0.95f, 1.6f, 0, 1);
     }
 	
 	public RayWheel getRayWheel() {
 		return wheel;
     }
-    public void reset() {
+    protected void reset() {
         this.lastl = null;
         this.lastr = null;
         this.lastColor = ColorRGBA.BlackNoAlpha;
     }
 	
-	public void cleanup() {
+	protected void cleanup() {
 		rootNode.detachChild(spat);
 		app.getRootNode().detachChild(skidLine);
     }

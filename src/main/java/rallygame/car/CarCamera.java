@@ -96,7 +96,7 @@ public class CarCamera extends BaseAppState implements RawInputListener {
 			Vector3f localVel = carRot.inverse().mult(p.vel);
 
 			Vector3f vec = new Vector3f();
-			float smoothing = tpf * 10;
+			float smoothing = tpf * 5f;
 			if (p.vel.length() > 4f) {
 				if (localVel.z < 0)
 					vec.interpolateLocal(carRot.mult(Vector3f.UNIT_Z).negate().normalize(), p.vel.normalize(), 0.5f);
