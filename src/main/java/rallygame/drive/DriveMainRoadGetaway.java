@@ -74,7 +74,7 @@ public class DriveMainRoadGetaway extends DriveBase {
 		
 		//add the chase car
 		hunter = this.cb.addCar(hunterType, new Vector3f(HUNTER_BUFFER - 10, 0.3f, 0), world.getStart().getRotation(), false);
-		hunter.attachAI(new DriveAtAI(hunter, this.cb.get(0).getPhysicsObject()), true);
+		hunter.attachAI(new DriveAtAI(hunter, this.cb.getPlayer().getPhysicsObject()), true);
 
 		display = new Container();
 		display.addChild(new Label("Score: "), 0, 0);
@@ -94,7 +94,7 @@ public class DriveMainRoadGetaway extends DriveBase {
 
 		frameCount++;
 		
-		RayCarControl player = this.cb.get(0);
+		RayCarControl player = this.cb.getPlayer();
 		RayCarControl chaser = this.cb.get(1);
 
 		float distanceFromStart = getPlayerDistanceFromStart(player);

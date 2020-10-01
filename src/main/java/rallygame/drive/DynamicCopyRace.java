@@ -109,7 +109,7 @@ public class DynamicCopyRace extends DriveBase implements PauseState.ICallback, 
         getState(BulletAppState.class).getPhysicsSpace().add(boxG);
 
         // init checkpoints
-        progress = new CheckpointProgress(CheckpointProgress.Type.Sprint, checkpoints, cb.getAll(), cb.get(0));
+        progress = new CheckpointProgress(CheckpointProgress.Type.Sprint, checkpoints, cb.getAll(), cb.getPlayer());
         progress.setCheckpointModel(CheckpointProgress.GetDefaultCheckpointModel(app, 4, new ColorRGBA(0, 1, 0, 0.4f)));
         getStateManager().attach(progress);
 
@@ -209,6 +209,8 @@ public class DynamicCopyRace extends DriveBase implements PauseState.ICallback, 
             checkWinners();
             time += tpf;
             timer.setText(H.roundDecimal(time, 2) + " sec");
+
+            checkCollisions();
             break;
         case Win:
             // delay and stuff maybe
@@ -231,6 +233,12 @@ public class DynamicCopyRace extends DriveBase implements PauseState.ICallback, 
                 nextState();
             }
         }
+    }
+
+    private void checkCollisions() {
+        //TODO check collisions with other cars, to copy them
+
+        // get info from DriveCrash, change collision detection logic to appstate
     }
 
     private void checkWinners() {

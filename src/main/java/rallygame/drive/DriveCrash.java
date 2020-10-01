@@ -100,7 +100,7 @@ public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
         super.update(tpf);
         frameCount++;
 
-        PhysicsRigidBody playerBody = this.cb.get(0).getPhysicsObject();
+        PhysicsRigidBody playerBody = this.cb.getPlayer().getPhysicsObject();
         Transform start = world.getStart();
         if (this.cb.getCount() < (themCount + 1) && frameCount % 60 == 0) {
             Vector3f spawn = Rand.randV3f(10, true);
@@ -116,7 +116,7 @@ public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
         // check if any hit ones are upside down, if so kill them
         List<RayCarControl> toKill = new ArrayList<RayCarControl>();
         for (RayCarControl c : this.hitList.keySet())
-            if (c.up != null && c.up.y < 0 && c != this.cb.get(0))
+            if (c.up != null && c.up.y < 0 && c != this.cb.getPlayer()) // not the player
                 toKill.add(c);
         for (RayCarControl c : this.cb.getAll())
             if (c.location.y < -100)

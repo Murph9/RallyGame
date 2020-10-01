@@ -134,9 +134,15 @@ public class DriveBase extends BaseAppState implements IDrive {
 
         sm.detach(uiNode);
 
-        this.cb.removeCar(cb.get(0));
+        var oldCar = cb.getPlayer();
+        var pos = oldCar.location;
+        var vel = oldCar.vel;
+        var rot = oldCar.rotation;
+        var ang = oldCar.angularVel;
+        this.cb.removeCar(oldCar);
 
         RayCarControl c = this.cb.addCar(car, world.getStart(), true);
+        c.setPhysicsProperties(pos, vel, rot, ang);
 
         // initCamera and ui again
         camera = new CarCamera(getApplication().getCamera(), c);

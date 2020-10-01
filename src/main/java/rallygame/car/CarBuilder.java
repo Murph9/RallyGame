@@ -193,7 +193,14 @@ public class CarBuilder extends BaseAppState {
             rcc.update(tpf);
         }
     }
-
+    public RayCarControl getPlayer() {
+        for (var car: cars) {
+            if (car.getAI() == null) {
+                return car;
+            }
+        }
+        return null;
+    }
     public RayCarControl get(int a) {
         if (cars.size() <= a) return null;
         return cars.get(a);

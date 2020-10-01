@@ -70,7 +70,7 @@ public class ChooseCar extends BaseAppState {
         Screen screen = new Screen(app.getContext().getSettings());
 
 		//info window first so the event listeners can delete it
-        infoWindow = new CarStatsUI(app.getAssetManager(), this.cb.get(0).getCarData());
+        infoWindow = new CarStatsUI(app.getAssetManager(), this.cb.getPlayer().getCarData());
         screen.topLeftMe(infoWindow);
 		((SimpleApplication) app).getGuiNode().attachChild(infoWindow);
 
@@ -86,17 +86,17 @@ public class ChooseCar extends BaseAppState {
                 public void execute( Button source ) {
                     car = c;
 
-                    cb.removeCar(cb.get(0));
+                    cb.removeCar(cb.getPlayer());
     				cb.addCar(car, worldType.start, worldType.rot, true);
                     
                     Screen screen = new Screen(app.getContext().getSettings());
 
 					((SimpleApplication) app).getGuiNode().detachChild(infoWindow);
-					infoWindow = new CarStatsUI(app.getAssetManager(), cb.get(0).getCarData());
+					infoWindow = new CarStatsUI(app.getAssetManager(), cb.getPlayer().getCarData());
                     screen.topLeftMe(infoWindow);
 					((SimpleApplication) app).getGuiNode().attachChild(infoWindow);
 
-    				graph.updateMyPhysicsVehicle(cb.get(0).getCarData());
+    				graph.updateMyPhysicsVehicle(cb.getPlayer().getCarData());
                 }
             });
         	i++;
@@ -113,7 +113,7 @@ public class ChooseCar extends BaseAppState {
         });
         
         Vector3f size = new Vector3f(400,400,0);
-        graph = new PowerCurveGraph(app.getAssetManager(), this.cb.get(0).getCarData(), size);
+        graph = new PowerCurveGraph(app.getAssetManager(), this.cb.getPlayer().getCarData(), size);
 		graph.setLocalTranslation(screen.get(HorizontalPos.Right, VerticalPos.Bottom, size));
 		((SimpleApplication)app).getGuiNode().attachChild(graph);
 	}
@@ -127,7 +127,7 @@ public class ChooseCar extends BaseAppState {
 		if (posReset > RESET_IMPULSE) {
 			posReset = 0;
 
-			RayCarControl car = cb.get(0);
+			RayCarControl car = cb.getPlayer();
             Vector3f pos = car.location;
             car.setPhysicsProperties(new Vector3f(0, pos.y, 0), null, (Quaternion) null, null);
 		}

@@ -72,7 +72,7 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
             c.attachAI(rAi, true);
         }
         
-        progress = new CheckpointProgress(CheckpointProgress.Type.Sprint, checkpoints, cb.getAll(), cb.get(0));
+        progress = new CheckpointProgress(CheckpointProgress.Type.Sprint, checkpoints, cb.getAll(), cb.getPlayer());
         progress.setCheckpointModel(CheckpointProgress.GetDefaultCheckpointModel(app, 4, new ColorRGBA(0, 1, 0, 0.4f)));
         getStateManager().attach(progress);
 

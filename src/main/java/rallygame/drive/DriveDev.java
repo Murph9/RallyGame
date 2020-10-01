@@ -37,7 +37,7 @@ public class DriveDev extends DriveBase {
         Screen screen = new Screen(app.getContext().getSettings());
 		
     	//init input gui
-		carEditor = new CarEditor(app.getInputManager(), this.cb.get(0), (data) -> { reloadCar(data);}, (car) -> { return resetCar(car); });
+		carEditor = new CarEditor(app.getInputManager(), this.cb.getPlayer(), (data) -> { reloadCar(data);}, (car) -> { return resetCar(car); });
 		carEditor.setLocalTranslation(screen.get(HorizontalPos.Left, VerticalPos.Top).add(0, -20, 0));
 		((SimpleApplication)app).getGuiNode().attachChild(carEditor);
 		
@@ -46,7 +46,7 @@ public class DriveDev extends DriveBase {
 		((SimpleApplication)app).getGuiNode().attachChild(worldEditor);
 		
 		Vector3f size = new Vector3f(400,400,0);
-        wheelGraphs = new TractionCurveGraph(app.getAssetManager(), this.cb.get(0).getCarData(), size);
+        wheelGraphs = new TractionCurveGraph(app.getAssetManager(), this.cb.getPlayer().getCarData(), size);
         wheelGraphs.setLocalTranslation(screen.get(HorizontalPos.Right, VerticalPos.Bottom, size));
 		((SimpleApplication)app).getGuiNode().attachChild(wheelGraphs);
 	}
@@ -58,13 +58,13 @@ public class DriveDev extends DriveBase {
 	}
 
 	private void reloadCar(CarDataConst data) {
-		RayCarControl car = this.cb.get(0);
+		RayCarControl car = this.cb.getPlayer();
 		car.setCarData(data);
 		wheelGraphs.setCarDataConst(data);
 	}
 	private RayCarControl resetCar(Car car) {
 		this.reInitPlayerCar(car);
-		return this.cb.get(0);
+		return this.cb.getPlayer();
 	}
 	
 	public void reloadWorld(IWorld world) {
@@ -74,7 +74,7 @@ public class DriveDev extends DriveBase {
 		getStateManager().attach(this.world);
 		
         //reset car
-        this.cb.get(0).reset();
+        this.cb.getPlayer().reset();
 	}
 	
 	@Override

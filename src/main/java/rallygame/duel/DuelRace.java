@@ -177,7 +177,7 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
     protected void quit() {
         DuelResultData d = new DuelResultData();
         d.raceResult = new DuelRaceResult();
-        d.raceResult.playerWon = winner == this.cb.get(0);
+        d.raceResult.playerWon = winner == this.cb.getPlayer();
         d.raceResult.mills = (long) (raceTimer * 1000f);
 
         Log.p("Winner: " + winner.getCarData().name);
@@ -225,7 +225,7 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
                 raceTimer = 0;
                 break;
             case Finished:
-                menu.raceStopped(this.winner == this.cb.get(0));
+                menu.raceStopped(this.winner == this.cb.getPlayer());
                 for (RayCarControl c : this.cb.getAll()) {
                     c.attachAI(new BrakeAI(c), true);
                 }
