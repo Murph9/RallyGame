@@ -12,8 +12,6 @@ import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
-import com.jme3.material.Material;
-import com.jme3.material.RenderState.FaceCullMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
@@ -39,7 +37,7 @@ public abstract class DefaultBuilder extends World {
     protected final List<Spatial> curPieces;
     private Supplier<Vector3f[]> objectDistFunction;
     
-    private Geometry startGeometry;
+    private Spatial startGeometry;
     protected List<WPObject> wpos;
 	
 	protected Vector3f nextPos;
@@ -99,13 +97,9 @@ public abstract class DefaultBuilder extends World {
 			this.wpos.add(wpo);
 		}
 		
-		Material matfloor = new Material(app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-		matfloor.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
-		matfloor.setColor("Color", ColorRGBA.Green);
-		
 		Box start = new Box(10, 0.25f, 10); //Something to spawn on (or in hint hint)
 		startGeometry = new Geometry("Starting Box", start);
-		startGeometry.setMaterial(matfloor);
+		startGeometry = LoadModelWrapper.create(app.getAssetManager(), startGeometry, ColorRGBA.Green);
 		startGeometry.setLocalTranslation(0, -0.1f, 0);
 		startGeometry.addControl(new RigidBodyControl(0));
 		
