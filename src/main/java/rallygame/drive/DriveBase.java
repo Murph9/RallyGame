@@ -13,6 +13,7 @@ import com.jme3.math.Transform;
 
 import rallygame.car.*;
 import rallygame.car.data.Car;
+import rallygame.car.data.CarDataConst;
 import rallygame.car.ray.RayCarControl;
 import rallygame.car.ui.*;
 import rallygame.effects.ParticleAtmosphere;
@@ -126,7 +127,19 @@ public class DriveBase extends BaseAppState implements IDrive {
         cb = null;
     }
 
+    protected final void reInitPlayerCar(CarDataConst carData) {
+        var oldCar = cb.getPlayer();
+        var newCar = this.cb.addCar(carData, world.getStart(), true);
+        reInitPlayerCar(oldCar, newCar);
+    }
+
     protected final void reInitPlayerCar(Car car) {
+        var oldCar = cb.getPlayer();
+        var newCar = this.cb.addCar(car, world.getStart(), true);
+        reInitPlayerCar(oldCar, newCar);
+    }
+
+    private final void reInitPlayerCar(RayCarControl oldCar, RayCarControl newCar) {
         // remove camera and ui
         AppStateManager sm = getStateManager();
         sm.detach(camera);
@@ -134,22 +147,20 @@ public class DriveBase extends BaseAppState implements IDrive {
 
         sm.detach(uiNode);
 
-        var oldCar = cb.getPlayer();
         var pos = oldCar.location;
         var vel = oldCar.vel;
         var rot = oldCar.rotation;
         var ang = oldCar.angularVel;
         this.cb.removeCar(oldCar);
 
-        RayCarControl c = this.cb.addCar(car, world.getStart(), true);
-        c.setPhysicsProperties(pos, vel, rot, ang);
+        newCar.setPhysicsProperties(pos, vel, rot, ang);
 
         // initCamera and ui again
-        camera = new CarCamera(getApplication().getCamera(), c);
+        camera = new CarCamera(getApplication().getCamera(), newCar);
         sm.attach(camera);
         getApplication().getInputManager().addRawInputListener(camera);
 
-        uiNode = new CarUI(c);
+        uiNode = new CarUI(newCar);
         sm.attach(uiNode);
     }
 

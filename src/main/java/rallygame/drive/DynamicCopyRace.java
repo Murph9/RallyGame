@@ -28,13 +28,16 @@ import rallygame.game.IDriveDone;
 import rallygame.helper.H;
 import rallygame.helper.Log;
 import rallygame.service.GridPositions;
+import rallygame.service.IRayCarCollisionListener;
+import rallygame.service.RayCarCollisionService;
 import rallygame.service.Screen;
 import rallygame.service.checkpoint.CheckpointProgress;
 import rallygame.service.checkpoint.CheckpointProgressUI;
 import rallygame.world.wp.DefaultBuilder;
 
 
-public class DynamicCopyRace extends DriveBase implements PauseState.ICallback, ICheckpointDrive, DefaultBuilder.IPieceChanged {
+public class DynamicCopyRace extends DriveBase 
+        implements IRayCarCollisionListener, PauseState.ICallback, ICheckpointDrive, DefaultBuilder.IPieceChanged {
 
     private final Car[] carList = new Car[]{
             Car.Rocket,
@@ -50,6 +53,7 @@ public class DynamicCopyRace extends DriveBase implements PauseState.ICallback, 
 
     private CheckpointProgressUI progressMenu;
     private CheckpointProgress progress;
+    private RayCarCollisionService carCollisionState;
 
     //racing things
     private Vector3f[] worldStarts;
@@ -63,6 +67,9 @@ public class DynamicCopyRace extends DriveBase implements PauseState.ICallback, 
     //TODO design:
     //- catch up to first by copying cars as you go
     //- win when you are first
+    //bugs:
+    // - when you copy cars you can't win, the checkpoint system loses you
+    // - also don't reset please
 
     public DynamicCopyRace(DefaultBuilder world, IDriveDone done) {
         super(done, Car.Runner, world);
@@ -122,6 +129,10 @@ public class DynamicCopyRace extends DriveBase implements PauseState.ICallback, 
         ((SimpleApplication) getApplication()).getGuiNode().attachChild(container);
         new Screen(getApplication().getContext().getSettings()).topLeftMe(container);
 
+        // init collision code
+        this.carCollisionState = new RayCarCollisionService(this, this.cb);
+        getState(BulletAppState.class).getPhysicsSpace().addCollisionListener(carCollisionState);
+
         //actually init
         nextState();
     }
@@ -151,7 +162,7 @@ public class DynamicCopyRace extends DriveBase implements PauseState.ICallback, 
             state = RaceState.Win;
             break;
         case Win:
-            state = RaceState.Init;
+            state = RaceState.NA;
             break;
         default:
             throw new IllegalStateException();
@@ -209,8 +220,6 @@ public class DynamicCopyRace extends DriveBase implements PauseState.ICallback, 
             checkWinners();
             time += tpf;
             timer.setText(H.roundDecimal(time, 2) + " sec");
-
-            checkCollisions();
             break;
         case Win:
             // delay and stuff maybe
@@ -233,12 +242,6 @@ public class DynamicCopyRace extends DriveBase implements PauseState.ICallback, 
                 nextState();
             }
         }
-    }
-
-    private void checkCollisions() {
-        //TODO check collisions with other cars, to copy them
-
-        // get info from DriveCrash, change collision detection logic to appstate
     }
 
     private void checkWinners() {
@@ -274,6 +277,7 @@ public class DynamicCopyRace extends DriveBase implements PauseState.ICallback, 
     public void cleanup(Application app) {
         Log.p("cleaning driverace class");
         progress.cleanup(app);
+        getState(BulletAppState.class).getPhysicsSpace().removeCollisionListener(this.carCollisionState);
         
         getStateManager().detach(progressMenu);
         progressMenu = null;
@@ -342,5 +346,11 @@ public class DynamicCopyRace extends DriveBase implements PauseState.ICallback, 
             throw new IllegalStateException("Think about it, how?");
 
         progress.setMinCheckpoint(pos);
+    }
+
+    @Override
+    public void playerCollision(RayCarControl player, RayCarControl them, Vector3f normalInWorld, Vector3f themLocalPos,
+            float appliedImpulse) {
+        this.reInitPlayerCar(them.getCarData());
     }
 }
