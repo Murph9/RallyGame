@@ -80,7 +80,7 @@ public abstract class CarAI implements ICarAI {
 	 */
 	protected final void driveAt(Vector3f targetPos) {
 		Vector3f curPos = this.car.location;
-		Quaternion w_angle = car.getPhysicsObject().getPhysicsRotation();
+		Quaternion w_angle = car.rotation;
 		Vector3f velocity = w_angle.inverse().mult(car.vel);
 		int reverse = (velocity.z < 0 ? -1 : 1);
 

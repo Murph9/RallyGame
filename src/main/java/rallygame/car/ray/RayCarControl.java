@@ -34,9 +34,8 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
 
     private final Application app;
     private final RayCarVisuals visuals;
-    private final RayCarControlDebug debug;
     private final RayCarControlInput input;
-        
+    
     // Steering averager (to get smooth left <-> right)
     private AverageFloatFramerate steeringAverager;
 
@@ -52,15 +51,11 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
     private final List<RawInputListener> controls;
     private ICarAI ai;
     
-    public float getDistanceTravelled() { return this.travelledDistance; }
-    
-    private final Node rootNode;
     private final PhysicsSpace space;
-    
-    private boolean added = false;
+    private boolean addedToSpace = false;
     
     //some fields to prevent needing to call GetPhysicsObject a lot
-    public Vector3f vel, forward, up, left, right;
+    public Vector3f vel, forward, up, left;
     public Vector3f angularVel;
     public Quaternion rotation;
     public Vector3f location;
@@ -69,16 +64,12 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
         super(shape, carData); //TODO this collision shape is an arugment against extending RayCarPowered
         this.app = app;
         this.space = app.getStateManager().getState(BulletAppState.class).getPhysicsSpace();
-        this.debug = new RayCarControlDebug(this, false);
         this.input = new RayCarControlInput(this);
 
-        vel = forward = up = left = right = location = angularVel = new Vector3f();
+        vel = forward = up = left = location = angularVel = new Vector3f();
         rotation = new Quaternion();
 
         this.steeringAverager = new AverageFloatFramerate(0.2f, IAverager.Type.Weighted);
-
-        this.rootNode = new Node("Car:" + carData);
-        this.rootNode.addControl(rbc);
 
         this.visuals = new RayCarVisuals(app, this);
         
@@ -106,16 +97,16 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
     @Override
     public void prePhysicsTick(PhysicsSpace space, float tpf) {
         if (rbEnabled()) {
-            rotation = rbc.getPhysicsRotation();
-            vel = rbc.getLinearVelocity();
-            forward = rotation.mult(Vector3f.UNIT_Z);
-            up = rotation.mult(Vector3f.UNIT_Y);
-            left = rotation.mult(Vector3f.UNIT_X);
-            right = rotation.mult(Vector3f.UNIT_X.negate());
-            angularVel = rbc.getAngularVelocity();
-            location = rbc.getPhysicsLocation();
+            // set many view fields (in place)
+            rbc.getPhysicsRotation(rotation);
+            rbc.getLinearVelocity(vel);
+            rotation.mult(Vector3f.UNIT_Z, forward);
+            rotation.mult(Vector3f.UNIT_Y, up);
+            rotation.mult(Vector3f.UNIT_X, left);
+            rbc.getAngularVelocity(angularVel);
+            rbc.getPhysicsLocation(location);
             
-            //wheel turning logic
+            // wheel turning logic
             steeringCurrent = 0;
             if (steerLeft != 0) //left
                 steeringCurrent += getBestTurnAngle(steerLeft, 1);
@@ -128,15 +119,13 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
         }
         
         super.prePhysicsTick(space, tpf);
-
-        debug.update(app);
     }
     
     private float getBestTurnAngle(float trySteerAngle, float sign) {
         if (ignoreSpeedFactor)
             return trySteerAngle;
         
-        Vector3f local_vel = rbc.getPhysicsRotation().inverse().mult(rbc.getLinearVelocity());
+        Vector3f local_vel = rotation.inverse().mult(vel);
         if (local_vel.z < 0 || ((-sign * this.driftAngle) < 0 && Math.abs(this.driftAngle) > carData.minDriftAngle * FastMath.DEG_TO_RAD)) {
             return trySteerAngle;
             //when going backwards, slow or needing to turning against drift, you get no speed factor
@@ -168,12 +157,12 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
         visuals.cleanup(app);
         
         space.removeTickListener(this);
-        space.remove(this.rootNode);
+        space.remove(this.visuals.getRootNode());
     }
     
 
     public Node getRootNode() {
-        return rootNode;
+        return visuals.getRootNode();
     }
     public CarDataConst getCarData() {
         return carData;
@@ -229,6 +218,9 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
         return results;
     }
     
+    /**
+     * Get base physics object. To easily get properties try: vel, forward, up, left,
+     * location, angularVel and rotation */
     public PhysicsRigidBody getPhysicsObject() {
         return rbc;
     }
@@ -263,12 +255,12 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
             this.rbc.setEnabled(enabled);
             visuals.enableSound(enabled);
             
-            if (enabled && !added) {
-                space.add(this.rootNode);
-                added = true;
-            } else if (!enabled && added) {
-                space.remove(this.rootNode);
-                added = false;
+            if (enabled && !addedToSpace) {
+                space.add(this.visuals.getRootNode());
+                addedToSpace = true;
+            } else if (!enabled && addedToSpace) {
+                space.remove(this.visuals.getRootNode());
+                addedToSpace = false;
             }
         }
     }
@@ -283,17 +275,17 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
     public void setNitro(boolean value) { ifNitro = value; }
     public void jump() { 
         rbc.applyImpulse(carData.JUMP_FORCE, new Vector3f()); // push up
-        Vector3f old = rbc.getPhysicsLocation();
+        Vector3f old = location.clone();
         old.y += 2; // and move up
         rbc.setPhysicsLocation(old);
 
-        Vector3f vel = rbc.getLinearVelocity();
+        Vector3f vel = this.vel.clone();
         vel.y = 0;
         rbc.setLinearVelocity(vel);
     }
-    public void flip() { 
-        rbc.setPhysicsRotation(new Quaternion());
-        rbc.setPhysicsLocation(rbc.getPhysicsLocation().add(new Vector3f(0, 1, 0)));
+    public void flip() {
+        rbc.setPhysicsRotation(new Quaternion()); //TODO keep forward the same
+        rbc.setPhysicsLocation(location.add(new Vector3f(0, 1, 0)));
     }
     public void reset() {
         rbc.setPhysicsRotation(new Quaternion());

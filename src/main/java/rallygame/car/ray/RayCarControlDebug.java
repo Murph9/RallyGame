@@ -16,9 +16,11 @@ public class RayCarControlDebug {
     private final boolean DEBUG_DRAG;
 
     private final RayCarControl car;
+    private final Application app;
 
-    public RayCarControlDebug(RayCarControl car, boolean ifDebug) {
+    public RayCarControlDebug(RayCarControl car, boolean ifDebug, Application app) {
         this.car = car;
+        this.app = app;
         this.DEBUG = ifDebug;
         this.DEBUG_SUS = this.DEBUG || false;
         this.DEBUG_SUS2 = this.DEBUG || false;
@@ -26,7 +28,7 @@ public class RayCarControlDebug {
         this.DEBUG_DRAG = this.DEBUG || false;
     }
 
-    public void update(Application app) {
+    public void update() {
         
         if (DEBUG) {
             Quaternion w_angle = car.rbc.getPhysicsRotation();

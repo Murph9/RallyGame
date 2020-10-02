@@ -5,9 +5,12 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.audio.AudioNode;
 import com.jme3.audio.AudioSource.Status;
 import com.jme3.math.FastMath;
+import com.jme3.scene.Node;
 
 public class RayCarVisuals {
 
+    private final RayCarControlDebug debug;
+    private final Node rootNode;
     private final RayWheelControl[] wheelControls;
     private final RayCarControl car;
 
@@ -16,6 +19,11 @@ public class RayCarVisuals {
 
     public RayCarVisuals(SimpleApplication app, RayCarControl car) {
         this.car = car;
+
+        this.debug = new RayCarControlDebug(car, false, app);
+
+        this.rootNode = new Node("Car:" + car.carData);
+        this.rootNode.addControl(car.rbc);
 
         // init visual wheels
         this.wheelControls = new RayWheelControl[4];
@@ -36,6 +44,8 @@ public class RayCarVisuals {
 
         for (int i = 0; i < this.wheelControls.length; i++)
             this.wheelControls[i].viewUpdate(tpf, car.rbc.getLinearVelocity(), car.carData.susByWheelNum(i).min_travel);
+
+        debug.update();
     }
 
     public void enableSound(boolean enabled) {
@@ -74,5 +84,9 @@ public class RayCarVisuals {
         engineSound.setLooping(true);
         engineSound.play();
         car.getRootNode().attachChild(engineSound);
+	}
+
+	public Node getRootNode() {
+		return this.rootNode;
 	}
 }

@@ -102,7 +102,6 @@ public class DriveCrash extends DriveBase implements IRayCarCollisionListener {
         super.update(tpf);
         frameCount++;
 
-        PhysicsRigidBody playerBody = this.cb.getPlayer().getPhysicsObject();
         Transform start = world.getStart();
         if (this.cb.getCount() < (themCount + 1) && frameCount % 60 == 0) {
             Vector3f spawn = Rand.randV3f(10, true);
@@ -112,7 +111,7 @@ public class DriveCrash extends DriveBase implements IRayCarCollisionListener {
 
             CarDataConst data = this.cb.loadData(them);
             RayCarControl c = this.cb.addCar(data, spawn, start.getRotation(), false);
-            c.attachAI(new DriveAtAI(c, playerBody), true);
+            c.attachAI(new DriveAtAI(c, this.cb.getPlayer().getPhysicsObject()), true);
         }
 
         // check if any hit ones are upside down, if so kill them
