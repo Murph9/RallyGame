@@ -14,8 +14,6 @@ import java.util.Map.Entry;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
-import com.jme3.bullet.collision.PhysicsCollisionEvent;
-import com.jme3.bullet.collision.PhysicsCollisionListener;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
@@ -39,9 +37,11 @@ import rallygame.game.IDriveDone;
 import rallygame.helper.Colours;
 import rallygame.helper.Geo;
 import rallygame.helper.Rand;
+import rallygame.service.IRayCarCollisionListener;
+import rallygame.service.RayCarCollisionService;
 import rallygame.service.Screen;
 
-public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
+public class DriveCrash extends DriveBase implements IRayCarCollisionListener {
 
     private static String POLICE_TEXT = "You are in trouble from the 'physics' police.\n"
             + "They are trying to nab you for breaking standard physics laws,\n specifcally for being rediculously bouncy.\n"
@@ -52,6 +52,7 @@ public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
 
     private final Map<RayCarControl, Instant> hitList;
     private static final Duration HIT_TIMEOUT = Duration.ofSeconds(5);
+    private RayCarCollisionService carCollisionState;
 
     private int totalFlipped;
     private int frameCount = 0; // global frame timer
@@ -74,7 +75,8 @@ public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
     @Override
     public void initialize(Application app) {
         super.initialize(app);
-        getState(BulletAppState.class).getPhysicsSpace().addCollisionListener(this);
+        this.carCollisionState = new RayCarCollisionService(this, this.cb);
+        getState(BulletAppState.class).getPhysicsSpace().addCollisionListener(carCollisionState);
 
         progressContainer = new Container();
         progressBar = createBar(0);
@@ -91,7 +93,7 @@ public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
     @Override
     public void cleanup(Application app) {
         ((SimpleApplication) app).getGuiNode().detachChild(progressContainer);
-        getState(BulletAppState.class).getPhysicsSpace().removeCollisionListener(this);
+        getState(BulletAppState.class).getPhysicsSpace().removeCollisionListener(this.carCollisionState);
 
         super.cleanup(app);
     }
@@ -150,41 +152,14 @@ public class DriveCrash extends DriveBase implements PhysicsCollisionListener {
                 updateToColour(entry.getKey(), ColorRGBA.White);
         }
     }
-
-    private RayCarControl getCarFrom(Spatial node) {
-        for (RayCarControl car : this.cb.getAll()) {
-            if (Geo.hasParentNode(node, car.getRootNode())) {
-                return car;
-            }
-        }
-        return null;
-    }
-
-    // detect if collisions are from the player
-    @Override
-    public void collision(PhysicsCollisionEvent event) {
-        RayCarControl carA = getCarFrom(event.getNodeA());
-        RayCarControl carB = getCarFrom(event.getNodeB());
-
-        if (carA == null || carB == null)
-            return; // not 2 car collisions
-        if (carA.getAI() != null && carB.getAI() != null)
-            return; // both are ai
-        if (carA.getAI() == null && carB.getAI() == null)
-            return; // both are a player !!!
-
-        if (carA.getAI() == null)
-            playerCollision(carA, carB, event.getNormalWorldOnB().negate(), event.getLocalPointB(), event.getAppliedImpulse());
-        else
-            playerCollision(carB, carA, event.getNormalWorldOnB(), event.getLocalPointA(), event.getAppliedImpulse());
-    }
     
     private void updateToColour(RayCarControl car, ColorRGBA colour) {
         Spatial s = Geo.getNamedSpatial(car.getRootNode(), CarPart.Chassis.getPartName());
         LoadModelWrapper.setPrimaryColour(s, colour);
     }
 
-    private void playerCollision(RayCarControl player, RayCarControl them, Vector3f normalInWorld, Vector3f themLocalPos, float appliedImpulse) {
+    @Override
+    public void playerCollision(RayCarControl player, RayCarControl them, Vector3f normalInWorld, Vector3f themLocalPos, float appliedImpulse) {
         Instant now = Instant.now();
         updateToColour(them, ColorRGBA.Blue);
 
