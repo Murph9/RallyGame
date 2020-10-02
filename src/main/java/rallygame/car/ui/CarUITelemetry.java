@@ -188,7 +188,7 @@ public class CarUITelemetry extends BaseAppState {
         CarDataConst data = p.getCarData();
         for (int i = 0; i < 4; i++) {
             WheelUI w = this.w[i];
-            RayWheel wheel = p.getWheel(i).getRayWheel();
+            RayWheel wheel = p.getWheel(i);
 
             Material m = new Material(getApplication().getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
             w.gripValue.setText(String.format("%.2f slip", wheel.skidFraction));

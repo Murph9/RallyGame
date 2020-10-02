@@ -126,9 +126,9 @@ public class RayWheelControl {
 		//Smoke can be found from source control
 	}
 
-	//hopefully called by the RayCarControl in physics step
+	//hopefully called by RayCarControl
 	protected void viewUpdate(float tpf, Vector3f velDir, float sus_min_travel) { 
-		//NOTE: sus_min_travel is just poor design, but how else will the wheel object know a car const?
+		//TODO NOTE: sus_min_travel is just poor design, but how else will the wheel object know a car const?
 		app.enqueue(() -> {
 			Vector3f posInLocal = new Vector3f(0, -wheel.susRayLength - sus_min_travel, 0);
 			rootNode.setLocalTranslation(offset.add(posInLocal));

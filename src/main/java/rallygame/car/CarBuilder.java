@@ -31,6 +31,7 @@ import rallygame.effects.LoadModelWrapper;
 import rallygame.helper.Geo;
 import rallygame.helper.Log;
 
+//TODO rename to carmanager
 public class CarBuilder extends BaseAppState {
 
     private final CarDataLoader loader;
@@ -139,15 +140,18 @@ public class CarBuilder extends BaseAppState {
         }
 
         //init car
-        Node carNode = new Node("Car:" + carData);
-        RayCarControl carControl = new RayCarControl((SimpleApplication)getApplication(), colShape, carData, carNode);
+        RayCarControl carControl = new RayCarControl((SimpleApplication)getApplication(), colShape, carData);
 		
-		Node carModel = LoadModelWrapper.create(am, initialCarModel, carData.baseColor);
-        carNode.attachChild(carModel);
-        carNode.setLocalTranslation(start);
-        carNode.setLocalRotation(rot);
+        var carRootNode = carControl.getRootNode();
 
-        rootNode.attachChild(carNode);
+        // TODO shouldn't this be managed by the control?
+        Node carModel = LoadModelWrapper.create(am, initialCarModel, carData.baseColor);
+
+        carRootNode.attachChild(carModel);
+        carRootNode.setLocalTranslation(start);
+        carRootNode.setLocalRotation(rot);
+
+        rootNode.attachChild(carRootNode);
         
         carControl.setPhysicsProperties(start, null, rot, null);
         // a fake angular rotational reducer, very important for driving feel

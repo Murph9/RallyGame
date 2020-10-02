@@ -11,7 +11,7 @@ import com.jme3.math.Vector3f;
 import rallygame.car.ray.GripHelper;
 import rallygame.car.ray.RayCarControl;
 import rallygame.car.ray.RayCarControlInput;
-import rallygame.car.ray.RayWheelControl;
+import rallygame.car.ray.RayWheel;
 import rallygame.game.DebugAppState;
 import rallygame.helper.H;
 import rallygame.helper.Log;
@@ -293,10 +293,10 @@ public abstract class CarAI implements ICarAI {
             return;
         
         // reduce excess wheel slipping
-        List<RayWheelControl> wheels = car.getDriveWheels();
+        List<RayWheel> wheels = car.getDriveWheels();
         float gripSum = 0;
-        for (RayWheelControl wheel : wheels) {
-            gripSum += wheel.getRayWheel().skidFraction;
+        for (RayWheel wheel : wheels) {
+            gripSum += wheel.skidFraction;
         }
         if (gripSum > wheels.size() && ifDrifting()) {
             onEvent(RayCarControlInput.ACTION_ACCEL, false);

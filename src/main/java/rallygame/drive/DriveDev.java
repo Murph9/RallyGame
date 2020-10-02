@@ -58,9 +58,7 @@ public class DriveDev extends DriveBase {
 	}
 
 	private void reloadCar(CarDataConst data) {
-		RayCarControl car = this.cb.getPlayer();
-		car.setCarData(data);
-		wheelGraphs.setCarDataConst(data);
+		this.reInitPlayerCar(data);
 	}
 	private RayCarControl resetCar(Car car) {
 		this.reInitPlayerCar(car);
