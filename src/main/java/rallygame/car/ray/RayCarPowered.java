@@ -7,7 +7,6 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
 import rallygame.car.data.CarDataConst;
-import rallygame.helper.H;
 
 //handles engine/drivetrain stuff
 public class RayCarPowered extends RayCar {
@@ -15,7 +14,7 @@ public class RayCarPowered extends RayCar {
 	protected static final int REVERSE_GEAR_INDEX = 0;
 	private static final float NITRO_COOLDOWN = 5;
 
-	private float engineTorque;
+	protected float engineTorque;
 	
 	protected float accelCurrent;
 	
@@ -197,19 +196,5 @@ public class RayCarPowered extends RayCar {
 
 		return result;
 	}
-
-	public final String statsString() {
-		return rallygame.helper.H.round3f(rbc.getPhysicsLocation(), 2) + "\nspeed:" + rallygame.helper.H.round3f(rbc.getLinearVelocity(), 2)
-                + "m/s\nRPM:" + curRPM + "\nengine:" + engineTorque + "\ndrag:" + H.roundDecimal(dragDir.length(), 3) + " rr("
-                + H.roundDecimal(rollingResistanceTotal(), 3) + ")N\ndistanceTravelled:" + H.roundDecimal(travelledDistance, 1)+"m";
-    }
-    
-    private float rollingResistanceTotal() {
-        float total = 0;
-        for (int w_id = 0; w_id < wheels.length; w_id++) {
-            total += wheels[w_id].rollingResistance;
-        }
-        return total;
-    }
 }
  

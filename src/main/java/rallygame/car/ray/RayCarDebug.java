@@ -7,7 +7,7 @@ import com.jme3.math.Vector3f;
 
 import rallygame.game.DebugAppState;
 
-public class RayCarControlDebug {
+public class RayCarDebug {
 
     private final boolean DEBUG;
     private final boolean DEBUG_SUS;
@@ -15,10 +15,10 @@ public class RayCarControlDebug {
     private final boolean DEBUG_TRACTION;
     private final boolean DEBUG_DRAG;
 
-    private final RayCarControl car;
+    private final RayCarPowered car;
     private final Application app;
 
-    public RayCarControlDebug(RayCarControl car, boolean ifDebug, Application app) {
+    public RayCarDebug(RayCarPowered car, boolean ifDebug, Application app) {
         this.car = car;
         this.app = app;
         this.DEBUG = ifDebug;

@@ -354,10 +354,6 @@ public class RayCar implements PhysicsTickListener {
 		this.handbrakeCur = handbrake;
 	}
 
-	protected final void setWheelTorque(int w_id, float torque) {
-		wheelTorque[w_id] = torque;
-	}
-
 	public final float getWheelTorque(int w_id) {
 		if (w_id < 0 || w_id > 4)
 			return 0;

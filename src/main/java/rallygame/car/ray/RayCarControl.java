@@ -29,8 +29,10 @@ import rallygame.service.averager.AverageFloatFramerate;
 import rallygame.service.averager.IAverager;
 import rallygame.service.ray.PhysicsRaycaster;
 
-//visual/input things
-public class RayCarControl extends RayCarPowered implements ICarPowered, ICarControlled {
+// data/input things
+public class RayCarControl implements ICarPowered, ICarControlled {
+
+    protected final RayCarPowered rayCar;
 
     private final Application app;
     private final RayCarVisuals visuals;
@@ -61,7 +63,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
     public Vector3f location;
     
     public RayCarControl(SimpleApplication app, CollisionShape shape, CarDataConst carData) {
-        super(shape, carData); //TODO this collision shape is an arugment against extending RayCarPowered
+        this.rayCar = new RayCarPowered(shape, carData);
         this.app = app;
         this.space = app.getStateManager().getState(BulletAppState.class).getPhysicsSpace();
         this.input = new RayCarControlInput(this);
@@ -75,17 +77,37 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
         
         this.controls = new LinkedList<RawInputListener>();
         
-        space.addTickListener(this);
+        space.addTickListener(rayCar);
         setEnabled(true);
     }
     
     public void update(float tpf) {
-        if (!this.rbEnabled())
+        if (!rayCar.rbEnabled())
             return; //don't update if the rigid body isn't
 
         if (ai != null) {
             ai.update(tpf);
         }
+        // set many view fields (in place)
+        rotation = rayCar.rbc.getPhysicsRotation();
+        vel = rayCar.rbc.getLinearVelocity();
+        rotation.mult(Vector3f.UNIT_Z, forward);
+        rotation.mult(Vector3f.UNIT_Y, up);
+        rotation.mult(Vector3f.UNIT_X, left);
+        angularVel = rayCar.rbc.getAngularVelocity();
+        location = rayCar.rbc.getPhysicsLocation();
+        
+        // wheel turning logic
+        steeringCurrent = 0;
+        if (steerLeft != 0) //left
+            steeringCurrent += getBestTurnAngle(steerLeft, 1);
+        if (steerRight != 0) //right
+            steeringCurrent -= getBestTurnAngle(steerRight, -1);
+        steeringCurrent = ignoreSpeedFactor ? steeringCurrent : steeringAverager.get(steeringCurrent, tpf);
+        steeringCurrent = FastMath.clamp(steeringCurrent, -rayCar.carData.w_steerAngle, 
+                rayCar.carData.w_steerAngle);
+
+        rayCar.updateControlInputs(steeringCurrent, brakeCurrent, handbrakeCurrent);
 
         visuals.viewUpdate(tpf);
     }
@@ -94,39 +116,13 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
         visuals.giveSound(audio);
     }
     
-    @Override
-    public void prePhysicsTick(PhysicsSpace space, float tpf) {
-        if (rbEnabled()) {
-            // set many view fields (in place)
-            rbc.getPhysicsRotation(rotation);
-            rbc.getLinearVelocity(vel);
-            rotation.mult(Vector3f.UNIT_Z, forward);
-            rotation.mult(Vector3f.UNIT_Y, up);
-            rotation.mult(Vector3f.UNIT_X, left);
-            rbc.getAngularVelocity(angularVel);
-            rbc.getPhysicsLocation(location);
-            
-            // wheel turning logic
-            steeringCurrent = 0;
-            if (steerLeft != 0) //left
-                steeringCurrent += getBestTurnAngle(steerLeft, 1);
-            if (steerRight != 0) //right
-                steeringCurrent -= getBestTurnAngle(steerRight, -1);
-            steeringCurrent = ignoreSpeedFactor ? steeringCurrent : steeringAverager.get(steeringCurrent, tpf);
-            steeringCurrent = FastMath.clamp(steeringCurrent, -carData.w_steerAngle, carData.w_steerAngle);
-
-            updateControlInputs(steeringCurrent, brakeCurrent, handbrakeCurrent);
-        }
-        
-        super.prePhysicsTick(space, tpf);
-    }
-    
     private float getBestTurnAngle(float trySteerAngle, float sign) {
         if (ignoreSpeedFactor)
             return trySteerAngle;
         
         Vector3f local_vel = rotation.inverse().mult(vel);
-        if (local_vel.z < 0 || ((-sign * this.driftAngle) < 0 && Math.abs(this.driftAngle) > carData.minDriftAngle * FastMath.DEG_TO_RAD)) {
+        if (local_vel.z < 0 || ((-sign * rayCar.driftAngle) < 0 && Math.abs(
+                rayCar.driftAngle) > rayCar.carData.minDriftAngle * FastMath.DEG_TO_RAD)) {
             return trySteerAngle;
             //when going backwards, slow or needing to turning against drift, you get no speed factor
             //eg: car is pointing more left than velocity, and is also turning left
@@ -138,7 +134,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
 
         // this is magic, but: minimum should be bast pjk lat, but it doesn't catch up to the turning angle required
         // so we just add some of the angular vel value to it
-        return this.wheels[0].data.maxLat + angularVel.length()*0.25f; //constant needs minor adjustments
+        return rayCar.wheels[0].data.maxLat + angularVel.length()*0.25f; //constant needs minor adjustments
         // remember that this value is clamped after this method is called
     }
 
@@ -156,7 +152,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
         
         visuals.cleanup(app);
         
-        space.removeTickListener(this);
+        space.removeTickListener(rayCar);
         space.remove(this.visuals.getRootNode());
     }
     
@@ -165,7 +161,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
         return visuals.getRootNode();
     }
     public CarDataConst getCarData() {
-        return carData;
+        return rayCar.carData;
     }
     
     public void attachAI(ICarAI ai, boolean setNotPlayer) {
@@ -198,19 +194,19 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
     }
     
     public boolean noWheelsInContact() {
-        return !wheels[0].inContact && !wheels[1].inContact && !wheels[2].inContact && !wheels[3].inContact;
+        return !rayCar.wheels[0].inContact && !rayCar.wheels[1].inContact && !rayCar.wheels[2].inContact && !rayCar.wheels[3].inContact;
     }
     public RayWheel getWheel(int w_id) {
-        return this.wheels[w_id];
+        return rayCar.wheels[w_id];
     }
     public List<RayWheel> getDriveWheels() {
         List<RayWheel> results = new LinkedList<>();
 
-        if (this.carData.driveFront) {
+        if (rayCar.carData.driveFront) {
             results.add(getWheel(0));
             results.add(getWheel(1));
         }
-        if (this.carData.driveRear) {
+        if (rayCar.carData.driveRear) {
             results.add(getWheel(2));
             results.add(getWheel(3));
         }
@@ -222,7 +218,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
      * Get base physics object. To easily get properties try: vel, forward, up, left,
      * location, angularVel and rotation */
     public PhysicsRigidBody getPhysicsObject() {
-        return rbc;
+        return rayCar.rbc;
     }
     
     /**
@@ -234,13 +230,13 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
      */
     public void setPhysicsProperties(Vector3f position, Vector3f velocity, Quaternion rotation, Vector3f angularVel) {
         if (position != null)
-            rbc.setPhysicsLocation(position);
+            rayCar.rbc.setPhysicsLocation(position);
         if (velocity != null)
-            rbc.setLinearVelocity(velocity);
+            rayCar.rbc.setLinearVelocity(velocity);
         if (rotation != null)
-            rbc.setPhysicsRotation(rotation);
+            rayCar.rbc.setPhysicsRotation(rotation);
         if (angularVel != null)
-            rbc.setAngularVelocity(angularVel);
+            rayCar.rbc.setAngularVelocity(angularVel);
     }
     
     public float getCurrentVehicleSpeedKmHour() {
@@ -252,7 +248,7 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
     //enabled functions
     public void setEnabled(boolean enabled) {
         if (this.space != null) {
-            this.rbc.setEnabled(enabled);
+            rayCar.rbc.setEnabled(enabled);
             visuals.enableSound(enabled);
             
             if (enabled && !addedToSpace) {
@@ -269,70 +265,89 @@ public class RayCarControl extends RayCarPowered implements ICarPowered, ICarCon
     public ICarControlled getControlledState() { return (ICarControlled)this; }
     public void setSteerLeft(float value) { steerLeft = value; }
     public void setSteerRight(float value) { steerRight = value; }
-    public void setAccel(float value) { accelCurrent = value; }
+    public void setAccel(float value) { rayCar.accelCurrent = value; }
     public void setBraking(float value) { brakeCurrent = value; }
     public void setHandbrake(boolean value) { handbrakeCurrent = value; }
-    public void setNitro(boolean value) { ifNitro = value; }
+    public void setNitro(boolean value) { rayCar.ifNitro = value; }
     public void jump() { 
-        rbc.applyImpulse(carData.JUMP_FORCE, new Vector3f()); // push up
+        rayCar.rbc.applyImpulse(rayCar.carData.JUMP_FORCE, new Vector3f()); // push up
         Vector3f old = location.clone();
         old.y += 2; // and move up
-        rbc.setPhysicsLocation(old);
+        rayCar.rbc.setPhysicsLocation(old);
 
         Vector3f vel = this.vel.clone();
         vel.y = 0;
-        rbc.setLinearVelocity(vel);
+        rayCar.rbc.setLinearVelocity(vel);
     }
     public void flip() {
-        rbc.setPhysicsRotation(new Quaternion()); //TODO keep forward the same
-        rbc.setPhysicsLocation(location.add(new Vector3f(0, 1, 0)));
+        rayCar.rbc.setPhysicsRotation(new Quaternion()); //TODO keep forward the same
+        rayCar.rbc.setPhysicsLocation(location.add(new Vector3f(0, 1, 0)));
     }
     public void reset() {
-        rbc.setPhysicsRotation(new Quaternion());
-        rbc.setLinearVelocity(new Vector3f());
-        rbc.setAngularVelocity(new Vector3f());
+        rayCar.rbc.setPhysicsRotation(new Quaternion());
+        rayCar.rbc.setLinearVelocity(new Vector3f());
+        rayCar.rbc.setAngularVelocity(new Vector3f());
 
-        this.curRPM = 1000;
-        for (RayWheel w : this.wheels) {
+        rayCar.curRPM = 1000;
+        for (RayWheel w : rayCar.wheels) {
             w.radSec = 0; // stop rotation of the wheels
             w.inContact = false; // stop any forces for at least one physics frame
         }
         visuals.reset();
 
         Transform transform = getResetPosition(this.app.getStateManager(), this);
-        rbc.setPhysicsLocation(transform.getTranslation());
-        rbc.setPhysicsRotation(transform.getRotation());
+        rayCar.rbc.setPhysicsLocation(transform.getTranslation());
+        rayCar.rbc.setPhysicsRotation(transform.getRotation());
     }
     public void reverse(boolean value) {
         if (value)
-            curGear = REVERSE_GEAR_INDEX;
+            rayCar.curGear = RayCarPowered.REVERSE_GEAR_INDEX;
         else
-            curGear = 1;
+            rayCar.curGear = 1;
     }
     public void ignoreSpeedFactor(boolean value) { ignoreSpeedFactor = value; }
     public void ignoreTractionModel(boolean value) { 
         if (value)
-            tractionEnabled = !tractionEnabled;
+            rayCar.tractionEnabled = !rayCar.tractionEnabled;
     }
     // #endregion
 
     // #region ICarPowered
     public ICarPowered getPoweredState() { return (ICarPowered)this; }
-    public float accelCurrent() { return accelCurrent; }
+    public float accelCurrent() { return rayCar.accelCurrent; }
     public float brakeCurrent() { return brakeCurrent; }
-    public int curGear() { return this.curGear; }
-    public float nitro() { return this.getNitroRemaining(); }
+    public int curGear() { return rayCar.curGear; }
+    public float nitro() { return rayCar.getNitroRemaining(); }
     public float steeringCurrent() { return this.steeringCurrent; }
-    public int curRPM() { return this.curRPM; }
+    public int curRPM() { return rayCar.curRPM; }
     public boolean ifHandbrake() { return this.handbrakeCurrent; }
-    public float driftAngle() { return this.driftAngle; }
+    public float driftAngle() { return rayCar.driftAngle; }
+    public Vector3f getPlanarGForce() { return rayCar.planarGForce; }
+    public float getWheelTorque(int w_id) { return rayCar.getWheelTorque(w_id); }
     // #endregion
     
-
     
     private static Transform getResetPosition(AppStateManager stateManager, RayCarControl car) {
         IDrive drive = stateManager.getState(IDrive.class);
         drive.resetWorld();
         return drive.resetPosition(car);
+    }
+
+    public final String statsString() {
+        var rbc = this.rayCar.rbc;
+        return rallygame.helper.H.round3f(rbc.getPhysicsLocation(), 2) + "\nspeed:"
+                + rallygame.helper.H.round3f(rbc.getLinearVelocity(), 2) + "m/s\nRPM:" + rayCar.curRPM + "\nengine:"
+                + rayCar.engineTorque + "\ndrag:" + rallygame.helper.H.roundDecimal(
+                        rayCar.dragDir.length(), 3) + " rr("
+                + rallygame.helper.H.roundDecimal(rollingResistanceTotal(), 3) + ")N\ndistanceTravelled:"
+                + rallygame.helper.H.roundDecimal(rayCar.travelledDistance, 1) + "m";
+    }
+
+    private float rollingResistanceTotal() {
+        float total = 0;
+        for (var w: rayCar.wheels) {
+            total += w.rollingResistance;
+        }
+        return total;
     }
 }

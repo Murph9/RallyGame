@@ -1,5 +1,7 @@
 package rallygame.car.ray;
 
+import com.jme3.math.Vector3f;
+
 public interface ICarPowered {
     float accelCurrent();
     float brakeCurrent();
@@ -9,4 +11,6 @@ public interface ICarPowered {
     float steeringCurrent();
     int curRPM();
     float driftAngle();
+    Vector3f getPlanarGForce();
+    float getWheelTorque(int w_id);
 }

@@ -213,7 +213,7 @@ public class CarUITelemetry extends BaseAppState {
         
         // g forces
         // needs to be translated from local into screen axis
-        Vector3f gs = p.planarGForce.mult(1 / gravity);
+        Vector3f gs = p.getPlanarGForce().mult(1 / gravity);
         gs.y = gs.z; // z is front back
         gs.z = 0; // screen has no depth
         gs = gForceAverager.get(gs);
