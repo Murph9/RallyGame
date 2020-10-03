@@ -88,12 +88,12 @@ public class RayCarControl implements ICarPowered, ICarControlled {
         if (ai != null) {
             ai.update(tpf);
         }
-        // set many view fields (in place)
+        // set many view fields
         rotation = rayCar.rbc.getPhysicsRotation();
         vel = rayCar.rbc.getLinearVelocity();
-        rotation.mult(Vector3f.UNIT_Z, forward);
-        rotation.mult(Vector3f.UNIT_Y, up);
-        rotation.mult(Vector3f.UNIT_X, left);
+        forward = rotation.mult(Vector3f.UNIT_Z);
+        up = rotation.mult(Vector3f.UNIT_Y);
+        left = rotation.mult(Vector3f.UNIT_X);
         angularVel = rayCar.rbc.getAngularVelocity();
         location = rayCar.rbc.getPhysicsLocation();
         
