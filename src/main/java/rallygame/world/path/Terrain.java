@@ -65,8 +65,9 @@ public class Terrain extends BaseAppState implements ILoadable {
     protected Terrain(TerrainSettings features) {
         this.features = features;
         this.sideLength = (1 << features.size) + 1; // 6 -> 64 + 1
+        
         features.tileCount = Math.max(features.tileCount, 1);
-
+        
         this.rootNode = new Node("Terrain root node");
         this.roads = new LinkedList<>();
 
@@ -100,12 +101,14 @@ public class Terrain extends BaseAppState implements ILoadable {
         this.loadingMessage = "Loading terrain";
 
         for (int i = 0; i < features.tileCount; i++) {
-            var tObj = new TerrainObj();
-            tObj.offset = new Vector2f(i, 0);
-            tObj.quad = factory.create(app.getAssetManager(), new Vector2f(i, 0), features.scale, sideLength);
-            tObj.rootNode = new Node("terrain at " + tObj.offset);
-            tObj.rootNode.attachChild(tObj.quad);
-            this.pieces.put(tObj.offset, tObj);
+            for (int j = 0; j < features.tileCount; j++) {
+                var tObj = new TerrainObj();
+                tObj.offset = new Vector2f(i, j);
+                tObj.quad = factory.create(app.getAssetManager(), tObj.offset, features.scale, sideLength);
+                tObj.rootNode = new Node("terrain at " + tObj.offset);
+                tObj.rootNode.attachChild(tObj.quad);
+                this.pieces.put(tObj.offset, tObj);
+            }
         }
         
         this.curStep++;
@@ -115,6 +118,15 @@ public class Terrain extends BaseAppState implements ILoadable {
         var roadGenerator = new TerrainRoadGenerator(HEIGHT_WEIGHT, SEARCH_TIMEOUT, (s) -> this.loadingMessage = "Loading roads\n"+s);
         List<TerrainQuad> terrainQuads = pieces.values().stream().map(x -> x.quad).collect(Collectors.toList());
         var roads = roadGenerator.generateFrom(terrainQuads);
+        // make sure they are valid roads
+        for (RoadPointList road : roads) {
+            if (road.failed) {
+                this.loadingMessage = road.failedMessage;
+                this.loaded = true;
+                return;
+                //TODO something better
+            }
+        }
 
         var roadCreator = new TerrainRoadPointsToObject(ROAD_WIDTH);
         this.roads.addAll(roadCreator.create(roads, app.getAssetManager()));
@@ -139,11 +151,6 @@ public class Terrain extends BaseAppState implements ILoadable {
                 continue;
             }
             quads.addAll(road.road.middle.getMeshAsQuads());
-        }
-
-        if (roads.stream().anyMatch(x -> x.failed)) {
-            loaded = true;
-            return;
         }
 
         var heights = TerrainQuadUtil.getHeightsForQuads(features.scale, quads);

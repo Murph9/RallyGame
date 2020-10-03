@@ -43,7 +43,7 @@ public class TerrainRoadPointsToObject {
         // TODO use a rolling average to smooth points so there are less hard corners
 
         Spline s3 = new Spline(SplineType.CatmullRom, list, 1, false); // [0-1], 1 is more smooth
-        CatmullRomRoad road = new CatmullRomRoad(s3, 1, this.roadWidth);
+        CatmullRomRoad road = new CatmullRomRoad(s3, 5, this.roadWidth);
 
         // add the extra things
         road.addWidth(CatmullRomRoad.SideA(this.roadWidth));

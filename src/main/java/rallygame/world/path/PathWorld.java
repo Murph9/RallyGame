@@ -29,7 +29,7 @@ public class PathWorld extends World implements ICheckpointWorld {
         ft.seed = seed;
         ft.scale = new Vector3f(scaleXZ, scaleY, scaleXZ);
         ft.size = size;
-        ft.tileCount = 3;
+        ft.tileCount = 2;
         ft.grass = terrainFeatures;
         ft.cubes = terrainFeatures;
         terrain = new Terrain(ft);

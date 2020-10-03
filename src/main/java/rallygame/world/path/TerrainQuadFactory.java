@@ -25,7 +25,7 @@ public class TerrainQuadFactory {
         terrain.setLocalTranslation(pieceGridToWorldPos(offset.mult((sideLength - 1)), scale));
 
         terrain.setMaterial(createMaterial(am, scale.y));
-
+        
         return terrain;
     }
 

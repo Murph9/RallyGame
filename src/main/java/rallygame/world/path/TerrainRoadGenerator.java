@@ -52,9 +52,11 @@ public class TerrainRoadGenerator {
         //normalise the start and end to grid positions, otherwise search will fail
         start = TerrainQuadUtil.getClosestGridPoint(terrains.get(0), start);
         end = TerrainQuadUtil.getClosestGridPoint(terrains.get(0), end);
+        var center = TerrainQuadUtil.getClosestGridPoint(terrains.get(0), H.v3tov2fXZ(boundingBox.getCenter()));
 
-        // generate road from start to end
-        roads.add(getFrom(terrains, start, end));
+        // generate road from start to end through the center
+        roads.add(getFrom(terrains, start, center));
+        roads.add(getFrom(terrains, center, end));
 
         // TODO something fancy like not assuming that we are driving on every quad
 

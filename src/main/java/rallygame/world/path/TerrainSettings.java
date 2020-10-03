@@ -14,7 +14,7 @@ public class TerrainSettings {
     public TerrainSettings() {
         seed = FastMath.nextRandomInt();
         size = 5;
-        tileCount = 3;
+        tileCount = 2;
         cubes = true;
         grass = true;
         scale = new Vector3f(30, 400, 30);
