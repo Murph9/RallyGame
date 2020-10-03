@@ -74,7 +74,7 @@ public class DynamicCopyRace extends DriveBase
     public DynamicCopyRace(DefaultBuilder world, IDriveDone done) {
         super(done, Car.Runner, world);
         world.registerListener(this);
-        world.setDistFunction(() -> this.cb.getAll().stream().map(x -> x.location).toArray(Vector3f[]::new));
+        world.setDistFunction(() -> this.cm.getAll().stream().map(x -> x.location).toArray(Vector3f[]::new));
 
         initCheckpointBuffer = new LinkedList<>();
     }
@@ -102,7 +102,7 @@ public class DynamicCopyRace extends DriveBase
 
         //buildCars and load ai
         for (int i = carList.length - 1; i >= 0; i--) {
-            RayCarControl c = this.cb.addCar(carList[i], worldStarts[i+1], worldRot, false);
+            RayCarControl c = this.cm.addCar(carList[i], worldStarts[i+1], worldRot, false);
             RaceAI rAi = new RaceAI(c, this, false);
             c.attachAI(rAi, true);
         }
@@ -116,7 +116,7 @@ public class DynamicCopyRace extends DriveBase
         getState(BulletAppState.class).getPhysicsSpace().add(boxG);
 
         // init checkpoints
-        progress = new CheckpointProgress(CheckpointProgress.Type.Sprint, checkpoints, cb.getAll(), cb.getPlayer());
+        progress = new CheckpointProgress(CheckpointProgress.Type.Sprint, checkpoints, cm.getAll(), cm.getPlayer());
         progress.setCheckpointModel(CheckpointProgress.GetDefaultCheckpointModel(app, 4, new ColorRGBA(0, 1, 0, 0.4f)));
         getStateManager().attach(progress);
 
@@ -130,7 +130,7 @@ public class DynamicCopyRace extends DriveBase
         new Screen(getApplication().getContext().getSettings()).topLeftMe(container);
 
         // init collision code
-        this.carCollisionState = new RayCarCollisionService(this, this.cb);
+        this.carCollisionState = new RayCarCollisionService(this, this.cm);
         getState(BulletAppState.class).getPhysicsSpace().addCollisionListener(carCollisionState);
 
         //actually init
@@ -223,7 +223,7 @@ public class DynamicCopyRace extends DriveBase
             break;
         case Win:
             // delay and stuff maybe
-            this.cb.setEnabled(false);
+            this.cm.setEnabled(false);
             end();
             break;
         default:
@@ -264,8 +264,8 @@ public class DynamicCopyRace extends DriveBase
     }
 
     private void setAllCarsToStart() {
-        int count = cb.getCount() - 1;
-        for (RayCarControl car: cb.getAll()) {
+        int count = cm.getCount() - 1;
+        for (RayCarControl car: cm.getAll()) {
             car.setPhysicsProperties(worldStarts[count], new Vector3f(), worldRot, new Vector3f());
             count--;
         }
@@ -293,7 +293,7 @@ public class DynamicCopyRace extends DriveBase
         getState(ParticleAtmosphere.class).setEnabled(true);
 
         this.camera.setEnabled(true);
-        this.cb.setEnabled(true);
+        this.cm.setEnabled(true);
     }
 
     @Override
@@ -302,7 +302,7 @@ public class DynamicCopyRace extends DriveBase
         getState(ParticleAtmosphere.class).setEnabled(false);
 
         this.camera.setEnabled(false);
-        this.cb.setEnabled(false);
+        this.cm.setEnabled(false);
     }
     
     @Override

@@ -13,7 +13,7 @@ import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.style.ElementId;
 
-import rallygame.car.CarBuilder;
+import rallygame.car.CarManager;
 import rallygame.car.CarCamera;
 import rallygame.car.ai.BrakeAI;
 import rallygame.car.ai.RaceAI;
@@ -31,7 +31,7 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
 
     private final IDuelFlow flow;
 
-    private CarBuilder cb;
+    private CarManager cm;
     private DuelRaceMenu menu;
     private CheckpointProgress progress;
     private CountdownTimer countdown;
@@ -62,18 +62,18 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
         Vector3f[] checkpoints = world.checkpoints();
         checkpointCount = checkpoints.length;
 
-        this.cb = getState(CarBuilder.class);
+        this.cm = getState(CarManager.class);
 
         DuelData data = flow.getData();
 
-        CarDataConst yourCarData = cb.loadData(data.yourCar, data.yourAdjuster);
-        RayCarControl rayCar = cb.addCar(yourCarData, world.start(0), true);
+        CarDataConst yourCarData = cm.loadData(data.yourCar, data.yourAdjuster);
+        RayCarControl rayCar = cm.addCar(yourCarData, world.start(0), true);
 
         uiNode = new CarUI(rayCar);
         getStateManager().attach(uiNode);
 
-        CarDataConst theirCarData = cb.loadData(data.theirCar, data.theirAdjuster);
-        RayCarControl car = this.cb.addCar(theirCarData, world.start(1), false);
+        CarDataConst theirCarData = cm.loadData(data.theirCar, data.theirAdjuster);
+        RayCarControl car = this.cm.addCar(theirCarData, world.start(1), false);
         car.attachAI(new RaceAI(car, this), true);
 
         // initCamera
@@ -82,7 +82,7 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
         app.getInputManager().addRawInputListener(camera);
 
         // wait until race start
-        cb.setEnabled(false);
+        cm.setEnabled(false);
 
         // init menu
         this.menu = new DuelRaceMenu(this, yourCarData, theirCarData, () -> {
@@ -95,7 +95,7 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
         countdown = new CountdownTimer();
 
         // Checkpoint detection and stuff
-        progress = new CheckpointProgress(CheckpointProgress.Type.Sprint, checkpoints, cb.getAll(), rayCar);
+        progress = new CheckpointProgress(CheckpointProgress.Type.Sprint, checkpoints, cm.getAll(), rayCar);
         progress.setCheckpointModel(CheckpointProgress.GetDefaultCheckpointModel(app, 10));
         getStateManager().attach(progress);
 
@@ -116,9 +116,9 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
         getStateManager().detach(uiNode);
         uiNode = null;
 
-        this.cb.setEnabled(false);
-        this.cb.removeAll();
-        this.cb = null;
+        this.cm.setEnabled(false);
+        this.cm.removeAll();
+        this.cm = null;
 
         getStateManager().detach(camera);
         app.getInputManager().removeRawInputListener(camera);
@@ -131,7 +131,7 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
         getState(ParticleAtmosphere.class).setEnabled(true);
 
         this.camera.setEnabled(true);
-        //TODO this should be enabling/disabling the cb here
+        //TODO this should be enabling/disabling the cm here
     }
 
     @Override
@@ -177,7 +177,7 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
     protected void quit() {
         DuelResultData d = new DuelResultData();
         d.raceResult = new DuelRaceResult();
-        d.raceResult.playerWon = winner == this.cb.getPlayer();
+        d.raceResult.playerWon = winner == this.cm.getPlayer();
         d.raceResult.mills = (long) (raceTimer * 1000f);
 
         Log.p("Winner: " + winner.getCarData().name);
@@ -221,12 +221,12 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
                 break;
             case Racing:
                 ((SimpleApplication) getApplication()).getGuiNode().detachChild(countdown);
-                cb.setEnabled(true);
+                cm.setEnabled(true);
                 raceTimer = 0;
                 break;
             case Finished:
-                menu.raceStopped(this.winner == this.cb.getPlayer());
-                for (RayCarControl c : this.cb.getAll()) {
+                menu.raceStopped(this.winner == this.cm.getPlayer());
+                for (RayCarControl c : this.cm.getAll()) {
                     c.attachAI(new BrakeAI(c), true);
                 }
                 break;
@@ -259,6 +259,6 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
 
     @Override
     public Collection<RayCarControl> getAllCars() {
-        return this.cb.getAll();
+        return this.cm.getAll();
     }
 }

@@ -82,12 +82,12 @@ public class DriveRace extends DriveBase implements PauseState.ICallback, ICheck
 
         //buildCars and load ai
         for (int i = 0; i < this.themCount; i++) {
-            RayCarControl c = this.cb.addCar(Rand.randFromArray(Car.values()), worldStarts[i+1], worldRot, false);
+            RayCarControl c = this.cm.addCar(Rand.randFromArray(Car.values()), worldStarts[i+1], worldRot, false);
             RaceAI rAi = new RaceAI(c, this);
             c.attachAI(rAi, true);
         }
         
-        progress = new CheckpointProgress(CheckpointProgress.Type.Lap, checkpoints, cb.getAll(), cb.getPlayer());
+        progress = new CheckpointProgress(CheckpointProgress.Type.Lap, checkpoints, cm.getAll(), cm.getPlayer());
         progress.setCheckpointModel(CheckpointProgress.GetDefaultCheckpointModel(app, 2, new ColorRGBA(0, 1, 0, 0.4f)));
         getStateManager().attach(progress);
 
@@ -192,7 +192,7 @@ public class DriveRace extends DriveBase implements PauseState.ICallback, ICheck
 
     private void setAllCarsToStart() {
         int count = 0;
-        for (RayCarControl car: cb.getAll()) {
+        for (RayCarControl car: cm.getAll()) {
             car.setPhysicsProperties(worldStarts[count], new Vector3f(), worldRot, new Vector3f());
             count++;
         }
@@ -219,7 +219,7 @@ public class DriveRace extends DriveBase implements PauseState.ICallback, ICheck
         getState(ParticleAtmosphere.class).setEnabled(true);
 
         this.camera.setEnabled(true);
-        this.cb.setEnabled(true);
+        this.cm.setEnabled(true);
     }
 
     @Override
@@ -228,7 +228,7 @@ public class DriveRace extends DriveBase implements PauseState.ICallback, ICheck
         getState(ParticleAtmosphere.class).setEnabled(false);
 
         this.camera.setEnabled(false);
-        this.cb.setEnabled(false);
+        this.cm.setEnabled(false);
     }
     
     @Override

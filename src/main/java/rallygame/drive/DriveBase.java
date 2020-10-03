@@ -28,7 +28,7 @@ public class DriveBase extends BaseAppState implements IDrive {
 
     // car stuff
     private final Car car;
-    protected CarBuilder cb;
+    protected CarManager cm;
 
     // gui and camera stuff
     protected CarCamera camera;
@@ -56,13 +56,13 @@ public class DriveBase extends BaseAppState implements IDrive {
         stateManager.attach(menu);
 
         // build player
-        this.cb = getState(CarBuilder.class);
-        if (!this.cb.getAll().isEmpty()) {
+        this.cm = getState(CarManager.class);
+        if (!this.cm.getAll().isEmpty()) {
             Log.e("!Unusually there are cars still in car builder, please clean up.");
-            this.cb.removeAll();
+            this.cm.removeAll();
         }
 
-        RayCarControl rayCar = cb.addCar(car, world.getStart(), true);
+        RayCarControl rayCar = cm.addCar(car, world.getStart(), true);
 
         uiNode = new CarUI(rayCar);
         stateManager.attach(uiNode);
@@ -89,7 +89,7 @@ public class DriveBase extends BaseAppState implements IDrive {
         this.world.setEnabled(enabled); // we kinda don't want the physics running while paused
         getState(BulletAppState.class).setEnabled(enabled);
         this.camera.setEnabled(enabled);
-        this.cb.setEnabled(enabled);
+        this.cm.setEnabled(enabled);
 
         getState(ParticleAtmosphere.class).setEnabled(enabled);
     }
@@ -103,7 +103,7 @@ public class DriveBase extends BaseAppState implements IDrive {
     }
 
     public final Collection<RayCarControl> getAllCars() {
-        return this.cb.getAll();
+        return this.cm.getAll();
     }
 
     @Override
@@ -123,19 +123,19 @@ public class DriveBase extends BaseAppState implements IDrive {
         app.getInputManager().removeRawInputListener(camera);
         camera = null;
 
-        cb.removeAll();
-        cb = null;
+        cm.removeAll();
+        cm = null;
     }
 
     protected final void reInitPlayerCar(CarDataConst carData) {
-        var oldCar = cb.getPlayer();
-        var newCar = this.cb.addCar(carData, world.getStart(), true);
+        var oldCar = cm.getPlayer();
+        var newCar = this.cm.addCar(carData, world.getStart(), true);
         reInitPlayerCar(oldCar, newCar);
     }
 
     protected final void reInitPlayerCar(Car car) {
-        var oldCar = cb.getPlayer();
-        var newCar = this.cb.addCar(car, world.getStart(), true);
+        var oldCar = cm.getPlayer();
+        var newCar = this.cm.addCar(car, world.getStart(), true);
         reInitPlayerCar(oldCar, newCar);
     }
 
@@ -151,7 +151,7 @@ public class DriveBase extends BaseAppState implements IDrive {
         var vel = oldCar.vel;
         var rot = oldCar.rotation;
         var ang = oldCar.angularVel;
-        this.cb.removeCar(oldCar);
+        this.cm.removeCar(oldCar);
 
         newCar.setPhysicsProperties(pos, vel, rot, ang);
 

@@ -12,7 +12,7 @@ import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
-import rallygame.car.CarBuilder;
+import rallygame.car.CarManager;
 import rallygame.car.data.Car;
 import rallygame.car.ray.RayCarControl;
 import rallygame.car.ui.CarStatsUI;
@@ -32,7 +32,7 @@ public class ChooseCar extends BaseAppState {
 	private IWorld world;
 	private StaticWorld worldType;
 
-	private CarBuilder cb;
+	private CarManager cm;
 	private Car car;
 	private Container infoWindow;
 	
@@ -59,8 +59,8 @@ public class ChooseCar extends BaseAppState {
 		getStateManager().attach(world);
         
         //init player
-		cb = getState(CarBuilder.class);
-		cb.addCar(car, worldType.start, new Quaternion(), true);
+		cm = getState(CarManager.class);
+		cm.addCar(car, worldType.start, new Quaternion(), true);
 
 		//init camera
 		camera = new BasicCamera("Camera", app.getCamera(), new Vector3f(0,3,7), new Vector3f(0,1.2f, 0));
@@ -70,7 +70,7 @@ public class ChooseCar extends BaseAppState {
         Screen screen = new Screen(app.getContext().getSettings());
 
 		//info window first so the event listeners can delete it
-        infoWindow = new CarStatsUI(app.getAssetManager(), this.cb.getPlayer().getCarData());
+        infoWindow = new CarStatsUI(app.getAssetManager(), this.cm.getPlayer().getCarData());
         screen.topLeftMe(infoWindow);
 		((SimpleApplication) app).getGuiNode().attachChild(infoWindow);
 
@@ -86,17 +86,17 @@ public class ChooseCar extends BaseAppState {
                 public void execute( Button source ) {
                     car = c;
 
-                    cb.removeCar(cb.getPlayer());
-    				cb.addCar(car, worldType.start, worldType.rot, true);
+                    cm.removeCar(cm.getPlayer());
+    				cm.addCar(car, worldType.start, worldType.rot, true);
                     
                     Screen screen = new Screen(app.getContext().getSettings());
 
 					((SimpleApplication) app).getGuiNode().detachChild(infoWindow);
-					infoWindow = new CarStatsUI(app.getAssetManager(), cb.getPlayer().getCarData());
+					infoWindow = new CarStatsUI(app.getAssetManager(), cm.getPlayer().getCarData());
                     screen.topLeftMe(infoWindow);
 					((SimpleApplication) app).getGuiNode().attachChild(infoWindow);
 
-    				graph.updateMyPhysicsVehicle(cb.getPlayer().getCarData());
+    				graph.updateMyPhysicsVehicle(cm.getPlayer().getCarData());
                 }
             });
         	i++;
@@ -113,7 +113,7 @@ public class ChooseCar extends BaseAppState {
         });
         
         Vector3f size = new Vector3f(400,400,0);
-        graph = new PowerCurveGraph(app.getAssetManager(), this.cb.getPlayer().getCarData(), size);
+        graph = new PowerCurveGraph(app.getAssetManager(), this.cm.getPlayer().getCarData(), size);
 		graph.setLocalTranslation(screen.get(HorizontalPos.Right, VerticalPos.Bottom, size));
 		((SimpleApplication)app).getGuiNode().attachChild(graph);
 	}
@@ -127,7 +127,7 @@ public class ChooseCar extends BaseAppState {
 		if (posReset > RESET_IMPULSE) {
 			posReset = 0;
 
-			RayCarControl car = cb.getPlayer();
+			RayCarControl car = cm.getPlayer();
             Vector3f pos = car.location;
             car.setPhysicsProperties(new Vector3f(0, pos.y, 0), null, (Quaternion) null, null);
 		}
@@ -144,18 +144,18 @@ public class ChooseCar extends BaseAppState {
 		graph.removeFromParent();
 		graph = null;
 
-		cb.removeAll();
-		cb = null;
+		cm.removeAll();
+		cm = null;
 	}
 
 	@Override
 	protected void onEnable() {
-		this.cb.setEnabled(true);
+		this.cm.setEnabled(true);
 	}
 
 	@Override
 	protected void onDisable() {
-		this.cb.setEnabled(false);
+		this.cm.setEnabled(false);
 	}
 
 

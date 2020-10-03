@@ -10,7 +10,7 @@ import com.jme3.bullet.BulletAppState.ThreadingType;
 import com.jme3.math.Vector3f;
 import com.simsilica.lemur.GuiGlobals;
 
-import rallygame.car.CarBuilder;
+import rallygame.car.CarManager;
 import rallygame.car.data.CarDataLoader;
 import rallygame.effects.FilterManager;
 import rallygame.effects.ParticleAtmosphere;
@@ -36,7 +36,7 @@ public class DuelApp extends SimpleApplication {
         super(new ParticleAtmosphere()
                 , new AudioListenerState()
                 , new FilterManager()
-                , new CarBuilder(0.4f, new CarDataLoader())
+                , new CarManager(0.4f, new CarDataLoader())
                 , new DebugAppState()
                 , new ObjectPlacer(true)
                 , new ConstantChecker()

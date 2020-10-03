@@ -19,7 +19,7 @@ import com.simsilica.lemur.HAlignment;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.style.ElementId;
 
-import rallygame.car.CarBuilder;
+import rallygame.car.CarManager;
 import rallygame.car.RotatesCarCamera;
 import rallygame.car.ai.DriveAlongAI;
 import rallygame.car.data.Car;
@@ -40,7 +40,7 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
     private final DefaultBuilder world;
 
     private AppState camera;
-    private CarBuilder cb;
+    private CarManager cm;
 
     private Container mainWindow;
     private Container altWindow;
@@ -56,7 +56,7 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
 
     @Override
     protected void initialize(Application app) {
-        this.cb = getState(CarBuilder.class);
+        this.cm = getState(CarManager.class);
 
         initMenu((SimpleApplication) app);
         initBackground((SimpleApplication) app);
@@ -77,7 +77,7 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
             });
 
             mainWindow.addChild(new Label("Wins: " + duelData.wins));
-            CarDataConst data = cb.loadData(duelData.yourCar, duelData.yourAdjuster);
+            CarDataConst data = cm.loadData(duelData.yourCar, duelData.yourAdjuster);
             mainWindow.addChild(new CarStatsUI(app.getAssetManager(), data), 2, 0);
         } else {
             Label l = mainWindow.addChild(new Label("Press any key to start"));
@@ -114,7 +114,7 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
         getStateManager().attach(world);
 
         // build player
-        RayCarControl car = cb.addCar(this.carType, world.getStart(), true);
+        RayCarControl car = cm.addCar(this.carType, world.getStart(), true);
 
         // attach basic ai, for the view
         DriveAlongAI ai = new DriveAlongAI(car, (vec) -> world.getNextPieceClosestTo(vec));
@@ -124,7 +124,7 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
         this.camera = new RotatesCarCamera(app.getCamera(), car);
         getStateManager().attach(this.camera);
 
-        this.cb.setEnabled(true);
+        this.cm.setEnabled(true);
         getState(BulletAppState.class).setEnabled(true);
     }
 
@@ -141,9 +141,9 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
         getStateManager().detach(camera);
         camera = null;
 
-        cb.removeAll();
-        cb.setEnabled(false);
-        cb = null;
+        cm.removeAll();
+        cm.setEnabled(false);
+        cm = null;
     }
 
     @Override

@@ -14,7 +14,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.system.AppSettings;
 import com.simsilica.lemur.GuiGlobals;
 
-import rallygame.car.CarBuilder;
+import rallygame.car.CarManager;
 import rallygame.car.data.CarDataLoader;
 import rallygame.effects.FilterManager;
 import rallygame.effects.ParticleAtmosphere;
@@ -36,7 +36,7 @@ public class App extends SimpleApplication {
 				, new StatsAppState()
 				, new FilterManager()
 				, new ObjectPlacer(true)
-				, new CarBuilder(0.4f, new CarDataLoader())
+				, new CarManager(0.4f, new CarDataLoader())
                 , new ConstantChecker()
 				, new DebugAppState()
 				, new WorldGuiText()

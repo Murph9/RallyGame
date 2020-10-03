@@ -39,7 +39,7 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
     public DriveDynamicRace(DefaultBuilder world, IDriveDone done) {
         super(done, Car.Runner, world);
         world.registerListener(this);
-        world.setDistFunction(() -> this.cb.getAll().stream().map(x -> x.location).toArray(Vector3f[]::new));
+        world.setDistFunction(() -> this.cm.getAll().stream().map(x -> x.location).toArray(Vector3f[]::new));
 
         initCheckpointBuffer = new LinkedList<>();
     }
@@ -67,12 +67,12 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
 
         //buildCars and load ai
         for (int i = 0; i < this.themCount; i++) {
-            RayCarControl c = this.cb.addCar(Car.LeMans, worldStarts[i+1], worldRot, false);
+            RayCarControl c = this.cm.addCar(Car.LeMans, worldStarts[i+1], worldRot, false);
             RaceAI rAi = new RaceAI(c, this, false);
             c.attachAI(rAi, true);
         }
         
-        progress = new CheckpointProgress(CheckpointProgress.Type.Sprint, checkpoints, cb.getAll(), cb.getPlayer());
+        progress = new CheckpointProgress(CheckpointProgress.Type.Sprint, checkpoints, cm.getAll(), cm.getPlayer());
         progress.setCheckpointModel(CheckpointProgress.GetDefaultCheckpointModel(app, 4, new ColorRGBA(0, 1, 0, 0.4f)));
         getStateManager().attach(progress);
 
@@ -189,7 +189,7 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
 
     private void setAllCarsToStart() {
         int count = 0;
-        for (RayCarControl car: cb.getAll()) {
+        for (RayCarControl car: cm.getAll()) {
             car.setPhysicsProperties(worldStarts[count], new Vector3f(), worldRot, new Vector3f());
             count++;
         }
@@ -216,7 +216,7 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
         getState(ParticleAtmosphere.class).setEnabled(true);
 
         this.camera.setEnabled(true);
-        this.cb.setEnabled(true);
+        this.cm.setEnabled(true);
     }
 
     @Override
@@ -225,7 +225,7 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
         getState(ParticleAtmosphere.class).setEnabled(false);
 
         this.camera.setEnabled(false);
-        this.cb.setEnabled(false);
+        this.cm.setEnabled(false);
     }
     
     @Override

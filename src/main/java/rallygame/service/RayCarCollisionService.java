@@ -4,17 +4,17 @@ import com.jme3.bullet.collision.PhysicsCollisionEvent;
 import com.jme3.bullet.collision.PhysicsCollisionListener;
 import com.jme3.scene.Spatial;
 
-import rallygame.car.CarBuilder;
+import rallygame.car.CarManager;
 import rallygame.car.ray.RayCarControl;
 import rallygame.helper.Geo;
 import rallygame.helper.Log;
 
 public class RayCarCollisionService implements PhysicsCollisionListener {
 
-    private final CarBuilder builder;
+    private final CarManager builder;
     private final IRayCarCollisionListener listener;
 
-    public RayCarCollisionService(IRayCarCollisionListener listener, CarBuilder builder) {
+    public RayCarCollisionService(IRayCarCollisionListener listener, CarManager builder) {
         this.builder = builder;
         this.listener = listener;
     }

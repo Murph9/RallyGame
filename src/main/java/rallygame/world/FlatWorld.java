@@ -9,7 +9,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 
-import rallygame.car.CarBuilder;
+import rallygame.car.CarManager;
 import rallygame.car.ray.RayCarControl;
 import rallygame.effects.LoadModelWrapper;
 
@@ -48,7 +48,7 @@ public class FlatWorld extends World {
 
 	@Override
 	public void update(float tpf) {
-        RayCarControl car = getState(CarBuilder.class).get(0);
+        RayCarControl car = getState(CarManager.class).get(0);
         if (car != null) {
             Vector3f pos = car.location.clone();
 

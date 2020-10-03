@@ -31,15 +31,14 @@ import rallygame.effects.LoadModelWrapper;
 import rallygame.helper.Geo;
 import rallygame.helper.Log;
 
-//TODO rename to carmanager
-public class CarBuilder extends BaseAppState {
+public class CarManager extends BaseAppState {
 
     private final CarDataLoader loader;
     private final List<RayCarControl> cars;
     private final Node rootNode;
     private final float angularDampening;
 
-    public CarBuilder(float angularDampening, CarDataLoader loader) {
+    public CarManager(float angularDampening, CarDataLoader loader) {
         this.cars = new LinkedList<>();
         this.rootNode = new Node("Car Builder Root");
         this.loader = loader;
@@ -48,7 +47,7 @@ public class CarBuilder extends BaseAppState {
     
     @Override
     public void initialize(Application app) {
-        Log.p("CarBuilder init");
+        Log.p(this.getClass().getName() + " init");
 
         ((SimpleApplication)app).getRootNode().attachChild(rootNode);
     }
@@ -164,7 +163,7 @@ public class CarBuilder extends BaseAppState {
         }
         
         cars.add(carControl);
-        carControl.setEnabled(this.isEnabled()); //copy carbuilder enabled-ness
+        carControl.setEnabled(this.isEnabled()); //copy carmanager enabled-ness
         return carControl;
     }
 
@@ -223,6 +222,6 @@ public class CarBuilder extends BaseAppState {
         }
 
         ((SimpleApplication)app).getRootNode().detachChild(rootNode);
-        Log.p("CarBuilder cleanup");
+        Log.p(this.getClass().getName() + " cleanup");
     }
 }

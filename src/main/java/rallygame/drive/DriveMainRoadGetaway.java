@@ -73,8 +73,8 @@ public class DriveMainRoadGetaway extends DriveBase {
 		super.initialize(app);
 		
 		//add the chase car
-		hunter = this.cb.addCar(hunterType, new Vector3f(HUNTER_BUFFER - 10, 0.3f, 0), world.getStart().getRotation(), false);
-		hunter.attachAI(new DriveAtAI(hunter, this.cb.getPlayer().getPhysicsObject()), true);
+		hunter = this.cm.addCar(hunterType, new Vector3f(HUNTER_BUFFER - 10, 0.3f, 0), world.getStart().getRotation(), false);
+		hunter.attachAI(new DriveAtAI(hunter, this.cm.getPlayer().getPhysicsObject()), true);
 
 		display = new Container();
 		display.addChild(new Label("Score: "), 0, 0);
@@ -94,16 +94,16 @@ public class DriveMainRoadGetaway extends DriveBase {
 
 		frameCount++;
 		
-		RayCarControl player = this.cb.getPlayer();
-		RayCarControl chaser = this.cb.get(1);
+		RayCarControl player = this.cm.getPlayer();
+		RayCarControl chaser = this.cm.get(1);
 
 		float distanceFromStart = getPlayerDistanceFromStart(player);
 		float playerSpeed = player.getCurrentVehicleSpeedKmHour();
 
 		if (life < 0) {
 			gameOverLabel.setText("GameOver");
-			for (int i = 2; i < this.cb.getAll().size(); i++) {
-				this.cb.removeCar(this.cb.get(i));
+			for (int i = 2; i < this.cm.getAll().size(); i++) {
+				this.cm.removeCar(this.cm.get(i));
             }
             player.setPhysicsProperties(null, new Vector3f(), (Quaternion) null, new Vector3f());
 			return;
@@ -126,7 +126,7 @@ public class DriveMainRoadGetaway extends DriveBase {
 			return;
 
 		//spawn more if required
-		if (this.cb.getCount() < maxCount && frameCount % 30 == 0) {
+		if (this.cm.getCount() < maxCount && frameCount % 30 == 0) {
 			final float z = nextZOff();
 			final boolean spawnPlayerDirection = spawnPlayerDirection();
 			
@@ -138,7 +138,7 @@ public class DriveMainRoadGetaway extends DriveBase {
 				? start.getRotation()
 				: new Quaternion().fromAngleAxis(FastMath.PI, Vector3f.UNIT_Y).mult(start.getRotation());
 
-			RayCarControl c = this.cb.addCar(Rand.randFromArray(this.trafficTypes), spawnPos, spawnDir, false);
+			RayCarControl c = this.cm.addCar(Rand.randFromArray(this.trafficTypes), spawnPos, spawnDir, false);
 
 			DriveAlongAI daai = new DriveAlongAI(c, (vec) -> {
 				return new Vector3f(vec.x + 20 * (spawnPlayerDirection ? 1 : -1), 0, z); // next pos math
@@ -151,7 +151,7 @@ public class DriveMainRoadGetaway extends DriveBase {
 		
 		//check if any traffic is falling and remove them
 		List<RayCarControl> toKill = new ArrayList<RayCarControl>();
-		for (RayCarControl c: this.cb.getAll()) {
+		for (RayCarControl c: this.cm.getAll()) {
 			if (c == player) continue; 
 			
 			if (c.location.y < -10) {
@@ -166,7 +166,7 @@ public class DriveMainRoadGetaway extends DriveBase {
 		}
 		for (RayCarControl c: toKill) {
 			//killed (out of loop)
-			cb.removeCar(c);
+			cm.removeCar(c);
 		}
 
 

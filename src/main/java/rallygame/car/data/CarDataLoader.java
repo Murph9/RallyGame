@@ -19,7 +19,7 @@ import rallygame.car.ray.GripHelper;
 import rallygame.helper.Duo;
 import rallygame.helper.Log;
 
-/** Private class for CarBuilder, manages the CarDataConst file */
+/** Private class for CarManager, manages the CarDataConst file */
 public class CarDataLoader { //CarDataFactory
     
     private static final String YAML_CAR_DATA = "/cardata/";

@@ -10,7 +10,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 
-import rallygame.car.CarBuilder;
+import rallygame.car.CarManager;
 import rallygame.effects.LoadModelWrapper;
 
 public class MovingWorld extends World {
@@ -38,9 +38,9 @@ public class MovingWorld extends World {
 	public void initialize(Application app) {
 		super.initialize(app);
 
-		CarBuilder cb = getState(CarBuilder.class);
-		if (cb.get(0) != null)
-        	cb.get(0).setPhysicsProperties(new Vector3f(0, BOX_HEIGHT + 0.5f, 0), null, null, null);
+		CarManager cm = getState(CarManager.class);
+		if (cm.get(0) != null)
+        	cm.get(0).setPhysicsProperties(new Vector3f(0, BOX_HEIGHT + 0.5f, 0), null, null, null);
 
 		//still box
 		startGeometry = LoadModelWrapper.create(app.getAssetManager(), 

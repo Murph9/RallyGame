@@ -37,8 +37,8 @@ public class DriveDrag extends DriveBase {
 
         Car[] types = Car.values();
         for (int i = 0; i < this.themCount; i++) {
-            RayCarControl c = this.cb.addCar(types[i], world.getStart(), false);
-            c.attachAI(new DriveAtAI(c, this.cb.getPlayer().getPhysicsObject()), true);
+            RayCarControl c = this.cm.addCar(types[i], world.getStart(), false);
+            c.attachAI(new DriveAtAI(c, this.cm.getPlayer().getPhysicsObject()), true);
         }
 
         setSpawns();
@@ -49,12 +49,12 @@ public class DriveDrag extends DriveBase {
     }
 
     private void setSpawns() {
-        int count = this.cb.getAll().size();
+        int count = this.cm.getAll().size();
         Transform start = world.getStart();
         for (int i = 0; i < count; i++) {
 
             final int index = i * 5;
-            RayCarControl car = this.cb.get(i);
+            RayCarControl car = this.cm.get(i);
             if (i != 0) {
                 car.attachAI(new DriveAlongAI(car, (vec) -> {
                     return new Vector3f(index, 0, vec.z + 20); // next pos math
@@ -66,21 +66,21 @@ public class DriveDrag extends DriveBase {
     }
     
     private void keepStill() {
-        int count = this.cb.getAll().size();
+        int count = this.cm.getAll().size();
         Transform start = world.getStart();
         for (int i = 0; i < count; i++) {
             final int index = i*5;
-            RayCarControl car = this.cb.get(i);
+            RayCarControl car = this.cm.get(i);
             Vector3f pos = car.location;
             car.setPhysicsProperties(new Vector3f(index, start.getTranslation().y, pos.z), new Vector3f(), (Quaternion) null, new Vector3f());
         }
     }
 
     private int detectWinner() {
-        int count = this.cb.getAll().size();
+        int count = this.cm.getAll().size();
         boolean aWinner = false;
         for (int i = 0; i < count; i++) {
-            RayCarControl car = this.cb.get(i);
+            RayCarControl car = this.cm.get(i);
             Vector3f pos = car.location;
             if (pos.z > 1000)
                 aWinner = true;
@@ -91,7 +91,7 @@ public class DriveDrag extends DriveBase {
             int maxI = -1;
 
             for (int i = 0; i < count; i++) {
-                RayCarControl car = this.cb.get(i);
+                RayCarControl car = this.cm.get(i);
                 Vector3f pos = car.location;
                 if (pos.z > max) {
                     max = pos.z;
@@ -112,7 +112,7 @@ public class DriveDrag extends DriveBase {
             ended = detectWinner() != -1;
         }
         if (ended) {
-            sprint.setText("Winner: " + this.cb.get(detectWinner()).getCarData().carModel);
+            sprint.setText("Winner: " + this.cm.get(detectWinner()).getCarData().carModel);
             keepStill();
             return;
         }
