@@ -11,6 +11,7 @@ import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
 import rallygame.drive.IFlow;
+import rallygame.service.Screen;
 
 public class Start extends BaseAppState {
 
@@ -29,9 +30,9 @@ public class Start extends BaseAppState {
 		App myapp = ((App) app);
 
 		//UI
+		Screen screen = new Screen(getApplication().getContext().getSettings());
 		myWindow = new Container();
 		myapp.getGuiNode().attachChild(myWindow);
-		myWindow.setLocalTranslation(300, 300, 0);
 		
         myWindow.addChild(new Label("Main Menu"));
 		
@@ -47,7 +48,9 @@ public class Start extends BaseAppState {
 		}
         
         Button exit = myWindow.addChild(new Button("Exit"));
-        exit.addClickCommands(source -> myapp.stop());
+		exit.addClickCommands(source -> myapp.stop());
+		
+		screen.topLeftMe(myWindow);
 	}
 		
 	@Override
