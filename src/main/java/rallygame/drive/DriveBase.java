@@ -129,13 +129,15 @@ public class DriveBase extends BaseAppState implements IDrive {
 
     protected final void reInitPlayerCar(CarDataConst carData) {
         var oldCar = cm.getPlayer();
-        var newCar = this.cm.addCar(carData, world.getStart(), true);
+        var transform = new Transform(oldCar.location, oldCar.rotation);
+        var newCar = this.cm.addCar(carData, transform, true);
         reInitPlayerCar(oldCar, newCar);
     }
 
     protected final void reInitPlayerCar(Car car) {
         var oldCar = cm.getPlayer();
-        var newCar = this.cm.addCar(car, world.getStart(), true);
+        var transform = new Transform(oldCar.location, oldCar.rotation);
+        var newCar = this.cm.addCar(car, transform, true);
         reInitPlayerCar(oldCar, newCar);
     }
 

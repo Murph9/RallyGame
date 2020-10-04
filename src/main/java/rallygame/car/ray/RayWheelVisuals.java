@@ -21,16 +21,16 @@ import com.jme3.util.BufferUtils;
 import rallygame.effects.LoadModelWrapper;
 import rallygame.helper.H;
 
-public class RayWheelControl {
-	
-	//#region Skid marks fields
-	private static final int QUAD_COUNT = 200;
+public class RayWheelVisuals {
+    
+    //#region Skid marks fields
+    private static final int QUAD_COUNT = 200;
     
     // Vector3f.size * triangle size * 2 (2 tri per quad) * count
-	private static final int VERTEX_BUFFER_SIZE = 4 * QUAD_COUNT;
-	private static final int[] indexes = { 2, 0, 1, 1, 3, 2 }; // tyre marks vertex order
-	private static final Vector2f[] texCoord = new Vector2f[] { // texture of quad with order
-		    new Vector2f(0, 0), new Vector2f(0, 1), new Vector2f(1, 0), new Vector2f(1, 1),
+    private static final int VERTEX_BUFFER_SIZE = 4 * QUAD_COUNT;
+    private static final int[] indexes = { 2, 0, 1, 1, 3, 2 }; // tyre marks vertex order
+    private static final Vector2f[] texCoord = new Vector2f[] { // texture of quad with order
+            new Vector2f(0, 0), new Vector2f(0, 1), new Vector2f(1, 0), new Vector2f(1, 1),
     };
     private static final int[] i_s = new int[6 * QUAD_COUNT];
     private static final Vector2f[] coord = new Vector2f[4 * QUAD_COUNT];
@@ -56,43 +56,43 @@ public class RayWheelControl {
         }
     }
     
-	private static final ColorRGBA BASE_SKID_COLOUR = ColorRGBA.Black;
-	
-	private final Geometry skidLine;
-	private final Vector3f[] vertices;
+    private static final ColorRGBA BASE_SKID_COLOUR = ColorRGBA.Black;
+    
+    private final Geometry skidLine;
+    private final Vector3f[] vertices;
     private final ColorRGBA[] colors;
     private int verticesPos;
-	
-	private ColorRGBA lastColor;
-	private Vector3f lastl;
-	private Vector3f lastr;
-	
-	private static final float SKID_MARK_TIMEOUT = 0.1f;
-	private float sinceLastPos;
-	//#endregion
-	
-	private final SimpleApplication app;
-	private final RayWheel wheel;
-	private final Node rootNode;
-	private final Spatial spat;
-	
-	private final Vector3f offset;
-	
-	protected RayWheelControl(SimpleApplication app, RayWheel wheel, Node carRootNode, Vector3f pos) {
-		this.app = app;
-		this.wheel = wheel;
-		this.offset = pos;
-		
-		//rotate and translate the wheel rootNode
+    
+    private ColorRGBA lastColor;
+    private Vector3f lastl;
+    private Vector3f lastr;
+    
+    private static final float SKID_MARK_TIMEOUT = 0.1f;
+    private float sinceLastPos;
+    //#endregion
+    
+    private final SimpleApplication app;
+    private final RayWheel wheel;
+    private final Node rootNode;
+    private final Spatial spat;
+    
+    private final Vector3f offset;
+    
+    protected RayWheelVisuals(SimpleApplication app, RayWheel wheel, Node carRootNode, Vector3f pos) {
+        this.app = app;
+        this.wheel = wheel;
+        this.offset = pos;
+        
+        //rotate and translate the wheel rootNode
         rootNode = new Node("wheel " + wheel.num);
         Spatial wheelModel = app.getAssetManager().loadModel(wheel.data.modelName);
         //TODO change back to string version when the wheels get colours
-		spat = LoadModelWrapper.create(app.getAssetManager(), wheelModel, ColorRGBA.DarkGray);
-		spat.center();
-		rootNode.attachChild(spat);
-		
-		carRootNode.attachChild(rootNode);
-		
+        spat = LoadModelWrapper.create(app.getAssetManager(), wheelModel, ColorRGBA.DarkGray);
+        spat.center();
+        rootNode.attachChild(spat);
+        
+        carRootNode.attachChild(rootNode);
+        
         //skid mark stuff
         this.lastColor = ColorRGBA.BlackNoAlpha;
         colors = new ColorRGBA[VERTEX_BUFFER_SIZE];
@@ -109,75 +109,75 @@ public class RayWheelControl {
         mesh.setMode(Mode.Triangles);
         mesh.setStreamed(); //will be updated rather often
         this.skidLine.setMesh(mesh);
-		
-		//material uses vertex colours
-		Material mat = new Material(app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-		mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
-		mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
-		mat.setBoolean("VertexColor", true);
-		this.skidLine.setMaterial(mat);
+        
+        //material uses vertex colours
+        Material mat = new Material(app.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+        mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
+        mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
+        mat.setBoolean("VertexColor", true);
+        this.skidLine.setMaterial(mat);
         this.skidLine.setQueueBucket(Bucket.Transparent);
-		
-		app.getRootNode().attachChild(this.skidLine);
+        
+        app.getRootNode().attachChild(this.skidLine);
         
         //trigger one view update so the cars wheels are in 'position' on load incase the car isn't loaded enabled
         viewUpdate(1/60f, new Vector3f(), 0);
 
-		//Smoke can be found from source control
-	}
-
-	//hopefully called by RayCarControl
-	protected void viewUpdate(float tpf, Vector3f velDir, float sus_min_travel) { 
-		//TODO NOTE: sus_min_travel is just poor design, but how else will the wheel object know a car const?
-		app.enqueue(() -> {
-			Vector3f posInLocal = new Vector3f(0, -wheel.susRayLength - sus_min_travel, 0);
-			rootNode.setLocalTranslation(offset.add(posInLocal));
-			
-			//rotate for wheel rotation
-			Quaternion q = new Quaternion();
-			q.fromAngleNormalAxis(-wheel.radSec * tpf * FastMath.sign(wheel.num % 2 == 1 ? 1 : -1),
-                    new Vector3f(1, 0, 0));
-			spat.setLocalRotation(spat.getLocalRotation().mult(q));
-			
-			//rotate for wheel steering
-			q.fromAngleNormalAxis(wheel.steering, new Vector3f(0,1,0));
-			rootNode.setLocalRotation(q);
-			//lastly the odd side needs rotating (but every frame?)
-			if (wheel.num % 2 == 1)
-				rootNode.rotate(0, FastMath.PI, 0);
-			
-			updateSkidLine(tpf, velDir);
-		});
+        //Smoke can be found from source control
     }
-	
-	private void updateSkidLine(float tpf, Vector3f velDir) {
+
+    //hopefully called by RayCarControl
+    protected void viewUpdate(float tpf, Vector3f velDir, float sus_min_travel) { 
+        //TODO NOTE: sus_min_travel is just poor design, but how else will the wheel object know a car const?
+        
+        Vector3f posInLocal = new Vector3f(0, -wheel.susRayLength - sus_min_travel, 0);
+        rootNode.setLocalTranslation(offset.add(posInLocal));
+        
+        //rotate for wheel rotation
+        Quaternion q = new Quaternion();
+        q.fromAngleNormalAxis(-wheel.radSec * tpf * FastMath.sign(wheel.num % 2 == 1 ? 1 : -1),
+                new Vector3f(1, 0, 0));
+        spat.setLocalRotation(spat.getLocalRotation().mult(q));
+        
+        //rotate for wheel steering
+        q.fromAngleNormalAxis(wheel.steering, new Vector3f(0,1,0));
+        rootNode.setLocalRotation(q);
+        //lastly the odd side needs rotating (but every frame?)
+        if (wheel.num % 2 == 1)
+            rootNode.rotate(0, FastMath.PI, 0);
+        
+        //TODO this has high perf issues
+        updateSkidLine(tpf, velDir);
+    }
+    
+    private void updateSkidLine(float tpf, Vector3f velDir) {
         boolean lastingSkid = false;
         // continually update the current skid mark position and 'lock it in' to persist
         sinceLastPos -= tpf;
-		if (sinceLastPos < 0) {
+        if (sinceLastPos < 0) {
             lastingSkid = true;
             sinceLastPos = SKID_MARK_TIMEOUT;
-		}
+        }
 
-		// Possible: change this be thinner with a larger drift angle (which we don't have here)
-		// i have tested this is real life, width is lower when sliding sideways but not that much lower
+        // Possible: change this be thinner with a larger drift angle (which we don't have here)
+        // i have tested this is real life, width is lower when sliding sideways but not that much lower
 
-		// scaling the grip value
-		float clampSkid = calcSkidSkew(this.wheel.skidFraction);
+        // scaling the grip value
+        float clampSkid = calcSkidSkew(this.wheel.skidFraction);
         ColorRGBA curColor = BASE_SKID_COLOUR.clone().mult(clampSkid);
         
         //ignore moving objects because we can't 'track' it and it looks weird
         boolean contactObjectIsMoving = wheel.collisionObject != null && wheel.collisionObject.getMass() > 0;
 
         // no contact or slow speed => no visible skid marks
-		if (!wheel.inContact || velDir.length() < 0.5f || clampSkid < 0.05f || contactObjectIsMoving) {
-			if (lastColor.equals(ColorRGBA.BlackNoAlpha)) {
-				//the last one was null, ignore
-				return;
+        if (!wheel.inContact || velDir.length() < 0.5f || clampSkid < 0.05f || contactObjectIsMoving) {
+            if (lastColor.equals(ColorRGBA.BlackNoAlpha)) {
+                //the last one was null, ignore
+                return;
             }
             //we reset the current quad to nothing
-			this.lastColor = curColor = ColorRGBA.BlackNoAlpha;
-		}
+            this.lastColor = curColor = ColorRGBA.BlackNoAlpha;
+        }
 
         Vector3f pos = wheel.curBasePosWorld;
         pos.y += 0.015f; // hacky z-buffering (i.e. to stop it "fighting" with the ground texture)
@@ -185,10 +185,10 @@ public class RayWheelControl {
         Vector3f posL = pos.add(rot.mult(wheel.data.width / 2));
         Vector3f posR = pos.add(rot.negate().mult(wheel.data.width / 2));
 
-		if (lastColor.equals(ColorRGBA.BlackNoAlpha)) {
+        if (lastColor.equals(ColorRGBA.BlackNoAlpha)) {
             // update with nothing
             updateSegment(curColor, curColor, posL, posR, posL, posR);
-		} else {
+        } else {
             updateSegment(lastColor, curColor, lastl, lastr, posL, posR);
         }
 
@@ -226,18 +226,18 @@ public class RayWheelControl {
     private static float calcSkidSkew(float skidFraction) {
         return H.skew(skidFraction, 0.95f, 1.6f, 0, 1);
     }
-	
-	public RayWheel getRayWheel() {
-		return wheel;
+    
+    public RayWheel getRayWheel() {
+        return wheel;
     }
     protected void reset() {
         this.lastl = null;
         this.lastr = null;
         this.lastColor = ColorRGBA.BlackNoAlpha;
     }
-	
-	protected void cleanup() {
-		rootNode.detachChild(spat);
-		app.getRootNode().detachChild(skidLine);
+    
+    protected void cleanup() {
+        rootNode.detachChild(spat);
+        app.getRootNode().detachChild(skidLine);
     }
 }

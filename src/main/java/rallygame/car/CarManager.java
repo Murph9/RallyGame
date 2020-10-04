@@ -140,7 +140,9 @@ public class CarManager extends BaseAppState {
 
         //init car
         RayCarControl carControl = new RayCarControl((SimpleApplication)getApplication(), colShape, carData);
-		
+        carControl.location = start;
+        carControl.rotation = rot;
+        
         var carRootNode = carControl.getRootNode();
 
         // TODO shouldn't this be managed by the control?

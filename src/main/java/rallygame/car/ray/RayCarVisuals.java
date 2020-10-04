@@ -11,7 +11,7 @@ public class RayCarVisuals {
 
     private final RayCarDebug debug;
     private final Node rootNode;
-    private final RayWheelControl[] wheelControls;
+    private final RayWheelVisuals[] wheelControls;
     private final RayCarControl car;
 
     // sound stuff
@@ -26,9 +26,9 @@ public class RayCarVisuals {
         this.rootNode.addControl(car.rayCar.rbc);
 
         // init visual wheels
-        this.wheelControls = new RayWheelControl[4];
+        this.wheelControls = new RayWheelVisuals[4];
         for (int i = 0; i < wheelControls.length; i++) {
-            wheelControls[i] = new RayWheelControl(app, car.rayCar.wheels[i], rootNode, car.getCarData().wheelOffset[i]);
+            wheelControls[i] = new RayWheelVisuals(app, car.rayCar.wheels[i], rootNode, car.getCarData().wheelOffset[i]);
         }
     }
 
@@ -61,12 +61,12 @@ public class RayCarVisuals {
 
     public void reset() {
         // reset all skidmarks
-        for (RayWheelControl c : this.wheelControls)
+        for (RayWheelVisuals c : this.wheelControls)
             c.reset();
     }
     
     public void cleanup(Application app) {
-        for (RayWheelControl w : this.wheelControls) {
+        for (RayWheelVisuals w : this.wheelControls) {
             w.cleanup();
         }
 
