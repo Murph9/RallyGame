@@ -9,7 +9,6 @@ import com.jme3.app.state.AppStateManager;
 import com.jme3.audio.AudioNode;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
-import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.input.InputManager;
 import com.jme3.input.RawInputListener;
@@ -62,8 +61,8 @@ public class RayCarControl implements ICarPowered, ICarControlled {
     public Quaternion rotation;
     public Vector3f location;
     
-    public RayCarControl(SimpleApplication app, CollisionShape shape, CarDataConst carData) {
-        this.rayCar = new RayCarPowered(shape, carData);
+    public RayCarControl(SimpleApplication app, RayCarPowered rayCar) {
+        this.rayCar = rayCar;
         this.app = app;
         this.space = app.getStateManager().getState(BulletAppState.class).getPhysicsSpace();
         this.input = new RayCarControlInput(this);
@@ -194,7 +193,7 @@ public class RayCarControl implements ICarPowered, ICarControlled {
     }
     
     public boolean noWheelsInContact() {
-        return !rayCar.wheels[0].inContact && !rayCar.wheels[1].inContact && !rayCar.wheels[2].inContact && !rayCar.wheels[3].inContact;
+        return rayCar.noWheelsInContact();
     }
     public RayWheel getWheel(int w_id) {
         return rayCar.wheels[w_id];

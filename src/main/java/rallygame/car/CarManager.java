@@ -27,6 +27,7 @@ import rallygame.car.data.Car;
 import rallygame.car.data.CarDataAdjuster;
 import rallygame.car.data.CarDataConst;
 import rallygame.car.ray.RayCarControl;
+import rallygame.car.ray.RayCarPowered;
 import rallygame.effects.LoadModelWrapper;
 import rallygame.helper.Geo;
 import rallygame.helper.Log;
@@ -112,34 +113,12 @@ public class CarManager extends BaseAppState {
         Spatial initialCarModel = am.loadModel(carData.carModel);
         // remove and fetch the single collision shape to use as collision
         Spatial collisionShape = Geo.removeNamedSpatial((Node)initialCarModel, CarPart.Collision.getPartName());
-		
-        CompoundCollisionShape colShape = null;
-        try {
-            Geometry collisionGeometry = null;
-            if (collisionGeometry instanceof Geometry) {
-                collisionGeometry = (Geometry)collisionShape;
-            } else { // Node
-                collisionGeometry = Geo.getGeomList(collisionShape).get(0); //lets hope its the only one too
-            }
-            // Mesh collisionMesh = collisionGeometry.getMesh();
-            // collisionMesh.setStatic();
-            // colShape = new HullCollisionShape(collisionMesh);
-
-            CollisionShape boxCol = CollisionShapeFactory.createBoxShape(collisionGeometry);
-            colShape = new CompoundCollisionShape();
-
-            Vector3f worldTrans = collisionGeometry.getWorldTranslation();
-            Vector3f worldCenter = collisionGeometry.getWorldBound().getCenter();
-            Vector3f absTrans = worldTrans.subtract(worldCenter);
-            colShape.addChildShape(boxCol, absTrans.negate());
-        } catch (Exception e) {
-            Log.e("!! car type " + carData.carModel + " is missing a collision shape.");
-            e.printStackTrace();
-            return null; //to make it clear this failed, and you need to fix it
-        }
+        
+        // init physics class
+        var rayCar = createRayCar(collisionShape, carData);
 
         //init car
-        RayCarControl carControl = new RayCarControl((SimpleApplication)getApplication(), colShape, carData);
+        RayCarControl carControl = new RayCarControl((SimpleApplication)getApplication(), rayCar);
         carControl.location = start;
         carControl.rotation = rot;
         
@@ -167,6 +146,29 @@ public class CarManager extends BaseAppState {
         cars.add(carControl);
         carControl.setEnabled(this.isEnabled()); //copy carmanager enabled-ness
         return carControl;
+    }
+
+    private RayCarPowered createRayCar(Spatial collisionShape, CarDataConst carData) {
+        
+        Geometry collisionGeometry = null;
+        if (collisionGeometry instanceof Geometry) {
+            collisionGeometry = (Geometry) collisionShape;
+        } else { // Node
+            collisionGeometry = Geo.getGeomList(collisionShape).get(0); // lets hope its the only one too
+        }
+        // Mesh collisionMesh = collisionGeometry.getMesh();
+        // collisionMesh.setStatic();
+        // colShape = new HullCollisionShape(collisionMesh);
+
+        CollisionShape boxCol = CollisionShapeFactory.createBoxShape(collisionGeometry);
+        var colShape = new CompoundCollisionShape();
+
+        Vector3f worldTrans = collisionGeometry.getWorldTranslation();
+        Vector3f worldCenter = collisionGeometry.getWorldBound().getCenter();
+        Vector3f absTrans = worldTrans.subtract(worldCenter);
+        colShape.addChildShape(boxCol, absTrans.negate());
+
+        return new RayCarPowered(colShape, carData);
     }
 
     public int removeAll() {

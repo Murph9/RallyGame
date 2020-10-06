@@ -32,7 +32,7 @@ public class RayCarDebug {
         
         if (DEBUG) {
             Quaternion w_angle = car.rbc.getPhysicsRotation();
-            car.doForEachWheel((w_id) -> {
+            for (int w_id = 0; w_id < car.wheels.length; w_id++) {
 
                 float susTravel = car.carData.susByWheelNum(w_id).travelTotal();
 
@@ -62,7 +62,7 @@ public class RayCarDebug {
                 if (DEBUG_DRAG) {
                     debug.drawArrow("dragarrow", ColorRGBA.Black, w_pos, car.dragDir);
                 }
-            });
+            }
         }
     }
 }

@@ -22,22 +22,25 @@ public class RayCarVisuals {
 
         this.debug = new RayCarDebug(car.rayCar, false, app);
 
-        this.rootNode = new Node("Car:" + car.getCarData());
+        var carData = car.getCarData();
+        this.rootNode = new Node("Car:" + carData);
         this.rootNode.addControl(car.rayCar.rbc);
 
         // init visual wheels
         this.wheelControls = new RayWheelVisuals[4];
         for (int i = 0; i < wheelControls.length; i++) {
-            wheelControls[i] = new RayWheelVisuals(app, car.rayCar.wheels[i], rootNode, car.getCarData().wheelOffset[i]);
+            wheelControls[i] = new RayWheelVisuals(app, car.rayCar.wheels[i], rootNode, carData.wheelOffset[i]);
         }
     }
 
     public void viewUpdate(float tpf) {
+        var carData = car.getCarData();
+
         if (engineSound != null && engineSound.getStatus() == Status.Playing) {
             var powered = car.getPoweredState();
 
             // if sound exists
-            float pitch = FastMath.clamp(0.5f + 1.5f * ((float) powered.curRPM() / (float) car.getCarData().e_redline), 0.5f, 2);
+            float pitch = FastMath.clamp(0.5f + 1.5f * ((float) powered.curRPM() / (float) carData.e_redline), 0.5f, 2);
             engineSound.setPitch(pitch);
 
             float volume = 0.75f + powered.accelCurrent() * 0.25f;
@@ -45,7 +48,7 @@ public class RayCarVisuals {
         }
 
         for (int i = 0; i < this.wheelControls.length; i++)
-            this.wheelControls[i].viewUpdate(tpf, car.getPhysicsObject().getLinearVelocity(), car.getCarData().susByWheelNum(i).min_travel);
+            this.wheelControls[i].viewUpdate(tpf, car.vel, carData.susByWheelNum(i).min_travel);
 
         debug.update();
     }

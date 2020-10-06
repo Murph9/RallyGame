@@ -1,7 +1,5 @@
 package rallygame.car.ray;
 
-import java.util.function.Consumer;
-
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.PhysicsTickListener;
 import com.jme3.bullet.collision.shapes.CollisionShape;
@@ -98,7 +96,7 @@ public class RayCar implements PhysicsTickListener {
 		Quaternion w_angle = rbc.getPhysicsRotation();
 
 		// Do suspension ray cast
-		doForEachWheel((w_id) -> {
+		for (int w_id = 0; w_id < wheels.length; w_id++) {
 			Vector3f localPos = carData.wheelOffset[w_id];
 
 			CarSusDataConst sus = carData.susByWheelNum(w_id);
@@ -124,10 +122,10 @@ public class RayCar implements PhysicsTickListener {
 			wheels[w_id].susRayLength = col.dist - carData.wheelData[w_id].radius; // remove the wheel radius
 			wheels[w_id].curBasePosWorld = col.pos;
 			wheels[w_id].inContact = true; // wheels are still touching..
-		});
+		}
 
 		// Do suspension forces
-		doForEachWheel((w_id) -> {
+		for (int w_id = 0; w_id < wheels.length; w_id++) {
 			CarSusDataConst sus = carData.susByWheelNum(w_id);
 			if (!wheels[w_id].inContact) {
 				wheels[w_id].susForce = 0;
@@ -180,7 +178,7 @@ public class RayCar implements PhysicsTickListener {
 			// applyImpulse (force = world space, pos = relative to local)
 			Vector3f f = wheels[w_id].hitNormalInWorld.mult(wheels[w_id].susForce * tpf);
 			applyWheelForce(f, wheels[w_id]);
-		});
+		}
 	}
 
 	private void applyTraction(PhysicsSpace space, float tpf) {
@@ -201,7 +199,7 @@ public class RayCar implements PhysicsTickListener {
 
 		final float slip_div = velocity.length();
 		final float steeringFake = steeringCur;
-		doForEachWheel((w_id) -> {
+		for (int w_id = 0; w_id < wheels.length; w_id++) {
 			float lastSlipAngle = wheels[w_id].slipAngle;
 			float lastSlipRatio = wheels[w_id].slipRatio;
 			Vector3f wheel_force = new Vector3f();
@@ -273,7 +271,7 @@ public class RayCar implements PhysicsTickListener {
 			applyWheelForce(w_angle.mult(wheel_force).mult(tpf), wheels[w_id]);
 
 			planarGForce.addLocal(wheel_force);
-		});
+		}
 
 		planarGForce.multLocal(1 / carData.mass); // F=m*a => a=F/m
 	}
@@ -316,7 +314,7 @@ public class RayCar implements PhysicsTickListener {
 		Vector3f w_velocity = rbc.getLinearVelocity();
 
 		Vector3f velocity = w_angle.inverse().mult(w_velocity);
-		doForEachWheel((w_id) -> {
+		for (int w_id = 0; w_id < wheels.length; w_id++) {
 			if (!wheels[w_id].inContact) {
 				wheels[w_id].rollingResistance = 0;
 				return;
@@ -326,7 +324,7 @@ public class RayCar implements PhysicsTickListener {
 			Vector3f wheel_force = new Vector3f(0, 0, FastMath.sign(velocity.z) * -carData.rollingResistance(w_id, wheels[w_id].susForce));
 			wheels[w_id].rollingResistance = wheel_force.z * tpf;
 			rbc.applyImpulse(w_angle.mult(wheel_force).mult(tpf), wheels[w_id].curBasePosWorld.subtract(w_pos));
-		});
+		}
 
 		// quadratic drag (air resistance)
 		dragDir = carData.quadraticDrag(w_velocity);
@@ -360,14 +358,8 @@ public class RayCar implements PhysicsTickListener {
 		return wheelTorque[w_id] + wheels[w_id].rollingResistance;
 	}
 
-	/////////////////
-	// helper functions
-	protected final void doForEachWheel(Consumer<Integer> func) {
-		if (func == null)
-			throw new NullPointerException("func is null");
-
-		for (int i = 0; i < wheels.length; i++)
-			func.accept(i);
+	public final boolean noWheelsInContact() {
+		return !wheels[0].inContact && !wheels[1].inContact && !wheels[2].inContact && !wheels[3].inContact;
 	}
 
 	private Vector3f vecLocalToWorld(Vector3f in) {
