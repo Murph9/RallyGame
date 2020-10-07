@@ -111,7 +111,7 @@ public class RayCar implements PhysicsTickListener {
 				wheels[w_id].inContact = false;
 				wheels[w_id].susRayLength = susTravel;
 				wheels[w_id].curBasePosWorld = localDown.mult(susTravel + carData.wheelData[w_id].radius);
-				return; // no force
+				continue; // no force
 			}
 
 			// TODO calculate rebound using wheel mass and suspension properties
@@ -129,14 +129,14 @@ public class RayCar implements PhysicsTickListener {
 			CarSusDataConst sus = carData.susByWheelNum(w_id);
 			if (!wheels[w_id].inContact) {
 				wheels[w_id].susForce = 0;
-				return;
+				continue;
 			}
 
 			if (wheels[w_id].susRayLength < 0) { // suspension bottomed out, apply max
 				wheels[w_id].susForce = (sus.preload_force + sus.travelTotal()) * sus.stiffness * 1000;
 				Vector3f f = w_angle.inverse().mult(wheels[w_id].hitNormalInWorld.mult(wheels[w_id].susForce * tpf));
 				applyWheelForce(f, wheels[w_id]);
-				return;
+				continue;
 			}
 
 			float denominator = wheels[w_id].hitNormalInWorld.dot(w_angle.mult(localDown)); // loss due to difference between collision and localdown (cos ish)
@@ -317,7 +317,7 @@ public class RayCar implements PhysicsTickListener {
 		for (int w_id = 0; w_id < wheels.length; w_id++) {
 			if (!wheels[w_id].inContact) {
 				wheels[w_id].rollingResistance = 0;
-				return;
+				continue;
 			}
 
 			// apply rolling resistance in the negative direction
