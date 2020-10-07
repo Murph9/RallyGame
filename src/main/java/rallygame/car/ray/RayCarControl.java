@@ -272,21 +272,15 @@ public class RayCarControl implements ICarPowered, ICarControlled {
         rayCar.rbc.applyImpulse(rayCar.carData.JUMP_FORCE, new Vector3f()); // push up
         Vector3f old = location.clone();
         old.y += 2; // and move up
-        rayCar.rbc.setPhysicsLocation(old);
-
         Vector3f vel = this.vel.clone();
-        vel.y = 0;
-        rayCar.rbc.setLinearVelocity(vel);
+        vel.y = 0; // reset vertical speed
+        this.setPhysicsProperties(old, vel, null, null);
     }
     public void flip() {
-        rayCar.rbc.setPhysicsRotation(new Quaternion()); //TODO keep forward the same
-        rayCar.rbc.setPhysicsLocation(location.add(new Vector3f(0, 1, 0)));
+        // TODO keep pointing the same direction
+        this.setPhysicsProperties(location.add(new Vector3f(0, 1, 0)), null, new Quaternion(), new Vector3f());
     }
     public void reset() {
-        rayCar.rbc.setPhysicsRotation(new Quaternion());
-        rayCar.rbc.setLinearVelocity(new Vector3f());
-        rayCar.rbc.setAngularVelocity(new Vector3f());
-
         rayCar.curRPM = 1000;
         for (RayWheel w : rayCar.wheels) {
             w.radSec = 0; // stop rotation of the wheels
@@ -295,8 +289,7 @@ public class RayCarControl implements ICarPowered, ICarControlled {
         visuals.reset();
 
         Transform transform = getResetPosition(this.app.getStateManager(), this);
-        rayCar.rbc.setPhysicsLocation(transform.getTranslation());
-        rayCar.rbc.setPhysicsRotation(transform.getRotation());
+        this.setPhysicsProperties(transform.getTranslation(), new Vector3f(), transform.getRotation(), new Vector3f());
     }
     public void reverse(boolean value) {
         if (value)
