@@ -128,42 +128,7 @@ public class DriveBase extends BaseAppState implements IDrive {
     }
 
     protected final void reInitPlayerCar(CarDataConst carData) {
-        var oldCar = cm.getPlayer();
-        var transform = new Transform(oldCar.location, oldCar.rotation);
-        var newCar = this.cm.addCar(carData, transform, true);
-        reInitPlayerCar(oldCar, newCar);
-    }
-
-    protected final void reInitPlayerCar(Car car) {
-        var oldCar = cm.getPlayer();
-        var transform = new Transform(oldCar.location, oldCar.rotation);
-        var newCar = this.cm.addCar(car, transform, true);
-        reInitPlayerCar(oldCar, newCar);
-    }
-
-    private final void reInitPlayerCar(RayCarControl oldCar, RayCarControl newCar) {
-        // remove camera and ui
-        AppStateManager sm = getStateManager();
-        sm.detach(camera);
-        getApplication().getInputManager().removeRawInputListener(camera);
-
-        sm.detach(uiNode);
-
-        var pos = oldCar.location;
-        var vel = oldCar.vel;
-        var rot = oldCar.rotation;
-        var ang = oldCar.angularVel;
-        this.cm.removeCar(oldCar);
-
-        newCar.setPhysicsProperties(pos, vel, rot, ang);
-
-        // initCamera and ui again
-        camera = new CarCamera(getApplication().getCamera(), newCar);
-        sm.attach(camera);
-        getApplication().getInputManager().addRawInputListener(camera);
-
-        uiNode = new CarUI(newCar);
-        sm.attach(uiNode);
+        this.cm.changeTo(cm.getPlayer(), carData);
     }
 
     public Transform resetPosition(RayCarControl car) {

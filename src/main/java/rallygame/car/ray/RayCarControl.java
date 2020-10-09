@@ -32,14 +32,14 @@ import rallygame.service.ray.PhysicsRaycaster;
 // data/input things
 public class RayCarControl implements ICarPowered, ICarControlled {
 
-    protected final RayCarPowered rayCar;
-
     private final Application app;
-    private final RayCarVisuals visuals;
     private final RayCarControlInput input;
-    
+
+    protected RayCarPowered rayCar;
+    private RayCarVisuals visuals;
+
     // Steering averager (to get smooth left <-> right)
-    private AverageFloatFramerate steeringAverager;
+    private final AverageFloatFramerate steeringAverager;
 
     // control fields
     private float steerLeft;
@@ -63,7 +63,6 @@ public class RayCarControl implements ICarPowered, ICarControlled {
     public Vector3f location;
     
     public RayCarControl(SimpleApplication app, Spatial initalCarModel, RayCarPowered rayCar) {
-        this.rayCar = rayCar;
         this.app = app;
         this.space = app.getStateManager().getState(BulletAppState.class).getPhysicsSpace();
         this.input = new RayCarControlInput(this);
@@ -73,12 +72,27 @@ public class RayCarControl implements ICarPowered, ICarControlled {
 
         this.steeringAverager = new AverageFloatFramerate(0.2f, IAverager.Type.Weighted);
 
-        this.visuals = new RayCarVisuals(app, initalCarModel, this);
-        
         this.controls = new LinkedList<RawInputListener>();
         
+        init(initalCarModel, rayCar);
+    }
+
+    private void init(Spatial carModel, RayCarPowered rayCar) {
+        this.rayCar = rayCar;
+        this.visuals = new RayCarVisuals((SimpleApplication)app, carModel, this);
         space.addTickListener(rayCar);
-        setEnabled(true);
+    }
+
+    public void changeRayCar(Spatial carModel, RayCarPowered rayCar) {
+        space.removeTickListener(this.rayCar);
+        space.remove(this.visuals.getRootNode());
+        visuals.cleanup(app);
+        addedToSpace = false;
+
+        // TODO control states aren't being kept
+
+        init(carModel, rayCar);
+        setPhysicsProperties(this.location, this.vel, this.rotation, this.angularVel);
     }
     
     public void update(float tpf) {

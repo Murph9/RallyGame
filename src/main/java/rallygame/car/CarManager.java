@@ -113,9 +113,7 @@ public class CarManager extends BaseAppState {
         //init car
         RayCarControl carControl = new RayCarControl((SimpleApplication)getApplication(), initialCarModel, rayCar);
         carControl.setPhysicsProperties(start, null, rot, null);
-        
-        var carRootNode = carControl.getRootNode();
-        rootNode.attachChild(carRootNode);
+        rootNode.attachChild(carControl.getRootNode());
         
         // a fake angular rotational reducer, very important for driving feel
         carControl.getPhysicsObject().setAngularDamping(angularDampening);
@@ -154,6 +152,36 @@ public class CarManager extends BaseAppState {
         colShape.addChildShape(boxCol, absTrans.negate());
 
         return new RayCarPowered(colShape, carData);
+    }
+
+    /** Allows changing the car a control uses entirely, an in place change. */
+    public RayCarControl changeTo(RayCarControl control, CarDataConst carData) {
+        if (!isInitialized())
+            throw new IllegalStateException(getClass().getName() + " hasn't been initialised");
+        if (control == null || !this.cars.contains(control))
+            throw new IllegalArgumentException(control.getClass().getName() + " must exist");
+        
+        var aPlayer = control.getAI() == null;
+        rootNode.detachChild(control.getRootNode());
+
+        AssetManager am = getApplication().getAssetManager();
+        // pre load car model so we can remove the collision object before materials are set
+        Spatial initialCarModel = am.loadModel(carData.carModel);
+        // remove and fetch the single collision shape to use as collision
+        Spatial collisionShape = Geo.removeNamedSpatial((Node) initialCarModel, CarPart.Collision.getPartName());
+
+        var rayCar = createRayCar(collisionShape, carData);
+        control.changeRayCar(initialCarModel, rayCar);
+        rootNode.attachChild(control.getRootNode());
+
+        if (aPlayer) {
+            // add sound back
+            control.giveSound(new AudioNode(am, "sounds/engine.wav", AudioData.DataType.Buffer));
+        }
+        
+        control.setEnabled(this.isEnabled());
+        control.update(1 / 60f); // call a single update to update visual and camera/input stuff
+        return control;
     }
 
     public int removeAll() {
