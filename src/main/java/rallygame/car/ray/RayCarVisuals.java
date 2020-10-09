@@ -6,6 +6,9 @@ import com.jme3.audio.AudioNode;
 import com.jme3.audio.AudioSource.Status;
 import com.jme3.math.FastMath;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
+
+import rallygame.effects.LoadModelWrapper;
 
 public class RayCarVisuals {
 
@@ -17,7 +20,7 @@ public class RayCarVisuals {
     // sound stuff
     private AudioNode engineSound;
 
-    public RayCarVisuals(SimpleApplication app, RayCarControl car) {
+    public RayCarVisuals(SimpleApplication app, Spatial initialCarModel, RayCarControl car) {
         this.car = car;
 
         this.debug = new RayCarDebug(car.rayCar, false, app);
@@ -31,6 +34,9 @@ public class RayCarVisuals {
         for (int i = 0; i < wheelControls.length; i++) {
             wheelControls[i] = new RayWheelVisuals(app, car.rayCar.wheels[i], rootNode, carData.wheelOffset[i]);
         }
+
+        Node carModel = LoadModelWrapper.create(app.getAssetManager(), initialCarModel, carData.baseColor);
+        this.rootNode.attachChild(carModel);
     }
 
     public void viewUpdate(float tpf) {

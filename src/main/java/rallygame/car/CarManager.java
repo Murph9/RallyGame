@@ -28,7 +28,6 @@ import rallygame.car.data.CarDataAdjuster;
 import rallygame.car.data.CarDataConst;
 import rallygame.car.ray.RayCarControl;
 import rallygame.car.ray.RayCarPowered;
-import rallygame.effects.LoadModelWrapper;
 import rallygame.helper.Geo;
 import rallygame.helper.Log;
 
@@ -99,14 +98,8 @@ public class CarManager extends BaseAppState {
     }
     /** Creates the vehicle and loads it into the world. */
     public RayCarControl addCar(CarDataConst carData, Vector3f start, Quaternion rot, boolean aPlayer) {
-        try {
-            if (!isInitialized())
-                throw new Exception(getClass().getName() + " hasn't been initialised");
-        } catch (Exception e) {
-            e.printStackTrace();
-            //this is a runtime exception that should have been fixed by the only dev
-            return null;
-        }
+        if (!isInitialized())
+            throw new IllegalStateException(getClass().getName() + " hasn't been initialised");
         
 		AssetManager am = getApplication().getAssetManager();
 		//pre load car model so we can remove the collision object before materials are set
@@ -118,22 +111,12 @@ public class CarManager extends BaseAppState {
         var rayCar = createRayCar(collisionShape, carData);
 
         //init car
-        RayCarControl carControl = new RayCarControl((SimpleApplication)getApplication(), rayCar);
-        carControl.location = start;
-        carControl.rotation = rot;
+        RayCarControl carControl = new RayCarControl((SimpleApplication)getApplication(), initialCarModel, rayCar);
+        carControl.setPhysicsProperties(start, null, rot, null);
         
         var carRootNode = carControl.getRootNode();
-
-        // TODO shouldn't this be managed by the control?
-        Node carModel = LoadModelWrapper.create(am, initialCarModel, carData.baseColor);
-
-        carRootNode.attachChild(carModel);
-        carRootNode.setLocalTranslation(start);
-        carRootNode.setLocalRotation(rot);
-
         rootNode.attachChild(carRootNode);
         
-        carControl.setPhysicsProperties(start, null, rot, null);
         // a fake angular rotational reducer, very important for driving feel
         carControl.getPhysicsObject().setAngularDamping(angularDampening);
         
@@ -145,6 +128,8 @@ public class CarManager extends BaseAppState {
         
         cars.add(carControl);
         carControl.setEnabled(this.isEnabled()); //copy carmanager enabled-ness
+
+        carControl.update(1/60f); //call a single update to update visual and camera/input stuff
         return carControl;
     }
 

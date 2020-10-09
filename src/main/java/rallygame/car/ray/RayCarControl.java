@@ -17,6 +17,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 
 import rallygame.car.JoystickEventListener;
 import rallygame.car.MyKeyListener;
@@ -61,7 +62,7 @@ public class RayCarControl implements ICarPowered, ICarControlled {
     public Quaternion rotation;
     public Vector3f location;
     
-    public RayCarControl(SimpleApplication app, RayCarPowered rayCar) {
+    public RayCarControl(SimpleApplication app, Spatial initalCarModel, RayCarPowered rayCar) {
         this.rayCar = rayCar;
         this.app = app;
         this.space = app.getStateManager().getState(BulletAppState.class).getPhysicsSpace();
@@ -72,7 +73,7 @@ public class RayCarControl implements ICarPowered, ICarControlled {
 
         this.steeringAverager = new AverageFloatFramerate(0.2f, IAverager.Type.Weighted);
 
-        this.visuals = new RayCarVisuals(app, this);
+        this.visuals = new RayCarVisuals(app, initalCarModel, this);
         
         this.controls = new LinkedList<RawInputListener>();
         
