@@ -46,7 +46,7 @@ public class RayCar implements PhysicsTickListener {
 	protected final float[] wheelTorque;
 
 	// debug values
-	protected Vector3f dragDir;
+	protected final Vector3f dragDir;
 	protected float driftAngle;
 	public final Vector3f planarGForce;
 	protected float travelledDistance;
@@ -58,6 +58,7 @@ public class RayCar implements PhysicsTickListener {
 		this.carData = carData;
 
 		this.planarGForce = new Vector3f();
+		this.dragDir = new Vector3f();
 
 		this.wheels = new RayWheel[carData.wheelData.length];
 		for (int i = 0; i < wheels.length; i++) {
@@ -327,7 +328,7 @@ public class RayCar implements PhysicsTickListener {
 		}
 
 		// quadratic drag (air resistance)
-		dragDir = carData.quadraticDrag(w_velocity);
+		dragDir.set(carData.quadraticDrag(w_velocity));
 		float dragDown = -0.5f * carData.areo_downforce * 1.225f * (w_velocity.z * w_velocity.z); // formula for downforce from wikipedia
 		rbc.applyCentralForce(dragDir.add(0, dragDown, 0)); // apply downforce after
 	}
