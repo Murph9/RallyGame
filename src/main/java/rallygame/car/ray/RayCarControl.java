@@ -89,10 +89,12 @@ public class RayCarControl implements ICarPowered, ICarControlled {
         visuals.cleanup(app);
         addedToSpace = false;
 
-        // TODO control input states aren't being kept
-
         init(carModel, rayCar);
+
+        // set physics state correctly
         setPhysicsProperties(this.location, this.vel, this.rotation, this.angularVel);
+        // update inputs, to survive the copy
+        rayCar.updateControlInputs(steeringCurrent, brakeCurrent, handbrakeCurrent);
     }
     
     public void update(float tpf) {
