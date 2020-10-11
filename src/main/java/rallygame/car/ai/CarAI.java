@@ -123,7 +123,7 @@ public abstract class CarAI implements ICarAI {
         } else {
             //drive as best to point, and don't accel
             this.onEvent(RayCarControlInput.ACTION_ACCEL, false);
-            this.onEvent(RayCarControlInput.ACTION_BRAKE, true);
+            this.onEvent(RayCarControlInput.ACTION_BRAKE, true, 0.3f);
 		}
 	}
 
