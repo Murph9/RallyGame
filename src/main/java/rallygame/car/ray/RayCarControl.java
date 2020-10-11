@@ -89,7 +89,7 @@ public class RayCarControl implements ICarPowered, ICarControlled {
         visuals.cleanup(app);
         addedToSpace = false;
 
-        // TODO control states aren't being kept
+        // TODO control input states aren't being kept
 
         init(carModel, rayCar);
         setPhysicsProperties(this.location, this.vel, this.rotation, this.angularVel);
@@ -143,7 +143,7 @@ public class RayCarControl implements ICarPowered, ICarControlled {
             //and drift angle needs to be large enough to matter
         }
 
-        if (local_vel.length() < 8) //prevent being able to turn at slow speeds
+        if (local_vel.length() < 8) //prevent not being able to turn at slow speeds
             return trySteerAngle;
 
         // this is magic, but: minimum should be bast pjk lat, but it doesn't catch up to the turning angle required
@@ -292,8 +292,13 @@ public class RayCarControl implements ICarPowered, ICarControlled {
         this.setPhysicsProperties(old, vel, null, null);
     }
     public void flip() {
-        // TODO keep pointing the same direction
-        this.setPhysicsProperties(location.add(new Vector3f(0, 1, 0)), null, new Quaternion(), new Vector3f());
+        var angleF = this.forward.angleBetween(Vector3f.UNIT_Z); // absolute angle between
+        float angOther = this.left.angleBetween(Vector3f.UNIT_Z); // calc if its pos or neg
+
+        // new angle in the correct direction
+        float nowTurn = -angleF * Math.signum(FastMath.HALF_PI - angOther);
+
+        this.setPhysicsProperties(location.add(new Vector3f(0, 1, 0)), null, new Quaternion().fromAngleAxis(nowTurn, Vector3f.UNIT_Y), new Vector3f());
     }
     public void reset() {
         rayCar.curRPM = 1000;
