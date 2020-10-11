@@ -109,7 +109,7 @@ public class DriveCrash extends DriveBase implements IRayCarCollisionListener {
             spawn.y = 0; // maybe ray cast from very high to find the ground height?
             spawn.z = Math.round(spawn.z) * 2;
 
-            CarDataConst data = this.cm.loadData(them);
+            CarDataConst data = this.cm.loadData(them, true);
             RayCarControl c = this.cm.addCar(data, spawn, start.getRotation(), false);
             c.attachAI(new DriveAtAI(c, this.cm.getPlayer().getPhysicsObject()), true);
         }

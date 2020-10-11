@@ -25,9 +25,11 @@ import rallygame.car.data.CarDataLoader;
 import rallygame.car.data.CarModelData.CarPart;
 import rallygame.car.data.Car;
 import rallygame.car.data.CarDataAdjuster;
+import rallygame.car.data.CarDataAdjustment;
 import rallygame.car.data.CarDataConst;
 import rallygame.car.ray.RayCarControl;
 import rallygame.car.ray.RayCarPowered;
+import rallygame.helper.Colours;
 import rallygame.helper.Geo;
 import rallygame.helper.Log;
 
@@ -67,7 +69,11 @@ public class CarManager extends BaseAppState {
     }
     
     /** Load car data from yaml file */
-    public CarDataConst loadData(Car car) {
+    public CarDataConst loadData(Car car, boolean randomColour) {
+        if (randomColour)
+            return loadData(car, new CarDataAdjuster(CarDataAdjustment.asFunc((data) -> {
+                    data.baseColor = Colours.randomColourHSV();
+                })));
         return loadData(car, null);
     }
     /** Load car data from yaml file, with a value adjuster */
@@ -86,11 +92,11 @@ public class CarManager extends BaseAppState {
 
     /** Creates the vehicle and loads it into the world. */
     public RayCarControl addCar(Car car, Transform trans, boolean aPlayer) {
-        return addCar(loadData(car), trans, aPlayer);
+        return addCar(loadData(car, true), trans, aPlayer);
     }
     /** Creates the vehicle and loads it into the world. */
     public RayCarControl addCar(Car car, Vector3f start, Quaternion rot, boolean aPlayer) {
-        return addCar(loadData(car), start, rot, aPlayer);
+        return addCar(loadData(car, true), start, rot, aPlayer);
     }
     /** Creates the vehicle and loads it into the world. */
     public RayCarControl addCar(CarDataConst carData, Transform trans, boolean aPlayer) {

@@ -61,7 +61,7 @@ public class DriveDev extends DriveBase {
 		this.reInitPlayerCar(data);
 	}
 	private RayCarControl resetCar(Car car) {
-		this.reInitPlayerCar(this.cm.loadData(car));
+		this.reInitPlayerCar(this.cm.loadData(car, false));
 		return this.cm.getPlayer();
 	}
 	
