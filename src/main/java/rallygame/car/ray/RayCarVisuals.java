@@ -32,7 +32,8 @@ public class RayCarVisuals {
         // init visual wheels
         this.wheelControls = new RayWheelVisuals[4];
         for (int i = 0; i < wheelControls.length; i++) {
-            wheelControls[i] = new RayWheelVisuals(app, car.rayCar.wheels[i], rootNode, carData.wheelOffset[i]);
+            wheelControls[i] = new RayWheelVisuals(app, car.rayCar.wheels[i],
+                    carData.susByWheelNum(i), rootNode, carData.wheelOffset[i]);
         }
 
         Node carModel = LoadModelWrapper.create(app.getAssetManager(), initialCarModel, carData.baseColor);
@@ -54,7 +55,7 @@ public class RayCarVisuals {
         }
 
         for (int i = 0; i < this.wheelControls.length; i++)
-            this.wheelControls[i].viewUpdate(tpf, car.vel, carData.susByWheelNum(i).min_travel);
+            this.wheelControls[i].viewUpdate(tpf, car.vel);
 
         debug.update();
     }

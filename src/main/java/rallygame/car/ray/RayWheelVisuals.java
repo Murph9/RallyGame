@@ -18,6 +18,7 @@ import com.jme3.scene.Mesh.Mode;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.util.BufferUtils;
 
+import rallygame.car.data.CarSusDataConst;
 import rallygame.effects.LoadModelWrapper;
 import rallygame.helper.H;
 
@@ -73,14 +74,16 @@ public class RayWheelVisuals {
     
     private final SimpleApplication app;
     private final RayWheel wheel;
+    private final CarSusDataConst carSus;
     private final Node rootNode;
     private final Spatial spat;
     
     private final Vector3f offset;
     
-    protected RayWheelVisuals(SimpleApplication app, RayWheel wheel, Node carRootNode, Vector3f pos) {
+    protected RayWheelVisuals(SimpleApplication app, RayWheel wheel, CarSusDataConst carSus, Node carRootNode, Vector3f pos) {
         this.app = app;
         this.wheel = wheel;
+        this.carSus = carSus;
         this.offset = pos;
         
         //rotate and translate the wheel rootNode
@@ -120,17 +123,15 @@ public class RayWheelVisuals {
         
         app.getRootNode().attachChild(this.skidLine);
         
-        //trigger one view update so the cars wheels are in 'position' on load incase the car isn't loaded enabled
-        viewUpdate(1/60f, new Vector3f(), 0);
+        // trigger one view update so the cars wheels are in 'position' on load incase the car isn't loaded enabled
+        viewUpdate(1/60f, new Vector3f());
 
-        //Smoke can be found from source control
+        // Smoke can be found from source control
     }
 
-    //hopefully called by RayCarControl
-    protected void viewUpdate(float tpf, Vector3f velDir, float sus_min_travel) { 
-        //TODO NOTE: sus_min_travel is just poor design, but how else will the wheel object know a car const?
-        
-        Vector3f posInLocal = new Vector3f(0, -wheel.susRayLength - sus_min_travel, 0);
+    // hopefully only called by RayCarControl
+    protected void viewUpdate(float tpf, Vector3f velDir) {
+        Vector3f posInLocal = new Vector3f(0, -wheel.susRayLength - carSus.min_travel, 0);
         rootNode.setLocalTranslation(offset.add(posInLocal));
         
         //rotate for wheel rotation
