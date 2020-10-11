@@ -147,7 +147,6 @@ public class RayWheelVisuals {
         if (wheel.num % 2 == 1)
             rootNode.rotate(0, FastMath.PI, 0);
         
-        //TODO this has high perf issues
         updateSkidLine(tpf, velDir);
     }
     
@@ -158,6 +157,10 @@ public class RayWheelVisuals {
         if (sinceLastPos < 0) {
             lastingSkid = true;
             sinceLastPos = SKID_MARK_TIMEOUT;
+        } else { // TODO remove these lines to apply the above 'continually update'
+            return; // if you want to have the line update more often for a large perf hit
+            // To fix that we might have to create a separate skid quad for just the dynamically
+            // updating part at the 'end' of it, preventing sending the whole large skid line to the gpu every frame
         }
 
         // Possible: change this be thinner with a larger drift angle (which we don't have here)
