@@ -4,8 +4,6 @@ import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.asset.AssetManager;
-import com.jme3.font.BitmapFont;
-import com.jme3.font.BitmapText;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
 import com.jme3.input.controls.ActionListener;
@@ -25,7 +23,6 @@ import com.jme3.system.AppSettings;
 import rallygame.car.ray.RayCarControl;
 import rallygame.car.ray.ICarPowered;
 import rallygame.helper.Geo;
-import rallygame.helper.H;
 
 public class CarUI extends BaseAppState {
 
@@ -36,7 +33,6 @@ public class CarUI extends BaseAppState {
 	
 	//hud stuff
 	private Geometry background;
-	private BitmapText angle;
 	
 	//rpm
 	private Geometry rpmQuad;
@@ -91,18 +87,10 @@ public class CarUI extends BaseAppState {
 
 		SimpleApplication r = (SimpleApplication)app;
 
-		BitmapFont guiFont = app.getAssetManager().loadFont("Interface/Fonts/Default.fnt");
 		AppSettings settings = app.getContext().getSettings();
 		rootNode = new Node("local root");
 		r.getGuiNode().attachChild(rootNode);
 		AssetManager am = r.getAssetManager();
-
-		angle = new BitmapText(guiFont, false);
-		angle.setSize(guiFont.getCharSet().getRenderedSize());
-		angle.setColor(ColorRGBA.White);
-		angle.setText("blaj");
-		angle.setLocalTranslation(settings.getWidth() - 300, 30, 0); // position
-		rootNode.attachChild(angle);
 		
 		//////////////////////////////
 		//speedo number textures
@@ -138,10 +126,7 @@ public class CarUI extends BaseAppState {
 		m.setColor("Color", ColorRGBA.Black);
 
 		///////////////
-		//make the variable parts:
-		Node speedoNode = new Node("Speedo");
-		rootNode.attachChild(speedoNode);
-		
+		//make the variable parts:		
 		Quad qback = new Quad(270, 200);
 		background = new Geometry("ui-background", qback);
 		background.setCullHint(CullHint.Never);
@@ -151,7 +136,7 @@ public class CarUI extends BaseAppState {
 		background.setMaterial(trans);
 		background.setLocalTranslation(settings.getWidth() - 270, 0, -10);
 		
-		speedoNode.attachChild(background);
+		rootNode.attachChild(background);
 		
 		//rpm bars 2
 		Quad rpmQ = new Quad(220, 220);
@@ -165,7 +150,7 @@ public class CarUI extends BaseAppState {
 		rpmMat.getAdditionalRenderState().setBlendMode(BlendMode.Additive);
 		rpmQuad.setMaterial(rpmMat);
 		rpmQuad.setLocalTranslation(settings.getWidth() - 240, -25, -10);
-		speedoNode.attachChild(rpmQuad);
+		rootNode.attachChild(rpmQuad);
 		
 		//rpm bars
 		Quad quad = new Quad(20, 20);
@@ -192,12 +177,12 @@ public class CarUI extends BaseAppState {
                 Geometry redLine2 = new Geometry("redline2", mq);
                 redLine2.setMaterial(mat);
                 redLine2.setLocalTranslation(centerx, centery, 0);
-                speedoNode.attachChild(redLine2);
+                rootNode.attachChild(redLine2);
             } 
             
             if (i % 1000 == 0) {
                 Node g = addRPMNumber(angle, (int)i/1000, quad, centerx-10, centery-10);
-                speedoNode.attachChild(g);
+                rootNode.attachChild(g);
             }
 		}
 		
@@ -209,14 +194,14 @@ public class CarUI extends BaseAppState {
 		nitroM.setColor("Color", new ColorRGBA(ColorRGBA.Green).mult(0.2f));
 		nitroOff.setMaterial(nitroM);
 		nitroOff.setLocalTranslation(centerx - (settings.getWidth() - centerx), 10, 0);
-		speedoNode.attachChild(nitroOff);
+		rootNode.attachChild(nitroOff);
 		
 		nitro = new Geometry("nitro", q);
 		nitroM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
 		nitroM.setColor("Color", new ColorRGBA(ColorRGBA.Green));
 		nitro.setMaterial(nitroM);
 		nitro.setLocalTranslation(centerx - (settings.getWidth() - centerx), 10, 0);
-		speedoNode.attachChild(nitro);
+		rootNode.attachChild(nitro);
 		
 		//throttle
 		q = new Quad(6, 60);
@@ -225,14 +210,14 @@ public class CarUI extends BaseAppState {
 		throttleM.setColor("Color", new ColorRGBA(ColorRGBA.Blue).mult(0.2f));
 		throttleOff.setMaterial(throttleM);
 		throttleOff.setLocalTranslation(centerx - 30, centery - 30, 0);
-		speedoNode.attachChild(throttleOff);
+		rootNode.attachChild(throttleOff);
 		
 		throttle = new Geometry("throttle", q);
 		throttleM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
 		throttleM.setColor("Color", new ColorRGBA(ColorRGBA.Blue));
 		throttle.setMaterial(throttleM);
 		throttle.setLocalTranslation(centerx - 30, centery - 30, 0);
-		speedoNode.attachChild(throttle);
+		rootNode.attachChild(throttle);
 		
 		//brake
 		brakeOff = new Geometry("brakeback", q);
@@ -240,14 +225,14 @@ public class CarUI extends BaseAppState {
 		brakeM.setColor("Color", new ColorRGBA(ColorRGBA.Red).mult(0.2f));
 		brakeOff.setMaterial(brakeM);
 		brakeOff.setLocalTranslation(centerx - 45, centery - 30, 0);
-		speedoNode.attachChild(brakeOff);
+		rootNode.attachChild(brakeOff);
 		
 		brake = new Geometry("brake", q);
 		brakeM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
 		brakeM.setColor("Color", new ColorRGBA(ColorRGBA.Red));
 		brake.setMaterial(brakeM);
 		brake.setLocalTranslation(centerx - 45, centery - 30, 0);
-		speedoNode.attachChild(brake);
+		rootNode.attachChild(brake);
 		
 		//steer
 		q = new Quad(60, 6);
@@ -256,7 +241,7 @@ public class CarUI extends BaseAppState {
 		steerM.setColor("Color", new ColorRGBA(ColorRGBA.White).mult(0.2f));
 		steerOff.setMaterial(steerM);
 		steerOff.setLocalTranslation(centerx - 35, centery + 40, 0);
-		speedoNode.attachChild(steerOff);
+		rootNode.attachChild(steerOff);
 		
 		int width = 6;
 		q = new Quad(width, 6);
@@ -265,7 +250,7 @@ public class CarUI extends BaseAppState {
 		steerM.setColor("Color", new ColorRGBA(ColorRGBA.White));
 		steer.setMaterial(steerM);
 		steer.setLocalTranslation(centerx - 35 + (60-width)/2, centery + 40, 0);
-		speedoNode.attachChild(steer);
+		rootNode.attachChild(steer);
 	}
 
 	private void makeKmH(AppSettings settings) {
@@ -324,12 +309,12 @@ public class CarUI extends BaseAppState {
 		int speedKMH = (int)Math.abs(p.getCurrentVehicleSpeedKmHour());
 		setSpeedDigits(speedKMH);
 
-		setGearDigit(powerState.curGear());
+		var gearIn = (int) FastMath.clamp(powerState.curGear(), 0, 9); // so we don't go off the end of the texture array
+		gear.setMaterial(numMats[gearIn]);
 		
 		//rpm bar 2
 		rpmMat.setFloat("Threshold", Math.min(1, 1 - (powerState.curRPM()/(float)Math.ceil(redline+1000))*(5/(float)8)));
 		
-		angle.setText(H.roundDecimal(powerState.driftAngle(), 1)+"'");
 		nitro.setLocalScale(1, powerState.nitro()/p.getCarData().nitro_max, 1);
 		throttle.setLocalScale(1, powerState.accelCurrent(), 1);
 		brake.setLocalScale(1, powerState.brakeCurrent(), 1);
@@ -350,11 +335,6 @@ public class CarUI extends BaseAppState {
             if (speedKMH < 1)
                 break;
         }
-	}
-	
-	private void setGearDigit(int gearIn) {
-		gearIn = (int)FastMath.clamp(gearIn, 0, 9); //so we don't go off the end of the texture array
-		gear.setMaterial(numMats[gearIn]);
 	}
 
 	@Override
