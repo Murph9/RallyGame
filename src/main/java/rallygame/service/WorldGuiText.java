@@ -64,8 +64,10 @@ public class WorldGuiText extends BaseAppState {
     }
 
     public void removeWorldText(WorldText text) {
-        if (textList.contains(text))
+        if (textList.contains(text)) {
             textList.remove(text);
+            guiRootNode.detachChild(text.con);
+        }
     }
 
     public class WorldText {
