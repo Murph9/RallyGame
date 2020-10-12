@@ -63,6 +63,11 @@ public class WorldGuiText extends BaseAppState {
         return wt;
     }
 
+    public void removeWorldText(WorldText text) {
+        if (textList.contains(text))
+            textList.remove(text);
+    }
+
     public class WorldText {
         final Container con;
         final Label label;

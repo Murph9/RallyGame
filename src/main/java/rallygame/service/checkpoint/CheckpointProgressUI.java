@@ -62,6 +62,11 @@ public class CheckpointProgressUI extends BaseAppState {
     @Override
     protected void cleanup(Application app) {
         ((SimpleApplication) app).getGuiNode().detachChild(main);
+
+        WorldGuiText textEngine = getState(WorldGuiText.class);
+        for (var text : positionLabels.values()) {
+            textEngine.removeWorldText(text);
+        }
     }
 
     @Override
