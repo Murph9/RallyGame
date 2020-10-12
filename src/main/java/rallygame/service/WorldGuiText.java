@@ -38,11 +38,16 @@ public class WorldGuiText extends BaseAppState {
 
         Camera cam = getApplication().getCamera();
         for (WorldText text: textList) {
-            if (cam.contains(new BoundingSphere(0.1f, text.worldPos)) != FrustumIntersect.Outside) {
+            var bv = new BoundingSphere(0.1f, text.worldPos);
+            int planeState = cam.getPlaneState(); // this code block follows the javadoc for Camera.contains(bv)
+            cam.setPlaneState(0);
+            if (cam.contains(bv) != FrustumIntersect.Outside) {
                 guiRootNode.attachChild(text.con);
                 screen.centeredAt(text.con, cam.getScreenCoordinates(text.worldPos));
-            } else 
+            } else {
                 guiRootNode.detachChild(text.con);
+            }
+            cam.setPlaneState(planeState);
         }
     }
 
