@@ -129,6 +129,10 @@ public class DriveBase extends BaseAppState implements IDrive {
 
     protected final void reInitPlayerCar(CarDataConst carData) {
         this.cm.changeTo(cm.getPlayer(), carData);
+
+        // refresh ui node
+        getApplication().getStateManager().detach(uiNode);
+        getApplication().getStateManager().attach(uiNode);
     }
 
     public Transform resetPosition(RayCarControl car) {

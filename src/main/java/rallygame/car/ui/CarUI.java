@@ -82,13 +82,13 @@ public class CarUI extends BaseAppState {
 	
 	public CarUI(RayCarControl p) {
 		this.p = p;
-		
-		this.redline = p.getCarData().e_redline;
-		this.finalRPM = (int)FastMath.ceil(this.redline) + 1000;
     }
     
 	@Override
 	protected void initialize(Application app) {
+		this.redline = p.getCarData().e_redline;
+		this.finalRPM = (int) FastMath.ceil(this.redline) + 1000;
+
 		SimpleApplication r = (SimpleApplication)app;
 
 		BitmapFont guiFont = app.getAssetManager().loadFont("Interface/Fonts/Default.fnt");

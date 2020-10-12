@@ -33,7 +33,7 @@ public class CarUITelemetry extends BaseAppState {
 
     private static final float G_FORCE_DOT_SCALE = 75;
 
-    private RayCarControl p;
+    private final RayCarControl p;
     private Node rootNode;
 
     private final WheelUI[] w = new WheelUI[4];
