@@ -145,7 +145,7 @@ public class CarUI extends BaseAppState {
 		rpmMat = new Material(am, "MatDefs/Radial.j3md");
 		rpmMat.setTransparent(true);
 		rpmMat.setTexture("ThresholdMap", am.loadTexture("image/radialgradient_large.png"));
-		rpmMat.setFloat("Threshold", FastMath.nextRandomFloat());
+		rpmMat.setFloat("Threshold", 0);
 		rpmMat.setColor("Color", ColorRGBA.White);
 		rpmMat.getAdditionalRenderState().setBlendMode(BlendMode.Additive);
 		rpmQuad.setMaterial(rpmMat);
@@ -193,14 +193,14 @@ public class CarUI extends BaseAppState {
 		Material nitroM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
 		nitroM.setColor("Color", new ColorRGBA(ColorRGBA.Green).mult(0.2f));
 		nitroOff.setMaterial(nitroM);
-		nitroOff.setLocalTranslation(centerx - (settings.getWidth() - centerx), 10, 0);
+		nitroOff.setLocalTranslation(centerx - 120, 10, 0);
 		rootNode.attachChild(nitroOff);
 		
 		nitro = new Geometry("nitro", q);
 		nitroM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
 		nitroM.setColor("Color", new ColorRGBA(ColorRGBA.Green));
 		nitro.setMaterial(nitroM);
-		nitro.setLocalTranslation(centerx - (settings.getWidth() - centerx), 10, 0);
+		nitro.setLocalTranslation(centerx - 120, 10, 0);
 		rootNode.attachChild(nitro);
 		
 		//throttle
