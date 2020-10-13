@@ -195,19 +195,19 @@ public class CarUI extends BaseAppState {
         
         
         //nitro 
-        Quad q = new Quad(10, 80);
+        Quad q = new Quad(80, 10);
         nitroOff = new Geometry("nitroback", q);
         Material nitroM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
         nitroM.setColor("Color", new ColorRGBA(ColorRGBA.Green).mult(0.2f));
         nitroOff.setMaterial(nitroM);
-        nitroOff.setLocalTranslation(0, 0, 0);
+        nitroOff.setLocalTranslation(0, 10, 0);
         rootNode.attachChild(nitroOff);
         
         nitro = new Geometry("nitro", q);
         nitroM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
         nitroM.setColor("Color", new ColorRGBA(ColorRGBA.Green));
         nitro.setMaterial(nitroM);
-        nitro.setLocalTranslation(0, 0, 0);
+        nitro.setLocalTranslation(0, 10, 0);
         rootNode.attachChild(nitro);
         
         //throttle
@@ -322,7 +322,7 @@ public class CarUI extends BaseAppState {
         //rpm bar 2
         rpmMat.setFloat("Threshold", Math.min(1, 1 - (powerState.curRPM()/(float)Math.ceil(redline+1000))*(5/(float)8)));
         
-        nitro.setLocalScale(1, powerState.nitro()/p.getCarData().nitro_max, 1);
+        nitro.setLocalScale(powerState.nitro() / p.getCarData().nitro_max, 1, 1);
         throttle.setLocalScale(1, powerState.accelCurrent(), 1);
         brake.setLocalScale(1, powerState.brakeCurrent(), 1);
         steer.setLocalTranslation(SPEEDO_WIDTH/2 - 35 + (powerState.steeringCurrent()*-1 + 0.5f)*60 - 6/2, SPEEDO_HEIGHT/2 + 40, 0); //steering is a translated square
