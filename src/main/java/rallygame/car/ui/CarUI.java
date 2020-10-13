@@ -26,8 +26,6 @@ import rallygame.helper.Geo;
 
 public class CarUI extends BaseAppState {
 
-    //TODO scale it with monitor size and pixel density (forza doesn't deal with this)
-    
     private static final float startAng = FastMath.PI * 5 / 4;
     private static final float finalAng = 0;
 
@@ -91,7 +89,11 @@ public class CarUI extends BaseAppState {
         AppSettings settings = app.getContext().getSettings();
         rootNode = new Node("local root");
         r.getGuiNode().attachChild(rootNode);
-        rootNode.setLocalTranslation(settings.getWidth() - SPEEDO_WIDTH, 0, 0);
+        
+        // the normal size is a 1200 screen
+        float scale = settings.getWidth()/1200f;
+        rootNode.setLocalTranslation(settings.getWidth() - SPEEDO_WIDTH*scale, 0, 0);
+        rootNode.scale(scale);
         AssetManager am = r.getAssetManager();
         
         //////////////////////////////
