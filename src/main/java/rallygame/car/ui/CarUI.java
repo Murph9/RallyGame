@@ -29,6 +29,10 @@ public class CarUI extends BaseAppState {
     private static final float startAng = FastMath.PI * 5 / 4;
     private static final float finalAng = 0;
 
+    private static final int SPEEDO_HEIGHT = 200;
+    private static final int SPEEDO_WIDTH = 200;
+    private static final int radius = 100;
+
     private static final String numImageFolder = "number/"; // texture location
 
     private final RayCarControl p;
@@ -57,10 +61,6 @@ public class CarUI extends BaseAppState {
     //speedo numbers
     private int finalRPM; //should be more than redline
     private float redline;
-    
-    private static final int SPEEDO_HEIGHT = 200;
-    private static final int SPEEDO_WIDTH = 200;
-    private static final int radius = 100;
 
     /////telemetry
     private boolean showTelemetry;
@@ -161,42 +161,42 @@ public class CarUI extends BaseAppState {
         final int quadXSize = 20;
         final int quadYSize = 20;
         Quad quad = new Quad(quadXSize, quadYSize);
-                
+        
+        final float innerArc = 0.81f * radius;
+        final float outerArc = 0.94f * radius;        
+
         final int increment = 100;
-        final float inner = 0.81f;
-        final float outer = 0.94f;
-        for (int i = 0; i < finalRPM+1; i += increment) {
-            float angle = FastMath.interpolateLinear(i/(float)finalRPM, startAng, finalAng);
+        for (int i = (int)Math.floor(redline / increment) * increment; i < finalRPM+1; i += increment) {
+            float angle = FastMath.interpolateLinear(i / (float) finalRPM, startAng, finalAng);
+            float angle2 = FastMath.interpolateLinear((i + increment) / (float) finalRPM, startAng, finalAng);
             
-            if (i >= redline) {
-                float angle2 = FastMath.interpolateLinear((i + increment) / (float) finalRPM, startAng, finalAng);
-                
-                Vector3f[] corners = new Vector3f[] {
-                        new Vector3f(FastMath.cos(angle) * radius * outer, FastMath.sin(angle) * radius * outer, 0),
-                        new Vector3f(FastMath.cos(angle) * radius * inner, FastMath.sin(angle) * radius * inner, 0),
-                        new Vector3f(FastMath.cos(angle2) * radius * outer, FastMath.sin(angle2) * radius * outer, 0),
-                        new Vector3f(FastMath.cos(angle2) * radius * inner, FastMath.sin(angle2) * radius * inner, 0),
-                    };
-                Mesh mq = Geo.createQuad(corners);
+            Vector3f[] corners = new Vector3f[] {
+                    new Vector3f(FastMath.cos(angle) * outerArc, FastMath.sin(angle) * outerArc, 0),
+                    new Vector3f(FastMath.cos(angle) * innerArc, FastMath.sin(angle) * innerArc, 0),
+                    new Vector3f(FastMath.cos(angle2) * outerArc, FastMath.sin(angle2) * outerArc, 0),
+                    new Vector3f(FastMath.cos(angle2) * innerArc, FastMath.sin(angle2) * innerArc, 0),
+                };
+            Mesh mq = Geo.createQuad(corners);
 
-                Material mat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-                mat.setColor("Color", new ColorRGBA(ColorRGBA.Red));
-                Geometry redLine2 = new Geometry("redline2", mq);
-                redLine2.setMaterial(mat);
-                redLine2.setLocalTranslation(SPEEDO_WIDTH/2, SPEEDO_HEIGHT/2, 0);
-                rootNode.attachChild(redLine2);
-            }
-            
-            if (i % 1000 == 0) {
-                Node g = addRPMNumber(angle, (int)i/1000, quad, SPEEDO_WIDTH/2 - quadXSize/2, SPEEDO_HEIGHT/2 - quadYSize/2);
-                rootNode.attachChild(g);
+            Material mat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+            mat.setColor("Color", new ColorRGBA(ColorRGBA.Red));
+            Geometry redLine2 = new Geometry("redline2", mq);
+            redLine2.setMaterial(mat);
+            redLine2.setLocalTranslation(SPEEDO_WIDTH/2, SPEEDO_HEIGHT/2, 0);
+            rootNode.attachChild(redLine2);
+        }
 
-                var innerPoint = new Vector3f(FastMath.cos(angle) * radius * inner, FastMath.sin(angle) * radius * inner, 0);
-                var outerPoint = new Vector3f(FastMath.cos(angle) * radius * (inner + (outer - inner) / 2), FastMath.sin(angle) * radius * (inner + (outer - inner)/2), 0);
-                var line = Geo.makeShapeLine(am, ColorRGBA.White, innerPoint, outerPoint);
-                line.setLocalTranslation(SPEEDO_WIDTH / 2, SPEEDO_HEIGHT / 2, -12);
-                rootNode.attachChild(line);
-            }
+        // generate numbers around the arc and 1k notches
+        for (int i = 0; i < finalRPM+1; i+=1000) {
+            float angle = FastMath.interpolateLinear(i / (float) finalRPM, startAng, finalAng);
+            Node g = addRPMNumber(angle, (int)i/1000, quad, SPEEDO_WIDTH/2 - quadXSize/2, SPEEDO_HEIGHT/2 - quadYSize/2);
+            rootNode.attachChild(g);
+
+            var innerPoint = new Vector3f(FastMath.cos(angle) * innerArc, FastMath.sin(angle) * innerArc, 0);
+            var outerPoint = new Vector3f(FastMath.cos(angle) * (innerArc + (outerArc - innerArc) / 2), FastMath.sin(angle) * (innerArc + (outerArc - innerArc)/2), 0);
+            var line = Geo.makeShapeLine(am, ColorRGBA.White, innerPoint, outerPoint);
+            line.setLocalTranslation(SPEEDO_WIDTH / 2, SPEEDO_HEIGHT / 2, -12);
+            rootNode.attachChild(line);
         }
         
         
