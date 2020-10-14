@@ -198,65 +198,67 @@ public class CarUI extends BaseAppState {
         Quad q = new Quad(80, 10);
         nitroOff = new Geometry("nitroback", q);
         Material nitroM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-        nitroM.setColor("Color", new ColorRGBA(ColorRGBA.Green).mult(0.2f));
+        nitroM.setColor("Color", new ColorRGBA(ColorRGBA.Green).mult(0.3f));
         nitroOff.setMaterial(nitroM);
-        nitroOff.setLocalTranslation(0, 10, 0);
+        nitroOff.setLocalTranslation(5, 10, 0);
         rootNode.attachChild(nitroOff);
         
         nitro = new Geometry("nitro", q);
         nitroM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
         nitroM.setColor("Color", new ColorRGBA(ColorRGBA.Green));
         nitro.setMaterial(nitroM);
-        nitro.setLocalTranslation(0, 10, 0);
+        nitro.setLocalTranslation(5, 10, 0);
         rootNode.attachChild(nitro);
         
         //throttle
-        q = new Quad(6, 60);
+        var width = 6;
+        var height = 60;
+        q = new Quad(width, height);
         throttleOff = new Geometry("throttleback", q);
         Material throttleM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-        throttleM.setColor("Color", new ColorRGBA(ColorRGBA.Blue).mult(0.2f));
+        throttleM.setColor("Color", new ColorRGBA(ColorRGBA.Blue).mult(0.3f));
         throttleOff.setMaterial(throttleM);
-        throttleOff.setLocalTranslation(SPEEDO_WIDTH/2 + 30, SPEEDO_HEIGHT/2 - 30, 0);
+        throttleOff.setLocalTranslation(SPEEDO_WIDTH/2 + 30 - width / 2, SPEEDO_HEIGHT/2 - height/2, 0);
         rootNode.attachChild(throttleOff);
         
         throttle = new Geometry("throttle", q);
         throttleM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
         throttleM.setColor("Color", new ColorRGBA(ColorRGBA.Blue));
         throttle.setMaterial(throttleM);
-        throttle.setLocalTranslation(SPEEDO_WIDTH/2 + 30, SPEEDO_HEIGHT/2 - 30, 0);
+        throttle.setLocalTranslation(SPEEDO_WIDTH/2 + 30 - width / 2, SPEEDO_HEIGHT/2 - height/2, 0);
         rootNode.attachChild(throttle);
         
         //brake
         brakeOff = new Geometry("brakeback", q);
         Material brakeM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-        brakeM.setColor("Color", new ColorRGBA(ColorRGBA.Red).mult(0.2f));
+        brakeM.setColor("Color", new ColorRGBA(ColorRGBA.Red).mult(0.3f));
         brakeOff.setMaterial(brakeM);
-        brakeOff.setLocalTranslation(SPEEDO_WIDTH/2 - 30, SPEEDO_HEIGHT/2 - 30, 0);
+        brakeOff.setLocalTranslation(SPEEDO_WIDTH/2 - 30 - width / 2, SPEEDO_HEIGHT/2 - height/2, 0);
         rootNode.attachChild(brakeOff);
         
         brake = new Geometry("brake", q);
         brakeM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
         brakeM.setColor("Color", new ColorRGBA(ColorRGBA.Red));
         brake.setMaterial(brakeM);
-        brake.setLocalTranslation(SPEEDO_WIDTH/2 - 30, SPEEDO_HEIGHT/2 - 30, 0);
+        brake.setLocalTranslation(SPEEDO_WIDTH/2 - 30 - width / 2, SPEEDO_HEIGHT/2 - height/2, 0);
         rootNode.attachChild(brake);
         
         //steer
         q = new Quad(60, 6);
         steerOff = new Geometry("steerback", q);
         Material steerM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-        steerM.setColor("Color", new ColorRGBA(ColorRGBA.White).mult(0.2f));
+        steerM.setColor("Color", new ColorRGBA(ColorRGBA.White).mult(0.3f));
         steerOff.setMaterial(steerM);
-        steerOff.setLocalTranslation(SPEEDO_WIDTH/2 - 35, SPEEDO_HEIGHT/2 + 40, 0);
+        steerOff.setLocalTranslation(SPEEDO_WIDTH/2 - 60/2, SPEEDO_HEIGHT/2 + 40, 0);
         rootNode.attachChild(steerOff);
         
-        int width = 6;
+        width = 6;
         q = new Quad(width, 6);
         steer = new Geometry("steer", q);
         steerM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
         steerM.setColor("Color", new ColorRGBA(ColorRGBA.White));
         steer.setMaterial(steerM);
-        steer.setLocalTranslation(SPEEDO_WIDTH/2 - 35 + (60-width)/2, SPEEDO_HEIGHT/2 + 40, 0);
+        steer.setLocalTranslation(SPEEDO_WIDTH/2 - width/2, SPEEDO_HEIGHT/2 + 40, 0);
         rootNode.attachChild(steer);
     }
 
@@ -319,13 +321,15 @@ public class CarUI extends BaseAppState {
         var gearIn = (int) FastMath.clamp(powerState.curGear(), 0, 9); // so we don't go off the end of the texture array
         gear.setMaterial(numMats[gearIn]);
         
-        //rpm bar 2
+        //rpm bar
         rpmMat.setFloat("Threshold", Math.min(1, 1 - (powerState.curRPM()/(float)Math.ceil(redline+1000))*(5/(float)8)));
         
         nitro.setLocalScale(powerState.nitro() / p.getCarData().nitro_max, 1, 1);
         throttle.setLocalScale(1, powerState.accelCurrent(), 1);
         brake.setLocalScale(1, powerState.brakeCurrent(), 1);
-        steer.setLocalTranslation(SPEEDO_WIDTH/2 - 35 + (powerState.steeringCurrent()*-1 + 0.5f)*60 - 6/2, SPEEDO_HEIGHT/2 + 40, 0); //steering is a translated square
+
+        var steeringValue = powerState.steeringCurrent()*60;
+        steer.setLocalTranslation(SPEEDO_WIDTH/2 - 6/2 - steeringValue, SPEEDO_HEIGHT/2 + 40, 0); //steering is a translated square
     }
 
     private void setSpeedDigits(int speedKMH) {
