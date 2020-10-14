@@ -190,6 +190,12 @@ public class CarUI extends BaseAppState {
             if (i % 1000 == 0) {
                 Node g = addRPMNumber(angle, (int)i/1000, quad, SPEEDO_WIDTH/2 - quadXSize/2, SPEEDO_HEIGHT/2 - quadYSize/2);
                 rootNode.attachChild(g);
+
+                var innerPoint = new Vector3f(FastMath.cos(angle) * radius * inner, FastMath.sin(angle) * radius * inner, 0);
+                var outerPoint = new Vector3f(FastMath.cos(angle) * radius * (inner + (outer - inner) / 2), FastMath.sin(angle) * radius * (inner + (outer - inner)/2), 0);
+                var line = Geo.makeShapeLine(am, ColorRGBA.White, innerPoint, outerPoint);
+                line.setLocalTranslation(SPEEDO_WIDTH / 2, SPEEDO_HEIGHT / 2, -12);
+                rootNode.attachChild(line);
             }
         }
         
