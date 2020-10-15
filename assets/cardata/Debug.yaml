@@ -43,7 +43,7 @@ w_steerAngle: 0.5
 wheelData:
 - &w
   mass: 10.0
-  modelName: models/wheel.obj
+  modelName: models/wheel1.blend.glb
   pjk_lat: {B: 56.0, C: 1.9, D1: 1.0, D2: 0.000055, E: 0.97}
   pjk_long: {B: 34.0, C: 1.5, D1: 1.0, D2: 0.000055, E: 0.98}
   radius: 0.3
