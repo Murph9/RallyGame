@@ -100,6 +100,7 @@ public class SmallTiled extends World {
         for (var t: tiles.values()) {
             t.sp.removeFromParent(); // removes them from the physics space
         }
+        tiles.clear();
     }
     
     private class CityPiece {
