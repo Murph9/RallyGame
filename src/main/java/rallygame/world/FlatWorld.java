@@ -31,7 +31,7 @@ public class FlatWorld extends World {
 	public void initialize(Application app) {
 		super.initialize(app);
 
-		startGeometry = LoadModelWrapper.create(app.getAssetManager(), 
+		startGeometry = LoadModelWrapper.createWithColour(app.getAssetManager(), 
 			new Geometry("box", new Box(20, 0.25f, 20)), 
 			ColorRGBA.Green);
 		startGeometry.setLocalTranslation(0, -0.1f, 0);

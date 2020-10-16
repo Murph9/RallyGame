@@ -201,7 +201,7 @@ public class Terrain extends BaseAppState implements ILoadable {
             tObj.grass = GrassPlacer.generate(tObj.quad, 10000, (v2) -> onRoad(v2));
             Geometry g = new Geometry("'grass'", tObj.grass);
             getApplication().enqueue(() -> {
-                this.rootNode.attachChild(LoadModelWrapper.create(am, g, colour));
+                this.rootNode.attachChild(LoadModelWrapper.createWithColour(am, g, colour));
             });
         }
     }

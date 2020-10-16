@@ -99,7 +99,7 @@ public abstract class DefaultBuilder extends World {
 		
 		Box start = new Box(10, 0.25f, 10); //Something to spawn on (or in hint hint)
 		startGeometry = new Geometry("Starting Box", start);
-		startGeometry = LoadModelWrapper.create(app.getAssetManager(), startGeometry, ColorRGBA.Green);
+		startGeometry = LoadModelWrapper.createWithColour(app.getAssetManager(), startGeometry, ColorRGBA.Green);
 		startGeometry.setLocalTranslation(0, -0.1f, 0);
 		startGeometry.addControl(new RigidBodyControl(0));
 		

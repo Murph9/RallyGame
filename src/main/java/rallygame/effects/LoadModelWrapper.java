@@ -18,44 +18,66 @@ import rallygame.helper.Log;
 
 public class LoadModelWrapper {
     
-    /**Loads a model with geometry with its own colours */
-    public static Node create(AssetManager am, String model) {
-        return create(am, am.loadModel(model), null);
-    }
-
-    /**Loads a model with geometry with a primaryColor, a null colour means it needs its own colour*/
-    public static Node create(AssetManager am, Spatial s, ColorRGBA primaryColor) {
+    /** Loads a model with all the same colour */
+    public static Node createWithColour(AssetManager am, Spatial s, ColorRGBA colour) {
         if (s == null)
             return null;
 
         if (s instanceof Geometry) {
             Node n = new Node();
-            n.attachChild(setMatColour(am, (Geometry) s, primaryColor));
+            n.attachChild(setMatColour(am, (Geometry) s, colour));
             return n;
         }
         Node n = (Node) s;
         List<Geometry> gList = Geo.getGeomList(n);
         for (Geometry g : gList) {
-            g.getParent().attachChild(setMatColour(am, g, primaryColor));
+            g.getParent().attachChild(setMatColour(am, g, colour));
         }
         return n;
     }
+    
+    /** Loads a model with geometry with its own colours */
+    public static Node create(AssetManager am, String model) {
+        return create(am, am.loadModel(model), null, null);
+    }
 
-    private static Geometry setMatColour(AssetManager am, Geometry g, ColorRGBA primaryColor) {
-        Material mat = g.getMaterial();
-        if (primaryColor == null) {
-            primaryColor = MaterialColourer.getColourFromMaterialName(mat);
-            if (primaryColor == null) {
-                throw new IllegalArgumentException("Material " + mat.getName() + " for geom: " + g.getName()
-                        + " doesn't have a colour set and i wasn't given one");
-            }
+    /** Loads a model with geometry with a primary colour */
+    public static Node create(AssetManager am, String model, ColorRGBA primaryColor) {
+        return create(am, am.loadModel(model), primaryColor, null);
+    }
+
+    /** Loads a model with geometry with a primary colour and secondary colour */
+    public static Node create(AssetManager am, Spatial s, ColorRGBA primaryColor, ColorRGBA secondaryColor) {
+        if (s == null)
+            return null;
+
+        if (s instanceof Geometry) {
+            Node n = new Node();
+            n.attachChild(setMat(am, (Geometry) s));
+            return n;
+        }
+        Node n = (Node) s;
+        List<Geometry> gList = Geo.getGeomList(n);
+        for (Geometry g : gList) {
+            g.getParent().attachChild(setMat(am, g));
+        }
+
+        setPrimaryColour(n, primaryColor);
+        setSecondaryColour(n, secondaryColor);
+        return n;
+    }
+
+    private static Geometry setMatColour(AssetManager am, Geometry g, ColorRGBA color) {
+        if (color == null) {
+            throw new IllegalArgumentException("Please don't send me a null colour");
         }
 
         Material baseMat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-        baseMat.setColor("Color", primaryColor);
+        baseMat.setColor("Color", color);
+        Material mat = g.getMaterial();
         if (mat != null) // keep the name if given
             baseMat.setName(mat.getName());
-        if (primaryColor.a < 1) {
+        if (color.a < 1) {
             // needs alpha stuff
             baseMat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Back);
             baseMat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
@@ -68,14 +90,27 @@ public class LoadModelWrapper {
         return g;
     }
 
+    private static Geometry setMat(AssetManager am, Geometry g) {
+        Material mat = g.getMaterial();
+        ColorRGBA colour = MaterialColourer.getColourFromMaterialName(mat);
+        if (colour == null) {
+            throw new IllegalArgumentException("Material " + mat.getName() + " for geom: " + g.getName()
+                    + " doesn't have a colour set");
+        }
+
+        return setMatColour(am, g, colour);
+    }
+
     /** Sets the colour of the primary tagged part */
     public static void setPrimaryColour(Spatial s, ColorRGBA colour) {
-        setColour(s, colour, CarModelData.CarPart.PRIMARY_TAG);
+        if (colour != null)
+            setColour(s, colour, CarModelData.CarPart.PRIMARY_TAG);
     }
 
     /** Sets the colour of the secondary tagged part */
     public static void setSecondaryColour(Spatial s, ColorRGBA colour) {
-        setColour(s, colour, CarModelData.CarPart.SECONDARY_TAG);
+        if (colour != null)
+            setColour(s, colour, CarModelData.CarPart.SECONDARY_TAG);
     }
 
     private static void setColour(Spatial s, ColorRGBA colour, String tag) {

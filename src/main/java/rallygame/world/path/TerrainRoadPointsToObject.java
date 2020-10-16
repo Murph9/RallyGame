@@ -57,13 +57,13 @@ public class TerrainRoadPointsToObject {
 
         CatmullRomWidth c3 = road.middle;
         Geometry g = new Geometry(road+":middle", c3);
-        rootNode.attachChild(LoadModelWrapper.create(am, g, ColorRGBA.Green));
+        rootNode.attachChild(LoadModelWrapper.createWithColour(am, g, ColorRGBA.Green));
 
         // add the extra things
         for (CatmullRomWidth r : road.others) {
             g = new Geometry(road+":other:"+r, r);
             g.setLocalTranslation(g.getLocalTranslation().add(0, -0.0001f, 0));
-            rootNode.attachChild(LoadModelWrapper.create(am, g, ColorRGBA.Brown));
+            rootNode.attachChild(LoadModelWrapper.createWithColour(am, g, ColorRGBA.Brown));
         }
 
         return rootNode;

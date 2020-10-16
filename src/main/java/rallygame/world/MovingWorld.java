@@ -43,7 +43,7 @@ public class MovingWorld extends World {
         	cm.get(0).setPhysicsProperties(new Vector3f(0, BOX_HEIGHT + 0.5f, 0), null, null, null);
 
 		//still box
-		startGeometry = LoadModelWrapper.create(app.getAssetManager(), 
+		startGeometry = LoadModelWrapper.createWithColour(app.getAssetManager(), 
 			new Geometry("box", new Box(BOX_SIZE, BOX_HEIGHT, BOX_SIZE)), 
 			ColorRGBA.Green);
 		startGeometry.setLocalTranslation(0, 0, 0);
@@ -53,7 +53,7 @@ public class MovingWorld extends World {
         getState(BulletAppState.class).getPhysicsSpace().add(startGeometry);
 
 		//moving box
-		box = LoadModelWrapper.create(app.getAssetManager(),
+		box = LoadModelWrapper.createWithColour(app.getAssetManager(),
 			new Geometry("Box", new Box(BOX_SIZE, BOX_HEIGHT, BOX_SIZE)),
 			ColorRGBA.Cyan);
 		

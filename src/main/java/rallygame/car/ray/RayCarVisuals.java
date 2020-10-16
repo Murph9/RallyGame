@@ -36,7 +36,7 @@ public class RayCarVisuals {
                     carData.susByWheelNum(i), rootNode, carData.wheelOffset[i]);
         }
 
-        Node carModel = LoadModelWrapper.create(app.getAssetManager(), initialCarModel, carData.baseColor);
+        Node carModel = LoadModelWrapper.create(app.getAssetManager(), initialCarModel, carData.baseColor, null);
         this.rootNode.attachChild(carModel);
     }
 

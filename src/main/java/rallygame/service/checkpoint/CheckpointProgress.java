@@ -233,7 +233,7 @@ public class CheckpointProgress extends BaseAppState {
     public static Spatial GetDefaultCheckpointModel(Application app, float scale, ColorRGBA colour) {
         Vector3f checkpointSize = Vector3f.UNIT_XYZ.mult(scale);
         Spatial baseSpat = new Geometry("checkpoint", new Box(checkpointSize.negate(), checkpointSize));
-        Spatial out = LoadModelWrapper.create(app.getAssetManager(), baseSpat, colour);
+        Spatial out = LoadModelWrapper.createWithColour(app.getAssetManager(), baseSpat, colour);
         for (Geometry g : Geo.getGeomList(out)) {
             g.getMaterial().getAdditionalRenderState().setWireframe(true);
             g.getMaterial().getAdditionalRenderState().setLineWidth(5);

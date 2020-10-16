@@ -31,7 +31,7 @@ public class CubePlacer {
         float size = 1f;
         Box b = new Box(size, size, size);
         Spatial s = new Geometry("box", b);
-        s = LoadModelWrapper.create(am, s, colour);
+        s = LoadModelWrapper.createWithColour(am, s, colour);
 
         List<Spatial> list = new LinkedList<>();
         for (int i = 0; i < count; i++) {

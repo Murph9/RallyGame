@@ -110,7 +110,7 @@ public class DynamicCopyRace extends DriveBase
         // Something bigger to spawn on
         Geometry gBox = new Geometry("a bigger starting box", new Box(20, 0.25f, 10));
         gBox.setLocalTranslation(-30, -0.1f, 0);
-        Spatial boxG = LoadModelWrapper.create(app.getAssetManager(), gBox, ColorRGBA.Red);
+        Spatial boxG = LoadModelWrapper.createWithColour(app.getAssetManager(), gBox, ColorRGBA.Red);
         boxG.addControl(new RigidBodyControl(0));
         ((SimpleApplication) app).getRootNode().attachChild(boxG);
         getState(BulletAppState.class).getPhysicsSpace().add(boxG);

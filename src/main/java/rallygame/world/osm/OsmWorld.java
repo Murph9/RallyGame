@@ -50,7 +50,7 @@ public class OsmWorld extends World {
             drawMeAQuad(Trig.rectFromLineXZ(l.a, l.b, roadScale), mapColorToType(l.subRoadType));
 
             Line objL = new Line(l.a, l.b);
-            this.rootNode.attachChild(LoadModelWrapper.create(app.getAssetManager(), new Geometry("line", objL), ColorRGBA.Blue));
+            this.rootNode.attachChild(LoadModelWrapper.createWithColour(app.getAssetManager(), new Geometry("line", objL), ColorRGBA.Blue));
         }
     }
 
@@ -76,7 +76,7 @@ public class OsmWorld extends World {
         PhysicsSpace phys = getState(BulletAppState.class).getPhysicsSpace();
         Mesh mesh = Geo.createQuad(v);
         Geometry geo = new Geometry("Quad", mesh);
-        Node n = LoadModelWrapper.create(getApplication().getAssetManager(), geo, colour);
+        Node n = LoadModelWrapper.createWithColour(getApplication().getAssetManager(), geo, colour);
 
         CollisionShape col = CollisionShapeFactory.createMeshShape(geo);
         RigidBodyControl c = new RigidBodyControl(col, 0);

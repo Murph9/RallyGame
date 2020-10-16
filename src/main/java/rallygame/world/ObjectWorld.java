@@ -65,7 +65,7 @@ public class ObjectWorld extends World {
 		floor = new Geometry("floor", floorBox);
 		floor.setMaterial(matfloor);
 		floor.setLocalTranslation(0, 0, 0);
-		floor = LoadModelWrapper.create(app.getAssetManager(), floor, ColorRGBA.White);
+		floor = LoadModelWrapper.createWithColour(app.getAssetManager(), floor, ColorRGBA.White);
 		
 		Spatial spat = LoadModelWrapper.create(app.getAssetManager(), ITEM);
 		if (spat instanceof Node) {

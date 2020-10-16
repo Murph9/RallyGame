@@ -189,7 +189,7 @@ public class Roads {
 		Mesh mesh = Geo.createQuad(v);
 		Geometry geo = new Geometry("Quad", mesh);
 		
-		Spatial s = LoadModelWrapper.create(am, geo, colour != null ? colour : ColorRGBA.White);
+		Spatial s = LoadModelWrapper.createWithColour(am, geo, colour != null ? colour : ColorRGBA.White);
 		
 		CollisionShape col = CollisionShapeFactory.createMeshShape(s);
 		RigidBodyControl c = new RigidBodyControl(col, 0);
