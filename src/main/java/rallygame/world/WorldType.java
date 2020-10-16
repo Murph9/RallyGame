@@ -12,12 +12,12 @@ public enum WorldType {
 	STATIC,
 	
 	OBJECT,
-	FULLCITY,
 	
 	TRACK,
 	LSYSTEM,
 	HIGHWAY,
     OSM,
+    SMALLTILED,
     
     PATH,
 
@@ -41,8 +41,6 @@ public enum WorldType {
             return dworld.getBuilder();
         case OBJECT:
             return new ObjectWorld();
-        case FULLCITY:
-            return new FullCityWorld();
         case LSYSTEM:
             return new LSystemWorld();
         case HIGHWAY:
@@ -55,6 +53,8 @@ public enum WorldType {
             return new OsmWorld();
         case TRACK:
             return new TrackWorld();
+        case SMALLTILED:
+            return new SmallTiled();
         case PATH:
             return new PathWorld();
 

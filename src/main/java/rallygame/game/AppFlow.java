@@ -34,6 +34,7 @@ public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
         Drag,
         Path,
         CopyRace,
+        TileExplorer,
         Dev;
     }
 
@@ -70,6 +71,11 @@ public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
                 break;
             case Crash:
                 loadme.add(new DriveCrash((IDriveDone)this));
+                break;
+            case TileExplorer:
+                var smallTiled = new SmallTiled();
+                loadingStates.add(smallTiled);
+                loadme.add(new DriveTileExplorer((IDriveDone) this, Car.Normal, smallTiled));
                 break;
             case Race:
                 sWorld = new StaticWorldBuilder(StaticWorld.duct2);

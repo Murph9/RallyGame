@@ -47,6 +47,21 @@ public class Trig {
         return new LineSegment(start, end).distance(point);
     }
 
+    /** Returns extents of V2f in xy directions. [xmin, ymin, xmax, ymax] */
+    public static float[] boundingBoxXZ(Vector2f... p) {
+        float xmin = Float.POSITIVE_INFINITY;
+        float xmax = Float.NEGATIVE_INFINITY;
+        float ymin = Float.POSITIVE_INFINITY;
+        float ymax = Float.NEGATIVE_INFINITY;
+        for (Vector2f v : p) {
+            xmin = Math.min(xmin, v.x);
+            xmax = Math.max(xmax, v.x);
+            ymin = Math.min(ymin, v.y);
+            ymax = Math.max(ymax, v.y);
+        }
+        return new float[] { xmin, ymin, xmax, ymax };
+    }   
+
     /** Returns extents of V3f in xz directions. [xmin, zmin, xmax, zmax] */
     public static float[] boundingBoxXZ(Vector3f... p) {
         float xmin = Float.POSITIVE_INFINITY;
