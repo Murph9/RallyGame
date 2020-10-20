@@ -13,7 +13,6 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
-import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
@@ -27,6 +26,23 @@ import com.jme3.scene.shape.Sphere;
 import com.jme3.util.BufferUtils;
 
 public class Geo {
+
+    public static Geometry createPointMesh(AssetManager am, Vector3f[] points, ColorRGBA color, float pointSize) {
+        Mesh mesh = new Mesh();
+        mesh.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(points));
+        mesh.setMode(Mesh.Mode.Points);
+        mesh.updateBound();
+        mesh.setStatic();
+        
+        var geo = new Geometry("point mesh", mesh);
+        Material mat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+        mat.setColor("Color", color);
+        mat.setFloat("PointSize", pointSize);
+        mat.getAdditionalRenderState().setWireframe(true);
+        geo.setMaterial(mat);
+
+        return geo;
+    }
 
     public static Geometry getXYCircleGeometry(int count) {
         Mesh m = new Mesh();
@@ -74,7 +90,7 @@ public class Geo {
     }
 
     public static Geometry makeShapeLine(AssetManager am, ColorRGBA color, Vector3f start, Vector3f end,
-            int lineWidth) {
+            float lineWidth) {
         if (!Vector3f.isValidVector(start) || !Vector3f.isValidVector(end)) {
             Log.e("not valid start or end", start, end);
             return null;
@@ -108,7 +124,6 @@ public class Geo {
         Geometry g = new Geometry(name, shape);
         g.setMaterial(mat);
         g.setLocalTranslation(pos);
-        g.setShadowMode(ShadowMode.Off);
         return g;
     }
 
