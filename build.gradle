@@ -78,6 +78,11 @@ application {
     mainClassName = 'rallygame.game.Main'
 }
 
+// run the 'real' game
+task runDuel(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'rallygame.duel.DuelApp'
+}
 
 task createFatJar(type: Jar) {
     archiveBaseName = 'rallyGame'
@@ -119,13 +124,21 @@ task cleanBlendGltfFiles(type: Delete) {
     }
 }
 
-def blenderCommand = "C:\\Program Files\\Blender Foundation\\Blender 2.82\\blender"
-def blenderPythonFile = "$projectDir\\assets\\blend2gltf.py"
+def blenderCommandWin = "C:\\Program Files\\Blender Foundation\\Blender 2.82\\blender"
+def blenderCommandLinux = "/usr/bin/blender"
+def blenderPythonFile = "$projectDir/assets/blend2gltf.py"
 
 task convertAllBlendFiles {
     doFirst {
-        //check blender exists first
-        assert file(blenderCommand+'.exe').exists()
+        def blenderCommand = blenderCommandLinux
+        print('Running on: ' + System.getProperty('os.name').toLowerCase(Locale.ROOT)+'\n')
+        def isWindows = System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')
+        if (isWindows) {
+            blenderCommand = blenderCommandWin + '.exe'
+        }
+        
+        // and check blender exists first
+        assert file(blenderCommand).exists()
 
         ConfigurableFileTree files = fileTree(dir: 'assets', include: '**/*.blend')
         
@@ -137,10 +150,13 @@ task convertAllBlendFiles {
                 exec {
                     standardOutput = ip
                     ignoreExitValue = true
-                    def command = '"' + blenderCommand + '" "'+file.path+'" ' + '--background ' + '--python "' + blenderPythonFile + '"'
-                    commandLine 'cmd', '/s', '/c', '"'+command+'"'
+                    def command = '"' + blenderCommand + '" "'+file.path+'" --background --python "' + blenderPythonFile + '"'
+                    if (isWindows) {
+                        commandLine 'cmd', '/s', '/c', '"'+command+'"'
+                    } else {
+                        commandLine 'sh', '-c', command
+                    }
                 }
-                //println ip
             } else {
                 println 'generated is newer for: ' + file.name
             }
@@ -148,5 +164,4 @@ task convertAllBlendFiles {
     }
 }
 
-// TODO fix blender task for linux
-// compileJava.dependsOn(convertAllBlendFiles)
+compileJava.dependsOn(convertAllBlendFiles)
