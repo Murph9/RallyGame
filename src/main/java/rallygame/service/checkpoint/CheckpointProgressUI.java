@@ -64,7 +64,7 @@ public class CheckpointProgressUI extends BaseAppState {
         ((SimpleApplication) app).getGuiNode().detachChild(main);
 
         WorldGuiText textEngine = getState(WorldGuiText.class);
-        for (var text : positionLabels.values()) {
+        for (WorldText text : positionLabels.values()) {
             textEngine.removeWorldText(text);
         }
     }
@@ -166,11 +166,15 @@ class RacerStateTableView extends Container {
     private String[] convertToValueRows(RacerState state, boolean isPlayer) {
         Duration d = state.duration;
         String durationStr = "";
+        
         if (d != null) {
+            durationStr = d.toString();
+            /* TODO This only compiles in java 11
             if (d.toHoursPart() > 0)
                 durationStr = "+59:99:999";
             else
                 durationStr = String.format("%02d:%02d:%03d", d.toMinutesPart(), d.toSecondsPart(), d.toMillisPart());
+            */
         }
 
         return new String[] {

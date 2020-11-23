@@ -22,7 +22,7 @@ class SearchWorld implements ISearchWorld<Vector2f> {
     public SearchWorld(List<TerrainQuad> terrains, float heightWeight, float maxSlope) {
         this.terrains = terrains;
         this.scale = terrains.get(0).getWorldScale().clone();
-        var xzAvg = (scale.x+scale.z)/2;
+        float xzAvg = (scale.x+scale.z)/2;
         this.heightDiffWeight = scale.y / xzAvg * heightWeight;
         this.maxHeightDiff = maxSlope * xzAvg;
     }
@@ -74,8 +74,8 @@ class SearchWorld implements ISearchWorld<Vector2f> {
         if (terrainHeightCache.containsKey(pos))
             return terrainHeightCache.get(pos);
         
-        for (var terrain : terrains) {
-            var value = terrain.getHeight(pos);
+        for (TerrainQuad terrain : terrains) {
+            float value = terrain.getHeight(pos);
             if (!Float.isNaN(value)) {
                 terrainHeightCache.put(pos, value);
                 return value;

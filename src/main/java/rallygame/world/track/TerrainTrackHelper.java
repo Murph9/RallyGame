@@ -199,7 +199,7 @@ public class TerrainTrackHelper {
         {
             for (int j = -size / 2; j <= size / 2; j++)
             {
-                var pos = new Vector2i(i, j);
+                Vector2i pos = new Vector2i(i, j);
                 Log.p(pos + " " + helper.indexOf(pos));
             }
         }

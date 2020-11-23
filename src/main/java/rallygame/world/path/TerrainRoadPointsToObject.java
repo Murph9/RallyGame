@@ -25,9 +25,9 @@ public class TerrainRoadPointsToObject {
     }
 
     public List<TerrainRoad> create(List<RoadPointList> pointLists, AssetManager am) {
-        var list = new LinkedList<TerrainRoad>();
-        for (var pointList : pointLists) {
-            var tr = new TerrainRoad();
+        List<TerrainRoad> list = new LinkedList<>();
+        for (RoadPointList pointList : pointLists) {
+            TerrainRoad tr = new TerrainRoad();
             tr.points = pointList;
             tr.road = drawRoad(tr.points);
             pointList.road = tr.road; // TODO this is such a mess
@@ -53,7 +53,7 @@ public class TerrainRoadPointsToObject {
     }
 
     private Spatial generateSpatial(CatmullRomRoad road, AssetManager am) {
-        var rootNode = new Node("road:"+road);
+        Node rootNode = new Node("road:"+road);
 
         CatmullRomWidth c3 = road.middle;
         Geometry g = new Geometry(road+":middle", c3);

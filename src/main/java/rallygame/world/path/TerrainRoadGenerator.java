@@ -6,6 +6,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import com.jme3.bounding.BoundingBox;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.terrain.geomipmap.TerrainQuad;
@@ -29,20 +30,20 @@ public class TerrainRoadGenerator {
 
     /**Generates a list of roads, please call on a background thread. */
     public List<RoadPointList> generateFrom(List<TerrainQuad> terrains) {
-        var roads = new LinkedList<RoadPointList>();
+        List<RoadPointList> roads = new LinkedList<>();
 
         if (terrains.isEmpty())
             return roads;
 
         // attempt2
-        final var boundingBox = TerrainQuadUtil.calcWorldExtents(terrains);
-        final var min = H.v3tov2fXZ(boundingBox.getMin(null));
-        final var max = H.v3tov2fXZ(boundingBox.getMax(null));
+        final BoundingBox boundingBox = TerrainQuadUtil.calcWorldExtents(terrains);
+        final Vector2f min = H.v3tov2fXZ(boundingBox.getMin(null));
+        final Vector2f max = H.v3tov2fXZ(boundingBox.getMax(null));
         
-        final var distance = max.distance(min);
+        final float distance = max.distance(min);
         
-        var start = Rand.randBetween(min, max);
-        var end = Rand.randBetween(min, max);
+        Vector2f start = Rand.randBetween(min, max);
+        Vector2f end = Rand.randBetween(min, max);
         while (start.distance(end) < distance/2) {
             // make sure the road distance is using 'some' of the map by checking its close-ish to distance
             start = Rand.randBetween(min, max);
@@ -52,7 +53,7 @@ public class TerrainRoadGenerator {
         //normalise the start and end to grid positions, otherwise search will fail
         start = TerrainQuadUtil.getClosestGridPoint(terrains.get(0), start);
         end = TerrainQuadUtil.getClosestGridPoint(terrains.get(0), end);
-        var center = TerrainQuadUtil.getClosestGridPoint(terrains.get(0), H.v3tov2fXZ(boundingBox.getCenter()));
+        Vector2f center = TerrainQuadUtil.getClosestGridPoint(terrains.get(0), H.v3tov2fXZ(boundingBox.getCenter()));
 
         // generate road from start to end through the center
         roads.add(getFrom(terrains, start, center));
@@ -64,7 +65,7 @@ public class TerrainRoadGenerator {
     }
 
     private RoadPointList getFrom(List<TerrainQuad> terrains, Vector2f worldStart, Vector2f worldEnd) {
-        var outRoad = new RoadPointList();
+        RoadPointList outRoad = new RoadPointList();
         List<Vector2f> list = null;
         try {
             // i.e. should it care about the scale of the terrain? (it has to care about the relative height vs width though)

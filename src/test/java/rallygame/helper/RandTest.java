@@ -13,9 +13,9 @@ public class RandTest {
 
     @RepeatedTest(100)
     public void randBetweenV2() {
-        var min = new Vector2f(-2, 0);
-        var max = new Vector2f(9, 4);
-        var b = Rand.randBetween(min, max);
+        Vector2f min = new Vector2f(-2, 0);
+        Vector2f max = new Vector2f(9, 4);
+        Vector2f b = Rand.randBetween(min, max);
 
         assertTrue(b.x >= min.x, "lower x bound failed");
         assertTrue(b.x <= max.x, "higher x bound failed");
@@ -25,9 +25,9 @@ public class RandTest {
 
     @RepeatedTest(100)
     public void randBetweenV3() {
-        var min = new Vector3f(-2, 0, 58);
-        var max = new Vector3f(9, 4, 59);
-        var b = Rand.randBetween(min, max);
+        Vector3f min = new Vector3f(-2, 0, 58);
+        Vector3f max = new Vector3f(9, 4, 59);
+        Vector3f b = Rand.randBetween(min, max);
         
         assertTrue(b.x >= min.x, "lower x bound failed");
         assertTrue(b.x <= max.x, "higher x bound failed");

@@ -15,6 +15,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
+import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.HeightfieldCollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.math.ColorRGBA;
@@ -95,14 +96,14 @@ public class Terrain extends BaseAppState implements ILoadable {
     }
 
     protected void offThreadInitialize(Application app) {
-        var space = app.getStateManager().getState(BulletAppState.class).getPhysicsSpace();
-        var factory = new TerrainQuadFactory(this.filteredBasis);
+        PhysicsSpace space = app.getStateManager().getState(BulletAppState.class).getPhysicsSpace();
+        TerrainQuadFactory factory = new TerrainQuadFactory(this.filteredBasis);
 
         this.loadingMessage = "Loading terrain";
 
         for (int i = 0; i < features.tileCount; i++) {
             for (int j = 0; j < features.tileCount; j++) {
-                var tObj = new TerrainObj();
+                TerrainObj tObj = new TerrainObj();
                 tObj.offset = new Vector2f(i, j);
                 tObj.quad = factory.create(app.getAssetManager(), tObj.offset, features.scale, sideLength);
                 tObj.rootNode = new Node("terrain at " + tObj.offset);
@@ -115,9 +116,9 @@ public class Terrain extends BaseAppState implements ILoadable {
         this.loadingMessage = "Loading roads";
 
         // Generate roads
-        var roadGenerator = new TerrainRoadGenerator(HEIGHT_WEIGHT, SEARCH_TIMEOUT, (s) -> this.loadingMessage = "Loading roads\n"+s);
+        TerrainRoadGenerator roadGenerator = new TerrainRoadGenerator(HEIGHT_WEIGHT, SEARCH_TIMEOUT, (s) -> this.loadingMessage = "Loading roads\n"+s);
         List<TerrainQuad> terrainQuads = pieces.values().stream().map(x -> x.quad).collect(Collectors.toList());
-        var roads = roadGenerator.generateFrom(terrainQuads);
+        List<RoadPointList> roads = roadGenerator.generateFrom(terrainQuads);
         // make sure they are valid roads
         for (RoadPointList road : roads) {
             if (road.failed) {
@@ -128,7 +129,7 @@ public class Terrain extends BaseAppState implements ILoadable {
             }
         }
 
-        var roadCreator = new TerrainRoadPointsToObject(ROAD_WIDTH);
+        TerrainRoadPointsToObject roadCreator = new TerrainRoadPointsToObject(ROAD_WIDTH);
         this.roads.addAll(roadCreator.create(roads, app.getAssetManager()));
 
         app.enqueue(() -> {
@@ -153,7 +154,7 @@ public class Terrain extends BaseAppState implements ILoadable {
             quads.addAll(road.road.middle.getMeshAsQuads());
         }
 
-        var heights = TerrainQuadUtil.getHeightsForQuads(features.scale, quads);
+        Map<Vector2f, Float> heights = TerrainQuadUtil.getHeightsForQuads(features.scale, quads);
         TerrainQuadUtil.setTerrainHeights(terrainQuads, heights);
 
         this.curStep++;
@@ -181,7 +182,7 @@ public class Terrain extends BaseAppState implements ILoadable {
         // Loaded!
         loaded = true;
         
-        for (var tObj: this.pieces.values())
+        for (TerrainObj tObj: this.pieces.values())
             finishedMinimalLoading(tObj);
     }
 
@@ -192,7 +193,7 @@ public class Terrain extends BaseAppState implements ILoadable {
         if (features.cubes) {
             List<Spatial> cubes = CubePlacer.generate(tObj.quad, am, 500, (v2, size) -> onRoad(v2, size), colour);
             getApplication().enqueue(() -> {
-                var ob = getState(ObjectPlacer.class);
+                ObjectPlacer ob = getState(ObjectPlacer.class);
                 tObj.cubes = ob.addBulk(cubes);
             });
         }
@@ -211,7 +212,7 @@ public class Terrain extends BaseAppState implements ILoadable {
         super.update(tpf);
 
         Camera cam = getApplication().getCamera();
-        for (var tObj :this.pieces.values()) {
+        for (TerrainObj tObj :this.pieces.values()) {
             if (tObj.grass != null)
                 tObj.grass.update(cam.getRotation());
         }
@@ -222,8 +223,8 @@ public class Terrain extends BaseAppState implements ILoadable {
         executor.shutdownNow();
         rootNode.removeFromParent();
 
-        var ob = getState(ObjectPlacer.class);
-        for (var obj :this.pieces.values()) {
+        ObjectPlacer ob = getState(ObjectPlacer.class);
+        for (TerrainObj obj :this.pieces.values()) {
             if (obj.cubes != null)
                 ob.removeBulk(obj.cubes);
         }
@@ -249,8 +250,8 @@ public class Terrain extends BaseAppState implements ILoadable {
 
     private boolean onRoad(Vector2f location, float objRadius) {
         // simple check that its more than x from a road vertex
-        for (var r : this.roads) {
-            var road = r.points;
+        for (TerrainRoad r : this.roads) {
+            RoadPointList road = r.points;
             for (int i = 0; i < road.size() - 1; i++) {
                 Vector3f cur = road.get(i);
                 Vector3f point = road.get(i + 1);
@@ -286,7 +287,7 @@ public class Terrain extends BaseAppState implements ILoadable {
             return null;
 
         Collection<Vector3f> points = new LinkedList<>();
-        for (var roads: this.roads) {
+        for (TerrainRoad roads: this.roads) {
             points.addAll(roads.points);
         }
         return points;

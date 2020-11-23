@@ -73,7 +73,7 @@ public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
                 loadme.add(new DriveCrash((IDriveDone)this));
                 break;
             case TileExplorer:
-                var smallTiled = new SmallTiled();
+                SmallTiled smallTiled = new SmallTiled();
                 loadingStates.add(smallTiled);
                 loadme.add(new DriveTileExplorer((IDriveDone) this, Car.Normal, smallTiled));
                 break;

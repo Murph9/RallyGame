@@ -19,7 +19,7 @@ public class TerrainQuadFactory {
 
     public TerrainQuad create(AssetManager am, Vector2f offset, Vector3f scale, int sideLength) {
         float[] heightMap = basis.getBuffer(sideLength, offset).array();
-        var terrain = new TerrainQuad("path terrain", sideLength, sideLength, heightMap);
+        TerrainQuad terrain = new TerrainQuad("path terrain", sideLength, sideLength, heightMap);
         terrain.setLocalScale(scale);
 
         terrain.setLocalTranslation(pieceGridToWorldPos(offset.mult((sideLength - 1)), scale));
@@ -30,7 +30,7 @@ public class TerrainQuadFactory {
     }
 
     private Material createMaterial(AssetManager am, float scale) {
-        var baseMat = new Material(am, "MatDefs/terrainheight/TerrainColorByHeight.j3md");
+        Material baseMat = new Material(am, "MatDefs/terrainheight/TerrainColorByHeight.j3md");
         baseMat.setColor("LowColor", new ColorRGBA(1.0f, 0.55f, 0.0f, 1.0f));
         baseMat.setColor("HighColor", new ColorRGBA(0.0f, 0.0f, 1.0f, 1.0f));
         baseMat.setFloat("Scale", scale * 0.6f); // margin of 0.2f

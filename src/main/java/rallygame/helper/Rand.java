@@ -9,14 +9,14 @@ import com.jme3.math.Vector3f;
 public class Rand {
     
     public static Vector2f randBetween(Vector2f min, Vector2f max) {
-        var diff = max.subtract(min);
-        var out = randV2f(1, false);
+        Vector2f diff = max.subtract(min);
+        Vector2f out = randV2f(1, false);
         return out.multLocal(diff).addLocal(min);
     }
 
     public static Vector3f randBetween(Vector3f min, Vector3f max) {
-        var diff = max.subtract(min);
-        var out = randV3f(1, false);
+        Vector3f diff = max.subtract(min);
+        Vector3f out = randV3f(1, false);
         return out.multLocal(diff).addLocal(min);
     }
 

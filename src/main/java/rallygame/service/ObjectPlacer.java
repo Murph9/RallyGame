@@ -105,7 +105,7 @@ public class ObjectPlacer extends BaseAppState {
         NodeId id = new NodeId();
         Node node = new Node();
         nodes.put(id, node);
-        for (var s : sp) {
+        for (Spatial s : sp) {
             node.attachChild(s);
         }
         node = GeometryBatchFactory.optimize(node, true);

@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.jme3.asset.AssetManager;
+import com.jme3.bounding.BoundingBox;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector2f;
@@ -24,9 +25,9 @@ public class CubePlacer {
     
     public static List<Spatial> generate(TerrainQuad terrain, AssetManager am, int count,
         BiFunction<Vector2f, Float, Boolean> posValid, ColorRGBA colour) {
-        var boundingBox = TerrainQuadUtil.calcWorldExtents(terrain);
-        final var min = H.v3tov2fXZ(boundingBox.getMin(null));
-        final var max = H.v3tov2fXZ(boundingBox.getMax(null));
+        BoundingBox boundingBox = TerrainQuadUtil.calcWorldExtents(terrain);
+        final Vector2f min = H.v3tov2fXZ(boundingBox.getMin(null));
+        final Vector2f max = H.v3tov2fXZ(boundingBox.getMax(null));
 
         float size = 1f;
         Box b = new Box(size, size, size);

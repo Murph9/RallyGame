@@ -19,7 +19,7 @@ public class GrassTerrain extends Mesh {
     public GrassTerrain(List<Vector3f> points) {
         this.triangles = new LinkedList<>();
 
-        for (var p : points)
+        for (Vector3f p : points)
             triangles.add(new Grass(p, 1));
         init();
     }

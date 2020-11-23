@@ -34,7 +34,7 @@ public class Geo {
         mesh.updateBound();
         mesh.setStatic();
         
-        var geo = new Geometry("point mesh", mesh);
+        Geometry geo = new Geometry("point mesh", mesh);
         Material mat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
         mat.setColor("Color", color);
         mat.setFloat("PointSize", pointSize);

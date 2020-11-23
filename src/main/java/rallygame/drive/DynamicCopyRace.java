@@ -124,7 +124,7 @@ public class DynamicCopyRace extends DriveBase
         getStateManager().attach(progressMenu);
 
         //show score
-        var container = new Container();
+        Container container = new Container();
         this.timer = container.addChild(new Label("Score: 0 sec"));
         ((SimpleApplication) getApplication()).getGuiNode().attachChild(container);
         new Screen(getApplication().getContext().getSettings()).topLeftMe(container);
@@ -171,7 +171,7 @@ public class DynamicCopyRace extends DriveBase
 
     @SuppressWarnings("unchecked") // button checked vargs
     private void end() {
-        var container = new Container();
+        Container container = new Container();
         container.addChild(new Label("Score: " + H.roundDecimal(time, 2) + " sec"));
         Button button = container.addChild(new Button("Okay"));
         button.addClickCommands(new Command<Button>() {

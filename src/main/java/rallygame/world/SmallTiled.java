@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.jme3.app.Application;
+import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
@@ -43,23 +44,23 @@ public class SmallTiled extends World {
         //try to place center
         placeTile(x, y);
 
-        var pos2 = H.v3tov2fXZ(pos);
+        Vector2f pos2 = H.v3tov2fXZ(pos);
 
         //try to place everything inside the bounding box of SPAWN_RANGE
         Vector2f plusXY = pos2.add(new Vector2f(SPAWN_RANGE * TILE_SIZE, SPAWN_RANGE * TILE_SIZE));
         Vector2f minusXY = pos2.add(new Vector2f(-SPAWN_RANGE * TILE_SIZE, -SPAWN_RANGE * TILE_SIZE));
         
-        for (var v: SmallTiled.getGridPosBoundingQuad(TILE_SIZE, new Vector2f[] { plusXY, minusXY })) {
+        for (Vector2f v: SmallTiled.getGridPosBoundingQuad(TILE_SIZE, new Vector2f[] { plusXY, minusXY })) {
             placeTile((int)v.x, (int)v.y);
         }
     }
     
     private void placeTile(int x, int y) {
-        var pos = new Vector2f(x, y);
+        Vector2f pos = new Vector2f(x, y);
         if (tiles.containsKey(pos))
             return;
         
-        var piece = loadPiece(x, y);
+        CityPiece piece = loadPiece(x, y);
         CollisionShape coll = CollisionShapeFactory.createMeshShape(piece.sp);
         piece.sp.addControl(new RigidBodyControl(coll, 0));
         
@@ -70,8 +71,8 @@ public class SmallTiled extends World {
     }
     
     private CityPiece loadPiece(int x, int y) {
-        var piece = Rand.randFromArray(CityPieceType.values());
-        var am = getApplication().getAssetManager();
+        CityPieceType piece = Rand.randFromArray(CityPieceType.values());
+        AssetManager am = getApplication().getAssetManager();
         Spatial spat = LoadModelWrapper.createWithColour(am, am.loadModel(piece.getName()), ColorRGBA.Green);
         spat.setLocalTranslation(new Vector3f(x, 0, y));
         spat.setLocalScale(TILE_SIZE/10);
@@ -97,7 +98,7 @@ public class SmallTiled extends World {
     public void cleanup(Application app) {
         super.cleanup(app);
 
-        for (var t: tiles.values()) {
+        for (CityPiece t: tiles.values()) {
             t.sp.removeFromParent(); // removes them from the physics space
         }
         tiles.clear();

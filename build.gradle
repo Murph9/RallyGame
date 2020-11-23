@@ -6,7 +6,7 @@ plugins {
     id 'eclipse'
 }
 
-sourceCompatibility = 11
+sourceCompatibility = 8
 
 repositories {
     jcenter()
@@ -147,4 +147,6 @@ task convertAllBlendFiles {
         }
     }
 }
-compileJava.dependsOn(convertAllBlendFiles)
+
+// TODO fix blender task for linux
+// compileJava.dependsOn(convertAllBlendFiles)

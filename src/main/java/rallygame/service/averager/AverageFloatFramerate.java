@@ -24,7 +24,7 @@ public class AverageFloatFramerate {
 
         if (total.size() > 1000) {
             // do some culling when the list gets very long
-            var newList = new LinkedList<Entry>();
+            LinkedList<Entry> newList = new LinkedList<>();
             Iterator<Entry> li = total.iterator();
             float startsAt = period;
             while (startsAt > 0 && li.hasNext()) {

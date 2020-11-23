@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 
@@ -47,7 +48,7 @@ public class AStar<T> implements ISearch<T> {
             return Float.compare(x.weight + x.heuristic, y.weight + y.heuristic);
         });
 
-        var closed = new HashSet<>();
+        Set<T> closed = new HashSet<>();
         Map<T, Float> gScore = new HashMap<>();
 
         AStar<T>.Node curNode = new Node(null, start, 0, 0);

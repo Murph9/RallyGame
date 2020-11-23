@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 
+import com.jme3.bounding.BoundingBox;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.terrain.geomipmap.TerrainQuad;
@@ -19,10 +20,10 @@ public class GrassPlacer {
     }
 
     private static List<Vector3f> generatePoints(int count, TerrainQuad terrain, Function<Vector2f, Boolean> posValid) {
-        var boundingBox = TerrainQuadUtil.calcWorldExtents(terrain);
-        final var min = H.v3tov2fXZ(boundingBox.getMin(null));
-        final var max = H.v3tov2fXZ(boundingBox.getMax(null));
-        var list = new LinkedList<Vector3f>();
+        BoundingBox boundingBox = TerrainQuadUtil.calcWorldExtents(terrain);
+        final Vector2f min = H.v3tov2fXZ(boundingBox.getMin(null));
+        final Vector2f max = H.v3tov2fXZ(boundingBox.getMax(null));
+        List<Vector3f> list = new LinkedList<>();
 
         for (int i = 0; i < count; i++) {
             Vector2f pos = Rand.randBetween(min, max);

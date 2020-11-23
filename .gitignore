@@ -49,3 +49,6 @@ local.properties
 
 /target/
 .vscode/settings.json
+
+# linux generated lib files
+*.so

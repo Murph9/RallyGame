@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.bounding.BoundingBox;
+import com.jme3.bounding.BoundingVolume;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Plane;
@@ -24,7 +25,7 @@ public class TerrainQuadUtil {
         return getClosestGridPoint(terrain, H.v3tov2fXZ(pos));
     }
     public static Vector2f getClosestGridPoint(TerrainQuad terrain, Vector2f pos) {
-        var terrainScale = terrain.getLocalScale();
+        Vector3f terrainScale = terrain.getLocalScale();
         return new Vector2f(Math.round(pos.x / terrainScale.x) * terrainScale.x, Math.round(pos.y / terrainScale.z) * terrainScale.z);
     }
 
@@ -108,8 +109,8 @@ public class TerrainQuadUtil {
 
     public static BoundingBox calcWorldExtents(List<TerrainQuad> quads) {
         BoundingBox bounding = new BoundingBox();
-        for (var quad: quads) {
-            var b = quad.getWorldBound();
+        for (TerrainQuad quad: quads) {
+            BoundingVolume b = quad.getWorldBound();
             b.setCenter(quad.getLocalTranslation());
             bounding.mergeLocal(b);
         }
@@ -123,8 +124,8 @@ public class TerrainQuadUtil {
     }
 
     public static float getHeight(List<TerrainQuad> terrains, Vector2f pos) {
-        for (var terrain : terrains) {
-            var value = terrain.getHeight(pos);
+        for (TerrainQuad terrain : terrains) {
+            float value = terrain.getHeight(pos);
             if (!Float.isNaN(value))
                 return value;
         }

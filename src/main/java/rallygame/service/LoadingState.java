@@ -129,7 +129,7 @@ public class LoadingState extends BaseAppState {
         StringBuilder sb = new StringBuilder();
         for (ILoadable state: loadingStates) {
             String message= state.loadPercent().message;
-            if (message != null && !message.isBlank())
+            if (message != null && !message.trim().isEmpty())
                 sb.append(message + "\n");
         }
         

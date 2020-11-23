@@ -38,7 +38,7 @@ public class WorldGuiText extends BaseAppState {
 
         Camera cam = getApplication().getCamera();
         for (WorldText text: textList) {
-            var bv = new BoundingSphere(0.1f, text.worldPos);
+            BoundingSphere bv = new BoundingSphere(0.1f, text.worldPos);
             int planeState = cam.getPlaneState(); // this code block follows the javadoc for Camera.contains(bv)
             cam.setPlaneState(0);
             if (cam.contains(bv) != FrustumIntersect.Outside) {

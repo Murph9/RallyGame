@@ -21,7 +21,7 @@ public class TerrainSettings {
     }
 
     public static TerrainSettings withFeatures(boolean value) {
-        var ts = new TerrainSettings();
+        TerrainSettings ts = new TerrainSettings();
         ts.cubes = value;
         ts.grass = value;
         return ts;

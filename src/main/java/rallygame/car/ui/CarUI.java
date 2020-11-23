@@ -192,9 +192,9 @@ public class CarUI extends BaseAppState {
             Node g = addRPMNumber(angle, (int)i/1000, quad, SPEEDO_WIDTH/2 - quadXSize/2, SPEEDO_HEIGHT/2 - quadYSize/2);
             rootNode.attachChild(g);
 
-            var innerPoint = new Vector3f(FastMath.cos(angle) * innerArc, FastMath.sin(angle) * innerArc, 0);
-            var outerPoint = new Vector3f(FastMath.cos(angle) * (innerArc + (outerArc - innerArc) / 2), FastMath.sin(angle) * (innerArc + (outerArc - innerArc)/2), 0);
-            var line = Geo.makeShapeLine(am, ColorRGBA.White, innerPoint, outerPoint);
+            Vector3f innerPoint = new Vector3f(FastMath.cos(angle) * innerArc, FastMath.sin(angle) * innerArc, 0);
+            Vector3f outerPoint = new Vector3f(FastMath.cos(angle) * (innerArc + (outerArc - innerArc) / 2), FastMath.sin(angle) * (innerArc + (outerArc - innerArc)/2), 0);
+            Geometry line = Geo.makeShapeLine(am, ColorRGBA.White, innerPoint, outerPoint);
             line.setLocalTranslation(SPEEDO_WIDTH / 2, SPEEDO_HEIGHT / 2, -12);
             rootNode.attachChild(line);
         }
@@ -217,8 +217,8 @@ public class CarUI extends BaseAppState {
         rootNode.attachChild(nitro);
         
         //throttle
-        var width = 6;
-        var height = 60;
+        int width = 6;
+        int height = 60;
         q = new Quad(width, height);
         throttleOff = new Geometry("throttleback", q);
         Material throttleM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -324,7 +324,7 @@ public class CarUI extends BaseAppState {
         int speedKMH = (int)Math.abs(p.getCurrentVehicleSpeedKmHour());
         setSpeedDigits(speedKMH);
 
-        var gearIn = (int) FastMath.clamp(powerState.curGear(), 0, 9); // so we don't go off the end of the texture array
+        int gearIn = (int) FastMath.clamp(powerState.curGear(), 0, 9); // so we don't go off the end of the texture array
         gear.setMaterial(numMats[gearIn]);
         
         //rpm bar
@@ -334,7 +334,7 @@ public class CarUI extends BaseAppState {
         throttle.setLocalScale(1, powerState.accelCurrent(), 1);
         brake.setLocalScale(1, powerState.brakeCurrent(), 1);
 
-        var steeringValue = powerState.steeringCurrent()*60;
+        float steeringValue = powerState.steeringCurrent()*60;
         steer.setLocalTranslation(SPEEDO_WIDTH/2 - 6/2 - steeringValue, SPEEDO_HEIGHT/2 + 40, 0); //steering is a translated square
     }
 

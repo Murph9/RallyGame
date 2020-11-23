@@ -8,6 +8,7 @@ import com.jme3.math.FastMath;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
+import rallygame.car.data.CarDataConst;
 import rallygame.effects.LoadModelWrapper;
 
 public class RayCarVisuals {
@@ -25,7 +26,7 @@ public class RayCarVisuals {
 
         this.debug = new RayCarDebug(car.rayCar, false, app);
 
-        var carData = car.getCarData();
+        CarDataConst carData = car.getCarData();
         this.rootNode = new Node("Car:" + carData);
         this.rootNode.addControl(car.rayCar.rbc);
 
@@ -41,10 +42,10 @@ public class RayCarVisuals {
     }
 
     public void viewUpdate(float tpf) {
-        var carData = car.getCarData();
+        CarDataConst carData = car.getCarData();
 
         if (engineSound != null && engineSound.getStatus() == Status.Playing) {
-            var powered = car.getPoweredState();
+            ICarPowered powered = car.getPoweredState();
 
             // if sound exists
             float pitch = FastMath.clamp(0.5f + 1.5f * ((float) powered.curRPM() / (float) carData.e_redline), 0.5f, 2);

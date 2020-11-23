@@ -114,7 +114,7 @@ public class CarManager extends BaseAppState {
         Spatial collisionShape = Geo.removeNamedSpatial((Node)initialCarModel, CarPart.Collision.getPartName());
         
         // init physics class
-        var rayCar = createRayCar(collisionShape, carData);
+        RayCarPowered rayCar = createRayCar(collisionShape, carData);
 
         //init car
         RayCarControl carControl = new RayCarControl((SimpleApplication)getApplication(), initialCarModel, rayCar);
@@ -150,7 +150,7 @@ public class CarManager extends BaseAppState {
         // colShape = new HullCollisionShape(collisionMesh);
 
         CollisionShape boxCol = CollisionShapeFactory.createBoxShape(collisionGeometry);
-        var colShape = new CompoundCollisionShape();
+        CompoundCollisionShape colShape = new CompoundCollisionShape();
 
         Vector3f worldTrans = collisionGeometry.getWorldTranslation();
         Vector3f worldCenter = collisionGeometry.getWorldBound().getCenter();
@@ -167,7 +167,7 @@ public class CarManager extends BaseAppState {
         if (control == null || !this.cars.contains(control))
             throw new IllegalArgumentException(control.getClass().getName() + " must exist");
         
-        var aPlayer = control.getAI() == null;
+        boolean aPlayer = control.getAI() == null;
         rootNode.detachChild(control.getRootNode());
 
         AssetManager am = getApplication().getAssetManager();
@@ -176,7 +176,7 @@ public class CarManager extends BaseAppState {
         // remove and fetch the single collision shape to use as collision
         Spatial collisionShape = Geo.removeNamedSpatial((Node) initialCarModel, CarPart.Collision.getPartName());
 
-        var rayCar = createRayCar(collisionShape, carData);
+        RayCarPowered rayCar = createRayCar(collisionShape, carData);
         control.changeRayCar(initialCarModel, rayCar);
         rootNode.attachChild(control.getRootNode());
 
@@ -220,7 +220,7 @@ public class CarManager extends BaseAppState {
         }
     }
     public RayCarControl getPlayer() {
-        for (var car: cars) {
+        for (RayCarControl car: cars) {
             if (car.getAI() == null) {
                 return car;
             }

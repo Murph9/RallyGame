@@ -5,12 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import com.jme3.bounding.BoundingBox;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.terrain.geomipmap.TerrainQuad;
@@ -71,7 +73,7 @@ public class TerrainQuadUtilTest {
                 new Vector3f(12,12,10), new Vector3f(12,12,12)
         };
 
-        var result = TerrainQuadUtil.getHeightsForQuads(scale, Arrays.asList(quad, quad2));
+        Map<Vector2f, Float> result = TerrainQuadUtil.getHeightsForQuads(scale, Arrays.asList(quad, quad2));
 
         assertTrue(!result.isEmpty());
         for (Entry<Vector2f, Float> pos: result.entrySet()) {
@@ -94,12 +96,12 @@ public class TerrainQuadUtilTest {
         Vector3f rand = Rand.randV3f(1000, true);
 
         int size = 1 << x;
-        var heightMap = new float[(size)*(size)];
+        float[] heightMap = new float[(size)*(size)];
         Arrays.fill(heightMap, 0.3f);
         TerrainQuad quad = new TerrainQuad("test terrain", size + 1, size + 1, heightMap);
         quad.setLocalTranslation(rand);
 
-        var boundingVolume = TerrainQuadUtil.calcWorldExtents(quad);
+        BoundingBox boundingVolume = TerrainQuadUtil.calcWorldExtents(quad);
 
         assertEquals(rand, boundingVolume.getCenter(), "Center not set correctly");
     }
@@ -107,7 +109,7 @@ public class TerrainQuadUtilTest {
     @Test
     public void getClosestGridPoint() {
         int size = 1 << 2;
-        var heightMap = new float[(size)*(size)];
+        float[] heightMap = new float[(size)*(size)];
         Arrays.fill(heightMap, 0.3f);
         TerrainQuad quad = new TerrainQuad("test terrain", size + 1, size + 1, heightMap);
         quad.setLocalScale(5, 3, 2);

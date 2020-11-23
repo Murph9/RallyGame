@@ -9,6 +9,7 @@ import com.jme3.app.state.AppStateManager;
 import com.jme3.audio.AudioNode;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
+import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.input.InputManager;
 import com.jme3.input.RawInputListener;
@@ -294,7 +295,7 @@ public class RayCarControl implements ICarPowered, ICarControlled {
         this.setPhysicsProperties(old, vel, null, null);
     }
     public void flip() {
-        var angleF = this.forward.angleBetween(Vector3f.UNIT_Z); // absolute angle between
+        float angleF = this.forward.angleBetween(Vector3f.UNIT_Z); // absolute angle between
         float angOther = this.left.angleBetween(Vector3f.UNIT_Z); // calc if its pos or neg
 
         // new angle in the correct direction
@@ -348,7 +349,7 @@ public class RayCarControl implements ICarPowered, ICarControlled {
     }
 
     public final String statsString() {
-        var rbc = this.rayCar.rbc;
+        RigidBodyControl rbc = this.rayCar.rbc;
         return rallygame.helper.H.round3f(rbc.getPhysicsLocation(), 2) + "\nspeed:"
                 + rallygame.helper.H.round3f(rbc.getLinearVelocity(), 2) + "m/s\nRPM:" + rayCar.curRPM + "\nengine:"
                 + rayCar.engineTorque + "\ndrag:" + rallygame.helper.H.roundDecimal(
@@ -359,7 +360,7 @@ public class RayCarControl implements ICarPowered, ICarControlled {
 
     private float rollingResistanceTotal() {
         float total = 0;
-        for (var w: rayCar.wheels) {
+        for (RayWheel w: rayCar.wheels) {
             total += w.rollingResistance;
         }
         return total;
