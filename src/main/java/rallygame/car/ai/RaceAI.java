@@ -11,18 +11,21 @@ public class RaceAI extends CarAI {
 
     private ICheckpointDrive race;
     private final boolean doFowardRayCast;
-    private float roadWidth;
+    private final float roadWidth;
     
+    public RaceAI(RayCarControl car, ICheckpointDrive race, float roadWidth) {
+        this(car, race, true, roadWidth);
+    }
     public RaceAI(RayCarControl car, ICheckpointDrive race) {
         this(car, race, true);
     }
 	public RaceAI(RayCarControl car, ICheckpointDrive race, boolean doForwardRayCast) {
+		this(car, race, true, 5);
+    }
+    public RaceAI(RayCarControl car, ICheckpointDrive race, boolean doForwardRayCast, float roadWidth) {
 		super(car);
         this.race = race;
         this.doFowardRayCast = doForwardRayCast;
-        roadWidth = 5;
-    }
-    public void setRoadWidth(float roadWidth) {
         this.roadWidth = roadWidth;
     }
 

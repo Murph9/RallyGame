@@ -215,7 +215,7 @@ public class CarManager extends BaseAppState {
     }
     
     public void update(float tpf) {
-        for (RayCarControl rcc: cars) {
+        for (RayCarControl rcc: new LinkedList<>(cars)) {
             rcc.update(tpf);
         }
     }

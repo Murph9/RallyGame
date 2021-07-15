@@ -68,6 +68,14 @@ public class CheckpointProgress extends BaseAppState {
         });
     }
 
+    public void addCar(RayCarControl c) {
+        engine.addCar(c);
+    }
+
+    public void removeCar(RayCarControl c) {
+        engine.removeCar(c);
+    }
+
     public void setCheckpointModel(Spatial spat) {
         if (this.isInitialized())
             throw new IllegalStateException("This must be only called before initialization.");
@@ -175,6 +183,10 @@ public class CheckpointProgress extends BaseAppState {
 
     protected List<RacerState> getRaceState() {
         return engine.getAllRaceStates();
+    }
+    public float getStateAsFloat(RayCarControl c) {
+        var state = engine.getRacerState(c);
+        return state.lap * 10000 + state.lastCheckpoint.num * 1000 + state.duration.getSeconds();
     }
 
     @Override

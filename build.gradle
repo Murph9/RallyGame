@@ -6,8 +6,6 @@ plugins {
     id 'eclipse'
 }
 
-sourceCompatibility = 8
-
 repositories {
     jcenter()
     maven {
@@ -61,6 +59,8 @@ dependencies {
     
     implementation 'org.yaml:snakeyaml:1.25'
     implementation 'com.simsilica:lemur:1.13.0'
+
+    implementation group: 'io.jenetics', name: 'jenetics', version: '6.2.0'
 
     // Use JUnit Jupiter API for testing
     testImplementation 'org.junit.jupiter:junit-jupiter:5.6.1'

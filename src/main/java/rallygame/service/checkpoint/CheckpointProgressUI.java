@@ -89,11 +89,13 @@ public class CheckpointProgressUI extends BaseAppState {
         List<RacerState> racers = progress.getRaceState();
         Collections.sort(racers);
 
+/*
         RacerState player = progress.getPlayerRacerState();
         progressTable.update(racers, player);
 
         screen.topRightMe(main);
 
+TODO this needs to reload the cars list every time, stop storing the list of cars that exist
         // update position in world labels
         int i = 0;
         for (RacerState racer : racers) {
@@ -118,7 +120,7 @@ public class CheckpointProgressUI extends BaseAppState {
                 debugNode.attachChild(entry.arrow);
             }
             ((SimpleApplication) getApplication()).getRootNode().attachChild(debugNode);
-        }
+        }*/
     }
 }
 
@@ -168,18 +170,15 @@ class RacerStateTableView extends Container {
         String durationStr = "";
         
         if (d != null) {
-            durationStr = d.toString();
-            /* TODO This only compiles in java 11
             if (d.toHoursPart() > 0)
                 durationStr = "+59:99:999";
             else
                 durationStr = String.format("%02d:%02d:%03d", d.toMinutesPart(), d.toSecondsPart(), d.toMillisPart());
-            */
         }
 
         return new String[] {
             state.getName(),
-            state.lap + "(" + state.lastCheckpoint.num + ")",
+            state.lap + "(" + (state.lastCheckpoint != null ? state.lastCheckpoint.num : "<unknown>") + ")",
             durationStr,
             isPlayer ? "-" : ""
         };

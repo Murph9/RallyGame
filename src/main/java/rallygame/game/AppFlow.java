@@ -35,6 +35,7 @@ public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
         Path,
         CopyRace,
         TileExplorer,
+        AILearning,
         Dev;
     }
 
@@ -99,6 +100,11 @@ public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
                 DefaultBuilder copyWorld = DynamicType.Valley.getBuilder();
                 loadingStates.add(copyWorld);
                 loadme.add(new DynamicCopyRace(copyWorld, (IDriveDone) this));
+                break;
+            case AILearning:
+                sWorld = new StaticWorldBuilder(StaticWorld.duct2);
+                loadingStates.add(sWorld);
+                loadme.add(new DriveAILearn(sWorld, (IDriveDone)this));
                 break;
             default:
                 Log.p("No idea which world type that was: " + type.name());

@@ -15,7 +15,8 @@
             "name": "Debug (Launch)-Main",
             "request": "launch",
             "mainClass": "rallygame.game.Main",
-            "projectName": "RallyGame"
+            "projectName": "RallyGame",
+            "vmArgs": "-Dio.jenetics.concurrency.splitThreshold=5 -XX:ActiveProcessorCount=10" // forcing the jenetics library to run multiple instances of the car
         }
     ]
 }

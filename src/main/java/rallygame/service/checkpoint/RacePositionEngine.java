@@ -63,6 +63,22 @@ public class RacePositionEngine {
         }
     }
 
+    public void addCar(RayCarControl c) {
+        var racer = new RacerState(c);
+        this.racers.put(c, racer);
+
+        if (this.checkpoints.isEmpty())
+            return; //just ignore the error
+
+        Checkpoint first = this.checkpoints.get(0);
+        racer.lastCheckpoint = first;
+        racer.nextCheckpoint = first;
+    }
+
+    public void removeCar(RayCarControl c) {
+        this.racers.remove(c);
+    }
+
     public void addCheckpoint(Checkpoint check) {
         this.checkpoints.add(check);
     }
@@ -178,7 +194,7 @@ public class RacePositionEngine {
 	}
 
 	public List<RacerState> getAllRaceStates() {
-		return new ArrayList<>(this.racers.values());
+		return new ArrayList<>(this.racers.values().stream().filter(x -> x.lastCheckpoint != null).collect(Collectors.toList()));
 	}
 
 	public int getCheckpointCount() {
@@ -192,7 +208,7 @@ public class RacePositionEngine {
 	}
 
 	public Collection<Checkpoint> getNextCheckpoints() {
-        return racers.values().stream().map(x -> x.nextCheckpoint).collect(Collectors.toList());
+        return racers.values().stream().map(x -> x.nextCheckpoint).filter(x -> x != null).collect(Collectors.toList());
     }
 
 	public Collection<Checkpoint> getAllPreviousCheckpoints(int num) {
