@@ -7,7 +7,7 @@
 
 $ErrorActionPreference = "Stop"
 
-$blenderPath = 'C:\Program Files\Blender Foundation\Blender 2.81\'
+$blenderPath = 'C:\Program Files\Blender Foundation\Blender 2.82\'
 $blenderPythonFile = 'blend2gltf.py'
 
 function Convert-gltf {

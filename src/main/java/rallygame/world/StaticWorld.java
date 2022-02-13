@@ -20,6 +20,8 @@ public enum StaticWorld {
 
 	realroad("real_road", 1, new Vector3f(225, -19, 708), new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y)),
 
+	spa("spa_v2.1", 15, new Vector3f(-123.3f, 31.18f, -33.77f), new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y)),
+
 	//other peoples:
 	track2("track2", 1, null, new Quaternion().fromAngleAxis(FastMath.PI, Vector3f.UNIT_Y)),
 	carpark("carpark", 1, null, null),
