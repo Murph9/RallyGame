@@ -242,14 +242,22 @@ public class RayCar implements PhysicsTickListener {
 				p = 1;
 			}
 
+			// only apply the merging when the forces are over the peak
+			ratiofract /= p;
+			anglefract /= p;
+			if (Math.abs(p) < 1) {
+				ratiofract = Math.signum(ratiofract);
+				anglefract = Math.signum(anglefract);
+			}
+
 			wheels[w_id].skidFraction = p;
 
 			// calc the longitudinal force from the slip ratio
-			wheel_force.z = (ratiofract / p)
+			wheel_force.z = (ratiofract)
 					* GripHelper.tractionFormula(carData.wheelData[w_id].pjk_long, wheels[w_id].slipRatio)
 					* GripHelper.loadFormula(carData.wheelData[w_id].pjk_long, this.wheels[w_id].susForce);
 			// calc the latitudinal force from the slip angle
-			wheel_force.x = -(anglefract / p)
+			wheel_force.x = -(anglefract)
 					* GripHelper.tractionFormula(carData.wheelData[w_id].pjk_lat, wheels[w_id].slipAngle)
 					* GripHelper.loadFormula(carData.wheelData[w_id].pjk_lat, this.wheels[w_id].susForce);
 
