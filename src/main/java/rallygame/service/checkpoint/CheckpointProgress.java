@@ -59,11 +59,7 @@ public class CheckpointProgress extends BaseAppState {
         this.rootNode = new Node("checkpoint progress root");
         this.attachedCheckpoints = new LinkedList<>();
 
-        this.listener = new CheckpointListener((ghost) -> {
-            return engine.getIfCheckpoint(ghost);
-        }, (body) -> {
-            return engine.getIfRayCar(body);
-        }, (racer) -> {
+        this.listener = new CheckpointListener(engine::getIfCheckpoint, engine::getIfRayCar, (racer) -> {
             engine.racerHitCheckpoint(racer, racer.nextCheckpoint);
         });
     }
@@ -82,6 +78,7 @@ public class CheckpointProgress extends BaseAppState {
         colShape = CollisionShapeFactory.createBoxShape(baseSpat);
         for (Vector3f checkPos : preInitCheckpoints)
             attachCheckpoint(checkPos);
+        preInitCheckpoints.clear();
 
         engine.init(app);
 
@@ -92,8 +89,10 @@ public class CheckpointProgress extends BaseAppState {
     public void addCheckpoint(Vector3f pos) {
         if (this.type == Type.Lap)
             throw new IllegalStateException("The " + Type.Sprint + " type cannot use this method");
-        if (this.isInitialized())
+        if (!this.isInitialized()) {
             preInitCheckpoints.add(pos);
+            return;
+        }
         attachCheckpoint(pos);
     }
 
@@ -117,8 +116,6 @@ public class CheckpointProgress extends BaseAppState {
         Checkpoint check = new Checkpoint(engine.getCheckpointCount(), pos, ghost, box);
         engine.addCheckpoint(check);
     }
-
-    
 
     public void setMinCheckpoint(Vector3f pos) {
         if (this.type == Type.Lap)
@@ -184,17 +181,21 @@ public class CheckpointProgress extends BaseAppState {
 
         // TODO change the collision channel of the ghost objects to prevent colliding with ground every update
         // https://wiki.jmonkeyengine.org/jme3/advanced/physics.html see PhysicsControl.addCollideWithGroup
+        var physicsSpace = getState(BulletAppState.class).getPhysicsSpace();
 
-        Collection<Checkpoint> ghosts = this.engine.getNextCheckpoints();
-        
-        for (Checkpoint check : this.attachedCheckpoints) // remove old
-            getState(BulletAppState.class).getPhysicsSpace().remove(check.ghost);
+        Collection<Checkpoint> newCheckpoints = this.engine.getNextCheckpoints();
+        Checkpoint[] old = this.attachedCheckpoints.stream().filter(x -> { return !newCheckpoints.contains(x); }).toArray(Checkpoint[]::new);
+        for (var o : old) {
+            physicsSpace.remove(o.ghost); // remove old checkpoints
+        }
 
-        for (Checkpoint check : ghosts) // add new
-            getState(BulletAppState.class).getPhysicsSpace().add(check.ghost);
+        Checkpoint[] _new = newCheckpoints.stream().filter(x -> { return !attachedCheckpoints.contains(x); }).toArray(Checkpoint[]::new);
+        for (var n : _new) { // add new
+            physicsSpace.add(n.ghost);
+        }
 
         this.attachedCheckpoints.clear();
-        this.attachedCheckpoints.addAll(ghosts);
+        this.attachedCheckpoints.addAll(newCheckpoints);
 
         //show only the next 2 checkpoints to the player
         for (Spatial sp : rootNode.getChildren())

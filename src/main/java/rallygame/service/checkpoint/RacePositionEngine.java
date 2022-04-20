@@ -192,10 +192,10 @@ public class RacePositionEngine {
 	}
 
 	public Collection<Checkpoint> getNextCheckpoints() {
-        return racers.values().stream().map(x -> x.nextCheckpoint).collect(Collectors.toList());
+        return racers.values().stream().map(x -> x.nextCheckpoint).distinct().collect(Collectors.toList());
     }
 
 	public Collection<Checkpoint> getAllPreviousCheckpoints(int num) {
-        return checkpoints.stream().filter(x -> x.num < num).collect(Collectors.toList());
+        return checkpoints.stream().filter(x -> x.num < num).distinct().collect(Collectors.toList());
 	}
 }

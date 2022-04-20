@@ -20,4 +20,17 @@ class Checkpoint {
             throw new IllegalArgumentException("Ghost control must be set");
         this.visualModel = visualModel;
     }
+    
+    public boolean equals(Object o) {
+        if (!(o instanceof Checkpoint))
+            return false;
+        var other = (Checkpoint)o;
+
+        return this.num == other.num && other.position.equals(this.position);
+    }
+
+    @Override
+    public int hashCode() {
+        return num*position.hashCode();
+    }
 }
