@@ -36,7 +36,7 @@ public class App extends SimpleApplication {
 				, new StatsAppState()
 				, new FilterManager()
 				, new ObjectPlacer(true)
-				, new CarManager(0.4f, new CarDataLoader())
+				, new CarManager(new CarDataLoader())
                 , new ConstantChecker()
 				, new DebugAppState()
 				, new WorldGuiText()

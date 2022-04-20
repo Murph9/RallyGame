@@ -36,7 +36,7 @@ public class DuelApp extends SimpleApplication {
         super(new ParticleAtmosphere()
                 , new AudioListenerState()
                 , new FilterManager()
-                , new CarManager(0.4f, new CarDataLoader())
+                , new CarManager(new CarDataLoader())
                 , new DebugAppState()
                 , new ObjectPlacer(true)
                 , new ConstantChecker()
