@@ -234,8 +234,8 @@ public class RayCar implements PhysicsTickListener {
 
 			// merging the forces into a traction circle
 			// normalise based on their independant max values
-			float ratiofract = wheels[w_id].slipRatio / carData.wheelData[w_id].maxLong;
-			float anglefract = wheels[w_id].slipAngle / carData.wheelData[w_id].maxLat;
+			float ratiofract = Math.abs(wheels[w_id].slipRatio) / carData.wheelData[w_id].maxLong;
+			float anglefract = Math.abs(wheels[w_id].slipAngle) / carData.wheelData[w_id].maxLat;
 			float p = FastMath.sqrt(ratiofract * ratiofract + anglefract * anglefract);
 			if (p == 0) {
 				// if p is zero then both anglefract and ratiofract are 0. So to prevent a 'div 0' we just make the denominator 1
@@ -246,11 +246,11 @@ public class RayCar implements PhysicsTickListener {
 
 			// calc the longitudinal force from the slip ratio
 			wheel_force.z = (ratiofract / p)
-					* GripHelper.tractionFormula(carData.wheelData[w_id].pjk_long, p * carData.wheelData[w_id].maxLong)
+					* GripHelper.tractionFormula(carData.wheelData[w_id].pjk_long, wheels[w_id].slipRatio)
 					* GripHelper.loadFormula(carData.wheelData[w_id].pjk_long, this.wheels[w_id].susForce);
 			// calc the latitudinal force from the slip angle
 			wheel_force.x = -(anglefract / p)
-					* GripHelper.tractionFormula(carData.wheelData[w_id].pjk_lat, p * carData.wheelData[w_id].maxLat)
+					* GripHelper.tractionFormula(carData.wheelData[w_id].pjk_lat, wheels[w_id].slipAngle)
 					* GripHelper.loadFormula(carData.wheelData[w_id].pjk_lat, this.wheels[w_id].susForce);
 
 			// braking and abs
