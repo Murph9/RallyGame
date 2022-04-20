@@ -234,8 +234,8 @@ public class RayCar implements PhysicsTickListener {
 
 			// merging the forces into a traction circle
 			// normalise based on their independant max values
-			float ratiofract = Math.abs(wheels[w_id].slipRatio) / carData.wheelData[w_id].maxLong;
-			float anglefract = Math.abs(wheels[w_id].slipAngle) / carData.wheelData[w_id].maxLat;
+			float ratiofract = Math.abs(wheels[w_id].slipRatio / carData.wheelData[w_id].maxLong);
+			float anglefract = Math.abs(wheels[w_id].slipAngle / carData.wheelData[w_id].maxLat);
 			float p = FastMath.sqrt(ratiofract * ratiofract + anglefract * anglefract);
 			if (p == 0) {
 				// if p is zero then both anglefract and ratiofract are 0. So to prevent a 'div 0' we just make the denominator 1
@@ -263,8 +263,8 @@ public class RayCar implements PhysicsTickListener {
 
 			// braking and abs
 			float brakeCurrent2 = brakingCur;
-			if (Math.abs(ratiofract) >= 1 && velocity.length() > 10 && brakingCur == 1)
-				brakeCurrent2 *= 0.5f; // abs (which i think works a bit well)
+			if (Math.abs(wheels[w_id].slipRatio / carData.wheelData[w_id].maxLong) >= 1 && velocity.length() > 10 && brakingCur > 0)
+				brakeCurrent2 *= 0; // abs (which i think works a bit well)
 
 			// add the wheel force after merging the forces
 			float totalLongForce = wheelTorque[w_id] - wheel_force.z
