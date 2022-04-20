@@ -22,26 +22,27 @@ public class GhostObjectCollisionListener implements PhysicsCollisionListener {
     @Override
     public void collision(PhysicsCollisionEvent event) {
         Spatial a = event.getNodeA();
-        PhysicsCollisionObject ac = event.getObjectA();
         Spatial b = event.getNodeB();
-        PhysicsCollisionObject bc = event.getObjectB();
-
         if (a == null || b == null)
             return; //something didn't add it to the physics space correctly, so ignore it it will come up somewhere else
 
-        if (a.getControl(GhostControl.class) != null && b.getControl(GhostControl.class) != null) {
+        var aGhost = a.getControl(GhostControl.class);
+        var bGhost = b.getControl(GhostControl.class);
+        if (aGhost != null && bGhost != null) {
             return; // ignore ghost | ghost collisions
         }
-
-        if (a.getControl(GhostControl.class) == null && b.getControl(GhostControl.class) == null) {
+        if (aGhost == null && bGhost == null) {
             return; // ignore non-ghost | non-ghost collisions
         }
 
-        if (a.getControl(GhostControl.class) != null && isMovingBody(bc)) {
+        PhysicsCollisionObject ac = event.getObjectA();
+        PhysicsCollisionObject bc = event.getObjectB();
+
+        if (isMovingBody(bc) && aGhost != null) {
             listener.ghostCollision((GhostControl) ac, (RigidBodyControl) bc);
         }
 
-        if (b.getControl(GhostControl.class) != null && isMovingBody(ac)) {
+        if (isMovingBody(ac) && bGhost != null) {
             listener.ghostCollision((GhostControl) bc, (RigidBodyControl) ac);
         }
     }

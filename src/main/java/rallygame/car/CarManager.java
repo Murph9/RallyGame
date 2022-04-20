@@ -148,9 +148,6 @@ public class CarManager extends BaseAppState {
         } else { // Node
             collisionGeometry = Geo.getGeomList(collisionShape).get(0); // lets hope its the only one too
         }
-        // Mesh collisionMesh = collisionGeometry.getMesh();
-        // collisionMesh.setStatic();
-        // colShape = new HullCollisionShape(collisionMesh);
 
         CollisionShape boxCol = CollisionShapeFactory.createBoxShape(collisionGeometry);
         CompoundCollisionShape colShape = new CompoundCollisionShape();
