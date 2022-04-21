@@ -15,6 +15,7 @@ import rallygame.service.ILoadable;
 import rallygame.service.LoadingState;
 import rallygame.world.*;
 import rallygame.world.wp.DefaultBuilder;
+import rallygame.world.wp.StaticBuilt;
 import rallygame.world.wp.WP.DynamicType;
 import rallygame.world.path.PathWorld;
 
@@ -35,6 +36,7 @@ public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
         Path,
         CopyRace,
         TileExplorer,
+        FixedDynamicRace,
         Dev;
     }
 
@@ -100,6 +102,10 @@ public class AppFlow implements IFlow, IDriveDone, IChooseStuff {
                 loadingStates.add(copyWorld);
                 loadme.add(new DynamicCopyRace(copyWorld, (IDriveDone) this));
                 break;
+            case FixedDynamicRace:
+                var staticW = new StaticBuilt();
+                loadingStates.add(staticW);
+                loadme.add(new DriveLapRace((IDriveDone) this, staticW));
             default:
                 Log.p("No idea which world type that was: " + type.name());
         }

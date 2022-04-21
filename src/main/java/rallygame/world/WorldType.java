@@ -10,6 +10,7 @@ import rallygame.world.wp.WP.DynamicType;
 public enum WorldType {
 	DYNAMIC,
 	STATIC,
+    FIXEDDYNAMIC,
 	
 	OBJECT,
 	
