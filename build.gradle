@@ -10,39 +10,7 @@ sourceCompatibility = 11
 
 repositories {
     jcenter()
-    maven {
-        url "https://dl.bintray.com/jmonkeyengine/org.jmonkeyengine"
-        url "https://dl.bintray.com/stephengold/jme3utilities" 
-    }
-}
-
-//allow vscode -> buildship -> f5 to read the generated assets.jar
-sourceSets {
-    main {
-        resources {
-            srcDirs "build/assets/libs/"
-        }
-    }
-}
-
-project(":assets") {
-    apply plugin: "java"
-    
-    buildDir = rootProject.file("build/assets")
-    
-    sourceSets {
-        main {
-            resources {
-                srcDir '.'
-                include '**'
-                exclude '**/*.blend'
-                exclude '**/*.ps1'
-                exclude '**/*.py'
-                exclude '**/*.blend1'
-                exclude 'bin/*'
-            }
-        }
-    }
+    mavenCentral()
 }
 
 def jme3Version = '3.3.0-stable'
@@ -64,8 +32,6 @@ dependencies {
 
     // Use JUnit Jupiter API for testing
     testImplementation 'org.junit.jupiter:junit-jupiter:5.6.1'
-
-    runtimeOnly project(':assets')
 }
 
 test {
@@ -117,17 +83,9 @@ task createDuelFatJar(type: Jar) {
     dependsOn 'build'
 }
 
-
-task cleanBlendGltfFiles(type: Delete) {
-    delete fileTree('assets') {
-        include '**/*.blend.glb'
-    }
-}
-
 def blenderCommandWin = "C:\\Program Files\\Blender Foundation\\Blender 2.82\\blender"
 def blenderCommandLinux = "/usr/bin/blender"
 def blenderPythonFile = "$projectDir/assets/blend2gltf.py"
-
 task convertAllBlendFiles {
     doFirst {
         def blenderCommand = blenderCommandLinux
