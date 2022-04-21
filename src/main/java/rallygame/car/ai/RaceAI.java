@@ -12,6 +12,7 @@ public class RaceAI extends CarAI {
     private ICheckpointDrive race;
     private final boolean doFowardRayCast;
     private float roadWidth;
+    private float catchUp;
     
     public RaceAI(RayCarControl car, ICheckpointDrive race) {
         this(car, race, true);
@@ -25,6 +26,9 @@ public class RaceAI extends CarAI {
     public void setRoadWidth(float roadWidth) {
         this.roadWidth = roadWidth;
     }
+    public void useCatchUp(float value) {
+        this.catchUp = value; // a usual value is ~0.3f
+    }
 
     @Override
 	public void update(float tpf) {
@@ -35,7 +39,7 @@ public class RaceAI extends CarAI {
 		}
         
         Vector3f[] nextCheckpoints = race.getNextCheckpoints(car, 2);
-        Vector3f pos = calcBetterCheckpointPos(race.getLastCheckpoint(car), 4, nextCheckpoints[0], nextCheckpoints[1]);
+        Vector3f pos = calcBetterCheckpointPos(race.getLastCheckpoint(car), roadWidth*0.9f, nextCheckpoints[0], nextCheckpoints[1]);
         driveAt(pos);
         
         boolean tooFast = tooFastForNextCheckpoints(atPos, roadWidth);
@@ -68,6 +72,14 @@ public class RaceAI extends CarAI {
         if (velocity < 2) {
             onEvent(RayCarControlInput.ACTION_ACCEL, true);
             onEvent(RayCarControlInput.ACTION_BRAKE, false);
+        }
+
+        if (catchUp > 0) {
+            Vector3f grav = car.getPhysicsObject().getGravity();
+            Vector3f targetDir = atPos.subtract(car.location);
+            car.getPhysicsObject().applyImpulse(targetDir.normalize().mult(car.getCarData().mass*grav.length()*tpf*catchUp), Vector3f.ZERO);
+            // TODO it goes way too fast for corners, might need a better slow down:
+            // car.getPhysicsObject().applyImpulse(car.vel.negate().normalize().mult(car.getCarData().mass*grav.length()*tpf*0.03f), Vector3f.ZERO);
         }
     }
 

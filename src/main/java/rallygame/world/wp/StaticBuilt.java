@@ -13,6 +13,7 @@ import rallygame.world.WorldType;
 public class StaticBuilt extends DefaultBuilder implements ICheckpointWorld {
 
     private List<Vector3f> placedPieces = new LinkedList<>();
+    private boolean initReset;
 
     public StaticBuilt() {
         super(Floating.values());
@@ -51,11 +52,22 @@ public class StaticBuilt extends DefaultBuilder implements ICheckpointWorld {
     }
 
     @Override
+    public void reset() {
+        if (!initReset) {
+            super.reset();
+            initReset = true;
+        }
+    }
+
+    @Override
     public void update(float tpf) {
         // no
     }
 
-    // TODO reset can break everything
+    @Override
+    protected void removePieces(Vector3f[] posList) {
+        // no
+    }
 
     @Override
     public WorldType getType() {
@@ -64,7 +76,7 @@ public class StaticBuilt extends DefaultBuilder implements ICheckpointWorld {
 
     @Override
     public DefaultBuilder copy() {
-        return new StaticBuilt();
+        return this;
     }
 
     @Override

@@ -1,16 +1,21 @@
 package rallygame.drive;
 
 import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.simsilica.lemur.Container;
+import com.simsilica.lemur.Label;
 
 import rallygame.car.ai.RaceAI;
 import rallygame.car.data.Car;
 import rallygame.car.ray.RayCarControl;
 import rallygame.game.IDriveDone;
+import rallygame.helper.H;
 import rallygame.helper.Log;
 import rallygame.service.GridPositions;
+import rallygame.service.Screen;
 import rallygame.service.checkpoint.CheckpointProgress;
 import rallygame.service.checkpoint.CheckpointProgressUI;
 import rallygame.world.ICheckpointWorld;
@@ -20,6 +25,12 @@ public class DriveLapRace extends DriveBase implements ICheckpointDrive {
 
     private CheckpointProgressUI progressMenu;
     private CheckpointProgress progress;
+
+    private RaceAI ai;
+
+    private Container container;
+    private Label timer;
+    private float difficulty = 0;
 
     public DriveLapRace(IDriveDone done, ICheckpointWorld world) {
         super(done, Car.Runner, world);
@@ -41,10 +52,11 @@ public class DriveLapRace extends DriveBase implements ICheckpointDrive {
                 checkpoints[0].subtract(checkpoints[checkpoints.length - 1]).negate())
                 .limit(2).toArray(Vector3f[]::new);
 
-        var c = cm.addCar(Car.Rally, worldStarts[1], worldRot, false);
-        RaceAI rAi = new RaceAI(c, this, false);
-        rAi.setRoadWidth(15);
-        c.attachAI(rAi, true);
+        cm.getPlayer().setPhysicsProperties(worldStarts[0], null, worldRot, null);
+        var c = cm.addCar(Car.Runner, worldStarts[1], worldRot, false);
+        ai = new RaceAI(c, this, false);
+        ai.setRoadWidth(12);
+        c.attachAI(ai, true);
 
         // Checkpoint detection and stuff
         progress = new CheckpointProgress(CheckpointProgress.Type.Sprint, checkpoints, cm.getAll(), cm.getPlayer());
@@ -53,6 +65,23 @@ public class DriveLapRace extends DriveBase implements ICheckpointDrive {
 
         progressMenu = new CheckpointProgressUI(progress);
         getStateManager().attach(progressMenu);
+
+        //show message
+        this.container = new Container();
+        container.addChild(new Label("The AI gets harder slowly"));
+        this.timer = container.addChild(new Label("???"));
+        ((SimpleApplication) getApplication()).getGuiNode().attachChild(container);
+        new Screen(getApplication().getContext().getSettings()).topLeftMe(container);
+    }
+
+    @Override
+    public void update(float tpf) {
+        super.update(tpf);
+
+        this.difficulty += tpf/300f;
+        this.timer.setText("Difficulty: " + H.roundDecimal(this.difficulty, 2));
+
+        ai.useCatchUp(this.difficulty);
     }
 
     @Override
