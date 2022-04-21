@@ -68,11 +68,10 @@ public class DynamicCopyRace extends DriveBase
     //- catch up to first by copying cars as you go
     //- win when you are first
     //bugs:
-    // - when you copy cars you can't win, the checkpoint system loses you
-    // - also don't reset please
+    // - the checkpoint system loses you
 
     public DynamicCopyRace(DefaultBuilder world, IDriveDone done) {
-        super(done, Car.Runner, world);
+        super(done, Car.Normal, world);
         world.registerListener(this);
         world.setDistFunction(() -> this.cm.getAll().stream().map(x -> x.location).toArray(Vector3f[]::new));
 
@@ -348,9 +347,12 @@ public class DynamicCopyRace extends DriveBase
         progress.setMinCheckpoint(pos);
     }
 
+    private RayCarControl lastCopied;
     @Override
-    public void playerCollision(RayCarControl player, RayCarControl them, Vector3f normalInWorld, Vector3f themLocalPos,
-            float appliedImpulse) {
+    public void playerCollision(RayCarControl player, RayCarControl them, Vector3f normalInWorld, Vector3f themLocalPos, float appliedImpulse) {
+        if (lastCopied == them)
+            return;
         this.reInitPlayerCar(them.getCarData());
+        lastCopied = them;
     }
 }
