@@ -45,8 +45,8 @@ wheelData:
 - &w
   mass: 10.0
   modelName: models/Mazda_121_Metro_wheel.blend.glb
-  pjk_lat: {B: 60, C: 1.9, D1: 1.1, D2: 0.000055, E: 0.97}
-  pjk_long: {B: 40, C: 1.9, D1: 1.1, D2: 0.000055, E: 0.97}
+  pjk_lat: {B: 30, C: 1.24, D1: 1.8, D2: 0.000055, E: 0.45}
+  pjk_long: {B: 25, C: 1.8, D1: 2, D2: 0.000055, E: 0.98}
   radius: 0.2875
   width: 0.15
 - *w
