@@ -121,8 +121,7 @@ public class RayCarControl implements ICarPowered, ICarControlled {
         if (steerRight != 0) //right
             steeringCurrent -= getBestTurnAngle(steerRight, -1);
         steeringCurrent = ignoreSpeedFactor ? steeringCurrent : steeringAverager.get(steeringCurrent, tpf);
-        steeringCurrent = FastMath.clamp(steeringCurrent, -rayCar.carData.w_steerAngle, 
-                rayCar.carData.w_steerAngle);
+        steeringCurrent = FastMath.clamp(steeringCurrent, -rayCar.carData.w_steerAngle, rayCar.carData.w_steerAngle);
 
         rayCar.updateControlInputs(steeringCurrent, brakeCurrent, handbrakeCurrent);
 
@@ -138,8 +137,7 @@ public class RayCarControl implements ICarPowered, ICarControlled {
             return trySteerAngle;
         
         Vector3f local_vel = rotation.inverse().mult(vel);
-        if (local_vel.z < 0 || ((-sign * rayCar.driftAngle) < 0 && Math.abs(
-                rayCar.driftAngle) > rayCar.carData.minDriftAngle * FastMath.DEG_TO_RAD)) {
+        if (local_vel.z < 0 || ((-sign * rayCar.driftAngle) < 0 && Math.abs(rayCar.driftAngle) > rayCar.carData.minDriftAngle * FastMath.DEG_TO_RAD)) {
             return trySteerAngle;
             //when going backwards, slow or needing to turning against drift, you get no speed factor
             //eg: car is pointing more left than velocity, and is also turning left
@@ -151,7 +149,7 @@ public class RayCarControl implements ICarPowered, ICarControlled {
 
         // this is magic, but: minimum should be bast pjk lat, but it doesn't catch up to the turning angle required
         // so we just add some of the angular vel value to it
-        return rayCar.wheels[0].data.maxLat + angularVel.length()*0.25f; //constant needs minor adjustments
+        return rayCar.wheels[0].data.maxLat + angularVel.length()*0.125f; //constant needs minor adjustments
         // remember that this value is clamped after this method is called
     }
 
