@@ -61,6 +61,7 @@ public class DynamicCopyRace extends DriveBase
     
     private LinkedList<Vector3f> initCheckpointBuffer;
     
+    private Container container;
     private Label timer;
     private float time;
 
@@ -123,7 +124,7 @@ public class DynamicCopyRace extends DriveBase
         getStateManager().attach(progressMenu);
 
         //show score
-        Container container = new Container();
+        this.container = new Container();
         this.timer = container.addChild(new Label("Score: 0 sec"));
         ((SimpleApplication) getApplication()).getGuiNode().attachChild(container);
         new Screen(getApplication().getContext().getSettings()).topLeftMe(container);
@@ -282,6 +283,9 @@ public class DynamicCopyRace extends DriveBase
         progressMenu = null;
         getStateManager().detach(progress);
         progress = null;
+
+        container.removeFromParent();
+        container = null;
 
         super.cleanup(app);
     }
