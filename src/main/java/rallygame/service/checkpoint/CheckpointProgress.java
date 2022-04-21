@@ -11,6 +11,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
+import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.GhostControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
@@ -111,6 +112,8 @@ public class CheckpointProgress extends BaseAppState {
         box.rotate(q);
 
         GhostControl ghost = new GhostControl(colShape);
+        ghost.setCollisionGroup(PhysicsCollisionObject.COLLISION_GROUP_02);
+        ghost.setCollideWithGroups(PhysicsCollisionObject.COLLISION_GROUP_02);
         box.addControl(ghost);
 
         Checkpoint check = new Checkpoint(engine.getCheckpointCount(), pos, ghost, box);

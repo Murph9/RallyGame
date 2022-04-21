@@ -116,7 +116,7 @@ public class DynamicCopyRace extends DriveBase
 
         // init checkpoints
         progress = new CheckpointProgress(CheckpointProgress.Type.Sprint, checkpoints, cm.getAll(), cm.getPlayer());
-        progress.setCheckpointModel(CheckpointProgress.GetDefaultCheckpointModel(app, 4, new ColorRGBA(0, 1, 0, 0.4f)));
+        progress.setCheckpointModel(CheckpointProgress.GetDefaultCheckpointModel(app, 20, new ColorRGBA(0, 1, 0, 0.4f)));
         getStateManager().attach(progress);
 
         progressMenu = new CheckpointProgressUI(progress);

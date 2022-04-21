@@ -11,6 +11,7 @@ import com.jme3.asset.AssetManager;
 import com.jme3.audio.AudioData;
 import com.jme3.audio.AudioNode;
 import com.jme3.bullet.BulletAppState;
+import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.bullet.util.CollisionShapeFactory;
@@ -34,6 +35,9 @@ import rallygame.helper.Geo;
 import rallygame.helper.Log;
 
 public class CarManager extends BaseAppState {
+
+    // Group 1 is general, Group 2 is for checkpoints
+    private static final int DefaultCollisionGroups = PhysicsCollisionObject.COLLISION_GROUP_01 | PhysicsCollisionObject.COLLISION_GROUP_02;
 
     private final CarDataLoader loader;
     private final List<RayCarControl> cars;
@@ -122,6 +126,8 @@ public class CarManager extends BaseAppState {
         //init car
         RayCarControl carControl = new RayCarControl((SimpleApplication)getApplication(), initialCarModel, rayCar);
         carControl.setPhysicsProperties(start, null, rot, null);
+        carControl.getPhysicsObject().setCollisionGroup(DefaultCollisionGroups);
+        carControl.getPhysicsObject().setCollideWithGroups(DefaultCollisionGroups);
         rootNode.attachChild(carControl.getRootNode());
         
         // a fake angular rotational reducer, very important for driving feel
