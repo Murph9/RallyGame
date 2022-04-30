@@ -88,7 +88,7 @@ task createDuelFatJar(type: Jar) {
     dependsOn 'build'
 }
 
-task createDuelFatJar(type: Jar) {
+task createSurvivalFatJar(type: Jar) {
     archiveBaseName = 'survival'
     manifest {
         attributes 'Main-Class': 'survival.SurvivalApp'
