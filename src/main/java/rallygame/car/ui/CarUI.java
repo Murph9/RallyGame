@@ -12,6 +12,7 @@ import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
+import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
@@ -46,11 +47,11 @@ public class CarUI extends BaseAppState {
     private Material rpmMat;
 
     //other meters
-    private Geometry nitro, nitroOff; //quads that display nitro
-    private Geometry throttle, throttleOff; //quads that display throttle 
-    private Geometry brake, brakeOff; //quads that display braking
-    private Geometry steer, steerOff; //quads that display turn value
-    private Geometry fuel, fuelOff;
+    private Geometry nitro; // quad that display nitro
+    private Geometry throttle; // quad that display throttle 
+    private Geometry brake; // quad that display braking
+    private Geometry steer; // quad that display turn value
+    private Geometry fuel; // displays fuel amount
     
     //texture
     private Material[] numMats = new Material[11]; //texture set
@@ -201,88 +202,47 @@ public class CarUI extends BaseAppState {
         }
         
         
-        //nitro 
-        Quad q = new Quad(80, 10);
-        nitroOff = new Geometry("nitroback", q);
-        Material nitroM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-        nitroM.setColor("Color", new ColorRGBA(ColorRGBA.Green).mult(0.3f));
-        nitroOff.setMaterial(nitroM);
-        nitroOff.setLocalTranslation(5, 10, 0);
-        rootNode.attachChild(nitroOff);
-        
-        nitro = new Geometry("nitro", q);
-        nitroM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-        nitroM.setColor("Color", new ColorRGBA(ColorRGBA.Green));
-        nitro.setMaterial(nitroM);
-        nitro.setLocalTranslation(5, 10, 0);
-        rootNode.attachChild(nitro);
-        
-        //throttle
+        // nitro 
+        nitro = makeProgressBar("nitro", am, ColorRGBA.Green, new Vector2f(80, 10), new Vector3f(5, 10, 0));
+       
+        // brake and throttle
         int width = 6;
         int height = 60;
-        q = new Quad(width, height);
-        throttleOff = new Geometry("throttleback", q);
-        Material throttleM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-        throttleM.setColor("Color", new ColorRGBA(ColorRGBA.Blue).mult(0.3f));
-        throttleOff.setMaterial(throttleM);
-        throttleOff.setLocalTranslation(SPEEDO_WIDTH/2 + 30 - width / 2, SPEEDO_HEIGHT/2 - height/2, 0);
-        rootNode.attachChild(throttleOff);
+        throttle = makeProgressBar("throttle", am, ColorRGBA.Blue, new Vector2f(width, height), new Vector3f(SPEEDO_WIDTH/2 + 30 - width / 2, SPEEDO_HEIGHT/2 - height/2, 0));
+        brake = makeProgressBar("brake", am, ColorRGBA.Red, new Vector2f(width, height), new Vector3f(SPEEDO_WIDTH/2 - 30 - width / 2, SPEEDO_HEIGHT/2 - height/2, 0));
         
-        throttle = new Geometry("throttle", q);
-        throttleM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-        throttleM.setColor("Color", new ColorRGBA(ColorRGBA.Blue));
-        throttle.setMaterial(throttleM);
-        throttle.setLocalTranslation(SPEEDO_WIDTH/2 + 30 - width / 2, SPEEDO_HEIGHT/2 - height/2, 0);
-        rootNode.attachChild(throttle);
+        // fuel
+        fuel = makeProgressBar("fuel", am, ColorRGBA.Magenta, new Vector2f(80, 10), new Vector3f(5, 25, 0));
         
-        //brake
-        brakeOff = new Geometry("brakeback", q);
-        Material brakeM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-        brakeM.setColor("Color", new ColorRGBA(ColorRGBA.Red).mult(0.3f));
-        brakeOff.setMaterial(brakeM);
-        brakeOff.setLocalTranslation(SPEEDO_WIDTH/2 - 30 - width / 2, SPEEDO_HEIGHT/2 - height/2, 0);
-        rootNode.attachChild(brakeOff);
-        
-        brake = new Geometry("brake", q);
-        brakeM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-        brakeM.setColor("Color", new ColorRGBA(ColorRGBA.Red));
-        brake.setMaterial(brakeM);
-        brake.setLocalTranslation(SPEEDO_WIDTH/2 - 30 - width / 2, SPEEDO_HEIGHT/2 - height/2, 0);
-        rootNode.attachChild(brake);
-        
-        //steer
-        q = new Quad(60, 6);
-        steerOff = new Geometry("steerback", q);
-        Material steerM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-        steerM.setColor("Color", new ColorRGBA(ColorRGBA.White).mult(0.3f));
-        steerOff.setMaterial(steerM);
+        // steer
+        var steerOff = makeUIBox("steerback", am, new ColorRGBA(ColorRGBA.White).mult(0.3f), new Vector2f(60, 6));
         steerOff.setLocalTranslation(SPEEDO_WIDTH/2 - 60/2, SPEEDO_HEIGHT/2 + 40, 0);
         rootNode.attachChild(steerOff);
         
-        width = 6;
-        q = new Quad(width, 6);
-        steer = new Geometry("steer", q);
-        steerM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-        steerM.setColor("Color", new ColorRGBA(ColorRGBA.White));
-        steer.setMaterial(steerM);
+        steer = makeUIBox("steer", am, new ColorRGBA(ColorRGBA.White), new Vector2f(6, 6));
         steer.setLocalTranslation(SPEEDO_WIDTH/2 - width/2, SPEEDO_HEIGHT/2 + 40, 0);
         rootNode.attachChild(steer);
+    }
 
-        //fuel 
-        q = new Quad(80, 10);
-        fuelOff = new Geometry("fuelback", q);
-        Material fuelM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-        fuelM.setColor("Color", new ColorRGBA(ColorRGBA.Magenta).mult(0.3f));
-        fuelOff.setMaterial(fuelM);
-        fuelOff.setLocalTranslation(5, 25, 0);
-        rootNode.attachChild(fuelOff);
+    private Geometry makeProgressBar(String name, AssetManager am, ColorRGBA colour, Vector2f size, Vector3f pos) {
+        var geomBack = makeUIBox(name+"back", am, new ColorRGBA(colour).mult(0.3f), size);
+        geomBack.setLocalTranslation(pos);
+        rootNode.attachChild(geomBack);
         
-        fuel = new Geometry("fuel", q);
-        fuelM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
-        fuelM.setColor("Color", new ColorRGBA(ColorRGBA.Magenta));
-        fuel.setMaterial(fuelM);
-        fuel.setLocalTranslation(5, 25, 0);
-        rootNode.attachChild(fuel);
+        var geom = makeUIBox(name, am, new ColorRGBA(colour), size);
+        geom.setLocalTranslation(pos);
+        rootNode.attachChild(geom);
+        
+        return geom;
+    }
+
+    private Geometry makeUIBox(String name, AssetManager am, ColorRGBA colour, Vector2f size) {
+        var q = new Quad(size.x, size.y);
+        var geom = new Geometry(name, q);
+        Material mat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+        mat.setColor("Color", colour);
+        geom.setMaterial(mat);
+        return geom;
     }
 
     private void makeKmH(AppSettings settings) {
