@@ -96,7 +96,7 @@ public class CarModelData {
 		Headlight_L("headlight"), //only one side
 		Taillight_L("taillight_l"), //only one side
 
-		Collision("collision") //model for collision in bullet physics (dynamic shapes were expensive)
+		Collision("collision") //unused model collision in bullet physics
 
 		//Please add more when needed
 		;

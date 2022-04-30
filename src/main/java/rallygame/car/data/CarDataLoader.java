@@ -91,9 +91,6 @@ public class CarDataLoader { //CarDataFactory
             throw new IllegalStateException("!!! Missing car model wheel position data for: " + data.carModel);
         }
 
-        if (!modelData.hasCollision())
-            throw new IllegalStateException(CarPart.Collision.name() + " should exist.");
-
         // validate that the wheels are in the correct quadrant for a car
         if (data.wheelOffset[0].x < 0 || data.wheelOffset[0].z < 0)
             throw new IllegalStateException(CarPart.Wheel_FL.name() + " should be in pos x and pos z");

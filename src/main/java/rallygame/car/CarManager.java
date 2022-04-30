@@ -12,9 +12,8 @@ import com.jme3.audio.AudioData;
 import com.jme3.audio.AudioNode;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.PhysicsCollisionObject;
-import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
-import com.jme3.bullet.util.CollisionShapeFactory;
+import com.jme3.bullet.collision.shapes.HullCollisionShape;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
@@ -115,14 +114,15 @@ public class CarManager extends BaseAppState {
             throw new IllegalStateException(getClass().getName() + " hasn't been initialised");
         
 		AssetManager am = getApplication().getAssetManager();
-		//pre load car model so we can remove the collision object before materials are set
+		// pre load car model so we can remove the collision object before materials are set
         Spatial initialCarModel = am.loadModel(carData.carModel);
-        // remove and fetch the single collision shape to use as collision
-        Spatial collisionShape = Geo.removeNamedSpatial((Node)initialCarModel, CarPart.Collision.getPartName());
+        // remove the old collision shape
+        Geo.removeNamedSpatial((Node)initialCarModel, CarPart.Collision.getPartName());
+        Spatial collisionShape = Geo.getNamedSpatial((Node)initialCarModel, CarPart.Chassis.getPartName());
         
         // init physics class
         RayCarPowered rayCar = createRayCar(collisionShape, carData);
-
+        
         //init car
         RayCarControl carControl = new RayCarControl((SimpleApplication)getApplication(), initialCarModel, rayCar);
         carControl.setPhysicsProperties(start, null, rot, null);
@@ -151,19 +151,17 @@ public class CarManager extends BaseAppState {
         Geometry collisionGeometry = null;
         if (collisionGeometry instanceof Geometry) {
             collisionGeometry = (Geometry) collisionShape;
+            var col = new HullCollisionShape(collisionGeometry.getMesh());
+            return new RayCarPowered(col, carData);
         } else { // Node
-            collisionGeometry = Geo.getGeomList(collisionShape).get(0); // lets hope its the only one too
+            var col = new CompoundCollisionShape();
+            for (var g : Geo.getGeomList(collisionShape)) {
+                var hullCol = new HullCollisionShape(g.getMesh());
+                col.addChildShape(hullCol, Vector3f.ZERO);
+            }
+            
+            return new RayCarPowered(col, carData);
         }
-
-        CollisionShape boxCol = CollisionShapeFactory.createBoxShape(collisionGeometry);
-        CompoundCollisionShape colShape = new CompoundCollisionShape();
-
-        Vector3f worldTrans = collisionGeometry.getWorldTranslation();
-        Vector3f worldCenter = collisionGeometry.getWorldBound().getCenter();
-        Vector3f absTrans = worldTrans.subtract(worldCenter);
-        colShape.addChildShape(boxCol, absTrans.negate());
-
-        return new RayCarPowered(colShape, carData);
     }
 
     /** Allows changing the car a control uses entirely, an in place change. */
