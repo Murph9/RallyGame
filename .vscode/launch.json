@@ -16,6 +16,12 @@
             "request": "launch",
             "mainClass": "rallygame.game.Main",
             "projectName": "RallyGame"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Survival",
+            "request": "launch",
+            "mainClass": "survival.SurvivalApp"
         }
     ]
 }

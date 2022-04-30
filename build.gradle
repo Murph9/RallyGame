@@ -50,6 +50,11 @@ task runDuel(type: JavaExec) {
     main = 'rallygame.duel.DuelApp'
 }
 
+task runSurvival(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'survival.SurvivalApp'
+}
+
 task createFatJar(type: Jar) {
     archiveBaseName = 'rallyGame'
 
@@ -71,6 +76,22 @@ task createDuelFatJar(type: Jar) {
     archiveBaseName = 'duel'
     manifest {
         attributes 'Main-Class': 'rallygame.duel.DuelApp'
+    }
+
+    from sourceSets.main.output
+    dependsOn configurations.compileClasspath
+
+    from {
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+    }
+
+    dependsOn 'build'
+}
+
+task createDuelFatJar(type: Jar) {
+    archiveBaseName = 'survival'
+    manifest {
+        attributes 'Main-Class': 'survival.SurvivalApp'
     }
 
     from sourceSets.main.output
