@@ -8,6 +8,7 @@ public interface ICarPowered {
     boolean ifHandbrake();
     int curGear();
     float nitro();
+    float fuel();
     float steeringCurrent();
     int curRPM();
     float driftAngle();

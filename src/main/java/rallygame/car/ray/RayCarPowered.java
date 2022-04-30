@@ -23,6 +23,9 @@ public class RayCarPowered extends RayCar {
 	private float nitroRemaining;
 	protected float getNitroRemaining() { return nitroRemaining; }
 	
+	private float fuelRemaining;
+	protected float fuelRemaining() { return fuelRemaining; }
+	
 	protected int curGear;
 	protected int curRPM;
 	private int gearChangeTo;
@@ -32,6 +35,7 @@ public class RayCarPowered extends RayCar {
 		super(shape, carData);
 		this.nitroRemaining = carData.nitro_on ? carData.nitro_max : 0;
 		this.curGear = 1;
+		this.fuelRemaining = carData.fuelMax;
 	}
 	
 	@Override
@@ -137,6 +141,16 @@ public class RayCarPowered extends RayCar {
 		if (accelCurrent < 0.01f || curRPM > carData.e_redline) //so compression only happens on no accel
 			engineDrag = (curRPM-carData.e_idle)*carData.e_compression * (Math.signum(wheelrot)); //reverse goes the other way
 		
+		if (accelCurrent > 0.01f) {
+			var nitroOffset = nitroForce > 0 ? 2 : 1; //nitro uses more fuel, its not like nitro IS fuel?
+			fuelRemaining -= tpf*carData.calcFuelRate(curRPM)*nitroOffset;
+			fuelRemaining = Math.max(fuelRemaining, 0);
+		}
+
+		if (fuelRemaining == 0) {
+			eTorque = 0; // :(	
+		}
+
 		float engineOutTorque = 0;
 		if (Math.abs(curRPM) > carData.e_redline)
 			engineOutTorque = -engineDrag; //kill engine if greater than redline, and only apply compression

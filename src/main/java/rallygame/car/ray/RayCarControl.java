@@ -331,6 +331,7 @@ public class RayCarControl implements ICarPowered, ICarControlled {
     public float brakeCurrent() { return brakeCurrent; }
     public int curGear() { return rayCar.curGear; }
     public float nitro() { return rayCar.getNitroRemaining(); }
+    public float fuel() { return rayCar.fuelRemaining(); }
     public float steeringCurrent() { return this.steeringCurrent; }
     public int curRPM() { return rayCar.curRPM; }
     public boolean ifHandbrake() { return this.handbrakeCurrent; }

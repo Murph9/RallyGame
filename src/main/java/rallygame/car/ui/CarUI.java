@@ -50,6 +50,7 @@ public class CarUI extends BaseAppState {
     private Geometry throttle, throttleOff; //quads that display throttle 
     private Geometry brake, brakeOff; //quads that display braking
     private Geometry steer, steerOff; //quads that display turn value
+    private Geometry fuel, fuelOff;
     
     //texture
     private Material[] numMats = new Material[11]; //texture set
@@ -266,6 +267,22 @@ public class CarUI extends BaseAppState {
         steer.setMaterial(steerM);
         steer.setLocalTranslation(SPEEDO_WIDTH/2 - width/2, SPEEDO_HEIGHT/2 + 40, 0);
         rootNode.attachChild(steer);
+
+        //fuel 
+        q = new Quad(80, 10);
+        fuelOff = new Geometry("fuelback", q);
+        Material fuelM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+        fuelM.setColor("Color", new ColorRGBA(ColorRGBA.Magenta).mult(0.3f));
+        fuelOff.setMaterial(fuelM);
+        fuelOff.setLocalTranslation(5, 25, 0);
+        rootNode.attachChild(fuelOff);
+        
+        fuel = new Geometry("fuel", q);
+        fuelM = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+        fuelM.setColor("Color", new ColorRGBA(ColorRGBA.Magenta));
+        fuel.setMaterial(fuelM);
+        fuel.setLocalTranslation(5, 25, 0);
+        rootNode.attachChild(fuel);
     }
 
     private void makeKmH(AppSettings settings) {
@@ -336,6 +353,8 @@ public class CarUI extends BaseAppState {
 
         float steeringValue = powerState.steeringCurrent()*60;
         steer.setLocalTranslation(SPEEDO_WIDTH/2 - 6/2 - steeringValue, SPEEDO_HEIGHT/2 + 40, 0); //steering is a translated square
+
+        fuel.setLocalScale(powerState.fuel() / p.getCarData().fuelMax, 1, 1);
     }
 
     private void setSpeedDigits(int speedKMH) {

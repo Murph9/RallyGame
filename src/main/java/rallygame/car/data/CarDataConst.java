@@ -67,6 +67,9 @@ public class CarDataConst implements Serializable {
 	public float nitro_rate;
 	public float nitro_max;
 	
+	public boolean fuelEnabled;
+	public float fuelMax = 80;
+	public float fuelRpmRate = 0.00003f;
 	
 	public float brakeMaxTorque;
 	
@@ -184,4 +187,9 @@ public class CarDataConst implements Serializable {
     public String toString() {
         return this.name + " " + this.carModel;
     }
+
+	public float calcFuelRate(int rpm) {
+		if (!fuelEnabled)  return 0;
+		return fuelRpmRate*rpm;
+	}
 }
