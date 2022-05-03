@@ -7,7 +7,7 @@ import com.jme3.scene.Geometry;
 
 import rallygame.car.ray.RayCarControl;
 
-class RacerState implements Comparable<RacerState> {
+public class RacerState implements Comparable<RacerState> {
     public final RayCarControl car;
 
     public int lap;

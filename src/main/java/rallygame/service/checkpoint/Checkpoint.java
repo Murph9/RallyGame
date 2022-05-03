@@ -4,7 +4,7 @@ import com.jme3.bullet.control.GhostControl;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
 
-class Checkpoint {
+public class Checkpoint {
     public final int num;
     public final Vector3f position;
     public final GhostControl ghost;
