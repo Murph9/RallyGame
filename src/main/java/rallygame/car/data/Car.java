@@ -1,6 +1,8 @@
 package rallygame.car.data;
 
 public enum Car {
+	Survivor("Survivor"),
+
 	Normal("Normal"),
 	Runner("Runner"),
 	Rally("Rally"),

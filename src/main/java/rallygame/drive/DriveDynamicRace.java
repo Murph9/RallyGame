@@ -50,7 +50,6 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
         
         nextState();
         
-        //hard coded checkpoints for duct2 (small)
         Vector3f[] checkpoints = new Vector3f[] {
                 new Vector3f(0, 0, 0),
                 new Vector3f(10, 0, 0) //starting vector to get the cars to drive forward

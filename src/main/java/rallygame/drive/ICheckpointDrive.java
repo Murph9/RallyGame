@@ -7,6 +7,8 @@ import rallygame.car.ray.RayCarControl;
 
 public interface ICheckpointDrive extends IDrive {
 
+    // TODO users of this should really be getting it from the stateManager somehow
+
     Transform resetPosition(RayCarControl car);
     Vector3f getLastCheckpoint(RayCarControl car);
     Vector3f getNextCheckpoint(RayCarControl car);
