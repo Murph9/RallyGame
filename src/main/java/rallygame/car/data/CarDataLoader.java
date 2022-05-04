@@ -49,7 +49,7 @@ public class CarDataLoader { //CarDataFactory
 
     public CarDataConst get(AssetManager am, Car car, Vector3f gravity) throws IllegalStateException {
         if (dataCache.containsKey(car))
-            return dataCache.get(car);
+            return dataCache.get(car).cloneWithSerialization();
         
         String carName = car.getCarName();
         Log.p("Loading file data for car type: " + carName);
@@ -69,7 +69,7 @@ public class CarDataLoader { //CarDataFactory
 
         dataCache.put(car, data);
 
-        return data;
+        return data.cloneWithSerialization();
     }
 
     public void reValidateData(CarDataConst data, AssetManager am, Vector3f gravity) {

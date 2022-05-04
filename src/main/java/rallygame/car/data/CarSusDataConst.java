@@ -1,8 +1,10 @@
 package rallygame.car.data;
 
+import java.io.Serializable;
+
 import com.jme3.math.FastMath;
 
-public class CarSusDataConst {
+public class CarSusDataConst implements Serializable {
 
 	//travel values are relative to wheel offset pos
 	public float min_travel; //[-0.3 - 0.3] upper travel length - closer to car

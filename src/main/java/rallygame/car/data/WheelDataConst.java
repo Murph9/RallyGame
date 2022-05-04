@@ -1,6 +1,8 @@
 package rallygame.car.data;
 
-public class WheelDataConst {
+import java.io.Serializable;
+
+public class WheelDataConst implements Serializable {
 	
 	public float maxLong;
 	public float maxLat;
