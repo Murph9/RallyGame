@@ -22,6 +22,7 @@ public enum WorldType {
     
     PATH,
 
+    TILEDFLAT,
 	FLAT,
 	MOVING,
 	NONE
@@ -56,6 +57,8 @@ public enum WorldType {
             return new TrackWorld();
         case SMALLTILED:
             return new SmallTiled();
+        case TILEDFLAT:
+            return new TiledFlatWorld();
         case PATH:
             return new PathWorld();
 
