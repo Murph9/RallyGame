@@ -3,7 +3,7 @@ package rallygame.world.wp;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
-public enum Rally implements WP {
+public enum Ditch implements WP {
 	CROSS("cross", new Vector3f(2,0,0), WP.STRAIGHT),
 	STRAIGHT("straight", new Vector3f(2,0,0), WP.STRAIGHT),
 	
@@ -21,7 +21,7 @@ public enum Rally implements WP {
 	HILL_DOWN("hill_down", new Vector3f(4,-0.5f,0), WP.STRAIGHT),
 	;
 	
-	private static String dir = "wb/rally/";
+	private static String dir = "wb/ditch/";
 	
 	String name;
 	Vector3f newPos; //what the piece does to the track
@@ -29,7 +29,7 @@ public enum Rally implements WP {
 	NodeType startNode;
 	NodeType endNode;
 
-	Rally(String s, Vector3f a, Quaternion g) {
+	Ditch(String s, Vector3f a, Quaternion g) {
 		this.name = s;
 		this.newPos = a;
 		this.newRot = g;
@@ -52,7 +52,7 @@ public enum Rally implements WP {
 	
 	static class Builder extends DefaultBuilder {
 		Builder() {
-			super(Rally.values());
+			super(Ditch.values());
 		}
 		
 		public DefaultBuilder copy() {

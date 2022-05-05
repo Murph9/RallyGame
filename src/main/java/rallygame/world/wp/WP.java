@@ -42,7 +42,7 @@ public interface WP {
 		Valley(new Valley.Builder()),
 		Rocks(new Rocks.Builder()),
 		MainRoad(new MainRoad.Builder()),
-		Rally(new Rally.Builder())
+		Ditch(new Ditch.Builder())
 		;
 		
 		private DefaultBuilder builder;
