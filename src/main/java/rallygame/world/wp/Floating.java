@@ -31,7 +31,7 @@ public enum Floating implements WP {
 	public float getScale() { return 1; }
 	public boolean needsMaterial() { return false; }
 	
-	public String getName() { return String.format(WP.FileFormat, dir, name); }
+	public String getFileName() { return String.format(WP.FileFormat, dir, name); }
 	public Vector3f getNewPos() { return new Vector3f(newPos); }
 	public Quaternion getNewAngle() { return new Quaternion(newRot); }
 	

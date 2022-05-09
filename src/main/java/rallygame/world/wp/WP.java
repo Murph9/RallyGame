@@ -61,7 +61,7 @@ public interface WP {
 	//boolean canMirror(); //This is commented out so if you are ever thinking of trying to make the inverses: DO NOT - [5]hrs wasted so far
 	
 	//change per model
-	String getName();
+	String getFileName();
 	Vector3f getNewPos(); //what the piece does to the track
 	Quaternion getNewAngle(); //change of angle (deg) for the next peice
 	

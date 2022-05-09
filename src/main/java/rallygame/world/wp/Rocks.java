@@ -53,7 +53,7 @@ public enum Rocks implements WP {
 	@Override
 	public float getScale() { return 1; }
 	@Override
-	public String getName() { return String.format(WP.FileFormat, dir, name); }
+	public String getFileName() { return String.format(WP.FileFormat, dir, name); }
 
 	@Override
 	public Vector3f getNewPos() { return newPos.clone(); }

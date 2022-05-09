@@ -87,7 +87,7 @@ public abstract class DefaultBuilder extends World {
 		for (int i = 0; i < type.length; i++) {
 			WPObject wpo = new WPObject();
 			wpo.wp = type[i];
-			wpo.sp = LoadModelWrapper.create(app.getAssetManager(), wpo.wp.getName());
+			wpo.sp = LoadModelWrapper.create(app.getAssetManager(), wpo.wp.getFileName());
 
 			//scale and unscale spatials so that the collision shape size is correct
 			wpo.sp.scale(wpo.wp.getScale());
