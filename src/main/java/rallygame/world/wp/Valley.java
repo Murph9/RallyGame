@@ -11,10 +11,10 @@ public enum Valley implements WP {
 	RIGHT("right", new Vector3f(12.94095f,0,1.70371f), WP.RIGHT_15),
 	LEFT("left", new Vector3f(12.94095f,0,-1.70371f), WP.LEFT_15),
 	
-//	TUNNEL("tunnel", new Vector3f(10f, 0,0), WP.STRIAGHT)
+	//	TUNNEL("tunnel", new Vector3f(10f, 0,0), WP.STRIAGHT)
 	;
-	
-	private static String dir = "wb/valley/";
+
+	private static final String file = "wb/valley.blend.glb";
 	
 	String name;
 	Vector3f newPos; //what the piece does to the track
@@ -33,7 +33,9 @@ public enum Valley implements WP {
 	public float getScale() { return 2; }
 	public boolean needsMaterial() { return false; }
 	
-	public String getFileName() { return String.format(WP.FileFormat, dir, name); }
+	public String getName() { return this.name; }
+	public String getFileName() { return file; }
+
 	public Vector3f getNewPos() { return new Vector3f(newPos); }
 	public Quaternion getNewAngle() { return new Quaternion(newRot); }
 	

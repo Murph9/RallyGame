@@ -26,8 +26,8 @@ public enum Track implements WP {
 	RIGHT_TUNNEL("right_tunnel", new Vector3f(4, 0,4), WP.RIGHT_90, NodeType.B, NodeType.B),
 	;
 	
-	public static String dir = "wb/track/";
-	
+	private static final String file = "wb/track.blend.glb";
+		
 	String name;
 	Vector3f newPos; //what the piece does to the track
 	Quaternion newRot; //change of angle (deg) for the next peice
@@ -45,7 +45,9 @@ public enum Track implements WP {
 	public float getScale() { return 8; }
 	public boolean needsMaterial() { return false; }
 	
-	public String getFileName() { return String.format(WP.FileFormat, dir, name); }
+	public String getName() { return this.name; }
+	public String getFileName() { return file; }
+
 	public Vector3f getNewPos() { return new Vector3f(newPos); }
 	public Quaternion getNewAngle() { return new Quaternion(newRot); }
 	

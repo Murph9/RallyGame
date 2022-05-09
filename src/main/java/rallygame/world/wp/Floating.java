@@ -13,8 +13,8 @@ public enum Floating implements WP {
 	RIGHT_CURVE("right", new Vector3f(21.21f,0,8.79f), new Quaternion(0, -0.38268346f, 0, 0.9238795f)),
 	;
 	
-	private static String dir = "wb/floating/";
-	
+	private static final String file = "wb/floating.blend.glb";
+		
 	String name;
 	Vector3f newPos;
 	Quaternion newRot;
@@ -31,7 +31,9 @@ public enum Floating implements WP {
 	public float getScale() { return 1; }
 	public boolean needsMaterial() { return false; }
 	
-	public String getFileName() { return String.format(WP.FileFormat, dir, name); }
+	public String getName() { return this.name; }
+	public String getFileName() { return file; }
+
 	public Vector3f getNewPos() { return new Vector3f(newPos); }
 	public Quaternion getNewAngle() { return new Quaternion(newRot); }
 	

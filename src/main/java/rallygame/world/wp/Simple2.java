@@ -16,8 +16,8 @@ public enum Simple2 implements WP {
 	
 	;
 	
-	private static String dir = "wb/simple2/";
-	
+	private static final String file = "wb/simple2.blend.glb";
+		
 	String name;
 	Vector3f newPos; //what the piece does to the next track
 	Quaternion newRot;
@@ -34,7 +34,9 @@ public enum Simple2 implements WP {
 	public float getScale() { return 1; }
 	public boolean needsMaterial() { return true; }
 	
-	public String getFileName() { return String.format(WP.FileFormat, dir, name); }
+	public String getName() { return this.name; }
+	public String getFileName() { return file; }
+
 	public Vector3f getNewPos() { return new Vector3f(newPos); }
 	public Quaternion getNewAngle() { return new Quaternion(newRot); }
 	

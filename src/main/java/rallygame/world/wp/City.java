@@ -19,7 +19,7 @@ public enum City implements WP {
 	HILL_DOWN("hill_down", new Vector3f(4,-0.5f,0), WP.STRAIGHT),
 	;
 	
-	private static String dir = "wb/city/";
+	private static final String file = "wb/city.blend.glb";
 	
 	String name;
 	Vector3f newPos; //what the piece does to the track
@@ -37,7 +37,8 @@ public enum City implements WP {
 	public float getScale() { return 25; }
 	public boolean needsMaterial() { return true; }
 	
-	public String getFileName() { return String.format(WP.FileFormat, dir, name); }
+	public String getName() { return this.name; }
+	public String getFileName() { return file; }
 	public Vector3f getNewPos() { return new Vector3f(newPos); }
 	public Quaternion getNewAngle() { return new Quaternion(newRot); }
 	

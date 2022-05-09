@@ -12,7 +12,6 @@ public interface WP {
 		A, B, C, D, E, F, G, H; //for defining what can connect to the end of the previous piece
 	}
 	
-	static final String FileFormat = "%s%s.blend.glb";
 	static final Quaternion
 		STRAIGHT = new Quaternion(0, 0, 0, 1),
 		BACK = new Quaternion(0, 1, 0, 0),
@@ -56,12 +55,12 @@ public interface WP {
 		}
 	}
 	
-	//shouldn't change per model in the set
-	float getScale();
+	float getScale(); //model scale
 	//boolean canMirror(); //This is commented out so if you are ever thinking of trying to make the inverses: DO NOT - [5]hrs wasted so far
 	
-	//change per model
+	String getName();
 	String getFileName();
+
 	Vector3f getNewPos(); //what the piece does to the track
 	Quaternion getNewAngle(); //change of angle (deg) for the next peice
 	

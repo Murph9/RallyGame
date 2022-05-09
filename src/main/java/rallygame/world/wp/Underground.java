@@ -16,7 +16,7 @@ public enum Underground implements WP {
 	JOIN_BA("join_ba", new Vector3f(14,0,0), WP.STRAIGHT, NodeType.B, NodeType.A),
 	;
 	
-	private static String dir = "wb/underground/";
+	private static final String file = "wb/underground.blend.glb";
 	
 	String name;
 	Vector3f newPos;
@@ -37,7 +37,9 @@ public enum Underground implements WP {
 	public float getScale() { return 2; }
 	public boolean needsMaterial() { return false; }
 	
-	public String getFileName() { return String.format(WP.FileFormat, dir, name); }
+	public String getName() { return this.name; }
+	public String getFileName() { return file; }
+
 	public Vector3f getNewPos() { return new Vector3f(newPos); }
 	public Quaternion getNewAngle() { return new Quaternion(newRot); }
 	

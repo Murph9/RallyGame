@@ -23,13 +23,13 @@ public enum Rocks implements WP {
 	
 //	DOWN_LEFT("down_left", new Vector3f(19.77269f, -0.48878f, -2.9327f), fromDEGAngles(0.3f, 16.5f, 2.5f)),
 //	DOWN_RIGHT("down_right", new Vector3f(19.7727f, -0.4868f, 2.9327f), fromDEGAngles(0.3f, -16.5f, 2.5f)), //are these actually down?
-	
+
 	UP_SOME("up_unknown", new Vector3f(19.9696f, 1.1286f, 0), fromDEGAngles(0, 0, 5.75f)),
 	DOWN_SOME("down_unknown", new Vector3f(19.9696f, -1.1286f, 0), fromDEGAngles(0, 0, -5.75f)),
 	;
-	
-	private static String dir = "wb/rocks/";
-	
+
+	private static final String file = "wb/rocks.blend.glb";
+
 	private static Quaternion fromDEGAngles(float x, float y, float z) {
 		return new Quaternion().fromAngles(x*FastMath.DEG_TO_RAD, y*FastMath.DEG_TO_RAD, z*FastMath.DEG_TO_RAD);
 	}
@@ -52,8 +52,11 @@ public enum Rocks implements WP {
 	
 	@Override
 	public float getScale() { return 1; }
+	
 	@Override
-	public String getFileName() { return String.format(WP.FileFormat, dir, name); }
+	public String getName() { return this.name; }
+	@Override
+	public String getFileName() { return file; }
 
 	@Override
 	public Vector3f getNewPos() { return newPos.clone(); }

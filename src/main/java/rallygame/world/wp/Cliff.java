@@ -12,7 +12,7 @@ public enum Cliff implements WP {
 	SHARTRIGHTDOWN("sharpright", new Vector3f(9.537f,-13.124f,48.31f), WP.RIGHT_135, NodeType.A, NodeType.A),
 	SHARTLEFTDOWN("sharpleft", new Vector3f(35,-4.5671f,-30), WP.LEFT_90, NodeType.A, NodeType.A),
 	;
-	public static String dir = "wb/cliff/";
+	private static final String file = "wb/cliff.blend.glb";
 	
 	String name;
 	Vector3f newPos; //what the piece does to the track
@@ -31,7 +31,9 @@ public enum Cliff implements WP {
 	public float getScale() { return 2.5f; }
 	public boolean needsMaterial() { return false; }
 	
-	public String getFileName() { return String.format(WP.FileFormat, dir, name); }
+	public String getName() { return this.name; }
+	public String getFileName() { return file; }
+
 	public Vector3f getNewPos() { return new Vector3f(newPos); }
 	public Quaternion getNewAngle() { return new Quaternion(newRot); }
 	
