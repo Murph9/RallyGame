@@ -22,13 +22,12 @@ public class TiledFlatWorld extends World {
     
     private static final int GRID_SIZE = 10;
     private static final int TILE_SIZE = 40;
-    private static float SPAWN_RANGE = 40;
+    private static float SPAWN_RANGE = TILE_SIZE*3;
     
 	private final HashSet<Vector2f> positions = new HashSet<>();
 
     private Spatial floor;
     
-    private Spatial geomI;
     private List<ObjectPlacer.ObjectId> addedObjects;
         
     public TiledFlatWorld() {
