@@ -7,11 +7,11 @@ areo_lineardrag: 0.012
 auto_changeTime: 0.2
 brakeMaxTorque: 8000.0
 cam_lookAtHeight: 1.3
-cam_offsetLength: -6.0
-cam_offsetHeight: 2.1
+cam_offsetLength: -12.0
+cam_offsetHeight: 6.1
 cam_shake: 2.0E-6
 carModel: models/track1_2.blend.glb
-driveFront: false
+driveFront: true
 driveRear: true
 e_compression: 0.1
 e_idle: 1000
@@ -50,7 +50,7 @@ susR: {
 trans_effic: 0.85
 trans_finaldrive: 3.5
 trans_gearRatios: [-2.9, 3.6, 2.5, 1.8, 1.3, 1, 0.84]
-trans_powerBalance: 0.5
+trans_powerBalance: 0.6
 w_steerAngle: 0.5
 wheelData:
 - &w

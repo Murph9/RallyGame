@@ -13,7 +13,23 @@ import rallygame.helper.H;
 import rallygame.service.Screen;
 import rallygame.service.checkpoint.CheckpointProgress;
 
-public class GameManager extends BaseAppState {
+/*
+Drive next x km to next checkpoint
+main problem is Fuel
+Drag gets worse as you drive (requiring more fuel)
+- time to next checkpoint might decrease slowly
+
+upgrade options are related to
+- improving general performance
+- fuel economy
+- buying fuel
+- buying new car type (which adds new fuel?)
+
+After every 10x kms there are races which you must win, ie these are the boss milestones
+or maybe just a mandatory fuel sacrifice
+*/
+
+public class CheckpointGameManager extends BaseAppState {
 
     private static final int CHECK_COUNT = 5;//25;
     private static final float CHECK_TIME = 60;
@@ -28,7 +44,7 @@ public class GameManager extends BaseAppState {
     private Label currentTime;
     private Label currentPercent;
 
-    public GameManager(Drive drive, CheckpointProgress progress) {
+    public CheckpointGameManager(Drive drive, CheckpointProgress progress) {
         this.drive = drive;
         this.progress = progress;
     }

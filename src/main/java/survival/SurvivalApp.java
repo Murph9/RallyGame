@@ -36,7 +36,7 @@ public class SurvivalApp extends SimpleApplication {
         super(new ParticleAtmosphere()
                 , new AudioListenerState()
                 , new FilterManager()
-                , new CarManager(new CarDataLoader())
+                , new CarManager(new CarDataLoader(), 0.6f)
                 , new DebugAppState()
                 , new ObjectPlacer(true)
                 , new ConstantChecker()
