@@ -57,6 +57,13 @@ public class BasicWaypointProgress extends BaseAppState {
         }
     }
 
+    public Vector3f getCurrentPos() {
+        if (this.curCheckpoint != null)
+            return this.curCheckpoint.position;
+
+        return null;
+    }
+
     private void addCheckpoint(Vector3f pos) {
         Vector3f checkpointSize = Vector3f.UNIT_XYZ.mult(10);
         Spatial baseSpat = new Geometry("checkpoint", new Box(checkpointSize.negate(), checkpointSize));

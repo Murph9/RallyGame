@@ -14,6 +14,7 @@ import rallygame.helper.H;
 import rallygame.helper.Rand;
 import rallygame.service.Screen;
 import rallygame.service.checkpoint.BasicWaypointProgress;
+import rallygame.service.checkpoint.CheckpointArrow;
 
 public class DodgeGameManager extends BaseAppState {
 
@@ -25,6 +26,7 @@ public class DodgeGameManager extends BaseAppState {
     private CarManager cm;
     private WaveManager waveManager;
     private BasicWaypointProgress waypoints;
+    private CheckpointArrow checkpointArrow;
 
     private Container currentSelectionWindow;
     private Label ruleLabel;
@@ -59,6 +61,9 @@ public class DodgeGameManager extends BaseAppState {
         ruleLabel = ruleWindow.addChild(new Label("Checkpoints: "));
         uiRootNode.attachChild(ruleWindow);
         new Screen(getApplication().getContext().getSettings()).topLeftMe(ruleWindow);
+
+        checkpointArrow = new CheckpointArrow(cm.getPlayer(), (__) -> this.waypoints.getCurrentPos());
+        getStateManager().attach(checkpointArrow);
     }
 
     @Override
@@ -115,18 +120,23 @@ public class DodgeGameManager extends BaseAppState {
 
         getStateManager().detach(waveManager);
         waveManager = null;
+
+        getStateManager().detach(checkpointArrow);
+        checkpointArrow = null;
     }
 
     @Override
     protected void onEnable() {
         this.cm.setEnabled(true);
         this.waveManager.setEnabled(true);
+        this.checkpointArrow.setEnabled(true);
     }
 
     @Override
     protected void onDisable() {
         this.cm.setEnabled(false);
         this.waveManager.setEnabled(false);
+        this.checkpointArrow.setEnabled(false);
     }
 
     public void updateRules(Consumer<GameRules> func) {
