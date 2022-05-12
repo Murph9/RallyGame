@@ -32,7 +32,7 @@ public class DodgeGameManager extends BaseAppState {
     private Label timer;
 
     public DodgeGameManager() {
-        rules = new GameRules();
+        rules = GameRules.Generate();
     }
 
     @Override
