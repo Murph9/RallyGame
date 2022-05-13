@@ -71,11 +71,11 @@ public class DodgeGameManager extends BaseAppState {
         if (!this.isEnabled())
             return;
         
+        if (time > 54 && time < 55) {
+            waveManager.addType(WaveType.SingleFollow, cm.getPlayer());
+        }
+
         if (time < 0) {
-            if (time > 1e5) {
-                //i.e. never happen but i want to keep the line here
-                waveManager.addType(WaveType.SingleFollow, cm.getPlayer());
-            }
             
             var loseWindow = new Container();
             loseWindow.addChild(new Label("You lost, pls close window"));
