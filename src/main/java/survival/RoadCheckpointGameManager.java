@@ -29,7 +29,7 @@ After every 10x kms there are races which you must win, ie these are the boss mi
 or maybe just a mandatory fuel sacrifice
 */
 
-public class CheckpointGameManager extends BaseAppState {
+public class RoadCheckpointGameManager extends BaseAppState {
 
     private static final int CHECK_COUNT = 5;//25;
     private static final float CHECK_TIME = 60;
@@ -44,7 +44,7 @@ public class CheckpointGameManager extends BaseAppState {
     private Label currentTime;
     private Label currentPercent;
 
-    public CheckpointGameManager(Drive drive, CheckpointProgress progress) {
+    public RoadCheckpointGameManager(Drive drive, CheckpointProgress progress) {
         this.drive = drive;
         this.progress = progress;
     }
