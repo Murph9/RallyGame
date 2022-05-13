@@ -15,7 +15,7 @@ import com.jme3.scene.Node;
 
 import rallygame.car.ray.RayCarControl;
 import rallygame.helper.Geo;
-import survival.controls.FollowControl;
+import survival.controls.BaseControl;
 
 public class WaveManager extends BaseAppState {
 
@@ -59,14 +59,14 @@ public class WaveManager extends BaseAppState {
     @Override
     protected void onEnable() {
         for (var geom: geoms) {
-            geom.getControl(FollowControl.class).setEnabled(true);
+            geom.getControl(BaseControl.class).setEnabled(true);
         }
     }
 
     @Override
     protected void onDisable() {
         for (var geom: geoms) {
-            geom.getControl(FollowControl.class).setEnabled(false);
+            geom.getControl(BaseControl.class).setEnabled(false);
         }
     }
     
@@ -83,9 +83,8 @@ class WaveGenerator {
     public static Geometry[] generateSingleProjectile(Application app, RayCarControl target) {
         var box = Geo.makeShapeBox(app.getAssetManager(), ColorRGBA.DarkGray, Vector3f.ZERO.add(0, 2, 0), 1);
         box.getMaterial().getAdditionalRenderState().setWireframe(false);
-        var control = new FollowControl(100, target, 2, 30);
-        box.addControl(control);
-
+        var c = new BaseControl(100, BaseControl.HoverAt(2), BaseControl.MaxSpeed(30), BaseControl.Target(target, 30));
+        box.addControl(c);
         return new Geometry[] { box };
     }
 }
