@@ -41,11 +41,11 @@ public class DodgeGameManager extends BaseAppState {
     protected void initialize(Application app) {
         cm = getState(CarManager.class);
 
-        waveManager = new WaveManager();
-        getStateManager().attach(waveManager);
-
         waypoints = new BasicWaypointProgress(cm.getPlayer());
         getStateManager().attach(waypoints);
+
+        waveManager = new WaveManager(cm.getPlayer());
+        getStateManager().attach(waveManager);
 
         var currentStateWindow = new Container();
         currentStateWindow.addChild(new Label("Checkpoints: "));
@@ -71,12 +71,7 @@ public class DodgeGameManager extends BaseAppState {
         if (!this.isEnabled())
             return;
         
-        if (time > 54 && time < 55) {
-            waveManager.addType(WaveType.SingleFollow, cm.getPlayer());
-        }
-
         if (time < 0) {
-            
             var loseWindow = new Container();
             loseWindow.addChild(new Label("You lost, pls close window"));
             this.setEnabled(false);

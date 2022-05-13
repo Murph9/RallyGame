@@ -68,7 +68,9 @@ class HoverAtBehaviour implements PhysicsBehaviour {
         }
 
         var loc = control.getPhysicsLocation().clone();
-        loc.y = this.height;
+        if (loc.y < this.height) {
+            loc.y = this.height;
+        }
         control.setPhysicsLocation(loc);
 
         var vel = control.getLinearVelocity();
