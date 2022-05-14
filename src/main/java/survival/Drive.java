@@ -13,8 +13,9 @@ import rallygame.helper.Log;
 import rallygame.world.IWorld;
 
 public class Drive extends DriveBase {
+    private static final boolean OFFER_UPGRADES = false;
+    private static final Car CAR_TYPE = Car.Survivor;
 
-    private final static Car CAR_TYPE = Car.Survivor;
     // TODO listen to pauses
     private DodgeGameManager manager;
 
@@ -26,7 +27,7 @@ public class Drive extends DriveBase {
     public void initialize(Application app) {
         super.initialize(app);
 
-        manager = new DodgeGameManager();
+        manager = new DodgeGameManager(OFFER_UPGRADES);
         getStateManager().attach(manager);
     }
 

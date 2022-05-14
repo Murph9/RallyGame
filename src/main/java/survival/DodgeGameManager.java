@@ -19,6 +19,7 @@ import rallygame.service.checkpoint.CheckpointArrow;
 public class DodgeGameManager extends BaseAppState {
 
     private final GameRules rules;
+    private final boolean offerUpgrades;
 
     private Node uiRootNode;
 
@@ -33,8 +34,9 @@ public class DodgeGameManager extends BaseAppState {
     private Label checkCount;
     private Label timer;
 
-    public DodgeGameManager() {
+    public DodgeGameManager(boolean offerUpgrades) {
         rules = GameRules.Generate();
+        this.offerUpgrades = offerUpgrades;
     }
 
     @Override
@@ -74,11 +76,13 @@ public class DodgeGameManager extends BaseAppState {
         if (time < 0) {
             var loseWindow = new Container();
             loseWindow.addChild(new Label("You lost, pls close window"));
+            uiRootNode.attachChild(loseWindow);
+            new Screen(getApplication().getContext().getSettings()).centerMe(loseWindow);
             this.setEnabled(false);
             return;
         }
 
-        if (waypoints.hitACheckpoint()) {
+        if (waypoints.hitACheckpoint() && offerUpgrades) {
             this.setEnabled(false);
             currentSelectionWindow = SelectionUI.GenerateSelectionUI(this, UpgradeType.values());
             uiRootNode.attachChild(currentSelectionWindow);
