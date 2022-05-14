@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import rallygame.car.data.CarDataConst;
 
 public enum UpgradeType {
+    MuchPOWER("MUCH POWER", null, x -> x.nitro_force *= 9),
     ShorterTimer("Reduce the amount of time to reach the next checkpoint", x -> x.CheckpointTimerLength *= 0.9f),
     IncreaseCheckpointRange("Increase the minimum distance of a checkpoint", x -> x.CheckpointDistance *= 1.1f),
 

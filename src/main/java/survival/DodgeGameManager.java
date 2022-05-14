@@ -10,6 +10,9 @@ import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
 import rallygame.car.CarManager;
+import rallygame.car.data.CarDataAdjuster;
+import rallygame.car.data.CarDataAdjustment;
+import rallygame.car.data.CarDataConst;
 import rallygame.helper.H;
 import rallygame.helper.Rand;
 import rallygame.service.Screen;
@@ -20,6 +23,7 @@ public class DodgeGameManager extends BaseAppState {
 
     private final GameRules rules;
     private final boolean offerUpgrades;
+    private final Drive drive;
 
     private Node uiRootNode;
 
@@ -34,8 +38,9 @@ public class DodgeGameManager extends BaseAppState {
     private Label checkCount;
     private Label timer;
 
-    public DodgeGameManager(boolean offerUpgrades) {
-        rules = GameRules.Generate();
+    public DodgeGameManager(Drive drive, boolean offerUpgrades) {
+        this.drive = drive;
+        this.rules = GameRules.Generate();
         this.offerUpgrades = offerUpgrades;
     }
 
@@ -140,6 +145,15 @@ public class DodgeGameManager extends BaseAppState {
 
     public void updateRules(Consumer<GameRules> func) {
         func.accept(this.rules);
+        this.setEnabled(true);
+
+        currentSelectionWindow.removeFromParent();
+        currentSelectionWindow = null;
+    }
+
+    public void updateCar(Consumer<CarDataConst> func) {
+        drive.applyChange(new CarDataAdjuster(CarDataAdjustment.asFunc(func)));
+
         this.setEnabled(true);
 
         currentSelectionWindow.removeFromParent();

@@ -13,7 +13,7 @@ import rallygame.helper.Log;
 import rallygame.world.IWorld;
 
 public class Drive extends DriveBase {
-    private static final boolean OFFER_UPGRADES = false;
+    private static final boolean OFFER_UPGRADES = true;
     private static final Car CAR_TYPE = Car.Survivor;
 
     // TODO listen to pauses
@@ -27,7 +27,7 @@ public class Drive extends DriveBase {
     public void initialize(Application app) {
         super.initialize(app);
 
-        manager = new DodgeGameManager(OFFER_UPGRADES);
+        this.manager = new DodgeGameManager(this, OFFER_UPGRADES);
         getStateManager().attach(manager);
     }
 
@@ -71,6 +71,11 @@ public class Drive extends DriveBase {
             }
         }));
 
+        var carData = this.cm.loadData(CAR_TYPE, adj);
+        this.reInitPlayerCar(carData);
+    }
+
+    public void applyChange(CarDataAdjuster adj) {
         var carData = this.cm.loadData(CAR_TYPE, adj);
         this.reInitPlayerCar(carData);
     }

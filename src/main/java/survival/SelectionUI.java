@@ -12,9 +12,14 @@ public class SelectionUI {
         for (var type : types) {
             Button b = container.addChild(new Button(type.label));
             b.setTextHAlignment(HAlignment.Center);
-            b.addClickCommands((source) -> {
-                manager.updateRules(type.ruleFunc);
-            });
+            if (type.ruleFunc != null)
+                b.addClickCommands((source) -> {
+                    manager.updateRules(type.ruleFunc);
+                });
+            if (type.carFunc != null)
+                b.addClickCommands((source) -> {
+                    manager.updateCar(type.carFunc);
+                });
         }
 
         return container;
