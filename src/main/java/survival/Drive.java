@@ -15,7 +15,7 @@ import rallygame.world.IWorld;
 public class Drive extends DriveBase {
 
     private final static Car CAR_TYPE = Car.Survivor;
-
+    // TODO listen to pauses
     private DodgeGameManager manager;
 
     public Drive(IDriveDone done, IWorld world) {

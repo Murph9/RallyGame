@@ -19,6 +19,16 @@ public class BaseControl extends RigidBodyControl {
     }
 
     @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+
+        if (enabled) {
+            //this.setRestitution(1);
+            this.setFriction(0);
+        }
+    }
+
+    @Override
     public void update(float tpf) {
         for (var bev: this.behaviours) {
             bev.accept(this, tpf);
@@ -46,6 +56,11 @@ public class BaseControl extends RigidBodyControl {
             }
     
             c.setLinearVelocity(vel);
+        };
+    }
+    public static PhysicsBehaviour Move(Vector3f dir, float strength) {
+        return (c, tpf) -> {
+            c.applyImpulse(dir.normalize().mult(c.getMass()*strength*tpf), Vector3f.ZERO);
         };
     }
 }
