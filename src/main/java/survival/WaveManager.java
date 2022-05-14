@@ -1,14 +1,18 @@
 package survival;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -35,14 +39,7 @@ public class WaveManager extends BaseAppState {
     }
 
     private void addType(WaveType type, RayCarControl target) {
-        final float BOX_DIST = 20;
-        var pos = target.location.clone();
-        pos.x = Math.round(pos.x/BOX_DIST)*BOX_DIST;
-        pos.y = Math.round(pos.y/BOX_DIST)*BOX_DIST;
-        pos.z = Math.round(pos.z/BOX_DIST)*BOX_DIST;
-
-        Geometry[] geoms = type.getGenerator().generate(getApplication(), pos, target);
-        
+        var geoms = type.getGenerator().generate(getApplication(), target);
         if (geoms != null) {
             for (var geom : geoms) {
                 physicsSpace.add(geom);
@@ -89,10 +86,11 @@ public class WaveManager extends BaseAppState {
             addType(type, player);
         }
 
-        // kill all boxes far away from player
+        // kill all far away from player
         var pos = player.location;
         for (var geom: new LinkedList<>(this.geoms)) {
-            if (geom.getLocalTranslation().distance(pos) > KILL_DIST) {
+            var geomPos = geom.getControl(BaseControl.class).getPhysicsLocation();
+            if (geomPos.distance(pos) > KILL_DIST) {
                 physicsSpace.remove(geom);
                 rootNode.detachChild(geom);
 
@@ -106,8 +104,9 @@ public class WaveManager extends BaseAppState {
 
 
 enum WaveType {
-    SingleFollow(WaveGenerator::generateSingleProjectile),
-    ManyLines(WaveGenerator::generateLines),
+    SingleFollow(WaveGenerator::generateSingleFollow),
+    Line(WaveGenerator::generateLine),
+    Fast(WaveGenerator::generateFast)
     ;
 
     public final IWaveGenerator func;
@@ -121,34 +120,64 @@ enum WaveType {
 }
 
 interface IWaveGenerator {
-    Geometry[] generate(Application app, Vector3f aClosePos, RayCarControl target);
+    List<Geometry> generate(Application app, RayCarControl target);
 }
 
 class WaveGenerator {
-    public static Geometry[] generateSingleProjectile(Application app, Vector3f aClosePos, RayCarControl target) {
-        var box = Geo.makeShapeBox(app.getAssetManager(), ColorRGBA.DarkGray, Vector3f.ZERO.add(0, 2, 0), 1);
+    public static List<Geometry> generateSingleFollow(Application app, RayCarControl target) {
+        var box = Geo.makeShapeBox(app.getAssetManager(), ColorRGBA.DarkGray, target.location, 1);
         box.getMaterial().getAdditionalRenderState().setWireframe(false);
         var c = new BaseControl(1000, BaseControl.HoverAt(2), BaseControl.MaxSpeed(35), BaseControl.Target(target, 15));
         box.addControl(c);
-        c.setPhysicsLocation(aClosePos);
 
-        return new Geometry[] { box };
+        return Arrays.asList(box);
+    }
+
+    public static List<Geometry> generateLine(Application app, RayCarControl target) {
+        int option = FastMath.rand.nextInt(3);
+        boolean optionBool = FastMath.rand.nextBoolean();
+        switch(option) {
+            case 0:
+                return generateLine(app, target.location, Vector3f.UNIT_X, 10, optionBool);
+            case 1:
+                return generateLine(app, target.location, Vector3f.UNIT_Z, 10, optionBool);
+            case 2:
+                var list = generateLine(app, target.location, Vector3f.UNIT_X, 10, optionBool);
+                list.addAll(generateLine(app, target.location, Vector3f.UNIT_Z, 10, optionBool));
+                return list;
+            default:
+                return new LinkedList<>();
+        }
     }
     
-    public static Geometry[] generateLines(Application app, Vector3f aClosePos, RayCarControl target) {
-        final int count = 10;
+    private static List<Geometry> generateLine(Application app, Vector3f aClosePos, Vector3f dir, int count, boolean negate) {
+        if (negate)
+            dir = dir.negate();
+
+        var offset = dir.negate().mult(WaveManager.KILL_DIST * 0.5f);
+        var between = new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y).mult(dir);
         var geoms = new Geometry[count];
         for (int i = 0; i < count; i++) {
-            var box = Geo.makeShapeBox(app.getAssetManager(), ColorRGBA.White, Vector3f.ZERO.add(0, 2, 0), 1.3f);
+            var pos = aClosePos.add(between.mult((i-(count/2))*20)).add(offset);
+            var box = Geo.makeShapeBox(app.getAssetManager(), ColorRGBA.White, pos, 1.3f);
             box.getMaterial().getAdditionalRenderState().setWireframe(false);
-            var c = new BaseControl(500, BaseControl.HoverAt(2), BaseControl.MaxSpeed(25), BaseControl.Move(Vector3f.UNIT_Z, 40));
+            var c = new BaseControl(500, BaseControl.HoverAt(2), BaseControl.MaxSpeed(25), BaseControl.Move(dir, 40));
             box.addControl(c);
-
-            var pos = aClosePos.add((i-(count/2))*10, 0, -WaveManager.KILL_DIST/2);
-            c.setPhysicsLocation(pos);
             geoms[i] = box;
         }
 
-        return geoms;
+        return Lists.newArrayList(geoms);
+    }
+
+    public static List<Geometry> generateFast(Application app, RayCarControl target) {
+        var dir = Rand.randV3f(1, true);
+
+        var pos = target.location.add(dir.negate().mult(WaveManager.KILL_DIST * 0.5f));
+        var box = Geo.makeShapeBox(app.getAssetManager(), ColorRGBA.Pink, pos, 0.5f);
+        box.getMaterial().getAdditionalRenderState().setWireframe(false);
+        var c = new BaseControl(3000, BaseControl.HoverAt(1), BaseControl.MaxSpeed(70), BaseControl.Move(dir, 100));
+        box.addControl(c);
+
+        return Arrays.asList(box);
     }
 }

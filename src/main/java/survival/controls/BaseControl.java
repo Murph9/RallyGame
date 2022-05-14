@@ -23,7 +23,7 @@ public class BaseControl extends RigidBodyControl {
         super.setEnabled(enabled);
 
         if (enabled) {
-            //this.setRestitution(1);
+            this.setRestitution(1);
             this.setFriction(0);
         }
     }
