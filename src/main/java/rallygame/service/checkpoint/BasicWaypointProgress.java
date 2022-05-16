@@ -21,6 +21,7 @@ import com.jme3.scene.shape.Box;
 
 import rallygame.car.ray.RayCarControl;
 import rallygame.effects.LoadModelWrapper;
+import rallygame.helper.Geo;
 import rallygame.service.GhostObjectCollisionListener;
 
 // should only have one checkpoint active
@@ -68,6 +69,9 @@ public class BasicWaypointProgress extends BaseAppState {
         Vector3f checkpointSize = Vector3f.UNIT_XYZ.mult(10);
         Spatial baseSpat = new Geometry("checkpoint", new Box(checkpointSize.negate(), checkpointSize));
         baseSpat = LoadModelWrapper.createWithColour(getApplication().getAssetManager(), baseSpat, ColorRGBA.Blue);
+        for (Geometry g: Geo.getGeomList(baseSpat))
+            g.getMaterial().getAdditionalRenderState().setWireframe(true);
+        
         baseSpat.setLocalTranslation(pos);
 
         GhostControl ghost = new GhostControl(CollisionShapeFactory.createBoxShape(baseSpat));
