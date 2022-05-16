@@ -125,9 +125,10 @@ interface IWaveGenerator {
 
 class WaveGenerator {
     public static List<Geometry> generateSingleFollow(Application app, RayCarControl target) {
-        var box = Geo.makeShapeBox(app.getAssetManager(), ColorRGBA.DarkGray, target.location, 1);
+        var pos = target.location.add(target.forward.negate().mult(10));
+        var box = Geo.makeShapeBox(app.getAssetManager(), ColorRGBA.DarkGray, pos, 1);
         box.getMaterial().getAdditionalRenderState().setWireframe(false);
-        var c = new BaseControl(1000, BaseControl.HoverAt(2), BaseControl.MaxSpeed(35), BaseControl.Target(target, 15));
+        var c = new BaseControl(800, BaseControl.HoverAt(2), BaseControl.MaxSpeed(35), BaseControl.Target(target, 12));
         box.addControl(c);
 
         return Arrays.asList(box);
