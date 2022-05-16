@@ -6,17 +6,17 @@ import com.jme3.math.Transform;
 import rallygame.car.data.Car;
 import rallygame.car.data.CarDataAdjuster;
 import rallygame.car.data.CarDataAdjustment;
+import rallygame.drive.PauseState;
 import rallygame.car.ray.RayCarControl;
 import rallygame.drive.DriveBase;
 import rallygame.game.IDriveDone;
 import rallygame.helper.Log;
 import rallygame.world.IWorld;
 
-public class Drive extends DriveBase {
-    private static final boolean OFFER_UPGRADES = true;
+public class Drive extends DriveBase implements PauseState.ICallback {
+    private static final boolean OFFER_UPGRADES = false;
     private static final Car CAR_TYPE = Car.Survivor;
 
-    // TODO listen to pauses
     private DodgeGameManager manager;
 
     public Drive(IDriveDone done, IWorld world) {
@@ -78,5 +78,27 @@ public class Drive extends DriveBase {
     public void applyChange(CarDataAdjuster adj) {
         var carData = this.cm.loadData(CAR_TYPE, adj);
         this.reInitPlayerCar(carData);
+    }
+
+    @Override
+    protected void onEnable() {
+        manager.setEnabled(true);
+        super.onEnable();
+    }
+
+    @Override
+    protected void onDisable() {
+        manager.setEnabled(false);
+        super.onDisable();
+    }
+
+    @Override
+    public void pauseState(boolean value) {
+        this.setEnabled(value);
+    }
+
+    @Override
+    public void quit() {
+        next();
     }
 }
