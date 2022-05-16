@@ -364,9 +364,4 @@ public class RayCarControl implements ICarPowered, ICarControlled {
         }
         return total;
     }
-
-    public void applyImpulse(Vector3f dir) {
-        var rbc = this.getPhysicsObject();
-        rbc.applyImpulse(dir.mult(rbc.getMass()), new Vector3f());
-    }
 }

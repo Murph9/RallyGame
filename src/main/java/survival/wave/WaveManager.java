@@ -8,6 +8,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 
@@ -106,7 +107,9 @@ public class WaveManager extends BaseAppState {
         if (control.hasBehaviour(BaseControl.Explode())) { // this is so gross
             control.getSpatial().removeFromParent();
             physicsSpace.remove(control.getSpatial());
-            player.applyImpulse(speedDiff);
+
+            var playerObj = player.getPhysicsObject();
+            playerObj.applyImpulse(speedDiff.mult(playerObj.getMass()), new Vector3f());
         }
     }
 }
