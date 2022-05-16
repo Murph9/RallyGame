@@ -80,7 +80,7 @@ class WaveBuilder {
         var pos = target.location.add(target.forward.negate().mult(30));
         var box = Geo.makeShapeBox(app.getAssetManager(), ColorRGBA.Red, pos, 1);
         box.getMaterial().getAdditionalRenderState().setWireframe(false);
-        var c = new BaseControl(1500, BaseControl.HoverAt(2), BaseControl.MaxSpeed(45), BaseControl.Target(target, 10));
+        var c = new BaseControl(1500, BaseControl.HoverAt(2), BaseControl.MaxSpeed(45), BaseControl.Target(target, 10), BaseControl.Explode());
         box.addControl(c);
 
         return Arrays.asList(box);

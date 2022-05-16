@@ -37,6 +37,10 @@ public class BaseControl extends RigidBodyControl {
         super.update(tpf);
     }
 
+    public boolean hasBehaviour(PhysicsBehaviour behaviour) {
+        return this.behaviours.contains(behaviour);
+    }
+
     public static PhysicsBehaviour HoverAt(float height) {
         return new HoverAtBehaviour(height);
     }
@@ -62,6 +66,10 @@ public class BaseControl extends RigidBodyControl {
         return (c, tpf) -> {
             c.applyImpulse(dir.normalize().mult(c.getMass()*strength*tpf), Vector3f.ZERO);
         };
+    }
+
+    public static PhysicsBehaviour Explode() {
+        return (c, tpf) -> {};
     }
 }
 

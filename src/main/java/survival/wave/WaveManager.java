@@ -22,6 +22,7 @@ public class WaveManager extends BaseAppState {
     private final RayCarControl player;
 
     private PhysicsSpace physicsSpace;
+    private WaveCollisionListener colListener;
 
     public static final float KILL_DIST = 350;
     private static final float WAVE_TIMER = 3;
@@ -48,12 +49,18 @@ public class WaveManager extends BaseAppState {
         ((SimpleApplication)app).getRootNode().attachChild(rootNode);
         this.physicsSpace = getState(BulletAppState.class).getPhysicsSpace();
 
+        this.colListener = new WaveCollisionListener(this, player);
+        physicsSpace.addCollisionListener(colListener);
+
         time = WAVE_TIMER;
     }
 
     @Override
     protected void cleanup(Application app) {
         rootNode.removeFromParent();
+
+        physicsSpace.removeCollisionListener(colListener);
+        colListener = null;
     }
 
     @Override
@@ -92,5 +99,14 @@ public class WaveManager extends BaseAppState {
         }
         
         super.update(tpf);
+    }
+
+    public void controlCollision(BaseControl control) {
+        var speedDiff = control.getLinearVelocity().subtract(player.vel);
+        if (control.hasBehaviour(BaseControl.Explode())) { // this is so gross
+            control.getSpatial().removeFromParent();
+            physicsSpace.remove(control.getSpatial());
+            player.applyImpulse(speedDiff);
+        }
     }
 }
