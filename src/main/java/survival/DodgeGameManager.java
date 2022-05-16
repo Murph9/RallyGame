@@ -18,6 +18,8 @@ import rallygame.helper.Rand;
 import rallygame.service.Screen;
 import rallygame.service.checkpoint.BasicWaypointProgress;
 import rallygame.service.checkpoint.CheckpointArrow;
+import survival.wave.UpgradeType;
+import survival.wave.WaveManager;
 
 public class DodgeGameManager extends BaseAppState {
 
