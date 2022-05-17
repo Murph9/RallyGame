@@ -103,7 +103,12 @@ public class WaveManager extends BaseAppState {
     }
 
     public void controlCollision(BaseControl control) {
+        final float minForce = 10;
+
         var speedDiff = control.getLinearVelocity().subtract(player.vel);
+        if (speedDiff.length() < minForce) {
+            speedDiff.normalizeLocal().multLocal(minForce); // increase to minimum force
+        }
         if (control.hasBehaviour(BaseControl.Explode())) { // this is so gross
             control.getSpatial().removeFromParent();
             physicsSpace.remove(control.getSpatial());

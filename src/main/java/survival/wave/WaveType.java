@@ -1,5 +1,6 @@
 package survival.wave;
 
+// TODO all block collisions need to take health off
 enum WaveType {
     SingleFollow(WaveBuilder::generateSingleFollow),
     Line(WaveBuilder::generateLine),

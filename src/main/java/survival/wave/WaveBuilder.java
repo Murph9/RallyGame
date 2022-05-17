@@ -22,7 +22,7 @@ class WaveBuilder {
         var pos = target.location.add(target.forward.negate().mult(10));
         var box = Geo.makeShapeBox(app.getAssetManager(), ColorRGBA.DarkGray, pos, 1);
         box.getMaterial().getAdditionalRenderState().setWireframe(false);
-        var c = new BaseControl(800, BaseControl.HoverAt(2), BaseControl.MaxSpeed(35), BaseControl.Target(target, 12));
+        var c = new BaseControl(800, BaseControl.HoverAt(2), BaseControl.MaxSpeed(35), BaseControl.Target(target, 15));
         box.addControl(c);
 
         return Arrays.asList(box);
@@ -65,22 +65,28 @@ class WaveBuilder {
     }
 
     public static List<Geometry> generateFast(Application app, RayCarControl target) {
+        final var count = 10;
+
         var dir = Rand.randV3f(1, true);
+        var geoms = new Geometry[count];
+        for (int i = 0; i < count; i++) {
+            var pos = target.location.add(dir.negate().mult(WaveManager.KILL_DIST * 0.5f));
+            var box = Geo.makeShapeBox(app.getAssetManager(), ColorRGBA.Pink, pos, 0.5f);
+            box.getMaterial().getAdditionalRenderState().setWireframe(false);
+            var c = new BaseControl(3000, BaseControl.HoverAt(0.5f), BaseControl.MaxSpeed(70), BaseControl.Move(dir, 100));
+            box.addControl(c);
 
-        var pos = target.location.add(dir.negate().mult(WaveManager.KILL_DIST * 0.5f));
-        var box = Geo.makeShapeBox(app.getAssetManager(), ColorRGBA.Pink, pos, 0.5f);
-        box.getMaterial().getAdditionalRenderState().setWireframe(false);
-        var c = new BaseControl(3000, BaseControl.HoverAt(1), BaseControl.MaxSpeed(70), BaseControl.Move(dir, 100));
-        box.addControl(c);
+            geoms[i] = box;
+        }
 
-        return Arrays.asList(box);
+        return Lists.newArrayList(geoms);
     }
     
     public static List<Geometry> generateExplode(Application app, RayCarControl target) {
         var pos = target.location.add(target.forward.negate().mult(30));
         var box = Geo.makeShapeBox(app.getAssetManager(), ColorRGBA.Red, pos, 1);
         box.getMaterial().getAdditionalRenderState().setWireframe(false);
-        var c = new BaseControl(1500, BaseControl.HoverAt(2), BaseControl.MaxSpeed(45), BaseControl.Target(target, 10), BaseControl.Explode());
+        var c = new BaseControl(1500, BaseControl.HoverAt(2), BaseControl.MaxSpeed(40), BaseControl.Target(target, 25), BaseControl.Explode());
         box.addControl(c);
 
         return Arrays.asList(box);
