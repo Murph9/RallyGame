@@ -57,33 +57,33 @@ task runSurvival(type: JavaExec) {
 
 task createFatJar(type: Jar) {
     archiveBaseName = 'rallyGame'
-
     manifest {
-        attributes 'Main-Class': 'rallygame.game.Main'
+        attributes('Main-Class':'rallygame.game.Main')
     }
-
-    from sourceSets.main.output
-    dependsOn configurations.compileClasspath
-
     from {
-        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    } {
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
     }
-
+    with jar
     dependsOn 'build'
 }
 
 task createDuelFatJar(type: Jar) {
     archiveBaseName = 'duel'
     manifest {
-        attributes 'Main-Class': 'rallygame.duel.DuelApp'
+        attributes('Main-Class':'rallygame.duel.DuelApp')
     }
-
-    from sourceSets.main.output
-    dependsOn configurations.compileClasspath
-
     from {
-        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    } {
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
     }
+    with jar
 
     dependsOn 'build'
 }
@@ -91,15 +91,16 @@ task createDuelFatJar(type: Jar) {
 task createSurvivalFatJar(type: Jar) {
     archiveBaseName = 'survival'
     manifest {
-        attributes 'Main-Class': 'survival.SurvivalApp'
+        attributes('Main-Class':'survival.SurvivalApp')
     }
-
-    from sourceSets.main.output
-    dependsOn configurations.compileClasspath
-
     from {
-        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    } {
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
     }
+    with jar
 
     dependsOn 'build'
 }
