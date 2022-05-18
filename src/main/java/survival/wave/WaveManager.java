@@ -14,22 +14,24 @@ import com.jme3.scene.Node;
 
 import rallygame.car.ray.RayCarControl;
 import rallygame.helper.Rand;
+import survival.DodgeGameManager;
 import survival.controls.BaseControl;
 
 public class WaveManager extends BaseAppState {
 
     private final List<Geometry> geoms = new LinkedList<>();
     private final Node rootNode = new Node("Wave root");
+    private final DodgeGameManager manager;
     private final RayCarControl player;
 
     private PhysicsSpace physicsSpace;
     private WaveCollisionListener colListener;
 
     public static final float KILL_DIST = 350;
-    private static final float WAVE_TIMER = 3;
     private float time;
 
-    public WaveManager(RayCarControl player) {
+    public WaveManager(DodgeGameManager manager, RayCarControl player) {
+        this.manager = manager;
         this.player = player;
     }
 
@@ -53,7 +55,7 @@ public class WaveManager extends BaseAppState {
         this.colListener = new WaveCollisionListener(this, player);
         physicsSpace.addCollisionListener(colListener);
 
-        time = WAVE_TIMER;
+        time = manager.getGameRules().WaveSpeed;
     }
 
     @Override
@@ -82,7 +84,7 @@ public class WaveManager extends BaseAppState {
     public void update(float tpf) {
         time -= tpf;
         if (time < 0) {
-            time = WAVE_TIMER;
+            time = manager.getGameRules().WaveSpeed;
             var type = Rand.randFromArray(WaveType.values());
             addType(type, player);
         }
@@ -103,7 +105,7 @@ public class WaveManager extends BaseAppState {
     }
 
     public void controlCollision(BaseControl control) {
-        final float minForce = 10;
+        final float minForce = 4;
 
         var speedDiff = control.getLinearVelocity().subtract(player.vel);
         if (speedDiff.length() < minForce) {

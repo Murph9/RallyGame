@@ -11,17 +11,23 @@ public class GameRules {
     public float CheckpointTimerLength;
     public float CheckpointDistance;
     public float PlayerHealth;
+    public float WaveSpeed;
+    public float WaveDensity;
 
     private GameRules() {
         CheckpointTimerLength = 60;
         CheckpointDistance = 100;
         PlayerHealth = 40;
+        WaveSpeed = 3;
+        WaveDensity = 1;
     }
 
     private Map<String, Object> GetProperties() {
         return Map.of(
-            "Checkpoint distance", this.CheckpointDistance,
-            "CheckTimer", this.CheckpointTimerLength,
+            "Checkpoint Distance", this.CheckpointDistance,
+            "Checkpoint Timer", this.CheckpointTimerLength,
+            "Wave Speed", this.WaveSpeed,
+            "Wave Density", this.WaveDensity,
             "PlayerHealth", this.PlayerHealth
         );
     }

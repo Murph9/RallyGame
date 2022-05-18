@@ -53,7 +53,7 @@ public class DodgeGameManager extends BaseAppState {
         waypoints = new BasicWaypointProgress(cm.getPlayer());
         getStateManager().attach(waypoints);
 
-        waveManager = new WaveManager(cm.getPlayer());
+        waveManager = new WaveManager(this, cm.getPlayer());
         getStateManager().attach(waveManager);
 
         var currentStateWindow = new Container();
@@ -89,12 +89,16 @@ public class DodgeGameManager extends BaseAppState {
             return;
         }
 
-        if (waypoints.hitACheckpoint() && offerUpgrades) {
-            this.setEnabled(false);
-            currentSelectionWindow = SelectionUI.GenerateSelectionUI(this, UpgradeType.values());
-            uiRootNode.attachChild(currentSelectionWindow);
-            new Screen(getApplication().getContext().getSettings()).centerMe(currentSelectionWindow);
-            return;
+        if (waypoints.hitACheckpoint()) {
+            if (offerUpgrades) {
+                this.setEnabled(false);
+                currentSelectionWindow = SelectionUI.GenerateSelectionUI(this, UpgradeType.values());
+                uiRootNode.attachChild(currentSelectionWindow);
+                new Screen(getApplication().getContext().getSettings()).centerMe(currentSelectionWindow);
+                return;
+            } else {
+                updateRules(UpgradeType.WaveSpeedInc.ruleFunc);
+            }
         }
 
         if (waypoints.noCheckpoint()) {
@@ -149,8 +153,10 @@ public class DodgeGameManager extends BaseAppState {
         func.accept(this.rules);
         this.setEnabled(true);
 
-        currentSelectionWindow.removeFromParent();
-        currentSelectionWindow = null;
+        if (currentSelectionWindow != null) {
+            currentSelectionWindow.removeFromParent();
+            currentSelectionWindow = null;
+        }
     }
 
     public void updateCar(Consumer<CarDataConst> func) {
@@ -160,6 +166,10 @@ public class DodgeGameManager extends BaseAppState {
 
         currentSelectionWindow.removeFromParent();
         currentSelectionWindow = null;
+    }
+
+    public GameRules getGameRules() {
+        return this.rules;
     }
 }
 

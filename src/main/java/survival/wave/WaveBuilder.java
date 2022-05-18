@@ -65,7 +65,7 @@ class WaveBuilder {
     }
 
     public static List<Geometry> generateFast(Application app, RayCarControl target) {
-        final var count = 10;
+        final var count = 5;
 
         var dir = Rand.randV3f(1, true);
         var geoms = new Geometry[count];

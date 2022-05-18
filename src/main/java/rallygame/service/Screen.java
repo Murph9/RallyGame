@@ -64,6 +64,11 @@ public class Screen {
         return new Vector3f(horiPos.calcPos(width, size.x), vertPos.calcPos(height, size.y), 0);
     }
 
+    public void posMe(Panel c, HorizontalPos horiPos, VerticalPos vertPos) {
+        Vector3f middle2 = get(horiPos, vertPos, c.getPreferredSize());
+        c.setLocalTranslation(middle2);
+    }
+
     public void centerMe(Panel c) {
         Vector3f middle2 = get(HorizontalPos.Middle, VerticalPos.Middle, c.getPreferredSize());
         c.setLocalTranslation(middle2);

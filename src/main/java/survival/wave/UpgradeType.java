@@ -7,8 +7,9 @@ import survival.GameRules;
 
 public enum UpgradeType {
     MuchPOWER("MUCH POWER", null, x -> x.nitro_force *= 9),
-    ShorterTimer("Reduce the amount of time to reach the next checkpoint", x -> x.CheckpointTimerLength *= 0.9f),
+    ShorterTimer("Reduce the amount of time to reach the next checkpoint", x -> x.CheckpointTimerLength -= 1),
     IncreaseCheckpointRange("Increase the minimum distance of a checkpoint", x -> x.CheckpointDistance *= 1.1f),
+    WaveSpeedInc("Increase the speed waves are spawned", x -> x.WaveSpeed -= 0.05f),
 
     ReducePlayerHealth("Reduce the amount of your health", x -> x.PlayerHealth *= 0.9f), //TODO we need some kind of collision detection to take health off
 
