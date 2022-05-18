@@ -12,13 +12,8 @@ import rallygame.world.TiledFlatWorld;
 Try and dodge the things
 Upgrades help with it i guess
 
-TODO:
-- damage
-- killing 'decayed' objects
-- killing objects that fell off
+TODO: player damage
 */
-
-
 
 public class Flow implements IDriveDone {
 
@@ -32,7 +27,7 @@ public class Flow implements IDriveDone {
 
         AppStateManager sm = app.getStateManager();
         var world = new TiledFlatWorld();
-        var drive = new Drive(this, world);
+        var drive = new Drive(this, world, version);
         var loading = new LoadingState(world, drive);
         loading.setCallback((states) -> {
             sm.attach(drive);

@@ -28,7 +28,7 @@ public class SurvivalApp extends SimpleApplication {
     }
 
     public static final Vector3f GRAVITY = new Vector3f(0, -9.81f, 0); // yay its down
-    public static final String PROJECT_VERSION = "v0.1.0 (2022-05-01)";
+    public static final String PROJECT_VERSION = "v0.1.0 (2022-05-19)";
 
     private Flow flow;
 

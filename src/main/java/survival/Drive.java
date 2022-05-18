@@ -1,7 +1,10 @@
 package survival;
 
 import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 import com.jme3.math.Transform;
+import com.simsilica.lemur.Container;
+import com.simsilica.lemur.Label;
 
 import rallygame.car.data.Car;
 import rallygame.car.data.CarDataAdjuster;
@@ -11,16 +14,20 @@ import rallygame.car.ray.RayCarControl;
 import rallygame.drive.DriveBase;
 import rallygame.game.IDriveDone;
 import rallygame.helper.Log;
+import rallygame.service.Screen;
 import rallygame.world.IWorld;
 
 public class Drive extends DriveBase implements PauseState.ICallback {
     private static final boolean OFFER_UPGRADES = false;
     private static final Car CAR_TYPE = Car.Survivor;
+    private final String version;
 
     private DodgeGameManager manager;
+    private Container versionWindow;
 
-    public Drive(IDriveDone done, IWorld world) {
+    public Drive(IDriveDone done, IWorld world, String version) {
         super(done, CAR_TYPE, world);
+        this.version = version;
     }
 
     @Override
@@ -29,6 +36,12 @@ public class Drive extends DriveBase implements PauseState.ICallback {
 
         this.manager = new DodgeGameManager(this, OFFER_UPGRADES);
         getStateManager().attach(manager);
+
+        versionWindow = new Container();
+        versionWindow.addChild(new Label("WASD or Arrows to move\nGet checkpoints"));
+        versionWindow.addChild(new Label("Version: " + this.version));
+        ((SimpleApplication)app).getGuiNode().attachChild(versionWindow);
+        new Screen(app.getContext().getSettings()).topRightMe(versionWindow);
     }
 
     @Override
@@ -50,6 +63,9 @@ public class Drive extends DriveBase implements PauseState.ICallback {
     public void cleanup(Application app) {
         Log.p("cleaning survivor drive class");
         super.cleanup(app);
+
+        versionWindow.removeFromParent();
+        versionWindow = null;
     }
 
     public void increaseGrip() {
