@@ -16,6 +16,7 @@ import rallygame.car.ray.RayCarControl;
 import rallygame.helper.Rand;
 import survival.DodgeGameManager;
 import survival.controls.BaseControl;
+import survival.controls.Explode;
 
 public class WaveManager extends BaseAppState {
 
@@ -111,7 +112,7 @@ public class WaveManager extends BaseAppState {
         if (speedDiff.length() < minForce) {
             speedDiff.normalizeLocal().multLocal(minForce); // increase to minimum force
         }
-        if (control.hasBehaviour(BaseControl.Explode())) { // this is so gross
+        if (control.getBehaviour(Explode.class) != null) {
             control.getSpatial().removeFromParent();
             physicsSpace.remove(control.getSpatial());
 

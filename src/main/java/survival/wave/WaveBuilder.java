@@ -16,13 +16,18 @@ import rallygame.car.ray.RayCarControl;
 import rallygame.helper.Geo;
 import rallygame.helper.Rand;
 import survival.controls.BaseControl;
+import survival.controls.Explode;
+import survival.controls.HoverAt;
+import survival.controls.MaxSpeed;
+import survival.controls.MoveDir;
+import survival.controls.Target;
 
 class WaveBuilder {
     public static List<Geometry> generateSingleFollow(Application app, RayCarControl target) {
         var pos = target.location.add(target.forward.negate().mult(10));
         var box = Geo.makeShapeBox(app.getAssetManager(), ColorRGBA.DarkGray, pos, 1);
         box.getMaterial().getAdditionalRenderState().setWireframe(false);
-        var c = new BaseControl(800, BaseControl.HoverAt(2), BaseControl.MaxSpeed(35), BaseControl.Target(target, 15));
+        var c = new BaseControl(800, new HoverAt(2), new MaxSpeed(35), new Target(target, 15));
         box.addControl(c);
 
         return Arrays.asList(box);
@@ -56,7 +61,7 @@ class WaveBuilder {
             var pos = aClosePos.add(between.mult((i-(count/2))*20)).add(offset);
             var box = Geo.makeShapeBox(app.getAssetManager(), ColorRGBA.White, pos, 1.3f);
             box.getMaterial().getAdditionalRenderState().setWireframe(false);
-            var c = new BaseControl(500, BaseControl.HoverAt(2), BaseControl.MaxSpeed(25), BaseControl.Move(dir, 40));
+            var c = new BaseControl(500, new HoverAt(2), new MaxSpeed(25), new MoveDir(dir, 40));
             box.addControl(c);
             geoms[i] = box;
         }
@@ -73,7 +78,7 @@ class WaveBuilder {
             var pos = target.location.add(dir.negate().mult(WaveManager.KILL_DIST * 0.5f));
             var box = Geo.makeShapeBox(app.getAssetManager(), ColorRGBA.Pink, pos, 0.5f);
             box.getMaterial().getAdditionalRenderState().setWireframe(false);
-            var c = new BaseControl(3000, BaseControl.HoverAt(0.5f), BaseControl.MaxSpeed(70), BaseControl.Move(dir, 100));
+            var c = new BaseControl(3000, new HoverAt(0.5f), new MaxSpeed(70), new MoveDir(dir, 100));
             box.addControl(c);
 
             geoms[i] = box;
@@ -86,7 +91,7 @@ class WaveBuilder {
         var pos = target.location.add(target.forward.negate().mult(30));
         var box = Geo.makeShapeBox(app.getAssetManager(), ColorRGBA.Red, pos, 1);
         box.getMaterial().getAdditionalRenderState().setWireframe(false);
-        var c = new BaseControl(1500, BaseControl.HoverAt(2), BaseControl.MaxSpeed(40), BaseControl.Target(target, 25), BaseControl.Explode());
+        var c = new BaseControl(1500, new HoverAt(2), new MaxSpeed(40), new Target(target, 25), new Explode());
         box.addControl(c);
 
         return Arrays.asList(box);
