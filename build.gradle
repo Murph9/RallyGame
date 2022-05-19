@@ -4,6 +4,8 @@ plugins {
     // Apply the application plugin to add support for building a CLI application.
     id 'application'
     id 'eclipse'
+
+    id 'edu.sc.seis.launch4j' version '2.5.3'
 }
 
 sourceCompatibility = 11
@@ -11,6 +13,14 @@ sourceCompatibility = 11
 repositories {
     jcenter()
     mavenCentral()
+}
+
+launch4j {
+    mainClassName = 'survival.SurvivalApp'
+    bundledJrePath = 'C:\\Program Files\\AdoptOpenJDK\\jdk-11.0.7.10-hotspot'
+    outfile = 'survival.exe'
+
+    // look in RallyGame\build\launch4j for the lib and exe files, usually i zip and upload
 }
 
 def jme3Version = '3.3.0-stable'
@@ -34,6 +44,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.6.1'
 }
 
+
 test {
     // Use junit platform for unit tests
     useJUnitPlatform()
@@ -53,56 +64,6 @@ task runDuel(type: JavaExec) {
 task runSurvival(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     main = 'survival.SurvivalApp'
-}
-
-task createFatJar(type: Jar) {
-    archiveBaseName = 'rallyGame'
-    manifest {
-        attributes('Main-Class':'rallygame.game.Main')
-    }
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    } {
-        exclude "META-INF/*.SF"
-        exclude "META-INF/*.DSA"
-        exclude "META-INF/*.RSA"
-    }
-    with jar
-    dependsOn 'build'
-}
-
-task createDuelFatJar(type: Jar) {
-    archiveBaseName = 'duel'
-    manifest {
-        attributes('Main-Class':'rallygame.duel.DuelApp')
-    }
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    } {
-        exclude "META-INF/*.SF"
-        exclude "META-INF/*.DSA"
-        exclude "META-INF/*.RSA"
-    }
-    with jar
-
-    dependsOn 'build'
-}
-
-task createSurvivalFatJar(type: Jar) {
-    archiveBaseName = 'survival'
-    manifest {
-        attributes('Main-Class':'survival.SurvivalApp')
-    }
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    } {
-        exclude "META-INF/*.SF"
-        exclude "META-INF/*.DSA"
-        exclude "META-INF/*.RSA"
-    }
-    with jar
-
-    dependsOn 'build'
 }
 
 def blenderCommandWin = "C:\\Program Files\\Blender Foundation\\Blender 2.82\\blender"
