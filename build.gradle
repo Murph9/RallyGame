@@ -17,10 +17,10 @@ repositories {
 
 launch4j {
     mainClassName = 'survival.SurvivalApp'
-    bundledJrePath = 'C:\\Program Files\\AdoptOpenJDK\\jdk-11.0.7.10-hotspot'
+    bundledJrePath = 'jre'
     outfile = 'survival.exe'
-
-    // look in RallyGame\build\launch4j for the lib and exe files, usually i zip and upload
+    // please run copyjre first
+    // look in RallyGame\build\launch4j for the lib, jre and exe files, usually i zip and upload
 }
 
 def jme3Version = '3.3.0-stable'
@@ -106,3 +106,13 @@ task convertAllBlendFiles {
 }
 
 compileJava.dependsOn(convertAllBlendFiles)
+
+task copyjre {
+    // TODO get this to run before launch4j.createExe
+    doFirst {
+        copy {
+            from "C:\\Program Files\\AdoptOpenJDK\\jdk-11.0.7.10-hotspot"
+            into "build/launch4j/jre"
+        }
+    }
+}
