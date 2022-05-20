@@ -6,23 +6,19 @@ import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 
 import rallygame.car.ray.RayCarControl;
 import rallygame.helper.Geo;
-import rallygame.service.Screen;
-import rallygame.service.Screen.HorizontalPos;
-import rallygame.service.Screen.VerticalPos;
 
 public class CheckpointArrow extends BaseAppState {
 
     private final RayCarControl player;
     private final Function<RayCarControl, Vector3f> posFunc;
 
-    private Node rootUINode;
+    private Node rootNode;
     private Geometry arrow;
 
     public CheckpointArrow(RayCarControl player, Function<RayCarControl, Vector3f> posFunc) {
@@ -32,33 +28,29 @@ public class CheckpointArrow extends BaseAppState {
 
     @Override
     protected void initialize(Application app) {
-        rootUINode = new Node("Checkpoint arrow node");
-        ((SimpleApplication)app).getGuiNode().attachChild(rootUINode);
+        rootNode = new Node("Checkpoint arrow node");
+        ((SimpleApplication)app).getRootNode().attachChild(rootNode);
 
-        var location = new Screen(app.getContext().getSettings()).get(HorizontalPos.Middle, VerticalPos.Top).add(0, -100, 0);
-        arrow = Geo.makeShapeArrow(app.getAssetManager(), ColorRGBA.White, Vector3f.UNIT_X.mult(80), location);
-        rootUINode.attachChild(arrow);
+        arrow = Geo.makeShapeArrow(app.getAssetManager(), ColorRGBA.White, Vector3f.UNIT_Z.mult(3), new Vector3f());
+        arrow.getMaterial().getAdditionalRenderState().setLineWidth(10);
+        rootNode.attachChild(arrow);
     }
 
     @Override
     protected void cleanup(Application app) {
-        rootUINode.removeFromParent();
-        rootUINode = null;
+        rootNode.removeFromParent();
+        rootNode = null;
     }
 
     @Override
     public void update(float tpf) {
         var checkPos = this.posFunc.apply(this.player);
         if (checkPos != null) {
-            Vector3f targetDir = checkPos.subtract(this.player.location);
-            targetDir.y = 0; // no caring about the vertical
-            targetDir.normalizeLocal();
-    
-            float angF = this.player.forward.angleBetween(targetDir);
-            float ang = this.player.left.normalize().angleBetween(targetDir);
-            float nowTurn = angF * Math.signum(FastMath.HALF_PI - ang);
-    
-            this.arrow.setLocalScale(nowTurn < 0 ? 1 : -1, 1, 1);
+            checkPos = checkPos.clone();
+            checkPos.y = this.player.location.y + 4;
+            this.arrow.lookAt(checkPos, Vector3f.UNIT_Y);
+            
+            this.arrow.setLocalTranslation(this.player.location.add(0, 4, 0));
         }
         
         super.update(tpf);
