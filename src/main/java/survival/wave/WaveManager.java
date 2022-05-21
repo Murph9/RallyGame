@@ -119,6 +119,16 @@ public class WaveManager extends BaseAppState {
 
             var playerObj = player.getPhysicsObject();
             playerObj.applyImpulse(speedDiff.mult(playerObj.getMass()), new Vector3f());
+
+            // force all other boxes away
+            var pos = control.getPhysicsLocation();
+            for (var geom: this.geoms) {
+                var baseControl = geom.getControl(BaseControl.class);
+                var dir = baseControl.getPhysicsLocation().subtract(pos);
+                if (dir.length() < 20) {
+                    baseControl.applyImpulse(dir.normalize().mult(baseControl.getMass() * 30 *(20-dir.length())), Vector3f.ZERO);
+                }
+            }
         }
 
         var damager = control.getBehaviour(Damager.class);
