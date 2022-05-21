@@ -125,8 +125,8 @@ public class WaveManager extends BaseAppState {
             for (var geom: this.geoms) {
                 var baseControl = geom.getControl(BaseControl.class);
                 var dir = baseControl.getPhysicsLocation().subtract(pos);
-                if (dir.length() < 20) {
-                    baseControl.applyImpulse(dir.normalize().mult(baseControl.getMass() * 30 *(20-dir.length())), Vector3f.ZERO);
+                if (dir.length() < 35) {
+                    baseControl.applyImpulse(dir.normalize().mult(baseControl.getMass() * 50), Vector3f.ZERO);
                 }
             }
         }
