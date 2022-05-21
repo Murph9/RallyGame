@@ -38,7 +38,6 @@ public class DodgeGameManager extends BaseAppState {
     private Container currentSelectionWindow;
     private Container ruleWindow;
     private Label checkCount;
-    private Label timer;
 
     public DodgeGameManager(Drive drive, boolean offerUpgrades) {
         this.drive = drive;
@@ -60,8 +59,6 @@ public class DodgeGameManager extends BaseAppState {
         var currentStateWindow = new Container();
         currentStateWindow.addChild(new Label("Checkpoints: "));
         checkCount = currentStateWindow.addChild(new Label("0"), 1);
-        currentStateWindow.addChild(new Label("Time remaining: "));
-        timer = currentStateWindow.addChild(new Label("0.00sec"), 1);
 
         uiRootNode = ((SimpleApplication) getApplication()).getGuiNode();
         uiRootNode.attachChild(currentStateWindow);
@@ -113,11 +110,9 @@ public class DodgeGameManager extends BaseAppState {
         this.state.update(tpf, rules);
         
         checkCount.setText(Integer.toString(waypoints.totalCheckpoints()));
-        timer.setText(Float.toString(this.state.CheckpointTimer));
         ruleWindow.getChildren().stream().forEach(x -> x.removeFromParent());
         ruleWindow.addChild(UiHelper.generateTableOfValues(this.rules.GetProperties()));
         ruleWindow.addChild(UiHelper.generateTableOfValues(this.state.GetProperties()));
-        //ruleLabel.setText(this.rules.toString()+"\n|\n"+this.state.toString());
 
         super.update(tpf);
     }
