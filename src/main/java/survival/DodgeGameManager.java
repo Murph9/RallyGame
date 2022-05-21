@@ -24,25 +24,26 @@ import survival.wave.WaveManager;
 public class DodgeGameManager extends BaseAppState {
 
     private final GameRules rules;
+    private final GameState state;
     private final boolean offerUpgrades;
     private final Drive drive;
 
     private Node uiRootNode;
 
-    private float time;
     private CarManager cm;
     private WaveManager waveManager;
     private BasicWaypointProgress waypoints;
     private CheckpointArrow checkpointArrow;
 
     private Container currentSelectionWindow;
-    private Label ruleLabel;
+    private Container ruleWindow;
     private Label checkCount;
     private Label timer;
 
     public DodgeGameManager(Drive drive, boolean offerUpgrades) {
         this.drive = drive;
         this.rules = GameRules.Generate();
+        this.state = new GameState(rules);
         this.offerUpgrades = offerUpgrades;
     }
 
@@ -66,8 +67,7 @@ public class DodgeGameManager extends BaseAppState {
         uiRootNode.attachChild(currentStateWindow);
         new Screen(getApplication().getContext().getSettings()).topCenterMe(currentStateWindow);
 
-        var ruleWindow = new Container();
-        ruleLabel = ruleWindow.addChild(new Label("Checkpoints: "));
+        ruleWindow = new Container();
         uiRootNode.attachChild(ruleWindow);
         new Screen(getApplication().getContext().getSettings()).topLeftMe(ruleWindow);
 
@@ -80,7 +80,7 @@ public class DodgeGameManager extends BaseAppState {
         if (!this.isEnabled())
             return;
         
-        if (time < 0) {
+        if (this.state.CheckpointTimer < 0) {
             var loseWindow = new Container();
             loseWindow.addChild(new Label("You lost, pls close window"));
             uiRootNode.attachChild(loseWindow);
@@ -102,7 +102,7 @@ public class DodgeGameManager extends BaseAppState {
         }
 
         if (waypoints.noCheckpoint()) {
-            time = rules.CheckpointTimerLength;
+            this.state.CheckpointTimer = rules.CheckpointTimerLength;
             var vec2 = H.v3tov2fXZ(this.cm.getPlayer().location);
             var dir = Rand.randV2f(1, true);
             dir.normalizeLocal();
@@ -110,10 +110,14 @@ public class DodgeGameManager extends BaseAppState {
             waypoints.addCheckpointAt(H.v2tov3fXZ(vec2.add(dir)));
         }
 
-        this.time -= tpf;
-        checkCount.setText(waypoints.totalCheckpoints()+"");
-        timer.setText(this.time+"");
-        ruleLabel.setText(this.rules.toString());
+        this.state.update(tpf, rules);
+        
+        checkCount.setText(Integer.toString(waypoints.totalCheckpoints()));
+        timer.setText(Float.toString(this.state.CheckpointTimer));
+        ruleWindow.getChildren().stream().forEach(x -> x.removeFromParent());
+        ruleWindow.addChild(UiHelper.generateTableOfValues(this.rules.GetProperties()));
+        ruleWindow.addChild(UiHelper.generateTableOfValues(this.state.GetProperties()));
+        //ruleLabel.setText(this.rules.toString()+"\n|\n"+this.state.toString());
 
         super.update(tpf);
     }
@@ -147,6 +151,10 @@ public class DodgeGameManager extends BaseAppState {
         this.cm.setEnabled(false);
         this.waveManager.setEnabled(false);
         this.checkpointArrow.setEnabled(false);
+    }
+
+    public void updateState(Consumer<GameState> func) {
+        func.accept(this.state);
     }
 
     public void updateRules(Consumer<GameRules> func) {

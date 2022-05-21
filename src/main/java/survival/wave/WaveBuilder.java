@@ -16,6 +16,7 @@ import rallygame.car.ray.RayCarControl;
 import rallygame.helper.Geo;
 import rallygame.helper.Rand;
 import survival.controls.BaseControl;
+import survival.controls.Damager;
 import survival.controls.Explode;
 import survival.controls.HoverAt;
 import survival.controls.MaxSpeed;
@@ -78,7 +79,7 @@ class WaveBuilder {
             var pos = target.location.add(dir.negate().mult(WaveManager.KILL_DIST * 0.5f));
             var box = Geo.makeShapeBox(app.getAssetManager(), ColorRGBA.Pink, pos, 0.5f);
             box.getMaterial().getAdditionalRenderState().setWireframe(false);
-            var c = new BaseControl(3000, new HoverAt(0.5f), new MaxSpeed(70), new MoveDir(dir, 100));
+            var c = new BaseControl(3000, new HoverAt(0.5f), new MaxSpeed(70), new MoveDir(dir, 100), new Damager());
             box.addControl(c);
 
             geoms[i] = box;
@@ -91,7 +92,12 @@ class WaveBuilder {
         var pos = target.location.add(target.forward.negate().mult(30));
         var box = Geo.makeShapeBox(app.getAssetManager(), ColorRGBA.Red, pos, 1);
         box.getMaterial().getAdditionalRenderState().setWireframe(false);
-        var c = new BaseControl(1500, new HoverAt(2), new MaxSpeed(40), new Target(target, 25), new Explode());
+        var c = new BaseControl(1500,
+            new HoverAt(2),
+            new MaxSpeed(40),
+            new Target(target, 25),
+            new Explode(),
+            new Damager(2));
         box.addControl(c);
 
         return Arrays.asList(box);

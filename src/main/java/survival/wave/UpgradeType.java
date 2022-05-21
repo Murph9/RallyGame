@@ -11,7 +11,7 @@ public enum UpgradeType {
     IncreaseCheckpointRange("Increase the minimum distance of a checkpoint", x -> x.CheckpointDistance *= 1.1f),
     WaveSpeedInc("Increase the speed waves are spawned", x -> x.WaveSpeed -= 0.05f),
 
-    ReducePlayerHealth("Reduce the amount of your health", x -> x.PlayerHealth *= 0.9f), //TODO we need some kind of collision detection to take health off
+    ReducePlayerHealth("Reduce the amount of your health", x -> x.PlayerMaxHealth *= 0.9f), //TODO we need some kind of collision detection to take health off
 
     // ability to push boxes back
     // ability to remove boxes every now and again

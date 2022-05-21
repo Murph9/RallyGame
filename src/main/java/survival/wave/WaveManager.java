@@ -16,6 +16,7 @@ import rallygame.car.ray.RayCarControl;
 import rallygame.helper.Rand;
 import survival.DodgeGameManager;
 import survival.controls.BaseControl;
+import survival.controls.Damager;
 import survival.controls.Explode;
 
 public class WaveManager extends BaseAppState {
@@ -106,7 +107,7 @@ public class WaveManager extends BaseAppState {
     }
 
     public void controlCollision(BaseControl control) {
-        
+        boolean removeControl = false;
 
         if (control.getBehaviour(Explode.class) != null) {
             var speedDiff = control.getLinearVelocity().subtract(player.vel);
@@ -114,11 +115,21 @@ public class WaveManager extends BaseAppState {
                 speedDiff.normalizeLocal().multLocal(Explode.MIN_FORCE); // increase to minimum force
             }
 
-            control.getSpatial().removeFromParent();
-            physicsSpace.remove(control.getSpatial());
+            removeControl = true;
 
             var playerObj = player.getPhysicsObject();
             playerObj.applyImpulse(speedDiff.mult(playerObj.getMass()), new Vector3f());
+        }
+
+        var damager = control.getBehaviour(Damager.class);
+        if (damager != null) {
+            this.manager.updateState(x -> x.PlayerHealth -= damager.amount);
+            removeControl = true;
+        }
+
+        if (removeControl) {
+            control.getSpatial().removeFromParent();
+            physicsSpace.remove(control.getSpatial());
         }
     }
 }
