@@ -21,8 +21,10 @@ public class HoverAt extends PhysicsBehaviour {
         }
 
         var loc = control.getPhysicsLocation().clone();
-        if (loc.y < this.height) { // TODO apply gravity though
+        if (loc.y < this.height) {
             loc.y = this.height;
+            //apply some gravity so they don't stay up
+            control.applyImpulse(new Vector3f(0, control.getMass() * -10 * tpf, 0), Vector3f.ZERO);
         }
         control.setPhysicsLocation(loc);
 
