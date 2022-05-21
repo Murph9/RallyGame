@@ -11,8 +11,6 @@ import rallygame.world.TiledFlatWorld;
 /**
 Try and dodge the things
 Upgrades help with it i guess
-
-TODO: player damage
 */
 
 public class Flow implements IDriveDone {
