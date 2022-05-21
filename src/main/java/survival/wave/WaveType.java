@@ -1,6 +1,7 @@
 package survival.wave;
 
 enum WaveType {
+    RandomDir(WaveBuilder::generateRandomMovers),
     SingleFollow(WaveBuilder::generateSingleFollow),
     Line(WaveBuilder::generateLine),
     Fast(WaveBuilder::generateFast),
