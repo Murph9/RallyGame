@@ -87,6 +87,8 @@ public class RayCar implements PhysicsTickListener {
 
 		// TODO apply the midpoint formula or any kind of actual physics stepped simulation method
 		// https://en.wikipedia.org/wiki/Midpoint_method
+		// Logic: we need at least 2 simulation steps for the longitudinal traction
+		// - i.e. run getRPM and engine power then the traction model then do it again with the the new wheel rpm
 		if (tractionEnabled)
 			applyTraction(space, tpf);
 
