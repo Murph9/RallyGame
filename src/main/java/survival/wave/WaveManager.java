@@ -23,17 +23,16 @@ public class WaveManager extends BaseAppState {
 
     private final List<Geometry> geoms = new LinkedList<>();
     private final Node rootNode = new Node("Wave root");
-    private final DodgeGameManager manager;
     private final RayCarControl player;
 
+    private DodgeGameManager manager;
     private PhysicsSpace physicsSpace;
     private WaveCollisionListener colListener;
 
     public static final float KILL_DIST = 350;
     private float time;
 
-    public WaveManager(DodgeGameManager manager, RayCarControl player) {
-        this.manager = manager;
+    public WaveManager(RayCarControl player) {
         this.player = player;
     }
 
@@ -57,12 +56,14 @@ public class WaveManager extends BaseAppState {
         this.colListener = new WaveCollisionListener(this, player);
         physicsSpace.addCollisionListener(colListener);
 
+        manager = getState(DodgeGameManager.class);
         time = manager.getGameRules().WaveSpeed;
     }
 
     @Override
     protected void cleanup(Application app) {
         rootNode.removeFromParent();
+        rootNode.detachAllChildren();
 
         physicsSpace.removeCollisionListener(colListener);
         colListener = null;

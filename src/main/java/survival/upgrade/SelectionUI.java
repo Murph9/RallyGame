@@ -16,7 +16,7 @@ public class SelectionUI {
             b.setTextHAlignment(HAlignment.Center);
             if (type.ruleFunc != null)
                 b.addClickCommands((source) -> {
-                    manager.updateRules(type.ruleFunc);
+                    manager.updateState(type.ruleFunc);
                 });
             if (type.carFunc != null)
                 b.addClickCommands((source) -> {

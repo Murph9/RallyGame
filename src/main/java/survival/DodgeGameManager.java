@@ -20,12 +20,12 @@ import rallygame.service.Screen;
 import rallygame.service.checkpoint.BasicWaypointProgress;
 import rallygame.service.checkpoint.CheckpointArrow;
 import survival.upgrade.SelectionUI;
+import survival.upgrade.UpgradeManager;
 import survival.upgrade.UpgradeType;
 import survival.wave.WaveManager;
 
 public class DodgeGameManager extends BaseAppState {
 
-    private final GameRules rules;
     private final GameState state;
     private final boolean offerUpgrades;
     private final Drive drive;
@@ -36,6 +36,7 @@ public class DodgeGameManager extends BaseAppState {
     private WaveManager waveManager;
     private BasicWaypointProgress waypoints;
     private CheckpointArrow checkpointArrow;
+    private UpgradeManager upgrades;
 
     private Container currentSelectionWindow;
     private Container ruleWindow;
@@ -43,8 +44,7 @@ public class DodgeGameManager extends BaseAppState {
 
     public DodgeGameManager(Drive drive, boolean offerUpgrades) {
         this.drive = drive;
-        this.rules = GameRules.Generate();
-        this.state = new GameState(rules);
+        this.state = GameState.generate();
         this.offerUpgrades = offerUpgrades;
     }
 
@@ -55,8 +55,11 @@ public class DodgeGameManager extends BaseAppState {
         waypoints = new BasicWaypointProgress(cm.getPlayer());
         getStateManager().attach(waypoints);
 
-        waveManager = new WaveManager(this, cm.getPlayer());
+        waveManager = new WaveManager(cm.getPlayer());
         getStateManager().attach(waveManager);
+
+        upgrades = new UpgradeManager(cm.getPlayer());
+        getStateManager().attach(upgrades);
 
         uiRootNode = ((SimpleApplication) getApplication()).getGuiNode();
 
@@ -96,27 +99,26 @@ public class DodgeGameManager extends BaseAppState {
                 screen.centerMe(currentSelectionWindow);
                 return;
             } else {
-                updateRules(UpgradeType.WaveSpeedInc.ruleFunc);
+                updateState(UpgradeType.WaveSpeedInc.ruleFunc);
             }
         }
 
         if (waypoints.noCheckpoint()) {
-            this.state.CheckpointTimer = rules.CheckpointTimerLength;
+            this.state.CheckpointTimer = state.CheckpointTimerLength;
             var vec2 = H.v3tov2fXZ(this.cm.getPlayer().location);
             var dir = Rand.randV2f(1, true);
             dir.normalizeLocal();
-            dir.multLocal(rules.CheckpointDistance);
+            dir.multLocal(state.CheckpointDistance);
             waypoints.addCheckpointAt(H.v2tov3fXZ(vec2.add(dir)));
         }
 
-        this.state.update(tpf, rules);
+        this.state.update(tpf);
         
         currentStateWindow.getChildren().stream().forEach(x -> x.removeFromParent());
         currentStateWindow.addChild(UiHelper.generateTableOfValues(Map.of("Checkpoints:", Integer.toString(waypoints.totalCheckpoints()), "Fuel:", cm.getPlayer().fuel())));
         screen.topCenterMe(currentStateWindow);
 
         ruleWindow.getChildren().stream().forEach(x -> x.removeFromParent());
-        ruleWindow.addChild(UiHelper.generateTableOfValues(this.rules.GetProperties()));
         ruleWindow.addChild(UiHelper.generateTableOfValues(this.state.GetProperties()));
 
         super.update(tpf);
@@ -137,6 +139,9 @@ public class DodgeGameManager extends BaseAppState {
 
         getStateManager().detach(checkpointArrow);
         checkpointArrow = null;
+
+        getStateManager().detach(upgrades);
+        upgrades = null;
     }
 
     @Override
@@ -155,10 +160,6 @@ public class DodgeGameManager extends BaseAppState {
 
     public void updateState(Consumer<GameState> func) {
         func.accept(this.state);
-    }
-
-    public void updateRules(Consumer<GameRules> func) {
-        func.accept(this.rules);
         this.setEnabled(true);
 
         if (currentSelectionWindow != null) {
@@ -176,8 +177,8 @@ public class DodgeGameManager extends BaseAppState {
         currentSelectionWindow = null;
     }
 
-    public GameRules getGameRules() {
-        return this.rules;
+    public GameState getGameRules() {
+        return this.state;
     }
 }
 
