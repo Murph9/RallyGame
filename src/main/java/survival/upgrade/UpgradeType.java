@@ -12,6 +12,17 @@ public enum UpgradeType {
     ReducePlayerHealth(false, "Reduce the amount of your health", x -> x.PlayerMaxHealth -= 2),
 
     MuchPOWER(true, "MUCH POWER", null, x -> x.nitro_force *= 9),
+    ImproveGrip(true, "Improve Grip", null, (data) -> {
+        for (int i = 0; i < 4; i++) {
+            data.wheelData[i].pjk_lat.D1 += 0.15f;
+            data.wheelData[i].pjk_long.D1 += 0.15f;
+        }
+    }),
+    ImproveEngine(true, "Improve Engine", null, (data) -> {
+        for (int i = 0; i < data.e_torque.length; i++) {
+            data.e_torque[i] *= 1.15f;
+        }
+    })
     
     // ability to push boxes back
     // ability to remove boxes every now and again

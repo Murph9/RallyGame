@@ -9,9 +9,12 @@ import com.simsilica.lemur.HAlignment;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.style.ElementId;
 
+import rallygame.car.data.CarDataAdjuster;
+import rallygame.car.data.CarDataAdjustment;
 import rallygame.helper.H;
 import rallygame.service.Screen;
 import rallygame.service.checkpoint.CheckpointProgress;
+import survival.upgrade.UpgradeType;
 
 /*
 Drive next x km to next checkpoint
@@ -127,17 +130,19 @@ public class RoadCheckpointGameManager extends BaseAppState {
     
     private void closeOptions(Container dialog, String selected) {
         ((SimpleApplication) getApplication()).getGuiNode().detachChild(dialog);
+        UpgradeType type = null;
         switch (selected) {
             case "Grip":
-                drive.increaseGrip();
+                type = UpgradeType.ImproveGrip;
                 break;
             case "Power":
-                drive.increasePower();
+                type = UpgradeType.ImproveEngine;
                 break;
             default:
                 break;
         }
-        
+
+        drive.applyChange(new CarDataAdjuster(CarDataAdjustment.asFunc(type.carFunc)));
         drive.setEnabled(true);
     }
 

@@ -5,7 +5,6 @@ import com.jme3.math.Transform;
 
 import rallygame.car.data.Car;
 import rallygame.car.data.CarDataAdjuster;
-import rallygame.car.data.CarDataAdjustment;
 import rallygame.drive.PauseState;
 import rallygame.car.ray.RayCarControl;
 import rallygame.drive.DriveBase;
@@ -44,29 +43,6 @@ public class Drive extends DriveBase implements PauseState.ICallback {
     public void cleanup(Application app) {
         Log.p("cleaning survivor drive class");
         super.cleanup(app);
-    }
-
-    public void increaseGrip() {
-        var adj = new CarDataAdjuster(CarDataAdjustment.asFunc((data) -> {
-            for (int i = 0; i < 4; i++) {
-                data.wheelData[i].pjk_lat.D1 *= 1.15;
-                data.wheelData[i].pjk_long.D1 *= 1.15;
-            }
-        }));
-
-        var carData = this.cm.loadData(this.car, adj);
-        this.reInitPlayerCar(carData);
-    }
-
-    public void increasePower() {
-        var adj = new CarDataAdjuster(CarDataAdjustment.asFunc((data) -> {
-            for (int i = 0; i < data.e_torque.length; i++) {
-                data.e_torque[i] *= 1.15f;
-            }
-        }));
-
-        var carData = this.cm.loadData(this.car, adj);
-        this.reInitPlayerCar(carData);
     }
 
     public void applyChange(CarDataAdjuster adj) {
