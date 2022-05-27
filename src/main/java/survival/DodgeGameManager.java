@@ -78,9 +78,9 @@ public class DodgeGameManager extends BaseAppState {
         
         var screen = new Screen(getApplication().getContext().getSettings());
 
-        if (this.state.CheckpointTimer < 0) {
+        if (this.state.CheckpointTimer <= 0 || this.state.PlayerHealth <= 0) {
             var loseWindow = new Container();
-            loseWindow.addChild(new Label("You lost, pls close window"));
+            loseWindow.addChild(new Label("You lost by either running of time or health.\nPlease restart game to replay."));
             uiRootNode.attachChild(loseWindow);
             screen.centerMe(loseWindow);
             this.setEnabled(false);
