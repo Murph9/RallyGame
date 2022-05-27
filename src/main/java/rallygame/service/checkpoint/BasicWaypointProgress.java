@@ -100,7 +100,7 @@ public class BasicWaypointProgress extends BaseAppState {
         totalHitCount++;
 
         if (curCheckpoint == null) {
-            Log.p("Very unusual that the checkpoint is null");
+            Log.p("Very unusual that the checkpoint is null, game will sort itself out though");
         } else {
             rootNode.detachChild(curCheckpoint.visualModel);
             getState(BulletAppState.class).getPhysicsSpace().remove(curCheckpoint.ghost);

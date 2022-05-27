@@ -94,14 +94,15 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
         }
 
         if (waypoints.hitACheckpoint()) {
+            for (var type: UpgradeType.getAllNegative())
+                upgrade(type); //oof
+            
             if (offerUpgrades) {
                 this.setEnabled(false);
-                currentSelectionWindow = SelectionUI.GenerateSelectionUI(this, UpgradeType.values());
+                currentSelectionWindow = SelectionUI.GenerateSelectionUI(this, UpgradeType.getAllPositive());
                 uiRootNode.attachChild(currentSelectionWindow);
                 screen.centerMe(currentSelectionWindow);
                 return;
-            } else {
-                upgrade(UpgradeType.WaveSpeedInc);
             }
         }
 

@@ -1,5 +1,7 @@
 package survival.upgrade;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import rallygame.car.data.CarDataConst;
@@ -41,5 +43,25 @@ public enum UpgradeType {
         this.label = label;
         this.stateFunc = stateFunc;
         this.carFunc = carFunc;
+    }
+
+    public static List<UpgradeType> getAllPositive() {
+        var result = new LinkedList<UpgradeType>();
+        for (var type: UpgradeType.values()) {
+            if (type.positive)
+                result.add(type);
+        }
+
+        return result;
+    }
+
+    public static List<UpgradeType> getAllNegative() {
+        var result = new LinkedList<UpgradeType>();
+        for (var type: UpgradeType.values()) {
+            if (!type.positive)
+                result.add(type);
+        }
+
+        return result;
     }
 }

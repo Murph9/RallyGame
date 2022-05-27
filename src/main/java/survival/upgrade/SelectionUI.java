@@ -1,5 +1,7 @@
 package survival.upgrade;
 
+import java.util.List;
+
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.HAlignment;
@@ -20,5 +22,9 @@ public class SelectionUI {
         }
 
         return container;
+    }
+
+    public static Container GenerateSelectionUI(DodgeGameManager manager, List<UpgradeType> types) {
+        return GenerateSelectionUI(manager, types.toArray(new UpgradeType[0]));
     }
 }
