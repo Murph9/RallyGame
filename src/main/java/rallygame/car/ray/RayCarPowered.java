@@ -25,7 +25,8 @@ public class RayCarPowered extends RayCar {
 	
 	private float fuelRemaining;
 	protected float fuelRemaining() { return fuelRemaining; }
-	
+	protected void setFuelRemaining(float value) { fuelRemaining = value; }
+
 	protected int curGear;
 	protected int curRPM;
 	private int gearChangeTo;

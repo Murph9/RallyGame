@@ -9,6 +9,7 @@ public interface ICarPowered {
     int curGear();
     float nitro();
     float fuel();
+    void setFuel(float value);
     float steeringCurrent();
     int curRPM();
     float driftAngle();
