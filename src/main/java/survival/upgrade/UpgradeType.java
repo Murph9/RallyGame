@@ -1,4 +1,4 @@
-package survival.wave;
+package survival.upgrade;
 
 import java.util.function.Consumer;
 

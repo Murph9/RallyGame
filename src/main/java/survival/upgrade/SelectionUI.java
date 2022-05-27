@@ -1,10 +1,10 @@
-package survival;
+package survival.upgrade;
 
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.HAlignment;
 
-import survival.wave.UpgradeType;
+import survival.DodgeGameManager;
 
 public class SelectionUI {
     @SuppressWarnings("unchecked") // button checked vargs
