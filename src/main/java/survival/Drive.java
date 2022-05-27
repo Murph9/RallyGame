@@ -18,24 +18,17 @@ import rallygame.service.Screen;
 import rallygame.world.IWorld;
 
 public class Drive extends DriveBase implements PauseState.ICallback {
-    private static final boolean OFFER_UPGRADES = false;
-    private static final Car CAR_TYPE = Car.Survivor;
     private final String version;
-
-    private DodgeGameManager manager;
     private Container versionWindow;
 
-    public Drive(IDriveDone done, IWorld world, String version) {
-        super(done, CAR_TYPE, world);
+    public Drive(IDriveDone done, IWorld world, Car car, String version) {
+        super(done, car, world);
         this.version = version;
     }
 
     @Override
     public void initialize(Application app) {
         super.initialize(app);
-
-        this.manager = new DodgeGameManager(this, OFFER_UPGRADES);
-        getStateManager().attach(manager);
 
         versionWindow = new Container();
         versionWindow.addChild(new Label("WASD or Arrows to move\nGet checkpoints"));
@@ -76,7 +69,7 @@ public class Drive extends DriveBase implements PauseState.ICallback {
             }
         }));
 
-        var carData = this.cm.loadData(CAR_TYPE, adj);
+        var carData = this.cm.loadData(this.car, adj);
         this.reInitPlayerCar(carData);
     }
 
@@ -87,25 +80,13 @@ public class Drive extends DriveBase implements PauseState.ICallback {
             }
         }));
 
-        var carData = this.cm.loadData(CAR_TYPE, adj);
+        var carData = this.cm.loadData(this.car, adj);
         this.reInitPlayerCar(carData);
     }
 
     public void applyChange(CarDataAdjuster adj) {
-        var carData = this.cm.loadData(CAR_TYPE, adj);
+        var carData = this.cm.loadData(this.car, adj);
         this.reInitPlayerCar(carData);
-    }
-
-    @Override
-    protected void onEnable() {
-        manager.setEnabled(true);
-        super.onEnable();
-    }
-
-    @Override
-    protected void onDisable() {
-        manager.setEnabled(false);
-        super.onDisable();
     }
 
     @Override

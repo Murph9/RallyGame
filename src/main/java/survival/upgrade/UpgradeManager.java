@@ -3,15 +3,10 @@ package survival.upgrade;
 import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
 
-import rallygame.car.ray.RayCarControl;
-
 // because they need an app state for actions
 public class UpgradeManager extends BaseAppState {
 
-    private final RayCarControl player;
-
-    public UpgradeManager(RayCarControl player) {
-        this.player = player;
+    public UpgradeManager() {
     }
 
     @Override
@@ -28,7 +23,7 @@ public class UpgradeManager extends BaseAppState {
     public void update(float tpf) {
         if (!this.isEnabled()) return;
 
-        
+        // TODO
     }
 
     @Override
@@ -40,4 +35,5 @@ public class UpgradeManager extends BaseAppState {
     protected void onDisable() {
         // TODO stop listening to keys
     }
+    
 }

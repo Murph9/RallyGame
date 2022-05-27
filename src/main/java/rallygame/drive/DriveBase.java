@@ -27,7 +27,7 @@ public class DriveBase extends BaseAppState implements IDrive {
     protected IWorld world;
 
     // car stuff
-    private final Car car;
+    protected final Car car;
     protected CarManager cm;
 
     // gui and camera stuff

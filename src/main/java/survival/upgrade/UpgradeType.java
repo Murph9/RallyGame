@@ -19,16 +19,16 @@ public enum UpgradeType {
 
     public final boolean positive;
     public final String label;
-    public final Consumer<GameState> ruleFunc;
+    public final Consumer<GameState> stateFunc;
     public final Consumer<CarDataConst> carFunc;
     
     UpgradeType(boolean positive, String label, Consumer<GameState> func) {
         this(positive, label, func, null);
     }
-    UpgradeType(boolean positive, String label, Consumer<GameState> __, Consumer<CarDataConst> func) {
+    UpgradeType(boolean positive, String label, Consumer<GameState> stateFunc, Consumer<CarDataConst> carFunc) {
         this.positive = positive;
         this.label = label;
-        this.ruleFunc = null;
-        this.carFunc = func;
+        this.stateFunc = stateFunc;
+        this.carFunc = carFunc;
     }
 }

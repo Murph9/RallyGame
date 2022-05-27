@@ -11,6 +11,9 @@ public class GameState {
         state.PlayerMaxHealth = 40;
         state.WaveSpeed = 3;
         state.WaveDensity = 1;
+
+        state.PlayerHealth = state.PlayerMaxHealth;
+        state.CheckpointTimer = state.CheckpointTimerLength;
         return state;
     }
 
@@ -24,8 +27,6 @@ public class GameState {
     public float CheckpointTimer;
 
     private GameState() {
-        this.PlayerHealth = PlayerMaxHealth;
-        this.CheckpointTimer = CheckpointTimerLength;
     }
 
     public void update(float tpf) {
@@ -42,12 +43,16 @@ public class GameState {
         // how to trigger game over?
     }
 
+    public boolean gameOver() {
+        return this.CheckpointTimer <= 0 || this.PlayerHealth <= 0;
+    }
+
     public Map<String, Object> GetProperties() {
         return Map.of(
             "Health", this.PlayerHealth,
             "Checkpoint Timer", this.CheckpointTimer,
             "Checkpoint Distance", this.CheckpointDistance,
-            "Checkpoint Timer", this.CheckpointTimerLength,
+            "Max Checkpoint Timer", this.CheckpointTimerLength,
             "Wave Speed", this.WaveSpeed,
             "Wave Density", this.WaveDensity,
             "Player Max Health", this.PlayerMaxHealth
