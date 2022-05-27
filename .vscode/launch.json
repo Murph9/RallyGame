@@ -7,7 +7,7 @@
             "type": "java",
             "name": "Debug (Launch)-DuelApp",
             "request": "launch",
-            "mainClass": "rallygame.duel.DuelApp",
+            "mainClass": "duel.DuelApp",
             "projectName": "RallyGame"
         },
         {

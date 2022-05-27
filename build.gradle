@@ -58,7 +58,7 @@ application {
 // run the 'real' game
 task runDuel(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
-    main = 'rallygame.duel.DuelApp'
+    main = 'duel.DuelApp'
 }
 
 task runSurvival(type: JavaExec) {

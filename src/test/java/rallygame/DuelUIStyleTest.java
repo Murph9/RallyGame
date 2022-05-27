@@ -22,7 +22,7 @@ import com.simsilica.lemur.style.ElementId;
 import com.simsilica.lemur.text.DocumentModelFilter;
 import com.simsilica.lemur.text.TextFilters;
 
-import rallygame.duel.DuelUiStyle;
+import duel.DuelUiStyle;
 import rallygame.helper.Log;
 import rallygame.service.Screen;
 

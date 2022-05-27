@@ -1,4 +1,4 @@
-package rallygame.duel;
+package duel;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

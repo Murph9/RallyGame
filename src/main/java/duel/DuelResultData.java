@@ -1,4 +1,4 @@
-package rallygame.duel;
+package duel;
 
 public class DuelResultData {
     public boolean quitGame;

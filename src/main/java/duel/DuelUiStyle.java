@@ -1,4 +1,4 @@
-package rallygame.duel;
+package duel;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.math.ColorRGBA;

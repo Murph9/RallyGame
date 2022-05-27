@@ -1,4 +1,4 @@
-package rallygame.duel;
+package duel;
 
 import rallygame.car.data.Car;
 import rallygame.car.data.CarDataAdjuster;
