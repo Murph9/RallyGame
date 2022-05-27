@@ -1,5 +1,6 @@
 package survival;
 
+import java.util.Map;
 import java.util.function.Consumer;
 
 import com.jme3.app.Application;
@@ -37,7 +38,7 @@ public class DodgeGameManager extends BaseAppState {
 
     private Container currentSelectionWindow;
     private Container ruleWindow;
-    private Label checkCount;
+    private Container currentStateWindow;
 
     public DodgeGameManager(Drive drive, boolean offerUpgrades) {
         this.drive = drive;
@@ -56,11 +57,9 @@ public class DodgeGameManager extends BaseAppState {
         waveManager = new WaveManager(this, cm.getPlayer());
         getStateManager().attach(waveManager);
 
-        var currentStateWindow = new Container();
-        currentStateWindow.addChild(new Label("Checkpoints: "));
-        checkCount = currentStateWindow.addChild(new Label("0"), 1);
-
         uiRootNode = ((SimpleApplication) getApplication()).getGuiNode();
+
+        currentStateWindow = new Container();
         uiRootNode.attachChild(currentStateWindow);
         new Screen(getApplication().getContext().getSettings()).topCenterMe(currentStateWindow);
 
@@ -77,11 +76,13 @@ public class DodgeGameManager extends BaseAppState {
         if (!this.isEnabled())
             return;
         
+        var screen = new Screen(getApplication().getContext().getSettings());
+
         if (this.state.CheckpointTimer < 0) {
             var loseWindow = new Container();
             loseWindow.addChild(new Label("You lost, pls close window"));
             uiRootNode.attachChild(loseWindow);
-            new Screen(getApplication().getContext().getSettings()).centerMe(loseWindow);
+            screen.centerMe(loseWindow);
             this.setEnabled(false);
             return;
         }
@@ -91,7 +92,7 @@ public class DodgeGameManager extends BaseAppState {
                 this.setEnabled(false);
                 currentSelectionWindow = SelectionUI.GenerateSelectionUI(this, UpgradeType.values());
                 uiRootNode.attachChild(currentSelectionWindow);
-                new Screen(getApplication().getContext().getSettings()).centerMe(currentSelectionWindow);
+                screen.centerMe(currentSelectionWindow);
                 return;
             } else {
                 updateRules(UpgradeType.WaveSpeedInc.ruleFunc);
@@ -109,7 +110,10 @@ public class DodgeGameManager extends BaseAppState {
 
         this.state.update(tpf, rules);
         
-        checkCount.setText(Integer.toString(waypoints.totalCheckpoints()));
+        currentStateWindow.getChildren().stream().forEach(x -> x.removeFromParent());
+        currentStateWindow.addChild(UiHelper.generateTableOfValues(Map.of("Checkpoints:", Integer.toString(waypoints.totalCheckpoints()), "Fuel:", cm.getPlayer().fuel())));
+        screen.topCenterMe(currentStateWindow);
+
         ruleWindow.getChildren().stream().forEach(x -> x.removeFromParent());
         ruleWindow.addChild(UiHelper.generateTableOfValues(this.rules.GetProperties()));
         ruleWindow.addChild(UiHelper.generateTableOfValues(this.state.GetProperties()));
