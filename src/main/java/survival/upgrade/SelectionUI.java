@@ -14,14 +14,9 @@ public class SelectionUI {
         for (var type : types) {
             Button b = container.addChild(new Button(type.label));
             b.setTextHAlignment(HAlignment.Center);
-            if (type.stateFunc != null)
-                b.addClickCommands((source) -> {
-                    manager.updateState(type.stateFunc);
-                });
-            if (type.carFunc != null)
-                b.addClickCommands((source) -> {
-                    manager.updateCar(type.carFunc);
-                });
+            b.addClickCommands((source) -> {
+                manager.upgrade(type);
+            });
         }
 
         return container;

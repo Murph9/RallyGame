@@ -1,12 +1,16 @@
 package survival;
 
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.Panel;
 
 import rallygame.helper.H;
+import survival.upgrade.UpgradeType;
 
 public class UiHelper {
     
@@ -22,6 +26,20 @@ public class UiHelper {
             }
         }
         
+        return panel;
+    }
+
+    public static Panel generateTableOfValues(List<UpgradeType> types) {
+        
+        var asCounts = types.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+        var panel = new Container();
+        
+        for (var entry: asCounts.entrySet()) {
+            panel.addChild(new Label(entry.getKey().name()));
+            panel.addChild(new Label(entry.getValue().toString()), 1);
+        }
+
         return panel;
     }
 }

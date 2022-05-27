@@ -28,8 +28,8 @@ public class Flow implements IDriveDone {
 
         AppStateManager sm = app.getStateManager();
         var world = new TiledFlatWorld();
-        var drive = new Drive(this, world, CAR_TYPE, version);
-        var dodgeGameManager = new DodgeGameManager(OFFER_UPGRADES);
+        var drive = new Drive(this, world, CAR_TYPE);
+        var dodgeGameManager = new DodgeGameManager(OFFER_UPGRADES, version);
         var loading = new LoadingState(world, drive, dodgeGameManager);
         loading.setCallback((states) -> {
             sm.attach(drive);

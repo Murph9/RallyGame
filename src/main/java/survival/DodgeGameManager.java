@@ -1,7 +1,6 @@
 package survival;
 
 import java.util.Map;
-import java.util.function.Consumer;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -11,9 +10,6 @@ import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
 import rallygame.car.CarManager;
-import rallygame.car.data.CarDataAdjuster;
-import rallygame.car.data.CarDataAdjustment;
-import rallygame.car.data.CarDataConst;
 import rallygame.drive.PauseState;
 import rallygame.helper.H;
 import rallygame.helper.Rand;
@@ -21,30 +17,30 @@ import rallygame.service.Screen;
 import rallygame.service.checkpoint.BasicWaypointProgress;
 import rallygame.service.checkpoint.CheckpointArrow;
 import survival.upgrade.SelectionUI;
-import survival.upgrade.UpgradeManager;
 import survival.upgrade.UpgradeType;
 import survival.wave.WaveManager;
 
 public class DodgeGameManager extends BaseAppState implements PauseState.ICallback {
 
-    private final GameState state;
     private final boolean offerUpgrades;
+    private final String version;
     
     private Node uiRootNode;
+    private Container versionWindow;
 
     private CarManager cm;
     private WaveManager waveManager;
     private BasicWaypointProgress waypoints;
     private CheckpointArrow checkpointArrow;
-    private UpgradeManager upgrades;
+    private StateManager stateManager;
 
     private Container currentSelectionWindow;
     private Container ruleWindow;
     private Container currentStateWindow;
 
-    public DodgeGameManager(boolean offerUpgrades) {
-        this.state = GameState.generate();
+    public DodgeGameManager(boolean offerUpgrades, String version) {
         this.offerUpgrades = offerUpgrades;
+        this.version = version;
     }
 
     @Override
@@ -57,8 +53,8 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
         waveManager = new WaveManager(cm.getPlayer());
         getStateManager().attach(waveManager);
 
-        upgrades = new UpgradeManager();
-        getStateManager().attach(upgrades);
+        stateManager = new StateManager();
+        getStateManager().attach(stateManager);
 
         uiRootNode = ((SimpleApplication) getApplication()).getGuiNode();
 
@@ -72,6 +68,12 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
 
         checkpointArrow = new CheckpointArrow(cm.getPlayer(), (__) -> this.waypoints.getCurrentPos());
         getStateManager().attach(checkpointArrow);
+
+        versionWindow = new Container();
+        versionWindow.addChild(new Label("WASD or Arrows to move\nGet checkpoints"));
+        versionWindow.addChild(new Label("Version: " + this.version));
+        uiRootNode.attachChild(versionWindow);
+        new Screen(app.getContext().getSettings()).topRightMe(versionWindow);
     }
 
     @Override
@@ -81,7 +83,8 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
         
         var screen = new Screen(getApplication().getContext().getSettings());
 
-        if (this.state.gameOver()) {
+        var state = this.stateManager.getState();
+        if (state.gameOver()) {
             var loseWindow = new Container();
             loseWindow.addChild(new Label("You lost by either running of time or health.\nPlease restart game to replay."));
             uiRootNode.attachChild(loseWindow);
@@ -98,27 +101,26 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
                 screen.centerMe(currentSelectionWindow);
                 return;
             } else {
-                updateState(UpgradeType.WaveSpeedInc.stateFunc);
+                upgrade(UpgradeType.WaveSpeedInc);
             }
         }
 
         if (waypoints.noCheckpoint()) {
-            this.state.CheckpointTimer = state.CheckpointTimerLength;
+            state.CheckpointTimer = state.CheckpointTimerLength;
             var vec2 = H.v3tov2fXZ(this.cm.getPlayer().location);
             var dir = Rand.randV2f(1, true);
             dir.normalizeLocal();
             dir.multLocal(state.CheckpointDistance);
             waypoints.addCheckpointAt(H.v2tov3fXZ(vec2.add(dir)));
         }
-
-        this.state.update(tpf);
         
         currentStateWindow.getChildren().stream().forEach(x -> x.removeFromParent());
         currentStateWindow.addChild(UiHelper.generateTableOfValues(Map.of("Checkpoints:", waypoints.totalCheckpoints(), "Fuel:", cm.getPlayer().fuel())));
         screen.topCenterMe(currentStateWindow);
 
         ruleWindow.getChildren().stream().forEach(x -> x.removeFromParent());
-        ruleWindow.addChild(UiHelper.generateTableOfValues(this.state.GetProperties()));
+        ruleWindow.addChild(UiHelper.generateTableOfValues(state.GetProperties()));
+        ruleWindow.addChild(UiHelper.generateTableOfValues(stateManager.getUpgrades()));
 
         super.update(tpf);
     }
@@ -126,6 +128,9 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
     @Override
     protected void cleanup(Application app) {
         cm = null;
+
+        versionWindow.removeFromParent();
+        versionWindow = null;
 
         uiRootNode.removeFromParent();
         uiRootNode = null;
@@ -139,8 +144,8 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
         getStateManager().detach(checkpointArrow);
         checkpointArrow = null;
 
-        getStateManager().detach(upgrades);
-        upgrades = null;
+        getStateManager().detach(stateManager);
+        stateManager = null;
 
         getStateManager().detach(getState(Drive.class));
     }
@@ -161,24 +166,16 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
         this.checkpointArrow.setEnabled(false);
     }
 
-    public void updateState(Consumer<GameState> func) {
-        func.accept(this.state);
-        this.setEnabled(true);
-
-        if (currentSelectionWindow != null) {
-            currentSelectionWindow.removeFromParent();
-            currentSelectionWindow = null;
-        }
-    }
-
-    public void updateCar(Consumer<CarDataConst> func) {
+    public void upgrade(UpgradeType type) {
         var curFuel = this.cm.getPlayer().fuel();
-        getState(Drive.class).applyChange(new CarDataAdjuster(CarDataAdjustment.asFunc(func)));
         
+        this.stateManager.add(type);
         this.setEnabled(true);
-
-        // this resets fuel so we have to set it manually...
-        this.cm.getPlayer().setFuel(curFuel);
+        if (type.carFunc != null) {
+            // this would reset fuel value so we have to set it manually...
+            this.cm.getPlayer().setFuel(curFuel);
+            //TODO clean this weird fuel value fix
+        }
 
         if (currentSelectionWindow != null) {
             currentSelectionWindow.removeFromParent();
@@ -186,9 +183,7 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
         }
     }
 
-    public GameState getGameRules() {
-        return this.state;
-    }
+    
     
     @Override
     public void pauseState(boolean value) {
