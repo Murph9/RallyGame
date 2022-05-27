@@ -13,16 +13,16 @@ public enum UpgradeType {
     WaveSpeedInc(false, "Increase the speed waves are spawned", x -> x.WaveSpeed -= 0.1f),
     ReducePlayerHealth(false, "Reduce the amount of your health", x -> x.PlayerMaxHealth -= 2),
 
-    MuchPOWER(true, "MUCH POWER", null, x -> x.nitro_force *= 9),
-    ImproveGrip(true, "Improve Grip", null, (data) -> {
+    MuchPOWER(true, "MUCH POWER (5% nitro increase) [ctrl]", null, x -> x.nitro_force *= 1.05f),
+    ImproveGrip(true, "Improve Grip (3%)", null, (data) -> {
         for (int i = 0; i < 4; i++) {
-            data.wheelData[i].pjk_lat.D1 += 0.15f;
-            data.wheelData[i].pjk_long.D1 += 0.15f;
+            data.wheelData[i].pjk_lat.D1 *= 1.03f;
+            data.wheelData[i].pjk_long.D1 *= 1.03f;
         }
     }),
-    ImproveEngine(true, "Improve Engine", null, (data) -> {
+    ImproveEngine(true, "Improve Engine (4%)", null, (data) -> {
         for (int i = 0; i < data.e_torque.length; i++) {
-            data.e_torque[i] *= 1.15f;
+            data.e_torque[i] *= 1.04f;
         }
     })
     

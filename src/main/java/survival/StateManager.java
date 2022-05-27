@@ -34,7 +34,13 @@ public class StateManager extends BaseAppState {
         types.add(type);
 
         if (type.carFunc != null) {
-            getState(Drive.class).applyChange(new CarDataAdjuster(CarDataAdjustment.asFunc(type.carFunc)));
+            // the car mods must be cumulative for now
+            var adjustments = new LinkedList<CarDataAdjustment>();
+            for (var t: types) {
+                if (t.carFunc != null)
+                    adjustments.add(CarDataAdjustment.asFunc(t.carFunc));
+            }
+            getState(Drive.class).applyChange(new CarDataAdjuster(adjustments));
         }
         
         if (type.stateFunc != null) {
