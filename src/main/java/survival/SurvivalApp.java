@@ -22,8 +22,10 @@ import rallygame.service.WorldGuiText;
 public class SurvivalApp extends SimpleApplication {
 
     public static void main(String[] args) {
+        boolean isDebug = java.lang.management.ManagementFactory.getRuntimeMXBean(). getInputArguments().toString().contains("-agentlib:jdwp");
+
         SurvivalApp app = new SurvivalApp();
-        app.setDisplayStatView(true);
+        app.setDisplayStatView(isDebug);
         app.start();
     }
 
@@ -41,6 +43,7 @@ public class SurvivalApp extends SimpleApplication {
                 , new ObjectPlacer(true)
                 , new ConstantChecker()
                 , new WorldGuiText()
+                , new com.jme3.app.StatsAppState()
         );
     }
 

@@ -10,22 +10,25 @@ import survival.GameState;
 public enum UpgradeType {
     ShorterTimer(false, "Reduce the amount of time to reach the next checkpoint", x -> x.CheckpointTimerLength -= 3),
     IncreaseCheckpointRange(false, "Increase the minimum distance of a checkpoint", x -> x.CheckpointDistance *= 1.1f),
-    WaveSpeedInc(false, "Increase the speed waves are spawned", x -> x.WaveSpeed -= 0.1f),
+    WaveSpeedInc(false, "Increase the speed waves are spawned", x -> x.WaveSpeed -= 0.2f),
     ReducePlayerHealth(false, "Reduce the amount of your health", x -> x.PlayerMaxHealth -= 2),
 
     MuchPOWER(true, "MUCH POWER (5% nitro increase) [ctrl]", null, x -> x.nitro_force *= 1.05f),
-    ImproveGrip(true, "Improve Grip (3%)", null, (data) -> {
+    /*ImproveGrip(true, "Improve Grip (3%)", null, (data) -> {
         for (int i = 0; i < 4; i++) {
             data.wheelData[i].pjk_lat.D1 *= 1.03f;
             data.wheelData[i].pjk_long.D1 *= 1.03f;
         }
-    }),
+    }),*/
     ImproveEngine(true, "Improve Engine (4%)", null, (data) -> {
         for (int i = 0; i < data.e_torque.length; i++) {
             data.e_torque[i] *= 1.04f;
         }
-    })
-    
+    }),
+    LongerTimer(true, "Increase checkpoint time by 5 sec", x -> x.CheckpointTimerLength += 5),
+    Heal(true, "Half Heal", x -> x.PlayerHealth += x.PlayerMaxHealth/2f),
+    ReduceFuelUse(true, "Reduce Full use by (10%)", null, x -> x.fuelRpmRate *= 0.9f),
+
     // ability to push boxes back
     // ability to remove boxes every now and again
     ;

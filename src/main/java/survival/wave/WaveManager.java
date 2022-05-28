@@ -29,7 +29,7 @@ public class WaveManager extends BaseAppState {
     private PhysicsSpace physicsSpace;
     private WaveCollisionListener colListener;
 
-    public static final float KILL_DIST = 350;
+    public static final float KILL_DIST = 250;
     private float time;
 
     public WaveManager(RayCarControl player) {

@@ -94,8 +94,10 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
         }
 
         if (waypoints.hitACheckpoint()) {
-            for (var type: UpgradeType.getAllNegative())
-                upgrade(type); //oof
+            if (state.CheckpointTimerLength > 30)
+                upgrade(UpgradeType.ShorterTimer);
+            if (state.WaveSpeed > 1f)
+                upgrade(UpgradeType.WaveSpeedInc);
             
             if (offerUpgrades) {
                 this.setEnabled(false);
