@@ -50,6 +50,6 @@ Then running these command to upload it (in Powershell):
 
 ```powershell
 project> $ProgressPreference = 'SilentlyContinue'
-project> Compress-Archive -Path "build\launch4j\*" -DestinationPath "build\launch4j\survival.zip"
+project> Compress-Archive -Path "build\launch4j\*" -DestinationPath "build\launch4j\survival.zip" -Force
 project> aws s3 cp "build\launch4j\survival.zip" "s3://cdn.murph9.com/mygames/survival.zip"
 ```

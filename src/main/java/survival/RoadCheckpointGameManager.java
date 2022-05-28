@@ -133,7 +133,7 @@ public class RoadCheckpointGameManager extends BaseAppState {
         UpgradeType type = null;
         switch (selected) {
             case "Grip":
-                type = UpgradeType.ImproveGrip;
+                type = UpgradeType.ImproveEngine;//UpgradeType.ImproveGrip;
                 break;
             case "Power":
                 type = UpgradeType.ImproveEngine;
