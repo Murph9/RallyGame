@@ -10,8 +10,7 @@ Currently still very much in testing, you can drive around in many different car
 The world can be selected from a prebuilt selection of pre made worlds. Or you could be adventurous and pick the dynamic world type and have a selection of tracks generated in front of you.
 
 ---
-The duel project is mean to be the real game that comes out of this.
-It is a separate download, or gradle task or fat jar file via gradle task
+The duel or surivial project is mean to be the real game that comes out of this.
 
 ---
 
@@ -25,6 +24,7 @@ The commands you need:
 - `./gradlew build`
 - `./gradlew run`
 - `./gradlew runDuel`
+- `./gradlew runSurvival`
 
 ### Debugging notes
 
@@ -36,3 +36,20 @@ So after you have generated the assets.jar you will need to 'force java compilat
 my testing on ubuntu with blender required me to run this command to get the blender commandline to work:
 
 `python3 -m pip install numpy`
+
+---
+
+## Surivival 'deployment'
+
+Deploying a launch4j exe to s3 is done by running the `launch4j.createExe` task.
+
+You must make sure the folder contains a valid java 11 or greater JRE. There is a task called `copyjre` which does this as an example.
+
+
+Then running these command to upload it (in Powershell):
+
+```powershell
+project> $ProgressPreference = 'SilentlyContinue'
+project> Compress-Archive -Path "build\launch4j\*" -DestinationPath "build\launch4j\survival.zip"
+project> aws s3 cp "build\launch4j\survival.zip" "s3://cdn.murph9.com/mygames/survival.zip"
+```
