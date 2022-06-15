@@ -1,11 +1,11 @@
 package survival.wave;
 
 enum WaveType {
-    RandomDir(WaveBuilder::generateRandomMovers),
+    // RandomDir(WaveBuilder::generateRandomMovers),
     SingleFollow(WaveBuilder::generateSingleFollow),
-    Line(WaveBuilder::generateLine),
-    Fast(WaveBuilder::generateFast),
-    Explode(WaveBuilder::generateExplode),
+    // Line(WaveBuilder::generateLine),
+    // Fast(WaveBuilder::generateFast),
+    // Explode(WaveBuilder::generateExplode),
     ;
 
     public final IWaveGenerator func;

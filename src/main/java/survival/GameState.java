@@ -2,6 +2,8 @@ package survival;
 
 import java.util.Map;
 
+import rallygame.helper.Duo;
+
 public class GameState {
     
     public static final GameState generate() {
@@ -11,9 +13,12 @@ public class GameState {
         state.PlayerMaxHealth = 40;
         state.WaveSpeed = 3;
         state.WaveDensity = 1;
+        state.ExplodeAbilityStrength = 35;
+        state.ExplodeAbilityTimerMax = 10;
 
         state.PlayerHealth = state.PlayerMaxHealth;
         state.CheckpointTimer = state.CheckpointTimerLength;
+        state.ExplodeAbilityTimer = state.ExplodeAbilityTimerMax;
         return state;
     }
 
@@ -25,6 +30,11 @@ public class GameState {
 
     public float PlayerHealth;
     public float CheckpointTimer;
+
+    public boolean ExplodeTriggered;
+    public float ExplodeAbilityTimerMax;
+    public float ExplodeAbilityTimer;
+    public float ExplodeAbilityStrength;
 
     private GameState() {
     }
@@ -39,8 +49,20 @@ public class GameState {
             this.CheckpointTimer = CheckpointTimerLength;
         }
 
+        this.ExplodeAbilityTimer -= tpf;
+        if (this.ExplodeAbilityTimer < 0) {
+            this.ExplodeAbilityTimer = this.ExplodeAbilityTimerMax;
+            this.ExplodeTriggered = true;
+        }
         // small health regen?
-        // how to trigger game over?
+    }
+
+    public boolean getExplodeTriggered() {
+        if (this.ExplodeTriggered) {
+            this.ExplodeTriggered = false;
+            return true;
+        }
+        return false;
     }
 
     public boolean gameOver() {
@@ -49,13 +71,13 @@ public class GameState {
 
     public Map<String, Object> GetProperties() {
         return Map.of(
-            "Health", this.PlayerHealth,
-            "Checkpoint Timer", this.CheckpointTimer,
+            "Health (Max)", new Duo<Float, Float>(this.PlayerHealth, this.PlayerMaxHealth),
+            "Checkpoint Timer (Max)", new Duo<Float, Float>(this.CheckpointTimer, this.CheckpointTimerLength),
             "Checkpoint Distance", this.CheckpointDistance,
-            "Max Checkpoint Timer", this.CheckpointTimerLength,
             "Wave Speed", this.WaveSpeed,
             "Wave Density", this.WaveDensity,
-            "Player Max Health", this.PlayerMaxHealth
+            "Explode Ability Timer (Max)", new Duo<Float, Float>(this.ExplodeAbilityTimer, this.ExplodeAbilityTimerMax),
+            "Explode Ability Strength", this.ExplodeAbilityStrength
         );
     }
 }

@@ -93,6 +93,10 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
             return;
         }
 
+        if (state.getExplodeTriggered()) {
+            this.waveManager.applyForceFrom(this.cm.getPlayer().location, state.ExplodeAbilityStrength, 50);
+        }
+
         if (waypoints.hitACheckpoint()) {
             if (state.CheckpointTimerLength > 30)
                 upgrade(UpgradeType.ShorterTimer);

@@ -9,6 +9,7 @@ import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.Panel;
 
+import rallygame.helper.Duo;
 import rallygame.helper.H;
 import survival.upgrade.UpgradeType;
 
@@ -18,15 +19,22 @@ public class UiHelper {
         var panel = new Container();
         for (var entry: map.entrySet()) {
             panel.addChild(new Label(entry.getKey()));
-            var value = entry.getValue();
-            if (value instanceof Float) {
-                panel.addChild(new Label(H.roundDecimal(((Float)value), 2)), 1);
-            } else {
-                panel.addChild(new Label(value.toString()));
-            }
+            panel.addChild(new Label(renderObj(entry.getValue())), 1);
         }
         
         return panel;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static String renderObj(Object value) {
+        if (value instanceof Float) {
+            return H.roundDecimal(((Float)value), 2);
+        } else if (value instanceof Duo) {
+            var duo = (Duo<Object,Object>)value;
+            return renderObj(duo.first) + " (" + renderObj(duo.second) + ")";
+        }
+        
+        return value.toString();
     }
 
     public static Panel generateTableOfValues(List<UpgradeType> types) {

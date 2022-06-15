@@ -114,7 +114,7 @@ class WaveBuilder {
         var c = new BaseControl(1500,
             new HoverAt(2),
             new MaxSpeed(40),
-            new Target(target, 25),
+            new Target(target, 25), //TODO maybe prevent these from moving?
             new Explode(),
             new Damager(2));
         box.addControl(c);

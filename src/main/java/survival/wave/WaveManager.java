@@ -1,7 +1,8 @@
 package survival.wave;
 
+import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
+import java.util.Set;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -21,7 +22,7 @@ import survival.controls.Explode;
 
 public class WaveManager extends BaseAppState {
 
-    private final List<Geometry> geoms = new LinkedList<>();
+    private final Set<Geometry> geoms = new HashSet<>();
     private final Node rootNode = new Node("Wave root");
     private final RayCarControl player;
 
@@ -121,15 +122,8 @@ public class WaveManager extends BaseAppState {
             var playerObj = player.getPhysicsObject();
             playerObj.applyImpulse(speedDiff.mult(playerObj.getMass()), new Vector3f());
 
-            // force all other boxes away
             var pos = control.getPhysicsLocation();
-            for (var geom: this.geoms) {
-                var baseControl = geom.getControl(BaseControl.class);
-                var dir = baseControl.getPhysicsLocation().subtract(pos);
-                if (dir.length() < 35) {
-                    baseControl.applyImpulse(dir.normalize().mult(baseControl.getMass() * 50), Vector3f.ZERO);
-                }
-            }
+            applyForceFrom(pos, 50, 35);
         }
 
         var damager = control.getBehaviour(Damager.class);
@@ -141,6 +135,17 @@ public class WaveManager extends BaseAppState {
         if (removeControl) {
             control.getSpatial().removeFromParent();
             physicsSpace.remove(control.getSpatial());
+        }
+    }
+
+    public void applyForceFrom(Vector3f pos, float strength, float distance) {
+        // force all other boxes away
+        for (var geom: this.geoms) {
+            var baseControl = geom.getControl(BaseControl.class);
+            var dir = baseControl.getPhysicsLocation().subtract(pos);
+            if (dir.length() < distance) {
+                baseControl.applyImpulse(dir.normalize().mult(baseControl.getMass() * strength), Vector3f.ZERO);
+            }
         }
     }
 }
