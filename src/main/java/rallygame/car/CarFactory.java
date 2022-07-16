@@ -31,15 +31,14 @@ public class CarFactory {
         Geo.removeNamedSpatial((Node)initialCarModel, CarPart.Collision.getPartName());
         Spatial collisionShape = Geo.getNamedSpatial((Node)initialCarModel, CarPart.Chassis.getPartName());
         
-        // init physics class
-        RayCarPowered rayCar = createRayCar(collisionShape, carData);
-        
-        //init car
+        //init car and physics class
+        var rayCar = createRayCar(collisionShape, carData);
         RayCarControl carControl = null;
         if (copy == null) {
             carControl = new RayCarControl(app, initialCarModel, rayCar);
         } else {
             carControl = copy;
+            rayCar.cloneData(copy.getRayCar());
             carControl.changeRayCar(initialCarModel, rayCar);
         }
         carControl.getPhysicsObject().setCollisionGroup(CarManager.DefaultCollisionGroups);
@@ -49,7 +48,7 @@ public class CarFactory {
         carControl.getPhysicsObject().setAngularDamping(angularDampening);
         
         if (aPlayer) {
-            //players get the keyboard and sound
+            // players get the keyboard and sound
             if (copy == null) {
                 carControl.attachControls(app.getInputManager());
             }

@@ -38,7 +38,23 @@ public class RayCarPowered extends RayCar {
 		this.curGear = 1;
 		this.fuelRemaining = carData.fuelMax;
 	}
-	
+
+	public void cloneData(RayCarPowered old) {
+		this.accelCurrent = old.accelCurrent;
+		this.curGear = old.curGear;
+		this.curRPM = old.curRPM;
+		this.fuelRemaining = old.fuelRemaining;
+		this.ifNitro = old.ifNitro;
+		this.nitroRemaining = old.nitroRemaining;
+		this.nitroTimeout = old.nitroTimeout;
+		this.tractionEnabled = old.tractionEnabled;
+		this.travelledDistance = old.travelledDistance;
+
+		for (int i = 0; i < this.wheels.length; i++) {
+			this.wheels[i].radSec = old.wheels[i].radSec;
+		}
+	}
+
 	@Override
 	public void prePhysicsTick(PhysicsSpace space, float tpf) {
         if (!rbEnabled())

@@ -36,7 +36,8 @@ public class RayCarControl implements ICarPowered, ICarControlled {
     private final Application app;
     private final RayCarControlInput input;
 
-    protected RayCarPowered rayCar;
+    private RayCarPowered rayCar;
+    public RayCarPowered getRayCar() { return rayCar; }
     private RayCarVisuals visuals;
 
     // Steering averager (to get smooth left <-> right)
