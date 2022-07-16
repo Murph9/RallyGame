@@ -104,15 +104,7 @@ public class CarManager extends BaseAppState {
         if (!isInitialized())
             throw new IllegalStateException(getClass().getName() + " hasn't been initialised");
         
-        var control = CarFactory.create((SimpleApplication)getApplication(), carData, aPlayer, angularDampening);
-        rootNode.attachChild(control.getRootNode());
-        control.setPhysicsProperties(start, null, rot, null);
-
-        cars.add(control);
-        control.setEnabled(this.isEnabled()); // copy carmanager enabled-ness
-        control.update(1/60f); //call a single update to update visual and camera/input stuff
-        
-		return control;
+        return createCar(carData, aPlayer, null);
     }
 
     /** Allows changing the car a control uses entirely, an in place change. */
@@ -125,14 +117,7 @@ public class CarManager extends BaseAppState {
         boolean aPlayer = control.getAI() == null;
         rootNode.detachChild(control.getRootNode());
 
-        var acontrol = CarFactory.create((SimpleApplication)getApplication(), carData, aPlayer, angularDampening, control);
-        rootNode.attachChild(acontrol.getRootNode());
-        
-        cars.add(acontrol);
-        acontrol.setEnabled(this.isEnabled()); // copy carmanager enabled-ness
-        acontrol.update(1/60f); //call a single update to update visual and camera/input stuff
-
-        return acontrol;
+        return createCar(carData, aPlayer, control);
     }
 
     public int removeAll() {
@@ -191,5 +176,17 @@ public class CarManager extends BaseAppState {
 
         ((SimpleApplication)app).getRootNode().detachChild(rootNode);
         Log.p(this.getClass().getName() + " cleanup");
+    }
+
+    private RayCarControl createCar(CarDataConst carData, boolean aPlayer, RayCarControl existingControl) {
+       
+        var acontrol = CarFactory.create((SimpleApplication)getApplication(), carData, aPlayer, angularDampening, existingControl);
+        rootNode.attachChild(acontrol.getRootNode());
+        
+        cars.add(acontrol);
+        acontrol.setEnabled(this.isEnabled()); // copy carmanager enabled-ness
+        acontrol.update(1/60f); //call a single update to update visual and camera/input stuff
+
+        return acontrol;
     }
 }
