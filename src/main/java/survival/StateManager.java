@@ -57,12 +57,12 @@ public class StateManager extends BaseAppState {
 
     @Override
     protected void onEnable() {
-        // TODO start listening to keys
+        // TODO start listening to action keys
     }
 
     @Override
     protected void onDisable() {
-        // TODO stop listening to keys
+        // TODO stop listening to action keys
     }
 
     public GameState getState() {

@@ -32,14 +32,22 @@ public class BasicWaypointProgress extends BaseAppState {
     private final BasicCheckpointListener listener;
     private final Queue<Vector3f> checkpointBuffer = new LinkedList<>();
     
+    private final int checkpointCountToGetUpgrade;
+
     private Node rootNode;
 
     private Checkpoint curCheckpoint;
+    
+    private int hitBuffer;
     private int hitCount;
+    private int readyUpgradeCount;
+
+    private int totalUpgradeCount;
     private int totalHitCount;
 
-    public BasicWaypointProgress(RayCarControl player) {
+    public BasicWaypointProgress(RayCarControl player, int checkpointCountToGetUpgrade) {
         this.listener = new BasicCheckpointListener(this, (x) -> player.getPhysicsObject() == x);
+        this.checkpointCountToGetUpgrade = checkpointCountToGetUpgrade;
     }
 
     @Override
@@ -96,7 +104,13 @@ public class BasicWaypointProgress extends BaseAppState {
     }
 
     public void playerHitCheckpoint() {
+        hitBuffer++;
         hitCount++;
+        if (hitCount >= checkpointCountToGetUpgrade) {
+            readyUpgradeCount++;
+            totalUpgradeCount++;
+            hitCount = 0;
+        }
         totalHitCount++;
 
         if (curCheckpoint == null) {
@@ -114,20 +128,27 @@ public class BasicWaypointProgress extends BaseAppState {
         }
     }
 
-    public boolean hitACheckpoint() {
-        if (hitCount > 0) {
-            hitCount--;
-            return true;
-        }
-
-        return false;
+    public int hasUpgradeReady() {
+        int temp = readyUpgradeCount;
+        readyUpgradeCount = 0;
+        return temp;
     }
-    public boolean noCheckpoint() {
+    public int checkpointHitsLeft() {
+        int temp = hitBuffer;
+        hitBuffer = 0;
+        return temp;
+    }
+
+    public boolean noCheckpointLoaded() {
         return curCheckpoint == null;
     }
 
     public int totalCheckpoints() {
         return totalHitCount;
+    }
+
+    public int totalUpgrades() {
+        return totalUpgradeCount;
     }
 
     @Override

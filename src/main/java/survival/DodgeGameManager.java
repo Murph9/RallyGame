@@ -22,6 +22,8 @@ import survival.wave.WaveManager;
 
 public class DodgeGameManager extends BaseAppState implements PauseState.ICallback {
 
+    private static final int checkpointCountToGetUpgrade = 3;
+
     private final boolean offerUpgrades;
     private final String version;
     
@@ -35,6 +37,7 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
     private StateManager stateManager;
 
     private Container currentSelectionWindow;
+
     private Container ruleWindow;
     private Container currentStateWindow;
 
@@ -47,7 +50,7 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
     protected void initialize(Application app) {
         cm = getState(CarManager.class);
 
-        waypoints = new BasicWaypointProgress(cm.getPlayer());
+        waypoints = new BasicWaypointProgress(cm.getPlayer(), checkpointCountToGetUpgrade);
         getStateManager().attach(waypoints);
 
         waveManager = new WaveManager(cm.getPlayer());
@@ -93,16 +96,18 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
             return;
         }
 
-        if (state.getExplodeTriggered()) {
+        if (state.getExplodeTriggered()) { // TODO ability manager maybe?
             this.waveManager.applyForceFrom(this.cm.getPlayer().location, state.ExplodeAbilityStrength, 50);
         }
 
-        if (waypoints.hitACheckpoint()) {
-            if (state.CheckpointTimerLength > 30)
-                upgrade(UpgradeType.ShorterTimer);
+        int checkpointsHit = waypoints.checkpointHitsLeft();
+        for (int i = 0; i< checkpointsHit; i++) {
             if (state.WaveSpeed > 1f)
                 upgrade(UpgradeType.WaveSpeedInc);
-            
+        }
+        
+        int upgrades = waypoints.hasUpgradeReady();
+        if (upgrades > 0) {
             if (offerUpgrades) {
                 this.setEnabled(false);
                 currentSelectionWindow = SelectionUI.GenerateSelectionUI(this, UpgradeType.getAllPositive());
@@ -112,7 +117,7 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
             }
         }
 
-        if (waypoints.noCheckpoint()) {
+        if (waypoints.noCheckpointLoaded()) {
             state.CheckpointTimer = state.CheckpointTimerLength;
             var vec2 = H.v3tov2fXZ(this.cm.getPlayer().location);
             var dir = Rand.randV2f(1, true);
@@ -122,7 +127,8 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
         }
         
         currentStateWindow.getChildren().stream().forEach(x -> x.removeFromParent());
-        currentStateWindow.addChild(UiHelper.generateTableOfValues(Map.of("Checkpoints:", waypoints.totalCheckpoints(), "Fuel:", cm.getPlayer().fuel())));
+        Map<String, Object> map = Map.of("Checkpoints:", waypoints.totalCheckpoints(), "Upgrades:", waypoints.totalUpgrades());
+        currentStateWindow.addChild(UiHelper.generateTableOfValues(map));
         screen.topCenterMe(currentStateWindow);
 
         ruleWindow.getChildren().stream().forEach(x -> x.removeFromParent());
@@ -167,29 +173,24 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
 
     @Override
     protected void onDisable() {
-        getState(Drive.class).setEnabled(false);
+        Drive drive = getState(Drive.class);
+        if (drive != null)
+            drive.setEnabled(false);
+        
         this.cm.setEnabled(false);
         this.waveManager.setEnabled(false);
         this.checkpointArrow.setEnabled(false);
     }
 
-    public void upgrade(UpgradeType type) {
-        var curFuel = this.cm.getPlayer().fuel();
-        
+    public void upgrade(UpgradeType type) {        
         this.stateManager.add(type);
         this.setEnabled(true);
-        if (type.carFunc != null) {
-            // this would reset fuel value so we have to set it manually...
-            this.cm.getPlayer().setFuel(curFuel);
-            //TODO clean this weird fuel value fix
-        }
-
+        
         if (currentSelectionWindow != null) {
             currentSelectionWindow.removeFromParent();
             currentSelectionWindow = null;
         }
     }
-
     
     
     @Override
