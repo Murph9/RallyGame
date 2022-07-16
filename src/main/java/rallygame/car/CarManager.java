@@ -7,36 +7,27 @@ import java.util.List;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
-import com.jme3.asset.AssetManager;
-import com.jme3.audio.AudioData;
-import com.jme3.audio.AudioNode;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.PhysicsCollisionObject;
-import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
-import com.jme3.bullet.collision.shapes.HullCollisionShape;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
 
 import rallygame.car.data.CarDataLoader;
-import rallygame.car.data.CarModelData.CarPart;
 import rallygame.car.data.Car;
 import rallygame.car.data.CarDataAdjuster;
 import rallygame.car.data.CarDataAdjustment;
 import rallygame.car.data.CarDataConst;
 import rallygame.car.ray.RayCarControl;
-import rallygame.car.ray.RayCarPowered;
 import rallygame.helper.Colours;
-import rallygame.helper.Geo;
 import rallygame.helper.Log;
 
 public class CarManager extends BaseAppState {
 
     // Group 1 is general, Group 2 is for checkpoints
-    private static final int DefaultCollisionGroups = PhysicsCollisionObject.COLLISION_GROUP_01 | PhysicsCollisionObject.COLLISION_GROUP_02;
+    public static final int DefaultCollisionGroups = PhysicsCollisionObject.COLLISION_GROUP_01 | PhysicsCollisionObject.COLLISION_GROUP_02;
+
 
     private final CarDataLoader loader;
     private final List<RayCarControl> cars;
@@ -113,27 +104,15 @@ public class CarManager extends BaseAppState {
         if (!isInitialized())
             throw new IllegalStateException(getClass().getName() + " hasn't been initialised");
         
-        var control = createControl(carData, aPlayer, null);
+        var control = CarFactory.create((SimpleApplication)getApplication(), carData, aPlayer, angularDampening);
+        rootNode.attachChild(control.getRootNode());
         control.setPhysicsProperties(start, null, rot, null);
-		return control;
-    }
 
-    private RayCarPowered createRayCar(Spatial collisionShape, CarDataConst carData) {
+        cars.add(control);
+        control.setEnabled(this.isEnabled()); // copy carmanager enabled-ness
+        control.update(1/60f); //call a single update to update visual and camera/input stuff
         
-        Geometry collisionGeometry = null;
-        if (collisionGeometry instanceof Geometry) {
-            collisionGeometry = (Geometry) collisionShape;
-            var col = new HullCollisionShape(collisionGeometry.getMesh());
-            return new RayCarPowered(col, carData);
-        } else { // Node
-            var col = new CompoundCollisionShape();
-            for (var g : Geo.getGeomList(collisionShape)) {
-                var hullCol = new HullCollisionShape(g.getMesh());
-                col.addChildShape(hullCol, Vector3f.ZERO);
-            }
-            
-            return new RayCarPowered(col, carData);
-        }
+		return control;
     }
 
     /** Allows changing the car a control uses entirely, an in place change. */
@@ -146,50 +125,14 @@ public class CarManager extends BaseAppState {
         boolean aPlayer = control.getAI() == null;
         rootNode.detachChild(control.getRootNode());
 
-        var acontrol = createControl(carData, aPlayer, control);
+        var acontrol = CarFactory.create((SimpleApplication)getApplication(), carData, aPlayer, angularDampening, control);
+        rootNode.attachChild(acontrol.getRootNode());
+        
+        cars.add(acontrol);
+        acontrol.setEnabled(this.isEnabled()); // copy carmanager enabled-ness
+        acontrol.update(1/60f); //call a single update to update visual and camera/input stuff
 
         return acontrol;
-    }
-
-    private RayCarControl createControl(CarDataConst carData, boolean aPlayer, RayCarControl copy) {
-        AssetManager am = getApplication().getAssetManager();
-		// pre load car model so we can remove the collision object before materials are set
-        Spatial initialCarModel = am.loadModel(carData.carModel);
-        // remove the old collision shape
-        Geo.removeNamedSpatial((Node)initialCarModel, CarPart.Collision.getPartName());
-        Spatial collisionShape = Geo.getNamedSpatial((Node)initialCarModel, CarPart.Chassis.getPartName());
-        
-        // init physics class
-        RayCarPowered rayCar = createRayCar(collisionShape, carData);
-        
-        //init car
-        RayCarControl carControl = null;
-        if (copy == null) {
-            carControl = new RayCarControl((SimpleApplication)getApplication(), initialCarModel, rayCar);
-        } else {
-            carControl = copy;
-            carControl.changeRayCar(initialCarModel, rayCar);
-        }
-        carControl.getPhysicsObject().setCollisionGroup(DefaultCollisionGroups);
-        carControl.getPhysicsObject().setCollideWithGroups(DefaultCollisionGroups);
-        rootNode.attachChild(carControl.getRootNode());
-        
-        // a fake angular rotational reducer, very important for driving feel
-        carControl.getPhysicsObject().setAngularDamping(angularDampening);
-        
-        if (aPlayer) {
-            //players get the keyboard and sound
-            if (copy == null) {
-                carControl.attachControls(getApplication().getInputManager());
-            }
-            carControl.giveSound(new AudioNode(am, "sounds/engine.wav", AudioData.DataType.Buffer));
-        }
-        
-        cars.add(carControl);
-        carControl.setEnabled(this.isEnabled()); // copy carmanager enabled-ness
-
-        carControl.update(1/60f); //call a single update to update visual and camera/input stuff
-        return carControl;
     }
 
     public int removeAll() {
