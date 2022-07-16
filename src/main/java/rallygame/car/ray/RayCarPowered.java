@@ -39,7 +39,7 @@ public class RayCarPowered extends RayCar {
 		this.fuelRemaining = carData.fuelMax;
 	}
 
-	public void cloneData(RayCarPowered old) {
+	public void loadData(RayCarPowered old) {
 		this.accelCurrent = old.accelCurrent;
 		this.curGear = old.curGear;
 		this.curRPM = old.curRPM;

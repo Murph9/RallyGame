@@ -180,27 +180,27 @@ public class CarManager extends BaseAppState {
 
     private RayCarControl createCar(CarDataConst carData, boolean aPlayer, Vector3f start, Quaternion rot) {
        
-        var acontrol = CarFactory.create((SimpleApplication)getApplication(), carData, aPlayer, angularDampening);
-        rootNode.attachChild(acontrol.getRootNode());
-        acontrol.setPhysicsProperties(start, null, rot, null);
+        var control = CarFactory.create((SimpleApplication)getApplication(), carData, aPlayer, angularDampening);
+        rootNode.attachChild(control.getRootNode());
+        control.setPhysicsProperties(start, null, rot, null);
 
-        cars.add(acontrol);
-        acontrol.setEnabled(this.isEnabled()); // copy carmanager enabled-ness
-        acontrol.update(1/60f); //call a single update to update visual and camera/input stuff
+        cars.add(control);
+        control.setEnabled(this.isEnabled()); // copy carmanager enabled-ness
+        control.update(1/60f); //call a single update to update visual and camera/input stuff
 
-        return acontrol;
+        return control;
     }
 
     private RayCarControl createCar(CarDataConst carData, boolean aPlayer, RayCarControl existingControl) {
         carData.baseColor = existingControl.getCarData().baseColor;
         
-        var acontrol = CarFactory.create((SimpleApplication)getApplication(), carData, aPlayer, angularDampening, existingControl);
-        rootNode.attachChild(acontrol.getRootNode());
+        var control = CarFactory.create((SimpleApplication)getApplication(), carData, aPlayer, angularDampening, existingControl);
+        rootNode.attachChild(control.getRootNode());
 
-        cars.add(acontrol);
-        acontrol.setEnabled(this.isEnabled()); // copy carmanager enabled-ness
-        acontrol.update(1/60f); //call a single update to update visual and camera/input stuff
+        cars.add(control);
+        control.setEnabled(this.isEnabled()); // copy carmanager enabled-ness
+        control.update(1/60f); //call a single update to update visual and camera/input stuff
 
-        return acontrol;
+        return control;
     }
 }

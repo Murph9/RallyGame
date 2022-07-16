@@ -38,7 +38,7 @@ public class CarFactory {
             carControl = new RayCarControl(app, initialCarModel, rayCar);
         } else {
             carControl = copy;
-            rayCar.cloneData(copy.getRayCar());
+            rayCar.loadData(copy.getRayCar());
             carControl.changeRayCar(initialCarModel, rayCar);
         }
         carControl.getPhysicsObject().setCollisionGroup(CarManager.DefaultCollisionGroups);
