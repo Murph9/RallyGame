@@ -192,6 +192,8 @@ public class CarManager extends BaseAppState {
     }
 
     private RayCarControl createCar(CarDataConst carData, boolean aPlayer, RayCarControl existingControl) {
+        carData.baseColor = existingControl.getCarData().baseColor;
+        
         var acontrol = CarFactory.create((SimpleApplication)getApplication(), carData, aPlayer, angularDampening, existingControl);
         rootNode.attachChild(acontrol.getRootNode());
 
