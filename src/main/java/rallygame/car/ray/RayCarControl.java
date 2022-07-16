@@ -36,7 +36,7 @@ public class RayCarControl implements ICarPowered, ICarControlled {
     private final Application app;
     private final RayCarControlInput input;
 
-    private RayCarPowered rayCar;
+    protected RayCarPowered rayCar;
     public RayCarPowered getRayCar() { return rayCar; }
     private RayCarVisuals visuals;
 

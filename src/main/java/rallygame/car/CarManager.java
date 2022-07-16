@@ -104,7 +104,7 @@ public class CarManager extends BaseAppState {
         if (!isInitialized())
             throw new IllegalStateException(getClass().getName() + " hasn't been initialised");
         
-        return createCar(carData, aPlayer, null);
+        return createCar(carData, aPlayer, start, rot);
     }
 
     /** Allows changing the car a control uses entirely, an in place change. */
@@ -178,11 +178,23 @@ public class CarManager extends BaseAppState {
         Log.p(this.getClass().getName() + " cleanup");
     }
 
-    private RayCarControl createCar(CarDataConst carData, boolean aPlayer, RayCarControl existingControl) {
+    private RayCarControl createCar(CarDataConst carData, boolean aPlayer, Vector3f start, Quaternion rot) {
        
+        var acontrol = CarFactory.create((SimpleApplication)getApplication(), carData, aPlayer, angularDampening);
+        rootNode.attachChild(acontrol.getRootNode());
+        acontrol.setPhysicsProperties(start, null, rot, null);
+
+        cars.add(acontrol);
+        acontrol.setEnabled(this.isEnabled()); // copy carmanager enabled-ness
+        acontrol.update(1/60f); //call a single update to update visual and camera/input stuff
+
+        return acontrol;
+    }
+
+    private RayCarControl createCar(CarDataConst carData, boolean aPlayer, RayCarControl existingControl) {
         var acontrol = CarFactory.create((SimpleApplication)getApplication(), carData, aPlayer, angularDampening, existingControl);
         rootNode.attachChild(acontrol.getRootNode());
-        
+
         cars.add(acontrol);
         acontrol.setEnabled(this.isEnabled()); // copy carmanager enabled-ness
         acontrol.update(1/60f); //call a single update to update visual and camera/input stuff
