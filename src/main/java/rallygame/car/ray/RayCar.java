@@ -135,9 +135,9 @@ public class RayCar implements PhysicsTickListener {
 				continue;
 			}
 
-			if (wheels[w_id].susRayLength < 0) { // suspension bottomed out, apply max
+			if (wheels[w_id].susRayLength < 0) { // suspension bottomed out, apply a collision force and set to max
 				wheels[w_id].susForce = (sus.preload_force + sus.travelTotal()) * sus.stiffness * 1000;
-				Vector3f f = w_angle.inverse().mult(wheels[w_id].hitNormalInWorld.mult(wheels[w_id].susForce * tpf));
+				Vector3f f = wheels[w_id].hitNormalInWorld.mult(carData.mass);
 				applyWheelForce(f, wheels[w_id]);
 				continue;
 			}
