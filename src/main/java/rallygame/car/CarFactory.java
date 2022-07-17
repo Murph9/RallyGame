@@ -27,9 +27,8 @@ public class CarFactory {
         AssetManager am = app.getAssetManager();
 		// pre load car model so we can remove the collision object before materials are set
         Spatial initialCarModel = am.loadModel(carData.carModel);
-        // remove the old collision shape
-        Geo.removeNamedSpatial((Node)initialCarModel, CarPart.Collision.getPartName());
-        Spatial collisionShape = Geo.getNamedSpatial((Node)initialCarModel, CarPart.Chassis.getPartName());
+        // remove the collision shape visual and use it separately for physics
+        Spatial collisionShape = Geo.removeNamedSpatial((Node)initialCarModel, CarPart.Collision.getPartName());
         
         //init car and physics class
         var rayCar = createRayCar(collisionShape, carData);

@@ -96,7 +96,7 @@ public class CarModelData {
 		Headlight_L("headlight"), //only one side
 		Taillight_L("taillight_l"), //only one side
 
-		Collision("collision") //unused model collision in bullet physics
+		Collision("collision") // model for collision in bullet physics, must be quite a bit off the ground to prevent clipping
 
 		//Please add more when needed
 		;

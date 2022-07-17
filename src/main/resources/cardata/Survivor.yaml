@@ -33,7 +33,7 @@ susF: &sus {
   max_force: 40000.0, 
   max_travel: 0.1,
   min_travel: -0.2,
-  preload_force: 2.0,
+  preload_force: 1.1,
   relax: 0.6,
   stiffness: 15.0
 }
@@ -43,7 +43,7 @@ susR: {
   max_force: 40000.0, 
   max_travel: 0.1,
   min_travel: -0.2,
-  preload_force: 2.0,
+  preload_force: 1.1,
   relax: 0.6,
   stiffness: 15.0
 }
