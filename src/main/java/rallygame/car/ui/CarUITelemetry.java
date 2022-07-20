@@ -113,6 +113,9 @@ public class CarUITelemetry extends BaseAppState {
             w.engineTorque = createText(guiFont, ColorRGBA.Magenta, w.pos.add(new Vector3f(-80, -20, 0)));
             rootNode.attachChild(w.engineTorque);
 
+            w.groundType = createText(guiFont, ColorRGBA.Orange, w.pos.add(new Vector3f(-80, 40, 0)));
+            rootNode.attachChild(w.groundType);
+
             w.susBacking = createGeometry("susOff" + i, q, w.pos.add(new Vector3f(30, 30, 0)), susMOff, 1);
             w.susBacking.rotate(0, 0, FastMath.PI);
             rootNode.attachChild(w.susBacking);
@@ -193,6 +196,7 @@ public class CarUITelemetry extends BaseAppState {
             Material m = new Material(getApplication().getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
             w.gripValue.setText(String.format("%.2f slip", wheel.skidFraction));
             w.wheelRot.setText(String.format("%.2f rad/s", wheel.radSec));
+            w.groundType.setText(wheel.lastGroundType.toString());
             w.engineTorque.setText(H.decimalFormat(p.getWheelTorque(i), "0000.0") + " Nm");
             m.setColor("Color", getGripBoxColour(wheel.skidFraction));
             w.gripBox.setMaterial(m);
@@ -238,6 +242,7 @@ public class CarUITelemetry extends BaseAppState {
         BitmapText gripValue;
         BitmapText wheelRot;
         BitmapText engineTorque;
+        BitmapText groundType;
 
         Geometry sus;
         Geometry susBacking; //background color

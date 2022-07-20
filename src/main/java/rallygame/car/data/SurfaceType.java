@@ -8,7 +8,8 @@ public enum SurfaceType {
     Grass;
 
     public static SurfaceType fromString(String str) {
-        // TODO
+        //if (str.contains("ss"))
+            //return Grass;
         return SurfaceType.Normal;
     }
 }
