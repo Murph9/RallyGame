@@ -1,0 +1,22 @@
+MaterialDef Base {
+
+    MaterialParameters {
+        Color Color
+
+        // Alpha threshold for fragment discarding
+        Float AlphaDiscardThreshold (AlphaTestFallOff)
+    }
+
+    Technique {
+        VertexShader GLSL310 GLSL300 GLSL100 GLSL150:   MatDefs/Base.vert
+        FragmentShader GLSL310 GLSL300 GLSL100 GLSL150: MatDefs/Base.frag
+
+        WorldParameters {
+            WorldViewProjectionMatrix
+        }
+
+        Defines {
+            DISCARD_ALPHA : AlphaDiscardThreshold
+        }
+    }
+}

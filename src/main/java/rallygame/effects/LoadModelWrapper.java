@@ -72,7 +72,7 @@ public class LoadModelWrapper {
             throw new IllegalArgumentException("Please don't send me a null colour");
         }
 
-        Material baseMat = new Material(am, "Common/MatDefs/Misc/Unshaded.j3md");
+        Material baseMat = new Material(am, "MatDefs/Base.j3md");
         baseMat.setColor("Color", color);
         Material mat = g.getMaterial();
         if (mat != null) // keep the name if given
