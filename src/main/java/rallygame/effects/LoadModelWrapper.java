@@ -74,6 +74,8 @@ public class LoadModelWrapper {
 
         Material baseMat = new Material(am, "MatDefs/Base.j3md");
         baseMat.setColor("Color", color);
+        baseMat.setFloat("RepeatingPatternSize", 15);
+        //baseMat.setColor("RepeatingColour", color); // TODO unused colour for now
         Material mat = g.getMaterial();
         if (mat != null) // keep the name if given
             baseMat.setName(mat.getName());

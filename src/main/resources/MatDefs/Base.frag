@@ -9,6 +9,7 @@
 #endif
 
 uniform vec4 m_Color;
+uniform vec4 m_RepeatingColour;
 
 varying vec3 worldUV;
 
@@ -27,10 +28,11 @@ void main() {
 
     #if defined(CROSS_HATCH)
         vec3 _worldUV = vec3(mymod(worldUV.x, m_RepeatingPatternSize), mymod(worldUV.y, m_RepeatingPatternSize), mymod(worldUV.z, m_RepeatingPatternSize));
-        if (_worldUV.x > 0.4 && _worldUV.x < 0.5)
-            color = vec4(1,0,1,1);
-        if (_worldUV.z > 0.6 && _worldUV.z < 0.7)
-            color = vec4(0,0,1,1);
+        float repeatingSizeHalf = 0.5 * m_RepeatingPatternSize;
+        if (_worldUV.x > repeatingSizeHalf && _worldUV.z < repeatingSizeHalf)
+            color *= 0.8;//m_RepeatingColour;
+        if (_worldUV.x < repeatingSizeHalf && _worldUV.z > repeatingSizeHalf)
+            color *= 0.8;//m_RepeatingColour;
     #endif
     
     gl_FragColor = color;
