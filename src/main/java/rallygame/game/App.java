@@ -22,6 +22,7 @@ import rallygame.helper.Log;
 import rallygame.service.ConstantChecker;
 import rallygame.service.ObjectPlacer;
 import rallygame.service.WorldGuiText;
+import rallygame.service.ray.SceneRaycaster;
 
 
 public class App extends SimpleApplication {
@@ -40,6 +41,7 @@ public class App extends SimpleApplication {
                 , new ConstantChecker()
 				, new DebugAppState()
 				, new WorldGuiText()
+				, new SceneRaycaster()
                 
                 // profiles in jme 3.2: possibly add physics engine stuff using custom sections
                 //, new DetailedProfilerState() 

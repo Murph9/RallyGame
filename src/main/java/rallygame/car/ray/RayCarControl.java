@@ -24,11 +24,14 @@ import rallygame.car.JoystickEventListener;
 import rallygame.car.MyKeyListener;
 import rallygame.car.ai.ICarAI;
 import rallygame.car.data.CarDataConst;
+import rallygame.car.data.SurfaceType;
 import rallygame.drive.IDrive;
+import rallygame.helper.Geo;
 import rallygame.helper.Log;
 import rallygame.service.averager.AverageFloatFramerate;
 import rallygame.service.averager.IAverager;
 import rallygame.service.ray.PhysicsRaycaster;
+import rallygame.service.ray.SceneRaycaster;
 
 // data/input things
 public class RayCarControl implements ICarPowered, ICarControlled {
@@ -126,7 +129,37 @@ public class RayCarControl implements ICarPowered, ICarControlled {
 
         rayCar.updateControlInputs(steeringCurrent, brakeCurrent, handbrakeCurrent);
 
+        updateGroundType();
+
         visuals.viewUpdate(tpf);
+    }
+
+    private void updateGroundType() {
+        // update the ground type for the wheels (shouldn't this be a physics concern?)
+        var caster = app.getStateManager().getState(SceneRaycaster.class);
+        for (int i = 0; i < 4; i++) {
+            var wheel = getWheel(i);
+            var pos = wheel.rayStartWorld;
+            var dir = wheel.rayDirWorld;
+            if (pos == null || dir == null) {
+                continue;
+            }
+            
+            var results = caster.castRay(pos, dir);
+            
+            for (var result: results) {
+                if (result.getDistance() > dir.length())
+                    continue;
+
+                if (Geo.getGeomList(this.getRootNode()).contains(result.getGeometry())) { //perf?
+                    // ignore anything on the car
+                    continue;
+                }
+
+                wheel.lastGroundType = SurfaceType.fromString(result.getGeometry().getMaterial().getName());
+                break; //only use the closest one
+            }
+        }
     }
 
     public void giveSound(AudioNode audio) {

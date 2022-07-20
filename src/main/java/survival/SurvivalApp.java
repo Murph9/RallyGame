@@ -18,6 +18,7 @@ import rallygame.game.DebugAppState;
 import rallygame.service.ConstantChecker;
 import rallygame.service.ObjectPlacer;
 import rallygame.service.WorldGuiText;
+import rallygame.service.ray.SceneRaycaster;
 
 public class SurvivalApp extends SimpleApplication {
 
@@ -44,6 +45,7 @@ public class SurvivalApp extends SimpleApplication {
                 , new ConstantChecker()
                 , new WorldGuiText()
                 , new com.jme3.app.StatsAppState()
+                , new SceneRaycaster()
         );
     }
 
