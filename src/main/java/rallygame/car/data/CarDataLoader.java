@@ -134,14 +134,10 @@ public class CarDataLoader { //CarDataFactory
                 throw new IllegalStateException("maxLat was: '" + wheel.maxLat + "'.");
             if (Float.isNaN(wheel.maxLong))
                 throw new IllegalStateException("maxLong was: '" + wheel.maxLong + "'.");
-        }
 
-        // validate that the D1 and D2 pjk const values fit the weight of the car
-        for (int i = 0; i < data.wheelData.length; i++) {
-            if (GripHelper.loadFormula(data.wheelData[i].pjk_lat, quarterMassForce) <= 0)
-                throw new IllegalStateException("Wheel load lat formula not in range: " + data.wheelData[i].pjk_lat + " " + quarterMassForce);
-            if (GripHelper.loadFormula(data.wheelData[i].pjk_long, quarterMassForce) <= 0)
-                throw new IllegalStateException("Wheel load long formula not in range: " + data.wheelData[i].pjk_lat + " " + quarterMassForce);
+            // generate the load quadratic values
+            wheel.pjk_lat.loadQuadratic = 1/(quarterMassForce*3);
+            wheel.pjk_long.loadQuadratic = 1/(quarterMassForce*3);
         }
     }
 

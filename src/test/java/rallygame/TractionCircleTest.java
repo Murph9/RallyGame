@@ -25,15 +25,15 @@ public class TractionCircleTest {
         curveConstLong = new WheelDataTractionConst();
         curveConstLong.B = 17;
         curveConstLong.C = 1.9f;
-        curveConstLong.D1 = 2;
-        curveConstLong.D2 = 0.000055f;
+        curveConstLong.D = 2;
+        curveConstLong.loadQuadratic = 0.000055f;
         curveConstLong.E = 0.1f;
 
         curveConstLat = new WheelDataTractionConst();
         curveConstLat.B = 40;
         curveConstLat.C = 1.9f;
-        curveConstLat.D1 = 2;
-        curveConstLong.D2 = 0.000055f;
+        curveConstLat.D = 2;
+        curveConstLong.loadQuadratic = 0.000055f;
         curveConstLat.E = 0.1f;
 
         maxLong = CalcSlipMax(curveConstLong);

@@ -53,8 +53,8 @@ wheelData:
 - &w
   mass: 10.0
   modelName: models/wheel1.blend.glb
-  pjk_lat: &pjk_lat {B: 30, C: 1.24, D1: 1.8, D2: 0.000055, E: 0.45}
-  pjk_long: {B: 25, C: 1.8, D1: 2, D2: 0.000055, E: 0.98}
+  pjk_lat: &pjk_lat {B: 30, C: 1.24, D: 1.8, E: 0.45}
+  pjk_long: {B: 25, C: 1.8, D: 2, E: 0.98}
   radius: 0.3
   width: 0.3
 - *w

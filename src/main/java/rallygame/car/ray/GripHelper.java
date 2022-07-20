@@ -22,13 +22,13 @@ public class GripHelper {
 		return FastMath.sin(w.C * FastMath.atan(w.B*slip - w.E * (w.B*slip - FastMath.atan(w.B*slip))));
 	}
 	public static float loadFormula(WheelDataTractionConst w, float load) {
-		return Math.max(0, w.D1 * (1 - w.D2 * load) * load);
+		return Math.max(0, w.D * (1 - w.loadQuadratic * load) * load);
 	}
 	public static float calcMaxLoad(WheelDataTractionConst w) {
 		return loadFormula(w, dloadFormula(w));
 	}
 	private static float dloadFormula(WheelDataTractionConst w) {
-		return 1 / (2f * w.D2);
+		return 1 / (2f * w.loadQuadratic);
 	}
 
 	//returns the slip value that gives the closest to 1 from the magic formula (should be called twice, lat and long)
