@@ -2,6 +2,7 @@ MaterialDef Base {
 
     MaterialParameters {
         Color Color
+        Float RepeatingPatternSize
 
         // Alpha threshold for fragment discarding
         Float AlphaDiscardThreshold (AlphaTestFallOff)
@@ -13,10 +14,30 @@ MaterialDef Base {
 
         WorldParameters {
             WorldViewProjectionMatrix
+            WorldMatrix
         }
 
         Defines {
             DISCARD_ALPHA : AlphaDiscardThreshold
+            CROSS_HATCH: RepeatingPatternSize
+        }
+    }
+
+    Technique PreNormalPass {
+
+        VertexShader GLSL310 GLSL300 GLSL100 GLSL150:   Common/MatDefs/SSAO/normal.vert
+        FragmentShader GLSL310 GLSL300 GLSL100 GLSL150: Common/MatDefs/SSAO/normal.frag
+
+        WorldParameters {
+            WorldViewProjectionMatrix
+            WorldViewMatrix
+            NormalMatrix
+            ViewProjectionMatrix
+            ViewMatrix
+        }
+
+        Defines {
+            COLORMAP_ALPHA : ColorMap
         }
     }
 }
