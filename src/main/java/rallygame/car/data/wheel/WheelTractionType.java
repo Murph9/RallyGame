@@ -1,4 +1,4 @@
-package rallygame.car.data;
+package rallygame.car.data.wheel;
 
 public enum WheelTractionType {
     Road("road"),

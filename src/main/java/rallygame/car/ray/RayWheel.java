@@ -4,7 +4,7 @@ import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Vector3f;
 
 import rallygame.car.data.SurfaceType;
-import rallygame.car.data.WheelDataConst;
+import rallygame.car.data.wheel.WheelDataConst;
 
 /** Class to store real-time data of this wheel */
 public class RayWheel {

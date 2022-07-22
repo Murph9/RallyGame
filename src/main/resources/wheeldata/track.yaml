@@ -1,4 +1,4 @@
-!!car.data.WheelTraction
+!!car.data.wheel.WheelTraction
 name: track
 pjk_lat: {B: 60, C: 1.24, D: 1.8, E: 0.45}
 pjk_long: {B: 45, C: 1.8, D: 2, E: 0.985}

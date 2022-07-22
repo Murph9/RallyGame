@@ -11,7 +11,7 @@ import com.jme3.math.Vector3f;
 
 import rallygame.car.data.CarDataConst;
 import rallygame.car.data.CarSusDataConst;
-import rallygame.car.data.WheelTraction;
+import rallygame.car.data.wheel.WheelTraction;
 import rallygame.service.ray.IPhysicsRaycaster;
 import rallygame.service.ray.PhysicsRaycaster;
 import rallygame.service.ray.RaycasterResult;

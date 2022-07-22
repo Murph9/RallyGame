@@ -7,7 +7,7 @@ import com.jme3.math.Vector3f;
 import com.simsilica.lemur.Container;
 
 import rallygame.car.data.CarDataConst;
-import rallygame.car.data.WheelDataTractionConst;
+import rallygame.car.data.wheel.WheelDataTractionConst;
 import rallygame.car.ray.GripHelper;
 import rallygame.helper.Geo;
 

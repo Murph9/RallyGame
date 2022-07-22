@@ -2,7 +2,7 @@ package rallygame.car.ray;
 
 import com.jme3.math.FastMath;
 
-import rallygame.car.data.WheelDataTractionConst;
+import rallygame.car.data.wheel.WheelDataTractionConst;
 
 public class GripHelper {
 	private static float ERROR = 0.0005f; //our fixed error, we don't really care how close it is past 3 or 4 decimals

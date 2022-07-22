@@ -1,4 +1,4 @@
-package rallygame.car.data;
+package rallygame.car.data.wheel;
 
 import java.io.Serializable;
 

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import rallygame.car.data.WheelDataTractionConst;
+import rallygame.car.data.wheel.WheelDataTractionConst;
 import rallygame.car.ray.GripHelper;
 import rallygame.helper.H;
 

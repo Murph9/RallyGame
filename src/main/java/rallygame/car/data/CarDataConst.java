@@ -11,6 +11,7 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 
+import rallygame.car.data.wheel.WheelDataConst;
 import rallygame.helper.Duo;
 
 public class CarDataConst implements Serializable {

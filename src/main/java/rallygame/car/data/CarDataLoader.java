@@ -15,6 +15,8 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
 import rallygame.car.data.CarModelData.CarPart;
+import rallygame.car.data.wheel.WheelDataLoader;
+import rallygame.car.data.wheel.WheelTractionType;
 import rallygame.car.ray.GripHelper;
 import rallygame.helper.Duo;
 import rallygame.helper.Log;
