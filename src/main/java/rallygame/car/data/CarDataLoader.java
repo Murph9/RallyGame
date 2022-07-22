@@ -49,17 +49,17 @@ public class CarDataLoader {
         }
     }
 
-    private CarDataConst loadFromFile(Car car) throws Exception {
+    private CarDataConst loadFromFile(Car car) {
         InputStream in = getClass().getResourceAsStream(car.getFileName());
         Yaml yaml = new Yaml(new Constructor(CarDataConst.class));
         Object yamlData = yaml.load(in);
 
         if (yamlData == null) {
-            Log.e("Loading data for car: " + car.getName() + " did not go well.");
+            Log.exit(-56, "Loading data for car: " + car.getName() + " did not go well.");
             return null;
         }
         if (!(yamlData instanceof CarDataConst)) {
-            Log.e("Loading data for car: " + car.getName() + " did not go that well.");
+            Log.exit(-55, "Loading data for car: " + car.getName() + " did not go that well.");
             return null;
         }
 
@@ -71,7 +71,7 @@ public class CarDataLoader {
             return dataCache.get(car).cloneWithSerialization();
         
         if (!loadedDataCache.containsKey(car)) {
-            Log.exit(-343, "!!! Tried to init load car data twice");
+            throw new IllegalStateException("!!! Tried to init load car data twice");
         }
 
         var data = loadedDataCache.get(car);
@@ -144,12 +144,10 @@ public class CarDataLoader {
             float minSusForce = (sus.preload_force + sus.stiffness * 0) * 1000;
             float maxSusForce = (sus.preload_force + sus.stiffness * (sus.max_travel - sus.min_travel)) * 1000;
             if (quarterMassForce < minSusForce) {
-                Log.e("!! Sus min range too high: " + quarterMassForce + " < " + minSusForce
-                        + ", decrease pre-load or stiffness");
+                throw new IllegalStateException("!! Sus min range too high: " + quarterMassForce + " < " + minSusForce + ", decrease pre-load or stiffness");
             }
             if (quarterMassForce > maxSusForce) {
-                Log.e("!! Sus max range too low: " + quarterMassForce + " > " + maxSusForce
-                        + ", increase pre-load or stiffness");
+                throw new IllegalStateException("!! Sus max range too low: " + quarterMassForce + " > " + maxSusForce + ", increase pre-load or stiffness");
             }
         }
     }
