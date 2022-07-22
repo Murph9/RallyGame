@@ -28,8 +28,8 @@ public class TractionCurveGraph extends Container {
 	}
 	
 	public void setCarDataConst(CarDataConst data) {
-		this.latData = data.wheelData[0].pjk_lat;
-		this.longData = data.wheelData[0].pjk_long;
+		this.latData = data.wheelData[0].traction.pjk_lat;
+		this.longData = data.wheelData[0].traction.pjk_long;
 		drawGraphs();
 	}
 

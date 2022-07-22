@@ -12,10 +12,10 @@ import rallygame.helper.Log;
 
 public class WheelDataLoader {
     
-    private static Map<Wheel, WheelTypeConst> dataCache = new HashMap<>();
+    private static Map<WheelTractionType, WheelTraction> dataCache = new HashMap<>();
 
     public WheelDataLoader() throws Exception {
-        for (var type: Wheel.values()) {
+        for (var type: WheelTractionType.values()) {
             var data = loadFromFile(type);
             dataCache.put(type, data);
         }
@@ -23,34 +23,34 @@ public class WheelDataLoader {
         // validate
         for (var data: dataCache.values()) {
             // generate the slip* max force from the car wheel data, and validate they are 'real'
-            data.pjk_lat._max = GripHelper.calcSlipMax(data.pjk_lat);
-            data.pjk_long._max = GripHelper.calcSlipMax(data.pjk_long);
+            data.pjk_lat.max = GripHelper.calcSlipMax(data.pjk_lat);
+            if (Float.isNaN(data.pjk_lat.max) || data.pjk_lat.max <= 0)
+                throw new IllegalStateException("maxLat was: '" + data.pjk_lat.max + "'.");
 
-            if (Float.isNaN(data.pjk_lat._max))
-                throw new IllegalStateException("maxLat was: '" + data.pjk_lat._max + "'.");
-            if (Float.isNaN(data.pjk_long._max))
-                throw new IllegalStateException("maxLong was: '" + data.pjk_long._max + "'.");
+            data.pjk_long.max = GripHelper.calcSlipMax(data.pjk_long);
+            if (Float.isNaN(data.pjk_long.max) || data.pjk_long.max <= 0)
+                throw new IllegalStateException("maxLong was: '" + data.pjk_long.max + "'.");
         }
     }
     
-    public WheelTypeConst get(Wheel type) {
+    public WheelTraction get(WheelTractionType type) {
         return dataCache.get(type);
     }
 
-    private WheelTypeConst loadFromFile(Wheel type) throws Exception {
+    private WheelTraction loadFromFile(WheelTractionType type) throws Exception {
         InputStream in = getClass().getResourceAsStream(type.getFileName());
-        var yaml = new Yaml(new Constructor(WheelTypeConst.class));
-        var yamlData = yaml.load(in);
+        Yaml yaml = new Yaml(new Constructor(WheelTraction.class));
+        Object yamlData = yaml.load(in);
 
         if (yamlData == null) {
             Log.e("Loading data for wheel: " + type + " did not go well.");
             return null;
         }
-        if (!(yamlData instanceof WheelTypeConst)) {
+        if (!(yamlData instanceof WheelTraction)) {
             Log.e("Loading data for wheel: " + type + " did not go that well.");
             return null;
         }
 
-        return (WheelTypeConst) yamlData;
+        return (WheelTraction) yamlData;
     }
 }

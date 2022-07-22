@@ -44,8 +44,7 @@ wheelData:
 - &w
   mass: 4.0
   modelName: models/wheel_raid_1.blend.glb
-  pjk_lat: {B: 30, C: 1.9, D: 1.8, E: 0.97}
-  pjk_long: {B: 20, C: 1.9, D: 1.8, E: 0.98}
+  tractionType: OffRoad
   radius: 0.45
   width: 0.4
 - *w

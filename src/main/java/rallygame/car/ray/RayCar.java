@@ -11,6 +11,7 @@ import com.jme3.math.Vector3f;
 
 import rallygame.car.data.CarDataConst;
 import rallygame.car.data.CarSusDataConst;
+import rallygame.car.data.WheelTraction;
 import rallygame.service.ray.IPhysicsRaycaster;
 import rallygame.service.ray.PhysicsRaycaster;
 import rallygame.service.ray.RaycasterResult;
@@ -232,12 +233,14 @@ public class RayCar implements PhysicsTickListener {
 				wheels[w_id].slipAngle = FastMath.atan2(slipa_rear, slip_div); // slip_div is questionable here
 			}
 
-			slipSimulationHacks(w_id, lastSlipAngle, lastSlipRatio);
+			var traction = carData.wheelData[w_id].traction;
+
+			slipSimulationHacks(w_id, lastSlipAngle, lastSlipRatio, traction);
 
 			// merging the forces into a traction circle
 			// normalise based on their independant max values
-			float ratiofract = Math.abs(wheels[w_id].slipRatio / carData.wheelData[w_id].maxLong);
-			float anglefract = Math.abs(wheels[w_id].slipAngle / carData.wheelData[w_id].maxLat);
+			float ratiofract = Math.abs(wheels[w_id].slipRatio / traction.pjk_lat.max);
+			float anglefract = Math.abs(wheels[w_id].slipAngle / traction.pjk_long.max);
 			float p = FastMath.sqrt(ratiofract * ratiofract + anglefract * anglefract);
 			if (p == 0) {
 				// if p is zero then both anglefract and ratiofract are 0. So to prevent a 'div 0' we just make the denominator 1
@@ -256,16 +259,16 @@ public class RayCar implements PhysicsTickListener {
 
 			// calc the longitudinal force from the slip ratio
 			wheel_force.z = (ratiofract)
-					* GripHelper.tractionFormula(carData.wheelData[w_id].pjk_long, wheels[w_id].slipRatio)
-					* GripHelper.loadFormula(carData.wheelData[w_id].pjk_long, this.wheels[w_id].susForce);
+					* GripHelper.tractionFormula(traction.pjk_long, wheels[w_id].slipRatio)
+					* GripHelper.loadFormula(traction.pjk_long, this.wheels[w_id].susForce, carData.wheelLoadQuadratic);
 			// calc the latitudinal force from the slip angle
 			wheel_force.x = -(anglefract)
-					* GripHelper.tractionFormula(carData.wheelData[w_id].pjk_lat, wheels[w_id].slipAngle)
-					* GripHelper.loadFormula(carData.wheelData[w_id].pjk_lat, this.wheels[w_id].susForce);
+					* GripHelper.tractionFormula(traction.pjk_lat, wheels[w_id].slipAngle)
+					* GripHelper.loadFormula(traction.pjk_lat, this.wheels[w_id].susForce, carData.wheelLoadQuadratic);
 
 			// braking and abs
 			float brakeCurrent2 = brakingCur;
-			if (Math.abs(wheels[w_id].slipRatio / carData.wheelData[w_id].maxLong) >= 1 && velocity.length() > 10 && brakingCur > 0)
+			if (Math.abs(wheels[w_id].slipRatio / traction.pjk_long.max) >= 1 && velocity.length() > 10 && brakingCur > 0)
 				brakeCurrent2 *= 0; // abs (which i think works a bit well)
 
 			// add the wheel force after merging the forces
@@ -287,33 +290,33 @@ public class RayCar implements PhysicsTickListener {
 		planarGForce.multLocal(1 / carData.mass); // F=m*a => a=F/m
 	}
 
-	private void slipSimulationHacks(int w_id, float lastSlipAngle, float lastSlipRatio) {
+	private void slipSimulationHacks(int w_id, float lastSlipAngle, float lastSlipRatio, WheelTraction traction) {
 		// Hack1: prevent 'losing' traction through a large integration step, by detecting jumps past the curve peak
 		// this should only affect this class as its only affecting the force by affecting where on curve the current state is
-		if (Math.abs(lastSlipAngle) < carData.wheelData[w_id].maxLat
-				&& Math.abs(wheels[w_id].slipAngle) > carData.wheelData[w_id].maxLat) {
-			wheels[w_id].slipAngle = carData.wheelData[w_id].maxLat * FastMath.sign(wheels[w_id].slipAngle);
+		if (Math.abs(lastSlipAngle) < traction.pjk_lat.max
+				&& Math.abs(wheels[w_id].slipAngle) > traction.pjk_lat.max) {
+			wheels[w_id].slipAngle = traction.pjk_lat.max * FastMath.sign(wheels[w_id].slipAngle);
 		}
-		if (Math.abs(lastSlipAngle) > carData.wheelData[w_id].maxLat
-				&& Math.abs(wheels[w_id].slipAngle) < carData.wheelData[w_id].maxLat) {
-			wheels[w_id].slipAngle = carData.wheelData[w_id].maxLat * FastMath.sign(lastSlipAngle);
+		if (Math.abs(lastSlipAngle) > traction.pjk_lat.max
+				&& Math.abs(wheels[w_id].slipAngle) < traction.pjk_lat.max) {
+			wheels[w_id].slipAngle = traction.pjk_lat.max * FastMath.sign(lastSlipAngle);
 		}
 		if (brakingCur == 0) { // needs to be disabled during braking as it prevents you from stopping
-			if (Math.abs(lastSlipRatio) < carData.wheelData[w_id].maxLong
-					&& Math.abs(wheels[w_id].slipRatio) > carData.wheelData[w_id].maxLong) {
-				wheels[w_id].slipRatio = carData.wheelData[w_id].maxLong * FastMath.sign(wheels[w_id].slipRatio);
+			if (Math.abs(lastSlipRatio) < traction.pjk_long.max
+					&& Math.abs(wheels[w_id].slipRatio) > traction.pjk_long.max) {
+				wheels[w_id].slipRatio = traction.pjk_long.max * FastMath.sign(wheels[w_id].slipRatio);
 			}
-			if (Math.abs(lastSlipRatio) > carData.wheelData[w_id].maxLong
-					&& Math.abs(wheels[w_id].slipRatio) < carData.wheelData[w_id].maxLong) {
-				wheels[w_id].slipRatio = carData.wheelData[w_id].maxLong * FastMath.sign(lastSlipRatio);
+			if (Math.abs(lastSlipRatio) > traction.pjk_long.max
+					&& Math.abs(wheels[w_id].slipRatio) < traction.pjk_long.max) {
+				wheels[w_id].slipRatio = traction.pjk_long.max * FastMath.sign(lastSlipRatio);
 			}
 		}
 		// Hack2: prevent flipping traction over 0 too fast, by always applying 0
 		// inbetween
-		if (Math.abs(lastSlipAngle) * carData.wheelData[w_id].maxLat < 0) { // will be negative if they have both signs
+		if (Math.abs(lastSlipAngle) * traction.pjk_lat.max < 0) { // will be negative if they have both signs
 			wheels[w_id].slipAngle = 0;
 		}
-		if (Math.abs(lastSlipRatio) * carData.wheelData[w_id].maxLong < 0) { // will be negative if they have both signs
+		if (Math.abs(lastSlipRatio) * traction.pjk_long.max < 0) { // will be negative if they have both signs
 			wheels[w_id].slipRatio = 0;
 		}
 	}

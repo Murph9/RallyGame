@@ -70,7 +70,7 @@ class CarStats {
         stats.add(new Stat("Drag: ", data.areo_drag + "(" + data.areo_lineardrag + ")"));
         stats.add(new Stat("Nitro", data.nitro_on ? data.nitro_force : 0));
         stats.add(new Stat("Downforce", data.areo_downforce));
-        float bestLatForce = GripHelper.calcMaxLoad(data.wheelData[0].pjk_lat);
+        float bestLatForce = GripHelper.calcMaxLoad(data.wheelData[0].traction.pjk_lat, data.wheelLoadQuadratic);
         stats.add(new Stat("Handling", data.mass * 10 / bestLatForce));
 
         normalisedStats = new NormalisedStats(data);
@@ -111,8 +111,8 @@ class NormalisedStats {
     public NormalisedStats(CarDataConst data) {
         accel = skewLog(data.getMaxPower().first / data.mass, -1, 0.75f);
         topSpeed = skewLog(data.getMaxPower().first / Math.abs(data.quadraticDrag(new Vector3f(27, 0, 0)).x), -2, 10);
-        handling = skewLog(data.mass / GripHelper.calcMaxLoad(data.wheelData[0].pjk_lat), -1, 1);
-        braking = skewLog(Math.min(data.brakeMaxTorque, GripHelper.calcMaxLoad(data.wheelData[0].pjk_long)) / data.mass, 0, 10);
+        handling = skewLog(data.mass / GripHelper.calcMaxLoad(data.wheelData[0].traction.pjk_lat, data.wheelLoadQuadratic), -1, 1);
+        braking = skewLog(Math.min(data.brakeMaxTorque, GripHelper.calcMaxLoad(data.wheelData[0].traction.pjk_long, data.wheelLoadQuadratic)) / data.mass, 0, 10);
     }
 
     // attempting to scale all values onto 0-1 so that we can display them like any game

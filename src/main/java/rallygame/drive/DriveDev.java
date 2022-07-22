@@ -27,7 +27,7 @@ public class DriveDev extends DriveBase {
 	private TractionCurveGraph wheelGraphs;
 	
 	public DriveDev(IDriveDone done) {
-    	super(done, Car.Rally, new StaticWorldBuilder(StaticWorld.track2));
+    	super(done, Car.Runner, new StaticWorldBuilder(StaticWorld.track2));
     }
 	
 	@Override

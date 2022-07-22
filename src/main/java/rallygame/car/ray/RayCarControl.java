@@ -183,7 +183,7 @@ public class RayCarControl implements ICarPowered, ICarControlled {
 
         // this is magic, but: minimum should be bast pjk lat, but it doesn't catch up to the turning angle required
         // so we just add some of the angular vel value to it
-        return rayCar.wheels[0].data.maxLat + angularVel.length()*0.125f; //constant needs minor adjustments
+        return rayCar.wheels[0].data.traction.pjk_lat.max + angularVel.length()*0.125f; //constant needs minor adjustments
         // remember that this value is clamped after this method is called
     }
 

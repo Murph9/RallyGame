@@ -78,9 +78,10 @@ public class CarDataConst implements Serializable {
 	public float w_steerAngle; //in radians
 	
 	//do not put wheel offset in the wheel obj, as they shouldn't know because the car determines their position
+	public float wheelLoadQuadratic;
 	public Vector3f[] wheelOffset;
 	public WheelDataConst[] wheelData;
-		
+	
 	//no idea category
 	public float minDriftAngle;
 	public Vector3f JUMP_FORCE;

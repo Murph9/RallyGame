@@ -44,8 +44,7 @@ wheelData:
 - &w
   mass: 10.0
   modelName: models/Wagon_Wheel.blend.glb
-  pjk_lat: {B: 160, C: 1.24, D: 1, E: 0.45}
-  pjk_long: {B: 135, C: 1.8, D: 1.3, E: 0.98}
+  tractionType: Wood
   radius: 0.5
   width: 0.15
 - *w

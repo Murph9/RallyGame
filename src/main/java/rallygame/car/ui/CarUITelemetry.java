@@ -139,16 +139,17 @@ public class CarUITelemetry extends BaseAppState {
         rootNode.attachChild(gForceDotPosition);
 
         // traction circle (for the g dots)
+        var data = p.getCarData();
         float gravity = p.getPhysicsObject().getGravity().length();
-        float maxLat = GripHelper.calcMaxLoad(p.getCarData().wheelData[0].pjk_lat);
-        float maxLong = GripHelper.calcMaxLoad(p.getCarData().wheelData[0].pjk_long);
+        float maxLat = GripHelper.calcMaxLoad(data.wheelData[0].traction.pjk_lat, data.wheelLoadQuadratic);
+        float maxLong = GripHelper.calcMaxLoad(data.wheelData[0].traction.pjk_long, data.wheelLoadQuadratic);
         gForceGeom = rallygame.helper.Geo.getXYCircleGeometry(24);
         gForceGeom.setLocalTranslation(gcenter);
         Material m = white.clone();
         m.getAdditionalRenderState().setWireframe(true);
         gForceGeom.setMaterial(m);
-        gForceGeom.setLocalScale(2 * G_FORCE_DOT_SCALE * maxLat / (gravity * p.getCarData().mass),
-                2 * G_FORCE_DOT_SCALE * maxLong / (gravity * p.getCarData().mass), 1);
+        gForceGeom.setLocalScale(2 * G_FORCE_DOT_SCALE * maxLat / (gravity * data.mass),
+                2 * G_FORCE_DOT_SCALE * maxLong / (gravity * data.mass), 1);
         rootNode.attachChild(gForceGeom);
         
         gForceText = createText(guiFont, ColorRGBA.Black, gcenter.subtract(40, 5, 0));
@@ -196,7 +197,9 @@ public class CarUITelemetry extends BaseAppState {
             Material m = new Material(getApplication().getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
             w.gripValue.setText(String.format("%.2f slip", wheel.skidFraction));
             w.wheelRot.setText(String.format("%.2f rad/s", wheel.radSec));
-            w.groundType.setText(wheel.lastGroundType.toString());
+            if (wheel.lastGroundType != null)
+                w.groundType.setText(wheel.lastGroundType.toString());
+            
             w.engineTorque.setText(H.decimalFormat(p.getWheelTorque(i), "0000.0") + " Nm");
             m.setColor("Color", getGripBoxColour(wheel.skidFraction));
             w.gripBox.setMaterial(m);

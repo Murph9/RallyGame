@@ -1,4 +1,4 @@
-!!car.data.WheelTypeConst
+!!car.data.WheelTraction
 name: oldRoad
 pjk_lat: {B: 20, C: 1.24, D: 1.8, E: 0.45}
 pjk_long: {B: 15, C: 1.8, D: 2, E: 0.98}

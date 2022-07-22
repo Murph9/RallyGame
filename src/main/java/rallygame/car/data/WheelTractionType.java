@@ -1,14 +1,14 @@
 package rallygame.car.data;
 
-public enum Wheel {
-    Road("name"),
+public enum WheelTractionType {
+    Road("road"),
     Track("track"),
-    oldRoad("oldRoad"),
+    OldRoad("oldRoad"),
     OffRoad("offroad"),
     Wood("wood");
 
     private String name;
-    Wheel(String name) {
+    WheelTractionType(String name) {
         this.name = name;
     }
 
@@ -16,5 +16,5 @@ public enum Wheel {
         return String.format(YAML_WHEEL_DATA, this.name);
     }
 
-    private static final String YAML_WHEEL_DATA = "/cardata/wheel/{0}.yaml";
+    private static final String YAML_WHEEL_DATA = "/wheeldata/%s.yaml";
 }

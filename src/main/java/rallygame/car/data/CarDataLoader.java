@@ -24,10 +24,18 @@ public class CarDataLoader {
     
     private static final String YAML_CAR_DATA = "/cardata/";
 
+    private WheelDataLoader wheelData;
     private static Map<Car, CarDataConst> loadedDataCache = new HashMap<>();
     private static Map<Car, CarDataConst> dataCache = new HashMap<>();
 
     public CarDataLoader() {
+        try {
+            wheelData = new WheelDataLoader();
+        } catch (Exception e1) {
+            e1.printStackTrace();
+            Log.exit(-344, "!!! wheel data load really failed");
+        }
+
         for (var type: Car.values()) {
             CarDataConst result = null;
             try {
@@ -79,7 +87,7 @@ public class CarDataLoader {
 
     public void resetAndValidateData(CarDataConst data, AssetManager am, Vector3f gravity) {
         updateFromModelData(data, am);
-        updateGripValues(data, gravity);
+        updateWheelValues(data, gravity);
         updateAutoGearChanges(data);
     }
 
@@ -112,9 +120,30 @@ public class CarDataLoader {
        
     }
 
-    private void updateGripValues(CarDataConst data, Vector3f gravity) {
+    private void updateWheelValues(CarDataConst data, Vector3f gravity) {
+        if (data.wheelData == null)
+            throw new IllegalStateException("Please do set wheelData in the yaml file");
+        
+        // load from the Wheel loader
+        for (int i = 0; i < data.wheelData.length; i++) {
+            if (data.wheelData[i].tractionType == null)
+                throw new IllegalStateException("Traction type not set in " + data.name + "for wheel" + i);
+
+            var wheelType = WheelTractionType.valueOf(data.wheelData[i].tractionType);
+            data.wheelData[i].traction = this.wheelData.get(wheelType);
+
+            var pjk = data.wheelData[i].traction.pjk_lat;
+            pjk.max = GripHelper.calcSlipMax(pjk);
+            
+            pjk = data.wheelData[i].traction.pjk_long;
+            pjk.max = GripHelper.calcSlipMax(pjk);
+        }
+        
         // Wheel validation
         float quarterMassForce = Math.abs(gravity.y) * data.mass / 4f;
+        
+        // generate the load quadratic value
+        data.wheelLoadQuadratic = 1/(quarterMassForce*4);
         for (int i = 0; i < data.wheelData.length; i++) {
             CarSusDataConst sus = data.susByWheelNum(i);
 
@@ -129,21 +158,6 @@ public class CarDataLoader {
                 Log.e("!! Sus max range too low: " + quarterMassForce + " > " + maxSusForce
                         + ", increase pre-load or stiffness");
             }
-
-            WheelDataConst wheel = data.wheelData[i];
-            // generate the slip* max force from the car wheel data, and validate they are 'real'
-            wheel.maxLat = GripHelper.calcSlipMax(wheel.pjk_lat);
-            wheel.maxLong = GripHelper.calcSlipMax(wheel.pjk_long);
-
-            if (Float.isNaN(wheel.maxLat))
-                throw new IllegalStateException("maxLat was: '" + wheel.maxLat + "'.");
-            if (Float.isNaN(wheel.maxLong))
-                throw new IllegalStateException("maxLong was: '" + wheel.maxLong + "'.");
-
-            // generate the load quadratic values
-            // TODO move to car data (as it is car specific)
-            wheel.pjk_lat.loadQuadratic = 1/(quarterMassForce*3);
-            wheel.pjk_long.loadQuadratic = 1/(quarterMassForce*3);
         }
     }
 

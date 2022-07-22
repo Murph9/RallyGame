@@ -1,4 +1,4 @@
-!!car.data.WheelTypeConst
+!!car.data.WheelTraction
 name: offroad
 pjk_lat: {B: 30, C: 1.9, D: 1.8, E: 0.97}
 pjk_long: {B: 20, C: 1.9, D: 1.8, E: 0.98}

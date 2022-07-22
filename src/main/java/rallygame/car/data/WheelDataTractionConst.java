@@ -11,9 +11,7 @@ public class WheelDataTractionConst implements Serializable {
     public float D;
     public float E;
 
-    public float loadQuadratic;
-
-    public float _max;
+    public float max;
 
     public WheelDataTractionConst() {
     }
@@ -22,12 +20,11 @@ public class WheelDataTractionConst implements Serializable {
         B = copy.B;
         C = copy.C;
         D = copy.D;
-        loadQuadratic = copy.loadQuadratic;
         E = copy.E;
     }
 
     @Override
     public String toString() {
-        return "B:" + B + ",C:" + C + ",D1:" + D + ",quad:" + loadQuadratic + ",E:" + E;
+        return "B:" + B + ",C:" + C + ",D:" + D + ",E:" + E;
     }
 }

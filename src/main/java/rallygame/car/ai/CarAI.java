@@ -40,8 +40,8 @@ public abstract class CarAI implements ICarAI {
         this.car = car;
         this.input = car.getInput();
 		
-        BEST_LAT_FORCE = GripHelper.calcMaxLoad(car.getCarData().wheelData[0].pjk_lat);
-        BEST_LONG_FORCE = GripHelper.calcMaxLoad(car.getCarData().wheelData[0].pjk_long);
+        BEST_LAT_FORCE = GripHelper.calcMaxLoad(car.getCarData().wheelData[0].traction.pjk_lat, car.getCarData().wheelLoadQuadratic);
+        BEST_LONG_FORCE = GripHelper.calcMaxLoad(car.getCarData().wheelData[0].traction.pjk_long, car.getCarData().wheelLoadQuadratic);
 
 		//ignore all turning speed factor code for AIs
 		onEvent("IgnoreSteeringSpeedFactor", true);

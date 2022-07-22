@@ -46,8 +46,7 @@ wheelData:
 - &w
   mass: 10.0
   modelName: models/na_w_1_out.blend.glb
-  pjk_lat: {B: 30, C: 1.24, D: 1.8, E: 0.45}
-  pjk_long: {B: 25, C: 1.8, D: 2, E: 0.98}
+  tractionType: Road
   radius: 0.289 #https://www.tyresizecalculator.com/tyre-wheel-calculators/tire-size-calculator-tire-dimensions
   width: 0.185
 - *w
