@@ -136,6 +136,7 @@ public class CarDataLoader { //CarDataFactory
                 throw new IllegalStateException("maxLong was: '" + wheel.maxLong + "'.");
 
             // generate the load quadratic values
+            // TODO move to car data (as it is car specific)
             wheel.pjk_lat.loadQuadratic = 1/(quarterMassForce*3);
             wheel.pjk_long.loadQuadratic = 1/(quarterMassForce*3);
         }

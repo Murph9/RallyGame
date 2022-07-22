@@ -13,6 +13,8 @@ public class WheelDataTractionConst implements Serializable {
 
     public float loadQuadratic;
 
+    public float _max;
+
     public WheelDataTractionConst() {
     }
 
