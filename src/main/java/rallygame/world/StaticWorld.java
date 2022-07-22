@@ -29,13 +29,14 @@ public enum StaticWorld {
 	
 	block_fort("block_fort", 10, new Vector3f(-20,0,-12), null),
 	rainbow_road("rainbow_road", 1, null, null),
-	wuhu_island("wuhu_island", 2, null, new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y)),
+//	wuhu_island("wuhu_island", 2, null, new Quaternion().fromAngleAxis(FastMath.HALF_PI, Vector3f.UNIT_Y)),
 
     //checkpoints
     lakelooproad("lakelooproad", 1, null, null),
 
 	//debug ones:
-	slope_test("slope_test", 1, null, null)
+	slope_test("slope_test", 1, null, null),
+	surfaceTest("surfaceTest", 1, null, null)
 //	paris1("paris1", 1, new Vector3f(40,75,0)), //be careful with this one, large
 //	track1("track1", 1, new Vector3f(255.12906f, 0.7663503f, -40.224197f)),
 //	track3("track3", 1, new Vector3f(-24.227085f, 0.7908745f, 98.21415f)),

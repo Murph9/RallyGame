@@ -13,6 +13,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 import rallygame.car.data.CarModelData;
+import rallygame.car.data.SurfaceType;
 import rallygame.helper.Geo;
 import rallygame.helper.Log;
 
@@ -68,6 +69,10 @@ public class LoadModelWrapper {
     }
 
     private static Geometry setMatColour(AssetManager am, Geometry g, ColorRGBA color) {
+        return setMatColour(am, g, color, SurfaceType.Normal);
+    }
+
+    private static Geometry setMatColour(AssetManager am, Geometry g, ColorRGBA color, SurfaceType type) {
         if (color == null) {
             throw new IllegalArgumentException("Please don't send me a null colour");
         }
@@ -75,7 +80,9 @@ public class LoadModelWrapper {
         Material baseMat = new Material(am, "MatDefs/Base.j3md");
         baseMat.setColor("Color", color);
         baseMat.setFloat("RepeatingPatternSize", 15);
-        //baseMat.setColor("RepeatingColour", color); // TODO unused colour for now
+        if (type != null && type != SurfaceType.Normal) {
+            baseMat.setColor("RepeatingColour", ColorRGBA.Black); //TODO better way of getting a pattern out of the material
+        }
         Material mat = g.getMaterial();
         if (mat != null) // keep the name if given
             baseMat.setName(mat.getName());
@@ -96,11 +103,12 @@ public class LoadModelWrapper {
         Material mat = g.getMaterial();
         ColorRGBA colour = MaterialColourer.getColourFromMaterialName(mat);
         if (colour == null) {
-            throw new IllegalArgumentException("Material " + mat.getName() + " for geom: " + g.getName()
-                    + " doesn't have a colour set");
+            Log.e("Material " + mat.getName() + " for geom: " + g.getName() + " doesn't have a colour set");
+            colour = new ColorRGBA(ColorRGBA.Magenta);
         }
 
-        return setMatColour(am, g, colour);
+        SurfaceType type = MaterialColourer.getSurfaceTypeFromMaterialName(mat);
+        return setMatColour(am, g, colour, type);
     }
 
     /** Sets the colour of the primary tagged part */

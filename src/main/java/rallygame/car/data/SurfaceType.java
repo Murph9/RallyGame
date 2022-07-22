@@ -3,13 +3,17 @@ package rallygame.car.data;
 public enum SurfaceType {
     Normal,
     Dirt,
-    Snow,
     Ice,
     Grass;
 
     public static SurfaceType fromString(String str) {
-        //if (str.contains("ss"))
-            //return Grass;
+        str = str.toLowerCase();
+        if (str.contains("@dirt"))
+            return SurfaceType.Dirt;
+        if (str.contains("@ice"))
+            return SurfaceType.Ice;
+        if (str.contains("@grass"))
+            return SurfaceType.Grass;
         return SurfaceType.Normal;
     }
 }

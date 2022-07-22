@@ -3,6 +3,7 @@ package rallygame.car.data.wheel;
 import java.io.Serializable;
 
 import rallygame.car.data.SurfaceType;
+import rallygame.car.ray.GripHelper;
 
 public class WheelTraction implements Serializable {
     public String name;
@@ -13,13 +14,29 @@ public class WheelTraction implements Serializable {
 		if (type == null || type == SurfaceType.Normal)
 			return pjk_lat;
 
-		return null; // TODO which will throw somewhere later
+		var result = new WheelDataTractionConst(pjk_lat);
+		switch(type) {
+			case Dirt: result.D *= 0.8f; break;
+			case Grass: result.D *= 0.7f; break;
+			case Ice: result.D *= 0.4f; break;
+			default:
+		}
+		result.max = GripHelper.calcSlipMax(result); // TODO VERY LARGE HACK
+		return result;
 	}
 
 	public WheelDataTractionConst getLongTractionFor(SurfaceType type) {
 		if (type == null || type == SurfaceType.Normal)
 			return pjk_long;
 
-		return null; // TODO which will throw somewhere later
+		var result = new WheelDataTractionConst(pjk_long);
+		switch(type) {
+			case Dirt: result.D *= 0.8f; break;
+			case Grass: result.D *= 0.7f; break;
+			case Ice: result.D *= 0.4f; break;
+			default:
+		}
+		result.max = GripHelper.calcSlipMax(result); // TODO VERY LARGE HACK
+		return result;
 	}
 }
