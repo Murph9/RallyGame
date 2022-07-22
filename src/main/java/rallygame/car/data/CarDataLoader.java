@@ -19,15 +19,27 @@ import rallygame.car.ray.GripHelper;
 import rallygame.helper.Duo;
 import rallygame.helper.Log;
 
-/** Private class for CarManager, manages the CarDataConst file */
-public class CarDataLoader { //CarDataFactory
+/** Private class for CarManager, manages the CarDataConst class */
+public class CarDataLoader {
     
     private static final String YAML_CAR_DATA = "/cardata/";
 
+    private static Map<Car, CarDataConst> loadedDataCache = new HashMap<>();
     private static Map<Car, CarDataConst> dataCache = new HashMap<>();
 
-    public void clearLoadingCache() {
-        dataCache.clear();
+    public CarDataLoader() {
+        for (var type: Car.values()) {
+            CarDataConst result = null;
+            try {
+                result = this.loadFromFile(type.getCarName());
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.exit(-343, "!!! car data load really failed");
+            }
+            
+            result.name = type.getCarName();
+            loadedDataCache.put(type, result);
+        }
     }
 
     private CarDataConst loadFromFile(String carName) throws Exception {
@@ -51,28 +63,21 @@ public class CarDataLoader { //CarDataFactory
         if (dataCache.containsKey(car))
             return dataCache.get(car).cloneWithSerialization();
         
-        String carName = car.getCarName();
-        Log.p("Loading file data for car type: " + carName);
-
-        CarDataConst data = null;
-        try {
-            data = loadFromFile(carName);
-            data.name = carName;
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.exit(-343, "!!! car data load really failed");
+        if (!loadedDataCache.containsKey(car)) {
+            Log.exit(-343, "!!! Tried to init load car data twice");
         }
-        
-        updateFromModelData(data, am);
-        updateGripValues(data, gravity);
-        updateAutoGearChanges(data);
 
+        var data = loadedDataCache.get(car);
+        loadedDataCache.remove(car); // so it can only be loaded once
+
+        resetAndValidateData(data, am, gravity);
+        
         dataCache.put(car, data);
 
         return data.cloneWithSerialization();
     }
 
-    public void reValidateData(CarDataConst data, AssetManager am, Vector3f gravity) {
+    public void resetAndValidateData(CarDataConst data, AssetManager am, Vector3f gravity) {
         updateFromModelData(data, am);
         updateGripValues(data, gravity);
         updateAutoGearChanges(data);
