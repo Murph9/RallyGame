@@ -23,8 +23,6 @@ import rallygame.helper.Log;
 /** Private class for CarManager, manages the CarDataConst class */
 public class CarDataLoader {
     
-    private static final String YAML_CAR_DATA = "/cardata/";
-
     private WheelDataLoader wheelData;
     private static Map<Car, CarDataConst> loadedDataCache = new HashMap<>();
     private static Map<Car, CarDataConst> dataCache = new HashMap<>();
@@ -40,28 +38,28 @@ public class CarDataLoader {
         for (var type: Car.values()) {
             CarDataConst result = null;
             try {
-                result = this.loadFromFile(type.getCarName());
+                result = this.loadFromFile(type);
             } catch (Exception e) {
                 e.printStackTrace();
                 Log.exit(-343, "!!! car data load really failed");
             }
             
-            result.name = type.getCarName();
+            result.name = type.getName();
             loadedDataCache.put(type, result);
         }
     }
 
-    private CarDataConst loadFromFile(String carName) throws Exception {
-        InputStream in = getClass().getResourceAsStream(YAML_CAR_DATA + carName + ".yaml");
+    private CarDataConst loadFromFile(Car car) throws Exception {
+        InputStream in = getClass().getResourceAsStream(car.getFileName());
         Yaml yaml = new Yaml(new Constructor(CarDataConst.class));
         Object yamlData = yaml.load(in);
 
         if (yamlData == null) {
-            Log.e("Loading data for car: " + carName + " did not go well.");
+            Log.e("Loading data for car: " + car.getName() + " did not go well.");
             return null;
         }
         if (!(yamlData instanceof CarDataConst)) {
-            Log.e("Loading data for car: " + carName + " did not go that well.");
+            Log.e("Loading data for car: " + car.getName() + " did not go that well.");
             return null;
         }
 
@@ -80,7 +78,7 @@ public class CarDataLoader {
         loadedDataCache.remove(car); // so it can only be loaded once
 
         loadFromModel(data, am);
-        validateData(data, am, gravity);
+        validateData(data, gravity);
         
         dataCache.put(car, data);
 
@@ -101,13 +99,13 @@ public class CarDataLoader {
         }
     }
 
-    public void validateData(CarDataConst data, AssetManager am, Vector3f gravity) {
-        validateModelData(data, am);
+    public void validateData(CarDataConst data, Vector3f gravity) {
+        validateModelData(data);
         updateWheelValues(data, gravity);
         updateAutoGearChanges(data);
     }
 
-    private void validateModelData(CarDataConst data, AssetManager am) {
+    private void validateModelData(CarDataConst data) {
         // validate that the wheels are in the correct quadrant for a car
         if (data.wheelOffset[0].x < 0 || data.wheelOffset[0].z < 0)
             throw new IllegalStateException(CarPart.Wheel_FL.name() + " should be in pos x and pos z");

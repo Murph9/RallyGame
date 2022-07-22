@@ -31,7 +31,10 @@ public enum Car {
 		this.carName = carName;
 	}
 
-	public String getCarName() {
-		return carName;
+	public String getName() { return this.carName; }
+	public String getFileName() {
+		return String.format(YAML_CAR_DATA, this.carName);
 	}
+	
+    private static final String YAML_CAR_DATA = "/cardata/%s.yaml";
 }

@@ -20,9 +20,8 @@ public class WheelDataLoader {
             dataCache.put(type, data);
         }
 
-        // validate
+        // generate the slip* max force from the car wheel data, and validate they are 'real'
         for (var data: dataCache.values()) {
-            // generate the slip* max force from the car wheel data, and validate they are 'real'
             data.pjk_lat.max = GripHelper.calcSlipMax(data.pjk_lat);
             if (Float.isNaN(data.pjk_lat.max) || data.pjk_lat.max <= 0)
                 throw new IllegalStateException("maxLat was: '" + data.pjk_lat.max + "'.");
