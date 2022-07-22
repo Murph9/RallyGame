@@ -17,7 +17,6 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import rallygame.car.data.CarModelData.CarPart;
 import rallygame.car.data.wheel.WheelDataLoader;
 import rallygame.car.data.wheel.WheelTractionType;
-import rallygame.car.ray.GripHelper;
 import rallygame.helper.Duo;
 import rallygame.helper.Log;
 
@@ -80,20 +79,15 @@ public class CarDataLoader {
         var data = loadedDataCache.get(car);
         loadedDataCache.remove(car); // so it can only be loaded once
 
-        resetAndValidateData(data, am, gravity);
+        loadFromModel(data, am);
+        validateData(data, am, gravity);
         
         dataCache.put(car, data);
 
         return data.cloneWithSerialization();
     }
 
-    public void resetAndValidateData(CarDataConst data, AssetManager am, Vector3f gravity) {
-        updateFromModelData(data, am);
-        updateWheelValues(data, gravity);
-        updateAutoGearChanges(data);
-    }
-
-    private void updateFromModelData(CarDataConst data, AssetManager am) {
+    private void loadFromModel(CarDataConst data, AssetManager am) {
         // init car static data based on the 3d model
         CarModelData modelData = new CarModelData(am, data.carModel, data.wheelModel);
         if (modelData.foundSomething() && modelData.foundAllWheels()) {
@@ -105,10 +99,15 @@ public class CarDataLoader {
         } else {
             throw new IllegalStateException("!!! Missing car model wheel position data for: " + data.carModel);
         }
+    }
 
-        if (!modelData.hasCollision())
-            throw new IllegalStateException(CarPart.Collision.name() + " should exist.");
+    public void validateData(CarDataConst data, AssetManager am, Vector3f gravity) {
+        validateModelData(data, am);
+        updateWheelValues(data, gravity);
+        updateAutoGearChanges(data);
+    }
 
+    private void validateModelData(CarDataConst data, AssetManager am) {
         // validate that the wheels are in the correct quadrant for a car
         if (data.wheelOffset[0].x < 0 || data.wheelOffset[0].z < 0)
             throw new IllegalStateException(CarPart.Wheel_FL.name() + " should be in pos x and pos z");
@@ -133,12 +132,6 @@ public class CarDataLoader {
 
             var wheelType = WheelTractionType.valueOf(data.wheelData[i].tractionType);
             data.wheelData[i].traction = this.wheelData.get(wheelType);
-
-            var pjk = data.wheelData[i].traction.pjk_lat;
-            pjk.max = GripHelper.calcSlipMax(pjk);
-            
-            pjk = data.wheelData[i].traction.pjk_long;
-            pjk.max = GripHelper.calcSlipMax(pjk);
         }
         
         // Wheel validation

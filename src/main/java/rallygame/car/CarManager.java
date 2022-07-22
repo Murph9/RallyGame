@@ -83,7 +83,7 @@ public class CarManager extends BaseAppState {
             adjuster.applyAll(data);
         }
         
-        loader.resetAndValidateData(data, getApplication().getAssetManager(), grav);
+        loader.validateData(data, getApplication().getAssetManager(), grav);
         return data;
     }
 
