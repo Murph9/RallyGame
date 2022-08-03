@@ -3,7 +3,10 @@ MaterialDef Base {
     MaterialParameters {
         Color Color
         Float RepeatingPatternSize
-        Color RepeatingColour
+        Boolean Checker
+        Boolean DiagStriped
+        Boolean Squared
+        Boolean Picnic
 
         // Alpha threshold for fragment discarding
         Float AlphaDiscardThreshold (AlphaTestFallOff)
@@ -20,7 +23,10 @@ MaterialDef Base {
 
         Defines {
             DISCARD_ALPHA : AlphaDiscardThreshold
-            CROSS_HATCH: RepeatingColour
+            T_CHECKER: Checker
+            T_DIAG_STRIPED: DiagStriped
+            T_SQUARED: Squared
+            T_PICNIC: Picnic
         }
     }
 

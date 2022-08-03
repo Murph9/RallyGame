@@ -80,9 +80,23 @@ public class LoadModelWrapper {
         Material baseMat = new Material(am, "MatDefs/Base.j3md");
         baseMat.setColor("Color", color);
         baseMat.setFloat("RepeatingPatternSize", 15);
-        if (type != null && type != SurfaceType.Normal) {
-            baseMat.setColor("RepeatingColour", ColorRGBA.Black); //TODO better way of getting a pattern out of the material
+        if (type != null) {
+            switch (type) {
+                case Dirt:
+                    baseMat.setBoolean("Checker", true);
+                    break;
+                case Grass:
+                    baseMat.setBoolean("Picnic", true);
+                    break;
+                case Ice:
+                    baseMat.setBoolean("DiagStriped", true);
+                    break;
+                case Normal:
+                default:
+                    break;
+            }
         }
+
         Material mat = g.getMaterial();
         if (mat != null) // keep the name if given
             baseMat.setName(mat.getName());

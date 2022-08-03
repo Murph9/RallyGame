@@ -4,12 +4,8 @@
     uniform float m_AlphaDiscardThreshold;
 #endif
 
-#if defined(CROSS_HATCH)
-    uniform float m_RepeatingPatternSize;
-#endif
-
+uniform float m_RepeatingPatternSize;
 uniform vec4 m_Color;
-uniform vec4 m_RepeatingColour;
 
 varying vec3 worldUV;
 
@@ -19,6 +15,7 @@ float mymod(float x, float y){
 
 void main() {
     vec4 color = m_Color;
+    float diff = 0.8; //TODO a arg
 
     #if defined(DISCARD_ALPHA)
         if (color.a < m_AlphaDiscardThreshold) {
@@ -26,14 +23,40 @@ void main() {
         }
     #endif
 
-    #if defined(CROSS_HATCH)
-        vec3 _worldUV = vec3(mymod(worldUV.x, m_RepeatingPatternSize), mymod(worldUV.y, m_RepeatingPatternSize), mymod(worldUV.z, m_RepeatingPatternSize));
-        float repeatingSizeHalf = 0.5 * m_RepeatingPatternSize;
-        if (_worldUV.x > repeatingSizeHalf && _worldUV.z < repeatingSizeHalf)
-            color *= 0.8;//m_RepeatingColour;
-        if (_worldUV.x < repeatingSizeHalf && _worldUV.z > repeatingSizeHalf)
-            color *= 0.8;//m_RepeatingColour;
+    vec3 _worldUV = vec3(mymod(worldUV.x, m_RepeatingPatternSize), mymod(worldUV.y, m_RepeatingPatternSize), mymod(worldUV.z, m_RepeatingPatternSize));
+    float repeatingSizeHalf = 0.5 * m_RepeatingPatternSize;
+
+    #ifdef T_CHECKER
+        if (_worldUV.x > repeatingSizeHalf && _worldUV.z < repeatingSizeHalf) {
+            color *= diff;
+        }
+        if (_worldUV.x < repeatingSizeHalf && _worldUV.z > repeatingSizeHalf) {
+            color *= diff;
+        }
     #endif
-    
+
+    #ifdef T_SQUARED
+        if (_worldUV.x < repeatingSizeHalf && _worldUV.z < repeatingSizeHalf) {
+            color *= diff;
+        }
+    #endif
+
+    #ifdef T_PICNIC
+        if (_worldUV.x < repeatingSizeHalf) {
+            color *= diff;
+        }
+        if (_worldUV.z < repeatingSizeHalf) {
+            color *= diff;
+        }
+    #endif
+
+    #ifdef T_DIAG_STRIPED
+        if (_worldUV.x + _worldUV.z > repeatingSizeHalf && _worldUV.x + _worldUV.z < m_RepeatingPatternSize) {
+            color *= diff;
+        } else if (_worldUV.x + _worldUV.z > m_RepeatingPatternSize*1.5) {
+            color *= diff;
+        }
+    #endif
+
     gl_FragColor = color;
 }
