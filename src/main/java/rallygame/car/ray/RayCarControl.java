@@ -156,7 +156,7 @@ public class RayCarControl implements ICarPowered, ICarControlled {
                     continue;
                 }
 
-                wheel.lastGroundType = SurfaceType.fromString(result.getGeometry().getMaterial().getName());
+                wheel.lastGroundType = SurfaceType.fromMaterialName(result.getGeometry().getMaterial());
                 break; //only use the closest one
             }
         }

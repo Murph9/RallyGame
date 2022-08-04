@@ -12,7 +12,6 @@ public class MaterialColourer {
     
     // geometry material name format: <blah blah>[<colour>] [<possibly other square bracket sections>]
     private static Pattern MAT_COLOUR_NAME_REGEX = Pattern.compile("\\[(#.+?)\\]");
-    private static Pattern MAT_SURFACE_NAME_REGEX = Pattern.compile("\\[(@\\w+)\\]");
 
     public static ColorRGBA getColourFromMaterialName(Material m) {
         if (m == null)
@@ -48,19 +47,6 @@ public class MaterialColourer {
         if (m == null)
             return SurfaceType.Normal;
 
-        String name = m.getName();
-        if (name == null)
-            return SurfaceType.Normal;
-
-        Matcher mat = MAT_SURFACE_NAME_REGEX.matcher(name);
-        if (!mat.find())
-            return null;
-
-        for (int i = 0; i < mat.groupCount(); i++) {
-            var result = SurfaceType.fromString(mat.group(i + 1));
-            if (result != null)
-                return result;
-        }
-        return SurfaceType.Normal;
+        return SurfaceType.fromMaterialName(m);
     }
 }
