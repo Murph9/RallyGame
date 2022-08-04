@@ -113,6 +113,8 @@ public class LoadModelWrapper {
                 return "Picnic";
             case Ice:
                 return "DiagStriped";
+            case None:
+                return "Xd";
             case Normal:
             default:
                 return null;

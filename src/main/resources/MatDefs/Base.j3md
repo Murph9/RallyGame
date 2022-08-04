@@ -7,6 +7,7 @@ MaterialDef Base {
         Boolean DiagStriped
         Boolean Squared
         Boolean Picnic
+        Boolean Xd
 
         // Alpha threshold for fragment discarding
         Float AlphaDiscardThreshold (AlphaTestFallOff)
@@ -27,6 +28,7 @@ MaterialDef Base {
             T_DIAG_STRIPED: DiagStriped
             T_SQUARED: Squared
             T_PICNIC: Picnic
+            T_Xd: Xd
         }
     }
 
@@ -41,10 +43,6 @@ MaterialDef Base {
             NormalMatrix
             ViewProjectionMatrix
             ViewMatrix
-        }
-
-        Defines {
-            COLORMAP_ALPHA : ColorMap
         }
     }
 }

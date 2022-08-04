@@ -58,5 +58,14 @@ void main() {
         }
     #endif
 
+    #ifdef T_Xd
+        float distance = (_worldUV.x-repeatingSizeHalf)*(_worldUV.x-repeatingSizeHalf) + (_worldUV.z-repeatingSizeHalf)*(_worldUV.z-repeatingSizeHalf);
+        if (distance < m_RepeatingPatternSize*1.5 && distance > m_RepeatingPatternSize*0.5) {
+            color *= diff;
+        } else if (_worldUV.x+_worldUV.z > m_RepeatingPatternSize*0.95 && _worldUV.x+_worldUV.z < m_RepeatingPatternSize*1.05) {
+            color *= diff;
+        }
+    #endif
+
     gl_FragColor = color;
 }

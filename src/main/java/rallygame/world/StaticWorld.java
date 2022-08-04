@@ -36,7 +36,7 @@ public enum StaticWorld {
 
 	//debug ones:
 	slope_test("slope_test", 1, null, null),
-	surfaceTest("surfaceTest", 1, null, null)
+	surfaceTest("surfaceTest", 5, null, null)
 //	paris1("paris1", 1, new Vector3f(40,75,0)), //be careful with this one, large
 //	track1("track1", 1, new Vector3f(255.12906f, 0.7663503f, -40.224197f)),
 //	track3("track3", 1, new Vector3f(-24.227085f, 0.7908745f, 98.21415f)),

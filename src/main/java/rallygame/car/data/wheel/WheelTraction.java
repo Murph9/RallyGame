@@ -16,9 +16,10 @@ public class WheelTraction implements Serializable {
 
 		var result = new WheelDataTractionConst(pjk_lat);
 		switch(type) {
-			case Dirt: result.D *= 0.8f; break;
-			case Grass: result.D *= 0.7f; break;
-			case Ice: result.D *= 0.4f; break;
+			case Dirt: result.D *= 0.7f; break;
+			case Grass: result.D *= 0.6f; break;
+			case Ice: result.D *= 0.3f; break;
+			case None: result.D *= 0.0f; break;
 			default:
 		}
 		result.max = GripHelper.calcSlipMax(result); // TODO VERY LARGE HACK
@@ -31,9 +32,10 @@ public class WheelTraction implements Serializable {
 
 		var result = new WheelDataTractionConst(pjk_long);
 		switch(type) {
-			case Dirt: result.D *= 0.8f; break;
-			case Grass: result.D *= 0.7f; break;
-			case Ice: result.D *= 0.4f; break;
+			case Dirt: result.D *= 0.7f; break;
+			case Grass: result.D *= 0.6f; break;
+			case Ice: result.D *= 0.3f; break;
+			case None: result.D *= 0.0f; break;
 			default:
 		}
 		result.max = GripHelper.calcSlipMax(result); // TODO VERY LARGE HACK

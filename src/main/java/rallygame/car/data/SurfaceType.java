@@ -6,7 +6,8 @@ public enum SurfaceType {
     Normal,
     Dirt,
     Ice,
-    Grass;
+    Grass,
+    None;
 
     public static SurfaceType fromMaterialName(Material mat) {
         if (mat == null)
@@ -22,6 +23,8 @@ public enum SurfaceType {
             return SurfaceType.Ice;
         if (str.contains("@grass"))
             return SurfaceType.Grass;
+        if (str.contains("@none"))
+            return SurfaceType.None;
         return SurfaceType.Normal;
     }
 }
