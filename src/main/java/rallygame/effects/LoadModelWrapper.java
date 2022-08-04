@@ -19,6 +19,8 @@ import rallygame.helper.Log;
 
 public class LoadModelWrapper {
     
+    private static float REPEATING_SIZE = 15;
+
     /** Loads a model with all the same colour */
     public static Node createWithColour(AssetManager am, Spatial s, ColorRGBA colour) {
         if (s == null)
@@ -79,23 +81,10 @@ public class LoadModelWrapper {
 
         Material baseMat = new Material(am, "MatDefs/Base.j3md");
         baseMat.setColor("Color", color);
-        baseMat.setFloat("RepeatingPatternSize", 15);
-        if (type != null) {
-            switch (type) {
-                case Dirt:
-                    baseMat.setBoolean("Checker", true);
-                    break;
-                case Grass:
-                    baseMat.setBoolean("Picnic", true);
-                    break;
-                case Ice:
-                    baseMat.setBoolean("DiagStriped", true);
-                    break;
-                case Normal:
-                default:
-                    break;
-            }
-        }
+        baseMat.setFloat("RepeatingPatternSize", REPEATING_SIZE);
+        var pattern = getMaterialPatternFromType(type);
+        if (pattern != null)
+            baseMat.setBoolean(pattern, true);
 
         Material mat = g.getMaterial();
         if (mat != null) // keep the name if given
@@ -111,6 +100,23 @@ public class LoadModelWrapper {
 
         g.setMaterial(baseMat);
         return g;
+    }
+
+    private static String getMaterialPatternFromType(SurfaceType type) {
+        if (type == null)
+            return null;
+        
+        switch (type) {
+            case Dirt:
+                return "Checker";
+            case Grass:
+                return "Picnic";
+            case Ice:
+                return "DiagStriped";
+            case Normal:
+            default:
+                return null;
+        }
     }
 
     private static Geometry setMat(AssetManager am, Geometry g) {
