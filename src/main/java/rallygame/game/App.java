@@ -64,7 +64,7 @@ public class App extends SimpleApplication {
 		BulletAppState bullet = new BulletAppState();
 		bullet.setThreadingType(ThreadingType.PARALLEL);
 		getStateManager().attach(bullet);
-		bullet.getPhysicsSpace().setAccuracy(1f / 120f); // physics rate
+		bullet.getPhysicsSpace().setAccuracy(1f / 60f); // physics rate
 		bullet.getPhysicsSpace().setGravity(GRAVITY);
 
 		///////

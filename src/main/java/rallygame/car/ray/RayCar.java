@@ -26,6 +26,8 @@ import rallygame.service.ray.RaycasterResult;
 /** Handles suspension/traction/drag and real-time data of this car */
 public class RayCar implements PhysicsTickListener {
 
+	private static final float TRACTION_SIMULATION_STEPS = 10;
+
 	private static final Vector3f localDown = new Vector3f(0, -1, 0);
 
 	protected CarDataConst carData;
@@ -80,12 +82,11 @@ public class RayCar implements PhysicsTickListener {
 
 		applySuspension(space, tpf);
 
-		// TODO apply the midpoint formula or any kind of actual physics stepped simulation method
-		// https://en.wikipedia.org/wiki/Midpoint_method
-		// Logic: we need at least 2 simulation steps for the longitudinal traction
-		// - i.e. run getRPM and engine power then the traction model then do it again with the the new wheel rpm
-		if (tractionEnabled)
-			applyTraction(space, tpf);
+		if (tractionEnabled) {
+			float fractionTpf = tpf/TRACTION_SIMULATION_STEPS;
+			for (int i = 0; i < TRACTION_SIMULATION_STEPS; i++)
+				applyTraction(space, fractionTpf);
+		}
 
 		applyDrag(space, tpf);
 	}
@@ -289,7 +290,7 @@ public class RayCar implements PhysicsTickListener {
 
 			wheels[w_id].gripDir = wheel_force;
 			applyWheelForce(w_angle.mult(wheel_force).mult(tpf), wheels[w_id]);
-
+			
 			planarGForce.addLocal(wheel_force);
 		}
 

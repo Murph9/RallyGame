@@ -66,7 +66,7 @@ public class DuelApp extends SimpleApplication {
         getStateManager().attach(bullet);
 
         //set things after attaching
-        bullet.getPhysicsSpace().setAccuracy(1f / 120f); // physics rate
+        bullet.getPhysicsSpace().setAccuracy(1f / 60f); // physics rate
         bullet.getPhysicsSpace().setGravity(GRAVITY);
 
 
