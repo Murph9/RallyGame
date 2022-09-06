@@ -172,6 +172,7 @@ public class RayCarControl implements ICarPowered, ICarControlled {
         
         Vector3f local_vel = rotation.inverse().mult(vel);
         if (local_vel.z < 0 || ((-sign * rayCar.driftAngle) < 0 && Math.abs(rayCar.driftAngle) > rayCar.carData.minDriftAngle * FastMath.DEG_TO_RAD)) {
+            // TODO turn to this real slow, no snapping pls
             return trySteerAngle;
             //when going backwards, slow or needing to turning against drift, you get no speed factor
             //eg: car is pointing more left than velocity, and is also turning left

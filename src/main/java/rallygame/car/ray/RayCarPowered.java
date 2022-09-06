@@ -106,7 +106,7 @@ public class RayCarPowered extends RayCar {
          * 
          * but this is too much work
 		 */
-
+		wheelTorque[0] = wheelTorque[1] = wheelTorque[2] = wheelTorque[3] = 0;
 		if (carData.driveFront) {
 			wheelTorque[0] = frontTorque;
 			wheelTorque[1] = frontTorque;

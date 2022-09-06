@@ -266,13 +266,22 @@ public class RayCar implements PhysicsTickListener {
 			// braking and abs
 			float brakeCurrent2 = brakingCur;
 			if (Math.abs(wheels[w_id].slipRatio / pjk_long.max) >= 1 && velocity.length() > 10 && brakingCur > 0)
-				brakeCurrent2 *= 0; // abs (which i think works a bit well)
+				brakeCurrent2 = 0; // very good abs
 
 			// add the wheel force after merging the forces
 			float totalLongForce = wheelTorque[w_id] - wheel_force.z
 					- (brakeCurrent2 * carData.brakeMaxTorque * Math.signum(wheels[w_id].radSec));
-			float totalLongForceTorque = tpf * totalLongForce / (carData.e_inertia()) * carData.wheelData[w_id].radius;
-			if (brakingCur != 0
+			// drive wheels have the engine to pull along
+			float wheelInertia = carData.wheel_inertia(w_id);
+			if (carData.driveFront && (w_id == 0 || w_id == 1)) {
+				wheelInertia = carData.e_inertia();
+			}
+			if (carData.driveRear && (w_id == 2 || w_id == 3)) {
+				wheelInertia = carData.e_inertia();
+			}
+			float totalLongForceTorque = tpf * (totalLongForce / wheelInertia) * carData.wheelData[w_id].radius;
+			
+			if (brakeCurrent2 != 0
 					&& Math.signum(wheels[w_id].radSec) != Math.signum(wheels[w_id].radSec + totalLongForceTorque))
 				wheels[w_id].radSec = 0; // maxed out the forces with braking, so prevent wheels from moving
 			else
