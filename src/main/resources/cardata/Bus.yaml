@@ -22,7 +22,7 @@ mass: 8700
 minDriftAngle: 3.0
 nitro_force: 300.0
 nitro_max: 15.0
-nitro_on: true
+nitro_on: false
 nitro_rate: 1.0
 susF: &sus {
   antiroll: 10, 
