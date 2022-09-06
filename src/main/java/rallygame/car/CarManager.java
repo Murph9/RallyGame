@@ -35,7 +35,7 @@ public class CarManager extends BaseAppState {
     private final float angularDampening;
 
     public CarManager(CarDataLoader loader) {
-        this(loader, 0.9f);
+        this(loader, 0.1f);
     }
     public CarManager(CarDataLoader loader, float angularDampening)  {
         this.cars = new LinkedList<>();
