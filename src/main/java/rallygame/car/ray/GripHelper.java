@@ -20,6 +20,7 @@ public class GripHelper {
 	 */
 	public static float tractionFormula(WheelDataTractionConst w, float slip) {
 		return FastMath.sin(w.C * FastMath.atan(w.B*slip - w.E * (w.B*slip - FastMath.atan(w.B*slip))));
+		// g(x) = sin(C * atan(B*x - E * (B*x - atan(B*x)))) geogebra copy paste
 	}
 	public static float loadFormula(WheelDataTractionConst w, float load, float loadQuadratic) {
 		return Math.max(0, w.D * (1 - loadQuadratic * load) * load);

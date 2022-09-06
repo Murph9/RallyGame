@@ -1,4 +1,6 @@
 !!car.data.wheel.WheelTraction
 name: road
-pjk_lat: {B: 30, C: 1.24, D: 1.8, E: 0.45}
-pjk_long: {B: 25, C: 1.8, D: 2, E: 0.98}
+pjk_lat: {B: 40, C: 1.24, D: 1.4, E: 0.45}
+pjk_long: {B: 32, C: 1.8, D: 1.7, E: 0.98}
+# this produces a slip angle of around 0.1 rad (6 deg)
+# most production car tyres are in this range, f1 are (3 deg for reference)
