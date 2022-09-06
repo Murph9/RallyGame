@@ -23,12 +23,6 @@ import rallygame.service.ray.RaycasterResult;
 //https://github.com/jMonkeyEngine/jmonkeyengine/blob/master/jme3-jbullet/src/main/java/com/jme3/bullet/objects/PhysicsVehicle.java
 //https://github.com/bubblecloud/jbullet/blob/master/src/main/java/com/bulletphysics/dynamics/vehicle/RaycastVehicle.java
 
-
-//Extending traction model:
-//add in a quadratic normal force forumla normal(x) = NK1 + N^2*K2 + K3
-//ideally replaces E in the base formla from: https://www.edy.es/dev/docs/pacejka-94-parameters-explained-a-comprehensive-guide/
-//Example given: https://github.com/chrisoco/M120/blob/master/RaceCar/RCAS/src/rcas/model/MagicFormulaTireModel.java
-
 /** Handles suspension/traction/drag and real-time data of this car */
 public class RayCar implements PhysicsTickListener {
 
@@ -194,14 +188,15 @@ public class RayCar implements PhysicsTickListener {
 
 		Vector3f velocity = w_angle.inverse().mult(w_velocity);
 		if (velocity.z == 0) // NaN on divide avoidance strategy
-			velocity.z += 0.0001f;
+			velocity.z = 0.0001f;
+		if (velocity.x == 0) // NaN on divide avoidance strategy
+			velocity.x = 0.0001f;
 
 		float steeringCur = this.steeringCur;
 		if (velocity.z < 0) { // to flip the steering on moving in reverse
 			steeringCur *= -1;
 		}
 
-		final float slip_div = velocity.length();
 		final float steeringFake = steeringCur;
 		for (int w_id = 0; w_id < wheels.length; w_id++) {
 			float lastSlipAngle = wheels[w_id].slipAngle;
@@ -216,9 +211,10 @@ public class RayCar implements PhysicsTickListener {
 			Vector3f objectRelVelocity = new Vector3f();
 			if (wheels[w_id].collisionObject != null) // convert contact object to local co-ords
 				objectRelVelocity = w_angle.inverse().mult(wheels[w_id].collisionObject.getLinearVelocity());
+			float groundVelocityZ = (velocity.z - objectRelVelocity.z);
 
-			float slipr = wheels[w_id].radSec * carData.wheelData[w_id].radius - (velocity.z - objectRelVelocity.z);
-			wheels[w_id].slipRatio = slipr / slip_div;
+			float slipr = wheels[w_id].radSec * carData.wheelData[w_id].radius - groundVelocityZ;
+			wheels[w_id].slipRatio = slipr / FastMath.abs(groundVelocityZ);
 
 			if (handbrakeCur && !isFrontWheel(w_id)) // rearwheels only
 				wheels[w_id].radSec = 0;
@@ -226,11 +222,11 @@ public class RayCar implements PhysicsTickListener {
 			wheels[w_id].slipAngle = 0;
 			if (isFrontWheel(w_id)) {
 				float slipa_front = (velocity.x - objectRelVelocity.x) + carData.wheelOffset[w_id].z * angVel;
-				wheels[w_id].slipAngle = FastMath.atan2(slipa_front, slip_div) - steeringFake;
+				wheels[w_id].slipAngle = FastMath.atan2(slipa_front, FastMath.abs(groundVelocityZ)) - steeringFake;
 			} else { // so rear
 				float slipa_rear = (velocity.x - objectRelVelocity.x) + carData.wheelOffset[w_id].z * angVel;
 				driftAngle = slipa_rear; // set drift angle as the rear amount
-				wheels[w_id].slipAngle = FastMath.atan2(slipa_rear, slip_div); // slip_div is questionable here
+				wheels[w_id].slipAngle = FastMath.atan2(slipa_rear, FastMath.abs(groundVelocityZ));
 			}
 
 			var pjk_lat = carData.wheelData[w_id].traction.getLatTractionFor(wheels[w_id].lastGroundType);
