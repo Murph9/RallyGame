@@ -169,7 +169,6 @@ public class DynamicCopyRace extends DriveBase
         }
     }
 
-    @SuppressWarnings("unchecked") // button checked vargs
     private void end() {
         Container container = new Container();
         container.addChild(new Label("Score: " + H.roundDecimal(time, 2) + " sec"));

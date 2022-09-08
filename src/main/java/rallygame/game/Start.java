@@ -24,7 +24,6 @@ public class Start extends BaseAppState {
 		this.flow = flow;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void initialize(Application app) {
 		App myapp = ((App) app);

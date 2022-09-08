@@ -53,7 +53,6 @@ public class DuelRaceMenu extends BaseAppState implements PauseState.ICallback {
         loadStartUi();
     }
 
-    @SuppressWarnings("unchecked") // button checked vargs
     private void loadStartUi() {
         startWindow = new Container();
         ((SimpleApplication) getApplication()).getGuiNode().attachChild(startWindow);
@@ -79,7 +78,6 @@ public class DuelRaceMenu extends BaseAppState implements PauseState.ICallback {
         loadEndUi(playerWon);
     }
 
-    @SuppressWarnings("unchecked") // button checked vargs
     private void loadEndUi(boolean playerWon) {
         endWindow = new Container();
         ((SimpleApplication) getApplication()).getGuiNode().attachChild(endWindow);

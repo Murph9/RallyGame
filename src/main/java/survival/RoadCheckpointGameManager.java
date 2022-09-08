@@ -102,7 +102,6 @@ public class RoadCheckpointGameManager extends BaseAppState {
     protected void onDisable() {
     }
 
-    @SuppressWarnings("unchecked") // button checked vargs
     private void openOptions() {
         var dialog = new Container();
         

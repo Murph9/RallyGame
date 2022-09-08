@@ -27,7 +27,6 @@ public class ChooseMap extends BaseAppState {
 		this.choose = choose;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void initialize(Application app) {
 		getState(BulletAppState.class).setEnabled(true);
@@ -85,7 +84,6 @@ public class ChooseMap extends BaseAppState {
         });
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void addButton(Container myWindow, WorldType world, String s, int j, int i) {
 		Button button = myWindow.addChild(new Button(s), j, i);
 		button.addClickCommands(new Command<Button>() {

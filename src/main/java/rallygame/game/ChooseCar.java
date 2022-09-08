@@ -49,7 +49,6 @@ public class ChooseCar extends BaseAppState {
 		car = Car.values()[0];
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void initialize(Application app) {
 		getState(BulletAppState.class).setEnabled(true);

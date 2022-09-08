@@ -85,7 +85,6 @@ public class CarEditor extends Container {
 			this.setLocalTranslation(getLocalTranslation().add(0, value*30, 0));
 	}
 
-	@SuppressWarnings("unchecked")
 	private void attachTree(Object o, Container root, String name) throws IllegalArgumentException, IllegalAccessException {
 		if (o == null)
 			return;

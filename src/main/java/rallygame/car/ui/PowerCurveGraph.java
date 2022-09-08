@@ -93,7 +93,7 @@ public class PowerCurveGraph extends Container {
 
 		float fontSize = guiFont.getCharSet().getRenderedSize();
 		//0 label
-		BitmapText label = new BitmapText(guiFont, false);
+		BitmapText label = new BitmapText(guiFont);
 		label.setSize(fontSize);
 		label.setColor(ColorRGBA.White);
 		label.setText("0");
@@ -102,14 +102,14 @@ public class PowerCurveGraph extends Container {
 		this.things.add(label);
 		
 		//max labels (note they aren't inside each other)
-		label = new BitmapText(guiFont, false);
+		label = new BitmapText(guiFont);
 		label.setSize(fontSize);
 		label.setColor(ColorRGBA.Blue);
 		label.setText(maxTorque+" Nm");
 		label.setLocalTranslation(topLeft.x-fontSize, topLeft.y+fontSize, 0);
 		attachChild(label);
 		this.things.add(label);
-		label = new BitmapText(guiFont, false);
+		label = new BitmapText(guiFont);
 		label.setSize(fontSize);
 		label.setColor(ColorRGBA.Red);
 		label.setText(maxKW+" Kw");

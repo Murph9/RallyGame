@@ -164,7 +164,7 @@ public class CarUITelemetry extends BaseAppState {
         return geom;
     }
     private static BitmapText createText(BitmapFont font, ColorRGBA colour, Vector3f pos) {
-        BitmapText text = new BitmapText(font, false);
+        BitmapText text = new BitmapText(font);
         text.setSize(font.getCharSet().getRenderedSize());
         text.setColor(colour);
         text.setText("...");

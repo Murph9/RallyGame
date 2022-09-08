@@ -62,7 +62,6 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
         initBackground((SimpleApplication) app);
     }
 
-    @SuppressWarnings("unchecked") // button checked vargs
     private void initMenu(SimpleApplication app) {
         
         mainWindow = new Container();

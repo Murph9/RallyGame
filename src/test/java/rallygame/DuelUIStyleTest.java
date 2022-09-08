@@ -55,7 +55,6 @@ public class DuelUIStyleTest extends BaseAppState {
 
     private List<Container> windows;
 
-    @SuppressWarnings("unchecked")
     @Override
     protected void initialize(Application app) {
         windows = new LinkedList<Container>();

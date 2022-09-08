@@ -12,6 +12,8 @@ import com.jme3.math.Vector3f;
 import rallygame.car.data.CarDataConst;
 import rallygame.car.data.CarSusDataConst;
 import rallygame.car.data.wheel.WheelDataTractionConst;
+import rallygame.helper.H;
+import rallygame.helper.Log;
 import rallygame.service.ray.IPhysicsRaycaster;
 import rallygame.service.ray.PhysicsRaycaster;
 import rallygame.service.ray.RaycasterResult;
@@ -33,7 +35,7 @@ public class RayCar implements PhysicsTickListener {
 	protected CarDataConst carData;
 	private IPhysicsRaycaster raycaster;
 	protected final RigidBodyControl rbc;
-	protected boolean rbEnabled() { return rbc.isEnabled() && rbc.isInWorld(); }
+	protected boolean rbEnabled() { return rbc.isEnabled(); }
 
 	// simulation variables
 	private float steeringCur;
@@ -106,11 +108,13 @@ public class RayCar implements PhysicsTickListener {
 			wheels[w_id].rayDirWorld = w_angle.mult(localDown.mult(susTravel + carData.wheelData[w_id].radius));
 			RaycasterResult col = raycaster.castRay(wheels[w_id].rayStartWorld, wheels[w_id].rayDirWorld, rbc);
 
-			if (col == null) { // suspension ray found nothing, extend all the way and don't apply a force (set to 0)
+			if (col == null) { // suspension ray found nothing, extend all the way
 				wheels[w_id].inContact = false;
 				wheels[w_id].susRayLength = susTravel;
-				wheels[w_id].curBasePosWorld = localDown.mult(susTravel + carData.wheelData[w_id].radius);
-				continue; // no force
+				wheels[w_id].collisionObject = null;
+				wheels[w_id].hitNormalInWorld = w_angle.mult(localDown);
+				wheels[w_id].curBasePosWorld = w_angle.mult(localDown.mult(susTravel + carData.wheelData[w_id].radius));
+				continue; // no contact
 			}
 
 			// TODO calculate rebound using wheel mass and suspension properties
@@ -176,6 +180,7 @@ public class RayCar implements PhysicsTickListener {
 
 			// applyImpulse (force = world space, pos = relative to local)
 			Vector3f f = wheels[w_id].hitNormalInWorld.mult(wheels[w_id].susForce * tpf);
+			f = H.clamp(f, sus.max_force);
 			applyWheelForce(f, wheels[w_id]);
 		}
 	}
@@ -356,6 +361,9 @@ public class RayCar implements PhysicsTickListener {
 	/**Apply wheel for in the correct world space and back to the object you are touching */
 	private void applyWheelForce(Vector3f force, RayWheel wheel) {
 		rbc.applyImpulse(force, wheel.curBasePosWorld.subtract(rbc.getPhysicsLocation()));
+		if (force.length() > 10000) {
+			Log.p(force);
+		}
 
 		// only apply if its something that we can 'work' with
 		if (wheel.collisionObject != null) {

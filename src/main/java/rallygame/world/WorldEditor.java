@@ -24,7 +24,6 @@ public class WorldEditor extends Container {
 		init();
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void init() {
 		
 		RollupPanel rp = new RollupPanel("Choose Map", "");
@@ -74,7 +73,6 @@ public class WorldEditor extends Container {
 		rp.setOpen(false);
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void addButton(Container myWindow, WorldType world, String s, int j, int i) {
 		Button button = myWindow.addChild(new Button(s), j, i);
 		button.addClickCommands(new Command<Button>() {

@@ -41,7 +41,6 @@ public class PauseState extends BaseAppState {
         }
     };
 
-    @SuppressWarnings("unchecked")
 	@Override
 	public void initialize(Application app) {
 		SimpleApplication sm = (SimpleApplication)app;
