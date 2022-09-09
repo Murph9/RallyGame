@@ -23,7 +23,7 @@ launch4j {
     // look in RallyGame\build\launch4j for the lib, jre and exe files, usually i zip and upload
 }
 
-def jme3Version = '3.3.0-stable'
+def jme3Version = '3.3.2-stable'
 dependencies {
     implementation 'com.google.guava:guava:28.0-jre'
 
