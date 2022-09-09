@@ -1,5 +1,8 @@
 package rallygame.drive;
 
+import java.util.Collections;
+import java.util.LinkedList;
+
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.scene.Node;
@@ -68,7 +71,9 @@ public class SprintMenu extends DriveMenu {
 		super.update(tpf);
 
 		StringBuilder sb = new StringBuilder();
-		for (RayCarControl car: this.drive.getAllCars()) {
+		var carList = new LinkedList<RayCarControl>(this.drive.getAllCars());
+		Collections.sort(carList, (o1, o2) -> (int)(o2.location.z - o1.location.z));
+		for (RayCarControl car: carList) {
 			sb.append(H.leftPad(H.roundDecimal(car.location.z, 0), 5, ' '));
 			sb.append("m @ ");
 			sb.append(H.leftPad(H.roundDecimal(car.getCurrentVehicleSpeedKmHour(), 0), 4, ' '));
