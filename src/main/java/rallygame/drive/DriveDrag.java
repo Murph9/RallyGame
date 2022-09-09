@@ -113,7 +113,7 @@ public class DriveDrag extends DriveBase {
         }
         if (ended) {
             sprint.setText("Winner: " + this.cm.get(detectWinner()).getCarData().carModel);
-            keepStill();
+            this.cm.setEnabled(false);
             return;
         }
 
