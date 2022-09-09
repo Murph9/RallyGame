@@ -4,6 +4,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetManager;
 import com.jme3.audio.AudioData;
 import com.jme3.audio.AudioNode;
+import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.bullet.collision.shapes.HullCollisionShape;
 import com.jme3.math.Vector3f;
@@ -31,7 +32,8 @@ public class CarFactory {
         Spatial collisionShape = Geo.removeNamedSpatial((Node)initialCarModel, CarPart.Collision.getPartName());
         
         //init car and physics class
-        var rayCar = createRayCar(collisionShape, carData);
+        var collision = getCollision(collisionShape, carData);
+        var rayCar = new RayCarPowered(collision, carData);
         RayCarControl carControl = null;
         if (copy == null) {
             carControl = new RayCarControl(app, initialCarModel, rayCar);
@@ -57,21 +59,18 @@ public class CarFactory {
         return carControl;
     }
 
-    private static RayCarPowered createRayCar(Spatial collisionShape, CarDataConst carData) {
-        
-        Geometry collisionGeometry = null;
-        if (collisionGeometry instanceof Geometry) {
-            collisionGeometry = (Geometry) collisionShape;
-            var col = new HullCollisionShape(collisionGeometry.getMesh());
-            return new RayCarPowered(col, carData);
-        } else { // Node
-            var col = new CompoundCollisionShape();
-            for (var g : Geo.getGeomList(collisionShape)) {
-                var hullCol = new HullCollisionShape(g.getMesh());
-                col.addChildShape(hullCol, Vector3f.ZERO);
-            }
-            
-            return new RayCarPowered(col, carData);
+    private static CollisionShape getCollision(Spatial collisionShape, CarDataConst carData) {
+        if (collisionShape instanceof Geometry) {
+            var collisionGeometry = (Geometry) collisionShape;
+            return new HullCollisionShape(collisionGeometry.getMesh());
         }
+        
+        // Node
+        var col = new CompoundCollisionShape();
+        for (var g : Geo.getGeomList(collisionShape)) {
+            var hullCol = new HullCollisionShape(g.getMesh());
+            col.addChildShape(hullCol, Vector3f.ZERO);
+        }
+        return col;
     }
 }
