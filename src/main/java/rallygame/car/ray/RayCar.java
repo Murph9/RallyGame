@@ -169,8 +169,10 @@ public class RayCar implements PhysicsTickListener {
 
 			// Sway bars https://forum.miata.net/vb/showthread.php?t=25716
 			int w_id_other = w_id == 0 ? 1 : w_id == 1 ? 0 : w_id == 2 ? 3 : 2; // fetch the index of the other side
-			float swayDiff = wheels[w_id_other].susRayLength - wheels[w_id].susRayLength;
-			wheels[w_id].susForce += swayDiff * sus.antiroll;
+			if (wheels[w_id_other].inContact) {
+				float swayDiff = wheels[w_id_other].susRayLength - wheels[w_id].susRayLength;
+				wheels[w_id].susForce += swayDiff * sus.antiroll;
+			}
 
 			wheels[w_id].susForce *= 1000; // kN
 
