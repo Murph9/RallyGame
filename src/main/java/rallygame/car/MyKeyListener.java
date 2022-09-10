@@ -22,32 +22,32 @@ public class MyKeyListener implements RawInputListener {
 	public MyKeyListener(RayCarControlInput a) {
 		this.input = a;
 		
-		layout.put(KeyInput.KEY_LEFT, "Left");
-		layout.put(KeyInput.KEY_A, "Left");
+		layout.put(KeyInput.KEY_LEFT, RayCarControlInput.ACTION_LEFT);
+		layout.put(KeyInput.KEY_A, RayCarControlInput.ACTION_LEFT);
 		
-		layout.put(KeyInput.KEY_RIGHT, "Right");
-		layout.put(KeyInput.KEY_D, "Right");
+		layout.put(KeyInput.KEY_RIGHT, RayCarControlInput.ACTION_RIGHT);
+		layout.put(KeyInput.KEY_D, RayCarControlInput.ACTION_RIGHT);
 		
-		layout.put(KeyInput.KEY_UP, "Accel");
-		layout.put(KeyInput.KEY_W, "Accel");
+		layout.put(KeyInput.KEY_UP, RayCarControlInput.ACTION_ACCEL);
+		layout.put(KeyInput.KEY_W, RayCarControlInput.ACTION_ACCEL);
 		
-		layout.put(KeyInput.KEY_DOWN, "Brake");
-		layout.put(KeyInput.KEY_S, "Brake");
+		layout.put(KeyInput.KEY_DOWN, RayCarControlInput.ACTION_BRAKE);
+		layout.put(KeyInput.KEY_S, RayCarControlInput.ACTION_BRAKE);
 		
-		layout.put(KeyInput.KEY_LSHIFT, "Reverse");
-		layout.put(KeyInput.KEY_RSHIFT, "Reverse");
+		layout.put(KeyInput.KEY_LSHIFT, RayCarControlInput.ACTION_REVERSE);
+		layout.put(KeyInput.KEY_RSHIFT, RayCarControlInput.ACTION_REVERSE);
 		
-		layout.put(KeyInput.KEY_SPACE, "Handbrake");
+		layout.put(KeyInput.KEY_SPACE, RayCarControlInput.ACTION_HANDBRAKE);
 
-		layout.put(KeyInput.KEY_LCONTROL, "Nitro");
-		layout.put(KeyInput.KEY_RCONTROL, "Nitro");
+		layout.put(KeyInput.KEY_LCONTROL, RayCarControlInput.ACTION_NITRO);
+		layout.put(KeyInput.KEY_RCONTROL, RayCarControlInput.ACTION_NITRO);
 		
 		//hacks
-		layout.put(KeyInput.KEY_F, "Flip");
-		layout.put(KeyInput.KEY_RETURN, "Reset");
-		layout.put(KeyInput.KEY_Q, "Jump");
-		layout.put(KeyInput.KEY_I, "IgnoreSteeringSpeedFactor");
-		layout.put(KeyInput.KEY_T, "IgnoreTractionModel");
+		layout.put(KeyInput.KEY_F, RayCarControlInput.ACTION_FLIP);
+		layout.put(KeyInput.KEY_RETURN, RayCarControlInput.ACTION_RESET);
+		layout.put(KeyInput.KEY_Q, RayCarControlInput.ACTION_JUMP);
+		layout.put(KeyInput.KEY_I, RayCarControlInput.ACTION_IgnoreSteeringSpeedFactor);
+		layout.put(KeyInput.KEY_T, RayCarControlInput.ACTION_IgnoreTractionModel);
 	}
 	
 	public void beginInput() {}

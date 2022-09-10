@@ -2,6 +2,7 @@ package rallygame.car.ray;
 
 public class RayCarControlInput {
 
+    public static final String ACTION_NOTHING = "$";
     public static final String ACTION_LEFT = "Left";
     public static final String ACTION_RIGHT = "Right";
     public static final String ACTION_ACCEL = "Accel";
@@ -26,6 +27,8 @@ public class RayCarControlInput {
             rallygame.helper.Log.p("No binding given?");
             return;
         }
+        if (binding == ACTION_NOTHING)
+            return; // actually ignore
 
         // value == 'if pressed (down) - we get one back when its unpressed (up)'
         // tpf is being used as the value for joysticks. deal with it

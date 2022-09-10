@@ -15,14 +15,17 @@ import com.jme3.input.event.TouchEvent;
 import com.jme3.math.FastMath;
 
 import rallygame.car.ray.RayCarControlInput;
+import rallygame.helper.Duo;
 
 public class JoystickEventListener implements RawInputListener {
 
-	private Map<String, String> intToButton = new HashMap<String, String>();
-	private Map<String, String> buttonToAction = new HashMap<String, String>();
-	
-	private RayCarControlInput input;
-	private float stickdeadzone = 0.2f;
+	private static final float STICK_DEADZONE = 0.2f;
+
+	private final RayCarControlInput input;
+
+	private final Map<String, String> intToButton = new HashMap<>();
+	private final Map<String, String> buttonToAction = new HashMap<>();
+	private final Map<String, Duo<String,String>> axisToAction = new HashMap<>();
 	
 	public JoystickEventListener (RayCarControlInput a) {
 		this.input = a;
@@ -42,14 +45,26 @@ public class JoystickEventListener implements RawInputListener {
 		intToButton.put(JoystickButton.BUTTON_9, "RightStick");
 		
 		//map to game actions
-		buttonToAction.put("A", "Handbrake");
-		buttonToAction.put("B", "Nitro");
+		buttonToAction.put("A", RayCarControlInput.ACTION_HANDBRAKE);
+		buttonToAction.put("B", RayCarControlInput.ACTION_NITRO);
 		
-		buttonToAction.put("Start", "Reset");
-		buttonToAction.put("X", "Flip");
-		buttonToAction.put("Y", "Jump");
+		buttonToAction.put("Start", RayCarControlInput.ACTION_RESET);
+		buttonToAction.put("X", RayCarControlInput.ACTION_FLIP);
+		buttonToAction.put("Y", RayCarControlInput.ACTION_JUMP);
 		
-		buttonToAction.put("RightStick", "Reverse");
+		buttonToAction.put("RightStick", RayCarControlInput.ACTION_REVERSE);
+
+		//map axis
+		axisToAction.put(JoystickAxis.X_AXIS, new Duo<>(RayCarControlInput.ACTION_RIGHT, RayCarControlInput.ACTION_LEFT));
+		axisToAction.put(JoystickAxis.Y_AXIS, new Duo<>(RayCarControlInput.ACTION_NOTHING, RayCarControlInput.ACTION_NOTHING));
+		axisToAction.put(JoystickAxis.Z_AXIS, new Duo<>(RayCarControlInput.ACTION_NOTHING, RayCarControlInput.ACTION_NOTHING));
+		
+		axisToAction.put(JoystickAxis.LEFT_TRIGGER, new Duo<>(RayCarControlInput.ACTION_BRAKE, RayCarControlInput.ACTION_ACCEL));
+		axisToAction.put(JoystickAxis.RIGHT_TRIGGER, new Duo<>(RayCarControlInput.ACTION_NOTHING, null));
+		
+		axisToAction.put(JoystickAxis.Z_ROTATION, new Duo<>(RayCarControlInput.ACTION_NOTHING, RayCarControlInput.ACTION_NOTHING));
+		axisToAction.put(JoystickAxis.POV_X, new Duo<>(RayCarControlInput.ACTION_NOTHING, RayCarControlInput.ACTION_NOTHING));
+		axisToAction.put(JoystickAxis.POV_Y, new Duo<>(RayCarControlInput.ACTION_NOTHING, RayCarControlInput.ACTION_NOTHING));
 	}
 
 	@Override
@@ -57,44 +72,18 @@ public class JoystickEventListener implements RawInputListener {
 		JoystickAxis axis = arg0.getAxis();
 		float value = arg0.getValue();
 		float valueAbs = Math.abs(value);
-		
-		if (axis == axis.getJoystick().getXAxis()) { // left/right normal stick
-			if (value > 0) {
-				input.handleInput("Left", false, 0);
-				input.handleInput("Right", true, nonLinearInput(valueAbs, stickdeadzone));
-			} else {
-				input.handleInput("Right", false, 0);
-				input.handleInput("Left", true, nonLinearInput(valueAbs, stickdeadzone));
-			}
-		} else if (axis == axis.getJoystick().getYAxis()) { //up/down normal stick
-			//not mapped yet			
-			
-		} else if (axis == axis.getJoystick().getAxis(JoystickAxis.Z_AXIS)) { //triggers?
-			if (value > 0) { //brake
-				input.handleInput("Accel", false, 0);
-				input.handleInput("Brake", true, nonLinearInput(valueAbs, stickdeadzone));
-			} else {
-				input.handleInput("Brake", false, 0);
-				input.handleInput("Accel", true, nonLinearInput(valueAbs, stickdeadzone));
-			}
-			
-		} else if (axis == axis.getJoystick().getAxis(JoystickAxis.Z_ROTATION)) {
-			//not mapped yet
-				
-		} else if (axis.getName().equals("Y Rotation")) { //The other stick
-			//not mapped yet
-			
-		} else if (axis.getName().equals("X Rotation")) { //The other stick
-			//not mapped yet
-		
-		} else if (axis == axis.getJoystick().getPovXAxis()) { //DPAD
-			//not mapped yet
-
-		} else if (axis == axis.getJoystick().getPovYAxis()) {
-		
-		}
-		
 		arg0.isConsumed();
+
+		var action = axisToAction.get(axis.getLogicalId());
+		
+		String actionS = null;
+		if (value > 0) {
+			actionS = action.first;
+		} else {
+			actionS = action.second;
+		}
+
+		input.handleInput(actionS, false, nonLinearInput(valueAbs, STICK_DEADZONE));
 	}
 
 	@Override

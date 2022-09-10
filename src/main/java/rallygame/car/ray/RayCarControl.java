@@ -12,6 +12,7 @@ import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.input.InputManager;
+import com.jme3.input.Joystick;
 import com.jme3.input.RawInputListener;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
@@ -237,7 +238,9 @@ public class RayCarControl implements ICarPowered, ICarControlled {
         }
         
         this.controls.add(new MyKeyListener(this.getInput()));
-        this.controls.add(new JoystickEventListener(this.getInput()));
+        Joystick[] joysticks = im.getJoysticks();
+        if (joysticks != null)
+            this.controls.add(new JoystickEventListener(this.getInput()));
         
         for (RawInputListener ril: this.controls)
             im.addRawInputListener(ril);
