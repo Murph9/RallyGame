@@ -18,17 +18,14 @@ public class DriveDrag extends DriveBase {
 
     // just like the drag mode in Need For Speed Underground
 
-    private int themCount;
-
     private SprintMenu sprint;
     private float started;
     private boolean ended;
 
     public DriveDrag(IDriveDone done) {
-        super(done, Car.Runner, new StaticWorldBuilder(StaticWorld.multidragstrip));
+        super(done, Car.Rocket, new StaticWorldBuilder(StaticWorld.multidragstrip));
 
-        this.themCount = Car.values().length;
-        this.started = -4;
+        this.started = -3.5f;
     }
 
     @Override
@@ -36,7 +33,7 @@ public class DriveDrag extends DriveBase {
         super.initialize(app);
 
         Car[] types = Car.values();
-        for (int i = 0; i < this.themCount; i++) {
+        for (int i = 0; i < types.length; i++) {
             RayCarControl c = this.cm.addCar(types[i], world.getStart(), false);
             c.attachAI(new DriveAtAI(c, this.cm.getPlayer().getPhysicsObject()), true);
         }

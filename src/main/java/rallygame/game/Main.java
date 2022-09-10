@@ -24,7 +24,6 @@ public class Main {
 			} else {
 				settings.setResolution(config.getWidth(),config.getHeight());
 			}
-			settings.setFrameRate(config.getFrameRate());
 			settings.setUseJoysticks(true);
 			settings.setTitle(config.getTitle());
 			settings.setVSync(config.ifVsnyc());

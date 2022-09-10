@@ -126,8 +126,8 @@ public class RayCar implements PhysicsTickListener {
 		// Do suspension forces
 		for (int w_id = 0; w_id < wheels.length; w_id++) {
 			CarSusDataConst sus = carData.susByWheelNum(w_id);
+			wheels[w_id].susForce = 0;
 			if (!wheels[w_id].inContact) {
-				wheels[w_id].susForce = 0;
 				continue;
 			}
 

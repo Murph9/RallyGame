@@ -23,7 +23,7 @@ import rallygame.world.StaticWorldBuilder;
 public class DriveRace extends DriveBase implements PauseState.ICallback, ICheckpointDrive {
 
     // ai things
-    private final int themCount = 15;
+    private final int themCount = 8;
 
     private CheckpointProgressUI progressMenu;
     private CheckpointProgress progress;
