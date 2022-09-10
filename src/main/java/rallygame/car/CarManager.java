@@ -26,8 +26,8 @@ import rallygame.helper.Log;
 public class CarManager extends BaseAppState {
 
     // Group 1 is general, Group 2 is for checkpoints
-    public static final int DefaultCollisionGroups = PhysicsCollisionObject.COLLISION_GROUP_01 | PhysicsCollisionObject.COLLISION_GROUP_02;
-
+    public static final int DefaultCollisionGroups = PhysicsCollisionObject.COLLISION_GROUP_01;
+    public static final int DefaultGhostCollisionGroups = PhysicsCollisionObject.COLLISION_GROUP_01 | PhysicsCollisionObject.COLLISION_GROUP_02;
 
     private final CarDataLoader loader;
     private final List<RayCarControl> cars;

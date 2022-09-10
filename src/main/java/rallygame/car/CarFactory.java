@@ -43,7 +43,7 @@ public class CarFactory {
             carControl.changeRayCar(initialCarModel, rayCar);
         }
         carControl.getPhysicsObject().setCollisionGroup(CarManager.DefaultCollisionGroups);
-        carControl.getPhysicsObject().setCollideWithGroups(CarManager.DefaultCollisionGroups);
+        carControl.getPhysicsObject().setCollideWithGroups(CarManager.DefaultGhostCollisionGroups);
         
         // a fake angular rotational reducer, very important for driving feel
         carControl.getPhysicsObject().setAngularDamping(angularDampening);
