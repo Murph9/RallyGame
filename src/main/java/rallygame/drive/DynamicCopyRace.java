@@ -221,7 +221,6 @@ public class DynamicCopyRace extends DriveBase
             setAllCarsToStart(cm);
             break;
         case Racing:
-            progress.update(tpf); // TODO do we need this
             checkWinners();
             time += tpf;
             timer.setText(H.roundDecimal(time, 2) + " sec");
