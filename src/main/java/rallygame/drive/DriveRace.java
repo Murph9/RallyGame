@@ -7,6 +7,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 
+import rallygame.car.CarManager;
 import rallygame.car.ai.RaceAI;
 import rallygame.car.data.Car;
 import rallygame.car.ray.RayCarControl;
@@ -81,8 +82,9 @@ public class DriveRace extends DriveBase implements PauseState.ICallback, ICheck
                 .limit(themCount + 1).toArray(i -> new Vector3f[i]);
 
         //buildCars and load ai
+        var cm = getState(CarManager.class);
         for (int i = 0; i < this.themCount; i++) {
-            RayCarControl c = this.cm.addCar(Rand.randFromArray(Car.values()), worldStarts[i+1], worldRot, false);
+            RayCarControl c = cm.addCar(Rand.randFromArray(Car.values()), worldStarts[i+1], worldRot, false);
             RaceAI rAi = new RaceAI(c, this);
             c.attachAI(rAi, true);
         }
@@ -138,6 +140,7 @@ public class DriveRace extends DriveBase implements PauseState.ICallback, ICheck
             return;
         
         super.update(tpf);
+        var cm = getState(CarManager.class);
 
         progressMenu.setBasicText("State:" + state.name() + "\nStateTimeout:" + this.stateTimeout);
         
@@ -151,10 +154,10 @@ public class DriveRace extends DriveBase implements PauseState.ICallback, ICheck
         case NA:
             return;
         case Init:
-            setAllCarsToStart();
+            setAllCarsToStart(cm);
             break;
         case Ready:
-            setAllCarsToStart();
+            setAllCarsToStart(cm);
             break;
         case Racing:
             progress.update(tpf);
@@ -190,7 +193,7 @@ public class DriveRace extends DriveBase implements PauseState.ICallback, ICheck
         return new Transform(pos, q);
     }
 
-    private void setAllCarsToStart() {
+    private void setAllCarsToStart(CarManager cm) {
         int count = 0;
         for (RayCarControl car: cm.getAll()) {
             car.setPhysicsProperties(worldStarts[count], new Vector3f(), worldRot, new Vector3f());
@@ -219,7 +222,7 @@ public class DriveRace extends DriveBase implements PauseState.ICallback, ICheck
         getState(ParticleAtmosphere.class).setEnabled(true);
 
         this.camera.setEnabled(true);
-        this.cm.setEnabled(true);
+        getState(CarManager.class).setEnabled(true);
     }
 
     @Override
@@ -228,7 +231,7 @@ public class DriveRace extends DriveBase implements PauseState.ICallback, ICheck
         getState(ParticleAtmosphere.class).setEnabled(false);
 
         this.camera.setEnabled(false);
-        this.cm.setEnabled(false);
+        getState(CarManager.class).setEnabled(false);
     }
     
     @Override

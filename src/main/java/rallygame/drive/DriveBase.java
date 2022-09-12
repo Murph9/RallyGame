@@ -26,7 +26,6 @@ public class DriveBase extends BaseAppState implements IDrive {
 
     // car stuff
     protected final Car car;
-    protected CarManager cm;
 
     // gui and camera stuff
     protected CarCamera camera;
@@ -54,10 +53,10 @@ public class DriveBase extends BaseAppState implements IDrive {
         stateManager.attach(menu);
 
         // build player
-        this.cm = getState(CarManager.class);
-        if (!this.cm.getAll().isEmpty()) {
+        var cm = getState(CarManager.class);
+        if (!cm.getAll().isEmpty()) {
             Log.e("!Unusually there are cars still in car builder, please clean up.");
-            this.cm.removeAll();
+            cm.removeAll();
         }
 
         RayCarControl rayCar = cm.addCar(car, world.getStart(), true);
@@ -87,8 +86,7 @@ public class DriveBase extends BaseAppState implements IDrive {
         this.world.setEnabled(enabled); // we kinda don't want the physics running while paused
         getState(BulletAppState.class).setEnabled(enabled);
         this.camera.setEnabled(enabled);
-        this.cm.setEnabled(enabled);
-
+        getState(CarManager.class).setEnabled(enabled);
         getState(ParticleAtmosphere.class).setEnabled(enabled);
     }
 
@@ -117,12 +115,12 @@ public class DriveBase extends BaseAppState implements IDrive {
         app.getInputManager().removeRawInputListener(camera);
         camera = null;
 
-        cm.removeAll();
-        cm = null;
+        getState(CarManager.class).removeAll();
     }
 
     protected final void reInitPlayerCar(CarDataConst carData) {
-        this.cm.changeTo(cm.getPlayer(), carData);
+        var cm = getState(CarManager.class);
+        cm.changeTo(cm.getPlayer(), carData);
 
         // refresh ui node
         getApplication().getStateManager().detach(uiNode);

@@ -19,6 +19,7 @@ import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
+import rallygame.car.CarManager;
 import rallygame.car.ai.RaceAI;
 import rallygame.car.data.Car;
 import rallygame.car.ray.RayCarControl;
@@ -74,7 +75,10 @@ public class DynamicCopyRace extends DriveBase
     public DynamicCopyRace(DefaultBuilder world, IDriveDone done) {
         super(done, Car.Normal, world);
         world.registerListener(this);
-        world.setDistFunction(() -> this.cm.getAll().stream().map(x -> x.location).toArray(Vector3f[]::new));
+        world.setDistFunction(() -> {
+            var cm = getState(CarManager.class);
+            return cm.getAll().stream().map(x -> x.location).toArray(Vector3f[]::new);
+        });
 
         initCheckpointBuffer = new LinkedList<>();
     }
@@ -101,8 +105,9 @@ public class DynamicCopyRace extends DriveBase
                 .limit(carList.length + 1).toArray(i -> new Vector3f[i]);
 
         //buildCars and load ai
+        var cm = getState(CarManager.class);
         for (int i = carList.length - 1; i >= 0; i--) {
-            RayCarControl c = this.cm.addCar(carList[i], worldStarts[i+1], worldRot, false);
+            RayCarControl c = cm.addCar(carList[i], worldStarts[i+1], worldRot, false);
             RaceAI rAi = new RaceAI(c, this, false);
             c.attachAI(rAi, true);
         }
@@ -130,7 +135,7 @@ public class DynamicCopyRace extends DriveBase
         new Screen(getApplication().getContext().getSettings()).topLeftMe(container);
 
         // init collision code
-        this.carCollisionState = new RayCarCollisionService(this, this.cm);
+        this.carCollisionState = new RayCarCollisionService(this, cm);
         getState(BulletAppState.class).getPhysicsSpace().addCollisionListener(carCollisionState);
 
         //actually init
@@ -189,7 +194,9 @@ public class DynamicCopyRace extends DriveBase
     public void update(float tpf) {
         if (!isEnabled())
             return;
+        
         super.update(tpf);
+        var cm = getState(CarManager.class);
 
         //add any buffered checkpoints
         if (progress.isInitialized() && !initCheckpointBuffer.isEmpty()) {
@@ -210,10 +217,10 @@ public class DynamicCopyRace extends DriveBase
         case NA:
             return;
         case Init:
-            setAllCarsToStart();
+            setAllCarsToStart(cm);
             break;
         case Ready:
-            setAllCarsToStart();
+            setAllCarsToStart(cm);
             break;
         case Racing:
             progress.update(tpf);
@@ -223,7 +230,7 @@ public class DynamicCopyRace extends DriveBase
             break;
         case Win:
             // delay and stuff maybe
-            this.cm.setEnabled(false);
+            cm.setEnabled(false);
             end();
             break;
         default:
@@ -263,7 +270,7 @@ public class DynamicCopyRace extends DriveBase
         return new Transform(pos, q);
     }
 
-    private void setAllCarsToStart() {
+    private void setAllCarsToStart(CarManager cm) {
         int count = cm.getCount() - 1;
         for (RayCarControl car: cm.getAll()) {
             car.setPhysicsProperties(worldStarts[count], new Vector3f(), worldRot, new Vector3f());
@@ -296,7 +303,7 @@ public class DynamicCopyRace extends DriveBase
         getState(ParticleAtmosphere.class).setEnabled(true);
 
         this.camera.setEnabled(true);
-        this.cm.setEnabled(true);
+        getState(CarManager.class).setEnabled(true);
     }
 
     @Override
@@ -305,7 +312,7 @@ public class DynamicCopyRace extends DriveBase
         getState(ParticleAtmosphere.class).setEnabled(false);
 
         this.camera.setEnabled(false);
-        this.cm.setEnabled(false);
+        getState(CarManager.class).setEnabled(false);
     }
     
     @Override

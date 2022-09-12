@@ -9,6 +9,7 @@ import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.math.Vector3f;
 
+import rallygame.car.CarManager;
 import rallygame.car.data.Car;
 import rallygame.car.data.CarDataConst;
 import rallygame.car.ray.RayCarControl;
@@ -36,8 +37,10 @@ public class DriveDev extends DriveBase {
         
         Screen screen = new Screen(app.getContext().getSettings());
 		
+		var cm = getState(CarManager.class);
+
     	//init input gui
-		carEditor = new CarEditor(app.getInputManager(), this.cm.getPlayer(), (data) -> { reloadCar(data);}, (car) -> { return resetCar(car); });
+		carEditor = new CarEditor(app.getInputManager(), cm.getPlayer(), (data) -> { reloadCar(data);}, (car) -> { return resetCar(car); });
 		carEditor.setLocalTranslation(screen.get(HorizontalPos.Left, VerticalPos.Top).add(0, -20, 0));
 		((SimpleApplication)app).getGuiNode().attachChild(carEditor);
 		
@@ -46,7 +49,7 @@ public class DriveDev extends DriveBase {
 		((SimpleApplication)app).getGuiNode().attachChild(worldEditor);
 		
 		Vector3f size = new Vector3f(400,400,0);
-        wheelGraphs = new TractionCurveGraph(app.getAssetManager(), this.cm.getPlayer().getCarData(), size);
+        wheelGraphs = new TractionCurveGraph(app.getAssetManager(), cm.getPlayer().getCarData(), size);
         wheelGraphs.setLocalTranslation(screen.get(HorizontalPos.Right, VerticalPos.Bottom, size));
 		((SimpleApplication)app).getGuiNode().attachChild(wheelGraphs);
 	}
@@ -61,8 +64,9 @@ public class DriveDev extends DriveBase {
 		this.reInitPlayerCar(data);
 	}
 	private RayCarControl resetCar(Car car) {
-		this.reInitPlayerCar(this.cm.loadData(car, false));
-		return this.cm.getPlayer();
+		var cm = getState(CarManager.class);
+		this.reInitPlayerCar(cm.loadData(car, false));
+		return cm.getPlayer();
 	}
 	
 	public void reloadWorld(IWorld world) {
@@ -72,7 +76,8 @@ public class DriveDev extends DriveBase {
 		getStateManager().attach(this.world);
 		
         //reset car
-        this.cm.getPlayer().reset();
+		var cm = getState(CarManager.class);
+        cm.getPlayer().reset();
 	}
 	
 	@Override

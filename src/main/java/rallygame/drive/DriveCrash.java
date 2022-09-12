@@ -26,6 +26,7 @@ import com.simsilica.lemur.DefaultRangedValueModel;
 import com.simsilica.lemur.ProgressBar;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
 
+import rallygame.car.CarManager;
 import rallygame.car.ai.DriveAtAI;
 import rallygame.car.data.Car;
 import rallygame.car.data.CarDataConst;
@@ -75,7 +76,9 @@ public class DriveCrash extends DriveBase implements IRayCarCollisionListener {
     @Override
     public void initialize(Application app) {
         super.initialize(app);
-        this.carCollisionState = new RayCarCollisionService(this, this.cm);
+        var cm = getState(CarManager.class);
+
+        this.carCollisionState = new RayCarCollisionService(this, cm);
         getState(BulletAppState.class).getPhysicsSpace().addCollisionListener(carCollisionState);
 
         progressContainer = new Container();
@@ -102,24 +105,25 @@ public class DriveCrash extends DriveBase implements IRayCarCollisionListener {
         super.update(tpf);
         frameCount++;
 
+        var cm = getState(CarManager.class);
         Transform start = world.getStart();
-        if (this.cm.getCount() < (themCount + 1) && frameCount % 60 == 0) {
+        if (cm.getCount() < (themCount + 1) && frameCount % 60 == 0) {
             Vector3f spawn = Rand.randV3f(10, true);
             spawn.x = Math.round(spawn.x) * 2;
             spawn.y = 0; // maybe ray cast from very high to find the ground height?
             spawn.z = Math.round(spawn.z) * 2;
 
-            CarDataConst data = this.cm.loadData(them, true);
-            RayCarControl c = this.cm.addCar(data, spawn, start.getRotation(), false);
-            c.attachAI(new DriveAtAI(c, this.cm.getPlayer().getPhysicsObject()), true);
+            CarDataConst data = cm.loadData(them, true);
+            RayCarControl c = cm.addCar(data, spawn, start.getRotation(), false);
+            c.attachAI(new DriveAtAI(c, cm.getPlayer().getPhysicsObject()), true);
         }
 
         // check if any hit ones are upside down, if so kill them
         List<RayCarControl> toKill = new ArrayList<RayCarControl>();
         for (RayCarControl c : this.hitList.keySet())
-            if (c.up != null && c.up.y < 0 && c != this.cm.getPlayer()) // not the player
+            if (c.up != null && c.up.y < 0 && c != cm.getPlayer()) // not the player
                 toKill.add(c);
-        for (RayCarControl c : this.cm.getAll())
+        for (RayCarControl c : cm.getAll())
             if (c.location.y < -100)
                 toKill.add(c);
         for (RayCarControl c : toKill) {
@@ -135,10 +139,10 @@ public class DriveCrash extends DriveBase implements IRayCarCollisionListener {
         }
 
         // update timeout mode only if we have an opponent
-        if (this.cm.getCount() > 1) {
+        if (cm.getCount() > 1) {
             loseTimer += tpf;
             if (loseTimer > TIMEOUT) // you lose
-                this.cm.setEnabled(false);
+                cm.setEnabled(false);
         }
 
         this.progressBar.setModel(new DefaultRangedValueModel(0, 1, loseTimer / TIMEOUT));

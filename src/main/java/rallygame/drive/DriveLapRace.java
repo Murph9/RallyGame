@@ -8,6 +8,7 @@ import com.jme3.math.Vector3f;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
+import rallygame.car.CarManager;
 import rallygame.car.ai.RaceAI;
 import rallygame.car.data.Car;
 import rallygame.car.ray.RayCarControl;
@@ -52,6 +53,7 @@ public class DriveLapRace extends DriveBase implements ICheckpointDrive {
                 checkpoints[0].subtract(checkpoints[checkpoints.length - 1]).negate())
                 .limit(2).toArray(Vector3f[]::new);
 
+        var cm = getState(CarManager.class);
         cm.getPlayer().setPhysicsProperties(worldStarts[0], null, worldRot, null);
         var c = cm.addCar(Car.Runner, worldStarts[1], worldRot, false);
         ai = new RaceAI(c, this, false);

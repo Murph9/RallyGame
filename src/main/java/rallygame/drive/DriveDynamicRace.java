@@ -10,6 +10,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 
+import rallygame.car.CarManager;
 import rallygame.car.ai.RaceAI;
 import rallygame.car.data.Car;
 import rallygame.car.ray.RayCarControl;
@@ -39,7 +40,10 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
     public DriveDynamicRace(DefaultBuilder world, IDriveDone done) {
         super(done, Car.Runner, world);
         world.registerListener(this);
-        world.setDistFunction(() -> this.cm.getAll().stream().map(x -> x.location).toArray(Vector3f[]::new));
+        world.setDistFunction(() -> {
+            var cm = getState(CarManager.class);
+            return cm.getAll().stream().map(x -> x.location).toArray(Vector3f[]::new);
+        });
 
         initCheckpointBuffer = new LinkedList<>();
     }
@@ -64,9 +68,10 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
                 checkpoints[0].subtract(checkpoints[checkpoints.length - 1]).negate())
                 .limit(themCount+1).toArray(i -> new Vector3f[i]);
 
+        var cm = getState(CarManager.class);
         //buildCars and load ai
         for (int i = 0; i < this.themCount; i++) {
-            RayCarControl c = this.cm.addCar(Car.LeMans, worldStarts[i+1], worldRot, false);
+            RayCarControl c = cm.addCar(Car.LeMans, worldStarts[i+1], worldRot, false);
             RaceAI rAi = new RaceAI(c, this, false);
             c.attachAI(rAi, true);
         }
@@ -122,6 +127,7 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
             return;
 
         super.update(tpf);
+        var cm = getState(CarManager.class);
 
         //add any buffered checkpoints
         if (progress.isInitialized() && !initCheckpointBuffer.isEmpty()) {
@@ -142,10 +148,10 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
         case NA:
             return;
         case Init:
-            setAllCarsToStart();
+            setAllCarsToStart(cm);
             break;
         case Ready:
-            setAllCarsToStart();
+            setAllCarsToStart(cm);
             break;
         case Racing:
             progress.update(tpf);
@@ -186,7 +192,7 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
         return new Transform(pos, q);
     }
 
-    private void setAllCarsToStart() {
+    private void setAllCarsToStart(CarManager cm) {
         int count = 0;
         for (RayCarControl car: cm.getAll()) {
             car.setPhysicsProperties(worldStarts[count], new Vector3f(), worldRot, new Vector3f());
@@ -215,7 +221,7 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
         getState(ParticleAtmosphere.class).setEnabled(true);
 
         this.camera.setEnabled(true);
-        this.cm.setEnabled(true);
+        getState(CarManager.class).setEnabled(true);
     }
 
     @Override
@@ -224,7 +230,7 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
         getState(ParticleAtmosphere.class).setEnabled(false);
 
         this.camera.setEnabled(false);
-        this.cm.setEnabled(false);
+        getState(CarManager.class).setEnabled(false);
     }
     
     @Override

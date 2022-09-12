@@ -3,6 +3,7 @@ package survival;
 import com.jme3.app.Application;
 import com.jme3.math.Transform;
 
+import rallygame.car.CarManager;
 import rallygame.car.data.Car;
 import rallygame.car.data.CarDataAdjuster;
 import rallygame.drive.PauseState;
@@ -46,7 +47,8 @@ public class Drive extends DriveBase implements PauseState.ICallback {
     }
 
     public void applyChange(CarDataAdjuster adj) {
-        var carData = this.cm.loadData(this.car, adj);
+        var cm = getState(CarManager.class);
+        var carData = cm.loadData(this.car, adj);
         this.reInitPlayerCar(carData);
     }
 
