@@ -3,8 +3,6 @@ package rallygame.drive;
 import rallygame.world.IWorld;
 import rallygame.world.WorldType;
 
-import java.util.Collection;
-
 import com.jme3.app.Application;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.app.state.BaseAppState;
@@ -100,10 +98,6 @@ public class DriveBase extends BaseAppState implements IDrive {
 
     public void resetWorld() {
         world.reset();
-    }
-
-    public final Collection<RayCarControl> getAllCars() {
-        return this.cm.getAll();
     }
 
     @Override

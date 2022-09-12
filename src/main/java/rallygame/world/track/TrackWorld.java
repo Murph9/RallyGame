@@ -37,8 +37,8 @@ import com.jme3.terrain.noise.filter.SmoothFilter;
 import com.jme3.terrain.noise.fractal.FractalSum;
 import com.jme3.terrain.noise.modulator.NoiseModulator;
 
+import rallygame.car.CarManager;
 import rallygame.car.ray.RayCarControl;
-import rallygame.drive.IDrive;
 import rallygame.effects.LoadModelWrapper;
 import rallygame.game.DebugAppState;
 import rallygame.helper.Geo;
@@ -297,12 +297,12 @@ public class TrackWorld extends World implements ICheckpointWorld {
 
 	@Override
 	public void update(float tpf) {
-		IDrive drive = getStateManager().getState(IDrive.class);
-		if (drive != null) {
-			boolean noCars = drive.getAllCars().isEmpty();
+		var carManager = getStateManager().getState(CarManager.class);
+		if (carManager != null) {
+			boolean noCars = carManager.getAll().isEmpty();
 			if (this.trackSegments != null && !noCars && DEBUG) {
 				// hack to see if the bezier curve stuff works
-				RayCarControl car = drive.getAllCars().stream().findFirst().get();
+				RayCarControl car = carManager.getAll().stream().findFirst().get();
 				Vector3f pos = getClosestPointTo(this.trackSegments, normalizeHeightIn(car.location));
 
 				getState(DebugAppState.class).drawBox("closestpointtocurve", ColorRGBA.LightGray, unnormalizeHeightIn(pos), 1);

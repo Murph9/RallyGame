@@ -9,6 +9,7 @@ import com.jme3.scene.Node;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
+import rallygame.car.CarManager;
 import rallygame.car.ray.RayCarControl;
 import rallygame.helper.H;
 import rallygame.service.Screen;
@@ -71,7 +72,7 @@ public class SprintMenu extends DriveMenu {
 		super.update(tpf);
 
 		StringBuilder sb = new StringBuilder();
-		var carList = new LinkedList<RayCarControl>(this.drive.getAllCars());
+		var carList = new LinkedList<RayCarControl>(getState(CarManager.class).getAll());
 		Collections.sort(carList, (o1, o2) -> (int)(o2.location.z - o1.location.z));
 		for (RayCarControl car: carList) {
 			sb.append(H.leftPad(H.roundDecimal(car.location.z, 0), 5, ' '));

@@ -1,7 +1,5 @@
 package duel;
 
-import java.util.Collection;
-
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
@@ -255,10 +253,5 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
 
     @Override
     public void resetWorld() {
-    }
-
-    @Override
-    public Collection<RayCarControl> getAllCars() {
-        return this.cm.getAll();
     }
 }
