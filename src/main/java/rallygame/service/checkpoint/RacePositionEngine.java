@@ -151,16 +151,21 @@ public class RacePositionEngine {
         return spatials;
     }
     private Checkpoint[] getNextCheckpoints(RayCarControl car, int count) {
+        var carState = this.racers.get(car);
+        if (carState == null) {
+            return new Checkpoint[0];
+        }
+
         if (count <= 1) {
-            return new Checkpoint[] { this.racers.get(car).nextCheckpoint };
+            return new Checkpoint[] { carState.nextCheckpoint };
         }
         //reduce to the size of the checkpoints given
         count = Math.min(count, this.getCheckpointCount());
 
         // calc the next 'count' checkpoints
-        int checkNum = this.racers.get(car).nextCheckpoint.num;
+        int checkNum = carState.nextCheckpoint.num;
         Checkpoint[] checks = new Checkpoint[count];
-        checks[0] = this.racers.get(car).nextCheckpoint;
+        checks[0] = carState.nextCheckpoint;
         for (int i = 0; i < count - 1; i++) {
             int check = calcNextCheckFrom(checkNum + i);
             checks[i + 1] = this.checkpoints.get(check);

@@ -11,7 +11,6 @@ import com.simsilica.lemur.Label;
 import rallygame.car.CarManager;
 import rallygame.car.ai.RaceAI;
 import rallygame.car.data.Car;
-import rallygame.car.ray.RayCarControl;
 import rallygame.game.IDriveDone;
 import rallygame.helper.H;
 import rallygame.helper.Log;
@@ -22,7 +21,7 @@ import rallygame.service.checkpoint.CheckpointProgressUI;
 import rallygame.world.ICheckpointWorld;
 import rallygame.world.wp.StaticBuilt;
 
-public class DriveLapRace extends DriveBase implements ICheckpointDrive {
+public class DriveLapRace extends DriveBase {
 
     private CheckpointProgressUI progressMenu;
     private CheckpointProgress progress;
@@ -56,9 +55,6 @@ public class DriveLapRace extends DriveBase implements ICheckpointDrive {
         var cm = getState(CarManager.class);
         cm.getPlayer().setPhysicsProperties(worldStarts[0], null, worldRot, null);
         var c = cm.addCar(Car.Runner, worldStarts[1], worldRot, false);
-        ai = new RaceAI(c, this, false);
-        ai.setRoadWidth(12);
-        c.attachAI(ai, true);
 
         // Checkpoint detection and stuff
         progress = new CheckpointProgress(CheckpointProgress.Type.Sprint, checkpoints, cm.getAll(), cm.getPlayer());
@@ -67,6 +63,11 @@ public class DriveLapRace extends DriveBase implements ICheckpointDrive {
 
         progressMenu = new CheckpointProgressUI(progress);
         getStateManager().attach(progressMenu);
+
+        // other ai stuff
+        ai = new RaceAI(c, progress, false);
+        ai.setRoadWidth(12);
+        c.attachAI(ai, true);
 
         //show message
         this.container = new Container();
@@ -84,21 +85,6 @@ public class DriveLapRace extends DriveBase implements ICheckpointDrive {
         this.timer.setText("Difficulty: " + H.roundDecimal(this.difficulty, 2));
 
         ai.useCatchUp(this.difficulty);
-    }
-
-    @Override
-    public Vector3f getLastCheckpoint(RayCarControl car) {
-        return progress.getLastCheckpoint(car);
-    }
-
-    @Override
-    public Vector3f getNextCheckpoint(RayCarControl car) {
-        return progress.getNextCheckpoint(car);
-    }
-    
-    @Override
-    public Vector3f[] getNextCheckpoints(RayCarControl car, int count) {
-        return progress.getNextCheckpoints(car, count);
     }
 
     @Override

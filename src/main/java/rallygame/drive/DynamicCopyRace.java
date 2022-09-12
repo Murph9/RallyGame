@@ -38,7 +38,7 @@ import rallygame.world.wp.DefaultBuilder;
 
 
 public class DynamicCopyRace extends DriveBase 
-        implements IRayCarCollisionListener, PauseState.ICallback, ICheckpointDrive, DefaultBuilder.IPieceChanged {
+        implements IRayCarCollisionListener, PauseState.ICallback, DefaultBuilder.IPieceChanged {
 
     private final Car[] carList = new Car[]{
             Car.Rocket,
@@ -102,22 +102,14 @@ public class DynamicCopyRace extends DriveBase
                 checkpoints[0].subtract(checkpoints[checkpoints.length - 1]).negate())
                 .limit(carList.length + 1).toArray(i -> new Vector3f[i]);
 
-        //buildCars and load ai
         var cm = getState(CarManager.class);
+        var aiCars = new LinkedList<RayCarControl>();
+        //buildCars and load ai
         for (int i = carList.length - 1; i >= 0; i--) {
             RayCarControl c = cm.addCar(carList[i], worldStarts[i+1], worldRot, false);
-            RaceAI rAi = new RaceAI(c, this, false);
-            c.attachAI(rAi, true);
+            aiCars.add(c);
         }
         
-        // Something bigger to spawn on
-        Geometry gBox = new Geometry("a bigger starting box", new Box(20, 0.25f, 10));
-        gBox.setLocalTranslation(-30, -0.1f, 0);
-        Spatial boxG = LoadModelWrapper.createWithColour(app.getAssetManager(), gBox, ColorRGBA.Red);
-        boxG.addControl(new RigidBodyControl(0));
-        ((SimpleApplication) app).getRootNode().attachChild(boxG);
-        getState(BulletAppState.class).getPhysicsSpace().add(boxG);
-
         // init checkpoints
         progress = new CheckpointProgress(CheckpointProgress.Type.Sprint, checkpoints, cm.getAll(), cm.getPlayer());
         progress.setCheckpointModel(CheckpointProgress.GetDefaultCheckpointModel(app, 20, new ColorRGBA(0, 1, 0, 0.4f)));
@@ -125,6 +117,20 @@ public class DynamicCopyRace extends DriveBase
 
         progressMenu = new CheckpointProgressUI(progress);
         getStateManager().attach(progressMenu);
+        
+        //buildCars and load ai
+        for (var aiCar: aiCars) {
+            RaceAI rAi = new RaceAI(aiCar, progress, false);
+            aiCar.attachAI(rAi, true);
+        }
+
+        // Something bigger to spawn on
+        Geometry gBox = new Geometry("a bigger starting box", new Box(20, 0.25f, 10));
+        gBox.setLocalTranslation(-30, -0.1f, 0);
+        Spatial boxG = LoadModelWrapper.createWithColour(app.getAssetManager(), gBox, ColorRGBA.Red);
+        boxG.addControl(new RigidBodyControl(0));
+        ((SimpleApplication) app).getRootNode().attachChild(boxG);
+        getState(BulletAppState.class).getPhysicsSpace().add(boxG);
 
         //show score
         this.container = new Container();
@@ -312,21 +318,6 @@ public class DynamicCopyRace extends DriveBase
         getState(CarManager.class).setEnabled(false);
     }
     
-    @Override
-    public Vector3f getLastCheckpoint(RayCarControl car) {
-        return progress.getLastCheckpoint(car);
-    }
-
-    @Override
-    public Vector3f getNextCheckpoint(RayCarControl car) {
-        return progress.getNextCheckpoint(car);
-    }
-    
-    @Override
-    public Vector3f[] getNextCheckpoints(RayCarControl car, int count) {
-        return progress.getNextCheckpoints(car, count);
-    }
-
     @Override
     public void pauseState(boolean value) {
         this.setEnabled(value);

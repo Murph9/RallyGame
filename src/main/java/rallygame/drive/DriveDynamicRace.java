@@ -23,7 +23,7 @@ import rallygame.service.checkpoint.CheckpointProgressUI;
 import rallygame.world.wp.DefaultBuilder;
 
 
-public class DriveDynamicRace extends DriveBase implements PauseState.ICallback, ICheckpointDrive, DefaultBuilder.IPieceChanged {
+public class DriveDynamicRace extends DriveBase implements PauseState.ICallback, DefaultBuilder.IPieceChanged {
 
     // ai things
     private final int themCount = 1;
@@ -69,11 +69,11 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
                 .limit(themCount+1).toArray(i -> new Vector3f[i]);
 
         var cm = getState(CarManager.class);
+        var aiCars = new LinkedList<RayCarControl>();
         //buildCars and load ai
         for (int i = 0; i < this.themCount; i++) {
             RayCarControl c = cm.addCar(Car.LeMans, worldStarts[i+1], worldRot, false);
-            RaceAI rAi = new RaceAI(c, this, false);
-            c.attachAI(rAi, true);
+            aiCars.add(c);
         }
         
         progress = new CheckpointProgress(CheckpointProgress.Type.Sprint, checkpoints, cm.getAll(), cm.getPlayer());
@@ -82,6 +82,11 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
 
         progressMenu = new CheckpointProgressUI(progress);
         getStateManager().attach(progressMenu);
+
+        for (var aiCar: aiCars) {
+            RaceAI rAi = new RaceAI(aiCar, progress, false);
+            aiCar.attachAI(rAi, true);
+        }
 
         //actually init
         nextState();
@@ -232,21 +237,6 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
         getState(CarManager.class).setEnabled(false);
     }
     
-    @Override
-    public Vector3f getLastCheckpoint(RayCarControl car) {
-        return progress.getLastCheckpoint(car);
-    }
-
-    @Override
-    public Vector3f getNextCheckpoint(RayCarControl car) {
-        return progress.getNextCheckpoint(car);
-    }
-    
-    @Override
-    public Vector3f[] getNextCheckpoints(RayCarControl car, int count) {
-        return progress.getNextCheckpoints(car, count);
-    }
-
     @Override
     public void pauseState(boolean value) {
         this.setEnabled(value);

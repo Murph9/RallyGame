@@ -18,14 +18,14 @@ import rallygame.car.ai.RaceAI;
 import rallygame.car.data.CarDataConst;
 import rallygame.car.ray.RayCarControl;
 import rallygame.car.ui.CarUI;
-import rallygame.drive.ICheckpointDrive;
+import rallygame.drive.IDrive;
 import rallygame.effects.ParticleAtmosphere;
 import rallygame.helper.Log;
 import rallygame.service.Screen;
 import rallygame.service.checkpoint.CheckpointProgress;
 import rallygame.world.ICheckpointWorld;
 
-public class DuelRace extends BaseAppState implements ICheckpointDrive {
+public class DuelRace extends BaseAppState implements IDrive {
 
     private final IDuelFlow flow;
 
@@ -72,7 +72,14 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
 
         CarDataConst theirCarData = cm.loadData(data.theirCar, data.theirAdjuster);
         RayCarControl car = this.cm.addCar(theirCarData, world.start(1), false);
-        car.attachAI(new RaceAI(car, this), true);
+
+        // Checkpoint detection and stuff
+        progress = new CheckpointProgress(CheckpointProgress.Type.Sprint, checkpoints, cm.getAll(), rayCar);
+        progress.setCheckpointModel(CheckpointProgress.GetDefaultCheckpointModel(app, 10));
+        getStateManager().attach(progress);
+
+        // add AI
+        car.attachAI(new RaceAI(car, progress), true);
 
         // initCamera
         camera = new CarCamera(app.getCamera(), rayCar);
@@ -91,11 +98,6 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
         getStateManager().attach(menu);
 
         countdown = new CountdownTimer();
-
-        // Checkpoint detection and stuff
-        progress = new CheckpointProgress(CheckpointProgress.Type.Sprint, checkpoints, cm.getAll(), rayCar);
-        progress.setCheckpointModel(CheckpointProgress.GetDefaultCheckpointModel(app, 10));
-        getStateManager().attach(progress);
 
         goToState(RaceState.WaitingForStartPress);
     }
@@ -181,21 +183,6 @@ public class DuelRace extends BaseAppState implements ICheckpointDrive {
         Log.p("Winner: " + winner.getCarData().name);
 
         flow.nextState(this, d);
-    }
-
-    @Override
-    public Vector3f getLastCheckpoint(RayCarControl car) {
-        return progress.getLastCheckpoint(car);
-    }
-
-    @Override
-    public Vector3f getNextCheckpoint(RayCarControl car) {
-        return progress.getNextCheckpoint(car);
-    }
-
-    @Override
-    public Vector3f[] getNextCheckpoints(RayCarControl car, int count) {
-        return progress.getNextCheckpoints(car, count);
     }
 
     @Override

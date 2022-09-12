@@ -4,22 +4,22 @@ import com.jme3.math.Vector3f;
 
 import rallygame.car.ray.RayCarControl;
 import rallygame.car.ray.RayCarControlInput;
-import rallygame.drive.ICheckpointDrive;
 import rallygame.helper.H;
+import rallygame.service.checkpoint.CheckpointProgress;
 
 public class RaceAI extends CarAI {
 
-    private ICheckpointDrive race;
+    private final CheckpointProgress checkpointProgress;
     private final boolean doFowardRayCast;
     private float roadWidth;
     private float catchUp;
     
-    public RaceAI(RayCarControl car, ICheckpointDrive race) {
-        this(car, race, true);
+    public RaceAI(RayCarControl car, CheckpointProgress checkpointProgress) {
+        this(car, checkpointProgress, true);
     }
-	public RaceAI(RayCarControl car, ICheckpointDrive race, boolean doForwardRayCast) {
+	public RaceAI(RayCarControl car, CheckpointProgress checkpointProgress, boolean doForwardRayCast) {
 		super(car);
-        this.race = race;
+        this.checkpointProgress = checkpointProgress;
         this.doFowardRayCast = doForwardRayCast;
         roadWidth = 5;
     }
@@ -32,14 +32,14 @@ public class RaceAI extends CarAI {
 
     @Override
 	public void update(float tpf) {
-		Vector3f atPos = race.getNextCheckpoint(car);
+		Vector3f atPos = checkpointProgress.getNextCheckpoint(car);
 		if (atPos == null) {
 			justBrake();
 			return;
 		}
         
-        Vector3f[] nextCheckpoints = race.getNextCheckpoints(car, 2);
-        Vector3f pos = calcBetterCheckpointPos(race.getLastCheckpoint(car), roadWidth*0.9f, nextCheckpoints[0], nextCheckpoints[1]);
+        Vector3f[] nextCheckpoints = checkpointProgress.getNextCheckpoints(car, 2);
+        Vector3f pos = calcBetterCheckpointPos(checkpointProgress.getLastCheckpoint(car), roadWidth*0.9f, nextCheckpoints[0], nextCheckpoints[1]);
         driveAt(pos);
         
         boolean tooFast = tooFastForNextCheckpoints(atPos, roadWidth);
@@ -84,7 +84,7 @@ public class RaceAI extends CarAI {
     }
 
     private boolean tooFastForNextCheckpoints(Vector3f atPos, float roadWidth) {
-        Vector3f[] checkpoints = race.getNextCheckpoints(car, 3);
+        Vector3f[] checkpoints = checkpointProgress.getNextCheckpoints(car, 3);
         if (checkpoints == null)
             return false;
 

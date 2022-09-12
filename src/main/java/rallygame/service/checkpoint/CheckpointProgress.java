@@ -223,7 +223,11 @@ public class CheckpointProgress extends BaseAppState {
         return engine.getRacerNextCheckpoints(car, count);
     }
     public Vector3f getNextCheckpoint(RayCarControl car) {
-        return getNextCheckpoints(car, 1)[0];
+        var nextChekpoints = getNextCheckpoints(car, 1);
+        if (nextChekpoints.length < 1)
+            return null;
+
+        return nextChekpoints[0];
     }
 
     public Vector3f getLastCheckpoint(RayCarControl car) {

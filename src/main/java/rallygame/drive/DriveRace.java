@@ -1,5 +1,7 @@
 package rallygame.drive;
 
+import java.util.LinkedList;
+
 import com.jme3.app.Application;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.math.ColorRGBA;
@@ -21,7 +23,7 @@ import rallygame.service.checkpoint.CheckpointProgressUI;
 import rallygame.world.StaticWorld;
 import rallygame.world.StaticWorldBuilder;
 
-public class DriveRace extends DriveBase implements PauseState.ICallback, ICheckpointDrive {
+public class DriveRace extends DriveBase implements PauseState.ICallback {
 
     // ai things
     private final int themCount = 8;
@@ -81,12 +83,12 @@ public class DriveRace extends DriveBase implements PauseState.ICallback, ICheck
                 .generate(checkpoints[0], checkpoints[0].subtract(checkpoints[checkpoints.length - 1]))
                 .limit(themCount + 1).toArray(i -> new Vector3f[i]);
 
-        //buildCars and load ai
         var cm = getState(CarManager.class);
+        var aiCars = new LinkedList<RayCarControl>();
+        //buildCars and load ai
         for (int i = 0; i < this.themCount; i++) {
             RayCarControl c = cm.addCar(Rand.randFromArray(Car.values()), worldStarts[i+1], worldRot, false);
-            RaceAI rAi = new RaceAI(c, this);
-            c.attachAI(rAi, true);
+            aiCars.add(c);
         }
         
         progress = new CheckpointProgress(CheckpointProgress.Type.Lap, checkpoints, cm.getAll(), cm.getPlayer());
@@ -95,6 +97,12 @@ public class DriveRace extends DriveBase implements PauseState.ICallback, ICheck
 
         progressMenu = new CheckpointProgressUI(progress);
         getStateManager().attach(progressMenu);
+
+        //buildCars and load ai
+        for (var aiCar: aiCars) {
+            RaceAI rAi = new RaceAI(aiCar, progress);
+            aiCar.attachAI(rAi, true);
+        }
         
         //actually init
         nextState();
@@ -233,21 +241,6 @@ public class DriveRace extends DriveBase implements PauseState.ICallback, ICheck
         getState(CarManager.class).setEnabled(false);
     }
     
-    @Override
-    public Vector3f getLastCheckpoint(RayCarControl car) {
-        return progress.getLastCheckpoint(car);
-    }
-
-    @Override
-    public Vector3f getNextCheckpoint(RayCarControl car) {
-        return progress.getNextCheckpoint(car);
-    }
-
-    @Override
-    public Vector3f[] getNextCheckpoints(RayCarControl car, int count) {
-        return progress.getNextCheckpoints(car, count);
-    }
-
     @Override
     public void pauseState(boolean value) {
         this.setEnabled(value);
