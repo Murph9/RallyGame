@@ -8,6 +8,7 @@ import com.jme3.audio.AudioListenerState;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.BulletAppState.ThreadingType;
 import com.jme3.math.Vector3f;
+import com.jme3.system.AppSettings;
 import com.simsilica.lemur.GuiGlobals;
 
 import rallygame.car.CarManager;
@@ -26,6 +27,11 @@ public class SurvivalApp extends SimpleApplication {
         boolean isDebug = java.lang.management.ManagementFactory.getRuntimeMXBean(). getInputArguments().toString().contains("-agentlib:jdwp");
 
         SurvivalApp app = new SurvivalApp();
+        AppSettings settings = new AppSettings(false);
+        
+        settings.setUseJoysticks(true);
+        app.setSettings(settings);
+
         app.setDisplayStatView(isDebug);
         app.start();
     }
