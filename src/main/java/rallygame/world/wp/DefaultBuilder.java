@@ -231,7 +231,6 @@ public abstract class DefaultBuilder extends World {
         return new Transform(new Vector3f(0, 1, 0), rot);
     }
     
-    @Override
     public Vector3f getNextPieceClosestTo(Vector3f myPos) {
         float minDistance = Float.MAX_VALUE;
         int index = -1;

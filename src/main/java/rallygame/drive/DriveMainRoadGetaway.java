@@ -21,7 +21,6 @@ import rallygame.car.ray.RayCarControl;
 import rallygame.game.IDriveDone;
 import rallygame.helper.H;
 import rallygame.helper.Rand;
-import rallygame.world.wp.DefaultBuilder;
 import rallygame.world.wp.WP.DynamicType;
 
 public class DriveMainRoadGetaway extends DriveBase {
@@ -36,7 +35,7 @@ public class DriveMainRoadGetaway extends DriveBase {
 	// - stopping
 	// - hitting traffic
 
-	private static final int TRAFFIC_COUNT = 60;
+	private static final int TRAFFIC_COUNT = 10;
 	private static final float TRAFFIC_BUFFER = 100;
 	private static final float HUNTER_BUFFER = 25;
 
@@ -133,10 +132,8 @@ public class DriveMainRoadGetaway extends DriveBase {
 			final float z = nextZOff();
 			final boolean spawnPlayerDirection = spawnPlayerDirection();
 			
-			//closest piece from the start of the end of the world (as its always increasing in a straight line down positive x)
-			//and then subtract a bit so that it doesn't fall off
-			Vector3f spawnPos = ((DefaultBuilder) this.world).getNextPieceClosestTo(new Vector3f(100000, 0, 0))
-					.add(-20, 0, z); //offset
+			//select a far away place
+			Vector3f spawnPos = player.location.add(150, 0, 0);
 			Quaternion spawnDir = spawnPlayerDirection
 				? start.getRotation()
 				: new Quaternion().fromAngleAxis(FastMath.PI, Vector3f.UNIT_Y).mult(start.getRotation());

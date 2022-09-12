@@ -89,13 +89,11 @@ public class DynamicCopyRace extends DriveBase
         
         nextState();
         
-        //hard coded checkpoints for duct2 (small)
         Vector3f[] checkpoints = new Vector3f[] {
                 new Vector3f(0, 0, 0),
                 new Vector3f(10, 0, 0) // starting vector to get the cars to drive forward
             };
         
-
         // generate starting positions and rotations
         this.worldRot = new Quaternion();
         worldRot.fromAngleAxis(FastMath.DEG_TO_RAD * 90, new Vector3f(0, 1, 0));
@@ -223,7 +221,7 @@ public class DynamicCopyRace extends DriveBase
             setAllCarsToStart(cm);
             break;
         case Racing:
-            progress.update(tpf);
+            progress.update(tpf); // TODO do we need this
             checkWinners();
             time += tpf;
             timer.setText(H.roundDecimal(time, 2) + " sec");

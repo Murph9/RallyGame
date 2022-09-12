@@ -154,7 +154,7 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
             setAllCarsToStart(cm);
             break;
         case Racing:
-            progress.update(tpf);
+            progress.update(tpf); // TODO do we need this
             break;
         case Win:
             // delay and stuff maybe

@@ -6,7 +6,6 @@ import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.math.Transform;
-import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 
 import rallygame.helper.Log;
@@ -46,11 +45,6 @@ public abstract class World extends BaseAppState implements IWorld {
 
 		Log.e("cleanup() world: " + rootNode.getName() + " rm(" + realRootNode.getChildren().size() + ")");
 		this.rootNode = null;
-	}
-
-	// Simpler AI call
-	public Vector3f getNextPieceClosestTo(Vector3f pos) {
-		return null;
 	}
 
 	@Override

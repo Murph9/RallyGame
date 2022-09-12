@@ -160,7 +160,7 @@ public class DriveRace extends DriveBase implements PauseState.ICallback, ICheck
             setAllCarsToStart(cm);
             break;
         case Racing:
-            progress.update(tpf);
+            progress.update(tpf); // TODO do we need this
             break;
         case Win:
             // delay and stuff maybe

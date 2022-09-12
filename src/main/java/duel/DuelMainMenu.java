@@ -1,5 +1,7 @@
 package duel;
 
+import java.util.LinkedList;
+
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AppState;
@@ -12,6 +14,8 @@ import com.jme3.input.event.KeyInputEvent;
 import com.jme3.input.event.MouseButtonEvent;
 import com.jme3.input.event.MouseMotionEvent;
 import com.jme3.input.event.TouchEvent;
+import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
@@ -27,10 +31,11 @@ import rallygame.car.data.CarDataConst;
 import rallygame.car.ray.RayCarControl;
 import rallygame.car.ui.CarStatsUI;
 import rallygame.service.Screen;
+import rallygame.service.checkpoint.CheckpointProgress;
 import rallygame.world.wp.DefaultBuilder;
 import rallygame.world.wp.WP.DynamicType;
 
-public class DuelMainMenu extends BaseAppState implements RawInputListener {
+public class DuelMainMenu extends BaseAppState implements RawInputListener, DefaultBuilder.IPieceChanged {
 
     private final IDuelFlow flow;
     private final DuelData duelData;
@@ -41,9 +46,12 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
 
     private AppState camera;
     private CarManager cm;
+    private CheckpointProgress progress;
 
     private Container mainWindow;
     private Container altWindow;
+    
+    private final LinkedList<Vector3f> initCheckpointBuffer;
 
     public DuelMainMenu(IDuelFlow flow, DuelData gameOverData, String version) {
         this.flow = flow;
@@ -52,6 +60,8 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
 
         carType = Car.Runner;
         world = DynamicType.Valley.getBuilder();
+
+        initCheckpointBuffer = new LinkedList<>();
     }
 
     @Override
@@ -114,7 +124,18 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
         getStateManager().attach(world);
 
         // build player
-        RayCarControl car = cm.addCar(this.carType, world.getStart(), true);
+        RayCarControl car = cm.addCar(this.carType, world.getStart(), false);
+
+        Vector3f[] checkpoints = new Vector3f[] {
+            new Vector3f(0, 0, 0),
+            new Vector3f(10, 0, 0) // starting vector to get the cars to drive forward
+        };
+
+        // init checkpoints
+        progress = new CheckpointProgress(CheckpointProgress.Type.Sprint, checkpoints, cm.getAll(), cm.getPlayer());
+        progress.setCheckpointModel(CheckpointProgress.GetDefaultCheckpointModel(app, 0, new ColorRGBA(0, 1, 0, 0.4f)));
+        getStateManager().attach(progress);
+        
 
         // attach basic ai, for the view
         DriveAlongAI ai = new DriveAlongAI(car, (vec) -> world.getNextPieceClosestTo(vec));
@@ -130,6 +151,9 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
 
     @Override
     protected void cleanup(Application app) {
+        getStateManager().detach(progress);
+        progress = null;
+
         Node n = ((SimpleApplication) app).getGuiNode();
         n.detachChild(mainWindow);
         n.detachChild(altWindow);
@@ -158,6 +182,13 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
         Screen screen = new Screen(getApplication().getContext().getSettings());
         screen.centerMe(mainWindow);
         screen.topCenterMe(altWindow);
+
+        //add any buffered checkpoints
+        if (progress.isInitialized() && !initCheckpointBuffer.isEmpty()) {
+            for (Vector3f p : initCheckpointBuffer)
+                progress.addCheckpoint(p);
+            initCheckpointBuffer.clear();
+        }
     }
 
     //#region input events
@@ -194,5 +225,23 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener {
             flow.nextState(this, d);
             this.setEnabled(false); //to prevent this being called twice
         }
+    }
+
+    @Override
+    public void pieceAdded(Vector3f pos) {
+        if (!progress.isInitialized())   {
+            initCheckpointBuffer.add(pos);
+            return;
+        }
+        
+        progress.addCheckpoint(pos);
+    }
+
+    @Override
+    public void pieceRemoved(Vector3f pos) {
+        if (!progress.isInitialized())
+            throw new IllegalStateException("Think about it, how?");
+
+        progress.setMinCheckpoint(pos);
     }
 }
