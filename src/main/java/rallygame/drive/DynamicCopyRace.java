@@ -32,6 +32,7 @@ import rallygame.service.GridPositions;
 import rallygame.service.IRayCarCollisionListener;
 import rallygame.service.RayCarCollisionService;
 import rallygame.service.Screen;
+import rallygame.service.checkpoint.CheckpointModelFactory;
 import rallygame.service.checkpoint.CheckpointProgress;
 import rallygame.service.checkpoint.CheckpointProgressUI;
 import rallygame.world.wp.DefaultBuilder;
@@ -111,8 +112,8 @@ public class DynamicCopyRace extends DriveBase
         }
         
         // init checkpoints
-        progress = new CheckpointProgress(CheckpointProgress.Type.Sprint, checkpoints, cm.getAll(), cm.getPlayer());
-        progress.setCheckpointModel(CheckpointProgress.GetDefaultCheckpointModel(app, 20, new ColorRGBA(0, 1, 0, 0.4f)));
+        progress = new CheckpointProgress(checkpoints, cm.getAll(), cm.getPlayer());
+        progress.setCheckpointModel(CheckpointModelFactory.GetDefaultCheckpointModel(app, 20, new ColorRGBA(0, 1, 0, 0.4f)));
         getStateManager().attach(progress);
 
         progressMenu = new CheckpointProgressUI(progress);

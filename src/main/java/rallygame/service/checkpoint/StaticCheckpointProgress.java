@@ -1,6 +1,5 @@
 package rallygame.service.checkpoint;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -22,24 +21,27 @@ import com.jme3.scene.Spatial;
 
 import rallygame.car.ray.RayCarControl;
 
-public class CheckpointProgress extends BaseAppState implements ICheckpointProgress {
+public class StaticCheckpointProgress extends BaseAppState implements ICheckpointProgress {
 
     private final RayCarControl player;
 
     private final CheckpointListener listener;
     private final RacePositionEngine engine;
+    private final Vector3f[] checkpoints;
 
     private final Node rootNode;
-    private final List<Vector3f> preInitCheckpoints;
     private final List<Checkpoint> attachedCheckpoints;
 
     private CollisionShape colShape;
     private Spatial baseSpat;
 
-    public CheckpointProgress(Vector3f[] checkpoints, Collection<RayCarControl> cars, RayCarControl player) {
-        this.player = player;
+    public StaticCheckpointProgress(Vector3f[] checkpoints, Collection<RayCarControl> cars, RayCarControl player) {
+        if (checkpoints == null || checkpoints.length < 2)
+            throw new IllegalStateException("This needs checkpoints given");
 
-        this.preInitCheckpoints = new LinkedList<>(Arrays.asList(checkpoints));
+        this.player = player;
+        this.checkpoints = checkpoints;
+
         this.engine = new RacePositionEngine(cars);
         
         this.rootNode = new Node("checkpoint progress root");
@@ -62,22 +64,12 @@ public class CheckpointProgress extends BaseAppState implements ICheckpointProgr
 
         // generate the checkpoint objects
         colShape = CollisionShapeFactory.createBoxShape(baseSpat);
-        for (Vector3f checkPos : preInitCheckpoints)
+        for (Vector3f checkPos : checkpoints)
             attachCheckpoint(checkPos);
-        preInitCheckpoints.clear();
 
         engine.init(app);
 
         listener.startListening(getState(BulletAppState.class).getPhysicsSpace());
-    }
-
-    /** Adds a checkpoint to the list */
-    public void addCheckpoint(Vector3f pos) {
-        if (!this.isInitialized()) {
-            preInitCheckpoints.add(pos);
-            return;
-        }
-        attachCheckpoint(pos);
     }
 
     private void attachCheckpoint(Vector3f pos) {

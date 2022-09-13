@@ -18,8 +18,9 @@ import rallygame.game.IDriveDone;
 import rallygame.helper.Log;
 import rallygame.helper.Rand;
 import rallygame.service.GridPositions;
-import rallygame.service.checkpoint.CheckpointProgress;
+import rallygame.service.checkpoint.CheckpointModelFactory;
 import rallygame.service.checkpoint.CheckpointProgressUI;
+import rallygame.service.checkpoint.StaticCheckpointProgress;
 import rallygame.world.StaticWorld;
 import rallygame.world.StaticWorldBuilder;
 
@@ -29,7 +30,7 @@ public class DriveRace extends DriveBase implements PauseState.ICallback {
     private final int themCount = 8;
 
     private CheckpointProgressUI progressMenu;
-    private CheckpointProgress progress;
+    private StaticCheckpointProgress progress;
 
     //racing things
     private Vector3f[] worldStarts;
@@ -91,8 +92,8 @@ public class DriveRace extends DriveBase implements PauseState.ICallback {
             aiCars.add(c);
         }
         
-        progress = new CheckpointProgress(CheckpointProgress.Type.Lap, checkpoints, cm.getAll(), cm.getPlayer());
-        progress.setCheckpointModel(CheckpointProgress.GetDefaultCheckpointModel(app, 10, new ColorRGBA(0, 1, 0, 0.4f)));
+        progress = new StaticCheckpointProgress(checkpoints, cm.getAll(), cm.getPlayer());
+        progress.setCheckpointModel(CheckpointModelFactory.GetDefaultCheckpointModel(app, 10, new ColorRGBA(0, 1, 0, 0.4f)));
         getStateManager().attach(progress);
 
         progressMenu = new CheckpointProgressUI(progress);

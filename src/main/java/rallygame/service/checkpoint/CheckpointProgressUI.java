@@ -23,7 +23,7 @@ import rallygame.service.WorldGuiText.WorldText;
 
 public class CheckpointProgressUI extends BaseAppState {
 
-    private final CheckpointProgress progress;
+    private final ICheckpointProgress progress;
     private final Map<RacerState, WorldText> positionLabels;
 
     private Container main;
@@ -35,7 +35,7 @@ public class CheckpointProgressUI extends BaseAppState {
     // debug things
     private Node debugNode;
 
-    public CheckpointProgressUI(CheckpointProgress progress) {
+    public CheckpointProgressUI(ICheckpointProgress progress) {
         this.progress = progress;
         this.positionLabels = new HashMap<>();
     }

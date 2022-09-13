@@ -5,19 +5,19 @@ import com.jme3.math.Vector3f;
 import rallygame.car.ray.RayCarControl;
 import rallygame.car.ray.RayCarControlInput;
 import rallygame.helper.H;
-import rallygame.service.checkpoint.CheckpointProgress;
+import rallygame.service.checkpoint.ICheckpointProgress;
 
 public class RaceAI extends CarAI {
 
-    private final CheckpointProgress checkpointProgress;
+    private final ICheckpointProgress checkpointProgress;
     private final boolean doFowardRayCast;
     private float roadWidth;
     private float catchUp;
     
-    public RaceAI(RayCarControl car, CheckpointProgress checkpointProgress) {
+    public RaceAI(RayCarControl car, ICheckpointProgress checkpointProgress) {
         this(car, checkpointProgress, true);
     }
-	public RaceAI(RayCarControl car, CheckpointProgress checkpointProgress, boolean doForwardRayCast) {
+	public RaceAI(RayCarControl car, ICheckpointProgress checkpointProgress, boolean doForwardRayCast) {
 		super(car);
         this.checkpointProgress = checkpointProgress;
         this.doFowardRayCast = doForwardRayCast;

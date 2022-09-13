@@ -32,6 +32,7 @@ import rallygame.car.ray.RayCarControl;
 import rallygame.car.ui.CarStatsUI;
 import rallygame.service.Screen;
 import rallygame.service.checkpoint.CheckpointProgress;
+import rallygame.service.checkpoint.CheckpointModelFactory;
 import rallygame.world.wp.DefaultBuilder;
 import rallygame.world.wp.WP.DynamicType;
 
@@ -132,8 +133,8 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener, Defa
         };
 
         // init checkpoints
-        progress = new CheckpointProgress(CheckpointProgress.Type.Sprint, checkpoints, cm.getAll(), cm.getPlayer());
-        progress.setCheckpointModel(CheckpointProgress.GetDefaultCheckpointModel(app, 0, new ColorRGBA(0, 1, 0, 0.4f)));
+        progress = new CheckpointProgress(checkpoints, cm.getAll(), cm.getPlayer());
+        progress.setCheckpointModel(CheckpointModelFactory.GetDefaultCheckpointModel(app, 0, new ColorRGBA(0, 1, 0, 0.4f)));
         getStateManager().attach(progress);
         
 

@@ -16,15 +16,16 @@ import rallygame.helper.H;
 import rallygame.helper.Log;
 import rallygame.service.GridPositions;
 import rallygame.service.Screen;
-import rallygame.service.checkpoint.CheckpointProgress;
+import rallygame.service.checkpoint.CheckpointModelFactory;
 import rallygame.service.checkpoint.CheckpointProgressUI;
+import rallygame.service.checkpoint.StaticCheckpointProgress;
 import rallygame.world.ICheckpointWorld;
 import rallygame.world.wp.StaticBuilt;
 
 public class DriveLapRace extends DriveBase {
 
     private CheckpointProgressUI progressMenu;
-    private CheckpointProgress progress;
+    private StaticCheckpointProgress progress;
 
     private RaceAI ai;
 
@@ -57,8 +58,8 @@ public class DriveLapRace extends DriveBase {
         var c = cm.addCar(Car.Runner, worldStarts[1], worldRot, false);
 
         // Checkpoint detection and stuff
-        progress = new CheckpointProgress(CheckpointProgress.Type.Sprint, checkpoints, cm.getAll(), cm.getPlayer());
-        progress.setCheckpointModel(CheckpointProgress.GetDefaultCheckpointModel(app, 10));
+        progress = new StaticCheckpointProgress(checkpoints, cm.getAll(), cm.getPlayer());
+        progress.setCheckpointModel(CheckpointModelFactory.GetDefaultCheckpointModel(app, 10));
         getStateManager().attach(progress);
 
         progressMenu = new CheckpointProgressUI(progress);
