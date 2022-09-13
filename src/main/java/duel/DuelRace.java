@@ -23,7 +23,7 @@ import rallygame.effects.ParticleAtmosphere;
 import rallygame.helper.Log;
 import rallygame.service.Screen;
 import rallygame.service.checkpoint.CheckpointModelFactory;
-import rallygame.service.checkpoint.CheckpointProgress;
+import rallygame.service.checkpoint.StaticCheckpointProgress;
 import rallygame.world.ICheckpointWorld;
 
 public class DuelRace extends BaseAppState implements IDrive {
@@ -32,7 +32,7 @@ public class DuelRace extends BaseAppState implements IDrive {
 
     private CarManager cm;
     private DuelRaceMenu menu;
-    private CheckpointProgress progress;
+    private StaticCheckpointProgress progress;
     private CountdownTimer countdown;
 
     private ICheckpointWorld world;
@@ -75,7 +75,7 @@ public class DuelRace extends BaseAppState implements IDrive {
         RayCarControl car = this.cm.addCar(theirCarData, world.start(1), false);
 
         // Checkpoint detection and stuff
-        progress = new CheckpointProgress(checkpoints, cm.getAll(), rayCar);
+        progress = new StaticCheckpointProgress(checkpoints, cm.getAll(), rayCar);
         progress.setCheckpointModel(CheckpointModelFactory.GetDefaultCheckpointModel(app, 10));
         getStateManager().attach(progress);
 

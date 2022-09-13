@@ -24,7 +24,7 @@ import rallygame.service.checkpoint.CheckpointProgressUI;
 import rallygame.world.wp.DefaultBuilder;
 
 
-public class DriveDynamicRace extends DriveBase implements PauseState.ICallback, DefaultBuilder.IPieceChanged {
+public class DriveDynamicRace extends DriveBase implements PauseState.ICallback {
 
     // ai things
     private final int themCount = 1;
@@ -40,7 +40,6 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
 
     public DriveDynamicRace(DefaultBuilder world, IDriveDone done) {
         super(done, Car.Runner, world);
-        world.registerListener(this);
         world.setDistFunction(() -> {
             var cm = getState(CarManager.class);
             return cm.getAll().stream().map(x -> x.location).toArray(Vector3f[]::new);
@@ -77,7 +76,7 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
             aiCars.add(c);
         }
         
-        progress = new CheckpointProgress(checkpoints, cm.getAll(), cm.getPlayer());
+        progress = new CheckpointProgress((DefaultBuilder)world, checkpoints, cm.getAll(), cm.getPlayer());
         progress.setCheckpointModel(CheckpointModelFactory.GetDefaultCheckpointModel(app, 4, new ColorRGBA(0, 1, 0, 0.4f)));
         getStateManager().attach(progress);
 
@@ -246,23 +245,5 @@ public class DriveDynamicRace extends DriveBase implements PauseState.ICallback,
     @Override
     public void quit() {
         next();
-    }
-
-    @Override
-    public void pieceAdded(Vector3f pos) {
-        if (!progress.isInitialized())   {
-            initCheckpointBuffer.add(pos);
-            return;
-        }
-        
-        progress.addCheckpoint(pos);
-    }
-
-    @Override
-    public void pieceRemoved(Vector3f pos) {
-        if (!progress.isInitialized())
-            throw new IllegalStateException("Think about it, how?");
-
-        progress.setMinCheckpoint(pos);
     }
 }

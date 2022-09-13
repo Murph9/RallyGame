@@ -36,7 +36,7 @@ import rallygame.service.checkpoint.CheckpointModelFactory;
 import rallygame.world.wp.DefaultBuilder;
 import rallygame.world.wp.WP.DynamicType;
 
-public class DuelMainMenu extends BaseAppState implements RawInputListener, DefaultBuilder.IPieceChanged {
+public class DuelMainMenu extends BaseAppState implements RawInputListener {
 
     private final IDuelFlow flow;
     private final DuelData duelData;
@@ -133,7 +133,7 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener, Defa
         };
 
         // init checkpoints
-        progress = new CheckpointProgress(checkpoints, cm.getAll(), cm.getPlayer());
+        progress = new CheckpointProgress(world, checkpoints, cm.getAll(), cm.getPlayer());
         progress.setCheckpointModel(CheckpointModelFactory.GetDefaultCheckpointModel(app, 0, new ColorRGBA(0, 1, 0, 0.4f)));
         getStateManager().attach(progress);
         
@@ -226,23 +226,5 @@ public class DuelMainMenu extends BaseAppState implements RawInputListener, Defa
             flow.nextState(this, d);
             this.setEnabled(false); //to prevent this being called twice
         }
-    }
-
-    @Override
-    public void pieceAdded(Vector3f pos) {
-        if (!progress.isInitialized())   {
-            initCheckpointBuffer.add(pos);
-            return;
-        }
-        
-        progress.addCheckpoint(pos);
-    }
-
-    @Override
-    public void pieceRemoved(Vector3f pos) {
-        if (!progress.isInitialized())
-            throw new IllegalStateException("Think about it, how?");
-
-        progress.setMinCheckpoint(pos);
     }
 }
