@@ -13,8 +13,6 @@ import rallygame.world.TiledFlatWorld;
  TODO
 Try and dodge the things
 Upgrades help with it i guess
-
-- don't pause game for upgrades
 */
 
 public class Flow implements IDriveDone {

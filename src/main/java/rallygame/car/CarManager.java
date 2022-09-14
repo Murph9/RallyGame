@@ -197,7 +197,6 @@ public class CarManager extends BaseAppState {
         var control = CarFactory.create((SimpleApplication)getApplication(), carData, aPlayer, angularDampening, existingControl);
         rootNode.attachChild(control.getRootNode());
 
-        cars.add(control);
         control.setEnabled(this.isEnabled()); // copy carmanager enabled-ness
         control.update(1/60f); //call a single update to update visual and camera/input stuff
 
