@@ -16,7 +16,7 @@ import rallygame.helper.Rand;
 import rallygame.service.Screen;
 import rallygame.service.checkpoint.BasicWaypointProgress;
 import rallygame.service.checkpoint.CheckpointArrow;
-import survival.upgrade.SelectionUI;
+import survival.hotmenu.HotMenu;
 import survival.upgrade.UpgradeType;
 import survival.wave.WaveManager;
 
@@ -35,8 +35,7 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
     private BasicWaypointProgress waypoints;
     private CheckpointArrow checkpointArrow;
     private StateManager stateManager;
-
-    private Container currentSelectionWindow;
+    private HotMenu hotMenu;
 
     private Container ruleWindow;
     private Container currentStateWindow;
@@ -73,10 +72,13 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
         getStateManager().attach(checkpointArrow);
 
         versionWindow = new Container();
-        versionWindow.addChild(new Label("WASD or Arrows to move\nGet checkpoints"));
+        versionWindow.addChild(new Label("WASD or Arrows to move\nGet checkpoints\nIJKL to navigate the upgrade menu"));
         versionWindow.addChild(new Label("Version: " + this.version));
         uiRootNode.attachChild(versionWindow);
         new Screen(app.getContext().getSettings()).topRightMe(versionWindow);
+
+        hotMenu = new HotMenu();
+        getStateManager().attach(hotMenu);
     }
 
     @Override
@@ -96,7 +98,7 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
             return;
         }
 
-        if (state.getExplodeTriggered()) { // TODO ability manager maybe?
+        if (state.getExplodeTriggered()) { // TODO ability manager maybe?, with controller
             this.waveManager.applyForceFrom(this.cm.getPlayer().location, state.ExplodeAbilityStrength, 50);
         }
 
@@ -110,9 +112,8 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
         if (upgrades > 0) {
             if (offerUpgrades) {
                 this.setEnabled(false);
-                currentSelectionWindow = SelectionUI.GenerateSelectionUI(this, UpgradeType.getAllPositive());
-                uiRootNode.attachChild(currentSelectionWindow);
-                screen.centerMe(currentSelectionWindow);
+                // TODO the hotmenu doesn't have to pause the game to work
+                hotMenu.addOptions(UpgradeType.getAllPositive());
                 return;
             }
         }
@@ -141,6 +142,9 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
     @Override
     protected void cleanup(Application app) {
         cm = null;
+
+        getStateManager().detach(hotMenu);
+        hotMenu = null;
 
         versionWindow.removeFromParent();
         versionWindow = null;
@@ -185,11 +189,7 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
     public void upgrade(UpgradeType type) {        
         this.stateManager.add(type);
         this.setEnabled(true);
-        
-        if (currentSelectionWindow != null) {
-            currentSelectionWindow.removeFromParent();
-            currentSelectionWindow = null;
-        }
+        hotMenu.removeAllOptions();
     }
     
     
