@@ -32,6 +32,13 @@ public class UiHelper {
         } else if (value instanceof Duo) {
             var duo = (Duo<Object,Object>)value;
             return renderObj(duo.first) + " (" + renderObj(duo.second) + ")";
+        } else if (value instanceof Object[]) {
+            var array = (Object[])value;
+            var result = "";
+            for (var a: array) {
+                result += renderObj(a)+",";
+            }
+            return result;
         }
         
         return value.toString();

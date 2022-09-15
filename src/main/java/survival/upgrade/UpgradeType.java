@@ -25,8 +25,8 @@ public enum UpgradeType {
             data.e_torque[i] *= 1.04f;
         }
     }),
-    QuickerExplodeAbility(true, "Reduce Explode Ability (-5%)", x -> x.ExplodeAbilityTimerMax *= 0.95f),
-    StrongerExplodeAbility(true, "Increase Explode Ability Strength (5%)", x -> x.ExplodeAbilityStrength *= 1.05f),
+    //QuickerExplodeAbility(true, "Reduce Explode Ability (-5%)", x -> x.ExplodeAbilityTimerMax *= 0.95f), //TODO this needs generic stuff to work probs
+    //StrongerExplodeAbility(true, "Increase Explode Ability Strength (5%)", x -> x.ExplodeAbilityStrength *= 1.05f),
     LongerTimer(true, "Increase checkpoint time by 5 sec", x -> x.CheckpointTimerLength += 5),
     // Heal(true, "Half Heal", x -> x.PlayerHealth += x.PlayerMaxHealth/2f),
     // ReduceFuelUse(true, "Reduce Full use by (10%)", null, x -> x.fuelRpmRate *= 0.9f),

@@ -13,12 +13,9 @@ public class GameState {
         state.PlayerMaxHealth = 40;
         state.WaveSpeed = 3;
         state.WaveDensity = 1;
-        state.ExplodeAbilityStrength = 35;
-        state.ExplodeAbilityTimerMax = 10;
 
         state.PlayerHealth = state.PlayerMaxHealth;
         state.CheckpointTimer = state.CheckpointTimerLength;
-        state.ExplodeAbilityTimer = state.ExplodeAbilityTimerMax;
         return state;
     }
 
@@ -31,13 +28,7 @@ public class GameState {
     public float PlayerHealth;
     public float CheckpointTimer;
 
-    public boolean ExplodeTriggered;
-    public float ExplodeAbilityTimerMax;
-    public float ExplodeAbilityTimer;
-    public float ExplodeAbilityStrength;
-
-    private GameState() {
-    }
+    private GameState() {}
 
     public void update(float tpf) {
         if (this.PlayerHealth > PlayerMaxHealth) {
@@ -49,20 +40,7 @@ public class GameState {
             this.CheckpointTimer = CheckpointTimerLength;
         }
 
-        this.ExplodeAbilityTimer -= tpf;
-        if (this.ExplodeAbilityTimer < 0) {
-            this.ExplodeAbilityTimer = this.ExplodeAbilityTimerMax;
-            this.ExplodeTriggered = true;
-        }
         // small health regen?
-    }
-
-    public boolean getExplodeTriggered() {
-        if (this.ExplodeTriggered) {
-            this.ExplodeTriggered = false;
-            return true;
-        }
-        return false;
     }
 
     public boolean gameOver() {
@@ -75,9 +53,7 @@ public class GameState {
             "Checkpoint Timer (Max)", new Duo<Float, Float>(this.CheckpointTimer, this.CheckpointTimerLength),
             "Checkpoint Distance", this.CheckpointDistance,
             "Wave Speed", this.WaveSpeed,
-            "Wave Density", this.WaveDensity,
-            "Explode Ability Timer (Max)", new Duo<Float, Float>(this.ExplodeAbilityTimer, this.ExplodeAbilityTimerMax),
-            "Explode Ability Strength", this.ExplodeAbilityStrength
+            "Wave Density", this.WaveDensity
         );
     }
 }

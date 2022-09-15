@@ -16,6 +16,7 @@ import rallygame.helper.Rand;
 import rallygame.service.Screen;
 import rallygame.service.checkpoint.BasicWaypointProgress;
 import rallygame.service.checkpoint.CheckpointArrow;
+import survival.ability.AbilityManager;
 import survival.hotmenu.HotMenu;
 import survival.upgrade.UpgradeType;
 import survival.wave.WaveManager;
@@ -36,6 +37,7 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
     private CheckpointArrow checkpointArrow;
     private StateManager stateManager;
     private HotMenu hotMenu;
+    private AbilityManager abilityManager;
 
     private Container ruleWindow;
     private Container currentStateWindow;
@@ -79,6 +81,9 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
 
         hotMenu = new HotMenu();
         getStateManager().attach(hotMenu);
+
+        abilityManager = new AbilityManager();
+        getStateManager().attach(abilityManager);
     }
 
     @Override
@@ -98,9 +103,6 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
             return;
         }
 
-        if (state.getExplodeTriggered()) { // TODO ability manager maybe?, with controller
-            this.waveManager.applyForceFrom(this.cm.getPlayer().location, state.ExplodeAbilityStrength, 50);
-        }
 
         int checkpointsHit = waypoints.checkpointHitsLeft();
         for (int i = 0; i< checkpointsHit; i++) {
@@ -134,6 +136,7 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
 
         ruleWindow.getChildren().stream().forEach(x -> x.removeFromParent());
         ruleWindow.addChild(UiHelper.generateTableOfValues(state.GetProperties()));
+        ruleWindow.addChild(UiHelper.generateTableOfValues(abilityManager.GetProperties()));
         ruleWindow.addChild(UiHelper.generateTableOfValues(stateManager.getUpgrades()));
 
         super.update(tpf);
@@ -142,6 +145,9 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
     @Override
     protected void cleanup(Application app) {
         cm = null;
+
+        getStateManager().detach(abilityManager);
+        abilityManager = null;
 
         getStateManager().detach(hotMenu);
         hotMenu = null;
