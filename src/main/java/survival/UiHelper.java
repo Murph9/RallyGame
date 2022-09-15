@@ -11,7 +11,7 @@ import com.simsilica.lemur.Panel;
 
 import rallygame.helper.Duo;
 import rallygame.helper.H;
-import survival.upgrade.UpgradeType;
+import survival.upgrade.Upgrade;
 
 public class UiHelper {
     
@@ -44,14 +44,14 @@ public class UiHelper {
         return value.toString();
     }
 
-    public static Panel generateTableOfValues(List<UpgradeType> types) {
+    public static Panel generateTableOfValues(List<Upgrade<?>> types) {
         
         var asCounts = types.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
         var panel = new Container();
         
         for (var entry: asCounts.entrySet()) {
-            panel.addChild(new Label(entry.getKey().name()));
+            panel.addChild(new Label(entry.getKey().label));
             panel.addChild(new Label(entry.getValue().toString()), 1);
         }
 

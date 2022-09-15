@@ -14,7 +14,7 @@ import rallygame.service.Screen;
 import rallygame.service.Screen.HorizontalPos;
 import rallygame.service.Screen.VerticalPos;
 import survival.DodgeGameManager;
-import survival.upgrade.UpgradeType;
+import survival.upgrade.Upgrade;
 
 public class HotMenu extends BaseAppState {
 
@@ -27,9 +27,9 @@ public class HotMenu extends BaseAppState {
 
     class MenuItem {
         public final String label;
-        public final UpgradeType type;
+        public final Upgrade<?> type;
         public Container ui;
-        public MenuItem(String label, UpgradeType type) {
+        public MenuItem(String label, Upgrade<?> type) {
             this.label = label;
             this.type = type;
         }
@@ -65,7 +65,7 @@ public class HotMenu extends BaseAppState {
     @Override
     protected void onDisable() { }
     
-    public void addOptions(List<UpgradeType> types) {
+    public void addOptions(List<Upgrade<?>> types) {
         for (var t: types) {
             menuElements.add(new MenuItem(t.label, t));
         }

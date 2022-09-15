@@ -8,12 +8,14 @@ import com.jme3.app.state.BaseAppState;
 
 import rallygame.car.data.CarDataAdjuster;
 import rallygame.car.data.CarDataAdjustment;
-import survival.upgrade.UpgradeType;
+import survival.upgrade.CarDataConstUpgrade;
+import survival.upgrade.GameStateUpgrade;
+import survival.upgrade.Upgrade;
 
 public class StateManager extends BaseAppState {
 
     private final GameState state;
-    private final List<UpgradeType> types;
+    private final List<Upgrade<?>> types;
 
     public StateManager() {
         state = GameState.generate();
@@ -30,21 +32,23 @@ public class StateManager extends BaseAppState {
         
     }
 
-    public void add(UpgradeType type) {
+    public void add(Upgrade<?> type) {
         types.add(type);
 
-        if (type.carFunc != null) {
-            // the car mods must be cumulative for now
+        if (type instanceof CarDataConstUpgrade) {
+            // the car mods must be cumulative for now, so we get all of them and apply
             var adjustments = new LinkedList<CarDataAdjustment>();
             for (var t: types) {
-                if (t.carFunc != null)
-                    adjustments.add(CarDataAdjustment.asFunc(t.carFunc));
+                if (t instanceof CarDataConstUpgrade) {
+                    var t2 = (CarDataConstUpgrade)t;
+                    adjustments.add(CarDataAdjustment.asFunc(t2.get()));
+                }
             }
             getState(Drive.class).applyChange(new CarDataAdjuster(adjustments));
         }
-        
-        if (type.stateFunc != null) {
-            type.stateFunc.accept(this.state);
+
+        if (type instanceof GameStateUpgrade) {
+            ((GameStateUpgrade)type).accept(this.state);
         }
     }
 
@@ -56,20 +60,16 @@ public class StateManager extends BaseAppState {
     }
 
     @Override
-    protected void onEnable() {
-        // TODO start listening to action keys
-    }
+    protected void onEnable() {}
 
     @Override
-    protected void onDisable() {
-        // TODO stop listening to action keys
-    }
+    protected void onDisable() {}
 
     public GameState getState() {
         return this.state;
     }
 
-    public List<UpgradeType> getUpgrades() {
+    public List<Upgrade<?>> getUpgrades() {
         return new LinkedList<>(this.types);
     }
 }

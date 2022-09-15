@@ -10,7 +10,7 @@ import survival.DodgeGameManager;
 
 public class SelectionUI {
     @SuppressWarnings("unchecked") // button checked vargs
-    public static Container GenerateSelectionUI(DodgeGameManager manager, UpgradeType[] types) {
+    public static Container GenerateSelectionUI(DodgeGameManager manager, Upgrade<?>[] types) {
         var container = new Container();
 
         for (var type : types) {
@@ -24,7 +24,7 @@ public class SelectionUI {
         return container;
     }
 
-    public static Container GenerateSelectionUI(DodgeGameManager manager, List<UpgradeType> types) {
-        return GenerateSelectionUI(manager, types.toArray(new UpgradeType[0]));
+    public static Container GenerateSelectionUI(DodgeGameManager manager, List<Upgrade<?>> types) {
+        return GenerateSelectionUI(manager, types.toArray(new Upgrade<?>[0]));
     }
 }

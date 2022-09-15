@@ -1,5 +1,6 @@
 package survival;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import com.jme3.app.Application;
@@ -18,7 +19,7 @@ import rallygame.service.checkpoint.BasicWaypointProgress;
 import rallygame.service.checkpoint.CheckpointArrow;
 import survival.ability.AbilityManager;
 import survival.hotmenu.HotMenu;
-import survival.upgrade.UpgradeType;
+import survival.upgrade.Upgrade;
 import survival.wave.WaveManager;
 
 public class DodgeGameManager extends BaseAppState implements PauseState.ICallback {
@@ -107,7 +108,7 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
         int checkpointsHit = waypoints.checkpointHitsLeft();
         for (int i = 0; i< checkpointsHit; i++) {
             if (state.WaveSpeed > 1f)
-                upgrade(UpgradeType.WaveSpeedInc);
+                upgrade(Upgrade.WaveSpeedInc);
         }
         
         int upgrades = waypoints.hasUpgradeReady();
@@ -115,7 +116,7 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
             if (offerUpgrades) {
                 this.setEnabled(false);
                 // TODO the hotmenu doesn't have to pause the game to work
-                hotMenu.addOptions(UpgradeType.getAllPositive());
+                hotMenu.addOptions(Arrays.asList(Upgrade.ImproveEngine, Upgrade.LongerTimer));
                 return;
             }
         }
@@ -192,7 +193,7 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
         this.checkpointArrow.setEnabled(false);
     }
 
-    public void upgrade(UpgradeType type) {        
+    public void upgrade(Upgrade<?> type) {        
         this.stateManager.add(type);
         this.setEnabled(true);
         hotMenu.removeAllOptions();
