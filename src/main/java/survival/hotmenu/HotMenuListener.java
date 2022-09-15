@@ -13,7 +13,7 @@ import com.jme3.input.event.MouseButtonEvent;
 import com.jme3.input.event.MouseMotionEvent;
 import com.jme3.input.event.TouchEvent;
 
-public class HotMenuJoystickListener implements RawInputListener {
+public class HotMenuListener implements RawInputListener {
     
     public static final String ACTION_LEFT = "Left";
     public static final String ACTION_RIGHT = "Right";
@@ -24,9 +24,9 @@ public class HotMenuJoystickListener implements RawInputListener {
 	private final Map<String, String> dpadToButton = new HashMap<>();
     private final Map<String, String> buttonToAction = new HashMap<>();
 
-    private final Map<Integer, String> keyToButton = new HashMap<>();
+    private final Map<Integer, String> keyToAction = new HashMap<>();
 	
-	public HotMenuJoystickListener(HotMenu menu) {
+	public HotMenuListener(HotMenu menu) {
         this.menu = menu;
 
 		dpadToButton.put(JoystickAxis.POV_X, "LR");
@@ -37,10 +37,10 @@ public class HotMenuJoystickListener implements RawInputListener {
         buttonToAction.put("UD1", ACTION_UP);
         buttonToAction.put("UD-1", ACTION_DOWN);
 
-        keyToButton.put(KeyInput.KEY_I, ACTION_UP);
-        keyToButton.put(KeyInput.KEY_K, ACTION_DOWN);
-        keyToButton.put(KeyInput.KEY_J, ACTION_LEFT);
-        keyToButton.put(KeyInput.KEY_L, ACTION_RIGHT);
+        keyToAction.put(KeyInput.KEY_I, ACTION_UP);
+        keyToAction.put(KeyInput.KEY_K, ACTION_DOWN);
+        keyToAction.put(KeyInput.KEY_J, ACTION_LEFT);
+        keyToAction.put(KeyInput.KEY_L, ACTION_RIGHT);
     }
     
     @Override
@@ -67,8 +67,8 @@ public class HotMenuJoystickListener implements RawInputListener {
         if (arg0.isReleased())
             return;
 
-        if (keyToButton.containsKey(arg0.getKeyCode()))
-            menu.input(keyToButton.get(arg0.getKeyCode()));
+        if (keyToAction.containsKey(arg0.getKeyCode()))
+            menu.input(keyToAction.get(arg0.getKeyCode()));
     }
     public void onMouseButtonEvent(MouseButtonEvent arg0) {}
     public void onMouseMotionEvent(MouseMotionEvent arg0) {}

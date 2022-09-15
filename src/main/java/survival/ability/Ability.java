@@ -7,5 +7,7 @@ public abstract class Ability {
 
     abstract String type();
     abstract boolean update(float tpf);
+    abstract float ready();
+    abstract void triggered();
     abstract Map.Entry<String, Object> GetProperties();
 }

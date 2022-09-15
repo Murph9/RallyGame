@@ -33,9 +33,9 @@ public class AbilityUpgrade extends Upgrade<List<Ability>> {
         return true;
     };
 
-    public static Upgrade<List<Ability>> AddExplodeAbility = new AbilityUpgrade(true, "Add Explode Ability", x -> x.add(new ExplodeAbility()), AbilityUpgrade.AddExplodeAbilityFunc);
+    public static Upgrade<List<Ability>> AddExplodeAbility = new AbilityUpgrade(true, "Add Explode Ability (Key: L ALT or Left Stick)", x -> x.add(new ExplodeAbility()), AbilityUpgrade.AddExplodeAbilityFunc);
 
-    // public static Upgrade<List<Ability>> QuickerExplodeAbility = new AbilityUpgrade(true, "Add Explode Ability", x -> x.ExplodeAbilityTimerMax *= 0.95f);
+    // public static Upgrade<List<Ability>> QuickerExplodeAbility = new AbilityUpgrade(true, "Improve Explode Ability", x -> x.ExplodeAbilityTimerMax *= 0.95f);
     // public static Upgrade<List<Ability>> StrongerExplodeAbility = new Upgrade<>(true, "Increase Explode Ability Strength (5%)", x -> x.ExplodeAbilityStrength *= 1.05f);
 
     //TODO ability ideas:

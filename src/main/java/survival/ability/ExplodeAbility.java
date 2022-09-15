@@ -23,12 +23,17 @@ public class ExplodeAbility extends Ability {
     @Override
     public boolean update(float tpf) {
         this.ExplodeAbilityTimer -= tpf;
-        if (this.ExplodeAbilityTimer < 0) {
-            this.ExplodeAbilityTimer = this.ExplodeAbilityTimerMax;
-            return true;
-        }
-
         return false;
+    }
+
+    @Override
+    public float ready() {
+        return this.ExplodeAbilityTimer/this.ExplodeAbilityTimerMax;
+    }
+
+    @Override
+    public void triggered() {
+        this.ExplodeAbilityTimer = this.ExplodeAbilityTimerMax;
     }
 
     public float getStrength() {
@@ -37,6 +42,6 @@ public class ExplodeAbility extends Ability {
 
     @Override
     public Map.Entry<String, Object> GetProperties() {
-        return new AbstractMap.SimpleEntry<>("Explode Ability", new Float[]{ExplodeAbilityStrength, ExplodeAbilityTimer, ExplodeAbilityTimerMax});
+        return new AbstractMap.SimpleEntry<>("Explode Ability", new Float[]{ExplodeAbilityStrength, ExplodeAbilityTimer, ExplodeAbilityTimerMax, ready()});
     }
 }

@@ -18,7 +18,7 @@ import survival.upgrade.Upgrade;
 
 public class HotMenu extends BaseAppState {
 
-    private final HotMenuJoystickListener listener;
+    private final HotMenuListener listener;
     private Container panel;
     private Container optionPanel;
     
@@ -36,7 +36,7 @@ public class HotMenu extends BaseAppState {
     }
 
     public HotMenu() {
-        listener = new HotMenuJoystickListener(this);
+        listener = new HotMenuListener(this);
     }
 
     @Override
@@ -106,16 +106,16 @@ public class HotMenu extends BaseAppState {
     }
 
     protected void input(String action) {
-        if (action == HotMenuJoystickListener.ACTION_DOWN) {
+        if (action == HotMenuListener.ACTION_DOWN) {
             menuSelection++;
         }
-        if (action == HotMenuJoystickListener.ACTION_UP) {
+        if (action == HotMenuListener.ACTION_UP) {
             menuSelection--;
         }
 
         menuSelection = H.clamp(menuSelection, 0, menuElements.size() - 1);
 
-        if (action == HotMenuJoystickListener.ACTION_RIGHT) {
+        if (action == HotMenuListener.ACTION_RIGHT) {
             // select the thingo
             getState(DodgeGameManager.class).upgrade(menuElements.get(menuSelection).type);
         }

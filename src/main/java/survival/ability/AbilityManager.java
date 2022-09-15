@@ -15,13 +15,17 @@ import survival.wave.WaveManager;
 public class AbilityManager extends BaseAppState {
 
     private final List<Ability> abilities = new LinkedList<>();
+    private final AbilityListener listener = new AbilityListener(this);
 
     @Override
-    protected void initialize(Application app) { }
+    protected void initialize(Application app) {
+        app.getInputManager().addRawInputListener(listener);
+    }
 
     @Override
     protected void cleanup(Application app) {
         abilities.clear();
+        app.getInputManager().removeRawInputListener(listener);
     }
 
     @Override
@@ -33,15 +37,7 @@ public class AbilityManager extends BaseAppState {
     @Override
     public void update(float tpf) {
         for (var ab: abilities) {
-            var result = ab.update(tpf);
-            if (result && ab instanceof ExplodeAbility) {
-                // a little bit hard coded
-                var value = ((ExplodeAbility)ab).getStrength();
-                if (value > 0) { // TODO ability manager maybe?, with controller
-                    var cm = getState(CarManager.class);
-                    getState(WaveManager.class).applyForceFrom(cm.getPlayer().location, value, 50);
-                }
-            }
+            ab.update(tpf);
         }
     }
 
@@ -56,5 +52,26 @@ public class AbilityManager extends BaseAppState {
 
     public void accept(Consumer<List<Ability>> consumer) {
         consumer.accept(this.abilities);
+    }
+
+    public void handlePress(String string) {
+        switch (string) {
+            case AbilityListener.ACTION_EXPLODE:
+                triggerAbility(ExplodeAbility.class);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void triggerAbility(Class<?> _class) {
+        for (var ab: abilities) {
+            if (ab.ready() < 0 && ab.getClass() == _class) {
+                var value = ((ExplodeAbility)ab).getStrength();
+                var cm = getState(CarManager.class);
+                getState(WaveManager.class).applyForceFrom(cm.getPlayer().location, value, 50);
+                ab.triggered();
+            }
+        }
     }
 }
