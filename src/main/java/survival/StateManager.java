@@ -8,6 +8,8 @@ import com.jme3.app.state.BaseAppState;
 
 import rallygame.car.data.CarDataAdjuster;
 import rallygame.car.data.CarDataAdjustment;
+import survival.ability.AbilityManager;
+import survival.upgrade.AbilityUpgrade;
 import survival.upgrade.CarDataConstUpgrade;
 import survival.upgrade.GameStateUpgrade;
 import survival.upgrade.Upgrade;
@@ -15,11 +17,11 @@ import survival.upgrade.Upgrade;
 public class StateManager extends BaseAppState {
 
     private final GameState state;
-    private final List<Upgrade<?>> types;
+    private final List<Upgrade<?>> upgrades;
 
     public StateManager() {
         state = GameState.generate();
-        types = new LinkedList<>();
+        upgrades = new LinkedList<>();
     }
 
     @Override
@@ -29,16 +31,16 @@ public class StateManager extends BaseAppState {
 
     @Override
     protected void cleanup(Application app) {
-        
+        upgrades.clear();
     }
 
     public void add(Upgrade<?> type) {
-        types.add(type);
+        upgrades.add(type);
 
         if (type instanceof CarDataConstUpgrade) {
             // the car mods must be cumulative for now, so we get all of them and apply
             var adjustments = new LinkedList<CarDataAdjustment>();
-            for (var t: types) {
+            for (var t: upgrades) {
                 if (t instanceof CarDataConstUpgrade) {
                     var t2 = (CarDataConstUpgrade)t;
                     adjustments.add(CarDataAdjustment.asFunc(t2.get()));
@@ -49,6 +51,10 @@ public class StateManager extends BaseAppState {
 
         if (type instanceof GameStateUpgrade) {
             ((GameStateUpgrade)type).accept(this.state);
+        }
+
+        if (type instanceof AbilityUpgrade) {
+            getState(AbilityManager.class).accept(((AbilityUpgrade)type).get());
         }
     }
 
@@ -70,6 +76,6 @@ public class StateManager extends BaseAppState {
     }
 
     public List<Upgrade<?>> getUpgrades() {
-        return new LinkedList<>(this.types);
+        return new LinkedList<>(this.upgrades);
     }
 }

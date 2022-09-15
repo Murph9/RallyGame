@@ -15,6 +15,7 @@ import rallygame.car.data.CarDataConst;
 import rallygame.helper.H;
 import rallygame.service.Screen;
 import rallygame.service.checkpoint.CheckpointProgress;
+import survival.upgrade.CarDataConstUpgrade;
 import survival.upgrade.Upgrade;
 
 /*
@@ -134,10 +135,10 @@ public class RoadCheckpointGameManager extends BaseAppState {
         Upgrade<CarDataConst> type = null;
         switch (selected) {
             case "Grip":
-                type = Upgrade.ImproveEngine;
+                type = CarDataConstUpgrade.ImproveEngine;
                 break;
             case "Power":
-                type = Upgrade.ImproveEngine;
+                type = CarDataConstUpgrade.ImproveEngine;
                 break;
             default:
                 break;

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
@@ -16,9 +17,7 @@ public class AbilityManager extends BaseAppState {
     private final List<Ability> abilities = new LinkedList<>();
 
     @Override
-    protected void initialize(Application app) {
-        abilities.add(new ExplodeAbility());
-    }
+    protected void initialize(Application app) { }
 
     @Override
     protected void cleanup(Application app) {
@@ -33,8 +32,6 @@ public class AbilityManager extends BaseAppState {
 
     @Override
     public void update(float tpf) {
-        //TODO use to get data var state = getState(StateManager.class).getState();
-
         for (var ab: abilities) {
             var result = ab.update(tpf);
             if (result && ab instanceof ExplodeAbility) {
@@ -55,5 +52,9 @@ public class AbilityManager extends BaseAppState {
             map.put(props.getKey(), props.getValue());
         }
         return map;
+    }
+
+    public void accept(Consumer<List<Ability>> consumer) {
+        consumer.accept(this.abilities);
     }
 }
