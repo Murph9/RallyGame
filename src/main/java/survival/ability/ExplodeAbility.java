@@ -3,45 +3,29 @@ package survival.ability;
 import java.util.AbstractMap;
 import java.util.Map;
 
-public class ExplodeAbility extends Ability {
+import com.jme3.app.state.AppStateManager;
 
-    private float ExplodeAbilityTimerMax;
-    private float ExplodeAbilityTimer;
+import rallygame.car.ray.RayCarControl;
+import survival.wave.WaveManager;
+
+public class ExplodeAbility extends TimedAbility {
+
     private float ExplodeAbilityStrength;
 
     public ExplodeAbility() {
         ExplodeAbilityStrength = 35;
-        ExplodeAbilityTimerMax = 10;
-        ExplodeAbilityTimer = ExplodeAbilityTimerMax;
+        AbilityTimerMax = 10;
+        AbilityTimer = AbilityTimerMax;
     }
 
     @Override
-    public String type() {
-        return TYPE_EXPLODE;
-    }
-
-    @Override
-    public boolean update(float tpf) {
-        this.ExplodeAbilityTimer -= tpf;
-        return false;
-    }
-
-    @Override
-    public float ready() {
-        return this.ExplodeAbilityTimer/this.ExplodeAbilityTimerMax;
-    }
-
-    @Override
-    public void triggered() {
-        this.ExplodeAbilityTimer = this.ExplodeAbilityTimerMax;
-    }
-
-    public float getStrength() {
-        return ExplodeAbilityStrength;
+    public void trigger(AppStateManager sm, RayCarControl player) {
+        this.AbilityTimer = this.AbilityTimerMax;
+        sm.getState(WaveManager.class).applyForceFrom(player.location, ExplodeAbilityStrength, 50);
     }
 
     @Override
     public Map.Entry<String, Object> GetProperties() {
-        return new AbstractMap.SimpleEntry<>("Explode Ability", new Float[]{ExplodeAbilityStrength, ExplodeAbilityTimer, ExplodeAbilityTimerMax, ready()});
+        return new AbstractMap.SimpleEntry<>("Explode Ability", new Float[] { ExplodeAbilityStrength, AbilityTimer, AbilityTimerMax, ready() });
     }
 }

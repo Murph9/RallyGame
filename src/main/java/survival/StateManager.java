@@ -26,7 +26,10 @@ public class StateManager extends BaseAppState {
 
     @Override
     protected void initialize(Application app) {
-        
+        // some ways of starting with upgrades:
+        // add(AbilityUpgrade.AddStopAbility);
+        // add(CarDataConstUpgrade.ImproveEngine);
+        // add(GameStateUpgrade.LongerTimer);
     }
 
     @Override

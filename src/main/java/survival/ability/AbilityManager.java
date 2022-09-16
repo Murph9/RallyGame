@@ -10,7 +10,6 @@ import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
 
 import rallygame.car.CarManager;
-import survival.wave.WaveManager;
 
 public class AbilityManager extends BaseAppState {
 
@@ -19,6 +18,8 @@ public class AbilityManager extends BaseAppState {
 
     @Override
     protected void initialize(Application app) {
+        // to start with abilities set them in the state
+
         app.getInputManager().addRawInputListener(listener);
     }
 
@@ -56,21 +57,22 @@ public class AbilityManager extends BaseAppState {
 
     public void handlePress(String string) {
         switch (string) {
-            case AbilityListener.ACTION_EXPLODE:
+            case Ability.TYPE_EXPLODE:
                 triggerAbility(ExplodeAbility.class);
                 break;
+            case Ability.TYPE_STOP:
+                triggerAbility(StopAbility.class);
             default:
                 break;
         }
     }
 
-    private void triggerAbility(Class<?> _class) {
+    private void triggerAbility(Class<?> type) {
         for (var ab: abilities) {
-            if (ab.ready() < 0 && ab.getClass() == _class) {
-                var value = ((ExplodeAbility)ab).getStrength();
-                var cm = getState(CarManager.class);
-                getState(WaveManager.class).applyForceFrom(cm.getPlayer().location, value, 50);
-                ab.triggered();
+            if (ab.ready() < 0 && ab.getClass().isAssignableFrom(type)) {
+                var player = getState(CarManager.class).getPlayer();
+                ab.trigger(getStateManager(), player);
+                break;
             }
         }
     }

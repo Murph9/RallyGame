@@ -15,7 +15,8 @@ public class UpgradeList {
 
         CarDataConstUpgrade.ImproveEngine,
 
-        AbilityUpgrade.AddExplodeAbility
+        AbilityUpgrade.AddExplodeAbility,
+        AbilityUpgrade.AddStopAbility
     );
 
     public static List<Upgrade<?>> AllPositive = All.stream().filter(x -> x.positive).collect(Collectors.toList());

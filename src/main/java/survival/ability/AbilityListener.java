@@ -15,8 +15,6 @@ import com.jme3.input.event.TouchEvent;
 
 public class AbilityListener implements RawInputListener {
 
-    public static final String ACTION_EXPLODE = "Explode";
-
     private final AbilityManager manager;
 
     private final Map<String, String> buttonToAction = new HashMap<>();
@@ -25,8 +23,12 @@ public class AbilityListener implements RawInputListener {
     public AbilityListener(AbilityManager manager) {
         this.manager = manager;
 
-        buttonToAction.put(JoystickButton.BUTTON_8, ACTION_EXPLODE);
-        keyToAction.put(KeyInput.KEY_LMENU, ACTION_EXPLODE); // left alt
+        buttonToAction.put(JoystickButton.BUTTON_8, Ability.TYPE_EXPLODE);
+        keyToAction.put(KeyInput.KEY_LMENU, Ability.TYPE_EXPLODE); // left alt
+
+        buttonToAction.put(JoystickButton.BUTTON_5, Ability.TYPE_STOP);
+        keyToAction.put(KeyInput.KEY_RMENU, Ability.TYPE_STOP); // right alt
+        
         //more..
     }
 
