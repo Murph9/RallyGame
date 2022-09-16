@@ -18,6 +18,10 @@ public class ExplodeAbility extends TimedAbility {
         AbilityTimer = AbilityTimerMax;
     }
 
+    public void changeStrength(float diff) {
+        this.ExplodeAbilityStrength += diff; 
+    }
+
     @Override
     public void trigger(AppStateManager sm, RayCarControl player) {
         this.AbilityTimer = this.AbilityTimerMax;

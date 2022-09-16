@@ -20,6 +20,10 @@ abstract class TimedAbility extends Ability {
     protected float AbilityTimerMax;
     protected float AbilityTimer;
 
+    public void changeTimerMax(float diff) {
+        AbilityTimerMax += diff;
+    }
+
     @Override
     public boolean update(float tpf) {
         this.AbilityTimer -= tpf;

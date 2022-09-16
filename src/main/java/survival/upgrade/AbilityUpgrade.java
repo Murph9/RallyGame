@@ -34,9 +34,20 @@ public class AbilityUpgrade extends Upgrade<List<Ability>> {
     }
 
     public static Upgrade<List<Ability>> AddExplodeAbility = new AbilityUpgrade(true, true, "Add Explode Ability (Key: L ALT or Left Stick)", x -> x.add(new ExplodeAbility()));
+    public static Upgrade<List<Ability>> QuickerExplodeAbility = new AbilityUpgrade(true, false, "Quicker cooldown for Explode Ability", x -> {
+        for (var u: x) {
+            if (u instanceof ExplodeAbility)
+                ((ExplodeAbility)u).changeTimerMax(-0.5f);
+        }
+    }, y -> y.contains(AddExplodeAbility));
+    public static Upgrade<List<Ability>> StrongerExplodeAbility = new AbilityUpgrade(true, false, "Increase Explode Ability Strength (5%)", x -> {
+        for (var u: x) {
+            if (u instanceof ExplodeAbility)
+                ((ExplodeAbility)u).changeStrength(1f);
+        }
+    }, y -> y.contains(AddExplodeAbility));
+
     public static Upgrade<List<Ability>> AddStopAbility = new AbilityUpgrade(true, true, "Add Stop Ability (Key: R ALT or R Bumper)", x -> x.add(new StopAbility()));
-    // public static Upgrade<List<Ability>> QuickerExplodeAbility = new AbilityUpgrade(true, false, "Improve Explode Ability", x -> x.ExplodeAbilityTimerMax *= 0.95f);
-    // public static Upgrade<List<Ability>> StrongerExplodeAbility = new Upgrade<>(true, false, "Increase Explode Ability Strength (5%)", x -> x.ExplodeAbilityStrength *= 1.05f);
 
     //TODO ability ideas:
     // freeze cubes (for some time)

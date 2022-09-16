@@ -17,6 +17,8 @@ public class UpgradeList {
         CarDataConstUpgrade.ImproveEngine,
 
         AbilityUpgrade.AddExplodeAbility,
+        AbilityUpgrade.StrongerExplodeAbility,
+        AbilityUpgrade.QuickerExplodeAbility,
         AbilityUpgrade.AddStopAbility
     );
 
