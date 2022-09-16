@@ -227,5 +227,14 @@ public class RayCarPowered extends RayCar {
 
 		return result;
 	}
+
+	public void reset() {
+		curRPM = 1000;
+		curGear = 1;
+
+        for (RayWheel w : wheels) {
+            w.radSec = 0; // stop rotation of the wheels
+        }
+	}
 }
  

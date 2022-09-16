@@ -340,11 +340,7 @@ public class RayCarControl implements ICarPowered, ICarControlled {
         this.setPhysicsProperties(location.add(new Vector3f(0, 1, 0)), null, new Quaternion().fromAngleAxis(nowTurn, Vector3f.UNIT_Y), new Vector3f());
     }
     public void reset() {
-        rayCar.curRPM = 1000;
-        for (RayWheel w : rayCar.wheels) {
-            w.radSec = 0; // stop rotation of the wheels
-            w.inContact = false; // stop any forces for at least one physics frame
-        }
+        rayCar.reset();
         visuals.reset();
 
         Transform transform = getResetPosition(this.app.getStateManager(), this);
