@@ -13,6 +13,7 @@ public class GameState {
         state.PlayerMaxHealth = 40;
         state.WaveSpeed = 3;
         state.WaveDensity = 1;
+        state.EntityCount = 10;
 
         state.PlayerHealth = state.PlayerMaxHealth;
         state.CheckpointTimer = state.CheckpointTimerLength;
@@ -22,8 +23,10 @@ public class GameState {
     public float CheckpointTimerLength;
     public float CheckpointDistance;
     public float PlayerMaxHealth;
+    
     public float WaveSpeed;
     public float WaveDensity;
+    public int EntityCount;
 
     public float PlayerHealth;
     public float CheckpointTimer;
@@ -53,7 +56,8 @@ public class GameState {
             "Checkpoint Timer (Max)", new Duo<Float, Float>(this.CheckpointTimer, this.CheckpointTimerLength),
             "Checkpoint Distance", this.CheckpointDistance,
             "Wave Speed", this.WaveSpeed,
-            "Wave Density", this.WaveDensity
+            "Wave Density", this.WaveDensity,
+            "Box count", this.EntityCount
         );
     }
 }

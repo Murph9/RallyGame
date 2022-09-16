@@ -109,7 +109,7 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
         int checkpointsHit = waypoints.checkpointHitsLeft();
         for (int i = 0; i< checkpointsHit; i++) {
             if (state.WaveSpeed > 1f)
-                upgrade(GameStateUpgrade.WaveSpeedInc);
+                upgrade(GameStateUpgrade.CubeCountInc);
         }
         
         int upgrades = waypoints.hasUpgradeReady();

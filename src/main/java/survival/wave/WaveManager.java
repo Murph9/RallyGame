@@ -88,9 +88,11 @@ public class WaveManager extends BaseAppState {
     public void update(float tpf) {
         time -= tpf;
         if (time < 0) {
-            time = stateManager.getState().WaveSpeed;
+            var state = stateManager.getState();
+            time = state.WaveSpeed;
             var type = Rand.randFromArray(WaveType.values());
-            addType(type, player);
+            if (state.EntityCount > this.geoms.size())
+                addType(type, player);
         }
 
         // kill all far away from player

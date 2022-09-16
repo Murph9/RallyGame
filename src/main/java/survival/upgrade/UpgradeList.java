@@ -10,6 +10,7 @@ public class UpgradeList {
         GameStateUpgrade.ShorterTimer,
         GameStateUpgrade.IncreaseCheckpointRange,
         GameStateUpgrade.WaveSpeedInc,
+        GameStateUpgrade.CubeCountInc,
         GameStateUpgrade.ReducePlayerHealth,
         GameStateUpgrade.LongerTimer,
 

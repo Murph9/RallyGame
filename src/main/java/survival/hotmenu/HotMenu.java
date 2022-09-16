@@ -74,6 +74,7 @@ public class HotMenu extends BaseAppState {
 
     public void removeAllOptions() {
         menuElements.clear();
+        menuSelection = 0;
         initOptionPanel();
     }
 
