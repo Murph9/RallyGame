@@ -17,21 +17,21 @@ public abstract class Ability {
 }
 
 abstract class TimedAbility extends Ability {
-    protected float AbilityTimerMax;
-    protected float AbilityTimer;
+    protected float abilityTimerMax;
+    protected float abilityTimer;
 
     public void changeTimerMax(float diff) {
-        AbilityTimerMax += diff;
+        abilityTimerMax += diff;
     }
 
     @Override
     public boolean update(float tpf) {
-        this.AbilityTimer -= tpf;
+        this.abilityTimer -= tpf;
         return false;
     }
 
     @Override
     public float ready() {
-        return this.AbilityTimer/this.AbilityTimerMax;
+        return this.abilityTimer/this.abilityTimerMax;
     }
 }

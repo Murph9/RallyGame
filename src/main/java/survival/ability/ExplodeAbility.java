@@ -10,26 +10,26 @@ import survival.wave.WaveManager;
 
 public class ExplodeAbility extends TimedAbility {
 
-    private float ExplodeAbilityStrength;
+    private float strength;
 
     public ExplodeAbility() {
-        ExplodeAbilityStrength = 35;
-        AbilityTimerMax = 10;
-        AbilityTimer = AbilityTimerMax;
+        strength = 35;
+        abilityTimerMax = 10;
+        abilityTimer = abilityTimerMax;
     }
 
     public void changeStrength(float diff) {
-        this.ExplodeAbilityStrength += diff; 
+        this.strength += diff; 
     }
 
     @Override
     public void trigger(AppStateManager sm, RayCarControl player) {
-        this.AbilityTimer = this.AbilityTimerMax;
-        sm.getState(WaveManager.class).applyForceFrom(player.location, ExplodeAbilityStrength, 50);
+        this.abilityTimer = this.abilityTimerMax;
+        sm.getState(WaveManager.class).applyForceFrom(player.location, strength, 50);
     }
 
     @Override
     public Map.Entry<String, Object> GetProperties() {
-        return new AbstractMap.SimpleEntry<>("Explode Ability", new Float[] { ExplodeAbilityStrength, AbilityTimer, AbilityTimerMax, ready() });
+        return new AbstractMap.SimpleEntry<>("Explode Ability", new Float[] { strength, abilityTimer, abilityTimerMax, ready() });
     }
 }
