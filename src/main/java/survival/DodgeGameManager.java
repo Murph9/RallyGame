@@ -62,7 +62,8 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
         stateManager = new StateManager();
         getStateManager().attach(stateManager);
 
-        uiRootNode = ((SimpleApplication) getApplication()).getGuiNode();
+        uiRootNode = new Node("UI node");
+        ((SimpleApplication) getApplication()).getGuiNode().attachChild(uiRootNode);
 
         currentStateWindow = new Container();
         uiRootNode.attachChild(currentStateWindow);
