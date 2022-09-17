@@ -9,10 +9,12 @@ import java.util.stream.Collectors;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
+import com.jme3.material.RenderState.BlendMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
+import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
@@ -124,6 +126,12 @@ public class Geo {
         Geometry g = new Geometry(name, shape);
         g.setMaterial(mat);
         g.setLocalTranslation(pos);
+
+        if (color.a < 1) {
+            g.setQueueBucket(Bucket.Transparent);
+            mat.getAdditionalRenderState().setWireframe(false);
+            mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
+        }
         return g;
     }
 

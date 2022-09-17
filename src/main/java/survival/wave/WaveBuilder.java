@@ -48,7 +48,8 @@ class WaveBuilder {
 
     public static List<Geometry> generateSingleFollow(Application app, RayCarControl target) {
         var pos = target.location.add(target.forward.negate().mult(10));
-        var box = Geo.makeShapeBox(app.getAssetManager(), ColorRGBA.DarkGray, pos, 1);
+        var colour = new ColorRGBA(0.2f, 0.2f, 0.2f, 0.8f);
+        var box = Geo.makeShapeBox(app.getAssetManager(), colour, pos, 1);
         box.getMaterial().getAdditionalRenderState().setWireframe(false);
         var c = new BaseControl(800, new HoverAt(2), new MaxSpeed(35), new Target(target, 15));
         box.addControl(c);
