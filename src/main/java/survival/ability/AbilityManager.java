@@ -13,6 +13,10 @@ import rallygame.car.CarManager;
 
 public class AbilityManager extends BaseAppState {
 
+    public static final String TYPE_EXPLODE = "explode";
+    public static final String TYPE_STOP = "stop";
+    public static final String TYPE_FREEZE = "freeze";
+
     private final List<Ability> abilities = new LinkedList<>();
     private final AbilityListener listener = new AbilityListener(this);
 
@@ -57,11 +61,15 @@ public class AbilityManager extends BaseAppState {
 
     public void handlePress(String string) {
         switch (string) {
-            case Ability.TYPE_EXPLODE:
+            case TYPE_EXPLODE:
                 triggerAbility(ExplodeAbility.class);
                 break;
-            case Ability.TYPE_STOP:
+            case TYPE_STOP:
                 triggerAbility(StopAbility.class);
+                break;
+            case TYPE_FREEZE:
+                triggerAbility(FreezeAbility.class);
+                break;
             default:
                 break;
         }

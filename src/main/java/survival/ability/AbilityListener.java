@@ -23,12 +23,14 @@ public class AbilityListener implements RawInputListener {
     public AbilityListener(AbilityManager manager) {
         this.manager = manager;
 
-        buttonToAction.put(JoystickButton.BUTTON_8, Ability.TYPE_EXPLODE);
-        keyToAction.put(KeyInput.KEY_LMENU, Ability.TYPE_EXPLODE); // left alt
+        buttonToAction.put(JoystickButton.BUTTON_8, AbilityManager.TYPE_EXPLODE);
+        keyToAction.put(KeyInput.KEY_LMENU, AbilityManager.TYPE_EXPLODE); // left alt
 
-        buttonToAction.put(JoystickButton.BUTTON_5, Ability.TYPE_STOP);
-        keyToAction.put(KeyInput.KEY_RMENU, Ability.TYPE_STOP); // right alt
+        buttonToAction.put(JoystickButton.BUTTON_5, AbilityManager.TYPE_STOP);
+        keyToAction.put(KeyInput.KEY_RMENU, AbilityManager.TYPE_STOP); // right alt
         
+        buttonToAction.put(JoystickButton.BUTTON_4, AbilityManager.TYPE_FREEZE);
+        keyToAction.put(KeyInput.KEY_Z, AbilityManager.TYPE_FREEZE); // right alt
         //more..
     }
 

@@ -19,7 +19,8 @@ public class UpgradeList {
         AbilityUpgrade.AddExplodeAbility,
         AbilityUpgrade.StrongerExplodeAbility,
         AbilityUpgrade.QuickerExplodeAbility,
-        AbilityUpgrade.AddStopAbility
+        AbilityUpgrade.AddStopAbility,
+        AbilityUpgrade.AddFreezeAbility
     );
 
     public static List<Upgrade<?>> AllPositive = All.stream().filter(x -> x.positive).collect(Collectors.toList());

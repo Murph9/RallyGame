@@ -33,6 +33,8 @@ public class WaveManager extends BaseAppState {
     public static final float KILL_DIST = 250;
     private float time;
 
+    private float frozenTimer;
+
     public WaveManager(RayCarControl player) {
         this.player = player;
     }
@@ -86,6 +88,17 @@ public class WaveManager extends BaseAppState {
 
     @Override
     public void update(float tpf) {
+        frozenTimer -= tpf;
+        if (frozenTimer > 0) {
+            for (var geom: this.geoms) {
+                geom.getControl(BaseControl.class).setEnabled(false);
+            }
+        } else {
+            for (var geom: this.geoms) {
+                geom.getControl(BaseControl.class).setEnabled(true);
+            }
+        }
+
         time -= tpf;
         if (time < 0) {
             var state = stateManager.getState();
@@ -149,5 +162,9 @@ public class WaveManager extends BaseAppState {
                 baseControl.applyImpulse(dir.normalize().mult(baseControl.getMass() * strength), Vector3f.ZERO);
             }
         }
+    }
+
+    public void freezeAll(float time) {
+        frozenTimer = time;
     }
 }

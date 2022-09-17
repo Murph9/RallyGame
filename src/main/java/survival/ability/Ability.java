@@ -7,9 +7,6 @@ import com.jme3.app.state.AppStateManager;
 import rallygame.car.ray.RayCarControl;
 
 public abstract class Ability {
-    public static final String TYPE_EXPLODE = "explode";
-    public static final String TYPE_STOP = "stop";
-
     abstract boolean update(float tpf);
     abstract float ready();
     abstract void trigger(AppStateManager sm, RayCarControl player);

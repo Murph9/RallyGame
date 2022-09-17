@@ -6,6 +6,7 @@ import java.util.function.Function;
 
 import survival.ability.Ability;
 import survival.ability.ExplodeAbility;
+import survival.ability.FreezeAbility;
 import survival.ability.StopAbility;
 
 public class AbilityUpgrade extends Upgrade<List<Ability>> {
@@ -49,7 +50,8 @@ public class AbilityUpgrade extends Upgrade<List<Ability>> {
 
     public static Upgrade<List<Ability>> AddStopAbility = new AbilityUpgrade(true, true, "Add Stop Ability (Key: R ALT or R Bumper)", x -> x.add(new StopAbility()));
 
+    public static Upgrade<List<Ability>> AddFreezeAbility = new AbilityUpgrade(true, true, "Add Freeze Ability (Key: Z or L Bumper)", x -> x.add(new FreezeAbility()));
+
     //TODO ability ideas:
-    // freeze cubes (for some time)
     // 'blink' a direction
 }
