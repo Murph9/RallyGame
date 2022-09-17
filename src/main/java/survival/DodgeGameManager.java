@@ -182,6 +182,7 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
         this.cm.setEnabled(true);
         this.waveManager.setEnabled(true);
         this.checkpointArrow.setEnabled(true);
+        this.stateManager.setEnabled(true);
     }
 
     @Override
@@ -193,6 +194,7 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
         this.cm.setEnabled(false);
         this.waveManager.setEnabled(false);
         this.checkpointArrow.setEnabled(false);
+        this.stateManager.setEnabled(false);
     }
 
     public void upgrade(Upgrade<?> type) {        
