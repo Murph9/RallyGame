@@ -13,7 +13,7 @@ public class FreezeAbility extends TimedAbility {
     private float length;
 
     public FreezeAbility() {
-        length = 5;
+        length = 2.5f;
         abilityTimerMax = 10;
         abilityTimer = abilityTimerMax;
     }

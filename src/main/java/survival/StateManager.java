@@ -30,7 +30,7 @@ public class StateManager extends BaseAppState {
         // add(AbilityUpgrade.AddStopAbility);
         // add(CarDataConstUpgrade.ImproveEngine);
         // add(GameStateUpgrade.LongerTimer);
-        add(AbilityUpgrade.AddFreezeAbility);
+        // add(AbilityUpgrade.AddFreezeAbility);
     }
 
     @Override
