@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import survival.ability.Ability;
+import survival.ability.BlinkAbility;
 import survival.ability.ExplodeAbility;
 import survival.ability.FreezeAbility;
 import survival.ability.StopAbility;
@@ -52,6 +53,5 @@ public class AbilityUpgrade extends Upgrade<List<Ability>> {
 
     public static Upgrade<List<Ability>> AddFreezeAbility = new AbilityUpgrade(true, true, "Add Freeze Ability (Key: Z or L Bumper)", x -> x.add(new FreezeAbility()));
 
-    //TODO ability ideas:
-    // 'blink' a direction
+    public static Upgrade<List<Ability>> AddBlinkAbility = new AbilityUpgrade(true, true, "Add Blink (Key: Y or pull on right stick and let go)", x -> x.add(new BlinkAbility()));
 }
