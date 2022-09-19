@@ -16,6 +16,7 @@ import com.jme3.math.FastMath;
 
 import rallygame.car.ray.RayCarControlInput;
 import rallygame.helper.Duo;
+import rallygame.helper.Log;
 
 public class JoystickEventListener implements RawInputListener {
 
@@ -83,7 +84,14 @@ public class JoystickEventListener implements RawInputListener {
 			actionS = action.second;
 		}
 
-		input.handleInput(actionS, false, nonLinearInput(valueAbs, STICK_DEADZONE));
+		valueAbs = nonLinearInput(valueAbs, STICK_DEADZONE);
+		if (valueAbs < 0.1f) {
+			valueAbs = 0;
+		}
+		if (axis.getLogicalId().equals(JoystickAxis.LEFT_TRIGGER))
+			Log.p(valueAbs);
+
+		input.handleInput(actionS, false, valueAbs);
 	}
 
 	@Override
