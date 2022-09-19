@@ -35,7 +35,7 @@ public class AbilityUpgrade extends Upgrade<List<Ability>> {
         return applies.apply(existing);
     }
 
-    public static Upgrade<List<Ability>> AddExplodeAbility = new AbilityUpgrade(true, true, "Add Explode Ability (Key: L ALT or Left Stick)", x -> x.add(new ExplodeAbility()));
+    public static Upgrade<List<Ability>> AddExplodeAbility = new AbilityUpgrade(true, true, "Add Explode Ability", x -> x.add(new ExplodeAbility()));
     public static Upgrade<List<Ability>> QuickerExplodeAbility = new AbilityUpgrade(true, false, "Quicker cooldown for Explode Ability", x -> {
         for (var u: x) {
             if (u instanceof ExplodeAbility)
@@ -49,9 +49,9 @@ public class AbilityUpgrade extends Upgrade<List<Ability>> {
         }
     }, y -> y.contains(AddExplodeAbility));
 
-    public static Upgrade<List<Ability>> AddStopAbility = new AbilityUpgrade(true, true, "Add Stop Ability (Key: R ALT or R Bumper)", x -> x.add(new StopAbility()));
+    public static Upgrade<List<Ability>> AddStopAbility = new AbilityUpgrade(true, true, "Add Stop Ability", x -> x.add(new StopAbility()));
 
-    public static Upgrade<List<Ability>> AddFreezeAbility = new AbilityUpgrade(true, true, "Add Freeze Ability (Key: Z or L Bumper)", x -> x.add(new FreezeAbility()));
+    public static Upgrade<List<Ability>> AddFreezeAbility = new AbilityUpgrade(true, true, "Add Freeze Ability", x -> x.add(new FreezeAbility()));
 
-    public static Upgrade<List<Ability>> AddBlinkAbility = new AbilityUpgrade(true, true, "Add Blink (Key: Y or pull on right stick and let go)", x -> x.add(new BlinkAbility()));
+    public static Upgrade<List<Ability>> AddBlinkAbility = new AbilityUpgrade(true, true, "Add Blink", x -> x.add(new BlinkAbility()));
 }

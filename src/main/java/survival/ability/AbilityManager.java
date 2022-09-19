@@ -22,15 +22,23 @@ public class AbilityManager extends BaseAppState {
     private final List<Ability> abilities = new LinkedList<>();
     private final AbilityListener listener = new AbilityListener(this);
 
+    private AbilityUI ui;
+
     @Override
     protected void initialize(Application app) {
         // to start with abilities set them in the state manager
 
         app.getInputManager().addRawInputListener(listener);
+
+        ui = new AbilityUI();
+        getStateManager().attach(ui);
     }
 
     @Override
     protected void cleanup(Application app) {
+        getStateManager().detach(ui);
+        ui = null;
+
         abilities.clear();
         app.getInputManager().removeRawInputListener(listener);
     }
@@ -46,6 +54,10 @@ public class AbilityManager extends BaseAppState {
         for (var ab: abilities) {
             ab.update(tpf);
         }
+    }
+
+    public List<Ability> getAbilities() {
+        return this.abilities;
     }
 
     public Map<String, Object> GetProperties() {

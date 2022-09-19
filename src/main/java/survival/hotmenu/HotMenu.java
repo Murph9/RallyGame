@@ -98,15 +98,18 @@ public class HotMenu extends BaseAppState {
 
         for (int i = 0; i < menuElements.size(); i++) {
             var el = menuElements.get(i);
-            var label = (Label)el.ui.getChild(1);
+            var label = (Label)el.ui.getChild("selectedLabel");
             if (i == menuSelection)
                 label.setText("(selected)");
-            else // TODO much better than this
+            else
                 label.setText("");
         }
     }
 
     protected void input(String action) {
+        if (menuElements.size() < 1)
+            return; // don't listen with no options
+
         if (action == HotMenuListener.ACTION_DOWN) {
             menuSelection++;
         }
@@ -125,7 +128,8 @@ public class HotMenu extends BaseAppState {
     private static Container generateRow(MenuItem item) {
         var output = new Container();
         output.addChild(new Label(item.label));
-        output.addChild(new Label(""), 1);
+        var l = output.addChild(new Label(""), 1);
+        l.setName("selectedLabel");
         return output;
     }
 }
