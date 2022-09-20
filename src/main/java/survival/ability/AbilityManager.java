@@ -51,6 +51,8 @@ public class AbilityManager extends BaseAppState {
 
     @Override
     public void update(float tpf) {
+        if (!this.isEnabled()) return;
+        
         for (var ab: abilities) {
             ab.update(tpf);
         }

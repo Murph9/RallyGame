@@ -116,9 +116,9 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
         int upgrades = waypoints.hasUpgradeReady();
         if (upgrades > 0) {
             if (offerUpgrades) {
+                // NOTE: the hotmenu doesn't have to pause the game to work
                 this.setEnabled(false);
-                // TODO the hotmenu doesn't have to pause the game to work
-                hotMenu.addOptions(UpgradeList.AllPositiveApplies(getState(StateManager.class).getUpgrades()));
+                hotMenu.addOptions(UpgradeList.AllPositiveApplies(stateManager.getUpgrades()));
                 return;
             }
         }
@@ -181,8 +181,8 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
         getState(Drive.class).setEnabled(true);
         this.cm.setEnabled(true);
         this.waveManager.setEnabled(true);
-        this.checkpointArrow.setEnabled(true);
         this.stateManager.setEnabled(true);
+        this.abilityManager.setEnabled(true);
     }
 
     @Override
@@ -193,8 +193,8 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
         
         this.cm.setEnabled(false);
         this.waveManager.setEnabled(false);
-        this.checkpointArrow.setEnabled(false);
         this.stateManager.setEnabled(false);
+        this.abilityManager.setEnabled(false);
     }
 
     public void upgrade(Upgrade<?> type) {        
