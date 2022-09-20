@@ -27,6 +27,8 @@ public class BaseControl extends RigidBodyControl {
 
     @Override
     public void update(float tpf) {
+        if (!enabled) return;
+        
         for (var bev: this.behaviours) {
             bev.accept(this, tpf);
         }

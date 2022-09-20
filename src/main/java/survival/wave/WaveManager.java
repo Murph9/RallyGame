@@ -119,8 +119,6 @@ public class WaveManager extends BaseAppState {
                 this.geoms.remove(geom);
             }
         }
-        
-        super.update(tpf);
     }
 
     public void controlCollision(BaseControl control) {

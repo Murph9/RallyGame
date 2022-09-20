@@ -143,8 +143,6 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
         ruleWindow.addChild(UiHelper.generateTableOfValues(state.GetProperties()));
         ruleWindow.addChild(UiHelper.generateTableOfValues(abilityManager.GetProperties()));
         ruleWindow.addChild(UiHelper.generateTableOfValues(stateManager.getUpgrades()));
-
-        super.update(tpf);
     }
 
     @Override
