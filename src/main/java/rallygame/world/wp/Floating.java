@@ -1,6 +1,7 @@
 package rallygame.world.wp;
 
-import com.jme3.math.*;
+import com.jme3.math.Quaternion;
+import com.jme3.math.Vector3f;
 
 public enum Floating implements WP {
 	STRAIGHT("straight", new Vector3f(20,0,0), Quaternion.IDENTITY),

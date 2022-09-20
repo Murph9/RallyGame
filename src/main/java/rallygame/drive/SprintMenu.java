@@ -5,6 +5,7 @@ import java.util.LinkedList;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
+import com.jme3.app.state.BaseAppState;
 import com.jme3.scene.Node;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
@@ -16,7 +17,7 @@ import rallygame.service.Screen;
 import rallygame.service.Screen.HorizontalPos;
 import rallygame.service.Screen.VerticalPos;
 
-public class SprintMenu extends DriveMenu {
+public class SprintMenu extends BaseAppState {
 
     private Node rootNode;
 
@@ -26,16 +27,8 @@ public class SprintMenu extends DriveMenu {
 	private Container scores;
 	private Label scoresLabel;
 
-
-    public SprintMenu(IDrive drive) {
-        super(drive);
-    }
-
-    
-	@Override
-	public void initialize(Application app) {
-		super.initialize(app);
-        
+    @Override
+    public void initialize(Application app) {
         this.rootNode = new Node("root SprintMenu node");
         SimpleApplication sm = (SimpleApplication) app;
         sm.getGuiNode().attachChild(rootNode);
@@ -57,9 +50,7 @@ public class SprintMenu extends DriveMenu {
 
     @Override
     public void cleanup(Application app) {
-        super.cleanup(app);
-
-        ((SimpleApplication) app).getGuiNode().detachChild(rootNode);
+        rootNode.removeFromParent();
     }
 
 	public void setText(String text) {
@@ -84,4 +75,10 @@ public class SprintMenu extends DriveMenu {
 		}
 		scoresLabel.setText(sb.toString());
 	}
+
+	@Override
+	protected void onEnable() {}
+
+	@Override
+	protected void onDisable() {}
 }

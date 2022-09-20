@@ -10,9 +10,9 @@ import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Label;
 
 import rallygame.car.CarManager;
-import rallygame.drive.PauseState;
 import rallygame.helper.H;
 import rallygame.helper.Rand;
+import rallygame.service.PauseState;
 import rallygame.service.Screen;
 import rallygame.service.checkpoint.BasicWaypointProgress;
 import rallygame.service.checkpoint.CheckpointArrow;
@@ -51,6 +51,8 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
 
     @Override
     protected void initialize(Application app) {
+        getState(PauseState.class).register(this);
+
         cm = getState(CarManager.class);
 
         waypoints = new BasicWaypointProgress(cm.getPlayer(), checkpointCountToGetUpgrade);
@@ -147,6 +149,8 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
 
     @Override
     protected void cleanup(Application app) {
+        getState(PauseState.class).deregister(this);
+
         cm = null;
 
         getStateManager().detach(abilityManager);
@@ -210,7 +214,7 @@ public class DodgeGameManager extends BaseAppState implements PauseState.ICallba
     }
 
     @Override
-    public void quit() {
+    public void pauseQuit() {
         getState(Drive.class).next();
     }
 }

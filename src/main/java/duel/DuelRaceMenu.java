@@ -10,8 +10,8 @@ import com.simsilica.lemur.Label;
 import com.simsilica.lemur.style.ElementId;
 
 import rallygame.car.data.CarDataConst;
-import rallygame.drive.PauseState;
 import rallygame.helper.H;
+import rallygame.service.PauseState;
 import rallygame.service.Screen;
 
 public class DuelRaceMenu extends BaseAppState implements PauseState.ICallback {
@@ -21,8 +21,6 @@ public class DuelRaceMenu extends BaseAppState implements PauseState.ICallback {
 
     private final CarDataConst your;
     private final CarDataConst their;
-
-    private PauseState pauseState;
 
     private Container startWindow;
     private Container endWindow;
@@ -39,8 +37,7 @@ public class DuelRaceMenu extends BaseAppState implements PauseState.ICallback {
 
     @Override
     protected void initialize(Application app) {
-        pauseState = new PauseState(this);
-        getStateManager().attach(pauseState);
+        getState(PauseState.class).register(this);
         
         //init the timer at the top
         currentStateWindow = new Container();
@@ -119,14 +116,13 @@ public class DuelRaceMenu extends BaseAppState implements PauseState.ICallback {
     }
 
     @Override
-    public void quit() {
+    public void pauseQuit() {
         quit.run();
     }
 
     @Override
     protected void cleanup(Application app) {
-        getStateManager().detach(pauseState);
-        pauseState = null;
+        getState(PauseState.class).deregister(this);
 
         ((SimpleApplication) app).getGuiNode().detachChild(currentStateWindow);
     }

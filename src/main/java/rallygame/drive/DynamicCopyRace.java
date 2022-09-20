@@ -38,7 +38,7 @@ import rallygame.service.checkpoint.CheckpointProgressUI;
 import rallygame.world.wp.DefaultBuilder;
 
 
-public class DynamicCopyRace extends DriveBase implements IRayCarCollisionListener, PauseState.ICallback {
+public class DynamicCopyRace extends DriveBase implements IRayCarCollisionListener {
 
     private final Car[] carList = new Car[] {
             Car.Rocket,
@@ -317,16 +317,6 @@ public class DynamicCopyRace extends DriveBase implements IRayCarCollisionListen
         getState(CarManager.class).setEnabled(false);
     }
     
-    @Override
-    public void pauseState(boolean value) {
-        this.setEnabled(value);
-    }
-
-    @Override
-    public void quit() {
-        next();
-    }
-
     private RayCarControl lastCopied;
     @Override
     public void playerCollision(RayCarControl player, RayCarControl them, Vector3f normalInWorld, Vector3f themLocalPos, float appliedImpulse) {

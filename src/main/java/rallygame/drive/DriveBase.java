@@ -9,19 +9,20 @@ import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.math.Transform;
 
-import rallygame.car.*;
+import rallygame.car.CarCamera;
+import rallygame.car.CarManager;
 import rallygame.car.data.Car;
 import rallygame.car.data.CarDataConst;
 import rallygame.car.ray.RayCarControl;
-import rallygame.car.ui.*;
+import rallygame.car.ui.CarUI;
 import rallygame.effects.ParticleAtmosphere;
 import rallygame.game.IDriveDone;
 import rallygame.helper.Log;
+import rallygame.service.PauseState;
 
-public class DriveBase extends BaseAppState implements IDrive {
+public class DriveBase extends BaseAppState implements IDrive, PauseState.ICallback {
 
     private final IDriveDone done;
-    public DriveMenu menu;
     protected IWorld world;
 
     // car stuff
@@ -49,8 +50,7 @@ public class DriveBase extends BaseAppState implements IDrive {
 
         stateManager.attach(world);
 
-        this.menu = new DriveMenu(this);
-        stateManager.attach(menu);
+        getState(PauseState.class).register(this);
 
         // build player
         var cm = getState(CarManager.class);
@@ -90,10 +90,6 @@ public class DriveBase extends BaseAppState implements IDrive {
         getState(ParticleAtmosphere.class).setEnabled(enabled);
     }
 
-    public void next() {
-        this.done.done(this);
-    }
-
     public void resetWorld() {
         world.reset();
     }
@@ -102,8 +98,7 @@ public class DriveBase extends BaseAppState implements IDrive {
     public void cleanup(Application app) {
         Log.p("cleaning drive class");
 
-        getStateManager().detach(menu);
-        menu = null;
+        getState(PauseState.class).deregister(this);
 
         getStateManager().detach(uiNode);
         uiNode = null;
@@ -129,5 +124,20 @@ public class DriveBase extends BaseAppState implements IDrive {
 
     public Transform resetPosition(RayCarControl car) {
         return world.getStart();
+    }
+
+    @Override
+    public void pauseState(boolean value) {
+        this.setEnabled(value);
+    }
+
+    @Override
+    public void pauseQuit() {
+        next();
+    }
+
+    @Override
+    public void next() {
+        this.done.done(this);
     }
 }

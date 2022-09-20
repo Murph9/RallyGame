@@ -6,14 +6,13 @@ import com.jme3.math.Transform;
 import rallygame.car.CarManager;
 import rallygame.car.data.Car;
 import rallygame.car.data.CarDataAdjuster;
-import rallygame.drive.PauseState;
 import rallygame.car.ray.RayCarControl;
 import rallygame.drive.DriveBase;
 import rallygame.game.IDriveDone;
 import rallygame.helper.Log;
 import rallygame.world.IWorld;
 
-public class Drive extends DriveBase implements PauseState.ICallback {
+public class Drive extends DriveBase {
 
     public Drive(IDriveDone done, IWorld world, Car car) {
         super(done, car, world);
@@ -22,7 +21,6 @@ public class Drive extends DriveBase implements PauseState.ICallback {
     @Override
     public void initialize(Application app) {
         super.initialize(app);
-
     }
 
     @Override
@@ -50,15 +48,5 @@ public class Drive extends DriveBase implements PauseState.ICallback {
         var cm = getState(CarManager.class);
         var carData = cm.loadData(this.car, adj);
         this.reInitPlayerCar(carData);
-    }
-
-    @Override
-    public void pauseState(boolean value) {
-        this.setEnabled(value);
-    }
-
-    @Override
-    public void quit() {
-        next();
     }
 }

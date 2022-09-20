@@ -42,8 +42,7 @@ public class DriveDrag extends DriveBase {
 
         setSpawns(cm);
 
-        getStateManager().detach(menu);
-        sprint = new SprintMenu(this);
+        sprint = new SprintMenu();
         getStateManager().attach(sprint);
     }
 

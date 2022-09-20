@@ -23,6 +23,7 @@ import com.jme3.scene.Spatial;
 import com.jme3.system.AppSettings;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.DefaultRangedValueModel;
+import com.simsilica.lemur.Label;
 import com.simsilica.lemur.ProgressBar;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
 
@@ -62,6 +63,7 @@ public class DriveCrash extends DriveBase implements IRayCarCollisionListener {
     private static float TIMEOUT = 10;
 
     private Container progressContainer;
+    private Label label;
     private ProgressBar progressBar;
 
     public DriveCrash(IDriveDone done) {
@@ -82,13 +84,9 @@ public class DriveCrash extends DriveBase implements IRayCarCollisionListener {
         getState(BulletAppState.class).getPhysicsSpace().addCollisionListener(carCollisionState);
 
         progressContainer = new Container();
+        label = progressContainer.addChild(new Label(""));
         progressBar = createBar(0);
         progressContainer.addChild(progressBar);
-
-        AppSettings settings = app.getContext().getSettings();
-        progressContainer.setPreferredSize(new Vector3f(settings.getWidth() / 3, settings.getHeight() / 15f, 0));
-
-        new Screen(settings).bottomCenterMe(progressContainer);
 
         ((SimpleApplication) app).getGuiNode().attachChild(progressContainer);
     }
@@ -102,7 +100,11 @@ public class DriveCrash extends DriveBase implements IRayCarCollisionListener {
     }
 
     public void update(float tpf) {
-        super.update(tpf);
+        AppSettings settings = getApplication().getContext().getSettings();
+        new Screen(settings).topRightMe(progressContainer);
+
+        if (!this.isEnabled()) return;
+        
         frameCount++;
 
         var cm = getState(CarManager.class);
@@ -134,9 +136,7 @@ public class DriveCrash extends DriveBase implements IRayCarCollisionListener {
             }
         }
 
-        if (this.menu.randomthing != null) {
-            this.menu.randomthing.setText(POLICE_TEXT + "Total Flipped: " + totalFlipped);
-        }
+        label.setText(POLICE_TEXT + "Total Flipped: " + totalFlipped);
 
         // update timeout mode only if we have an opponent
         if (cm.getCount() > 1) {

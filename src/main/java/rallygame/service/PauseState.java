@@ -1,4 +1,7 @@
-package rallygame.drive;
+package rallygame.service;
+
+import java.util.LinkedList;
+import java.util.List;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -12,23 +15,20 @@ import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
 
-import rallygame.service.Screen;
-
 public class PauseState extends BaseAppState {
     
     public interface ICallback {
         void pauseState(boolean value);
-        void quit();
+        void pauseQuit();
     }
 
     private static final String PAUSE_ACTION = "PauseState";
 
-    private final ICallback callback;
+    private final List<ICallback> callbacks = new LinkedList<>();
     private final Node rootNode;
     private Container pauseMenu;
     
-    public PauseState(ICallback callback) {
-        this.callback = callback;
+    public PauseState() {
         this.rootNode = new Node("root DriveMenu node");
     }
 
@@ -40,6 +40,13 @@ public class PauseState extends BaseAppState {
             }
         }
     };
+
+    public void register(ICallback callback) {
+        this.callbacks.add(callback);
+    }
+    public void deregister(ICallback callback) {
+        this.callbacks.remove(callback);
+    }
 
     @SuppressWarnings("unchecked")
 	@Override
@@ -64,7 +71,8 @@ public class PauseState extends BaseAppState {
         button2.addClickCommands(new Command<Button>() {
             @Override
             public void execute(Button source) {
-                callback.quit();
+                for (var cal: callbacks)
+                    cal.pauseQuit();
                 rootNode.detachChild(pauseMenu);
             }
         });
@@ -96,15 +104,17 @@ public class PauseState extends BaseAppState {
     }
 
     public void togglePause() {
-        if (callback == null)
+        if (callbacks == null || callbacks.isEmpty())
             return;
 
         if (rootNode.hasChild(pauseMenu)) {
             rootNode.detachChild(pauseMenu);
-            callback.pauseState(true);
+            for (var cal: callbacks)
+                cal.pauseState(true);
         } else {
             rootNode.attachChild(pauseMenu);
-            callback.pauseState(false);
+            for (var cal: callbacks)
+                cal.pauseState(false);
         }
     }
 }

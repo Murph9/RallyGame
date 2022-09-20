@@ -17,6 +17,7 @@ import rallygame.effects.ParticleAtmosphere;
 import rallygame.game.DebugAppState;
 import rallygame.service.ConstantChecker;
 import rallygame.service.ObjectPlacer;
+import rallygame.service.PauseState;
 import rallygame.service.WorldGuiText;
 import rallygame.service.ray.SceneRaycaster;
 
@@ -43,6 +44,7 @@ public class DuelApp extends SimpleApplication {
                 , new ConstantChecker()
                 , new WorldGuiText()
                 , new SceneRaycaster()
+                , new PauseState()
         );
     }
 

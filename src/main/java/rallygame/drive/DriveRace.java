@@ -24,7 +24,7 @@ import rallygame.service.checkpoint.StaticCheckpointProgress;
 import rallygame.world.StaticWorld;
 import rallygame.world.StaticWorldBuilder;
 
-public class DriveRace extends DriveBase implements PauseState.ICallback {
+public class DriveRace extends DriveBase {
 
     // ai things
     private final int themCount = 8;
@@ -240,15 +240,5 @@ public class DriveRace extends DriveBase implements PauseState.ICallback {
 
         this.camera.setEnabled(false);
         getState(CarManager.class).setEnabled(false);
-    }
-    
-    @Override
-    public void pauseState(boolean value) {
-        this.setEnabled(value);
-    }
-
-    @Override
-    public void quit() {
-        next();
     }
 }
