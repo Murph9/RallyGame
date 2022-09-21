@@ -13,7 +13,7 @@ public class GameState {
         state.PlayerMaxHealth = 40;
         state.WaveSpeed = 3;
         state.WaveDensity = 1;
-        state.EntityCount = 10;
+        state.EntityCount = 5;
 
         state.PlayerHealth = state.PlayerMaxHealth;
         state.CheckpointTimer = state.CheckpointTimerLength;

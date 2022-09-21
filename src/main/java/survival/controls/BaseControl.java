@@ -20,7 +20,7 @@ public class BaseControl extends RigidBodyControl {
         super.setEnabled(enabled);
 
         if (enabled) {
-            this.setRestitution(1);
+            //do we want bounciness back?: this.setRestitution(1);
             this.setFriction(0);
         }
     }
