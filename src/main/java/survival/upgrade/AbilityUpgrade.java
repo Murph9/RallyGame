@@ -8,6 +8,7 @@ import survival.ability.Ability;
 import survival.ability.BlinkAbility;
 import survival.ability.ExplodeAbility;
 import survival.ability.FreezeAbility;
+import survival.ability.GravityAbility;
 import survival.ability.StopAbility;
 
 public class AbilityUpgrade extends Upgrade<List<Ability>> {
@@ -54,4 +55,6 @@ public class AbilityUpgrade extends Upgrade<List<Ability>> {
     public static Upgrade<List<Ability>> AddFreezeAbility = new AbilityUpgrade(true, true, "Add Freeze Ability", x -> x.add(new FreezeAbility()));
 
     public static Upgrade<List<Ability>> AddBlinkAbility = new AbilityUpgrade(true, true, "Add Blink", x -> x.add(new BlinkAbility()));
+
+    public static Upgrade<List<Ability>> AddGripAbility = new AbilityUpgrade(true, true, "Add Gravity", x -> x.add(new GravityAbility()));
 }

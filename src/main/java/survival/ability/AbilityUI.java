@@ -100,6 +100,10 @@ public class AbilityUI extends BaseAppState {
             return "(Key: Y or pull on right stick and let go)";
         }
 
+        if (ab instanceof GravityAbility) {
+            return "(Key: G, or button 11)";
+        }
+
         return null;
     }
 }

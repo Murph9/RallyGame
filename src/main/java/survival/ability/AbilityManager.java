@@ -18,6 +18,7 @@ public class AbilityManager extends BaseAppState {
     public static final String TYPE_STOP = "stop";
     public static final String TYPE_FREEZE = "freeze";
     public static final String TYPE_BLINK = "blink";
+    public static final String TYPE_GRAVITY = "gravity";
 
     private final List<Ability> abilities = new LinkedList<>();
     private final AbilityListener listener = new AbilityListener(this);
@@ -54,7 +55,7 @@ public class AbilityManager extends BaseAppState {
         if (!this.isEnabled()) return;
         
         for (var ab: abilities) {
-            ab.update(tpf);
+            ab.update(getStateManager(), tpf);
         }
     }
 
@@ -103,6 +104,9 @@ public class AbilityManager extends BaseAppState {
                     blink.setDirection(blinkDir);
                     triggerAbility(BlinkAbility.class);
                 }
+            case TYPE_GRAVITY:
+                triggerAbility(GravityAbility.class);
+                break;
             default:
                 break;
         }

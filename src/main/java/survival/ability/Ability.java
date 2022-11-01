@@ -7,7 +7,7 @@ import com.jme3.app.state.AppStateManager;
 import rallygame.car.ray.RayCarControl;
 
 public abstract class Ability {
-    abstract boolean update(float tpf);
+    abstract boolean update(AppStateManager sm, float tpf);
     abstract float ready();
     abstract void trigger(AppStateManager sm, RayCarControl player);
     abstract Map.Entry<String, Object> GetProperties();
@@ -22,7 +22,7 @@ abstract class TimedAbility extends Ability {
     }
 
     @Override
-    public boolean update(float tpf) {
+    public boolean update(AppStateManager sm, float tpf) {
         this.abilityTimer -= tpf;
         return false;
     }

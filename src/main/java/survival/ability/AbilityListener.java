@@ -37,11 +37,14 @@ public class AbilityListener implements RawInputListener {
         keyToAction.put(KeyInput.KEY_RMENU, AbilityManager.TYPE_STOP); // right alt
         
         buttonToAction.put(JoystickButton.BUTTON_4, AbilityManager.TYPE_FREEZE);
-        keyToAction.put(KeyInput.KEY_Z, AbilityManager.TYPE_FREEZE); // right alt
+        keyToAction.put(KeyInput.KEY_Z, AbilityManager.TYPE_FREEZE); // z
 
         keyToAction.put(KeyInput.KEY_Y, AbilityManager.TYPE_BLINK);
         axisToAction.put(JoystickAxis.Z_AXIS, AbilityManager.TYPE_BLINK); //right stick
 		axisToAction.put(JoystickAxis.Z_ROTATION, AbilityManager.TYPE_BLINK);
+
+        buttonToAction.put(JoystickButton.BUTTON_11, AbilityManager.TYPE_GRAVITY);
+        keyToAction.put(KeyInput.KEY_G, AbilityManager.TYPE_GRAVITY); // g
     }
 
     @Override
